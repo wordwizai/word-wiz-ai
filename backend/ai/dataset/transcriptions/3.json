@@ -1,0 +1,8 @@
+{
+    "Key": "3",
+    "Original Sentence": "The boy saw a shop",
+    "Altered Sentence": "The boy saw a sop",
+    "Original Phonemes": "\u00f0\u0259 b\u0254\u026a s\u0254 \u0259 \u0283\u0251p",
+    "Altered Phonemes": "\u00f0\u0259 b\u0254\u026a s\u0254 \u0259 s\u0251p",
+    "PER": "0.2"
+}

@@ -1,0 +1,4 @@
+Summary of Evaluation:
+Average Speed Score: 0.95
+Average Accuracy Score: 4.30
+Average Feedback Quality Score: 4.35

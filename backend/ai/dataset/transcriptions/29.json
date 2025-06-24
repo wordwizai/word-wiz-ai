@@ -1,0 +1,8 @@
+{
+    "Key": "29",
+    "Original Sentence": "The cat has the car",
+    "Altered Sentence": "The cap has the car",
+    "Original Phonemes": "\u00f0\u0259 k\u00e6t h\u0259z \u00f0\u0259 k\u0251r",
+    "Altered Phonemes": "\u00f0\u0259 k\u00e6p h\u0259z \u00f0\u0259 k\u0251r",
+    "PER": "0.2"
+}

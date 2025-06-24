@@ -1,0 +1,21 @@
+original_sentence,altered_sentence,change_type,affected_phoneme,replacing_phoneme
+"The cat ran fast and sat by the mat","The tat tan tast and tat by the mat",substitution,/k/,/t/
+"She made a big cake and baked it well","She made a big dake and daked it well",substitution,/k/,/d/
+"The dog dug holes and barked at the squirrel","The dog dug holes and darked at the squirrel",substitution,/b/,/d/
+"I can read red books and ride red bikes","I can read led looks and lide led likes",substitution,/r/,/l/
+"He went to the store and bought some bread","He went to the shtore and shought some shread",addition,/ʃ/,/
+"The plane flew fast and floated above the field","The plame frew frast and floted abuve the fild",substitution,/l/,/r/
+"They saw three sheep sleeping near the shed","They thaw three theep thleeping near the thed",substitution,/s/,/θ/
+"The teacher gave the students work and a worksheet","The teature gave the shtudents work and a worsheet",substitution,/ʧ/,/ʃ/
+"The small child dropped his glass and broke it","The smal chilt droppet his glat and brote it",substitution,/d/,/t/
+"Tom played games and stayed up very late","Tom blayed bames and stayed up very blate",substitution,/g/,/b/
+"The sun sets slowly behind the tall mountains","The shun shets shlowly behind the tall mountans",substitution,/s/,/ʃ/
+"The frog jumped quickly into the dark pond","The prog bumed brickly indo the bark bond",substitution,/f/,/p/
+"We like to sing songs and dance every Friday","We like to zing zongs and danze every Zriday",substitution,/s/,/z/
+"Anna put apples and apricots on the plate","Anna put appless and apricods on the blate",substitution,/p/,/b/
+"He took a trip to the lake and camped","He took a drip to the dake and gamped",substitution,/t/,/d/
+"Lucy lit candles and placed them on the table","Lucy lid candless and blaced them on the dable",substitution,/t/,/d/
+"She bought a red dress and red shoes","She bought a led dless and led shooz",substitution,/r/,/l/
+"I found a frog and fed it flies","I bound a blog and bed it blies",substitution,/f/,/b/
+"They shouted loudly and clapped their hands","They shouded roudly and crapped their hands",substitution,/l/,/r/
+"Ben plays piano and paints pretty pictures","Ben prays priano and praints pritty prictures",substitution,/p/,/pr/

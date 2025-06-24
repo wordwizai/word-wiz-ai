@@ -1,0 +1,116 @@
+[
+    {
+        "speed_score": 1,
+        "accuracy_score": 4,
+        "feedback_quality_score": 3,
+        "elapsed_time": 9.868340015411377
+    },
+    {
+        "speed_score": 1,
+        "accuracy_score": 4,
+        "feedback_quality_score": 5,
+        "elapsed_time": 7.040478944778442
+    },
+    {
+        "speed_score": 1,
+        "accuracy_score": 5,
+        "feedback_quality_score": 4,
+        "elapsed_time": 8.212397336959839
+    },
+    {
+        "speed_score": 1,
+        "accuracy_score": 5,
+        "feedback_quality_score": 5,
+        "elapsed_time": 5.842084169387817
+    },
+    {
+        "speed_score": 1,
+        "accuracy_score": 4,
+        "feedback_quality_score": 5,
+        "elapsed_time": 7.71547794342041
+    },
+    {
+        "speed_score": 1,
+        "accuracy_score": 5,
+        "feedback_quality_score": 5,
+        "elapsed_time": 7.9225242137908936
+    },
+    {
+        "speed_score": 1,
+        "accuracy_score": 5,
+        "feedback_quality_score": 5,
+        "elapsed_time": 8.39277172088623
+    },
+    {
+        "speed_score": 1,
+        "accuracy_score": 4,
+        "feedback_quality_score": 5,
+        "elapsed_time": 7.470113754272461
+    },
+    {
+        "speed_score": 1,
+        "accuracy_score": 4,
+        "feedback_quality_score": 4,
+        "elapsed_time": 7.603936672210693
+    },
+    {
+        "speed_score": 1,
+        "accuracy_score": 5,
+        "feedback_quality_score": 4,
+        "elapsed_time": 10.101741552352905
+    },
+    {
+        "speed_score": 1,
+        "accuracy_score": 5,
+        "feedback_quality_score": 5,
+        "elapsed_time": 10.377620697021484
+    },
+    {
+        "speed_score": 1,
+        "accuracy_score": 5,
+        "feedback_quality_score": 5,
+        "elapsed_time": 7.1639885902404785
+    },
+    {
+        "speed_score": 1,
+        "accuracy_score": 4,
+        "feedback_quality_score": 3,
+        "elapsed_time": 9.213687896728516
+    },
+    {
+        "speed_score": 1,
+        "accuracy_score": 4,
+        "feedback_quality_score": 5,
+        "elapsed_time": 9.839270114898682
+    },
+    {
+        "speed_score": 1,
+        "accuracy_score": 4,
+        "feedback_quality_score": 5,
+        "elapsed_time": 9.24878191947937
+    },
+    {
+        "speed_score": 1,
+        "accuracy_score": 4,
+        "feedback_quality_score": 4,
+        "elapsed_time": 9.220714807510376
+    },
+    {
+        "speed_score": 1,
+        "accuracy_score": 5,
+        "feedback_quality_score": 5,
+        "elapsed_time": 7.5401270389556885
+    },
+    {
+        "speed_score": 1,
+        "accuracy_score": 5,
+        "feedback_quality_score": 5,
+        "elapsed_time": 9.356658220291138
+    },
+    {
+        "speed_score": 1,
+        "accuracy_score": 5,
+        "feedback_quality_score": 5,
+        "elapsed_time": 8.781255722045898
+    }
+]

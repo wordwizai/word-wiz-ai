@@ -1,0 +1,81 @@
+Key,Original Sentence,Altered Sentence,Original Phonemes,Altered Phonemes,PER
+1,The cat is very cool,The tat is very cool,ðə kæt ɪz ˈvɛri kul,ðə tæt ɪz ˈvɛri kul,0.2
+2,I like my cake and my kite,I like my take and my kite,aɪ laɪk maɪ keɪk ənd maɪ kaɪt,aɪ laɪk maɪ teɪk ənd maɪ kaɪt,0.14285714285714285
+3,We can card to the cook,We can tard to the cook,wi kən kɑrd tɪ ðə kʊk,wi kən tard tɪ ðə kʊk,0.16666666666666666
+4,She has a cap in her kit,She has a tap in her kit,ʃi həz ə kæp ɪn hər kɪt,ʃi həz ə tæp ɪn hər kɪt,0.14285714285714285
+5,The boy corn with the back,The boy torn with the back,ðə bɔɪ kɔrn wɪθ ðə bæk,ðə bɔɪ tɔrn wɪθ ðə bæk,0.16666666666666666
+6,The sun is very safe,The fun is very safe,ðə sən ɪz ˈvɛri seɪf,ðə fən ɪz ˈvɛri seɪf,0.2
+7,I like my seat and my soap,I like my feat and my soap,aɪ laɪk maɪ sit ənd maɪ soʊp,aɪ laɪk maɪ fit ənd maɪ soʊp,0.14285714285714285
+8,We can pass to the suit,We can paff to the suit,wi kən pæs tɪ ðə sut,wi kən pæf tɪ ðə sut,0.16666666666666666
+9,She has a sock in her six,She has a fock in her six,ʃi həz ə sɑk ɪn hər sɪks,ʃi həz ə fock ɪn hər sɪks,0.14285714285714285
+10,The boy say with the sing,The boy fay with the sing,ðə bɔɪ seɪ wɪθ ðə sɪŋ,ðə bɔɪ feɪ wɪθ ðə sɪŋ,0.16666666666666666
+11,The ship is very wash,The sip is very wash,ðə ʃɪp ɪz ˈvɛri wɑʃ,ðə sɪp ɪz ˈvɛri wɑʃ,0.2
+12,I like my shop and my cash,I like my sop and my cash,aɪ laɪk maɪ ʃɑp ənd maɪ kæʃ,aɪ laɪk maɪ sɑp ənd maɪ kæʃ,0.14285714285714285
+13,We can fish to the dish,We can fiss to the dish,wi kən fɪʃ tɪ ðə dɪʃ,wi kən fɪs tɪ ðə dɪʃ,0.16666666666666666
+14,She has a wish in her sheep,She has a wiss in her sheep,ʃi həz ə wɪʃ ɪn hər ʃip,ʃi həz ə wɪs ɪn hər ʃip,0.14285714285714285
+15,The boy brush with the shake,The boy bruss with the shake,ðə bɔɪ brəʃ wɪθ ðə ʃeɪk,ðə bɔɪ brəs wɪθ ðə ʃeɪk,0.16666666666666666
+16,The red is very room,The wed is very room,ðə rɛd ɪz ˈvɛri rum,ðə wɛd ɪz ˈvɛri rum,0.2
+17,I like my run and my race,I like my wun and my race,aɪ laɪk maɪ rən ənd maɪ reɪs,aɪ laɪk maɪ wun ənd maɪ reɪs,0.14285714285714285
+18,We can very to the rope,We can vewy to the rope,wi kən ˈvɛri tɪ ðə roʊp,wi kən vewy tɪ ðə roʊp,0.16666666666666666
+19,She has a frog in her rain,She has a fwog in her rain,ʃi həz ə frɑg ɪn hər reɪn,ʃi həz ə fwog ɪn hər reɪn,0.14285714285714285
+20,The boy train with the reach,The boy twain with the reach,ðə bɔɪ treɪn wɪθ ðə riʧ,ðə bɔɪ tweɪn wɪθ ðə riʧ,0.16666666666666666
+21,The thin is very thank,The fin is very thank,ðə θɪn ɪz ˈvɛri θæŋk,ðə fɪn ɪz ˈvɛri θæŋk,0.2
+22,I like my mouth and my third,I like my mouf and my third,aɪ laɪk maɪ maʊθ ənd maɪ θərd,aɪ laɪk maɪ mouf ənd maɪ θərd,0.14285714285714285
+23,We can thumb to the thaw,We can fumb to the thaw,wi kən θəm tɪ ðə θɔ,wi kən fumb tɪ ðə θɔ,0.16666666666666666
+24,She has a thief in her theme,She has a fief in her theme,ʃi həz ə θif ɪn hər θim,ʃi həz ə fif ɪn hər θim,0.14285714285714285
+25,The boy thick with the north,The boy fick with the north,ðə bɔɪ θɪk wɪθ ðə nɔrθ,ðə bɔɪ fɪk wɪθ ðə nɔrθ,0.16666666666666666
+26,The the is very they,The de is very they,ðə ðə ɪz ˈvɛri ðeɪ,ðə də ɪz ˈvɛri ðeɪ,0.2
+27,I like my then and my those,I like my den and my those,aɪ laɪk maɪ ðɛn ənd maɪ ðoʊz,aɪ laɪk maɪ dɛn ənd maɪ ðoʊz,0.14285714285714285
+28,We can mother to the these,We can mudder to the these,wi kən ˈməðər tɪ ðə ðiz,wi kən mudder tɪ ðə ðiz,0.16666666666666666
+29,She has a brother in her other,She has a brudder in her other,ʃi həz ə ˈbrəðər ɪn hər ˈəðər,ʃi həz ə brudder ɪn hər ˈəðər,0.14285714285714285
+30,The boy that with the father,The boy dat with the father,ðə bɔɪ ðət wɪθ ðə ˈfɑðər,ðə bɔɪ dæt wɪθ ðə ˈfɑðər,0.16666666666666666
+31,The bat is very ball,The pat is very ball,ðə bæt ɪz ˈvɛri bɔl,ðə pæt ɪz ˈvɛri bɔl,0.2
+32,I like my big and my back,I like my pig and my back,aɪ laɪk maɪ bɪg ənd maɪ bæk,aɪ laɪk maɪ pɪg ənd maɪ bæk,0.14285714285714285
+33,We can bad to the best,We can pad to the best,wi kən bæd tɪ ðə bɛst,wi kən pæd tɪ ðə bɛst,0.16666666666666666
+34,She has a bus in her boy,She has a pus in her boy,ʃi həz ə bəs ɪn hər bɔɪ,ʃi həz ə pəs ɪn hər bɔɪ,0.14285714285714285
+35,The boy bag with the bed,The boy pag with the bed,ðə bɔɪ bæg wɪθ ðə bɛd,ðə bɔɪ pag wɪθ ðə bɛd,0.16666666666666666
+36,The tie is very time,The die is very time,ðə taɪ ɪz ˈvɛri taɪm,ðə daɪ ɪz ˈvɛri taɪm,0.2
+37,I like my hat and my tell,I like my had and my tell,aɪ laɪk maɪ hæt ənd maɪ tɛl,aɪ laɪk maɪ hæd ənd maɪ tɛl,0.14285714285714285
+38,We can tent to the town,We can dent to the town,wi kən tɛnt tɪ ðə taʊn,wi kən dɛnt tɪ ðə taʊn,0.16666666666666666
+39,She has a team in her tree,She has a deam in her tree,ʃi həz ə tim ɪn hər tri,ʃi həz ə dim ɪn hər tri,0.14285714285714285
+40,The boy top with the take,The boy dop with the take,ðə bɔɪ tɔp wɪθ ðə teɪk,ðə bɔɪ dop wɪθ ðə teɪk,0.16666666666666666
+41,The van is very vote,The ban is very vote,ðə væn ɪz ˈvɛri voʊt,ðə bæn ɪz ˈvɛri voʊt,0.2
+42,I like my very and my vest,I like my bery and my vest,aɪ laɪk maɪ ˈvɛri ənd maɪ vɛst,aɪ laɪk maɪ bery ənd maɪ vɛst,0.14285714285714285
+43,We can five to the view,We can fibe to the view,wi kən faɪv tɪ ðə vju,wi kən fibe tɪ ðə vju,0.16666666666666666
+44,She has a save in her vase,She has a sabe in her vase,ʃi həz ə seɪv ɪn hər vɑz,ʃi həz ə sabe ɪn hər vɑz,0.14285714285714285
+45,The boy over with the vain,The boy ober with the vain,ðə bɔɪ ˈoʊvər wɪθ ðə veɪn,ðə bɔɪ ˈoʊbər wɪθ ðə veɪn,0.16666666666666666
+46,The zoo is very lazy,The soo is very lazy,ðə zu ɪz ˈvɛri ˈleɪzi,ðə su ɪz ˈvɛri ˈleɪzi,0.2
+47,I like my buzz and my crazy,I like my buss and my crazy,aɪ laɪk maɪ bəz ənd maɪ ˈkreɪzi,aɪ laɪk maɪ bəs ənd maɪ ˈkreɪzi,0.14285714285714285
+48,We can fuzz to the zoom,We can fuss to the zoom,wi kən fəz tɪ ðə zum,wi kən fəs tɪ ðə zum,0.16666666666666666
+49,She has a zone in her zap,She has a sone in her zap,ʃi həz ə zoʊn ɪn hər zæp,ʃi həz ə sone ɪn hər zæp,0.14285714285714285
+50,The boy freeze with the zip,The boy freese with the zip,ðə bɔɪ friz wɪθ ðə zɪp,ðə bɔɪ friz wɪθ ðə zɪp,0.0
+51,The seat is very deep,The sit is very deep,ðə sit ɪz ˈvɛri dip,ðə sɪt ɪz ˈvɛri dip,0.2
+52,I like my feel and my sleep,I like my fill and my sleep,aɪ laɪk maɪ fil ənd maɪ slip,aɪ laɪk maɪ fɪl ənd maɪ slip,0.14285714285714285
+53,We can sheet to the beam,We can shit to the beam,wi kən ʃit tɪ ðə bim,wi kən ʃɪt tɪ ðə bim,0.16666666666666666
+54,She has a leave in her cheap,She has a live in her cheap,ʃi həz ə liv ɪn hər ʧip,ʃi həz ə lɪv ɪn hər ʧip,0.14285714285714285
+55,The boy peace with the sheep,The boy piss with the sheep,ðə bɔɪ pis wɪθ ðə ʃip,ðə bɔɪ pɪs wɪθ ðə ʃip,0.16666666666666666
+56,The pool is very noon,The pull is very noon,ðə pul ɪz ˈvɛri nun,ðə pʊl ɪz ˈvɛri nun,0.2
+57,I like my fool and my suit,I like my full and my suit,aɪ laɪk maɪ ful ənd maɪ sut,aɪ laɪk maɪ fʊl ənd maɪ sut,0.14285714285714285
+58,We can Luke to the choose,We can look to the choose,wi kən luk tɪ ðə ʧuz,wi kən lʊk tɪ ðə ʧuz,0.16666666666666666
+59,She has a cooed in her rude,She has a could in her rude,ʃi həz ə cooed ɪn hər rud,ʃi həz ə kʊd ɪn hər rud,0.14285714285714285
+60,The boy boot with the nude,The boy book with the nude,ðə bɔɪ but wɪθ ðə nud,ðə bɔɪ bʊk wɪθ ðə nud,0.16666666666666666
+61,The bat is very tan,The bet is very tan,ðə bæt ɪz ˈvɛri tæn,ðə bɛt ɪz ˈvɛri tæn,0.2
+62,I like my cat and my man,I like my Ket and my man,aɪ laɪk maɪ kæt ənd maɪ mæn,aɪ laɪk maɪ ket ənd maɪ mæn,0.14285714285714285
+63,We can hat to the fan,We can het to the fan,wi kən hæt tɪ ðə fæn,wi kən het tɪ ðə fæn,0.16666666666666666
+64,She has a sad in her bag,She has a sed in her bag,ʃi həz ə sæd ɪn hər bæg,ʃi həz ə sed ɪn hər bæg,0.14285714285714285
+65,The boy bad with the lag,The boy bed with the lag,ðə bɔɪ bæd wɪθ ðə læg,ðə bɔɪ bɛd wɪθ ðə læg,0.16666666666666666
+66,The cot is very tot,The cut is very tot,ðə kɑt ɪz ˈvɛri tɑt,ðə kət ɪz ˈvɛri tɑt,0.2
+67,I like my pot and my rot,I like my putt and my rot,aɪ laɪk maɪ pɑt ənd maɪ rɑt,aɪ laɪk maɪ pət ənd maɪ rɑt,0.14285714285714285
+68,We can not to the spot,We can nut to the spot,wi kən nɑt tɪ ðə spɑt,wi kən nət tɪ ðə spɑt,0.16666666666666666
+69,She has a shot in her lot,She has a shut in her lot,ʃi həz ə ʃɑt ɪn hər lɔt,ʃi həz ə ʃət ɪn hər lɔt,0.14285714285714285
+70,The boy hot with the dock,The boy hut with the dock,ðə bɔɪ hɑt wɪθ ðə dɑk,ðə bɔɪ hət wɪθ ðə dɑk,0.16666666666666666
+71,The mate is very bake,The met is very bake,ðə meɪt ɪz ˈvɛri beɪk,ðə mɛt ɪz ˈvɛri beɪk,0.2
+72,I like my rate and my take,I like my ret and my take,aɪ laɪk maɪ reɪt ənd maɪ teɪk,aɪ laɪk maɪ rɛt ənd maɪ teɪk,0.14285714285714285
+73,We can date to the lake,We can det to the lake,wi kən deɪt tɪ ðə leɪk,wi kən det tɪ ðə leɪk,0.16666666666666666
+74,She has a late in her make,She has a let in her make,ʃi həz ə leɪt ɪn hər meɪk,ʃi həz ə lɛt ɪn hər meɪk,0.14285714285714285
+75,The boy fate with the sake,The boy fet with the sake,ðə bɔɪ feɪt wɪθ ðə seɪk,ðə bɔɪ fet wɪθ ðə seɪk,0.16666666666666666
+76,The time is very side,The tame is very side,ðə taɪm ɪz ˈvɛri saɪd,ðə teɪm ɪz ˈvɛri saɪd,0.2
+77,I like my dine and my hide,I like my dane and my hide,aɪ laɪk maɪ daɪn ənd maɪ haɪd,aɪ laɪk maɪ deɪn ənd maɪ haɪd,0.14285714285714285
+78,We can mine to the tide,We can mane to the tide,wi kən maɪn tɪ ðə taɪd,wi kən meɪn tɪ ðə taɪd,0.16666666666666666
+79,She has a fine in her pike,She has a fane in her pike,ʃi həz ə faɪn ɪn hər paɪk,ʃi həz ə feɪn ɪn hər paɪk,0.14285714285714285
+80,The boy line with the like,The boy lane with the like,ðə bɔɪ laɪn wɪθ ðə laɪk,ðə bɔɪ leɪn wɪθ ðə laɪk,0.16666666666666666

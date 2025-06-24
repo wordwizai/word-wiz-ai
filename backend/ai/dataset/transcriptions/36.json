@@ -1,0 +1,8 @@
+{
+    "Key": "36",
+    "Original Sentence": "A dog found a fun game",
+    "Altered Sentence": "A bog found a fun game",
+    "Original Phonemes": "\u0259 d\u0254g fa\u028and \u0259 f\u0259n ge\u026am",
+    "Altered Phonemes": "\u0259 b\u0254g fa\u028and \u0259 f\u0259n ge\u026am",
+    "PER": "0.16666666666666666"
+}

@@ -1,0 +1,8 @@
+{
+    "Key": "5",
+    "Original Sentence": "The boy has the car",
+    "Altered Sentence": "The boy has the cah",
+    "Original Phonemes": "\u00f0\u0259 b\u0254\u026a h\u0259z \u00f0\u0259 k\u0251r",
+    "Altered Phonemes": "\u00f0\u0259 b\u0254\u026a h\u0259z \u00f0\u0259 cah",
+    "PER": "0.2"
+}

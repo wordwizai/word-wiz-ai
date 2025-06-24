@@ -1,0 +1,8 @@
+{
+    "Key": "52",
+    "Original Sentence": "The cat eats a ship",
+    "Altered Sentence": "The cap eats a ship",
+    "Original Phonemes": "\u00f0\u0259 k\u00e6t its \u0259 \u0283\u026ap",
+    "Altered Phonemes": "\u00f0\u0259 k\u00e6p its \u0259 \u0283\u026ap",
+    "PER": "0.2"
+}

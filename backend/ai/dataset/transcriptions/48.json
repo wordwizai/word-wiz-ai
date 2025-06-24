@@ -1,0 +1,8 @@
+{
+    "Key": "48",
+    "Original Sentence": "The boy saw a bath",
+    "Altered Sentence": "The boy saw a bat",
+    "Original Phonemes": "\u00f0\u0259 b\u0254\u026a s\u0254 \u0259 b\u00e6\u03b8",
+    "Altered Phonemes": "\u00f0\u0259 b\u0254\u026a s\u0254 \u0259 b\u00e6t",
+    "PER": "0.2"
+}

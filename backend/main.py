@@ -2,11 +2,15 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from database import Base, engine
 from routers import auth
 from routers import user
 from routers import ai
 
 app = FastAPI(debug=True)
+
+# Create the database tables
+Base.metadata.create_all(bind=engine)
 
 origins = [
     "http://localhost:5174",
@@ -20,6 +24,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 app.include_router(user.router)
 app.include_router(auth.router, prefix="/auth")

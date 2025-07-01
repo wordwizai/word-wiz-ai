@@ -3,6 +3,23 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  /* Colors */
+  --color-pastel-purple: #efddfd;
+  --color-pastel-mint: #e8f7f1;
+  --color-pastel-peach: #f9f3e9;
+  --color-pastel-pink: #fce4f4;
+  --color-pastel-blue: #ddf1fd;
+  --color-background: #f5f4fa;
+  --color-card: #ffffff;
+  --color-text: #2d2d2d;
+
+  /* Fonts */
+  --font-heading: "Poppins", sans-serif;
+  --font-body: "Nunito", sans-serif;
+  --font-ipa: "Charis SIL", serif;
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

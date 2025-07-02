@@ -4,13 +4,11 @@ import {
   BadgeCheck,
   Bell,
   CircleQuestionMark,
-  CreditCard,
   House,
   LogOut,
   MessageSquareMore,
   Route,
   Settings,
-  Sparkles,
   Target,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -33,6 +31,7 @@ import { useContext } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import type { AuthContextType } from "@/contexts/AuthContext";
 import { nameToInitials } from "@/lib/utils";
+import { ModeToggle } from "./ModeToggle";
 
 const Sidebar = () => {
   // get the user
@@ -45,9 +44,9 @@ const Sidebar = () => {
         <Tooltip delayDuration={300}>
           <TooltipTrigger asChild>
             <Link to="/dashboard">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="iconLg">
                 <span className="sr-only">Home</span>
-                <House />
+                <House className="size-5" />
               </Button>
             </Link>
           </TooltipTrigger>
@@ -56,9 +55,9 @@ const Sidebar = () => {
         <Tooltip delayDuration={300}>
           <TooltipTrigger asChild>
             <Link to="/practice">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="iconLg">
                 <span className="sr-only">Practice</span>
-                <Target />
+                <Target className="size-5" />
               </Button>
             </Link>
           </TooltipTrigger>
@@ -67,9 +66,9 @@ const Sidebar = () => {
         <Tooltip delayDuration={300}>
           <TooltipTrigger asChild>
             <Link to="/feedback">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="iconLg">
                 <span className="sr-only">Feedback</span>
-                <MessageSquareMore />
+                <MessageSquareMore className="size-5" />
               </Button>
             </Link>
           </TooltipTrigger>
@@ -78,9 +77,9 @@ const Sidebar = () => {
         <Tooltip delayDuration={300}>
           <TooltipTrigger asChild>
             <Link to="progress">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="iconLg">
                 <span className="sr-only">Progress</span>
-                <Route />
+                <Route className="size-5" />
               </Button>
             </Link>
           </TooltipTrigger>
@@ -88,13 +87,21 @@ const Sidebar = () => {
         </Tooltip>
         {/* Bottom Buttons */}
         <div className="mt-auto space-y-2">
+          {/* Theme Toggle */}
+          <Tooltip delayDuration={300}>
+            <TooltipTrigger asChild>
+              <ModeToggle />
+            </TooltipTrigger>
+            <TooltipContent side="right">Theme toggle</TooltipContent>
+          </Tooltip>
+
           {/* Settings */}
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
               <Link to="/settings">
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="iconLg">
                   <span className="sr-only">Settings</span>
-                  <Settings />
+                  <Settings className="size-5" />
                 </Button>
               </Link>
             </TooltipTrigger>
@@ -102,9 +109,9 @@ const Sidebar = () => {
           </Tooltip>
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="iconLg">
                 <span className="sr-only">Help</span>
-                <CircleQuestionMark />
+                <CircleQuestionMark className="size-5" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right">Help</TooltipContent>
@@ -113,7 +120,7 @@ const Sidebar = () => {
           {/* Avatar Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="iconLg">
                 <span className="sr-only">Account</span>
                 <Avatar className="w-8 h-8 mx-auto rounded-md">
                   <AvatarImage src="" alt={user?.username} />
@@ -150,31 +157,31 @@ const Sidebar = () => {
                   </div>
                 </div>
               </DropdownMenuLabel>
+              {/* <DropdownMenuSeparator /> */}
+              {/* <DropdownMenuGroup> */}
+              {/*   <DropdownMenuItem> */}
+              {/*     <Sparkles size={20} /> */}
+              {/* Upgrade to Pro */}
+              {/*   </DropdownMenuItem> */}
+              {/* </DropdownMenuGroup> */}
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem>
-                  <Sparkles />
-                  Upgrade to Pro
+                <DropdownMenuItem asChild>
+                  <Link to="/settings#account">
+                    <BadgeCheck size={20} />
+                    Account
+                  </Link>
                 </DropdownMenuItem>
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <DropdownMenuItem>
-                  <BadgeCheck />
-                  Account
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <CreditCard />
-                  Billing
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Bell />
-                  Notifications
+                <DropdownMenuItem asChild>
+                  <Link to="/settings#notifications">
+                    <Bell size={20} />
+                    Notifications
+                  </Link>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout}>
-                <LogOut />
+                <LogOut size={20} />
                 Log out
               </DropdownMenuItem>
             </DropdownMenuContent>

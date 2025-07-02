@@ -24,3 +24,6 @@ editdistance
 webrtcvad
 optree>=0.13.0
 alembic
+authlib[starlette]
+requests
+itsdangerous

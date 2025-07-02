@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 
 from sqlalchemy.ext.declarative import declarative_base
 
-URL_DATABASE = "sqlite:///./users.db"
+URL_DATABASE = "sqlite:///./phoneme_db.db"
 
 engine = create_engine(URL_DATABASE, connect_args={"check_same_thread": False})
 

@@ -22,6 +22,13 @@ import { Separator } from "@/components/ui/separator";
 
 const Settings = () => {
   const [savedStatus, setSavedStatus] = useState("");
+  const [tab, setTab] = useState(() => {
+    const hash =
+      typeof window !== "undefined"
+        ? window.location.hash.replace("#", "")
+        : "";
+    return hash || "profile";
+  });
 
   const handleSave = () => {
     setSavedStatus("Settings saved successfully!");
@@ -32,7 +39,14 @@ const Settings = () => {
     <div className="container mx-auto py-8 max-w-4xl">
       <h1 className="text-3xl font-bold mb-6">Settings</h1>
 
-      <Tabs defaultValue="profile" className="w-full">
+      <Tabs
+        value={tab}
+        onValueChange={(value) => {
+          setTab(value);
+          window.location.hash = value;
+        }}
+        className="w-full"
+      >
         <TabsList className="grid grid-cols-4 mb-8">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="account">Account</TabsTrigger>

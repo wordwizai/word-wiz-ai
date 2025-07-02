@@ -44,4 +44,14 @@ const fetchUserProfile = async (token) => {
   }
 };
 
-export { loginUser, registerUser, fetchUserProfile };
+const googleLogin = async () => {
+  try {
+    // Redirect to your backend's Google login route
+    window.location.href = `${API_URL}/auth/google/login`;
+  } catch (error) {
+    console.error("Google login error:", error);
+    throw error;
+  }
+};
+
+export { loginUser, registerUser, fetchUserProfile, googleLogin };

@@ -13,7 +13,10 @@ interface User {
 interface AuthContextType {
   token: string | null;
   user: User | null;
-  login: (username: string, password: string) => Promise<void>;
+  loginWithEmailAndPassword: (
+    username: string,
+    password: string,
+  ) => Promise<void>;
   register: (
     username: string,
     email: string,
@@ -21,14 +24,16 @@ interface AuthContextType {
     full_name: string,
   ) => Promise<void>;
   logout: () => void;
+  loginWithGoogleToken: (token: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   token: null,
   user: { id: "", username: "adsf", email: "", full_name: "Guest" },
-  login: async () => {},
+  loginWithEmailAndPassword: async () => {},
   register: async () => {},
   logout: () => {},
+  loginWithGoogleToken: async () => {},
 });
 
 const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -53,7 +58,10 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [token]);
 
-  const login = async (username: string, password: string): Promise<void> => {
+  const loginWithEmailAndPassword = async (
+    username: string,
+    password: string,
+  ): Promise<void> => {
     // username is an alias for email in this context
     const response = await loginUser({ username, password });
     if (response?.access_token) {
@@ -61,8 +69,16 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem("token", response.access_token);
       const userProfile = await fetchUserProfile(response.access_token);
       setUser(userProfile);
-      navigate("/profile");
+      navigate("/dashboard");
     }
+  };
+
+  const loginWithGoogleToken = async (token: string): Promise<void> => {
+    setToken(token);
+    localStorage.setItem("token", token);
+    const userProfile = await fetchUserProfile(token);
+    setUser(userProfile);
+    navigate("/dashboard");
   };
 
   const register = async (
@@ -83,7 +99,16 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ token, user, login, register, logout }}>
+    <AuthContext.Provider
+      value={{
+        token,
+        user,
+        loginWithEmailAndPassword,
+        register,
+        logout,
+        loginWithGoogleToken,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

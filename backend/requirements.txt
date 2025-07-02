@@ -10,18 +10,17 @@ python-decouple
 python-multipart
 openai
 sounddevice
-numpy
+numpy<2.0.0
 dotenv
 pandas
-torch==2.2.2+cu121
-torchvision==0.17.2+cu121
-torchaudio==2.2.2+cu121
---extra-index-url https://download.pytorch.org/whl/cu121
+torch==2.6.0
 librosa
-transformers
+transformers>=4.30.0
 eng_to_ipa
 elevenlabs
 noisereduce
 IPython
 editdistance
 webrtcvad
+optree>=0.13.0
+alembic

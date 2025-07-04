@@ -14,7 +14,6 @@ import { AuthContext } from "@/contexts/AuthContext";
 import React from "react";
 import { AlertCircleIcon } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
-import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { googleLogin } from "@/api";
 
 export function LoginForm({

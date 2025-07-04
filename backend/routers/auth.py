@@ -8,6 +8,7 @@ from auth.auth_handler import (
     authenticate_user,
     ACCESS_TOKEN_EXPIRE_MINUTES,
     create_access_token,
+    create_user,
     get_user,
     get_password_hash,
 )
@@ -36,9 +37,7 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
             status_code=500,
             detail=f"Error creating user: Try a different email or username",
         )
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
+    create_user(db, db_user)
     return db_user
 
 

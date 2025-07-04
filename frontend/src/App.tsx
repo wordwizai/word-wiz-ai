@@ -3,7 +3,7 @@ import Home from "./pages/Home.tsx";
 import Layout from "./components/Layout.tsx";
 import Login from "./pages/Login.tsx";
 import SignUp from "./pages/SignUp.tsx";
-import PhonemePractice from "./pages/PhonemePractice.tsx";
+import UnlimitedPractice from "./pages/UnlimitedPractice.tsx";
 import Feedback from "./pages/Feedback.tsx";
 import ProgressDashboard from "./pages/ProgressDashboard.tsx";
 import Settings from "./pages/Settings.tsx";
@@ -21,6 +21,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/oauth-callback" element={<OAuthRedirect />} />
+              <Route path="/practice" element={<UnlimitedPractice />} />
               <Route
                 element={
                   <Layout>
@@ -29,7 +30,6 @@ function App() {
                 }
               >
                 <Route path="/dashboard" element={<Home />} />
-                <Route path="/practice" element={<PhonemePractice />} />
                 <Route path="/feedback" element={<Feedback />} />
                 <Route path="/progress" element={<ProgressDashboard />} />
                 <Route path="/settings" element={<Settings />} />

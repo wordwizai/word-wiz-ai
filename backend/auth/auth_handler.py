@@ -11,7 +11,7 @@ import os
 
 from database import get_db
 from schemas import TokenData
-from models import User
+from models import User, UserSettings
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -51,6 +51,29 @@ def get_password_hash(password):
         str: The hashed password.
     """
     return pwd_context.hash(password)
+
+
+def create_user(db: Session, user: User):
+    """
+    Create a new user in the database.
+
+    Args:
+        db (Session): SQLAlchemy database session.
+        user (User): The user object to create.
+
+    Returns:
+        User: The created user object.
+    """
+    db.add(user)
+    db.flush()
+
+    # add settings
+    settings = UserSettings(user_id=user.id)
+    db.add(settings)
+
+    db.commit()
+    db.refresh(user)
+    return user
 
 
 def get_user(db: Session, email: str):

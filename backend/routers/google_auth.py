@@ -7,7 +7,7 @@ import os
 
 from sqlalchemy.orm import Session
 
-from auth.auth_handler import ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token, get_user
+from auth.auth_handler import ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token, create_user, get_user
 from database import get_db
 from models import User
 
@@ -68,9 +68,7 @@ async def google_auth_callback(request: Request, db: Session = Depends(get_db)):
             username=email.split("@")[0],  # Use email prefix as username
             hashed_password=None,  # Password is not needed for OAuth
         )
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
+        create_user(db, db_user)
 
     # Generate a session or JWT for the frontend
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)

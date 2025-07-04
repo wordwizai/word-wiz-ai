@@ -5,11 +5,13 @@ import numpy as np
 import io
 
 from ai.phoneme_assistant import PhonemeAssistant
+from ai.audio_preprocessing import preprocess_audio
 from database import get_db
 from auth.auth_handler import get_current_active_user
 from models import User
 import math
 import pandas as pd
+from pydub import AudioSegment
 
 router = APIRouter()
 phoneme_assistant = PhonemeAssistant()
@@ -22,11 +24,27 @@ async def analyze_audio(
     db: Session = Depends(get_db),
 ):
     try:
+
+        if audio_file.content_type not in ["audio/wav", "audio/x-wav", "audio/mpeg"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Unsupported audio format. Please upload a WAV or MP3 file.",
+            )
+
         # Read audio file into numpy array
         audio_bytes = await audio_file.read()
         import soundfile as sf
-
+        print("audio_file.filename:", audio_file.filename)
+        print("audio_file.content_type:", audio_file.content_type)
+        print("audio_bytes length:", len(audio_bytes))
         audio_array, _ = sf.read(io.BytesIO(audio_bytes), dtype="float32")
+        print("audio_array shape:", audio_array.shape)
+        if len(audio_array.shape) == 2:
+            audio_array = np.mean(audio_array, axis=1)
+        print("audio_array shape after mean:", audio_array.shape)
+        audio_array = preprocess_audio(audio_array)
+
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -56,6 +74,7 @@ async def analyze_audio(
         return JSONResponse(
             content={
                 "response": response,
+                "df": sanitize(df.to_dict()),
                 "highest_per_word": sanitize(highest_per_word.to_dict()),
                 "problem_summary": sanitize(problem_summary),
                 "per_summary": sanitize(per_summary),

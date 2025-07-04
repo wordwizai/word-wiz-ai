@@ -27,3 +27,4 @@ alembic
 authlib[starlette]
 requests
 itsdangerous
+pydub

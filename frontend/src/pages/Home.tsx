@@ -27,14 +27,16 @@ const Home = () => {
       </div>
 
       {/* Progress */}
-      <Card className="bg-pastel-mint">
+      <Card className="bg-green-100 dark:bg-green-600/20 transition-colors">
         <CardHeader>
-          <h2 className="text-lg font-semibold">Progress: {progress}%</h2>
+          <h2 className="text-lg font-semibold text-primary">
+            Progress: {progress}%
+          </h2>
         </CardHeader>
         <CardContent>
-          <div className="h-6 w-full bg-muted rounded overflow-hidden">
+          <div className="h-6 w-full bg-gray-200 dark:bg-gray-700/60 rounded overflow-hidden">
             <div
-              className="h-full bg-primary transition-all"
+              className="h-full bg-gray-700"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -45,7 +47,10 @@ const Home = () => {
         {/* Activities */}
         <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
           {activities.map((a, idx) => (
-            <Card key={idx} className="bg-pastel-pink">
+            <Card
+              key={idx}
+              className="bg-pink-100 dark:bg-pink-600/20 transition-colors"
+            >
               <CardHeader>
                 <h3 className="text-base font-medium">{a}</h3>
               </CardHeader>
@@ -61,7 +66,7 @@ const Home = () => {
 
         {/* Practice Calendar / Sidebar */}
         <div className="space-y-4">
-          <Card className="bg-pastel-peach">
+          <Card className="bg-orange-100 dark:bg-orange-600/20 transition-colors">
             <CardHeader>
               <h3 className="text-base font-medium">Practice Sessions</h3>
             </CardHeader>
@@ -69,7 +74,7 @@ const Home = () => {
               <Calendar mode="single" className="rounded-lg border" />
             </CardContent>
           </Card>
-          <Card className="bg-pastel-blue">
+          <Card className="bg-blue-100 dark:bg-blue-600/20 transition-colors">
             <CardHeader>
               <h3 className="text-base font-medium">Something Else</h3>
             </CardHeader>

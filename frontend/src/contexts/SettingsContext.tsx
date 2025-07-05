@@ -12,7 +12,7 @@ type Settings = {
   tts_speed?: number | null;
   audio_feedback_volume?: number | null;
   notifications_enabled?: boolean | null;
-  email_updates?: boolean | null;
+  email_notifications?: boolean | null;
 };
 
 type SettingsContextType = {

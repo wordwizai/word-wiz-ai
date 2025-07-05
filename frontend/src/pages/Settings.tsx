@@ -42,7 +42,7 @@ type Settings = {
 
 const initialSettings: Settings = {
   preferred_language: "english",
-  theme: "system",
+  theme: "light",
   tts_speed: 1.0,
   audio_feedback_volume: 0.5,
   notifications_enabled: true,
@@ -213,7 +213,7 @@ const Settings = () => {
                   </p>
                 </div>
                 <Select
-                  value={tempSettings.theme ?? "system"}
+                  value={tempSettings.theme ?? "light"}
                   onValueChange={(value) =>
                     handleChange("theme", value as "dark" | "light" | "system")
                   }

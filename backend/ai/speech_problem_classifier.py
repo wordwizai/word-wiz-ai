@@ -17,7 +17,7 @@ class SpeechProblemClassifier:
     }
 
     @staticmethod
-    def classify_problems(results):
+    def classify_problems(results) -> dict:
         """
         Analyzes the results to find the most common phoneme and word-level problems,
         and classifies phoneme errors by group.

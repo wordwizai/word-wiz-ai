@@ -157,20 +157,9 @@ def align_sequences(gt, pred):
     operations.reverse()
     return operations
 
-def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=16000, phoneme_extraction_model=None, word_extraction_model=None):
+def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=16000, phoneme_extraction_model=None, word_extraction_model=None) -> list[dict]:
     """
     Use the phoneme extractor to transcribe an audio array.
-    @returns: [
-        {
-            phonemes: [phoneme1, phoneme2, ...]
-            ground_truth_phonemes: [phoneme1, phoneme2, ...]
-            per: 0.5
-            missed: [phoneme1, phoneme2, ...]
-            added: [phoneme1, phoneme2, ...]
-            substituted: [(phoneme1, phoneme2), (phoneme3, phoneme4), ...]
-        },
-        ...
-    ]
     """
     if phoneme_extraction_model is None:
         phoneme_extraction_model = PhonemeExtractor()
@@ -291,7 +280,7 @@ def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=16000,
 
     return results
 
-def analyze_results(results: list[dict]) -> tuple[pd.DataFrame, float, dict]:
+def analyze_results(results: list[dict]) -> tuple[pd.DataFrame, dict, dict, dict]:
     """
     Analyzes the results of phoneme and word extraction.
 
@@ -302,7 +291,11 @@ def analyze_results(results: list[dict]) -> tuple[pd.DataFrame, float, dict]:
         tuple[pd.DataFrame, pd.Series, dict, dict]: DataFrame of word-level results, highest phoneme error rate word, problems, and sentence per 
     """
     df = pd.DataFrame(results)
-    highest_per = df.sort_values("per", ascending=False).iloc[0]
+
+    # get the highest PER word
+    highest_per = df.sort_values("per", ascending=False).iloc[0].to_dict()
+
+    # Get the problem summary
     problem_summary = SpeechProblemClassifier.classify_problems(results)
 
     # Aggregate phoneme counts and errors for the entire sentence
@@ -316,13 +309,15 @@ def analyze_results(results: list[dict]) -> tuple[pd.DataFrame, float, dict]:
     # Calculate sentence-level PER
     sentence_per = total_errors / total_phonemes if total_phonemes > 0 else 0.0
 
-    # Return sentence-level PER along with existing results
-    return df, highest_per, problem_summary, {
+    per_summary = {
         "total_phonemes": total_phonemes,
         "total_errors": total_errors,
         "sentence_per": sentence_per,
         "problem_summary": problem_summary,
     }
+
+    # Return sentence-level PER along with existing results
+    return df, highest_per, problem_summary, per_summary
 
 if __name__ == "__main__":
     import librosa

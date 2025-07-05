@@ -14,7 +14,7 @@ from schemas import TokenData
 from models import User, UserSettings
 
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 load_dotenv()
 secret_key = os.getenv("SECRET_KEY")

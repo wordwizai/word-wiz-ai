@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -19,9 +19,43 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { AuthContext } from "@/contexts/AuthContext";
+import { useSettings } from "@/contexts/SettingsContext";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+type Settings = {
+  preferred_language?: string;
+  theme?: "dark" | "light" | "system" | null;
+  tts_speed?: number | null;
+  audio_feedback_volume?: number | null;
+  notifications_enabled?: boolean | null;
+  email_notifications?: boolean | null;
+};
+
+const initialSettings: Settings = {
+  preferred_language: "english",
+  theme: "system",
+  tts_speed: 1.0,
+  audio_feedback_volume: 0.5,
+  notifications_enabled: true,
+  email_notifications: true,
+};
 
 const Settings = () => {
   const [savedStatus, setSavedStatus] = useState("");
+  const { user } = useContext(AuthContext);
+  const { settings, updateSettings } = useSettings();
+  const [tempSettings, setTempSettings] = useState<Settings>(
+    settings || initialSettings,
+  );
   const [tab, setTab] = useState(() => {
     const hash =
       typeof window !== "undefined"
@@ -30,9 +64,25 @@ const Settings = () => {
     return hash || "profile";
   });
 
-  const handleSave = () => {
-    setSavedStatus("Settings saved successfully!");
-    setTimeout(() => setSavedStatus(""), 3000);
+  useEffect(() => {
+    if (settings) {
+      setTempSettings(settings);
+    }
+  }, [settings]);
+
+  const handleChange = (field: keyof Settings, value: any) => {
+    setTempSettings((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSave = async () => {
+    const response = await updateSettings(tempSettings);
+    if (response) {
+      setSavedStatus("Settings saved successfully!");
+      setTimeout(() => setSavedStatus(""), 3000);
+    } else {
+      setSavedStatus("Failed to save settings.");
+    }
+    console.log("Settings updated:", response);
   };
 
   return (
@@ -66,20 +116,23 @@ const Settings = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="fullName">Full Name</Label>
-                  <Input id="fullName" placeholder="Enter your full name" />
+                  <Input
+                    id="fullName"
+                    placeholder="Enter your full name"
+                    value={user?.full_name || ""}
+                    disabled
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="your@email.com" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your@email.com"
+                    disabled
+                    value={user?.email || ""}
+                  />
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="bio">Biography</Label>
-                <textarea
-                  id="bio"
-                  className="w-full min-h-[100px] px-3 py-2 rounded-md border border-input bg-background"
-                  placeholder="Tell us about yourself"
-                ></textarea>
               </div>
             </CardContent>
           </Card>
@@ -96,15 +149,17 @@ const Settings = () => {
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 <Label htmlFor="language">Language</Label>
-                <Select defaultValue="english">
+                <Select
+                  defaultValue="english"
+                  onValueChange={(value) =>
+                    handleChange("preferred_language", value)
+                  }
+                >
                   <SelectTrigger id="language">
                     <SelectValue placeholder="Select language" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="english">English</SelectItem>
-                    <SelectItem value="spanish">Spanish</SelectItem>
-                    <SelectItem value="french">French</SelectItem>
-                    <SelectItem value="german">German</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -118,7 +173,24 @@ const Settings = () => {
                     Permanently delete your account and all associated data.
                   </p>
                 </div>
-                <Button variant="destructive">Delete Account</Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive">Delete Account</Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Feature not implemented
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Deleting your account is not implemented yet.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Close</AlertDialogCancel>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </CardContent>
           </Card>
@@ -140,24 +212,19 @@ const Settings = () => {
                     Toggle between light and dark mode.
                   </p>
                 </div>
-                <Switch id="darkMode" />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="fontSize">Font Size</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Choose your preferred text size.
-                  </p>
-                </div>
-                <Select defaultValue="medium">
-                  <SelectTrigger id="fontSize" className="w-32">
-                    <SelectValue placeholder="Select size" />
+                <Select
+                  value={tempSettings.theme ?? "system"}
+                  onValueChange={(value) =>
+                    handleChange("theme", value as "dark" | "light" | "system")
+                  }
+                >
+                  <SelectTrigger id="theme" className="w-32">
+                    <SelectValue placeholder="Select theme" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="small">Small</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="large">Large</SelectItem>
+                    <SelectItem value="light">Light</SelectItem>
+                    <SelectItem value="dark">Dark</SelectItem>
+                    <SelectItem value="system">System</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -181,7 +248,13 @@ const Settings = () => {
                     Receive updates and information via email.
                   </p>
                 </div>
-                <Switch id="emailNotifs" defaultChecked />
+                <Switch
+                  id="emailNotifs"
+                  checked={!!tempSettings.email_notifications}
+                  onCheckedChange={(checked) =>
+                    handleChange("email_notifications", checked)
+                  }
+                />
               </div>
 
               <div className="flex items-center justify-between">
@@ -191,7 +264,13 @@ const Settings = () => {
                     Receive notifications on your device.
                   </p>
                 </div>
-                <Switch id="pushNotifs" defaultChecked />
+                <Switch
+                  id="pushNotifs"
+                  checked={!!tempSettings.notifications_enabled}
+                  onCheckedChange={(checked) =>
+                    handleChange("notifications_enabled", checked)
+                  }
+                />
               </div>
             </CardContent>
           </Card>

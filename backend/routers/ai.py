@@ -12,8 +12,8 @@ from models import User
 import math
 import pandas as pd
 import json
-
 import soundfile as sf
+from models import Recording
 
 
 router = APIRouter()
@@ -39,6 +39,7 @@ async def analyze_audio(
     attempted_sentence: str = Form(...),
     audio_file: UploadFile = File(...),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
 ):
 
     # Process the audio file
@@ -83,6 +84,19 @@ async def analyze_audio(
                 },
             }
             yield f"data: {json.dumps(analysis_payload)}\n\n"
+
+            # add analysis data to the database
+            new_recording = Recording(
+                user_id=current_user.id,
+                sentence=attempted_sentence,
+                phoneme_errors=json.dumps(pronunciation_dataframe.to_dict()),
+                problem_summary=json.dumps(problem_summary),
+                error_rates=json.dumps(per_summary),
+            )
+            db.add(new_recording)
+            db.commit()
+            db.refresh(new_recording)
+
             # STEP 2: GET GPT RESPONSE
             response = phoneme_assistant.get_gpt_response(
                 attempted_sentence=attempted_sentence,
@@ -91,10 +105,13 @@ async def analyze_audio(
                 problem_summary=problem_summary,
                 per_summary=per_summary,
             )
-            gpt_payload = {"type": "gpt_response", "data": {
-                "sentence": response.get("sentence", ""),
-                "feedback": response.get("feedback", ""),
-            }}
+            gpt_payload = {
+                "type": "gpt_response",
+                "data": {
+                    "sentence": response.get("sentence", ""),
+                    "feedback": response.get("feedback", ""),
+                },
+            }
             yield f"data: {json.dumps(gpt_payload)}\n\n"
 
             # STEP 3: FEEDBACK AUDIO
@@ -110,7 +127,11 @@ async def analyze_audio(
             yield f"data: {json.dumps(audio_payload)}\n\n"
 
         except Exception as e:
-            yield f"event: error\ndata: {json.dumps({'error': f'AI processing failed: {str(e)}'})}\n\n"
+            error_payload = {
+                "type": "error",
+                "data": {"error": f"AI processing failed: {str(e)}"},
+            }
+            yield f"data: {json.dumps(error_payload)}\n\n"
             return
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")

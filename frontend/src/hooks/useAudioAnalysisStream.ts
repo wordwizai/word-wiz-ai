@@ -75,15 +75,23 @@ export const useAudioAnalysisStream = (
                 } else if (parsed.type === "gpt_response") {
                   options?.onGptResponse?.(parsed.data);
                 } else if (parsed.type === "audio_feedback_file") {
+                  console.log(
+                    "Received base64 audio length:",
+                    parsed.data.length,
+                  );
+                  console.log("First 100 chars:", parsed.data.slice(0, 100));
                   const audioBlob = b64toBlob(
                     parsed.data,
                     parsed.mimetype || "audio/wav",
                   );
                   const objectUrl = URL.createObjectURL(audioBlob);
+                  window.open(objectUrl, "_blank");
                   options?.onAudioFeedback?.(objectUrl, {
                     filename: parsed.filename || "feedback.wav",
                     mimetype: parsed.mimetype || "audio/wav",
                   });
+                } else if (parsed.type === "error") {
+                  console.error("SSE Error:", parsed.data);
                 }
               } catch (err) {
                 options?.onError?.("Failed to parse SSE message");

@@ -54,4 +54,50 @@ const googleLogin = async () => {
   }
 };
 
-export { loginUser, registerUser, fetchUserProfile, googleLogin, API_URL };
+const updateSettings = async (
+  token: string,
+  settings: {
+    preferred_language?: string;
+    theme?: string | null;
+    tts_speed?: number | null;
+    audio_feedback_volume?: number | null;
+    notifications_enabled?: boolean | null;
+    email_notifications?: boolean | null;
+  },
+) => {
+  try {
+    const response = await axios.put(`${API_URL}/users/me/settings`, settings, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Update settings error:", error);
+    throw error;
+  }
+};
+
+const fetchSettings = async (token: string) => {
+  try {
+    const response = await axios.get(`${API_URL}/users/me/settings`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Fetch settings error:", error);
+    throw error;
+  }
+};
+
+export {
+  loginUser,
+  registerUser,
+  fetchUserProfile,
+  googleLogin,
+  API_URL,
+  updateSettings,
+  fetchSettings,
+};

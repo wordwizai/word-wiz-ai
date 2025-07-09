@@ -9,7 +9,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { useContext } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 
-const Home = () => {
+const Dashboard = () => {
   const { user } = useContext(AuthContext);
 
   const userName = user?.full_name || "Guest";
@@ -88,4 +88,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Dashboard;

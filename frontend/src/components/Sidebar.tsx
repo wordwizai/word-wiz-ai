@@ -45,12 +45,12 @@ const Sidebar = () => {
           <TooltipTrigger asChild>
             <Link to="/dashboard">
               <Button variant="ghost" size="iconLg">
-                <span className="sr-only">Home</span>
+                <span className="sr-only">Dashboard</span>
                 <House className="size-5" />
               </Button>
             </Link>
           </TooltipTrigger>
-          <TooltipContent side="right">Home</TooltipContent>
+          <TooltipContent side="right">Dashboard</TooltipContent>
         </Tooltip>
         <Tooltip delayDuration={300}>
           <TooltipTrigger asChild>

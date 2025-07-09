@@ -1,4 +1,4 @@
-#idk why I needed to do this this is gonna be a very simple program
+# idk why I needed to do this this is gonna be a very simple program
 # from g2p_en import G2p
 import eng_to_ipa as G2p
 
@@ -12,7 +12,18 @@ def grapheme_to_phoneme(grapheme) -> list[tuple]:
     normalized = unfiltered_phonemes.split(" ")
     output = []
     for word, phonemes in zip(grapheme.split(" "), normalized):
-        output.append((word, list(phonemes.replace("ˈ","").replace("ˌ","").replace("*","").replace(",","").replace("'","")))) # remove stress markers
+        output.append(
+            (
+                word,
+                list(
+                    phonemes.replace("ˈ", "")
+                    .replace("ˌ", "")
+                    .replace("*", "")
+                    .replace(",", "")
+                    .replace("'", "")
+                ),
+            )
+        )  # remove stress markers
     return output
 
 

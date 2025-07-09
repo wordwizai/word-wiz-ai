@@ -1,42 +1,25 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, status, Depends, Form
-from fastapi.responses import JSONResponse, StreamingResponse
-from sqlalchemy.orm import Session
-import numpy as np
-import io
-
-from ai.phoneme_assistant import PhonemeAssistant
-from ai.audio_preprocessing import preprocess_audio
-from database import get_db
 from auth.auth_handler import get_current_active_user
+from core.modes.unlimited import UnlimitedPractice
+from core.phoneme_assistant import PhonemeAssistant
+from crud.session import get_session
+from database import get_db
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi.responses import StreamingResponse
 from models import User
-import math
-import pandas as pd
-import json
-import soundfile as sf
-from models import Recording
-
+from routers.handlers.audio_processing_handler import (
+    analyze_audio_file_event_stream,
+    load_and_preprocess_audio_file,
+)
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 phoneme_assistant = PhonemeAssistant()
 
 
-def sanitize(obj):
-    if isinstance(obj, float):
-        if math.isnan(obj) or math.isinf(obj):
-            return None
-        return obj
-    elif isinstance(obj, dict):
-        return {k: sanitize(v) for k, v in obj.items()}
-    elif isinstance(obj, list):
-        return [sanitize(v) for v in obj]
-    elif isinstance(obj, pd.DataFrame):
-        return sanitize(obj.to_dict())
-    return obj
-
-
 @router.post("/analyze-audio")
 async def analyze_audio(
     attempted_sentence: str = Form(...),
+    session_id: int = Form(...),
     audio_file: UploadFile = File(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
@@ -44,117 +27,39 @@ async def analyze_audio(
 
     # Process the audio file
     try:
-        if audio_file.content_type not in [
-            "audio/wav",
-            "audio/x-wav",
-            "audio/mpeg",
-        ]:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Unsupported audio format. Please upload a WAV or MP3 file.",
-            )
-
-        # Read audio file into numpy array
-        audio_bytes = await audio_file.read()
-        audio_array, _ = sf.read(io.BytesIO(audio_bytes), dtype="float32")
-        if len(audio_array.shape) == 2:
-            audio_array = np.mean(audio_array, axis=1)
-        audio_array = preprocess_audio(audio_array)
+        audio_array = await load_and_preprocess_audio_file(audio_file)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Failed to process audio file: {str(e)}",
         )
 
-    async def event_stream():
-        try:
-            # STEP 1: ANALYZE AUDIO
-            pronunciation_dataframe, highest_per_word, problem_summary, per_summary = (
-                phoneme_assistant.process_audio(attempted_sentence, audio_array)
-            )
-            analysis_payload = {
-                "type": "analysis",
-                "data": {
-                    "pronunciation_dataframe": sanitize(
-                        pronunciation_dataframe.to_dict()
-                    ),
-                    "highest_per_word": sanitize(highest_per_word),
-                    "problem_summary": sanitize(problem_summary),
-                    "per_summary": sanitize(per_summary),
-                },
-            }
-            yield f"data: {json.dumps(analysis_payload)}\n\n"
+    session = get_session(db, session_id)
 
-            # add analysis data to the database
-            new_recording = Recording(
-                user_id=current_user.id,
-                sentence=attempted_sentence,
-                phoneme_errors=json.dumps(pronunciation_dataframe.to_dict()),
-                problem_summary=json.dumps(problem_summary),
-                error_rates=json.dumps(per_summary),
-            )
-            db.add(new_recording)
-            db.commit()
-            db.refresh(new_recording)
+    # Build the activity object based on the mode
+    if session is None or session.activity is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Session or activity not found",
+        )
 
-            # STEP 2: GET GPT RESPONSE
-            response = phoneme_assistant.get_gpt_response(
-                attempted_sentence=attempted_sentence,
-                pronunciation_data=pronunciation_dataframe.to_dict(),
-                highest_per_word_data=highest_per_word,
-                problem_summary=problem_summary,
-                per_summary=per_summary,
-            )
-            gpt_payload = {
-                "type": "gpt_response",
-                "data": {
-                    "sentence": response.get("sentence", ""),
-                    "feedback": response.get("feedback", ""),
-                },
-            }
-            yield f"data: {json.dumps(gpt_payload)}\n\n"
+    if session.activity.type == "unlimited":
+        activity_object = UnlimitedPractice()
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported mode: {session.activity.type}",
+        )
 
-            # STEP 3: FEEDBACK AUDIO
-            response_audio_file = phoneme_assistant.feedback_to_audio(
-                response.get("feedback", "")
-            )
-            audio_payload = {
-                "type": "audio_feedback_file",
-                "data": response_audio_file["data"],
-                "filename": response_audio_file["filename"],
-                "mimetype": response_audio_file["mimetype"],
-            }
-            yield f"data: {json.dumps(audio_payload)}\n\n"
-
-        except Exception as e:
-            error_payload = {
-                "type": "error",
-                "data": {"error": f"AI processing failed: {str(e)}"},
-            }
-            yield f"data: {json.dumps(error_payload)}\n\n"
-            return
-
-    return StreamingResponse(event_stream(), media_type="text/event-stream")
-
-    # try:
-    #     response, df, highest_per_word, problem_summary, per_summary = (
-    #         phoneme_assistant.process_audio(
-    #             attempted_sentence=attempted_sentence, audio_array=audio_array
-    #         )
-    #     )
-    #
-    #
-    #     return JSONResponse(
-    #         content={
-    #             "response": response,
-    #             "df": sanitize(df.to_dict()),
-    #             "highest_per_word": sanitize(highest_per_word.to_dict()),
-    #             "problem_summary": sanitize(problem_summary),
-    #             "per_summary": sanitize(per_summary),
-    #         }
-    #     )
-    # except Exception as e:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-    #         detail=f"AI processing failed: {str(e)}",
-    #     )
+    return StreamingResponse(
+        analyze_audio_file_event_stream(
+            phoneme_assistant=phoneme_assistant,
+            activity_object=activity_object,
+            audio_array=audio_array,
+            attempted_sentence=attempted_sentence,
+            current_user=current_user,
+            session=session,
+            db=db,
+        ),
+        media_type="text/event-stream",
+    )

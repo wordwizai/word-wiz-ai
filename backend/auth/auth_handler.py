@@ -1,17 +1,16 @@
-import jwt
-from fastapi import Depends, HTTPException, status, APIRouter
-from fastapi.security import OAuth2PasswordBearer
-from jwt.exceptions import InvalidTokenError
-from passlib.context import CryptContext
+import os
 from datetime import datetime, timedelta, timezone
 
-from sqlalchemy.orm import Session
-from dotenv import load_dotenv
-import os
-
+import jwt
 from database import get_db
-from schemas import TokenData
+from dotenv import load_dotenv
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from jwt.exceptions import InvalidTokenError
 from models import User, UserSettings
+from passlib.context import CryptContext
+from schemas.token_user import TokenData
+from sqlalchemy.orm import Session
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60

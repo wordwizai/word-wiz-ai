@@ -1,0 +1,148 @@
+import io
+import json
+import math
+
+import numpy as np
+import pandas as pd
+import soundfile as sf
+from core.audio_preprocessing import preprocess_audio
+from core.modes.base_mode import BaseMode
+from core.phoneme_assistant import PhonemeAssistant
+from crud.feedback_entry import create_feedback_entry, get_feedback_entries_by_session
+from crud.session import get_session
+from fastapi import HTTPException, UploadFile, status
+from models.session import Session as UserSession
+from models.user import User
+from schemas.feedback_entry import AudioAnalysis, FeedbackEntryCreate
+from sqlalchemy.orm import Session
+
+
+async def load_and_preprocess_audio_file(audio_file: UploadFile) -> np.ndarray:
+    """
+    Load and preprocess the audio file.
+
+    Args:
+        audio_file (UploadFile): The uploaded audio file.
+
+    Returns:
+        np.ndarray: The preprocessed audio array.
+    """
+    if audio_file.content_type not in [
+        "audio/wav",
+        "audio/x-wav",
+        "audio/mpeg",
+    ]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unsupported audio format. Please upload a WAV or MP3 file.",
+        )
+
+    # Read audio file into numpy array
+    audio_bytes = await audio_file.read()
+    audio_array, _ = sf.read(io.BytesIO(audio_bytes), dtype="float32")
+    if len(audio_array.shape) == 2:
+        audio_array = np.mean(audio_array, axis=1)
+    audio_array = preprocess_audio(audio_array)
+    return audio_array
+
+
+def sanitize(obj):
+    if isinstance(obj, float):
+        if math.isnan(obj) or math.isinf(obj):
+            return None
+        return obj
+    elif isinstance(obj, dict):
+        return {k: sanitize(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [sanitize(v) for v in obj]
+    elif isinstance(obj, pd.DataFrame):
+        return sanitize(obj.to_dict())
+    return obj
+
+
+async def analyze_audio_file_event_stream(
+    phoneme_assistant: PhonemeAssistant,
+    activity_object: BaseMode,
+    audio_array: np.ndarray,
+    attempted_sentence: str,
+    db: Session,
+    current_user: User,
+    session: UserSession
+):
+    try:
+        # STEP 1: ANALYZE AUDIO
+        pronunciation_dataframe, highest_per_word, problem_summary, per_summary = (
+            phoneme_assistant.process_audio(attempted_sentence, audio_array)
+        )
+        audio_analysis_object = AudioAnalysis(
+            pronunciation_dataframe=pronunciation_dataframe,
+            problem_summary=problem_summary,
+            per_summary=per_summary,
+            highest_per_word=highest_per_word,
+        )
+        analysis_payload = {
+            "type": "analysis",
+            "data": {
+                "pronunciation_dataframe": sanitize(pronunciation_dataframe.to_dict()),
+                "highest_per_word": sanitize(highest_per_word),
+                "problem_summary": sanitize(problem_summary),
+                "per_summary": sanitize(per_summary),
+            },
+        }
+        yield f"data: {json.dumps(analysis_payload)}\n\n"
+
+        session = get_session(db, session_id=session_id)
+
+        # STEP 2: GET GPT RESPONSE
+
+        # based on the mode
+        response = activity_object.get_feedback_and_next_sentence(
+            attempted_sentence=attempted_sentence,
+            analysis=audio_analysis_object,
+            phoneme_assistant=phoneme_assistant,
+            session=session,
+        )
+        # response = phoneme_assistant.get_gpt_response(
+        #     attempted_sentence=attempted_sentence,
+        #     pronunciation_data=pronunciation_dataframe.to_dict(),
+        #     highest_per_word_data=highest_per_word,
+        #     problem_summary=problem_summary,
+        #     per_summary=per_summary,
+        # )
+        gpt_payload = {
+            "type": "gpt_response",
+            "data": {
+                "sentence": response.get("sentence", ""),
+                "feedback": response.get("feedback", ""),
+                "metadata": response.get("metadata", {}),
+            },
+        }
+        yield f"data: {json.dumps(gpt_payload)}\n\n"
+
+        # STEP 3: FEEDBACK AUDIO
+        response_audio_file = phoneme_assistant.feedback_to_audio(
+            response.get("feedback", "")
+        )
+        audio_payload = {
+            "type": "audio_feedback_file",
+            "data": response_audio_file["data"],
+            "filename": response_audio_file["filename"],
+            "mimetype": response_audio_file["mimetype"],
+        }
+        yield f"data: {json.dumps(audio_payload)}\n\n"
+
+        # STEP 4: LOG THE ENTRY INTO THE DB
+        feedback_entry = FeedbackEntryCreate(
+            session_id=session_id,
+            sentence=attempted_sentence,
+            phoneme_analysis=pronunciation_dataframe.to_dict(),
+            feedback_text=response.get("feedback", ""),
+        )
+        create_feedback_entry(db, feedback_entry)
+    except Exception as e:
+        error_payload = {
+            "type": "error",
+            "data": {"error": f"AI processing failed: {str(e)}"},
+        }
+        yield f"data: {json.dumps(error_payload)}\n\n"
+        return

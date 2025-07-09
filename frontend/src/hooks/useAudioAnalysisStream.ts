@@ -85,7 +85,6 @@ export const useAudioAnalysisStream = (
                     parsed.mimetype || "audio/wav",
                   );
                   const objectUrl = URL.createObjectURL(audioBlob);
-                  window.open(objectUrl, "_blank");
                   options?.onAudioFeedback?.(objectUrl, {
                     filename: parsed.filename || "feedback.wav",
                     mimetype: parsed.mimetype || "audio/wav",

@@ -13,7 +13,7 @@ sounddevice
 numpy<2.0.0
 dotenv
 pandas
-torch==2.6.0
+torch
 librosa
 transformers>=4.30.0
 eng_to_ipa

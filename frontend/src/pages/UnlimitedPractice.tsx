@@ -1,20 +1,29 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Mic, Home, Ellipsis } from "lucide-react";
+import { Home } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useAudioAnalysisStream } from "@/hooks/useAudioAnalysisStream";
+import { WordBadge } from "@/components/WordBadge";
+import { FeedbackAnimatedText } from "@/components/FeedbackAnimatedText";
+import { RecordAndNextButtons } from "@/components/RecordAndNextButtons";
 
 const UnlimitedPractice = () => {
   const [currentSentence, setCurrentSentence] = useState(
     "The quick brown fox jumped over the lazy dog",
   );
-  const [analysisData, setAnalysisData] = useState<any>(null);
+  const [analysisData, setAnalysisData] = useState<{
+    pronunciation_dataframe: { per: number[] };
+  } | null>(null);
   const [showHighlightedWords, setShowHighlightedWords] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [nextSentence, setNextSentence] = useState<string | null>(null);
+  const [showNextButton, setShowNextButton] = useState(false);
   const wordArray = currentSentence.split(" ");
-  const { start, stop } = useAudioAnalysisStream({
+
+  // Analysis stream (for communicating with the backend)
+  const { start } = useAudioAnalysisStream({
     onAnalysis: (data) => {
       console.log("Analysis:", data);
       setShowHighlightedWords(true);
@@ -22,21 +31,35 @@ const UnlimitedPractice = () => {
     },
     onGptResponse: (data) => {
       console.log("GPT:", data);
-      setShowHighlightedWords(false);
-      setCurrentSentence(data.sentence);
+      setNextSentence(data.sentence);
       setFeedback(data.feedback);
     },
     onAudioFeedback: (url) => {
       const audio = new Audio(url);
       audio.play();
+      setTimeout(() => {
+        setShowNextButton(true);
+      }, 1000);
     },
     onError: (err) => console.error("Stream error:", err),
   });
+  // Recording functionality
   const { isRecording, startRecording, stopRecording } = useAudioRecorder(
     (audioFile: File) => {
       start(audioFile, currentSentence);
     },
   );
+
+  const displayNextSentence = () => {
+    setShowHighlightedWords(false);
+    setAnalysisData(null);
+    setCurrentSentence(
+      nextSentence || "The quick brown fox jumped over the lazy dog",
+    );
+    setNextSentence(null);
+    setFeedback(null);
+    setShowNextButton(false);
+  };
 
   return (
     <div className="min-h-screen px-4 py-4 flex flex-col items-center gap-6">
@@ -55,61 +78,35 @@ const UnlimitedPractice = () => {
         <div className="w-16" />
       </div>
       <div className="w-full flex flex-col items-center justify-center gap-6 flex-1">
-        <div className="flex flex-row items-center justify-center gap-4 w-full flex-wrap max-w-2/3">
-          {wordArray.map((word, idx) => {
-            let textClass = "rounded-xl px-4 py-2 text-4xl font-medium";
-            let style = undefined;
-            if (analysisData !== null && showHighlightedWords) {
-              const per = analysisData.pronunciation_dataframe.per[idx];
-              const p = Math.max(0, Math.min(1, per));
-              let r, g, b;
-              if (p < 0.5) {
-                // Green to Yellow
-                r = Math.round(2 * 255 * p);
-                g = 255;
-              } else {
-                // Yellow to Red
-                r = 255;
-                g = Math.round(255 * (1 - 2 * (p - 0.5)));
-              }
-              b = 100; // No blue component
-              style = { backgroundColor: `rgb(${r},${g},${b})` };
-              textClass += p > 0.5 ? " text-white" : " text-black";
-            }
-            return (
-              <Badge
-                key={idx}
-                variant="outline"
-                className={textClass}
-                style={style}
-              >
-                {word}
-              </Badge>
-            );
-          })}
-        </div>
-        <div className="flex justify-center">
-          {isRecording ? (
-            <Button
-              className="w-24 h-24 not-hover:animate-pulse shadow-inner transition-colors rounded-full bg-fuchsia-200 hover:bg-fuchsia-300"
-              variant="secondary"
-              onClick={stopRecording}
-            >
-              <Ellipsis className="size-10 text-purple-700" />
-            </Button>
-          ) : (
-            <Button
-              className="w-24 h-24 not-hover:animate-pulse shadow-inner transition-colors rounded-full hover:bg-fuchsia-200"
-              variant="secondary"
-              onClick={startRecording}
-            >
-              <Mic className="size-10 text-purple-700" />
-            </Button>
-          )}
-        </div>
-        {/* Feedback text */}
-        <div className="flex "> {feedback}</div>
+        <motion.div
+          className="flex flex-row items-center justify-center gap-4 w-full flex-wrap max-w-2/3"
+          layout
+        >
+          <AnimatePresence>
+            {wordArray.map((word, idx) => {
+              return (
+                <WordBadge
+                  word={word}
+                  idx={idx}
+                  showHighlighted={showHighlightedWords}
+                  analysisPer={analysisData?.pronunciation_dataframe.per[idx]}
+                  key={word + idx}
+                />
+              );
+            })}
+          </AnimatePresence>
+        </motion.div>
+        {/* Recording Button */}
+        <RecordAndNextButtons
+          isRecording={isRecording}
+          onStartRecording={startRecording}
+          onStopRecording={stopRecording}
+          showNextButton={showNextButton}
+          onNext={displayNextSentence}
+        />
       </div>
+      {/* Feedback text */}
+      <FeedbackAnimatedText feedback={feedback} />
     </div>
   );
 };

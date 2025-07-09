@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
-import Home from "./pages/Home.tsx";
+import Dashboard from "./pages/Dashboard.tsx";
 import Layout from "./components/Layout.tsx";
 import Login from "./pages/Login.tsx";
 import SignUp from "./pages/SignUp.tsx";
@@ -31,7 +31,7 @@ function App() {
                     </Layout>
                   }
                 >
-                  <Route path="/dashboard" element={<Home />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/feedback" element={<Feedback />} />
                   <Route path="/progress" element={<ProgressDashboard />} />
                   <Route path="/settings" element={<Settings />} />

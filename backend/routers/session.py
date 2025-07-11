@@ -1,4 +1,5 @@
 from auth.auth_handler import get_current_active_user
+from crud import session
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
 from models import Activity
@@ -7,10 +8,7 @@ from models import User
 from schemas.session import SessionCreate, SessionOut
 from sqlalchemy.orm import Session as DBSession
 
-router = APIRouter(
-    prefix="/sessions",
-    tags=["sessions"],
-)
+router = APIRouter()
 
 
 @router.post("/", response_model=SessionOut, status_code=status.HTTP_201_CREATED)
@@ -24,14 +22,7 @@ def create_session(
     if not activity:
         raise HTTPException(status_code=404, detail="Activity not found")
     # Create session
-    db_session = UserSession(
-        activity_id=session_in.activity_id,
-        user_id=current_user.id,
-        metadata=session_in.metadata or {},
-    )
-    db.add(db_session)
-    db.commit()
-    db.refresh(db_session)
+    db_session = session.create_session(db, session_in)
     return db_session
 
 
@@ -43,6 +34,7 @@ def get_active_sessions(
     sessions = (
         db.query(UserSession)
         .filter(UserSession.user_id == current_user.id)
+        .filter(UserSession.is_completed == 0)  # Assuming is_completed is a boolean
         .order_by(UserSession.created_at.desc())
         .all()
     )
@@ -55,11 +47,7 @@ def get_session_by_id(
     db: DBSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
-    session = (
-        db.query(UserSession)
-        .filter(UserSession.id == session_id, UserSession.user_id == current_user.id)
-        .first()
-    )
-    if not session:
+    db_session = session.get_session(db, session_id)
+    if not db_session:
         raise HTTPException(status_code=404, detail="Session not found")
     return session

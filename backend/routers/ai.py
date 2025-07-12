@@ -43,7 +43,7 @@ async def analyze_audio(
             detail="Session or activity not found",
         )
 
-    if session.activity.type == "unlimited":
+    if session.activity.activity_type == "unlimited":
         activity_object = UnlimitedPractice()
     else:
         raise HTTPException(

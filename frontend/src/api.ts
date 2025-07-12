@@ -111,7 +111,7 @@ const getSession = async (
   sessionId: number,
 ): Promise<Session> => {
   try {
-    const response = await axios.get(`${API_URL}/sessions/${sessionId}`, {
+    const response = await axios.get(`${API_URL}/session/${sessionId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -125,7 +125,7 @@ const getSession = async (
 
 const getSessions = async (token: string) => {
   try {
-    const response = await axios.get(`${API_URL}/sessions/active`, {
+    const response = await axios.get(`${API_URL}/session/active`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -140,7 +140,7 @@ const getSessions = async (token: string) => {
 const createSession = async (token: string, activityId: number) => {
   try {
     const response = await axios.post(
-      `${API_URL}/sessions/`,
+      `${API_URL}/session/`,
       { activity_id: activityId },
       {
         headers: {

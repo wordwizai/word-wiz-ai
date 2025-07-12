@@ -17,6 +17,7 @@ interface UseAudioAnalysisStreamOptions {
     meta: { filename: string; mimetype: string },
   ) => void;
   onError?: (err: string) => void;
+  sessionId?: number;
 }
 
 export const useAudioAnalysisStream = (
@@ -34,6 +35,7 @@ export const useAudioAnalysisStream = (
     const formData = new FormData();
     formData.append("audio_file", file);
     formData.append("attempted_sentence", sentence);
+    formData.append("session_id", options?.sessionId?.toString() || "");
 
     const url = `${API_URL}/ai/analyze-audio`;
 

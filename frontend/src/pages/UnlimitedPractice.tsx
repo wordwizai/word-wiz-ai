@@ -8,8 +8,13 @@ import { useAudioAnalysisStream } from "@/hooks/useAudioAnalysisStream";
 import { WordBadge } from "@/components/WordBadge";
 import { FeedbackAnimatedText } from "@/components/FeedbackAnimatedText";
 import { RecordAndNextButtons } from "@/components/RecordAndNextButtons";
+import type { Session } from "@/api";
 
-const UnlimitedPractice = () => {
+interface UnlimitedPracticeProps {
+  session: Session;
+}
+
+const UnlimitedPractice = (props: UnlimitedPracticeProps) => {
   const [currentSentence, setCurrentSentence] = useState(
     "The quick brown fox jumped over the lazy dog",
   );
@@ -42,6 +47,7 @@ const UnlimitedPractice = () => {
       }, 1000);
     },
     onError: (err) => console.error("Stream error:", err),
+    sessionId: props.session.id,
   });
   // Recording functionality
   const { isRecording, startRecording, stopRecording } = useAudioRecorder(

@@ -2,6 +2,20 @@ import axios from "axios";
 
 const API_URL = "http://localhost:8000";
 
+interface Session {
+  id: number;
+  activity_id: number;
+  is_completed: boolean;
+  created_at: string;
+  activity: {
+    activity_type: string;
+    title: string;
+    target_phoneme: string | null;
+    config: any;
+    id: number;
+  };
+}
+
 const loginUser = async (credentials) => {
   try {
     const params = new URLSearchParams();
@@ -92,7 +106,10 @@ const fetchSettings = async (token: string) => {
   }
 };
 
-const getSession = async (token: string, sessionId: number) => {
+const getSession = async (
+  token: string,
+  sessionId: number,
+): Promise<Session> => {
   try {
     const response = await axios.get(`${API_URL}/sessions/${sessionId}`, {
       headers: {
@@ -180,3 +197,4 @@ export {
   getActivities,
   getActivity,
 };
+export type { Session };

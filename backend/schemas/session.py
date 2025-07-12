@@ -1,10 +1,12 @@
+from datetime import datetime
+
 from pydantic import BaseModel
+from schemas.activity import ActivityOut
 
 
 class SessionBase(BaseModel):
     activity_id: int
     user_id: int
-    metadata: dict = {}
 
 
 class SessionCreate(SessionBase):
@@ -13,7 +15,16 @@ class SessionCreate(SessionBase):
 
 class SessionOut(SessionBase):
     id: int
-    created_at: str  # ISO format date string
+    created_at: datetime  # ISO format date string
+    is_completed: bool  # True for completed, False for not completed
+    activity: ActivityOut
 
-    class Config:
-        orm_mode = True  # Enable ORM mode for compatibility with SQLAlchemy models
+    model_config = {"from_attributes": True}
+
+
+class SessionInDB(SessionBase):
+    id: int
+    created_at: datetime  # ISO format date string
+    is_completed: bool  # True for completed, False for not completed
+
+    model_config = {"from_attributes": True}

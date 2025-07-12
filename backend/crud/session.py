@@ -1,6 +1,7 @@
 from models.session import Session
 from schemas.session import SessionCreate
 from sqlalchemy.orm import Session as orm_session
+from sqlalchemy.orm import selectinload
 
 
 def create_session(db: orm_session, session: SessionCreate):
@@ -15,7 +16,14 @@ def create_session(db: orm_session, session: SessionCreate):
 
 
 def get_session(db: orm_session, session_id: int):
-    return db.query(Session).filter(Session.id == session_id).first()
+    return (
+        db.query(Session)
+        .options(
+            selectinload(Session.feedback_entries)
+        )  # Eagerly load feedback_entries
+        .filter(Session.id == session_id)
+        .first()
+    )
 
 
 def get_sessions_by_user(

@@ -7,7 +7,7 @@ class Activity(Base):
     __tablename__ = "activities"
     id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
-    type = Column(String, nullable=False)  # e.g., 'story_mode', 'drill', etc.
+    activity_type = Column(String, nullable=False)  # e.g., 'story_mode', 'drill', etc.
     target_phoneme = Column(String, nullable=True)  # e.g., "/ʃ/"
     config = Column(JSON, default={})  # extra config per activity
 

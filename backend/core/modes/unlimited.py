@@ -70,11 +70,17 @@ class UnlimitedPractice(BaseMode):
         ]
 
         previous_utterances = session.feedback_entries
+        print("Previous utterances:", previous_utterances)
         for entry in previous_utterances:
             conversation_history.append(
                 {
                     "role": "user",
-                    "content": json.dumps({entry.phoneme_analysis, entry.sentence}),
+                    "content": json.dumps(
+                        {
+                            "phoneme_analysis": entry.phoneme_analysis,
+                            "sentence": entry.sentence,
+                        }
+                    ),
                 }
             )
             conversation_history.append(
@@ -83,6 +89,7 @@ class UnlimitedPractice(BaseMode):
                     "content": entry.feedback_text,
                 }
             )
+        print("Conversation history:", conversation_history)
 
         # Add the current user input to the conversation history
         conversation_history.append(user_input)
@@ -91,6 +98,7 @@ class UnlimitedPractice(BaseMode):
         response = phoneme_assistant.query_gpt(
             conversation_history=conversation_history,
         )
+        print("GPT Response:", response)
         # get the json from the response
         json_response = phoneme_assistant.extract_json(response)
 

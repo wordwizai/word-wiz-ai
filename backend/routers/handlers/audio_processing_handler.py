@@ -14,6 +14,7 @@ from fastapi import HTTPException, UploadFile, status
 from models.session import Session as UserSession
 from models.user import User
 from schemas.feedback_entry import AudioAnalysis, FeedbackEntryCreate
+from schemas.session import SessionBase
 from sqlalchemy.orm import Session
 
 
@@ -67,7 +68,7 @@ async def analyze_audio_file_event_stream(
     attempted_sentence: str,
     db: Session,
     current_user: User,
-    session: UserSession
+    session: UserSession,
 ):
     try:
         # STEP 1: ANALYZE AUDIO
@@ -90,8 +91,6 @@ async def analyze_audio_file_event_stream(
             },
         }
         yield f"data: {json.dumps(analysis_payload)}\n\n"
-
-        session = get_session(db, session_id=session_id)
 
         # STEP 2: GET GPT RESPONSE
 
@@ -133,7 +132,7 @@ async def analyze_audio_file_event_stream(
 
         # STEP 4: LOG THE ENTRY INTO THE DB
         feedback_entry = FeedbackEntryCreate(
-            session_id=session_id,
+            session_id=session.id,
             sentence=attempted_sentence,
             phoneme_analysis=pronunciation_dataframe.to_dict(),
             feedback_text=response.get("feedback", ""),

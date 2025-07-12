@@ -92,6 +92,80 @@ const fetchSettings = async (token: string) => {
   }
 };
 
+const getSession = async (token: string, sessionId: number) => {
+  try {
+    const response = await axios.get(`${API_URL}/sessions/${sessionId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Fetch session error:", error);
+    throw error;
+  }
+};
+
+const getSessions = async (token: string) => {
+  try {
+    const response = await axios.get(`${API_URL}/sessions/active`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Fetch sessions error:", error);
+    throw error;
+  }
+};
+
+const createSession = async (token: string, activityId: number) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/sessions/`,
+      { activity_id: activityId },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Create session error:", error);
+    throw error;
+  }
+};
+
+const getActivities = async (token: string) => {
+  try {
+    const response = await axios.get(`${API_URL}/activities/`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Fetch activities error:", error);
+    throw error;
+  }
+};
+
+const getActivity = async (token: string, activityId: number) => {
+  try {
+    const response = await axios.get(`${API_URL}/activities/${activityId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Fetch activity error:", error);
+    throw error;
+  }
+};
+
 export {
   loginUser,
   registerUser,
@@ -100,4 +174,9 @@ export {
   API_URL,
   updateSettings,
   fetchSettings,
+  getSession,
+  getSessions,
+  createSession,
+  getActivities,
+  getActivity,
 };

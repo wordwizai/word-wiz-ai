@@ -3,9 +3,9 @@ from pydantic import BaseModel
 
 class ActivityBase(BaseModel):
     title: str
-    type = str  # e.g., 'story_mode', 'drill', etc.
+    activity_type: str  # e.g., 'story_mode', 'drill', etc.
     target_phoneme: str | None = None  # e.g., "/ʃ/"
-    metadata: dict = {}
+    config: dict = {}  # extra config per activity, default to empty dict
 
 
 class ActivityCreate(ActivityBase):
@@ -19,5 +19,4 @@ class ActivityUpdate(ActivityBase):
 class ActivityOut(ActivityBase):
     id: int
 
-    class Config:
-        orm_mode = True  # Enable ORM mode for compatibility with SQLAlchemy models
+    model_config = {"from_attributes": True}

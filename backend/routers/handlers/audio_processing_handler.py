@@ -73,7 +73,7 @@ async def analyze_audio_file_event_stream(
     try:
         # STEP 1: ANALYZE AUDIO
         pronunciation_dataframe, highest_per_word, problem_summary, per_summary = (
-            phoneme_assistant.process_audio(attempted_sentence, audio_array)
+            phoneme_assistant.process_audio(attempted_sentence, audio_array, verbose=True)
         )
         audio_analysis_object = AudioAnalysis(
             pronunciation_dataframe=pronunciation_dataframe,
@@ -134,7 +134,7 @@ async def analyze_audio_file_event_stream(
         feedback_entry = FeedbackEntryCreate(
             session_id=session.id,
             sentence=attempted_sentence,
-            phoneme_analysis=pronunciation_dataframe.to_dict(),
+            phoneme_analysis=analysis_payload.get("data", {}),
             feedback_text=response.get("feedback", ""),
         )
         create_feedback_entry(db, feedback_entry)

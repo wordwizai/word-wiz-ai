@@ -8,6 +8,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { useContext } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
+import ActivitiesList from "@/components/ActivitiesList";
 
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
@@ -45,24 +46,7 @@ const Dashboard = () => {
 
       <div className="flex space-x-6">
         {/* Activities */}
-        <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
-          {activities.map((a, idx) => (
-            <Card
-              key={idx}
-              className="bg-pink-100 dark:bg-pink-600/20 transition-colors"
-            >
-              <CardHeader>
-                <h3 className="text-base font-medium">{a}</h3>
-              </CardHeader>
-              <CardContent>
-                <p>Details about {a}...</p>
-              </CardContent>
-              <CardFooter>
-                <Button size="sm">Start</Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
+        <ActivitiesList numberOfActivities={3} />
 
         {/* Practice Calendar / Sidebar */}
         <div className="space-y-4">

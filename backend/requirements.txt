@@ -28,3 +28,4 @@ authlib[starlette]
 requests
 itsdangerous
 pydub
+google-genai

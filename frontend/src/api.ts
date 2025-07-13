@@ -139,6 +139,10 @@ const getSessions = async (token: string) => {
 
 const createSession = async (token: string, activityId: number) => {
   try {
+    console.log("Token:", token);
+    console.log("Headers:", {
+      Authorization: `Bearer ${token}`,
+    });
     const response = await axios.post(
       `${API_URL}/session/`,
       { activity_id: activityId },

@@ -203,7 +203,7 @@ class PhonemeAssistantApp:
                     return
                 
                 # Get the response, DataFrame, and other details from the assistant
-                response, df, highest_per_word, problem_summary, per_summary = self.assistant.record_audio_and_get_response(
+                response, df, highest_per_word, problem_summary, per_summary = self.assistant.process_audio(
                     attempted_sentence, 
                     verbose=True, 
                     status_callback=lambda msg: self.safe_update_ui(self.status_label.config, text=msg)

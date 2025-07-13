@@ -13,7 +13,7 @@ from openai import OpenAI
 
 from .phoneme_extractor import PhonemeExtractor
 from .process_audio import analyze_results, process_audio_array
-from .text_to_audio import ElevenLabsAPIClient
+from .text_to_audio import ElevenLabsAPIClient, GoogleTTSAPIClient
 from .word_extractor import WordExtractor
 
 
@@ -34,7 +34,7 @@ class PhonemeAssistant:
         # load the models
         self.phoneme_extractor = PhonemeExtractor()
         self.word_extractor = WordExtractor()
-        self.tts = ElevenLabsAPIClient()
+        self.tts = GoogleTTSAPIClient()
 
         # load in our prompt
 

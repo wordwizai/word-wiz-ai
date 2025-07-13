@@ -5,7 +5,7 @@ import UnlimitedPractice from "./UnlimitedPractice";
 import { AuthContext } from "@/contexts/AuthContext";
 import type { Session } from "@/api";
 
-export default function Practice() {
+export default function PracticeRouter() {
   const { sessionId } = useParams();
   const navigate = useNavigate();
   const { token } = useContext(AuthContext);

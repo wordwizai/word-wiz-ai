@@ -10,7 +10,8 @@ import { AuthProvider } from "./contexts/AuthContext.tsx";
 import OAuthRedirect from "./components/OAuthRedirect.tsx";
 import { ThemeProvider } from "./contexts/ThemeContext.tsx";
 import { SettingsProvider } from "./contexts/SettingsContext.tsx";
-import Practice from "./pages/Practice.tsx";
+import PracticeRouter from "./pages/PracticeRouter.tsx";
+import PracticeDashboard from "./pages/PracticeDashboard.tsx";
 
 function App() {
   return (
@@ -23,7 +24,11 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="/oauth-callback" element={<OAuthRedirect />} />
-                <Route path="/practice/:sessionId" element={<Practice />} />
+                <Route
+                  path="/practice/:sessionId"
+                  element={<PracticeRouter />}
+                />
+                <Route path="/practice" element={<PracticeDashboard />} />
                 <Route
                   element={
                     <Layout>

@@ -70,14 +70,13 @@ class UnlimitedPractice(BaseMode):
         ]
 
         previous_utterances = session.feedback_entries
-        print("Previous utterances:", previous_utterances)
         for entry in previous_utterances:
             conversation_history.append(
                 {
                     "role": "user",
                     "content": json.dumps(
                         {
-                            "phoneme_analysis": entry.phoneme_analysis,
+                            "phoneme_analysis": entry.phoneme_analysis.get("phoneme_error_counts", {}),
                             "sentence": entry.sentence,
                         }
                     ),

@@ -2,7 +2,7 @@ import uvicorn
 from database import Base, engine
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import ai, auth, google_auth, session, user
+from routers import ai, auth, google_auth, session, user, activities
 from starlette.middleware.sessions import SessionMiddleware
 
 app = FastAPI(debug=True)
@@ -31,6 +31,7 @@ app.include_router(auth.router, prefix="/auth")
 app.include_router(ai.router, prefix="/ai")
 app.include_router(google_auth.router, prefix="/auth/google")
 app.include_router(session.router, prefix="/session")
+app.include_router(activities.router, prefix="/activities")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

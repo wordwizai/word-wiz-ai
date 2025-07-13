@@ -19,7 +19,7 @@ const UnlimitedPractice = (props: UnlimitedPracticeProps) => {
     "The quick brown fox jumped over the lazy dog",
   );
   const [analysisData, setAnalysisData] = useState<{
-    pronunciation_dataframe: { per: number[] };
+    pronunciation_dataframe: { per: number[]; ground_truth_word: string[] };
   } | null>(null);
   const [showHighlightedWords, setShowHighlightedWords] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -95,7 +95,14 @@ const UnlimitedPractice = (props: UnlimitedPracticeProps) => {
                   word={word}
                   idx={idx}
                   showHighlighted={showHighlightedWords}
-                  analysisPer={analysisData?.pronunciation_dataframe.per[idx]}
+                  analysisPer={
+                    analysisData?.pronunciation_dataframe.per[
+                      Object.values(
+                        analysisData?.pronunciation_dataframe
+                          .ground_truth_word || [],
+                      ).indexOf(word)
+                    ]
+                  }
                   key={word + idx}
                 />
               );

@@ -3,9 +3,11 @@ from pydantic import BaseModel
 
 class ActivityBase(BaseModel):
     title: str
+    description: str
+    emoji_icon: str | None = None  # e.g., "🎮"
     activity_type: str  # e.g., 'story_mode', 'drill', etc.
     target_phoneme: str | None = None  # e.g., "/ʃ/"
-    config: dict = {}  # extra config per activity, default to empty dict
+    activity_settings: dict = {}  # extra config per activity, default to empty dict
 
 
 class ActivityCreate(ActivityBase):

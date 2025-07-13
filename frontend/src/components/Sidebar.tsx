@@ -65,17 +65,6 @@ const Sidebar = () => {
         </Tooltip>
         <Tooltip delayDuration={300}>
           <TooltipTrigger asChild>
-            <Link to="/feedback">
-              <Button variant="ghost" size="iconLg">
-                <span className="sr-only">Feedback</span>
-                <MessageSquareMore className="size-5" />
-              </Button>
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent side="right">Feedback</TooltipContent>
-        </Tooltip>
-        <Tooltip delayDuration={300}>
-          <TooltipTrigger asChild>
             <Link to="progress">
               <Button variant="ghost" size="iconLg">
                 <span className="sr-only">Progress</span>

@@ -3,7 +3,6 @@ import Dashboard from "./pages/Dashboard.tsx";
 import Layout from "./components/Layout.tsx";
 import Login from "./pages/Login.tsx";
 import SignUp from "./pages/SignUp.tsx";
-import Feedback from "./pages/Feedback.tsx";
 import ProgressDashboard from "./pages/ProgressDashboard.tsx";
 import Settings from "./pages/Settings.tsx";
 import { AuthProvider } from "./contexts/AuthContext.tsx";
@@ -28,7 +27,6 @@ function App() {
                   path="/practice/:sessionId"
                   element={<PracticeRouter />}
                 />
-                <Route path="/practice" element={<PracticeDashboard />} />
                 <Route
                   element={
                     <Layout>
@@ -37,9 +35,9 @@ function App() {
                   }
                 >
                   <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/feedback" element={<Feedback />} />
                   <Route path="/progress" element={<ProgressDashboard />} />
                   <Route path="/settings" element={<Settings />} />
+                  <Route path="/practice" element={<PracticeDashboard />} />
                 </Route>
               </Routes>
             </ThemeProvider>

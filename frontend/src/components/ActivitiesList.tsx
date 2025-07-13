@@ -1,11 +1,15 @@
 import { useContext, useEffect, useState } from "react";
-import { Button } from "./ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
 import { AuthContext } from "@/contexts/AuthContext";
 import { createSession, getActivities } from "@/api";
-import { CirclePlay } from "lucide-react";
 import ActivityCard from "./ActivityCard";
 import { Skeleton } from "./ui/skeleton";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "./ui/carousel";
 
 interface Activity {
   id: number;
@@ -18,14 +22,14 @@ interface Activity {
 
 interface ActivitiesListProps {
   numberOfActivities?: number;
-  displayMode?: "featured" | "list"; // list just lists them out, featured shows 1 big and the rest small
+  displayMode?: "featured" | "list" | "carousel"; // list just lists them out, featured shows 1 big and the rest small
   type?: string; // filter by activity type
 }
 
 const ActivitiesList = ({
   numberOfActivities = -1,
   displayMode = "list",
-  type = null,
+  type = "",
 }: ActivitiesListProps) => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const { token } = useContext(AuthContext);
@@ -52,6 +56,48 @@ const ActivitiesList = ({
     window.location.href = `/practice/${response.id}`;
   };
 
+  if (displayMode === "carousel") {
+    return (
+      <Carousel
+        opts={{
+          align: "start",
+        }}
+      >
+        <CarouselContent>
+          {activities.length === 0
+            ? Array.from(
+                {
+                  length: numberOfActivities === -1 ? 1 : numberOfActivities,
+                },
+                (_, idx) => (
+                  <CarouselItem
+                    key={idx}
+                    className="md:basis-1/6 sm:basis-1/3 @xs:basis-1"
+                  >
+                    <Skeleton />
+                  </CarouselItem>
+                ),
+              )
+            : activities
+                .filter((a) => (type != "" ? a.activity_type == type : true))
+                .slice(0, numberOfActivities ?? -1)
+                .map((activity, idx) => (
+                  <CarouselItem
+                    key={idx}
+                    className="xl:basis-1/5 lg:basis-1/4 md:basis-1/3 sm:basis-1/2 @xs:basis-1"
+                  >
+                    <ActivityCard
+                      activity={activity}
+                      onActivityClick={onActivityClick}
+                    />
+                  </CarouselItem>
+                ))}
+        </CarouselContent>
+        <CarouselPrevious />
+        <CarouselNext />
+      </Carousel>
+    );
+  }
   return (
     <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
       {activities.length === 0
@@ -60,7 +106,7 @@ const ActivitiesList = ({
             (_, idx) => <Skeleton key={idx} />,
           )
         : activities
-            .filter((a) => (type ? a.activity_type == type : true))
+            .filter((a) => (type != "" ? a.activity_type == type : true))
             .slice(0, numberOfActivities ?? -1)
             .map((activity, idx) => (
               <ActivityCard

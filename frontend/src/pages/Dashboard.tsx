@@ -9,7 +9,21 @@ const Dashboard = () => {
   const { user } = useContext(AuthContext);
 
   const userName = user?.full_name || "Guest";
-  const motivational = "Keep pushing forward!";
+  const motivationalQuotes = [
+    "📚 Keep turning the page—every chapter brings you closer to your goals!",
+    "🌟 Every word you read is a step forward. Keep going!",
+    "🚀 Reading today, leading tomorrow. Stay inspired!",
+    "🧠 Feed your mind—read something new every day!",
+    "💡 Each book is a new adventure. Dive in!",
+    "🎯 Consistency in reading leads to mastery. You’ve got this!",
+    "🌱 Grow your knowledge, one page at a time.",
+    "🔥 Ignite your passion for learning—read on!",
+    "🏆 Every page read is a victory. Celebrate your progress!",
+    "✨ The more you read, the more you succeed. Keep it up!",
+  ];
+  const today = new Date();
+  const quoteIndex = today.getDate() % motivationalQuotes.length;
+  const motivational = motivationalQuotes[quoteIndex];
 
   return (
     <main className="flex-1 p-6 bg-background space-y-8 overflow-auto">

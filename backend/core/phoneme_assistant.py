@@ -39,7 +39,7 @@ class PhonemeAssistant:
         # load in our prompt
 
     def load_prompt(self, prompt_path: str) -> str:
-        with open(prompt_path) as file:
+        with open(prompt_path, encoding="utf-8") as file:
             lines = file.readlines()
             content = [
                 line for line in lines if not line.strip().startswith("//")
@@ -107,7 +107,6 @@ class PhonemeAssistant:
             top_p=1,
             frequency_penalty=0,
             presence_penalty=0,
-            stop=["</ANSWER>"],
         )
 
         model_response = response.choices[0].message.content

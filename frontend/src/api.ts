@@ -187,6 +187,20 @@ const getActivity = async (token: string, activityId: number) => {
   }
 };
 
+const getSentencePers = async (token: string) => {
+  try {
+    const response = await axios.get(`${API_URL}/feedback/user/sentence-pers`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Fetch sentence pers error:", error);
+    throw error;
+  }
+};
+
 export {
   loginUser,
   registerUser,
@@ -200,5 +214,6 @@ export {
   createSession,
   getActivities,
   getActivity,
+  getSentencePers,
 };
 export type { Session };

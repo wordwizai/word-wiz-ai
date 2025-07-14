@@ -1,22 +1,15 @@
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { useContext } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import ActivitiesList from "@/components/ActivitiesList";
+import SentencePersChart from "@/components/SentencePersChart";
 
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
 
   const userName = user?.full_name || "Guest";
   const motivational = "Keep pushing forward!";
-  const progress = 45;
-  const activities = ["Activity 1", "Activity 2", "Activity 3"];
 
   return (
     <main className="flex-1 p-6 bg-background space-y-8 overflow-auto">
@@ -28,21 +21,9 @@ const Dashboard = () => {
       </div>
 
       {/* Progress */}
-      <Card className="bg-green-100 dark:bg-green-600/20 transition-colors">
-        <CardHeader>
-          <h2 className="text-lg font-semibold text-primary">
-            Progress: {progress}%
-          </h2>
-        </CardHeader>
-        <CardContent>
-          <div className="h-6 w-full bg-gray-200 dark:bg-gray-700/60 rounded overflow-hidden">
-            <div
-              className="h-full bg-gray-700"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <div>
+        <SentencePersChart />
+      </div>
 
       <div className="flex space-x-6">
         {/* Activities */}

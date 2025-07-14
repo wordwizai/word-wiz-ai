@@ -1,6 +1,7 @@
 from models import FeedbackEntry  # Adjust import if needed
 from schemas.feedback_entry import FeedbackEntryCreate, FeedbackEntryOut
 from sqlalchemy.orm import Session
+from models.session import Session as SessionModel
 
 
 def create_feedback_entry(db: Session, feedback: FeedbackEntryCreate) -> FeedbackEntry:
@@ -40,3 +41,17 @@ def delete_feedback_entry(db: Session, feedback_id: int):
         db.delete(db_feedback)
         db.commit()
     return db_feedback
+
+
+def get_feedback_entries_by_user(
+    db: Session, user_id: int, skip: int = 0, limit: int = 100
+):
+    return (
+        db.query(FeedbackEntry)
+        .join(SessionModel, FeedbackEntry.session_id == SessionModel.id)
+        .filter(SessionModel.user_id == user_id)
+        .order_by(SessionModel.created_at.asc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )

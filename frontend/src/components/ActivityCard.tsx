@@ -21,7 +21,7 @@ const ActivityCard = ({
   onActivityClick: (activity: any) => void;
 }) => {
   return (
-    <Card className="bg-pink-100 dark:bg-pink-600/20 transition-colors text-center">
+    <Card className="text-center">
       <CardHeader>
         <h3 className="text-2xl font-bold">
           <span className="mr-2">{activity.emoji_icon}</span>

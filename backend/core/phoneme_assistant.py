@@ -172,7 +172,7 @@ class PhonemeAssistant:
     #
     #     return self.extract_json(model_response)
 
-    def process_audio(
+    async def process_audio(
         self, attempted_sentence, audio_array, verbose=False, status_callback=None
     ):
         """Record or process specific audio and get the model's response.

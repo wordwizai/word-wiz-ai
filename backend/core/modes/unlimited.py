@@ -1,3 +1,4 @@
+import asyncio
 import json
 from typing import override
 
@@ -14,7 +15,7 @@ class UnlimitedPractice(BaseMode):
     """
 
     @override
-    def get_feedback_and_next_sentence(
+    async def get_feedback_and_next_sentence(
         self,
         attempted_sentence,
         analysis: AudioAnalysis,
@@ -76,7 +77,9 @@ class UnlimitedPractice(BaseMode):
                     "role": "user",
                     "content": json.dumps(
                         {
-                            "phoneme_analysis": entry.phoneme_analysis.get("phoneme_error_counts", {}),
+                            "phoneme_analysis": entry.phoneme_analysis.get(
+                                "phoneme_error_counts", {}
+                            ),
                             "sentence": entry.sentence,
                         }
                     ),
@@ -94,8 +97,9 @@ class UnlimitedPractice(BaseMode):
         conversation_history.append(user_input)
 
         # Get GPT response
-        response = phoneme_assistant.query_gpt(
-            conversation_history=conversation_history,
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            None, phoneme_assistant.query_gpt, conversation_history
         )
         print("GPT Response:", response)
         # get the json from the response

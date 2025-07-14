@@ -1,6 +1,8 @@
+import asyncio
 import io
 import json
 import math
+from urllib.parse import quote
 
 import numpy as np
 import pandas as pd
@@ -71,9 +73,12 @@ async def analyze_audio_file_event_stream(
     session: UserSession,
 ):
     try:
+
         # STEP 1: ANALYZE AUDIO
         pronunciation_dataframe, highest_per_word, problem_summary, per_summary = (
-            phoneme_assistant.process_audio(attempted_sentence, audio_array, verbose=True)
+            await phoneme_assistant.process_audio(
+                attempted_sentence, audio_array, verbose=True
+            )
         )
         audio_analysis_object = AudioAnalysis(
             pronunciation_dataframe=pronunciation_dataframe,
@@ -91,11 +96,12 @@ async def analyze_audio_file_event_stream(
             },
         }
         yield f"data: {json.dumps(analysis_payload)}\n\n"
+        await asyncio.sleep(0)  # Yield control to the event loop
 
         # STEP 2: GET GPT RESPONSE
 
         # based on the mode
-        response = activity_object.get_feedback_and_next_sentence(
+        response = await activity_object.get_feedback_and_next_sentence(
             attempted_sentence=attempted_sentence,
             analysis=audio_analysis_object,
             phoneme_assistant=phoneme_assistant,
@@ -117,10 +123,12 @@ async def analyze_audio_file_event_stream(
             },
         }
         yield f"data: {json.dumps(gpt_payload)}\n\n"
+        await asyncio.sleep(0)  # Yield control to the event loop
 
         # STEP 3: FEEDBACK AUDIO
-        response_audio_file = phoneme_assistant.feedback_to_audio(
-            response.get("feedback", "")
+        loop = asyncio.get_event_loop()
+        response_audio_file = await loop.run_in_executor(
+            None, phoneme_assistant.feedback_to_audio, response.get("feedback", "")
         )
         audio_payload = {
             "type": "audio_feedback_file",
@@ -128,7 +136,14 @@ async def analyze_audio_file_event_stream(
             "filename": response_audio_file["filename"],
             "mimetype": response_audio_file["mimetype"],
         }
+        # audio_payload = {
+        #     "type": "audio_feedback_url",
+        #     "data": {
+        #         "url": f"/feedback-audio?session_id={session.id}&text={quote(response.get('feedback',''))}"
+        #     },
+        # }
         yield f"data: {json.dumps(audio_payload)}\n\n"
+        await asyncio.sleep(0)  # Yield control to the event loop
 
         # STEP 4: LOG THE ENTRY INTO THE DB
         feedback_entry = FeedbackEntryCreate(

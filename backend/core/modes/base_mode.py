@@ -8,7 +8,7 @@ class BaseMode:
     Base class for all modes.
     """
 
-    def get_feedback_and_next_sentence(
+    async def get_feedback_and_next_sentence(
         self,
         attempted_sentence: str,
         analysis: AudioAnalysis,

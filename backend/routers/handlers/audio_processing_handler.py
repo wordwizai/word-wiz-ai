@@ -125,7 +125,16 @@ async def analyze_audio_file_event_stream(
         yield f"data: {json.dumps(gpt_payload)}\n\n"
         await asyncio.sleep(0)  # Yield control to the event loop
 
-        # STEP 3: FEEDBACK AUDIO
+        # STEP 3: LOG THE ENTRY INTO THE DB
+        feedback_entry = FeedbackEntryCreate(
+            session_id=session.id,
+            sentence=attempted_sentence,
+            phoneme_analysis=analysis_payload.get("data", {}),
+            gpt_response=gpt_payload.get("data", {}),
+        )
+        create_feedback_entry(db, feedback_entry)
+
+        # STEP 4: FEEDBACK AUDIO
         loop = asyncio.get_event_loop()
         response_audio_file = await loop.run_in_executor(
             None, phoneme_assistant.feedback_to_audio, response.get("feedback", "")
@@ -145,14 +154,6 @@ async def analyze_audio_file_event_stream(
         yield f"data: {json.dumps(audio_payload)}\n\n"
         await asyncio.sleep(0)  # Yield control to the event loop
 
-        # STEP 4: LOG THE ENTRY INTO THE DB
-        feedback_entry = FeedbackEntryCreate(
-            session_id=session.id,
-            sentence=attempted_sentence,
-            phoneme_analysis=analysis_payload.get("data", {}),
-            feedback_text=response.get("feedback", ""),
-        )
-        create_feedback_entry(db, feedback_entry)
     except Exception as e:
         error_payload = {
             "type": "error",

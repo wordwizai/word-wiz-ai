@@ -114,6 +114,9 @@ const SentencePersChart = () => {
               stroke="var(--chart-2)"
               fill="url(#perGradient)"
               name="Raw PER"
+              connectNulls={false}
+              dot={false}
+              isAnimationActive={false}
             />
             <Area
               dataKey="avg5"

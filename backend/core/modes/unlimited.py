@@ -27,7 +27,7 @@ class UnlimitedPractice(BaseMode):
         This method processes the audio analysis and provides feedback without a limit on attempts.
         """
         per_summary = analysis.per_summary
-        pronunciation_data = analysis.pronunciation_dataframe.to_dict()
+        pronunciation_data = analysis.pronunciation_dataframe.to_dict("records")
         highest_per_word_data = analysis.highest_per_word
         problem_summary = analysis.problem_summary
 

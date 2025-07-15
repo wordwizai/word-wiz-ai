@@ -58,8 +58,27 @@ export const WordBadge = ({
     >
       <Badge
         variant="outline"
-        className={textClass}
+        className={`${textClass} cursor-pointer transition-colors hover:bg-muted`}
         style={{ background: "transparent" }}
+        onClick={() => {
+          console.log(`Clicked on word: ${word}`);
+
+          if ("speechSynthesis" in window) {
+            window.speechSynthesis.cancel(); // Stop any ongoing speech
+            const utter = new window.SpeechSynthesisUtterance(word);
+            console.log(`Speaking word: ${word} with ${utter}`);
+            utter.lang = "en-US"; // Set language if needed
+            const voices = window.speechSynthesis.getVoices();
+            const preferredVoice = voices.find(
+              (v) => v.lang === "en-US" && v.name.includes("Female"),
+            ); // or any criteria
+            if (preferredVoice) {
+              utter.voice = preferredVoice;
+            }
+
+            window.speechSynthesis.speak(utter);
+          }
+        }}
       >
         {word}
       </Badge>

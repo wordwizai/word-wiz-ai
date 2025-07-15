@@ -10,7 +10,8 @@ class FeedbackEntry(Base):
     session_id = Column(Integer, ForeignKey("sessions.id"))
     sentence = Column(Text)  # Sentence given to user
     phoneme_analysis = Column(JSON)  # Phoneme evaluation
-    feedback_text = Column(Text)  # What GPT said
+    # feedback_text = Column(Text)  # What GPT said
+    gpt_response = Column(JSON)  # GPT response
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     session = relationship("Session", back_populates="feedback_entries")

@@ -1,5 +1,6 @@
 from auth.auth_handler import get_current_active_user
 from core.modes.unlimited import UnlimitedPractice
+from core.modes.choice_story import ChoiceStoryPractice
 from core.phoneme_assistant import PhonemeAssistant
 from crud.session import get_session
 from database import get_db
@@ -45,6 +46,8 @@ async def analyze_audio(
 
     if session.activity.activity_type == "unlimited":
         activity_object = UnlimitedPractice()
+    elif session.activity.activity_type == "choice-story":
+        activity_object = ChoiceStoryPractice()
     else:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

@@ -4,6 +4,7 @@ import { getSession } from "../api"; // your API call
 import UnlimitedPractice from "./UnlimitedPractice";
 import { AuthContext } from "@/contexts/AuthContext";
 import type { Session } from "@/api";
+import ChoiceStoryPractice from "./ChoiceStoryPractice";
 
 export default function PracticeRouter() {
   const { sessionId } = useParams();
@@ -28,7 +29,8 @@ export default function PracticeRouter() {
   switch (session.activity.activity_type) {
     case "unlimited":
       return <UnlimitedPractice session={session} />;
-    // Add more cases for other practice types
+    case "choice-story":
+      return <ChoiceStoryPractice session={session} />;
     default:
       return <div>Unknown practice type</div>;
   }

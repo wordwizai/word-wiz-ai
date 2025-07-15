@@ -2,14 +2,14 @@ from datetime import datetime
 from typing import Any, Optional
 
 import pandas as pd
-from pydantic import BaseModel
+from pydantic import BaseModel, Json
 
 
 class FeedbackEntryBase(BaseModel):
     session_id: int
     sentence: str
-    phoneme_analysis: Any
-    feedback_text: str
+    phoneme_analysis: dict
+    gpt_response: dict
 
 
 class FeedbackEntryCreate(FeedbackEntryBase):

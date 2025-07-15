@@ -5,16 +5,18 @@ interface RecordAndNextButtonsProps {
   isRecording: boolean;
   onStartRecording: () => void;
   onStopRecording: () => void;
-  showNextButton: boolean;
-  onNext: () => void;
+  showNextButton?: boolean;
+  onNext?: () => void;
 }
 
 export const RecordAndNextButtons = ({
   isRecording,
   onStartRecording,
   onStopRecording,
-  showNextButton,
-  onNext,
+  showNextButton = false,
+  onNext = () => {
+    console.warn("Next button clicked, but no handler provided");
+  },
 }: RecordAndNextButtonsProps) => (
   <div className="flex justify-center items-center gap-4">
     {isRecording ? (

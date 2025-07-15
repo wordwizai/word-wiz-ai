@@ -8,7 +8,7 @@ from models.session import Session as UserSession
 from schemas.feedback_entry import AudioAnalysis
 
 
-class UnlimitedPractice(BaseMode):
+class ChoiceStoryPractice(BaseMode):
     """
     Unlimited Practice Mode for continuous practice without a set limit.
     This mode allows users to practice indefinitely, focusing on improving their skills.
@@ -27,22 +27,25 @@ class UnlimitedPractice(BaseMode):
         This method processes the audio analysis and provides feedback without a limit on attempts.
         """
         per_summary = analysis.per_summary
-        pronunciation_data = analysis.pronunciation_dataframe.to_dict()
+        pronunciation_data = analysis.pronunciation_dataframe.to_dict("records")
         highest_per_word_data = analysis.highest_per_word
         problem_summary = analysis.problem_summary
 
         past_problem_summaries = []
+        past_sentences = []
 
         previous_utterances = session.feedback_entries
         for entry in previous_utterances:
             past_problem_summaries.append(
                 entry.phoneme_analysis.get("problem_summary", {})
             )
+            past_sentences.append(entry.sentence)
 
         user_input = {
             "role": "user",
             "content": json.dumps(
                 {
+                    "past_sentences": past_sentences,
                     "attempted_sentence": attempted_sentence,
                     "pronunciation": pronunciation_data,
                     "highest_per_word": highest_per_word_data,
@@ -56,7 +59,7 @@ class UnlimitedPractice(BaseMode):
             {
                 "role": "system",
                 "content": phoneme_assistant.load_prompt(
-                    "core/gpt_prompts/unlimited_mode_prompt_v2.txt"
+                    "core/gpt_prompts/choice_story_mode_prompt_v2.txt"
                 ),
             }
         ]

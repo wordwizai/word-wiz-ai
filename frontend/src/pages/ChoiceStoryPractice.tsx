@@ -5,17 +5,26 @@ import { Home } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useAudioAnalysisStream } from "@/hooks/useAudioAnalysisStream";
-import { WordBadge } from "@/components/WordBadge";
 import { FeedbackAnimatedText } from "@/components/FeedbackAnimatedText";
 import { RecordAndNextButtons } from "@/components/RecordAndNextButtons";
 import type { Session } from "@/api";
 import WordBadgeRow from "@/components/WordBadgeRow";
 
-interface UnlimitedPracticeProps {
+interface ChoiceStoryPracticeProps {
   session: Session;
 }
+interface SentenceOption {
+  sentence: string;
+  icon: string;
+  action: string;
+}
 
-const UnlimitedPractice = (props: UnlimitedPracticeProps) => {
+interface SentenceOptions {
+  option_1: SentenceOption;
+  option_2: SentenceOption;
+}
+
+const ChoiceStoryPractice = (props: ChoiceStoryPracticeProps) => {
   const [currentSentence, setCurrentSentence] = useState(
     "The quick brown fox jumped over the lazy dog",
   );
@@ -24,8 +33,9 @@ const UnlimitedPractice = (props: UnlimitedPracticeProps) => {
   } | null>(null);
   const [showHighlightedWords, setShowHighlightedWords] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
-  const [nextSentence, setNextSentence] = useState<string | null>(null);
-  const [showNextButton, setShowNextButton] = useState(false);
+  const [sentenceOptions, setSentenceOptions] =
+    useState<SentenceOptions | null>(null);
+  const [showSentenceOptions, setShowSentenceOptions] = useState(false);
   const wordArray = currentSentence.split(" ");
 
   // Analysis stream (for communicating with the backend)
@@ -37,11 +47,9 @@ const UnlimitedPractice = (props: UnlimitedPracticeProps) => {
     },
     onGptResponse: (data) => {
       console.log("GPT:", data);
-      setNextSentence(data.sentence);
+      setSentenceOptions(data.sentence);
       setFeedback(data.feedback);
-      setTimeout(() => {
-        setShowNextButton(true);
-      }, 1000);
+      setShowSentenceOptions(true);
     },
     onAudioFeedback: (url) => {
       const audio = new Audio(url);
@@ -57,15 +65,17 @@ const UnlimitedPractice = (props: UnlimitedPracticeProps) => {
     },
   );
 
-  const displayNextSentence = () => {
+  const displayNextSentence = (nextSentence: string) => {
+    if (!nextSentence) {
+      console.error("No next sentence provided");
+      return;
+    }
     setShowHighlightedWords(false);
     setAnalysisData(null);
-    setCurrentSentence(
-      nextSentence || "The quick brown fox jumped over the lazy dog",
-    );
-    setNextSentence(null);
+    setCurrentSentence(nextSentence);
+    setSentenceOptions(null);
     setFeedback(null);
-    setShowNextButton(false);
+    setShowSentenceOptions(false);
   };
 
   return (
@@ -80,7 +90,7 @@ const UnlimitedPractice = (props: UnlimitedPracticeProps) => {
           </Button>
         </Link>
         <h1 className="scroll-m-20 text-3xl font-semibold tracking-tight first:mt-0">
-          Unlimited Practice
+          Choice Story Practice
         </h1>
         <div className="w-16" />
       </div>
@@ -91,14 +101,46 @@ const UnlimitedPractice = (props: UnlimitedPracticeProps) => {
           wordArray={wordArray}
           analysisData={analysisData}
         />
-        {/* Recording Button */}
-        <RecordAndNextButtons
-          isRecording={isRecording}
-          onStartRecording={startRecording}
-          onStopRecording={stopRecording}
-          showNextButton={showNextButton}
-          onNext={displayNextSentence}
-        />
+        <div className="w-full flex justify-center items-center gap-4">
+          {showSentenceOptions && (
+            <Button
+              className="h-24 shadow-inner rounded-full hover:bg-fuchsia-200"
+              variant="secondary"
+              onClick={() =>
+                displayNextSentence(sentenceOptions?.option_1?.sentence ?? "")
+              }
+            >
+              <span className="text-4xl">
+                {sentenceOptions?.option_1?.icon}
+              </span>
+              <span className="text-lg">
+                {sentenceOptions?.option_1?.action}
+              </span>
+            </Button>
+          )}
+          {/* Recording Button */}
+          <RecordAndNextButtons
+            isRecording={isRecording}
+            onStartRecording={startRecording}
+            onStopRecording={stopRecording}
+          />
+          {showSentenceOptions && (
+            <Button
+              className="h-24 shadow-inner rounded-full hover:bg-fuchsia-200"
+              variant="secondary"
+              onClick={() =>
+                displayNextSentence(sentenceOptions?.option_2?.sentence ?? "")
+              }
+            >
+              <span className="text-4xl">
+                {sentenceOptions?.option_2?.icon}
+              </span>
+              <span className="text-lg">
+                {sentenceOptions?.option_2?.action}
+              </span>
+            </Button>
+          )}
+        </div>
       </div>
       {/* Feedback text */}
       <FeedbackAnimatedText feedback={feedback} />
@@ -106,4 +148,4 @@ const UnlimitedPractice = (props: UnlimitedPracticeProps) => {
   );
 };
 
-export default UnlimitedPractice;
+export default ChoiceStoryPractice;

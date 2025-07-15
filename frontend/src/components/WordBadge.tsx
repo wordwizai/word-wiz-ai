@@ -1,5 +1,8 @@
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
+import { useSpeechSynthesis } from "@/hooks/useSpeechSynthesis";
+import { useEffect, useState } from "react";
+import { Columns, Split, SplitSquareVertical, Text } from "lucide-react";
 
 interface WordBadgeProps {
   word: string;
@@ -14,6 +17,158 @@ export const WordBadge = ({
   showHighlighted,
   analysisPer,
 }: WordBadgeProps) => {
+  const PHONICS_CHUNKS = [
+    // Vowel teams & diphthongs
+    "ai",
+    "ay",
+    "au",
+    "aw",
+    "ea",
+    "ee",
+    "ei",
+    "ey",
+    "ie",
+    "oa",
+    "oe",
+    "oo",
+    "ou",
+    "ow",
+    "ue",
+    "ui",
+    "ew",
+    "oy",
+    "oi",
+    "igh",
+
+    // R-controlled vowels (Bossy R)
+    "ar",
+    "er",
+    "ir",
+    "or",
+    "ur",
+
+    // Consonant digraphs
+    "ch",
+    "ck",
+    "gh",
+    "gn",
+    "kn",
+    "ph",
+    "sh",
+    "th",
+    "wh",
+    "wr",
+    "qu",
+    "ng",
+
+    // Common consonant blends (initial and final)
+    "bl",
+    "br",
+    "cl",
+    "cr",
+    "dr",
+    "fl",
+    "fr",
+    "gl",
+    "gr",
+    "pl",
+    "pr",
+    "sc",
+    "scr",
+    "sk",
+    "sl",
+    "sm",
+    "sn",
+    "sp",
+    "spl",
+    "spr",
+    "st",
+    "str",
+    "sw",
+    "tr",
+    "tw",
+
+    // Word endings / suffixes
+    "ing",
+    "ed",
+    "es",
+    "ly",
+    "er",
+    "est",
+    "y",
+    "en",
+    "ness",
+    "ful",
+    "less",
+    "ment",
+    "tion",
+    "sion",
+    "ous",
+    "able",
+    "ible",
+
+    // Common word families (rimes) – optional but useful
+    "ack",
+    "all",
+    "ank",
+    "ash",
+    "ate",
+    "eep",
+    "ell",
+    "est",
+    "ick",
+    "ing",
+    "ink",
+    "ock",
+    "op",
+    "uck",
+    "ump",
+
+    // Silent letter patterns
+    "mb",
+    "gn",
+    "kn",
+    "wr",
+  ];
+
+  function chunkPhonics(word: string): string[] {
+    const chunks: string[] = [];
+    let i = 0;
+
+    const lower = word.toLowerCase();
+
+    while (i < lower.length) {
+      let found = false;
+
+      // Try to match longest possible chunk (up to 3 letters)
+      for (let len = 3; len > 0; len--) {
+        const piece = lower.slice(i, i + len);
+        if (PHONICS_CHUNKS.includes(piece)) {
+          chunks.push(piece);
+          i += len;
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        // Default to single letter
+        chunks.push(lower[i]);
+        i += 1;
+      }
+    }
+
+    return chunks;
+  }
+  const [phonicsChunks, setPhonicsChunks] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (word) {
+      const chunks = chunkPhonics(word);
+      setPhonicsChunks(chunks);
+    }
+  }, [word]);
+
   let initialBg = "rgb(255,255,255)";
   let targetBg = "rgb(255,255,255)";
   let textClass = "rounded-xl px-4 py-2 text-4xl font-medium";
@@ -31,6 +186,10 @@ export const WordBadge = ({
     targetBg = `rgb(${r},${g},${b})`;
     textClass += p > 0.5 ? " text-white" : " text-black";
   }
+
+  const { speak } = useSpeechSynthesis();
+  const [isGraphemes, setIsGraphemes] = useState(false);
+
   return (
     <motion.div
       initial={{
@@ -53,34 +212,97 @@ export const WordBadge = ({
           : { opacity: 1, scale: 1, backgroundColor: initialBg }
       }
       exit={{ opacity: 0, scale: 0.8 }}
-      style={{ borderRadius: "0.75rem" }}
-      className="inline-block"
+      style={{ borderRadius: "0.75rem", position: "relative" }}
+      className="inline-block group"
     >
+      {/* Toggle Grapheme Button */}
+      <button
+        type="button"
+        aria-label="Toggle grapheme mode"
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsGraphemes((s) => !s);
+        }}
+        className="absolute top-[-8px] right-[-8px] z-10 p-1.5 rounded-full bg-white/80 hover:bg-muted shadow transition-opacity opacity-0 group-hover:opacity-100"
+        tabIndex={0}
+      >
+        {isGraphemes ? (
+          <Text className="h-5 w-5" />
+        ) : (
+          <Columns className="h-5 w-5" />
+        )}
+      </button>
       <Badge
         variant="outline"
-        className={`${textClass} cursor-pointer transition-colors hover:bg-muted`}
+        className={`${textClass} cursor-pointer transition-colors hover:bg-muted relative`}
         style={{ background: "transparent" }}
         onClick={() => {
-          console.log(`Clicked on word: ${word}`);
-
-          if ("speechSynthesis" in window) {
-            window.speechSynthesis.cancel(); // Stop any ongoing speech
-            const utter = new window.SpeechSynthesisUtterance(word);
-            console.log(`Speaking word: ${word} with ${utter}`);
-            utter.lang = "en-US"; // Set language if needed
-            const voices = window.speechSynthesis.getVoices();
-            const preferredVoice = voices.find(
-              (v) => v.lang === "en-US" && v.name.includes("Female"),
-            ); // or any criteria
-            if (preferredVoice) {
-              utter.voice = preferredVoice;
-            }
-
-            window.speechSynthesis.speak(utter);
+          if (!isGraphemes) {
+            speak(word, { rate: 1 });
+          } else {
+            speak(phonicsChunks.join(" "), { rate: 0.6 });
           }
         }}
       >
-        {word}
+        {isGraphemes ? (
+          <span>
+            <AnimatePresence>
+              {phonicsChunks.map((g, i) => (
+                <motion.span
+                  key={i}
+                  initial={{
+                    opacity: 0,
+                    scale: 0.5,
+                    x: 0,
+                    y: 0,
+                    rotate: Math.random() * 20 - 10, // random slight rotation
+                  }}
+                  animate={{
+                    opacity: 1,
+                    scale: 1,
+                    x: (i - phonicsChunks.length / 2 + 0.5) * 12, // spread horizontally
+                    y: 0,
+                    rotate: 0,
+                    transition: {
+                      delay: i * 0.08,
+                      duration: 0.5,
+                      type: "spring",
+                      stiffness: 120,
+                      damping: 9,
+                    },
+                  }}
+                  exit={{
+                    opacity: 0,
+                    scale: 0.5,
+                    x: 0,
+                    y: 0,
+                    transition: {
+                      duration: 0.3,
+                      type: "spring",
+                    },
+                  }}
+                >
+                  <Badge
+                    key={i}
+                    variant="secondary"
+                    className="mx-0.5 text-4xl font-medium px-3"
+                  >
+                    {g}
+                  </Badge>
+                </motion.span>
+              ))}
+            </AnimatePresence>
+          </span>
+        ) : (
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            key="whole-word"
+          >
+            {word}
+          </motion.span>
+        )}
       </Badge>
     </motion.div>
   );

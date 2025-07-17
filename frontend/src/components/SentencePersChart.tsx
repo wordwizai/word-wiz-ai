@@ -22,7 +22,11 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getSentencePers } from "@/api";
 
-const SentencePersChart = () => {
+const SentencePersChart = ({
+  className = "",
+}: {
+  className?: string; // additional class names for styling
+}) => {
   const [chartData, setChartData] = useState<
     { date: Date; per: number; avg5: number | null }[]
   >([]);
@@ -62,7 +66,7 @@ const SentencePersChart = () => {
     },
   } satisfies ChartConfig;
   return (
-    <Card className="h-64 w-full space-y-0 gap-0 px-0">
+    <Card className={"h-64 w-full space-y-0 gap-0 px-0 " + className}>
       <CardHeader>
         <CardTitle>Error Rate Progress</CardTitle>
       </CardHeader>

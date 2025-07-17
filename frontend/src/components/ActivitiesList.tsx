@@ -26,6 +26,7 @@ interface ActivitiesListProps {
   type?: string; // filter by activity type
   filter?: string; // filter by activity settings
   inputActivities?: Activity[];
+  className?: string; // additional class names for styling
 }
 
 const ActivitiesList = ({
@@ -33,6 +34,7 @@ const ActivitiesList = ({
   displayMode = "list",
   type = "",
   inputActivities = [],
+  className = "",
 }: ActivitiesListProps) => {
   const [activities, setActivities] = useState<Activity[]>(inputActivities);
   const { token } = useContext(AuthContext);
@@ -66,6 +68,7 @@ const ActivitiesList = ({
         opts={{
           align: "start",
         }}
+        className={className}
       >
         <CarouselContent>
           {activities.length === 0
@@ -103,7 +106,9 @@ const ActivitiesList = ({
     );
   }
   return (
-    <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div
+      className={"flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 " + className}
+    >
       {activities.length === 0
         ? Array.from(
             { length: numberOfActivities === -1 ? 1 : numberOfActivities },

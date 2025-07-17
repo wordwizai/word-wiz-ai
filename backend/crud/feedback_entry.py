@@ -9,7 +9,7 @@ def create_feedback_entry(db: Session, feedback: FeedbackEntryCreate) -> Feedbac
         session_id=feedback.session_id,
         sentence=feedback.sentence,
         phoneme_analysis=feedback.phoneme_analysis,
-        feedback_text=feedback.feedback_text,
+        gpt_response=feedback.gpt_response,
     )
     db.add(db_feedback)
     db.commit()

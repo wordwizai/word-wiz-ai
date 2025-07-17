@@ -27,7 +27,7 @@ export function ThemeProvider({
   storageKey = "vite-ui-theme",
   ...props
 }: ThemeProviderProps) {
-  const { settings } = useSettings();
+  const { settings, updateSettings } = useSettings();
   const [theme, setTheme] = useState<Theme>(
     () => (localStorage.getItem(storageKey) as Theme) || defaultTheme,
   );
@@ -61,6 +61,9 @@ export function ThemeProvider({
     theme,
     setTheme: (theme: Theme) => {
       localStorage.setItem(storageKey, theme);
+      updateSettings({ theme }).catch((error) => {
+        console.error("Failed to update theme in settings:", error);
+      });
       setTheme(theme);
     },
   };

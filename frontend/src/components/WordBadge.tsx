@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { useSpeechSynthesis } from "@/hooks/useSpeechSynthesis";
 import { useEffect, useState } from "react";
 import { Columns, Split, SplitSquareVertical, Text } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface WordBadgeProps {
   word: string;
@@ -171,7 +172,9 @@ export const WordBadge = ({
 
   let initialBg = "rgb(255,255,255)";
   let targetBg = "rgb(255,255,255)";
-  let textClass = "rounded-xl px-4 py-2 text-4xl font-medium";
+  const baseBgClass = "bg-white dark:bg-zinc-900";
+  const baseTextClass = "text-black dark:text-white";
+  let textClass = `rounded-xl px-4 py-2 text-4xl font-medium ${baseTextClass}`;
   if (typeof analysisPer === "number" && showHighlighted) {
     const p = Math.max(0, Math.min(1, analysisPer));
     let r, g;
@@ -184,7 +187,8 @@ export const WordBadge = ({
       g = Math.round(255 * (1 - 2 * (p - 0.5)));
     }
     targetBg = `rgb(${r},${g},${b})`;
-    textClass += p > 0.5 ? " text-white" : " text-black";
+    textClass +=
+      p > 0.5 ? " text-white dark:text-white" : " text-black dark:text-black";
   }
 
   const { speak } = useSpeechSynthesis();
@@ -195,7 +199,6 @@ export const WordBadge = ({
       initial={{
         opacity: 0,
         scale: 0.8,
-        backgroundColor: initialBg,
       }}
       animate={
         showHighlighted && typeof analysisPer === "number"
@@ -209,11 +212,11 @@ export const WordBadge = ({
                 scale: { delay: idx * 0.08, duration: 0.3 },
               },
             }
-          : { opacity: 1, scale: 1, backgroundColor: initialBg }
+          : { opacity: 1, scale: 1 }
       }
       exit={{ opacity: 0, scale: 0.8 }}
       style={{ borderRadius: "0.75rem", position: "relative" }}
-      className="inline-block group"
+      className="inline-block group bg-white dark:bg-zinc-900"
     >
       {/* Toggle Grapheme Button */}
       <button
@@ -234,7 +237,7 @@ export const WordBadge = ({
       </button>
       <Badge
         variant="outline"
-        className={`${textClass} cursor-pointer transition-colors hover:bg-muted relative`}
+        className={`${textClass} ${baseBgClass} cursor-pointer transition-colors hover:bg-muted relative`}
         style={{ background: "transparent" }}
         onClick={() => {
           if (!isGraphemes) {

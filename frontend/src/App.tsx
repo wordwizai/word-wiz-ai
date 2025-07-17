@@ -14,7 +14,7 @@ import PracticeDashboard from "./pages/PracticeDashboard.tsx";
 
 function App() {
   return (
-    <div className="">
+    <div className="font-body">
       <BrowserRouter>
         <AuthProvider>
           <SettingsProvider>

@@ -48,6 +48,20 @@ def get_active_sessions(
     return [SessionOut.model_validate(s) for s in sessions]
 
 
+@router.get("/all", response_model=list[SessionOut])
+def get_all_sessions(
+    db: DBSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    sessions = (
+        db.query(UserSession)
+        .filter(UserSession.user_id == current_user.id)
+        .order_by(UserSession.created_at.desc())
+        .all()
+    )
+    return [SessionOut.model_validate(s) for s in sessions]
+
+
 @router.get("/{session_id}", response_model=SessionOut)
 def get_session_by_id(
     session_id: int,

@@ -1,12 +1,34 @@
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Calendar } from "@/components/ui/calendar";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import ActivitiesList from "@/components/ActivitiesList";
 import SentencePersChart from "@/components/SentencePersChart";
+import { Clock, Play } from "lucide-react";
+import { getSessions } from "@/api";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useNavigate } from "react-router-dom";
+
+interface Session {
+  id: string;
+  created_at: string;
+  activity: {
+    id: number;
+    title: string;
+    activity_type: string;
+    emoji_icon: string;
+  };
+  is_completed: boolean;
+}
+const activityColors = [
+  "pastel-blue",
+  "pastel-mint",
+  "pastel-peach",
+  "pastel-purple",
+  "pastel-pink",
+];
 
 const Dashboard = () => {
-  const { user } = useContext(AuthContext);
+  const { user, token } = useContext(AuthContext);
 
   const userName = user?.full_name || "Guest";
   const motivationalQuotes = [
@@ -25,8 +47,35 @@ const Dashboard = () => {
   const quoteIndex = today.getDate() % motivationalQuotes.length;
   const motivational = motivationalQuotes[quoteIndex];
 
+  const [pastSessions, setPastSessions] = useState<Session[]>([]);
+  const router = useNavigate();
+  useEffect(() => {
+    const fetchPastSessions = async () => {
+      if (!token) return;
+      try {
+        const response = await getSessions(token);
+        console.log("Past Sessions:", response);
+        setPastSessions(response);
+      } catch (error) {
+        console.error("Error fetching past sessions:", error);
+      }
+    };
+    fetchPastSessions();
+  }, [token]);
+
+  const formatActivityType = (type: string) => {
+    switch (type.toLowerCase()) {
+      case "unlimited":
+        return "Unlimited";
+      case "choice-story":
+        return "Choice Story";
+      default:
+        return type.charAt(0).toUpperCase() + type.slice(1);
+    }
+  };
+
   return (
-    <main className="flex-1 p-6 bg-background space-y-8 overflow-auto">
+    <main className="flex-1 p-6 bg-background space-y-8 overflow-auto flex flex-col min-h-0">
       {/* Main content */}
       {/* Header */}
       <div>
@@ -35,33 +84,53 @@ const Dashboard = () => {
       </div>
 
       {/* Progress */}
-      <div>
-        <SentencePersChart />
-      </div>
+      <SentencePersChart />
 
-      <div className="flex space-x-6">
+      <div className="flex space-x-6 flex-1 w-full min-w-0 min-h-0">
         {/* Activities */}
         <ActivitiesList numberOfActivities={3} />
 
         {/* Practice Calendar / Sidebar */}
-        <div className="space-y-4">
-          <Card className="bg-orange-100 dark:bg-orange-600/20 transition-colors">
-            <CardHeader>
-              <h3 className="text-base font-medium">Practice Sessions</h3>
-            </CardHeader>
-            <CardContent>
-              <Calendar mode="single" className="rounded-lg border" />
-            </CardContent>
-          </Card>
-          <Card className="bg-blue-100 dark:bg-blue-600/20 transition-colors">
-            <CardHeader>
-              <h3 className="text-base font-medium">Something Else</h3>
-            </CardHeader>
-            <CardContent>
-              <p>Put something here</p>
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="gap-1 pb-1 flex flex-col overflow-hidden min-h-0">
+          <CardHeader>
+            <h3 className="text-lg font-bold">
+              <Clock className="inline-block mr-2" />
+              Past Sessions
+            </h3>
+          </CardHeader>
+          <CardContent className="px-1 flex-1 flex flex-col overflow-hidden min-h-0">
+            {pastSessions.length > 0 ? (
+              <ScrollArea className="rounded-2xl h-full min-h-0">
+                {pastSessions.map((session) => {
+                  const colorIndex =
+                    Math.abs(session.activity.id) % activityColors.length;
+                  const cardColor = activityColors[colorIndex];
+
+                  return (
+                    <Card
+                      key={session.id}
+                      className={`h-fit py-2 group bg-${cardColor}`}
+                      onClick={() => router(`/practice/${session.id}`)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <CardContent>
+                        <div className="text-lg font-bold">
+                          {session.activity.emoji_icon} {session.activity.title}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {formatActivityType(session.activity.activity_type)} -{" "}
+                          {new Date(session.created_at).toDateString()}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </ScrollArea>
+            ) : (
+              <div>No past sessions found.</div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </main>
   );

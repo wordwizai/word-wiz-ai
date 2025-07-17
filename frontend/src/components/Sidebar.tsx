@@ -6,7 +6,6 @@ import {
   CircleQuestionMark,
   House,
   LogOut,
-  MessageSquareMore,
   Route,
   Settings,
   Target,
@@ -32,10 +31,12 @@ import { AuthContext } from "@/contexts/AuthContext";
 import type { AuthContextType } from "@/contexts/AuthContext";
 import { nameToInitials } from "@/lib/utils";
 import { ModeToggle } from "./ModeToggle";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const Sidebar = () => {
   // get the user
   const { user, logout } = useContext<AuthContextType>(AuthContext);
+  const { theme, setTheme } = useTheme();
 
   return (
     <TooltipProvider>

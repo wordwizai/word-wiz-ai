@@ -4,19 +4,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  /* Colors */
-  --color-pastel-purple: #efddfd;
-  --color-pastel-mint: #e8f7f1;
-  --color-pastel-peach: #f9f3e9;
-  --color-pastel-pink: #fce4f4;
-  --color-pastel-blue: #ddf1fd;
-  --color-background: #f5f4fa;
-  --color-card: #ffffff;
-  --color-text: #2d2d2d;
-
   /* Fonts */
   --font-heading: "Poppins", sans-serif;
-  --font-body: "Nunito", sans-serif;
+  --font-body: "Poppins", sans-serif;
   --font-ipa: "Charis SIL", serif;
 }
 
@@ -56,6 +46,18 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Pastel colors */
+  --color-pastel-purple: var(--pastel-purple);
+  --color-pastel-purple-foreground: var(--pastel-purple-foreground);
+  --color-pastel-mint: var(--pastel-mint);
+  --color-pastel-mint-foreground: var(--pastel-mint-foreground);
+  --color-pastel-peach: var(--pastel-peach);
+  --color-pastel-peach-foreground: var(--pastel-peach-foreground);
+  --color-pastel-pink: var(--pastel-pink);
+  --color-pastel-pink-foreground: var(--pastel-pink-foreground);
+  --color-pastel-blue: var(--pastel-blue);
+  --color-pastel-blue-foreground: var(--pastel-blue-foreground);
 }
 
 :root {
@@ -91,6 +93,20 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --pastel-purple: #ede8fa; /* oklch(0.95 0.06 310) */
+  --pastel-purple-foreground: #3b2954;
+
+  --pastel-mint: #e7f9ee; /* oklch(0.95 0.05 160) */
+  --pastel-mint-foreground: #224d3b;
+
+  --pastel-peach: #fff2dd; /* oklch(0.96 0.04 70) */
+  --pastel-peach-foreground: #6b3f1e;
+
+  --pastel-pink: #fde7eb; /* oklch(0.96 0.05 10) */
+  --pastel-pink-foreground: #5c1a22;
+
+  --pastel-blue: #e9f1fd; /* oklch(0.95 0.06 250) */
+  --pastel-blue-foreground: #1f2e5d;
 }
 
 .dark {
@@ -125,6 +141,20 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --pastel-purple: #4c3e5f; /* oklch(0.35 0.04 310) */
+  --pastel-purple-foreground: #f4eefd;
+
+  --pastel-mint: #3e594c; /* oklch(0.36 0.04 160) */
+  --pastel-mint-foreground: #f1fbf6;
+
+  --pastel-peach: #5e4a36; /* oklch(0.38 0.04 70) */
+  --pastel-peach-foreground: #fffaf3;
+
+  --pastel-pink: #5e3f45; /* oklch(0.38 0.04 10) */
+  --pastel-pink-foreground: #fff5f7;
+
+  --pastel-blue: #475066; /* oklch(0.38 0.04 250) */
+  --pastel-blue-foreground: #f0f5ff;
 }
 
 @layer base {

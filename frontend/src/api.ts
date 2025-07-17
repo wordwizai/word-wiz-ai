@@ -125,7 +125,7 @@ const getSession = async (
 
 const getSessions = async (token: string) => {
   try {
-    const response = await axios.get(`${API_URL}/session/active`, {
+    const response = await axios.get(`${API_URL}/session/all`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

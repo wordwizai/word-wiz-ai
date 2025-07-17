@@ -123,6 +123,26 @@ const getSession = async (
   }
 };
 
+const getLatestSessionFeedback = async (
+  token: string,
+  sessionId: number,
+): Promise<any> => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/session/${sessionId}/latest-feedback`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Fetch latest session feedback error:", error);
+    throw error;
+  }
+};
+
 const getSessions = async (token: string) => {
   try {
     const response = await axios.get(`${API_URL}/session/all`, {
@@ -230,6 +250,7 @@ export {
   updateSettings,
   fetchSettings,
   getSession,
+  getLatestSessionFeedback,
   getSessions,
   createSession,
   getActivities,

@@ -96,3 +96,26 @@ def deactivate_session(
     db.commit()
     db.refresh(db_session)
     return SessionOut.model_validate(db_session)
+
+
+@router.get("/{session_id}/latest-feedback")
+def get_latest_feedback_for_session(
+    session_id: int,
+    db: DBSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    db_session = session_crud.get_session(db, session_id)
+    if not db_session:
+        print(db_session, "not found for session_id", session_id)
+        raise HTTPException(status_code=404, detail="Session not found")
+    if db_session.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403, detail="Not authorized to access this session"
+        )
+    feedback = (
+        db_session.feedback_entries if hasattr(db_session, "feedback_entries") else []
+    )
+    if not feedback:
+        return None
+    latest_feedback = max(feedback, key=lambda f: getattr(f, "created_at", None))
+    return latest_feedback

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
@@ -7,8 +7,9 @@ import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useAudioAnalysisStream } from "@/hooks/useAudioAnalysisStream";
 import { FeedbackAnimatedText } from "@/components/FeedbackAnimatedText";
 import { RecordAndNextButtons } from "@/components/RecordAndNextButtons";
-import type { Session } from "@/api";
+import { getLatestSessionFeedback, type Session } from "@/api";
 import WordBadgeRow from "@/components/WordBadgeRow";
+import { AuthContext } from "@/contexts/AuthContext";
 
 interface ChoiceStoryPracticeProps {
   session: Session;
@@ -25,9 +26,7 @@ interface SentenceOptions {
 }
 
 const ChoiceStoryPractice = (props: ChoiceStoryPracticeProps) => {
-  const [currentSentence, setCurrentSentence] = useState(
-    "The quick brown fox jumped over the lazy dog",
-  );
+  const [currentSentence, setCurrentSentence] = useState<string | null>(null);
   const [analysisData, setAnalysisData] = useState<{
     pronunciation_dataframe: { per: number[]; ground_truth_word: string[] };
   } | null>(null);
@@ -36,7 +35,31 @@ const ChoiceStoryPractice = (props: ChoiceStoryPracticeProps) => {
   const [sentenceOptions, setSentenceOptions] =
     useState<SentenceOptions | null>(null);
   const [showSentenceOptions, setShowSentenceOptions] = useState(false);
-  const wordArray = currentSentence.split(" ");
+  const wordArray =
+    typeof currentSentence === "string" ? currentSentence.split(" ") : [];
+
+  const { token } = useContext(AuthContext);
+
+  useEffect(() => {
+    // Initialize with a default sentence
+    const getCurrentSentence = async () => {
+      // You can replace this with an API call to fetch a random sentence
+      const fetchedSentence = await getLatestSessionFeedback(
+        token ?? "",
+        props.session.id,
+      );
+      console.log("Fetched sentence:", fetchedSentence);
+      if (fetchedSentence) {
+        setCurrentSentence(fetchedSentence.sentence);
+        setFeedback(fetchedSentence.gpt_response.feedback);
+        setSentenceOptions(fetchedSentence.gpt_response.sentence);
+        setShowSentenceOptions(true);
+      } else {
+        setCurrentSentence("The quick brown fox jumped over the lazy dog");
+      }
+    };
+    getCurrentSentence();
+  }, [props.session.id, token]);
 
   // Analysis stream (for communicating with the backend)
   const { start } = useAudioAnalysisStream({

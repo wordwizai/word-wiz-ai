@@ -35,28 +35,29 @@ const ActivitiesList = ({
   displayMode = "list",
   type,
   useInputActivities = false, // if true, use inputActivities prop instead of fetching
-  inputActivities = [],
+  inputActivities,
   className = "",
 }: ActivitiesListProps) => {
-  const [activities, setActivities] = useState<Activity[]>(inputActivities);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const { token } = useContext(AuthContext);
 
   useEffect(() => {
     if (useInputActivities) {
-      setActivities(inputActivities);
+      setActivities(inputActivities || []);
       return;
     }
     if (!token) return;
     const fetchActivities = async (token: string) => {
       try {
         const activitiesData = await getActivities(token);
+        console.log("Fetched activities:", activitiesData);
         setActivities(activitiesData);
       } catch (error) {
         console.error("Failed to fetch activities:", error);
       }
     };
     fetchActivities(token);
-  }, [token, inputActivities, useInputActivities]);
+  }, [token, useInputActivities, inputActivities]);
 
   const onActivityClick = async (activity: Activity) => {
     console.log("Activity clicked:", activity, token);

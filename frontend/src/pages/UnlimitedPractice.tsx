@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
@@ -8,17 +8,16 @@ import { useAudioAnalysisStream } from "@/hooks/useAudioAnalysisStream";
 import { WordBadge } from "@/components/WordBadge";
 import { FeedbackAnimatedText } from "@/components/FeedbackAnimatedText";
 import { RecordAndNextButtons } from "@/components/RecordAndNextButtons";
-import type { Session } from "@/api";
+import { getLatestSessionFeedback, type Session } from "@/api";
 import WordBadgeRow from "@/components/WordBadgeRow";
+import { AuthContext } from "@/contexts/AuthContext";
 
 interface UnlimitedPracticeProps {
   session: Session;
 }
 
 const UnlimitedPractice = (props: UnlimitedPracticeProps) => {
-  const [currentSentence, setCurrentSentence] = useState(
-    "The quick brown fox jumped over the lazy dog",
-  );
+  const [currentSentence, setCurrentSentence] = useState<string | null>(null);
   const [analysisData, setAnalysisData] = useState<{
     pronunciation_dataframe: { per: number[]; ground_truth_word: string[] };
   } | null>(null);
@@ -26,7 +25,26 @@ const UnlimitedPractice = (props: UnlimitedPracticeProps) => {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [nextSentence, setNextSentence] = useState<string | null>(null);
   const [showNextButton, setShowNextButton] = useState(false);
-  const wordArray = currentSentence.split(" ");
+  const wordArray =
+    typeof currentSentence === "string" ? currentSentence.split(" ") : [];
+  const { token } = useContext(AuthContext);
+
+  useEffect(() => {
+    // Initialize with a default sentence
+    const getCurrentSentence = async () => {
+      // You can replace this with an API call to fetch a random sentence
+      const fetchedSentence = await getLatestSessionFeedback(
+        token ?? "",
+        props.session.id,
+      );
+      if (fetchedSentence) {
+        setCurrentSentence(fetchedSentence.gpt_response.sentence);
+      } else {
+        setCurrentSentence("The quick brown fox jumped over the lazy dog");
+      }
+    };
+    getCurrentSentence();
+  }, [props.session.id, token]);
 
   // Analysis stream (for communicating with the backend)
   const { start } = useAudioAnalysisStream({
@@ -53,6 +71,10 @@ const UnlimitedPractice = (props: UnlimitedPracticeProps) => {
   // Recording functionality
   const { isRecording, startRecording, stopRecording } = useAudioRecorder(
     (audioFile: File) => {
+      if (!currentSentence) {
+        console.error("Current sentence is not set");
+        return;
+      }
       start(audioFile, currentSentence);
     },
   );
@@ -88,7 +110,7 @@ const UnlimitedPractice = (props: UnlimitedPracticeProps) => {
         {/* Word Row */}
         <WordBadgeRow
           showHighlightedWords={showHighlightedWords}
-          wordArray={wordArray}
+          wordArray={wordArray ?? []}
           analysisData={analysisData}
         />
         {/* Recording Button */}

@@ -54,7 +54,6 @@ const Dashboard = () => {
       if (!token) return;
       try {
         const response = await getSessions(token);
-        console.log("Past Sessions:", response);
         setPastSessions(response);
       } catch (error) {
         console.error("Error fetching past sessions:", error);
@@ -109,9 +108,12 @@ const Dashboard = () => {
                   return (
                     <Card
                       key={session.id}
-                      className={`h-fit py-2 group bg-${cardColor}`}
+                      className={`h-fit py-2 group`}
                       onClick={() => router(`/practice/${session.id}`)}
-                      style={{ cursor: "pointer" }}
+                      style={{
+                        cursor: "pointer",
+                        backgroundColor: `var(--${cardColor})`,
+                      }}
                     >
                       <CardContent>
                         <div className="text-lg font-bold">

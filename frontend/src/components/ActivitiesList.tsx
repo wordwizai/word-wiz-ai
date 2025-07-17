@@ -25,6 +25,7 @@ interface ActivitiesListProps {
   displayMode?: "featured" | "list" | "carousel"; // list just lists them out, featured shows 1 big and the rest small
   type?: string; // filter by activity type
   filter?: string; // filter by activity settings
+  useInputActivities?: boolean; // if true, use inputActivities prop instead of fetching
   inputActivities?: Activity[];
   className?: string; // additional class names for styling
 }
@@ -32,7 +33,8 @@ interface ActivitiesListProps {
 const ActivitiesList = ({
   numberOfActivities = -1,
   displayMode = "list",
-  type = "",
+  type,
+  useInputActivities = false, // if true, use inputActivities prop instead of fetching
   inputActivities = [],
   className = "",
 }: ActivitiesListProps) => {
@@ -40,19 +42,21 @@ const ActivitiesList = ({
   const { token } = useContext(AuthContext);
 
   useEffect(() => {
-    if (activities.length !== 0) return; // If activities are already provided, skip fetching
+    if (useInputActivities) {
+      setActivities(inputActivities);
+      return;
+    }
     if (!token) return;
     const fetchActivities = async (token: string) => {
       try {
         const activitiesData = await getActivities(token);
-        console.log("Fetched activities:", activitiesData);
         setActivities(activitiesData);
       } catch (error) {
         console.error("Failed to fetch activities:", error);
       }
     };
     fetchActivities(token);
-  }, [token, activities]);
+  }, [token, inputActivities, useInputActivities]);
 
   const onActivityClick = async (activity: Activity) => {
     console.log("Activity clicked:", activity, token);
@@ -86,8 +90,13 @@ const ActivitiesList = ({
                 ),
               )
             : activities
-                .filter((a) => (type !== "" ? a.activity_type === type : true))
-                .slice(0, numberOfActivities ?? -1)
+                .filter((a) => (type ? a.activity_type === type : true))
+                .slice(
+                  0,
+                  numberOfActivities === -1
+                    ? activities.length
+                    : numberOfActivities,
+                )
                 .map((activity, idx) => (
                   <CarouselItem
                     key={idx}
@@ -115,8 +124,13 @@ const ActivitiesList = ({
             (_, idx) => <Skeleton key={idx} />,
           )
         : activities
-            .filter((a) => (type != "" ? a.activity_type === type : true))
-            .slice(0, numberOfActivities ?? -1)
+            .filter((a) => (type ? a.activity_type === type : true))
+            .slice(
+              0,
+              numberOfActivities === -1
+                ? activities.length
+                : numberOfActivities,
+            )
             .map((activity, idx) => (
               <ActivityCard
                 key={idx}

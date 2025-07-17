@@ -36,8 +36,6 @@ const SentencePersChart = ({
     const fetchChartData = async () => {
       if (!token) return;
       const response = await getSentencePers(token);
-      console.log("Fetched chart data:", response);
-
       const processed = response.map((item: any) => ({
         date: new Date(item.date),
         per: item.per,

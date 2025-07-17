@@ -190,6 +190,14 @@ class PhonemeAssistant:
         if status_callback:
             status_callback("Loading audio from file...")
 
+        # clean the sentence
+        attempted_sentence = (
+            (attempted_sentence.strip().lower().replace(".", "").replace(",", ""))
+            .replace("?", "")
+            .replace("!", "")
+            .replace("'", "")
+        )
+
         ground_truth_phonemes = grapheme_to_phoneme(attempted_sentence)
         pronunciation_data = process_audio_array(
             ground_truth_phonemes=ground_truth_phonemes,

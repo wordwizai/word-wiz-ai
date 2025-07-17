@@ -1,3 +1,4 @@
+import PhonemeErrorsPieChart from "@/components/PhonemeErrorsPieChart";
 import SentencePersChart from "@/components/SentencePersChart";
 import { Route } from "lucide-react";
 
@@ -14,6 +15,11 @@ const ProgressDashboard = () => {
         </p>
       </div>
       <SentencePersChart />
+      <div className="flex gap-6 w-full min-w-0 min-h-0">
+        <PhonemeErrorsPieChart errorType="substitution" className="flex-1" />
+        <PhonemeErrorsPieChart errorType="insertion" className="flex-1" />
+        <PhonemeErrorsPieChart errorType="deletion" className="flex-1" />
+      </div>
     </main>
   );
 };

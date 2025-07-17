@@ -35,7 +35,13 @@ const ActivityCard = ({
   const { theme } = useTheme();
 
   return (
-    <Card className={`text-center bg-${cardColor} flex flex-col h-full`}>
+    <Card
+      className={`text-center flex flex-col h-full`}
+      style={{
+        backgroundColor: `var(--${cardColor})`,
+        cursor: "pointer",
+      }}
+    >
       <CardHeader>
         <h3 className="text-2xl font-bold text-left flex flex-col gap-4">
           <div className="text-4xl">{activity.emoji_icon}</div>

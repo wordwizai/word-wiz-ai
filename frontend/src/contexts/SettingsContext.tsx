@@ -45,7 +45,6 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     try {
       const data = await apiFetchSettings(token || "");
       setSettings(data);
-      console.log("Fetched settings:", data);
     } catch (e: any) {
       setError(e.message || "Failed to fetch settings");
     } finally {

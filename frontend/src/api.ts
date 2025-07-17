@@ -201,6 +201,26 @@ const getSentencePers = async (token: string) => {
   }
 };
 
+const getPhonemesPerMistakeType = async (
+  token: string,
+  errorType: "insertion" | "deletion" | "substitution",
+) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/feedback/user/mistake-type-phonemes?mistake_type=${errorType}&limit=10`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Fetch phonemes per mistake type error:", error);
+    throw error;
+  }
+};
+
 export {
   loginUser,
   registerUser,
@@ -215,5 +235,6 @@ export {
   getActivities,
   getActivity,
   getSentencePers,
+  getPhonemesPerMistakeType,
 };
 export type { Session };

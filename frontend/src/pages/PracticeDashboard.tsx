@@ -40,7 +40,6 @@ const PracticeDashboard = () => {
     const fetchActivities = async (token: string) => {
       try {
         const activitiesData = await getActivities(token);
-        console.log("Fetched activities:", activitiesData);
         setActivities(activitiesData);
       } catch (error) {
         console.error("Failed to fetch activities:", error);
@@ -69,6 +68,7 @@ const PracticeDashboard = () => {
             type={section.filter}
             displayMode="carousel"
             inputActivities={activities}
+            useInputActivities={true}
           />
         </div>
       ))}

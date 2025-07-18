@@ -247,15 +247,17 @@ class PhonemeAssistant:
 
         audio_bytes = b"".join(audio_generator)
 
-        sample_rate = getattr(self.tts, "sample_rate", 22050)
+        sample_rate = getattr(self.tts, "sample_rate", 24000)
 
         audio_buffer = io.BytesIO()
         try:
             import numpy as np
 
-            audio_array = np.frombuffer(audio_bytes, dtype=np.float32)
+            # Ensure audio_bytes is treated as PCM data
+            audio_array = np.frombuffer(audio_bytes, dtype=np.int16)  # Assuming PCM 16-bit depth
             sf.write(audio_buffer, audio_array, sample_rate, format="WAV")
-        except Exception:
+        except Exception as e:
+            print(f"Audio processing error: {str(e)}")
             # fallback: just write the raw bytes if conversion fails
             audio_buffer.write(audio_bytes)
 

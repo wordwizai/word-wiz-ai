@@ -31,7 +31,7 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
             full_name=user.full_name,
             hashed_password=hashed_password,
         )
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=500,
             detail=f"Error creating user: Try a different email or username",
@@ -42,7 +42,7 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/token")
 async def login_for_access_token(
-    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
+    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db), remember_me: bool = False
 ) -> Token:
     # Username is an alias for email in this context
     user = authenticate_user(db, form_data.username, form_data.password)
@@ -52,7 +52,10 @@ async def login_for_access_token(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    if remember_me:
+        access_token_expires = timedelta(days=30)  # Extended expiration for Remember Me
+    else:
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )

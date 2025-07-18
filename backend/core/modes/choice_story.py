@@ -59,7 +59,7 @@ class ChoiceStoryPractice(BaseMode):
             {
                 "role": "system",
                 "content": phoneme_assistant.load_prompt(
-                    "core/gpt_prompts/choice_story_mode_prompt_v2.txt"
+                    "core/gpt_prompts/choice_story_mode_prompt_v3.txt"
                 ),
             }
         ]

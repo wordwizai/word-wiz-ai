@@ -90,9 +90,9 @@ const Dashboard = () => {
         <ActivitiesList numberOfActivities={3} />
 
         {/* Practice Calendar / Sidebar */}
-        <Card className="gap-1 pb-1 flex flex-col overflow-hidden min-h-0">
+        <Card className="gap-4 pb-1 px-2 flex flex-col overflow-hidden min-h-0">
           <CardHeader>
-            <h3 className="text-lg font-bold">
+            <h3 className="text-xl font-bold">
               <Clock className="inline-block mr-2" />
               Past Sessions
             </h3>
@@ -100,33 +100,36 @@ const Dashboard = () => {
           <CardContent className="px-1 flex-1 flex flex-col overflow-hidden min-h-0">
             {pastSessions.length > 0 ? (
               <ScrollArea className="rounded-2xl h-full min-h-0">
-                {pastSessions.map((session) => {
-                  const colorIndex =
-                    Math.abs(session.activity.id) % activityColors.length;
-                  const cardColor = activityColors[colorIndex];
+                <div className="flex flex-col gap-2">
+                  {pastSessions.map((session) => {
+                    const colorIndex =
+                      Math.abs(session.activity.id) % activityColors.length;
+                    const cardColor = activityColors[colorIndex];
 
-                  return (
-                    <Card
-                      key={session.id}
-                      className={`h-fit py-2 group`}
-                      onClick={() => router(`/practice/${session.id}`)}
-                      style={{
-                        cursor: "pointer",
-                        backgroundColor: `var(--${cardColor})`,
-                      }}
-                    >
-                      <CardContent>
-                        <div className="text-lg font-bold">
-                          {session.activity.emoji_icon} {session.activity.title}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          {formatActivityType(session.activity.activity_type)} -{" "}
-                          {new Date(session.created_at).toDateString()}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
+                    return (
+                      <Card
+                        key={session.id}
+                        className={`h-fit py-4 group shadow-lg hover:shadow-xl transition-all`}
+                        onClick={() => router(`/practice/${session.id}`)}
+                        style={{
+                          cursor: "pointer",
+                          backgroundColor: `var(--${cardColor})`,
+                        }}
+                      >
+                        <CardContent>
+                          <div className="text-lg font-bold">
+                            {session.activity.emoji_icon}{" "}
+                            {session.activity.title}
+                          </div>
+                          <div className="text-md text-muted-foreground">
+                            {formatActivityType(session.activity.activity_type)}{" "}
+                            - {new Date(session.created_at).toDateString()}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
               </ScrollArea>
             ) : (
               <div>No past sessions found.</div>

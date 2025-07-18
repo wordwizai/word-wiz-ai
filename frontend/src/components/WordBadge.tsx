@@ -132,6 +132,11 @@ export const WordBadge = ({
     "wr",
   ];
 
+  const formatWord = (w: string) => {
+    // make everything lowercase and remove any non-alphabetic characters
+    return w.toLowerCase().replace(/[^a-z]/g, "");
+  };
+
   function chunkPhonics(word: string): string[] {
     const chunks: string[] = [];
     let i = 0;
@@ -165,7 +170,7 @@ export const WordBadge = ({
 
   useEffect(() => {
     if (word) {
-      const chunks = chunkPhonics(word);
+      const chunks = chunkPhonics(formatWord(word));
       setPhonicsChunks(chunks);
     }
   }, [word]);

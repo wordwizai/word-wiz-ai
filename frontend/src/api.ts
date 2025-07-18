@@ -123,13 +123,13 @@ const getSession = async (
   }
 };
 
-const getLatestSessionFeedback = async (
+const getCurrentSessionState = async (
   token: string,
   sessionId: number,
 ): Promise<any> => {
   try {
     const response = await axios.get(
-      `${API_URL}/session/${sessionId}/latest-feedback`,
+      `${API_URL}/session/${sessionId}/current-data`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -250,7 +250,7 @@ export {
   updateSettings,
   fetchSettings,
   getSession,
-  getLatestSessionFeedback,
+  getCurrentSessionState,
   getSessions,
   createSession,
   getActivities,

@@ -17,6 +17,11 @@ const WordBadgeRow = ({
   analysisData,
   wordArray,
 }: WordBadgeRowProps & {}) => {
+  const formatWord = (word: string) => {
+    // Format the word to remove any special characters or spaces
+    return word.replace(/[^a-zA-Z]/g, "").toLowerCase();
+  };
+
   return (
     <motion.div
       className="flex flex-row items-center justify-center gap-4 w-full flex-wrap max-w-2/3"
@@ -34,7 +39,7 @@ const WordBadgeRow = ({
                   Object.values(
                     analysisData?.pronunciation_dataframe.ground_truth_word ||
                       [],
-                  ).indexOf(word)
+                  ).indexOf(formatWord(word))
                 ]
               }
               key={word + idx}

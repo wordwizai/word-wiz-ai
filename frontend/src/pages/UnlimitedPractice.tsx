@@ -8,7 +8,7 @@ import { useAudioAnalysisStream } from "@/hooks/useAudioAnalysisStream";
 import { WordBadge } from "@/components/WordBadge";
 import { FeedbackAnimatedText } from "@/components/FeedbackAnimatedText";
 import { RecordAndNextButtons } from "@/components/RecordAndNextButtons";
-import { getLatestSessionFeedback, type Session } from "@/api";
+import { getCurrentSessionState, type Session } from "@/api";
 import WordBadgeRow from "@/components/WordBadgeRow";
 import { AuthContext } from "@/contexts/AuthContext";
 
@@ -33,12 +33,12 @@ const UnlimitedPractice = (props: UnlimitedPracticeProps) => {
     // Initialize with a default sentence
     const getCurrentSentence = async () => {
       // You can replace this with an API call to fetch a random sentence
-      const fetchedSentence = await getLatestSessionFeedback(
+      const fetchedSentence = await getCurrentSessionState(
         token ?? "",
         props.session.id,
       );
-      if (fetchedSentence) {
-        setCurrentSentence(fetchedSentence.gpt_response.sentence);
+      if (fetchedSentence.type == "full-feedback-state") {
+        setCurrentSentence(fetchedSentence.data.gpt_response.sentence);
       } else {
         setCurrentSentence("The quick brown fox jumped over the lazy dog");
       }

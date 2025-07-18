@@ -98,24 +98,38 @@ def deactivate_session(
     return SessionOut.model_validate(db_session)
 
 
-@router.get("/{session_id}/latest-feedback")
-def get_latest_feedback_for_session(
+@router.get("/{session_id}/current-data")
+def get_current_data_for_session(
     session_id: int,
     db: DBSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
+    # Fetch session from the database
     db_session = session_crud.get_session(db, session_id)
     if not db_session:
-        print(db_session, "not found for session_id", session_id)
         raise HTTPException(status_code=404, detail="Session not found")
+
+    # Ensure the current user is authorized to access this session
     if db_session.user_id != current_user.id:
         raise HTTPException(
             status_code=403, detail="Not authorized to access this session"
         )
-    feedback = (
-        db_session.feedback_entries if hasattr(db_session, "feedback_entries") else []
-    )
+
+    # Retrieve feedback entries if they exist
+    feedback = getattr(db_session, "feedback_entries", [])
+
+    # If no feedback exists, return activity settings
     if not feedback:
-        return None
+        return {
+            "type": "activity-settings",
+            "data": db_session.activity.activity_settings,
+        }
+
+    # Retrieve the latest feedback entry based on `created_at`
     latest_feedback = max(feedback, key=lambda f: getattr(f, "created_at", None))
-    return latest_feedback
+
+    # Return the latest feedback in a structured format
+    return {
+        "type": "full-feedback-state",
+        "data": latest_feedback,
+    }

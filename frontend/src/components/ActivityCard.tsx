@@ -2,6 +2,7 @@ import { CirclePlay } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
 import { useTheme } from "@/contexts/ThemeContext";
+import { Badge } from "./ui/badge";
 
 interface ActivityCardProps {
   activity: {
@@ -10,9 +11,9 @@ interface ActivityCardProps {
     description: string;
     emoji_icon: string;
     activity_type: string;
-    activity_settings: any;
+    activity_settings: Record<string, unknown>;
   };
-  onActivityClick: (activity: any) => void;
+  onActivityClick: (activity: Record<string, unknown>) => void;
 }
 
 const activityColors = [
@@ -46,10 +47,16 @@ const ActivityCard = ({
         <h3 className="text-2xl font-bold text-left flex flex-col gap-4">
           <div className="text-4xl">{activity.emoji_icon}</div>
           <div className="">{activity.title}</div>
+          <Badge
+            variant="secondary"
+            className="px-1 text-sm font-semibold rounded-full"
+          >
+            {activity.activity_type}
+          </Badge>
         </h3>
       </CardHeader>
       <CardContent className="flex-1">
-        <p className="text-base text- text-left">{activity.description}</p>
+        <p className="text-base text-left">{activity.description}</p>
       </CardContent>
       <CardFooter className="flex justify-center">
         <Button

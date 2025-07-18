@@ -7,7 +7,7 @@ import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useAudioAnalysisStream } from "@/hooks/useAudioAnalysisStream";
 import { FeedbackAnimatedText } from "@/components/FeedbackAnimatedText";
 import { RecordAndNextButtons } from "@/components/RecordAndNextButtons";
-import { getLatestSessionFeedback, type Session } from "@/api";
+import { getCurrentSessionState, type Session } from "@/api";
 import WordBadgeRow from "@/components/WordBadgeRow";
 import { AuthContext } from "@/contexts/AuthContext";
 
@@ -44,16 +44,23 @@ const ChoiceStoryPractice = (props: ChoiceStoryPracticeProps) => {
     // Initialize with a default sentence
     const getCurrentSentence = async () => {
       // You can replace this with an API call to fetch a random sentence
-      const fetchedSentence = await getLatestSessionFeedback(
+      const fetchedSentence = await getCurrentSessionState(
         token ?? "",
         props.session.id,
       );
       console.log("Fetched sentence:", fetchedSentence);
-      if (fetchedSentence) {
-        setCurrentSentence(fetchedSentence.sentence);
-        setFeedback(fetchedSentence.gpt_response.feedback);
-        setSentenceOptions(fetchedSentence.gpt_response.sentence);
+      if (fetchedSentence.type === "full-feedback-state") {
+        setCurrentSentence(fetchedSentence.data.sentence);
+        setFeedback(fetchedSentence.data.gpt_response.feedback);
+        setSentenceOptions(fetchedSentence.data.gpt_response.sentence);
+        setAnalysisData(fetchedSentence.data.phoneme_analysis);
         setShowSentenceOptions(true);
+        setShowHighlightedWords(true);
+      } else if (fetchedSentence.type === "activity-settings") {
+        setCurrentSentence(fetchedSentence.data.first_sentence);
+        setFeedback(null);
+        setSentenceOptions(null);
+        setShowSentenceOptions(false);
       } else {
         setCurrentSentence("The quick brown fox jumped over the lazy dog");
       }

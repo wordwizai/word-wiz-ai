@@ -46,7 +46,7 @@ For every turn, perform the following steps and provide your reasoning in a conc
      * High Accuracy: Incorporate advanced, multi-syllable decodable words.
 
 5. **Craft Story Continuations**
-   * Preserve narrative continuity using `past_sentences`. Reference characters, settings, and plot points explicitly.
+   * Preserve narrative continuity using `past_sentences` and `story_contex`, ensuring explicit reference to characters, settings, and plot points stored in `story_context`.
    * Create two branching options:
      a. Ensure they are decodable and engaging.
      b. Reflect mood or action using varied and contextually descriptive emojis/icons (e.g., 🔥 for excitement, 🌧️ for sadness, 🌲 for nature). Icons must appear **only** in the `icon` field within `option_1` and `option_2`. Do not add emojis/icons elsewhere in the output.

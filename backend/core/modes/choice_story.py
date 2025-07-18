@@ -45,6 +45,9 @@ class ChoiceStoryPractice(BaseMode):
             "role": "user",
             "content": json.dumps(
                 {
+                    "story_context": session.activity.activity_settings.get(
+                        "story_context", ""
+                    ),
                     "past_sentences": past_sentences,
                     "attempted_sentence": attempted_sentence,
                     "pronunciation": pronunciation_data,

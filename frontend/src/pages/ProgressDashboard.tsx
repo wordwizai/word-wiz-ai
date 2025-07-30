@@ -15,7 +15,7 @@ const ProgressDashboard = () => {
         </p>
       </div>
       <SentencePersChart />
-      <div className="flex gap-6 w-full min-w-0 min-h-0">
+      <div className="flex flex-col md:flex-row gap-6 w-full min-w-0 min-h-0">
         <PhonemeErrorsPieChart errorType="substitution" className="flex-1" />
         <PhonemeErrorsPieChart errorType="insertion" className="flex-1" />
         <PhonemeErrorsPieChart errorType="deletion" className="flex-1" />

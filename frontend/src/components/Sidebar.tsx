@@ -31,16 +31,20 @@ import { AuthContext } from "@/contexts/AuthContext";
 import type { AuthContextType } from "@/contexts/AuthContext";
 import { nameToInitials } from "@/lib/utils";
 import { ModeToggle } from "./ModeToggle";
-import { useTheme } from "@/contexts/ThemeContext";
 
-const Sidebar = () => {
+interface SidebarProps {
+  className?: string;
+}
+
+const Sidebar = ({ className }: SidebarProps) => {
   // get the user
   const { user, logout } = useContext<AuthContextType>(AuthContext);
-  const { theme, setTheme } = useTheme();
 
   return (
     <TooltipProvider>
-      <aside className="w-16 flex flex-col items-center bg-background p-4 space-y-4">
+      <aside
+        className={`w-16 flex flex-col items-center bg-background p-4 space-y-4 ${className}`}
+      >
         {/* Home */}
         <Tooltip delayDuration={300}>
           <TooltipTrigger asChild>

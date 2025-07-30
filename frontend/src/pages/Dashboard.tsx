@@ -7,6 +7,7 @@ import { Clock, Play } from "lucide-react";
 import { getSessions } from "@/api";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNavigate } from "react-router-dom";
+import { wordWizIcon } from "@/assets";
 
 interface Session {
   id: string;
@@ -83,21 +84,27 @@ const Dashboard = () => {
       </div>
 
       {/* Progress */}
-      <SentencePersChart />
+      <div className="hidden md:visible">
+        <SentencePersChart />
+      </div>
 
-      <div className="flex space-x-6 flex-1 w-full min-w-0 min-h-0">
+      <div className="flex space-x-6 space-y-6 flex-1 w-full min-w-0 min-h-0 flex-col md:flex-row">
         {/* Activities */}
-        <ActivitiesList numberOfActivities={3} />
+        <ActivitiesList numberOfActivities={3} className="w-full" />
+        {/* Progress -- Mobile*/}
+        <div className="md:hidden w-full">
+          <SentencePersChart />
+        </div>
 
         {/* Practice Calendar / Sidebar */}
-        <Card className="gap-4 pb-1 px-2 flex flex-col overflow-hidden min-h-0">
+        <Card className="gap-4 pb-1 px-2 flex flex-col md:overflow-hidden md:min-h-0">
           <CardHeader>
             <h3 className="text-xl font-bold">
               <Clock className="inline-block mr-2" />
               Past Sessions
             </h3>
           </CardHeader>
-          <CardContent className="px-1 flex-1 flex flex-col overflow-hidden min-h-0">
+          <CardContent className="px-1 md:flex-1 flex flex-col overflow-hidden min-h-0">
             {pastSessions.length > 0 ? (
               <ScrollArea className="rounded-2xl h-full min-h-0">
                 <div className="flex flex-col gap-2">

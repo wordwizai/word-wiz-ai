@@ -9,11 +9,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/contexts/ThemeContext";
 
-export function ModeToggle({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLButtonElement>) {
-  const { setTheme } = useTheme();
+interface ModeToggleProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  className?: string;
+  displayMode?: boolean;
+}
+
+export function ModeToggle({ className, ...props }: ModeToggleProps) {
+  const { theme, setTheme } = useTheme();
 
   return (
     <DropdownMenu>

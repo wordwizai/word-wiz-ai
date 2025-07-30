@@ -8,11 +8,11 @@ from models.session import Session as UserSession
 from schemas.feedback_entry import AudioAnalysis
 
 
-class ChoiceStoryPractice(BaseMode):
+class StoryPractice(BaseMode):
     """
-    The Choice Story Practice Mode allows the user to get unlimited practice but they get to choose their
-    own adventure along the way. It offers them two choices (actions) to follow and adapts the story that way
-    Each session follows a different plot outlined in the activity config
+    The story practice mode allows for the student to read a version of a story that they might already know
+    In a decodable format. For example Red Riding Hood but it contains a lot of 't's or 'o's  
+    The target phoneme groups are outlined in the config
     """
 
     @override

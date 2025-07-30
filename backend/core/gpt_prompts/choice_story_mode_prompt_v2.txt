@@ -118,5 +118,3 @@ Begin with a **REASONING:** block (1–6 short steps). Then produce **OUTPUT:** 
 * **Adaptive Branching**: Vary emojis/icons based on story tone—e.g., 🔥 for excitement, 🌧️ for mood.
 * **Child Engagement**: Occasionally ask a simple question in the feedback (e.g., "Can you try that r sound again?") but keep it within one sentence.
 * **Logging**: Include internal hints in reasoning for debugging (e.g., "\[DEBUG: selected /k/]") and omit them in the final output.
-
-This enhanced prompt ensures robust phoneme analysis, imaginative story progression, and dynamic, engaging choices for young readers.

@@ -29,3 +29,4 @@ requests
 itsdangerous
 pydub
 google-genai
+google-cloud-texttospeech

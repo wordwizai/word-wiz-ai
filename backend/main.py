@@ -2,6 +2,7 @@ import uvicorn
 from database import Base, engine
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import os
 from routers import ai, auth, google_auth, session, user, activities, feedback
 from starlette.middleware.sessions import SessionMiddleware
 

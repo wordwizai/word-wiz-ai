@@ -28,3 +28,5 @@ __pycache__/
 venv/
 .env
 temp_audio/
+
+backend/credentials/

@@ -84,13 +84,13 @@ const Dashboard = () => {
       </div>
 
       {/* Progress */}
-      <div className="hidden md:visible">
+      <div className="hidden md:block">
         <SentencePersChart />
       </div>
 
       <div className="flex space-x-6 space-y-6 flex-1 w-full min-w-0 min-h-0 flex-col md:flex-row">
         {/* Activities */}
-        <ActivitiesList numberOfActivities={3} className="w-full" />
+        <ActivitiesList numberOfActivities={3} className="w-full md:h-full" />
         {/* Progress -- Mobile*/}
         <div className="md:hidden w-full">
           <SentencePersChart />

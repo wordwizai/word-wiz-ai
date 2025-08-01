@@ -179,7 +179,7 @@ export const WordBadge = ({
   let targetBg = "rgb(255,255,255)";
   const baseBgClass = "bg-white dark:bg-zinc-900";
   const baseTextClass = "text-black dark:text-white";
-  let textClass = `rounded-xl px-4 py-2 text-4xl font-medium ${baseTextClass}`;
+  let textClass = `rounded-xl px-2 md:px-4 py-1 md:py-2 text-4xl font-medium ${baseTextClass}`;
   if (typeof analysisPer === "number" && showHighlighted) {
     const p = Math.max(0, Math.min(1, analysisPer));
     let r, g;
@@ -293,7 +293,7 @@ export const WordBadge = ({
                   <Badge
                     key={i}
                     variant="secondary"
-                    className="mx-0.5 text-4xl font-medium px-3"
+                    className="mx-0.5 text-2xl md:text-4xl font-medium px-3"
                   >
                     {g}
                   </Badge>
@@ -307,6 +307,7 @@ export const WordBadge = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             key="whole-word"
+            className="text-2xl md:text-4xl font-medium px-1 md:px-3"
           >
             {word}
           </motion.span>

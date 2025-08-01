@@ -46,13 +46,13 @@ const MobileNav = ({ className }: MobileNavProps) => {
   return (
     <TooltipProvider>
       <aside className={`${className}`}>
-        <div className="mx-5 mb-1 p-1 flex flex-row items-center justify-around bg-background rounded-lg shadow-md shadow-primary/50 dark:shadow-none">
+        <div className="mx-5 mb-1 p-1 flex flex-row items-center justify-around bg-primary-foreground rounded-lg shadow-md shadow-primary/50 dark:shadow-none">
           {/* Home */}
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
               <Link to="/dashboard">
                 <span className="sr-only">Dashboard</span>
-                <House className="size-6" />
+                <House className="size-6 stroke-primary" />
               </Link>
             </TooltipTrigger>
             <TooltipContent side="right">Dashboard</TooltipContent>
@@ -61,7 +61,7 @@ const MobileNav = ({ className }: MobileNavProps) => {
             <TooltipTrigger asChild>
               <Link to="/practice">
                 <span className="sr-only">Practice</span>
-                <Target className="size-6" />
+                <Target className="size-6 stroke-primary" />
               </Link>
             </TooltipTrigger>
             <TooltipContent side="right">Practice</TooltipContent>
@@ -70,7 +70,7 @@ const MobileNav = ({ className }: MobileNavProps) => {
             <TooltipTrigger asChild>
               <Link to="progress">
                 <span className="sr-only">Progress</span>
-                <Route className="size-6" />
+                <Route className="size-6 stroke-primary" />
               </Link>
             </TooltipTrigger>
             <TooltipContent side="right">Progress</TooltipContent>
@@ -79,7 +79,7 @@ const MobileNav = ({ className }: MobileNavProps) => {
             <TooltipTrigger asChild>
               <Link to="/settings">
                 <span className="sr-only">Settings</span>
-                <Settings className="size-6" />
+                <Settings className="size-6 stroke-primary" />
               </Link>
             </TooltipTrigger>
             <TooltipContent side="right">Settings</TooltipContent>
@@ -91,7 +91,7 @@ const MobileNav = ({ className }: MobileNavProps) => {
                 <span className="sr-only">Account</span>
                 <Avatar className="w-8 h-8 mx-auto rounded-md">
                   <AvatarImage src="" alt={user?.username} />
-                  <AvatarFallback>
+                  <AvatarFallback className="border-2 border-primary">
                     {nameToInitials(user?.full_name ?? "")}
                   </AvatarFallback>
                 </Avatar>

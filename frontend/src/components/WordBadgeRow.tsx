@@ -24,7 +24,7 @@ const WordBadgeRow = ({
 
   return (
     <motion.div
-      className="flex flex-row items-center justify-center gap-4 w-full flex-wrap max-w-2/3"
+      className="flex flex-row items-center justify-center gap-2 md:gap-4 flex-wrap w-full md:max-w-2/3"
       layout
     >
       <AnimatePresence>

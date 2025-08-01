@@ -92,19 +92,19 @@ const UnlimitedPractice = (props: UnlimitedPracticeProps) => {
 
   return (
     <div className="min-h-screen px-4 py-4 flex flex-col items-center gap-6">
-      <div className="w-full flex justify-between items-center">
+      <div className="w-full flex flex-row justify-between items-center">
         <Link to="/dashboard">
           <Button variant="ghost" className="text-muted-foreground group">
             <Home className="size-5" />
-            <span className="opacity-0 translate-x-[-16px] transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0">
+            <span className="opacity-0 translate-x-[-16px] transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0 hidden md:inline-block">
               Home
             </span>
           </Button>
         </Link>
-        <h1 className="scroll-m-20 text-3xl font-semibold tracking-tight first:mt-0">
+        <h1 className="scroll-m-20 text-3xl font-semibold tracking-tight first:mt-0 text-center flex-1">
           Unlimited Practice
         </h1>
-        <div className="w-16" />
+        <div className="w-16 hidden md:inline-block" />
       </div>
       <div className="w-full flex flex-col items-center justify-center gap-6 flex-1">
         {/* Word Row */}

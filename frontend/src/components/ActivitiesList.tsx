@@ -73,9 +73,9 @@ const ActivitiesList = ({
         opts={{
           align: "start",
         }}
-        className={className}
+        className={className + " overflow-y-visible"}
       >
-        <CarouselContent>
+        <CarouselContent className="overflow-y-visible">
           {activities.length === 0
             ? Array.from(
                 {
@@ -101,7 +101,7 @@ const ActivitiesList = ({
                 .map((activity, idx) => (
                   <CarouselItem
                     key={idx}
-                    className="xl:basis-1/5 lg:basis-1/4 md:basis-1/3 sm:basis-1/2 @xs:basis-1"
+                    className="xl:basis-1/5 lg:basis-1/4 md:basis-1/3 sm:basis-1/2 @xs:basis-1 overflow-y-visible"
                   >
                     <ActivityCard
                       activity={activity}

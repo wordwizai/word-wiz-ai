@@ -97,7 +97,7 @@ const Dashboard = () => {
         </div>
 
         {/* Practice Calendar / Sidebar */}
-        <Card className="gap-4 pb-1 px-2 flex flex-col md:overflow-hidden md:min-h-0">
+        <Card className="gap-4 pb-1 px-2 flex flex-col md:overflow-hidden md:min-h-0 rounded-3xl">
           <CardHeader>
             <h3 className="text-xl font-bold">
               <Clock className="inline-block mr-2" />
@@ -116,7 +116,7 @@ const Dashboard = () => {
                     return (
                       <Card
                         key={session.id}
-                        className={`h-fit py-4 group shadow-lg hover:shadow-xl transition-all`}
+                        className={`h-fit py-4 group shadow-lg hover:shadow-xl transition-all rounded-3xl`}
                         onClick={() => router(`/practice/${session.id}`)}
                         style={{
                           cursor: "pointer",

@@ -21,6 +21,7 @@ import {
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getSentencePers } from "@/api";
+import { TrendingUp, Target } from "lucide-react";
 
 const SentencePersChart = ({
   className = "",
@@ -36,15 +37,15 @@ const SentencePersChart = ({
     const fetchChartData = async () => {
       if (!token) return;
       const response = await getSentencePers(token);
-      const processed = response.map((item: any) => ({
+      const processed = response.map((item: { date: string; per: number }) => ({
         date: new Date(item.date),
         per: item.per,
       }));
       // Calculate rolling average over groups of 5
-      const withAvg5 = processed.map((item, idx, arr) => {
+      const withAvg5 = processed.map((item: { date: Date; per: number }, idx: number, arr: { date: Date; per: number }[]) => {
         const start = Math.max(0, idx - 4);
         const window = arr.slice(start, idx + 1);
-        const avg = window.reduce((sum, v) => sum + v.per, 0) / window.length;
+        const avg = window.reduce((sum: number, v: { date: Date; per: number }) => sum + v.per, 0) / window.length;
         return { ...item, avg5: avg };
       });
 
@@ -63,14 +64,35 @@ const SentencePersChart = ({
       color: "--var(--chart-3)",
     },
   } satisfies ChartConfig;
+  
   return (
-    <Card className={"h-64 w-full space-y-0 gap-0 px-0 " + className}>
-      <CardHeader>
-        <CardTitle>Error Rate Progress</CardTitle>
+    <Card
+      className={
+        "w-full h-64 flex flex-col space-y-0 gap-0 px-0 rounded-3xl border-2 border-purple-100/50 bg-gradient-to-br from-white to-purple-50/30 shadow-xl " +
+        className
+      }
+      style={{ minHeight: 0 }}
+    >
+      <CardHeader className="flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-gradient-to-r from-purple-200 to-pink-200 rounded-full">
+            <TrendingUp className="w-6 h-6 text-purple-600" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-purple-800">Error Rate Progress</h3>
+            <p className="text-sm text-purple-600">Track your improvement over time.</p>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent className="h-full w-full pt-0 px-2">
-        <ChartContainer config={chartConfig} className="h-full w-full">
-          <AreaChart accessibilityLayer data={chartData} height={220}>
+      <CardContent className="flex-1 min-h-0 relative pt-0 px-4 flex flex-col justify-end">
+        <ChartContainer config={chartConfig} className="h-full w-full min-h-0">
+          <AreaChart
+            accessibilityLayer
+            data={chartData}
+            height={undefined}
+            width={undefined}
+            style={{ height: "100%", width: "100%", minHeight: 0 }}
+          >
             <defs>
               <linearGradient id="perGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop
@@ -89,21 +111,26 @@ const SentencePersChart = ({
                 <stop offset="95%" stopColor="var(--chart-3)" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid vertical={false} />
+            <CartesianGrid
+              vertical={false}
+              strokeDasharray="3 3"
+              stroke="rgba(139, 92, 246, 0.1)"
+            />
             <XAxis
               dataKey="date"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
+              tick={{ fill: "rgba(139, 92, 246, 0.7)", fontSize: 12 }}
               tickFormatter={(date) =>
                 typeof date === "string"
                   ? date
                   : date instanceof Date
-                    ? date.toLocaleDateString(undefined, {
-                        month: "short",
-                        day: "numeric",
-                      })
-                    : ""
+                  ? date.toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                    })
+                  : ""
               }
             />
             <ChartTooltip
@@ -114,21 +141,23 @@ const SentencePersChart = ({
               dataKey="per"
               type="natural"
               stroke="var(--chart-2)"
+              strokeWidth={3}
               fill="url(#perGradient)"
               name="Raw PER"
               connectNulls={false}
-              dot={false}
-              isAnimationActive={false}
+              dot={{ fill: "var(--chart-2)", strokeWidth: 2, r: 4 }}
+              isAnimationActive={true}
             />
             <Area
               dataKey="avg5"
               type="natural"
               stroke="var(--chart-3)"
+              strokeWidth={3}
               fill="url(#avg5Gradient)"
               name="Average (5) "
               connectNulls={false}
-              dot={false}
-              isAnimationActive={false}
+              dot={{ fill: "var(--chart-3)", strokeWidth: 2, r: 4 }}
+              isAnimationActive={true}
             />
           </AreaChart>
         </ChartContainer>

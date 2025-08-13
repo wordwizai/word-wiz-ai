@@ -124,16 +124,17 @@ def align_phonemes_to_words(pred_phonemes: list, gt_words_phonemes: list[tuple[s
                 len_diff = abs(len(gt_phs) - len(pred_segment))
                 if len_diff > max(len(gt_phs), 1):  # Simple heuristic
                     continue
-                
-                per = compute_per(gt_phs, pred_segment)
+               
+                # Use distance for the cost
+                distance = compute_per(gt_phs, pred_segment) * max(len(gt_phs), 1)
                 
                 # Early termination for perfect matches
-                if per == 0.0:
+                if distance == 0.0:
                     best_cost = dp[i - 1, k]
                     best_k = k
                     break
                 
-                cost = dp[i - 1, k] + per
+                cost = dp[i - 1, k] + distance
                 if cost < best_cost:
                     best_cost = cost
                     best_k = k
@@ -155,8 +156,8 @@ def align_phonemes_to_words(pred_phonemes: list, gt_words_phonemes: list[tuple[s
             
         gt_word, gt_phs = gt_words_phonemes[i - 1]
         pred_segment = pred_phonemes[k:j]
-        per = compute_per(gt_phs, pred_segment)
-        alignment.append((gt_word, pred_segment, per))
+        distance = compute_per(gt_phs, pred_segment)
+        alignment.append((gt_word, pred_segment, distance))
         i -= 1
         j = k
 
@@ -246,9 +247,8 @@ def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=16000,
     # regroup the phonemes to reflect the words that were spoken
     flattened_phoneme_predictions = [item for sublist in phoneme_predictions for item in sublist]
     predicted_words_phonemes = g2p(" ".join(predicted_words)) # take the words our model thinks we said and get the phonemes for them
-    if(len(phoneme_predictions) != len(predicted_words_phonemes)):
-        alignment = align_phonemes_to_words(flattened_phoneme_predictions, predicted_words_phonemes)
-        phoneme_predictions = [pred_phonemes for _, pred_phonemes,_ in alignment]
+    alignment = align_phonemes_to_words(flattened_phoneme_predictions, predicted_words_phonemes)
+    phoneme_predictions = [pred_phonemes for _, pred_phonemes,_ in alignment]
     print("aligned phoneme predictions: ", phoneme_predictions)
 
 

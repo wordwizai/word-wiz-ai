@@ -50,11 +50,11 @@ async def analyze_audio(
     elif session.activity.activity_type == "choice-story":
         activity_object = ChoiceStoryPractice()
     elif session.activity.activity_type == "story":
-        activity_object = StoryPractice()
+        activity_object = StoryPractice(session.activity.activity_settings.get("story_name",""))
     else:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Unsupported mode: {session.activity.type}",
+            detail=f"Unsupported mode: {session.activity.activity_type}",
         )
 
     return StreamingResponse(

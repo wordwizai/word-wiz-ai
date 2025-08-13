@@ -26,10 +26,6 @@ const PracticeDashboard = () => {
       title: "Story Practice",
       filter: "story",
     },
-    {
-      title: "Lesson based",
-      filter: "lesson",
-    },
   ];
 
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -63,19 +59,20 @@ const PracticeDashboard = () => {
       {/* Content */}
       {sections.map((section, idx) => (
         <div key={idx} className="space-y-2 px-10">
-
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 bg-gradient-to-r from-blue-200 to-purple-200 rounded-xl">
-            <Target className="w-5 h-5 text-blue-600" />
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-gradient-to-r from-blue-200 to-purple-200 rounded-xl">
+              <Target className="w-5 h-5 text-blue-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800">
+              {section.title}
+            </h2>
           </div>
-          <h2 className="text-2xl font-bold text-gray-800">{section.title}</h2>
-        </div>
-            <ActivitiesList
-              type={section.filter}
-              displayMode="carousel"
-              inputActivities={activities}
-              useInputActivities={true}
-            />
+          <ActivitiesList
+            type={section.filter}
+            displayMode="carousel"
+            inputActivities={activities}
+            useInputActivities={true}
+          />
         </div>
       ))}
     </main>

@@ -1,6 +1,7 @@
 import asyncio
 import json
 from typing import override
+import os
 
 from core.modes.base_mode import BaseMode
 from core.phoneme_assistant import PhonemeAssistant
@@ -10,10 +11,81 @@ from schemas.feedback_entry import AudioAnalysis
 
 class StoryPractice(BaseMode):
     """
-    The story practice mode allows for the student to read a version of a story that they might already know
-    In a decodable format. For example Red Riding Hood but it contains a lot of 't's or 'o's  
-    The target phoneme groups are outlined in the config
+    The story practice mode allows students to read a classic story in a decodable format.
+    The story progresses sentence by sentence, with vocabulary adapted to the reader's skill level.
+    Focus is on pronunciation feedback without revealing story spoilers.
     """
+
+    def __init__(self, story_name: str = ""):
+        self.story_name = story_name
+        self.story_content = {}
+        self.load_story_content()
+
+    def load_story_content(self):
+        """Load story content from the story files directory."""
+        story_dir = os.path.join(os.path.dirname(__file__), "..", "story_files")
+        for filename in os.listdir(story_dir):
+            if filename == f"{self.story_name}.txt":
+                filepath = os.path.join(story_dir, filename)
+                with open(filepath, "r", encoding="utf-8") as f:
+                    content = f.read()
+
+                # Parse story file
+                lines = content.strip().split("\n")
+                story_name = ""
+                plot_desc = ""
+                story_content_lines = []
+                in_story_content = False
+
+                for line in lines:
+                    if line.startswith("NAME:"):
+                        story_name = line.replace("NAME:", "").strip()
+                    elif line.startswith("PLOT DESC:"):
+                        plot_desc = line.replace("PLOT DESC:", "").strip()
+                    elif line.startswith("STORY CONTENT:"):
+                        in_story_content = True
+                    elif in_story_content and line.strip():
+                        story_content_lines.append(line.strip())
+
+                if story_name and story_content_lines:
+                    # Each line is a sentence
+                    sentences = [line for line in story_content_lines if line]
+                    self.story_content = {
+                        "name": story_name,
+                        "plot_desc": plot_desc,
+                        "sentences": sentences,
+                        "total_sentences": len(sentences),
+                    }
+                    break
+
+    def get_current_sentence_index(self, session):
+        """Get the current sentence index based on feedback entry count."""
+        return len(session.feedback_entries)
+
+    def get_current_sentence(self, session):
+        """Get the current sentence the user should read."""
+        if not self.story_content:
+            return "The story could not be loaded."
+
+        current_index = self.get_current_sentence_index(session)
+
+        if current_index >= len(self.story_content["sentences"]):
+            return "You have finished the story! Great job reading!"
+
+        return self.story_content["sentences"][current_index]
+
+    def get_next_sentence(self, session):
+        """Get the next sentence in the story."""
+        if not self.story_content:
+            return "The story could not be loaded."
+
+        current_index = self.get_current_sentence_index(session)
+        next_index = current_index + 1
+
+        if next_index >= len(self.story_content["sentences"]):
+            return "You have finished the story! Great job reading! **END**"
+
+        return self.story_content["sentences"][next_index]
 
     @override
     async def get_feedback_and_next_sentence(
@@ -25,7 +97,7 @@ class StoryPractice(BaseMode):
     ):
         """
         Get the feedback based on the pronunciation.
-        This method processes the audio analysis and provides feedback without a limit on attempts.
+        This method processes the audio analysis and provides feedback for the current story sentence.
         """
         per_summary = analysis.per_summary
         pronunciation_data = analysis.pronunciation_dataframe.to_dict("records")
@@ -42,13 +114,19 @@ class StoryPractice(BaseMode):
             )
             past_sentences.append(entry.sentence)
 
+        # Get story context and current progress
+        current_index = self.get_current_sentence_index(session)
+        next_sentence = self.get_next_sentence(session)
+        story_context = {
+            "story_name": self.story_content.get("name", ""),
+            "plot_desc": self.story_content.get("plot_desc", ""),
+        }
+
         user_input = {
             "role": "user",
             "content": json.dumps(
                 {
-                    "story_context": session.activity.activity_settings.get(
-                        "story_context", ""
-                    ),
+                    "story_context": story_context,
                     "past_sentences": past_sentences,
                     "attempted_sentence": attempted_sentence,
                     "pronunciation": pronunciation_data,
@@ -56,6 +134,7 @@ class StoryPractice(BaseMode):
                     "problem_summary": problem_summary,
                     "past_problem_summaries": past_problem_summaries,
                     "per_summary": per_summary,
+                    "next_sentence_description": next_sentence,
                 }
             ),
         }
@@ -63,7 +142,7 @@ class StoryPractice(BaseMode):
             {
                 "role": "system",
                 "content": phoneme_assistant.load_prompt(
-                    "core/gpt_prompts/choice_story_mode_prompt_v3.txt"
+                    "core/gpt_prompts/story_mode_prompt_v1.txt"
                 ),
             }
         ]
@@ -78,7 +157,8 @@ class StoryPractice(BaseMode):
             None, phoneme_assistant.query_gpt, conversation_history
         )
         print("GPT Response:", response)
-        # get the json from the response
+
+        # Extract the JSON response
         json_response = phoneme_assistant.extract_json(response)
 
         return json_response

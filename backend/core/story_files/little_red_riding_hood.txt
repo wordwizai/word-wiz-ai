@@ -1,3 +1,33 @@
 NAME: Little Red Riding Hood
-PLOT DESC:
-STORY CONTENT:
+PLOT DESC: A young girl in a red hood visits her grandmother but encounters a cunning wolf who tries to deceive her. The story teaches about stranger danger and the importance of following parental advice.
+STORY CONTENT: 
+Little Red Riding Hood lived in a village near the forest.
+One day, her mother asked her to take some food to her sick grandmother.
+The girl put on her red hood and set off through the woods.
+As she walked, she met a wolf.
+The wolf asked where she was going.
+Red Riding Hood told him she was visiting her grandmother.
+The wolf ran ahead to the grandmother's house.
+He knocked on the door.
+The grandmother let him in.
+The wolf ate the grandmother.
+He put on her clothes and got into her bed.
+Red Riding Hood arrived at the house.
+She knocked on the door.
+The wolf called out to come in.
+Red Riding Hood entered the house.
+She noticed her grandmother looked strange.
+She asked about her big eyes.
+The wolf said they were to see her better.
+She asked about her big ears.
+The wolf said they were to hear her better.
+She asked about her big teeth.
+The wolf said they were to eat her better.
+The wolf jumped out of bed.
+Red Riding Hood screamed.
+A woodcutter heard her cry.
+He ran to the house.
+The woodcutter killed the wolf.
+He cut open the wolf's stomach.
+The grandmother came out unharmed.
+Red Riding Hood learned to never talk to strangers.

@@ -11,7 +11,14 @@ interface Session {
     activity_type: string;
     title: string;
     target_phoneme: string | null;
-    config: any;
+    activity_settings: {
+      first_sentence?: string;
+      sentence_options?: {
+        option_1: string;
+        option_2: string;
+      };
+      [key: string]: any; // Allow other settings
+    };
     id: number;
   };
 }

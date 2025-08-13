@@ -1,3 +1,3 @@
-import wordWizIcon from "./wordWizIcon.svg";
+import wordWizIcon from "./wordwizIcon.svg";
 
 export { wordWizIcon };

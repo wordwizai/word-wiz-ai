@@ -1,3 +1,4 @@
-import wordWizIcon from "./wordwizIcon.svg";
+import wordWizIcon from "./wordWizIcon.svg";
+import demoScreenshot from "./demoScreenshot.png";
 
-export { wordWizIcon };
+export { wordWizIcon, demoScreenshot };

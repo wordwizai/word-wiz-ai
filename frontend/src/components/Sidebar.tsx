@@ -52,9 +52,12 @@ const Sidebar = ({ className }: SidebarProps) => {
       >
         {/* Logo/Brand */}
         <div className="relative mb-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-primary/60 to-purple-300 rounded-2xl flex items-center justify-center shadow-lg">
+          <a
+            href="./"
+            className="w-12 h-12 bg-gradient-to-br from-primary/60 to-purple-300 rounded-2xl flex items-center justify-center shadow-lg"
+          >
             <img src={wordWizIcon} alt="Word Wiz" className="w-10 h-10" />
-          </div>
+          </a>
         </div>
 
         {/* Navigation Items */}

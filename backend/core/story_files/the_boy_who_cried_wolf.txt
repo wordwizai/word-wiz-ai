@@ -1,0 +1,30 @@
+NAME: The Boy Who Cried Wolf
+PLOT DESC: A shepherd boy repeatedly lies about a wolf attacking his sheep, causing people to stop believing him. When a real wolf comes, no one helps him. The story teaches about the importance of honesty.
+STORY CONTENT: 
+4.A young shepherd boy watched sheep on a hillside.
+5.His job was to keep the sheep safe from wolves.
+6.The boy found his work boring and lonely.
+7.One day he decided to play a trick on the villagers.
+8.He ran toward the village shouting loudly.
+9.He cried out that a wolf was attacking his sheep.
+10.The villagers dropped their work and ran to help.
+11.They climbed the hill with sticks and stones.
+12.When they arrived, they found no wolf.
+13.The boy laughed at his clever trick.
+14.The villagers were angry but went back to work.
+15.A few days later, the boy played the same trick.
+16.Again he shouted that a wolf was coming.
+17.Some villagers came running to help again.
+18.Once more, they found no wolf at all.
+19.The boy thought his joke was very funny.
+20.The villagers warned him not to lie anymore.
+21.One day a real wolf came to the hillside.
+22.The wolf began chasing the frightened sheep.
+23.The boy screamed for help as loud as he could.
+24.But this time, no villagers came running.
+25.They thought he was lying again.
+26.The wolf caught and ate several sheep.
+27.The boy cried real tears this time.
+28.When the villagers found out what happened, they were sad.
+29.The boy learned that lying destroys trust.
+30.He promised to always tell the truth from then on.

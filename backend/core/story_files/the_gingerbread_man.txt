@@ -1,0 +1,32 @@
+NAME: The Gingerbread Man
+PLOT DESC: A gingerbread cookie comes to life and runs away from everyone who wants to eat him, but his overconfidence leads to trouble. The story teaches about being too proud and trusting strangers.
+STORY CONTENT: 
+4.An old woman baked a gingerbread man.
+5.She put him in the oven to cook.
+6.When she opened the oven door, he jumped out.
+7.The gingerbread man was alive and could talk.
+8.He ran out the door as fast as he could.
+9.The old woman and old man chased after him.
+10.The gingerbread man shouted as he ran.
+11.He said they could not catch him.
+12.He ran past a cow in the field.
+13.The cow wanted to eat the gingerbread man.
+14.But he ran too fast for the cow to catch.
+15.He ran past a horse in the meadow.
+16.The horse tried to catch him too.
+17.The gingerbread man kept running and laughing.
+18.He ran past a group of farmers.
+19.All the farmers tried to grab him.
+20.But the gingerbread man was too quick.
+21.He came to a river and could not cross.
+22.A sly fox offered to help him.
+23.The fox said he would carry him across.
+24.The gingerbread man climbed onto the fox's tail.
+25.The fox started swimming across the river.
+26.He told the gingerbread man to climb on his back.
+27.Then the fox said to climb on his head.
+28.Finally, the fox told him to sit on his nose.
+29.When the gingerbread man climbed on the fox's nose, the fox ate him.
+30.The gingerbread man was gone forever.
+31.Everyone learned that being too confident can be dangerous.
+32.The fox went home with a full belly.

@@ -1,0 +1,32 @@
+NAME: Jack and the Beanstalk
+PLOT DESC: A boy trades his cow for magic beans and climbs a giant beanstalk to find treasure. The story teaches about courage and the consequences of taking risks.
+STORY CONTENT: 
+4.Jack lived with his mother in a small cottage.
+5.They were very poor and had little food.
+6.Their only valuable thing was an old cow.
+7.Jack's mother told him to sell the cow at market.
+8.On his way to town, Jack met a strange man.
+9.The man offered to trade magic beans for the cow.
+10.Jack thought the beans looked interesting.
+11.He traded his cow for the magic beans.
+12.When Jack got home, his mother was very angry.
+13.She threw the beans out the window.
+14.That night, the beans grew into a giant beanstalk.
+15.The beanstalk reached high up into the clouds.
+16.Jack decided to climb the enormous plant.
+17.At the top, he found a giant's castle.
+18.Jack snuck inside the huge castle.
+19.He saw piles of gold coins everywhere.
+20.The giant was sleeping in his chair.
+21.Jack grabbed a bag of gold and ran away.
+22.He climbed down the beanstalk quickly.
+23.Jack and his mother were rich now.
+24.But Jack wanted to go back for more treasure.
+25.He climbed the beanstalk again the next day.
+26.This time he found a hen that laid golden eggs.
+27.The giant woke up and chased Jack.
+28.Jack ran to the beanstalk with the hen.
+29.He climbed down faster than ever before.
+30.Jack chopped down the beanstalk with an axe.
+31.The giant fell down and was never seen again.
+32.Jack and his mother lived happily with their treasure.

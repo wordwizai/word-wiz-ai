@@ -1,32 +1,32 @@
 NAME: Hansel and Gretel
 PLOT DESC: Two children get lost in the forest and find a house made of candy, but the owner is a witch who wants to eat them. The story teaches about staying together and being clever in difficult situations.
 STORY CONTENT: 
-4.Hansel and Gretel lived with their father and stepmother.
-5.The family was very poor and had little food.
-6.The stepmother convinced the father to take the children to the forest.
-7.She wanted to leave them there so there would be more food.
-8.Hansel heard the plan and filled his pockets with white stones.
-9.The next day, their father led them deep into the woods.
-10.Hansel dropped white stones along the path as they walked.
-11.Their father left them alone in the forest.
-12.When night came, the children followed the stones home.
-13.The stepmother was angry to see them return.
-14.A few days later, she made the father take them away again.
-15.This time Hansel only had bread crumbs to mark the path.
-16.Birds ate all the bread crumbs during the day.
-17.Hansel and Gretel were lost in the dark forest.
-18.They walked for days looking for their way home.
-19.Finally, they found a house made of gingerbread and candy.
-20.The hungry children began eating parts of the house.
-21.An old witch came out and invited them inside.
-22.She locked Hansel in a cage to fatten him up.
-23.She made Gretel work as her servant.
-24.The witch planned to cook and eat both children.
-25.Every day she checked to see if Hansel was fat enough.
-26.Hansel was clever and held out a thin bone instead of his finger.
-27.Finally, the witch decided to cook Gretel first.
-28.She told Gretel to climb into the oven.
-29.But Gretel was smart and pushed the witch into the oven instead.
-30.Gretel freed Hansel from his cage.
-31.They took the witch's jewels and found their way home.
-32.Their stepmother had died and their father welcomed them back happily.
+Hansel and Gretel lived with their father and stepmother.
+The family was very poor and had little food.
+The stepmother convinced the father to take the children to the forest.
+She wanted to leave them there so there would be more food.
+Hansel heard the plan and filled his pockets with white stones.
+The next day, their father led them deep into the woods.
+Hansel dropped white stones along the path as they walked.
+Their father left them alone in the forest.
+When night came, the children followed the stones home.
+The stepmother was angry to see them return.
+A few days later, she made the father take them away again.
+This time Hansel only had bread crumbs to mark the path.
+Birds ate all the bread crumbs during the day.
+Hansel and Gretel were lost in the dark forest.
+They walked for days looking for their way home.
+Finally, they found a house made of gingerbread and candy.
+The hungry children began eating parts of the house.
+An old witch came out and invited them inside.
+She locked Hansel in a cage to fatten him up.
+She made Gretel work as her servant.
+The witch planned to cook and eat both children.
+Every day she checked to see if Hansel was fat enough.
+Hansel was clever and held out a thin bone instead of his finger.
+Finally, the witch decided to cook Gretel first.
+She told Gretel to climb into the oven.
+But Gretel was smart and pushed the witch into the oven instead.
+Gretel freed Hansel from his cage.
+They took the witch's jewels and found their way home.
+Their stepmother had died and their father welcomed them back happily.

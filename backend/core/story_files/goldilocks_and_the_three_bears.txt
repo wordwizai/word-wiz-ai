@@ -1,32 +1,32 @@
 NAME: Goldilocks and the Three Bears
 PLOT DESC: A curious girl enters a bear family's home and uses their belongings without permission. The story teaches about respecting others' property and the consequences of being too curious.
 STORY CONTENT: 
-4.Goldilocks was walking through the forest.
-5.She found a pretty little house.
-6.The door was open so she went inside.
-7.Three bears lived in this house.
-8.The bears had gone for a walk.
-9.Goldilocks saw three bowls of porridge on the table.
-10.She tasted the first bowl but it was too hot.
-11.She tasted the second bowl but it was too cold.
-12.She tasted the third bowl and it was just right.
-13.Goldilocks ate all the porridge in the small bowl.
-14.Then she saw three chairs in the living room.
-15.She sat in the first chair but it was too hard.
-16.She sat in the second chair but it was too soft.
-17.She sat in the third chair and it was just right.
-18.But the chair broke when she sat in it.
-19.Goldilocks felt tired and went upstairs.
-20.She found three beds in the bedroom.
-21.She tried the first bed but it was too firm.
-22.She tried the second bed but it was too soft.
-23.She tried the third bed and it was just right.
-24.Goldilocks fell asleep in the small bed.
-25.The three bears came home from their walk.
-26.They saw their porridge bowls were disturbed.
-27.They found their broken chair.
-28.They went upstairs and found Goldilocks sleeping.
-29.Goldilocks woke up and saw the three bears.
-30.She jumped out of bed and ran out of the house.
-31.The bears never saw Goldilocks again.
-32.Goldilocks learned not to enter houses without permission.
+Goldilocks was walking through the forest.
+She found a pretty little house.
+The door was open so she went inside.
+Three bears lived in this house.
+The bears had gone for a walk.
+Goldilocks saw three bowls of porridge on the table.
+She tasted the first bowl but it was too hot.
+She tasted the second bowl but it was too cold.
+She tasted the third bowl and it was just right.
+Goldilocks ate all the porridge in the small bowl.
+Then she saw three chairs in the living room.
+She sat in the first chair but it was too hard.
+She sat in the second chair but it was too soft.
+She sat in the third chair and it was just right.
+But the chair broke when she sat in it.
+Goldilocks felt tired and went upstairs.
+She found three beds in the bedroom.
+She tried the first bed but it was too firm.
+She tried the second bed but it was too soft.
+She tried the third bed and it was just right.
+Goldilocks fell asleep in the small bed.
+The three bears came home from their walk.
+They saw their porridge bowls were disturbed.
+They found their broken chair.
+They went upstairs and found Goldilocks sleeping.
+Goldilocks woke up and saw the three bears.
+She jumped out of bed and ran out of the house.
+The bears never saw Goldilocks again.
+Goldilocks learned not to enter houses without permission.

@@ -6,7 +6,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { wordWizIcon } from "@/assets";
+import { demoScreenshot, wordWizIcon } from "@/assets";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -109,7 +109,11 @@ const LandingPage = () => {
           </div>
           <div className="flex-1 max-w-full">
             <div className="bg-muted border border-border rounded-2xl aspect-[4/3] flex items-center justify-center max-w-full">
-              <p className="text-muted-foreground">Illustration Placeholder</p>
+              <img
+                src={demoScreenshot}
+                alt="Word Wiz AI Demo"
+                className="w-full h-full object-cover rounded-2xl p-2 bg-background"
+              />
             </div>
           </div>
         </div>
@@ -147,9 +151,9 @@ const LandingPage = () => {
                 text: "Receive tailored pronunciation tips to enhance fluency.",
               },
               {
-                icon: "📚",
-                title: "Smart Recommendations",
-                text: "Discover books that match your reading level and interests.",
+                icon: "💰",
+                title: "Completely Free",
+                text: "No ads, no subscriptions. Our mission is to help kids across the country read better *without* cost",
               },
             ].map((feature, i) => (
               <motion.div
@@ -188,17 +192,17 @@ const LandingPage = () => {
               {
                 icon: "🧒",
                 title: "Young Readers",
-                text: "Help children gain confidence and fluency early.",
-              },
-              {
-                icon: "🎓",
-                title: "Students",
-                text: "Boost comprehension and performance across subjects.",
+                text: "Boost reading confidence with personalized feedback.",
               },
               {
                 icon: "🧑‍🏫",
                 title: "Educators",
-                text: "Support individualized reading practice in the classroom.",
+                text: "Integrate AI reading feedback into your classroom reading programs.",
+              },
+              {
+                icon: "🧑",
+                title: "Parents",
+                text: "Empower your kids with personalized reading feedback.",
               },
             ].map((target, i) => (
               <motion.div

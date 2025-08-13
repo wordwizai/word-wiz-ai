@@ -53,6 +53,7 @@ const GenericPractice = ({
         />
         <RecordAndNextButtons
           isRecording={props.isRecording}
+          isProcessing={props.isProcessing}
           onStartRecording={props.onStartRecording}
           onStopRecording={props.onStopRecording}
           showNextButton={
@@ -109,6 +110,7 @@ const GenericPractice = ({
           )}
           <RecordAndNextButtons
             isRecording={props.isRecording}
+            isProcessing={props.isProcessing}
             onStartRecording={props.onStartRecording}
             onStopRecording={props.onStopRecording}
           />

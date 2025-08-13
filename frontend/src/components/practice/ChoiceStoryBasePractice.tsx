@@ -26,6 +26,7 @@ interface ChoiceStoryBasePracticeProps {
     feedback: string | null;
     showHighlightedWords: boolean;
     isRecording: boolean;
+    isProcessing: boolean;
     onStartRecording: () => void;
     onStopRecording: () => void;
     displayNextSentence: (nextSentence: string) => void;
@@ -47,6 +48,7 @@ const ChoiceStoryBasePractice = ({
   const [sentenceOptions, setSentenceOptions] =
     useState<SentenceOptions | null>(null);
   const [showSentenceOptions, setShowSentenceOptions] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const { token } = useContext(AuthContext);
 
   useEffect(() => {
@@ -76,6 +78,12 @@ const ChoiceStoryBasePractice = ({
   }, [session.id, token]);
 
   const { start } = useAudioAnalysisStream({
+    onProcessingStart: () => {
+      setIsProcessing(true);
+    },
+    onProcessingEnd: () => {
+      setIsProcessing(false);
+    },
     onAnalysis: (data) => {
       console.log("Analysis:", data);
       setShowHighlightedWords(true);
@@ -91,13 +99,16 @@ const ChoiceStoryBasePractice = ({
       const audio = new Audio(url);
       audio.play();
     },
-    onError: (err) => console.error("Stream error:", err),
+    onError: (err) => {
+      console.error("Stream error:", err);
+      setIsProcessing(false); // Make sure to clear processing state on error
+    },
     sessionId: session.id,
   });
 
   const { isRecording, startRecording, stopRecording } = useAudioRecorder(
     (audioFile: File) => {
-      start(audioFile, currentSentence);
+      start(audioFile, currentSentence ?? "");
     },
   );
 
@@ -112,6 +123,7 @@ const ChoiceStoryBasePractice = ({
     setSentenceOptions(null);
     setFeedback(null);
     setShowSentenceOptions(false);
+    setIsProcessing(false); // Clear processing state when moving to next sentence
   };
 
   const wordArray =
@@ -124,6 +136,7 @@ const ChoiceStoryBasePractice = ({
     feedback,
     showHighlightedWords,
     isRecording,
+    isProcessing,
     onStartRecording: startRecording,
     onStopRecording: stopRecording,
     displayNextSentence,

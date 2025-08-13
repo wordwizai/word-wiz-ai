@@ -15,6 +15,7 @@ interface BasePracticeProps {
     feedback: string | null;
     showHighlightedWords: boolean;
     isRecording: boolean;
+    isProcessing: boolean;
     onStartRecording: () => void;
     onStopRecording: () => void;
     displayNextSentence: () => void;
@@ -32,6 +33,7 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [nextSentence, setNextSentence] = useState<string | null>(null);
   const [showNextButton, setShowNextButton] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const { token } = useContext(AuthContext);
 
   useEffect(() => {
@@ -52,6 +54,12 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
   }, [session.id, token]);
 
   const { start } = useAudioAnalysisStream({
+    onProcessingStart: () => {
+      setIsProcessing(true);
+    },
+    onProcessingEnd: () => {
+      setIsProcessing(false);
+    },
     onAnalysis: (data) => {
       setShowHighlightedWords(true);
       setAnalysisData(data);
@@ -67,7 +75,10 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
       const audio = new Audio(url);
       audio.play();
     },
-    onError: (err) => console.error("Stream error:", err),
+    onError: (err) => {
+      console.error("Stream error:", err);
+      setIsProcessing(false); // Make sure to clear processing state on error
+    },
     sessionId: session.id,
   });
 
@@ -86,6 +97,7 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
     setNextSentence(null);
     setFeedback(null);
     setShowNextButton(false);
+    setIsProcessing(false); // Clear processing state when moving to next sentence
   };
 
   const wordArray =
@@ -98,6 +110,7 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
     feedback,
     showHighlightedWords,
     isRecording,
+    isProcessing,
     onStartRecording: startRecording,
     onStopRecording: stopRecording,
     displayNextSentence,

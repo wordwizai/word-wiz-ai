@@ -1,32 +1,32 @@
 NAME: The Three Billy Goats Gruff
 PLOT DESC: Three goat brothers want to cross a bridge guarded by a mean troll. They use cleverness and teamwork to get past the troll. The story teaches about problem-solving and helping family.
 STORY CONTENT: 
-4.Three billy goats lived on one side of a river.
-5.Their names were Little Billy Goat, Middle Billy Goat, and Big Billy Goat Gruff.
-6.On the other side was a field full of sweet grass.
-7.The goats wanted to cross the bridge to eat the grass.
-8.But a mean troll lived under the bridge.
-9.The troll would eat anyone who tried to cross.
-10.Little Billy Goat decided to try crossing first.
-11.His hooves made a trip-trap sound on the bridge.
-12.The troll jumped up and growled fiercely.
-13.The troll threatened to eat the little goat.
-14.Little Billy Goat said he was too small and skinny.
-15.He told the troll to wait for his bigger brother.
-16.The troll let Little Billy Goat cross the bridge.
-17.Next, Middle Billy Goat started across the bridge.
-18.His hooves made a louder trip-trap sound.
-19.The troll appeared again and threatened to eat him.
-20.Middle Billy Goat said he was still too small.
-21.He told the troll to wait for Big Billy Goat.
-22.The troll let Middle Billy Goat cross too.
-23.Finally, Big Billy Goat Gruff approached the bridge.
-24.His heavy hooves made a loud TRIP-TRAP sound.
-25.The troll jumped up ready to eat him.
-26.But Big Billy Goat was not afraid of the troll.
-27.He lowered his head and charged at the troll.
-28.Big Billy Goat knocked the troll into the river.
-29.The troll was washed away and never came back.
-30.All three billy goats ate the sweet grass safely.
-31.They could cross the bridge whenever they wanted.
-32.The three brothers lived happily ever after.
+Three billy goats lived on one side of a river.
+Their names were Little Billy Goat, Middle Billy Goat, and Big Billy Goat Gruff.
+On the other side was a field full of sweet grass.
+The goats wanted to cross the bridge to eat the grass.
+But a mean troll lived under the bridge.
+The troll would eat anyone who tried to cross.
+Little Billy Goat decided to try crossing first.
+His hooves made a trip-trap sound on the bridge.
+The troll jumped up and growled fiercely.
+The troll threatened to eat the little goat.
+Little Billy Goat said he was too small and skinny.
+He told the troll to wait for his bigger brother.
+The troll let Little Billy Goat cross the bridge.
+Next, Middle Billy Goat started across the bridge.
+His hooves made a louder trip-trap sound.
+The troll appeared again and threatened to eat him.
+Middle Billy Goat said he was still too small.
+He told the troll to wait for Big Billy Goat.
+The troll let Middle Billy Goat cross too.
+Finally, Big Billy Goat Gruff approached the bridge.
+His heavy hooves made a loud TRIP-TRAP sound.
+The troll jumped up ready to eat him.
+But Big Billy Goat was not afraid of the troll.
+He lowered his head and charged at the troll.
+Big Billy Goat knocked the troll into the river.
+The troll was washed away and never came back.
+All three billy goats ate the sweet grass safely.
+They could cross the bridge whenever they wanted.
+The three brothers lived happily ever after.

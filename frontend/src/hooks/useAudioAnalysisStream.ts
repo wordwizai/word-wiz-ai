@@ -17,6 +17,8 @@ interface UseAudioAnalysisStreamOptions {
     meta: { filename: string; mimetype: string },
   ) => void;
   onError?: (err: string) => void;
+  onProcessingStart?: () => void;
+  onProcessingEnd?: () => void;
   sessionId?: number;
 }
 
@@ -31,6 +33,9 @@ export const useAudioAnalysisStream = (
       options?.onError?.("Not authenticated");
       return;
     }
+
+    // Signal that processing has started
+    options?.onProcessingStart?.();
 
     const formData = new FormData();
     formData.append("audio_file", file);
@@ -76,6 +81,8 @@ export const useAudioAnalysisStream = (
                   options?.onAnalysis?.(parsed.data);
                 } else if (parsed.type === "gpt_response") {
                   options?.onGptResponse?.(parsed.data);
+                  // Signal that processing has ended when we get the final GPT response
+                  options?.onProcessingEnd?.();
                 } else if (parsed.type === "audio_feedback_file") {
                   console.log(
                     "Received base64 audio length:",
@@ -105,6 +112,8 @@ export const useAudioAnalysisStream = (
       })
       .catch((err) => {
         options?.onError?.(err.message);
+        // Signal that processing has ended on error
+        options?.onProcessingEnd?.();
       });
   };
 

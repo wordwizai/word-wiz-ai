@@ -74,6 +74,7 @@ Begin with a concise **REASONING:** section (1–6 numbered steps). Follow with 
 ```json
 {
   "feedback": "...TTS-friendly feedback...",
+  "feedback_ssml": "...SSML-enhanced feedback...",
   "sentence": {
     "option_1": {
       "sentence": "...first continuation...",

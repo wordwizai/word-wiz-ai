@@ -60,7 +60,7 @@ Then:
 OUTPUT:
 
 ```json
-{ "feedback": ..., "sentence": ... }
+{ "feedback": ..., "feedback_ssml": ..., "sentence": ... }
 ```
 
 * **feedback**: A single text string. Use a compliment‑sandwich structure (positive → constructive → positive). Mention only the student’s pronunciation. Use plain letters or letter‑combinations (e.g., "sh", "th"); avoid IPA or special slashes. Ensure compatibility with TTS.

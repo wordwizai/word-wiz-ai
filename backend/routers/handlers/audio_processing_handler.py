@@ -126,18 +126,28 @@ async def analyze_audio_file_event_stream(
         await asyncio.sleep(0)  # Yield control to the event loop
 
         # STEP 3: LOG THE ENTRY INTO THE DB
+        # Store the full response including SSML for logging, but only send plain feedback to frontend
+        gpt_response_for_db = {
+            "sentence": response.get("sentence", ""),
+            "feedback": response.get("feedback", ""),
+            "feedback_ssml": response.get("feedback_ssml", ""),
+            "metadata": response.get("metadata", {}),
+        }
         feedback_entry = FeedbackEntryCreate(
             session_id=session.id,
             sentence=attempted_sentence,
             phoneme_analysis=analysis_payload.get("data", {}),
-            gpt_response=gpt_payload.get("data", {}),
+            gpt_response=gpt_response_for_db,
         )
         create_feedback_entry(db, feedback_entry)
 
         # STEP 4: FEEDBACK AUDIO
         loop = asyncio.get_event_loop()
         response_audio_file = await loop.run_in_executor(
-            None, phoneme_assistant.feedback_to_audio, response.get("feedback", "")
+            None, 
+            phoneme_assistant.feedback_to_audio, 
+            response.get("feedback", ""),
+            response.get("feedback_ssml", None)
         )
         audio_payload = {
             "type": "audio_feedback_file",

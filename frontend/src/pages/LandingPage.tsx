@@ -33,16 +33,16 @@ const LandingPage = () => {
   return (
     <main className="scroll-smooth bg-background text-foreground">
       {/* Navbar */}
-      <nav className="w-full px-6 py-4 sticky top-0 z-50 bg-background/70 backdrop-blur border-b border-border flex flex-col md:flex-row items-center justify-between gap-3 md:gap-0">
+      <nav className="w-full px-4 sm:px-6 py-4 sticky top-0 z-50 bg-background/70 backdrop-blur border-b border-border flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
         <div className="flex items-center gap-2">
           <img src={wordWizIcon} alt="Word Wiz Icon" className="h-8 w-8" />
-          <span className="text-xl font-semibold">Word Wiz AI</span>
+          <span className="text-lg sm:text-xl font-semibold">Word Wiz AI</span>
         </div>
-        <div className="flex flex-col md:flex-row items-center gap-2 w-full md:w-auto">
-          <Link to="/login" className="w-full md:w-auto">
+        <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+          <Link to="/login" className="w-full sm:w-auto">
             <Button
               variant="ghost"
-              className="w-full"
+              className="w-full min-h-[44px]"
               as={motion.button}
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 300 }}
@@ -50,9 +50,9 @@ const LandingPage = () => {
               Log In
             </Button>
           </Link>
-          <Link to="/signup" className="w-full md:w-auto">
+          <Link to="/signup" className="w-full sm:w-auto">
             <Button
-              className="w-full"
+              className="w-full min-h-[44px]"
               as={motion.button}
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 300 }}
@@ -65,27 +65,27 @@ const LandingPage = () => {
 
       {/* Hero Section */}
       <motion.section
-        className="px-6 py-20 md:py-28 bg-pastel-purple text-foreground"
+        className="px-4 sm:px-6 py-12 sm:py-20 md:py-28 bg-pastel-purple text-foreground"
         variants={fadeUpVariant}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.3 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
-          <div className="flex-1 space-y-6">
-            <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold leading-tight text-primary">
+        <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-8 md:gap-12">
+          <div className="flex-1 space-y-4 sm:space-y-6 text-center md:text-left">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-extrabold leading-tight text-primary">
               Your Personal Reading Companion
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-full sm:max-w-xl">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-full sm:max-w-xl mx-auto md:mx-0">
               Word Wiz AI helps you become a better reader by analyzing your
               mistakes and recommending engaging texts that sharpen your skills.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
               <Link to="/signup" className="w-full sm:w-auto">
                 <Button
                   size="lg"
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-auto min-h-[48px]"
                   as={motion.button}
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 300 }}
@@ -97,7 +97,7 @@ const LandingPage = () => {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-auto min-h-[48px]"
                   as={motion.button}
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 300 }}

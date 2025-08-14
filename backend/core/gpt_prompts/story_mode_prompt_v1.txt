@@ -100,6 +100,7 @@ Begin with a concise **REASONING:** section (1–4 numbered steps). Follow with 
 ```json
 {
   "feedback": "...TTS-friendly feedback...",
+  "feedback_ssml": "...SSML-enhanced feedback...",
   "sentence": "...next sentence in the story based on the next_sentence_description from the input (tailored to the student's skill level)..."
 }
 ```

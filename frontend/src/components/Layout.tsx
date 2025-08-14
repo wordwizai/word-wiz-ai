@@ -12,10 +12,10 @@ const Layout = ({ children }: LayoutProps) => {
       <div className="hidden md:flex h-full relative z-10">
         <Sidebar />
       </div>
-      <div className="relative z-10 flex-1 w-full h-full overflow-y-auto">
+      <div className="relative z-10 flex-1 w-full h-full overflow-y-auto pb-20 md:pb-0">
         {children}
       </div>
-      <MobileNav className="fixed bottom-0 w-full md:hidden z-20" />
+      <MobileNav className="fixed bottom-0 w-full md:hidden z-20 h-16 bg-background/95 backdrop-blur-sm border-t border-border" />
     </div>
   );
 };

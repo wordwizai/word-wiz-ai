@@ -14,6 +14,13 @@ import { useContext } from "react";
 import React from "react";
 import { AlertCircleIcon } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { motion } from "framer-motion";
+import { 
+  formContainerVariants, 
+  formFieldVariants, 
+  buttonHover, 
+  buttonTap 
+} from "@/lib/animations";
 
 export function CreateAccountForm({
   className,
@@ -47,86 +54,119 @@ export function CreateAccountForm({
   }
 
   return (
-    <div
+    <motion.div
       className={cn("flex flex-col gap-6 max-w-sm w-full mx-auto", className)}
+      initial="hidden"
+      animate="visible"
+      variants={formContainerVariants}
       {...props}
     >
-      <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-xl">Create your account</CardTitle>
-          <CardDescription>Fill in your details to sign up</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit}>
-            <div className="grid gap-6">
-              <div className="grid gap-3">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Your Name"
-                  required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  disabled={loading}
-                />
+      <motion.div variants={formFieldVariants}>
+        <Card>
+          <CardHeader className="text-center">
+            <CardTitle className="text-xl">Create your account</CardTitle>
+            <CardDescription>Fill in your details to sign up</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit}>
+              <div className="grid gap-6">
+                <motion.div 
+                  className="grid gap-3"
+                  variants={formFieldVariants}
+                >
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Your Name"
+                    required
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    disabled={loading}
+                  />
+                </motion.div>
+                <motion.div 
+                  className="grid gap-3"
+                  variants={formFieldVariants}
+                >
+                  <Label htmlFor="email">Username</Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    required
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    disabled={loading}
+                  />
+                </motion.div>
+                <motion.div 
+                  className="grid gap-3"
+                  variants={formFieldVariants}
+                >
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="m@example.com"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={loading}
+                  />
+                </motion.div>
+                <motion.div 
+                  className="grid gap-3"
+                  variants={formFieldVariants}
+                >
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={loading}
+                  />
+                </motion.div>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Alert variant="destructive">
+                      <AlertCircleIcon />
+                      <AlertTitle>Unable to Create an account</AlertTitle>
+                      <AlertDescription>
+                        <p>{error}</p>
+                      </AlertDescription>
+                    </Alert>
+                  </motion.div>
+                )}
+                <motion.div
+                  variants={formFieldVariants}
+                  whileHover={buttonHover}
+                  whileTap={buttonTap}
+                >
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? "Creating Account..." : "Create Account"}
+                  </Button>
+                </motion.div>
+                <motion.div 
+                  className="text-center text-sm"
+                  variants={formFieldVariants}
+                >
+                  Already have an account?{" "}
+                  <a href="/login" className="underline underline-offset-4">
+                    Login
+                  </a>
+                </motion.div>
               </div>
-              <div className="grid gap-3">
-                <Label htmlFor="email">Username</Label>
-                <Input
-                  id="username"
-                  type="text"
-                  required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  disabled={loading}
-                />
-              </div>
-              <div className="grid gap-3">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={loading}
-                />
-              </div>
-              <div className="grid gap-3">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={loading}
-                />
-              </div>
-              {error && (
-                <Alert variant="destructive">
-                  <AlertCircleIcon />
-                  <AlertTitle>Unable to Create an account</AlertTitle>
-                  <AlertDescription>
-                    <p>{error}</p>
-                  </AlertDescription>
-                </Alert>
-              )}
-              <Button type="submit" className="w-full">
-                Create Account
-              </Button>
-              <div className="text-center text-sm">
-                Already have an account?{" "}
-                <a href="/login" className="underline underline-offset-4">
-                  Login
-                </a>
-              </div>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+            </form>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </motion.div>
   );
 }

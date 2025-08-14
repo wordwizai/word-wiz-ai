@@ -12,6 +12,7 @@ import { SettingsProvider } from "./contexts/SettingsContext.tsx";
 import PracticeRouter from "./pages/PracticeRouter.tsx";
 import PracticeDashboard from "./pages/PracticeDashboard.tsx";
 import LandingPage from "./pages/LandingPage.tsx";
+import PageTransition from "./components/PageTransition.tsx";
 
 function App() {
   return (
@@ -21,9 +22,21 @@ function App() {
           <SettingsProvider>
             <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
               <Routes>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<SignUp />} />
+                <Route path="/" element={
+                  <PageTransition>
+                    <LandingPage />
+                  </PageTransition>
+                } />
+                <Route path="/login" element={
+                  <PageTransition>
+                    <Login />
+                  </PageTransition>
+                } />
+                <Route path="/signup" element={
+                  <PageTransition>
+                    <SignUp />
+                  </PageTransition>
+                } />
                 <Route path="/oauth-callback" element={<OAuthRedirect />} />
                 <Route
                   path="/practice/:sessionId"
@@ -32,7 +45,9 @@ function App() {
                 <Route
                   element={
                     <Layout>
-                      <Outlet />
+                      <PageTransition>
+                        <Outlet />
+                      </PageTransition>
                     </Layout>
                   }
                 >

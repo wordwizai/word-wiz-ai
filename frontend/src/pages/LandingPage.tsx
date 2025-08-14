@@ -40,25 +40,33 @@ const LandingPage = () => {
         </div>
         <div className="flex flex-col md:flex-row items-center gap-2 w-full md:w-auto">
           <Link to="/login" className="w-full md:w-auto">
-            <Button
-              variant="ghost"
-              className="w-full"
-              as={motion.button}
+            <motion.div
               whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 300 }}
+              className="w-full"
             >
-              Log In
-            </Button>
+              <Button
+                variant="ghost"
+                className="w-full"
+              >
+                Log In
+              </Button>
+            </motion.div>
           </Link>
           <Link to="/signup" className="w-full md:w-auto">
-            <Button
-              className="w-full"
-              as={motion.button}
+            <motion.div
               whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 300 }}
+              className="w-full"
             >
-              Sign Up
-            </Button>
+              <Button
+                className="w-full"
+              >
+                Sign Up
+              </Button>
+            </motion.div>
           </Link>
         </div>
       </nav>
@@ -83,27 +91,35 @@ const LandingPage = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link to="/signup" className="w-full sm:w-auto">
-                <Button
-                  size="lg"
-                  className="w-full sm:w-auto"
-                  as={motion.button}
+                <motion.div
                   whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   transition={{ type: "spring", stiffness: 300 }}
+                  className="w-full sm:w-auto"
                 >
-                  📖 Create an Account
-                </Button>
+                  <Button
+                    size="lg"
+                    className="w-full sm:w-auto"
+                  >
+                    📖 Create an Account
+                  </Button>
+                </motion.div>
               </Link>
               <a href="#how-it-works-section" className="w-full sm:w-auto">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="w-full sm:w-auto"
-                  as={motion.button}
+                <motion.div
                   whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   transition={{ type: "spring", stiffness: 300 }}
+                  className="w-full sm:w-auto"
                 >
-                  🔍 How It Works
-                </Button>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="w-full sm:w-auto"
+                  >
+                    🔍 How It Works
+                  </Button>
+                </motion.div>
               </a>
             </div>
           </div>
@@ -337,11 +353,14 @@ const LandingPage = () => {
           <Link
             className="inline-block bg-primary text-primary-foreground py-3 px-8 rounded-lg font-semibold transition-all duration-300 hover:shadow-md w-full max-w-xs mx-auto md:mx-0"
             to="/signup"
-            as={motion.a}
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 300 }}
           >
-            📖 Create a Word Wiz account
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              📖 Create a Word Wiz account
+            </motion.div>
           </Link>
         </div>
       </motion.section>

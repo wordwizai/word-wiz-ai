@@ -3,12 +3,20 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import ActivitiesList from "@/components/ActivitiesList";
 import SentencePersChart from "@/components/SentencePersChart";
-import { Clock, Play, TrendingUp } from "lucide-react";
+import { Clock, Play } from "lucide-react";
 import { getSessions } from "@/api";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNavigate } from "react-router-dom";
-import { wordWizIcon } from "@/assets";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import { 
+  staggerContainer, 
+  staggerChild, 
+  fadeInUp, 
+  cardHover,
+  buttonHover,
+  buttonTap
+} from "@/lib/animations";
 
 interface Session {
   id: string;
@@ -81,10 +89,18 @@ const Dashboard = () => {
   };
 
   return (
-    <main className="flex-1 p-6 bg-gradient-to-br from-background via-background to-accent/5 space-y-8 overflow-y-auto flex flex-col min-h-0 h-full">
+    <motion.main 
+      className="flex-1 p-6 bg-gradient-to-br from-background via-background to-accent/5 space-y-8 overflow-y-auto flex flex-col min-h-0 h-full"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
       {/* Main content */}
       {/* Header with enhanced styling */}
-      <div className="relative text-center">
+      <motion.div 
+        className="relative text-center"
+        variants={staggerChild}
+      >
         <div className="relative z-10">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent">
             Hi, {userName}!
@@ -93,96 +109,154 @@ const Dashboard = () => {
             <p className="text-lg text-muted-foreground font-medium">{motivational}</p>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Progress Chart with enhanced styling */}
-      <div className="hidden md:block">
+      <motion.div 
+        className="hidden md:block"
+        variants={staggerChild}
+      >
         <div className="relative">
           <SentencePersChart />
         </div>
-      </div>
+      </motion.div>
 
-      <div className="flex space-x-6 space-y-6 flex-1 w-full min-w-0 min-h-0 flex-col md:flex-row">
+      <motion.div 
+        className="flex space-x-6 space-y-6 flex-1 w-full min-w-0 min-h-0 flex-col md:flex-row"
+        variants={staggerChild}
+      >
         {/* Activities with enhanced styling */}
-        <div className="relative flex-1 flex flex-col">
+        <motion.div 
+          className="relative flex-1 flex flex-col"
+          variants={fadeInUp}
+        >
             <ActivitiesList numberOfActivities={3} className="w-full md:h-full flex-1" />
             <div className="flex justify-center mt-4">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="text-foreground border-primary/30 hover:border-primary/60 hover:bg-primary/5 transition-all duration-200 px-6"
-                onClick={() => router("/practice")}
+              <motion.div
+                whileHover={buttonHover}
+                whileTap={buttonTap}
               >
-                View All Activities
-              </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-foreground border-primary/30 hover:border-primary/60 hover:bg-primary/5 transition-all duration-200 px-6"
+                  onClick={() => router("/practice")}
+                >
+                  View All Activities
+                </Button>
+              </motion.div>
             </div>
-        </div>
+        </motion.div>
         
         {/* Progress -- Mobile */}
-        <div className="md:hidden w-full">
+        <motion.div 
+          className="md:hidden w-full"
+          variants={staggerChild}
+        >
           <SentencePersChart />
-        </div>
+        </motion.div>
 
         {/* Practice Calendar / Sidebar with enhanced styling */}
-        <Card className="gap-4 pb-1 px-2 flex flex-col md:overflow-hidden md:min-h-0 rounded-3xl bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl md:w-80">
-          <CardHeader className="relative">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-r from-purple-200 to-pink-200 rounded-xl">
-                <Clock className="w-6 h-6 text-purple-600" />
+        <motion.div
+          variants={fadeInUp}
+          whileHover={cardHover}
+        >
+          <Card className="gap-4 pb-1 px-2 flex flex-col md:overflow-hidden md:min-h-0 rounded-3xl bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl md:w-80">
+            <CardHeader className="relative">
+              <div className="flex items-center gap-3">
+                <motion.div 
+                  className="p-2 bg-gradient-to-r from-purple-200 to-pink-200 rounded-xl"
+                  whileHover={{ rotate: 5 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <Clock className="w-6 h-6 text-purple-600" />
+                </motion.div>
+                <h3 className="text-xl font-bold text-purple-800">Past Sessions</h3>
               </div>
-              <h3 className="text-xl font-bold text-purple-800">Past Sessions</h3>
-            </div>
-          </CardHeader>
-          <CardContent className="px-1 md:flex-1 flex flex-col overflow-hidden min-h-0">
-            {pastSessions.length > 0 ? (
-              <ScrollArea className="rounded-2xl h-full min-h-0">
-                <div className="flex flex-col gap-3">
-                  {pastSessions.map((session) => {
-                    const colorIndex =
-                      Math.abs(session.activity.id) % activityColors.length;
-                    const cardColor = activityColors[colorIndex];
+            </CardHeader>
+            <CardContent className="px-1 md:flex-1 flex flex-col overflow-hidden min-h-0">
+              {pastSessions.length > 0 ? (
+                <ScrollArea className="rounded-2xl h-full min-h-0">
+                  <motion.div 
+                    className="flex flex-col gap-3"
+                    variants={staggerContainer}
+                    initial="hidden"
+                    animate="visible"
+                  >
+                    {pastSessions.map((session, index) => {
+                      const colorIndex =
+                        Math.abs(session.activity.id) % activityColors.length;
+                      const cardColor = activityColors[colorIndex];
 
-                    return (
-                      <Card
-                        key={session.id}
-                        className={`h-fit py-4 group shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl border-2 border-white/50 cursor-pointer hover:-translate-y-2 hover:scale-105`}
-                        onClick={() => router(`/practice/${session.id}`)}
-                        style={{
-                          backgroundColor: `var(--${cardColor})`,
-                        }}
-                      >
-                        <CardContent className="relative">
-                          <div className="absolute top-2 right-2 w-2 h-2 bg-white/60 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                          <div className="text-lg font-bold text-gray-800">
-                            {session.activity.emoji_icon}{" "}
-                            {session.activity.title}
-                          </div>
-                          <div className="text-sm text-gray-600 mt-1">
-                            {formatActivityType(session.activity.activity_type)}{" "}
-                            - {new Date(session.created_at).toDateString()}
-                          </div>
-                          <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2">
-                            <Play className="w-4 h-4 text-gray-600" />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              </ScrollArea>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-32 text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full flex items-center justify-center mb-3">
-                  <Clock className="w-8 h-8 text-gray-500" />
-                </div>
-                <p className="text-gray-500 font-medium">No sessions yet</p>
-                <p className="text-sm text-gray-400">Start practicing to see your progress!</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </main>
+                      return (
+                        <motion.div
+                          key={session.id}
+                          variants={staggerChild}
+                          whileHover={{ 
+                            y: -4, 
+                            scale: 1.02,
+                            transition: { type: "spring", stiffness: 300 }
+                          }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <Card
+                            className={`h-fit py-4 group shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl border-2 border-white/50 cursor-pointer relative overflow-hidden`}
+                            onClick={() => router(`/practice/${session.id}`)}
+                            style={{
+                              backgroundColor: `var(--${cardColor})`,
+                            }}
+                          >
+                            <CardContent className="relative">
+                              <motion.div 
+                                className="absolute top-2 right-2 w-2 h-2 bg-white/60 rounded-full opacity-0 group-hover:opacity-100"
+                                initial={{ scale: 0 }}
+                                whileHover={{ scale: 1 }}
+                                transition={{ duration: 0.3 }}
+                              />
+                              <div className="text-lg font-bold text-gray-800">
+                                {session.activity.emoji_icon}{" "}
+                                {session.activity.title}
+                              </div>
+                              <div className="text-sm text-gray-600 mt-1">
+                                {formatActivityType(session.activity.activity_type)}{" "}
+                                - {new Date(session.created_at).toDateString()}
+                              </div>
+                              <motion.div 
+                                className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100"
+                                initial={{ x: 8, opacity: 0 }}
+                                whileHover={{ x: 0, opacity: 1 }}
+                                transition={{ duration: 0.3 }}
+                              >
+                                <Play className="w-4 h-4 text-gray-600" />
+                              </motion.div>
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                      );
+                    })}
+                  </motion.div>
+                </ScrollArea>
+              ) : (
+                <motion.div 
+                  className="flex flex-col items-center justify-center h-32 text-center"
+                  variants={fadeInUp}
+                >
+                  <motion.div 
+                    className="w-16 h-16 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full flex items-center justify-center mb-3"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <Clock className="w-8 h-8 text-gray-500" />
+                  </motion.div>
+                  <p className="text-gray-500 font-medium">No sessions yet</p>
+                  <p className="text-sm text-gray-400">Start practicing to see your progress!</p>
+                </motion.div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
+    </motion.main>
   );
 };
 

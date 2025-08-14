@@ -1,4 +1,5 @@
 import os
+import html
 
 from dotenv import load_dotenv
 from elevenlabs import stream
@@ -44,14 +45,13 @@ class GoogleTTSAPIClient:
             # Wrap in SSML root element if not already wrapped
             if not text.strip().startswith("<speak>"):
                 text = f"<speak>{text}</speak>"
-            text = "<speak>Great job overall! <break time='300ms'/> Keep practicing!</speak>"
             synthesis_input = texttospeech.SynthesisInput(ssml=text)
         else:
             synthesis_input = texttospeech.SynthesisInput(text=text)
 
         voice = texttospeech.VoiceSelectionParams(
             language_code="en-US",
-            name="en-US-Chirp3-HD-Charon",
+            ssml_gender=texttospeech.SsmlVoiceGender.MALE,
         )
 
         audio_config = texttospeech.AudioConfig(

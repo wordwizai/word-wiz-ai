@@ -18,7 +18,6 @@ import {
   fadeInUp,
   iconHover 
 } from "@/lib/animations";
-import LoadingSpinner from "./LoadingSpinner";
 
 interface Activity {
   id: number;

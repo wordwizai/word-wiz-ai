@@ -1,4 +1,4 @@
-import { Play, Star } from "lucide-react";
+import { Play } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";

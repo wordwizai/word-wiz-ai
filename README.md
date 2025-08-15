@@ -30,7 +30,7 @@ It combines **AI-generated practice sentences** with **phoneme-level audio feedb
 - [X] Add **customizable difficulty for different reading levels**
 - [X] Make a **quality** frontend
 - [X] Implement three engaging modes
-- [X] Polish
+- [ ] Polish
 - [ ] DEPLOY!!!
 
 ---

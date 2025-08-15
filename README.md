@@ -1,4 +1,4 @@
-# <img src="frontend/src/assets/wordwizIcon.png" width="32"/> Word Wiz AI
+# <img src="frontend/src/assets/wordwizIcon.svg" width="32"/> Word Wiz AI
 
 **Word Wiz AI** is an AI-powered educational web application designed to help young children learn to read in a fun and engaging way.  
 It combines **AI-generated practice sentences** with **phoneme-level audio feedback** to provide precise guidance on pronunciation.

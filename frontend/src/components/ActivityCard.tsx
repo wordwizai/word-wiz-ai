@@ -44,7 +44,7 @@ const ActivityCard = ({ activity, onActivityClick }: ActivityCardProps) => {
       transition={{ duration: 0.3 }}
     >
       <Card
-        className="flex flex-col h-full rounded-3xl shadow-lg cursor-pointer transition-all duration-300 overflow-visible border-2 border-white/50 hover:-translate-y-2 hover:scale-105 relative group"
+        className="flex flex-col h-full rounded-3xl shadow-lg cursor-pointer transition-all duration-300 overflow-visible border-2 border-white/50 hover:-translate-y-2 hover:scale-105 relative group gap-1 py-0"
         style={{ backgroundColor: `var(--${cardColor})` }}
         onClick={() => onActivityClick(activity)}
         role="button"
@@ -53,13 +53,15 @@ const ActivityCard = ({ activity, onActivityClick }: ActivityCardProps) => {
           if (e.key === "Enter" || e.key === " ") onActivityClick(activity);
         }}
       >
-        <CardHeader className="flex flex-col items-start gap-4 p-6">
+        <CardHeader className="flex flex-col items-start gap-4 px-6 pt-6">
           <div className="relative">
             <div className="text-6xl relative z-10">{activity.emoji_icon}</div>
           </div>
-          
+
           <div className="space-y-2">
-            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 leading-tight">{activity.title}</h3>
+            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 leading-tight">
+              {activity.title}
+            </h3>
             <Badge
               variant="secondary"
               className="px-2 sm:px-3 py-1 text-xs sm:text-sm font-semibold rounded-full bg-white/60 text-gray-700 border border-white/40 hover:bg-white/80 transition-colors duration-200"
@@ -68,12 +70,14 @@ const ActivityCard = ({ activity, onActivityClick }: ActivityCardProps) => {
             </Badge>
           </div>
         </CardHeader>
-        
-        <CardContent className="flex-1 text-left text-sm sm:text-base leading-relaxed px-4 sm:px-6 pb-4">
-          <p className="text-gray-700 leading-relaxed">{activity.description}</p>
+
+        <CardContent className="flex-1 text-left text-sm sm:text-base leading-relaxed px-4 sm:px-6 py-2">
+          <p className="text-gray-700 leading-relaxed">
+            {activity.description}
+          </p>
         </CardContent>
-        
-        <CardFooter className="flex justify-center pb-4 sm:pb-6">
+
+        <CardFooter className="flex justify-center pb-4">
           <motion.div
             whileHover={{ scale: 1.1, rotate: 5 }}
             whileTap={{ scale: 0.9, rotate: -5 }}
@@ -92,7 +96,7 @@ const ActivityCard = ({ activity, onActivityClick }: ActivityCardProps) => {
             </Button>
           </motion.div>
         </CardFooter>
-        
+
         {/* Bottom accent line */}
         <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-20 h-1 bg-gradient-to-r from-transparent via-white/60 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
       </Card>

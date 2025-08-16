@@ -70,53 +70,53 @@ const ActivitiesList = ({
 
   if (displayMode === "carousel") {
     return (
-        <Carousel
-          opts={{
-            align: "start",
-          }}
+      <Carousel
+        opts={{
+          align: "start",
+        }}
         className={className + " overflow-y-visible"}
-        >
-          <CarouselContent className="overflow-y-visible">
-            {activities.length === 0
-              ? Array.from(
-                  {
-                    length: numberOfActivities === -1 ? 1 : numberOfActivities,
-                  },
-                  (_, idx) => (
-                    <CarouselItem
-                      key={idx}
-                      className="md:basis-1/6 sm:basis-1/3 @xs:basis-1"
-                    >
-                      <Skeleton className="h-80 rounded-3xl" />
-                    </CarouselItem>
-                  ),
+      >
+        <CarouselContent className="overflow-y-visible">
+          {activities.length === 0
+            ? Array.from(
+                {
+                  length: numberOfActivities === -1 ? 1 : numberOfActivities,
+                },
+                (_, idx) => (
+                  <CarouselItem
+                    key={idx}
+                    className="xl:basis-1/4 lg:basis-1/3 md:basis-1/2 overflow-y-visible"
+                  >
+                    <Skeleton className="h-80 rounded-3xl" />
+                  </CarouselItem>
+                ),
+              )
+            : activities
+                .filter((a) => (type ? a.activity_type === type : true))
+                .slice(
+                  0,
+                  numberOfActivities === -1
+                    ? activities.length
+                    : numberOfActivities,
                 )
-              : activities
-                  .filter((a) => (type ? a.activity_type === type : true))
-                  .slice(
-                    0,
-                    numberOfActivities === -1
-                      ? activities.length
-                      : numberOfActivities,
-                  )
-                  .map((activity, idx) => (
-                    <CarouselItem
-                      key={idx}
-                      className="xl:basis-1/5 lg:basis-1/4 md:basis-1/3 sm:basis-1/2 @xs:basis-1 overflow-y-visible"
-                    >
-                      <ActivityCard
-                        activity={activity}
-                        onActivityClick={onActivityClick}
-                      />
-                    </CarouselItem>
-                  ))}
-          </CarouselContent>
-          <CarouselPrevious className="bg-white/80 border-2 border-gray-200 hover:bg-white hover:border-gray-300 transition-all duration-200" />
-          <CarouselNext className="bg-white/80 border-2 border-gray-200 hover:bg-white hover:border-gray-300 transition-all duration-200" />
-        </Carousel>
+                .map((activity, idx) => (
+                  <CarouselItem
+                    key={idx}
+                    className="xl:basis-1/4 lg:basis-1/3 md:basis-1/2 overflow-y-visible"
+                  >
+                    <ActivityCard
+                      activity={activity}
+                      onActivityClick={onActivityClick}
+                    />
+                  </CarouselItem>
+                ))}
+        </CarouselContent>
+        <CarouselPrevious className="bg-white/80 border-2 border-gray-200 hover:bg-white hover:border-gray-300 transition-all duration-200" />
+        <CarouselNext className="bg-white/80 border-2 border-gray-200 hover:bg-white hover:border-gray-300 transition-all duration-200" />
+      </Carousel>
     );
   }
-  
+
   return (
     <div className={"space-y-6 flex flex-col " + className}>
       {/* Header section */}
@@ -124,16 +124,21 @@ const ActivitiesList = ({
         <div className="p-2 bg-gradient-to-r from-blue-200 to-purple-200 rounded-xl">
           <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
         </div>
-        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">Choose Your Practice</h2>
+        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">
+          Choose Your Practice
+        </h2>
       </div>
-      
+
       {/* Activities grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 flex-1">
         {activities.length === 0
           ? Array.from(
               { length: numberOfActivities === -1 ? 3 : numberOfActivities },
               (_, idx) => (
-                <Skeleton key={idx} className="h-64 sm:h-72 md:h-80 rounded-3xl" />
+                <Skeleton
+                  key={idx}
+                  className="h-64 sm:h-72 md:h-80 rounded-3xl"
+                />
               ),
             )
           : activities
@@ -152,17 +157,6 @@ const ActivitiesList = ({
                 />
               ))}
       </div>
-      
-      {/* Empty state with enhanced styling */}
-      {activities.length === 0 && !useInputActivities && (
-        <div className="text-center py-12">
-          <div className="w-20 h-20 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full flex items-center justify-center mx-auto mb-4">
-            <BookOpen className="w-10 h-10 text-gray-500" />
-          </div>
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">No activities available</h3>
-          <p className="text-gray-500">Check back later for new practice activities!</p>
-        </div>
-      )}
     </div>
   );
 };

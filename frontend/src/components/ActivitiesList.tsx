@@ -120,20 +120,20 @@ const ActivitiesList = ({
   return (
     <div className={"space-y-6 flex flex-col " + className}>
       {/* Header section */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-4 sm:mb-6">
         <div className="p-2 bg-gradient-to-r from-blue-200 to-purple-200 rounded-xl">
-          <BookOpen className="w-5 h-5 text-blue-600" />
+          <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-800">Choose Your Practice</h2>
+        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">Choose Your Practice</h2>
       </div>
       
       {/* Activities grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 flex-1">
         {activities.length === 0
           ? Array.from(
               { length: numberOfActivities === -1 ? 3 : numberOfActivities },
               (_, idx) => (
-                <Skeleton key={idx} className="h-80 rounded-3xl" />
+                <Skeleton key={idx} className="h-64 sm:h-72 md:h-80 rounded-3xl" />
               ),
             )
           : activities

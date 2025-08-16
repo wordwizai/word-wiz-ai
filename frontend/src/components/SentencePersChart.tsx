@@ -68,30 +68,30 @@ const SentencePersChart = ({
   return (
     <Card
       className={
-        "w-full h-64 flex flex-col space-y-0 gap-0 px-0 rounded-3xl border-2 border-purple-100/50 bg-gradient-to-br from-white to-purple-50/30 shadow-xl " +
+        "w-full h-48 sm:h-56 md:h-64 flex flex-col space-y-0 gap-0 px-0 rounded-3xl border-2 border-purple-100/50 bg-gradient-to-br from-white to-purple-50/30 shadow-xl " +
         className
       }
       style={{ minHeight: 0 }}
     >
-      <CardHeader className="flex-shrink-0">
+      <CardHeader className="flex-shrink-0 p-3 sm:p-4">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-gradient-to-r from-purple-200 to-pink-200 rounded-full">
-            <TrendingUp className="w-6 h-6 text-purple-600" />
+            <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-purple-600" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-purple-800">Error Rate Progress</h3>
-            <p className="text-sm text-purple-600">Track your improvement over time.</p>
+            <h3 className="text-lg sm:text-xl font-bold text-purple-800">Error Rate Progress</h3>
+            <p className="text-xs sm:text-sm text-purple-600">Track your improvement over time.</p>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 min-h-0 relative pt-0 px-4 flex flex-col justify-end">
-        <ChartContainer config={chartConfig} className="h-full w-full min-h-0">
+      <CardContent className="flex-1 min-h-0 relative pt-0 px-2 sm:px-4 flex flex-col justify-end">
+        <ChartContainer config={chartConfig} className="h-full w-full min-h-0" style={{ minHeight: '120px' }}>
           <AreaChart
             accessibilityLayer
             data={chartData}
             height={undefined}
             width={undefined}
-            style={{ height: "100%", width: "100%", minHeight: 0 }}
+            style={{ height: "100%", width: "100%", minHeight: '120px' }}
           >
             <defs>
               <linearGradient id="perGradient" x1="0" y1="0" x2="0" y2="1">
@@ -121,7 +121,7 @@ const SentencePersChart = ({
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tick={{ fill: "rgba(139, 92, 246, 0.7)", fontSize: 12 }}
+              tick={{ fill: "rgba(139, 92, 246, 0.7)", fontSize: 10 }}
               tickFormatter={(date) =>
                 typeof date === "string"
                   ? date

@@ -45,43 +45,43 @@ const MobileNav = ({ className }: MobileNavProps) => {
   return (
     <TooltipProvider>
       <aside className={`${className}`}>
-        <div className="mx-5 mb-1 p-1 flex flex-row items-center justify-around bg-primary-foreground rounded-lg shadow-md shadow-primary/50 dark:shadow-none">
+        <div className="mx-3 sm:mx-5 mb-1 p-2 flex flex-row items-center justify-around bg-primary-foreground rounded-lg shadow-md shadow-primary/50 dark:shadow-none">
           {/* Home */}
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
-              <Link to="/dashboard">
+              <Link to="/dashboard" className="p-2 rounded-lg hover:bg-primary/10 transition-colors">
                 <span className="sr-only">Dashboard</span>
                 <House className="size-6 stroke-primary" />
               </Link>
             </TooltipTrigger>
-            <TooltipContent side="right">Dashboard</TooltipContent>
+            <TooltipContent side="top">Dashboard</TooltipContent>
           </Tooltip>
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
-              <Link to="/practice">
+              <Link to="/practice" className="p-2 rounded-lg hover:bg-primary/10 transition-colors">
                 <span className="sr-only">Practice</span>
                 <Target className="size-6 stroke-primary" />
               </Link>
             </TooltipTrigger>
-            <TooltipContent side="right">Practice</TooltipContent>
+            <TooltipContent side="top">Practice</TooltipContent>
           </Tooltip>
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
-              <Link to="progress">
+              <Link to="progress" className="p-2 rounded-lg hover:bg-primary/10 transition-colors">
                 <span className="sr-only">Progress</span>
                 <Route className="size-6 stroke-primary" />
               </Link>
             </TooltipTrigger>
-            <TooltipContent side="right">Progress</TooltipContent>
+            <TooltipContent side="top">Progress</TooltipContent>
           </Tooltip>
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
-              <Link to="/settings">
+              <Link to="/settings" className="p-2 rounded-lg hover:bg-primary/10 transition-colors">
                 <span className="sr-only">Settings</span>
                 <Settings className="size-6 stroke-primary" />
               </Link>
             </TooltipTrigger>
-            <TooltipContent side="right">Settings</TooltipContent>
+            <TooltipContent side="top">Settings</TooltipContent>
           </Tooltip>
           {/* Avatar Dropdown */}
           <DropdownMenu>
@@ -89,7 +89,7 @@ const MobileNav = ({ className }: MobileNavProps) => {
               <Button 
                 variant="ghost" 
                 size="iconLg"
-                className="w-12 h-12 rounded-2xl hover:bg-purple-100/50 hover:shadow-md transition-all duration-200 group"
+                className="w-12 h-12 rounded-2xl hover:bg-purple-100/50 hover:shadow-md transition-all duration-200 group p-2"
               >
                 <span className="sr-only">Account</span>
                 <Avatar className="w-8 h-8 mx-auto rounded-xl group-hover:scale-110 transition-transform duration-200">
@@ -102,7 +102,7 @@ const MobileNav = ({ className }: MobileNavProps) => {
             </DropdownMenuTrigger>
             <DropdownMenuContent
               className="w-64 rounded-2xl border-2 border-purple-200 bg-white/95 shadow-xl"
-              side="right"
+              side="top"
               align="end"
               sideOffset={4}
             >

@@ -81,16 +81,18 @@ const Dashboard = () => {
   };
 
   return (
-    <main className="flex-1 p-6 bg-gradient-to-br from-background via-background to-accent/5 space-y-8 overflow-y-auto flex flex-col min-h-0 h-full">
+    <main className="flex-1 p-4 sm:p-6 bg-gradient-to-br from-background via-background to-accent/5 space-y-6 sm:space-y-8 overflow-y-auto flex flex-col min-h-0 h-full">
       {/* Main content */}
       {/* Header with enhanced styling */}
       <div className="relative text-center">
         <div className="relative z-10">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent">
             Hi, {userName}!
           </h1>
           <div className="flex items-center justify-center gap-3 mt-3">
-            <p className="text-lg text-muted-foreground font-medium">{motivational}</p>
+            <p className="text-sm sm:text-base md:text-lg text-muted-foreground font-medium text-center px-2">
+              {motivational}
+            </p>
           </div>
         </div>
       </div>
@@ -102,22 +104,25 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="flex space-x-6 space-y-6 flex-1 w-full min-w-0 min-h-0 flex-col md:flex-row">
+      <div className="flex space-x-0 sm:space-x-6 space-y-6 flex-1 w-full min-w-0 min-h-0 flex-col md:flex-row md:space-y-0">
         {/* Activities with enhanced styling */}
         <div className="relative flex-1 flex flex-col">
-            <ActivitiesList numberOfActivities={3} className="w-full md:h-full flex-1" />
-            <div className="flex justify-center mt-4">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="text-foreground border-primary/30 hover:border-primary/60 hover:bg-primary/5 transition-all duration-200 px-6"
-                onClick={() => router("/practice")}
-              >
-                View All Activities
-              </Button>
-            </div>
+          <ActivitiesList
+            numberOfActivities={3}
+            className="w-full md:h-full flex-1"
+          />
+          <div className="flex justify-center mt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-foreground border-primary/30 hover:border-primary/60 hover:bg-primary/5 transition-all duration-200 px-6 py-2 min-h-[44px]"
+              onClick={() => router("/practice")}
+            >
+              View All Activities
+            </Button>
+          </div>
         </div>
-        
+
         {/* Progress -- Mobile */}
         <div className="md:hidden w-full">
           <SentencePersChart />
@@ -128,9 +133,11 @@ const Dashboard = () => {
           <CardHeader className="relative">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-gradient-to-r from-purple-200 to-pink-200 rounded-xl">
-                <Clock className="w-6 h-6 text-purple-600" />
+                <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
               </div>
-              <h3 className="text-xl font-bold text-purple-800">Past Sessions</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-purple-800">
+                Past Sessions
+              </h3>
             </div>
           </CardHeader>
           <CardContent className="px-1 md:flex-1 flex flex-col overflow-hidden min-h-0">
@@ -176,7 +183,9 @@ const Dashboard = () => {
                   <Clock className="w-8 h-8 text-gray-500" />
                 </div>
                 <p className="text-gray-500 font-medium">No sessions yet</p>
-                <p className="text-sm text-gray-400">Start practicing to see your progress!</p>
+                <p className="text-sm text-gray-400">
+                  Start practicing to see your progress!
+                </p>
               </div>
             )}
           </CardContent>

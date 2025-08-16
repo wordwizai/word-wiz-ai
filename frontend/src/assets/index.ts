@@ -1,4 +1,4 @@
-import wordWizIcon from "./wordWizIcon.svg";
+import wordWizIcon from "./wordwizIcon.svg";
 import demoScreenshot from "./demoScreenshot.png";
 
 export { wordWizIcon, demoScreenshot };

@@ -184,5 +184,18 @@
 
   body {
     @apply bg-background text-foreground;
+    /* Ensure minimum font size for mobile readability */
+    font-size: max(16px, 1rem);
+  }
+
+  /* Mobile-specific styles for better readability and usability */
+  @media (max-width: 768px) {
+    html {
+      font-size: 16px; /* Prevent zoom on iOS when inputs are focused */
+    }
+    
+    input, textarea, select {
+      font-size: 16px; /* Prevent zoom on iOS */
+    }
   }
 }

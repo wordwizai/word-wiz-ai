@@ -48,7 +48,7 @@ export function CreateAccountForm({
 
   return (
     <div
-      className={cn("flex flex-col gap-6 max-w-sm w-full mx-auto", className)}
+      className={cn("flex flex-col gap-6 max-w-sm w-full", className)}
       {...props}
     >
       <Card>

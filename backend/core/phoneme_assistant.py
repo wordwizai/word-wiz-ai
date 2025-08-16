@@ -45,7 +45,22 @@ class PhonemeAssistant:
                 line for line in lines if not line.strip().startswith("//")
             ]  # // is how we are going to comments in the txt file
             text = "".join(content)
-            return text
+        
+        # Automatically append SSML instruction to all prompts
+        ssml_instruction_path = "core/gpt_prompts/ssml_instruction.txt"
+        try:
+            with open(ssml_instruction_path, encoding="utf-8") as ssml_file:
+                ssml_lines = ssml_file.readlines()
+                ssml_content = [
+                    line for line in ssml_lines if not line.strip().startswith("//")
+                ]
+                ssml_text = "".join(ssml_content)
+                text += "\n\n" + ssml_text
+        except FileNotFoundError:
+            # If SSML instruction file is missing, continue without it
+            pass
+        
+        return text
 
     def extract_json(self, response_text):
         """
@@ -227,11 +242,13 @@ class PhonemeAssistant:
     def feedback_to_audio(
         self,
         feedback: str,
+        feedback_ssml: str = None,
     ) -> dict:
-        """Generate feedback audio using Elevenlabs TTS service and return as base64-encoded file
+        """Generate feedback audio using Google TTS service and return as base64-encoded file
 
         Args:
-            feedback (str): string of feedback to be converted to audio
+            feedback (str): string of feedback to be converted to audio (plain text fallback)
+            feedback_ssml (str, optional): SSML version of feedback for better pronunciation
             save (bool, optional): Whether to save the audio. Defaults to False.
             save_path (str, optional): Path to save the audio. Defaults to "temp_audio/feedback.wav".
 
@@ -243,7 +260,11 @@ class PhonemeAssistant:
             }
         """
 
-        audio_generator = self.tts.getAudio(feedback)
+        # Use SSML version if available, otherwise use plain text
+        text_to_convert = feedback_ssml if feedback_ssml else feedback
+        is_ssml = feedback_ssml is not None
+        
+        audio_generator = self.tts.getAudio(text_to_convert, is_ssml=is_ssml)
 
         audio_bytes = b"".join(audio_generator)
 

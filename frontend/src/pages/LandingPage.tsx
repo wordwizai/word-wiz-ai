@@ -33,12 +33,12 @@ const LandingPage = () => {
   return (
     <main className="scroll-smooth bg-background text-foreground">
       {/* Navbar */}
-      <nav className="w-full px-4 sm:px-6 py-4 sticky top-0 z-50 bg-background/70 backdrop-blur border-b border-border flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
+      <nav className="w-full px-4 sm:px-6 py-4 sticky top-0 z-50 bg-background/70 backdrop-blur border-b border-border flex flex-row items-center justify-between gap-3 sm:gap-0">
         <div className="flex items-center gap-2">
           <img src={wordWizIcon} alt="Word Wiz Icon" className="h-8 w-8" />
           <span className="text-lg sm:text-xl font-semibold">Word Wiz AI</span>
         </div>
-        <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+        <div className="flex flex-row items-center gap-2 w-auto">
           <Link to="/login" className="w-full sm:w-auto">
             <Button
               variant="ghost"

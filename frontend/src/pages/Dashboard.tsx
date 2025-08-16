@@ -168,9 +168,6 @@ const Dashboard = () => {
                             {formatActivityType(session.activity.activity_type)}{" "}
                             - {new Date(session.created_at).toDateString()}
                           </div>
-                          <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2">
-                            <Play className="w-4 h-4 text-gray-600" />
-                          </div>
                         </CardContent>
                       </Card>
                     );

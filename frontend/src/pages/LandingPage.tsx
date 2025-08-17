@@ -274,7 +274,7 @@ const LandingPage = () => {
       </motion.section>
 
       {/* Testimonials Section */}
-      <motion.section
+      {/*<motion.section
         className="px-6 py-20 bg-muted/50"
         variants={fadeUpVariant}
         initial="hidden"
@@ -316,7 +316,7 @@ const LandingPage = () => {
             ))}
           </motion.div>
         </div>
-      </motion.section>
+      </motion.section>*}
 
       {/* CTA button */}
       <motion.section

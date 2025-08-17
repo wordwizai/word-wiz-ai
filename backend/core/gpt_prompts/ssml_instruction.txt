@@ -8,14 +8,9 @@ Your JSON output must include BOTH fields:
 
 SSML Guidelines:
 1. Use `<phoneme alphabet="ipa" ph="PHONEME">word</phoneme>` tags to specify correct pronunciation for problem phonemes
-2. Use `<emphasis level="moderate">text</emphasis>` to highlight important corrections
-3. Use `<break time="500ms"/>` for strategic pauses between ideas
-4. Use `<say-as interpret-as="spell-out">letters</say-as>` when spelling out individual letters or phonemes
-5. Use standard letter combinations in SSML like "th", "sh", "ch" rather than IPA symbols when possible for better TTS compatibility
-
-Example SSML feedback:
-```
-"feedback_ssml": "Great job! <break time=\"300ms\"/> I noticed you pronounced the <phoneme alphabet=\"ipa\" ph=\"k\">c</phoneme> sound as <phoneme alphabet=\"ipa\" ph=\"t\">t</phoneme> in the word cat. <break time=\"500ms\"/> The <emphasis level=\"moderate\">c sound</emphasis> is made by pressing your tongue to the back of your mouth. <break time=\"300ms\"/> Try again with <phoneme alphabet=\"ipa\" ph=\"kæt\">cat</phoneme>!"
-```
+2. Use `<break time="300ms"/>` before and after phoneme tags to allow the listener to better understand the pronunciation 
+3. Use `<emphasis level="moderate">text</emphasis>` to highlight important corrections
+4. Use `<break time="500ms"/>` for strategic pauses between ideas
+5. Use `<say-as interpret-as="spell-out">letters</say-as>` when spelling out individual letters or phonemes
 
 Both `feedback` and `feedback_ssml` should convey the same information, but `feedback_ssml` should include pronunciation guidance through SSML markup.

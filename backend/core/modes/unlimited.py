@@ -56,7 +56,7 @@ class UnlimitedPractice(BaseMode):
             {
                 "role": "system",
                 "content": phoneme_assistant.load_prompt(
-                    "core/gpt_prompts/unlimited_mode_prompt_v2.txt"
+                    "core/gpt_prompts/unlimited_mode_prompt_v4.txt"
                 ),
             }
         ]

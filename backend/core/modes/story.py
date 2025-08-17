@@ -142,7 +142,7 @@ class StoryPractice(BaseMode):
             {
                 "role": "system",
                 "content": phoneme_assistant.load_prompt(
-                    "core/gpt_prompts/story_mode_prompt_v1.txt"
+                    "core/gpt_prompts/story_mode_prompt_v2.txt"
                 ),
             }
         ]

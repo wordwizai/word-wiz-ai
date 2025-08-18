@@ -65,4 +65,4 @@ GUIDELINES:
 5. **TTS Compatibility**: Use letter combinations ("ch", "th", "sh") for digraphs, avoid complex symbols.
 
 Example feedback approach:
-- "You had trouble with the 'l' sound in words like 'little' and 'loved'. When we mix up this sound, it can make words harder to recognize when reading. Let's practice with words that have lots of 'l' sounds."
+- "You had trouble with the 'l' sound in words like 'little' and 'loved'. Let's practice with words that have lots of 'l' sounds."

@@ -91,4 +91,4 @@ NOTE: 🔵 and 🟢 are simply placeholder icons -- NEVER USE THEM IN YOUR OUTPU
 * Use appropriate icons for the story context and plain text for TTS compatibility.
 
 Example approach:
-- "You had trouble with the 's' sound in 'said' and 'story'. When we mix up this sound, it can make it harder to recognize these important words when reading. Both choices below will have lots of 's' sounds to practice. Would you like to search the forest or stay by the stream?"
+- "You had trouble with the 's' sound in 'said' and 'story'. Both choices below will have lots of 's' sounds to practice. Would you like to search the forest or stay by the stream?"

@@ -92,4 +92,4 @@ Begin with **REASONING:** section (1–4 numbered steps). Follow with **OUTPUT:*
 * Use plain text with letter combinations like "th", "sh", "ch" for TTS compatibility.
 
 Example approach:
-- "You had trouble with the 'r' sound in 'grandmother' and 'her'. When we mix up this sound, it can make it harder to recognize these important words when reading. The next sentence will have lots of 'r' sounds to practice."
+- "You had trouble with the 'r' sound in 'grandmother' and 'her'. The next sentence will have lots of 'r' sounds to practice."

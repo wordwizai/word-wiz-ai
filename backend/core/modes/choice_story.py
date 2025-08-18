@@ -42,6 +42,12 @@ class ChoiceStoryPractice(BaseMode):
             )
             past_sentences.append(entry.sentence)
 
+        # Create simplified data for LLM to reduce input size
+        simplified_problem_summary = {
+            "phoneme_error_counts": problem_summary.get("phoneme_error_counts", {}),
+            "recommended_focus_phoneme": problem_summary.get("recommended_focus_phoneme")
+        }
+
         user_input = {
             "role": "user",
             "content": json.dumps(
@@ -53,8 +59,7 @@ class ChoiceStoryPractice(BaseMode):
                     "attempted_sentence": attempted_sentence,
                     "pronunciation": pronunciation_data,
                     "highest_per_word": highest_per_word_data,
-                    "problem_summary": problem_summary,
-                    "past_problem_summaries": past_problem_summaries,
+                    "problem_summary": simplified_problem_summary,
                     "per_summary": per_summary,
                 }
             ),
@@ -63,7 +68,7 @@ class ChoiceStoryPractice(BaseMode):
             {
                 "role": "system",
                 "content": phoneme_assistant.load_prompt(
-                    "core/gpt_prompts/choice_story_mode_prompt_v3.txt"
+                    "core/gpt_prompts/choice_story_mode_prompt_v4.txt"
                 ),
             }
         ]

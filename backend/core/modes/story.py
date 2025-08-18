@@ -122,6 +122,12 @@ class StoryPractice(BaseMode):
             "plot_desc": self.story_content.get("plot_desc", ""),
         }
 
+        # Create simplified data for LLM to reduce input size
+        simplified_problem_summary = {
+            "phoneme_error_counts": problem_summary.get("phoneme_error_counts", {}),
+            "recommended_focus_phoneme": problem_summary.get("recommended_focus_phoneme")
+        }
+
         user_input = {
             "role": "user",
             "content": json.dumps(
@@ -131,8 +137,7 @@ class StoryPractice(BaseMode):
                     "attempted_sentence": attempted_sentence,
                     "pronunciation": pronunciation_data,
                     "highest_per_word": highest_per_word_data,
-                    "problem_summary": problem_summary,
-                    "past_problem_summaries": past_problem_summaries,
+                    "problem_summary": simplified_problem_summary,
                     "per_summary": per_summary,
                     "next_sentence_description": next_sentence,
                 }
@@ -142,7 +147,7 @@ class StoryPractice(BaseMode):
             {
                 "role": "system",
                 "content": phoneme_assistant.load_prompt(
-                    "core/gpt_prompts/story_mode_prompt_v1.txt"
+                    "core/gpt_prompts/story_mode_prompt_v2.txt"
                 ),
             }
         ]

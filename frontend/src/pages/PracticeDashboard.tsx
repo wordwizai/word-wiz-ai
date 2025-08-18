@@ -14,10 +14,10 @@ interface Activity {
 
 const PracticeDashboard = () => {
   const sections = [
-    {
-      title: "Unlimited Practice",
-      filter: "unlimited",
-    },
+    // {
+    //   title: "Unlimited Practice",
+    //   filter: "unlimited",
+    // },
     {
       title: "Choice Story Practice",
       filter: "choice-story",

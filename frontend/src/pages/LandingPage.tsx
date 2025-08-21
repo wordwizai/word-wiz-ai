@@ -34,10 +34,10 @@ const LandingPage = () => {
     <main className="scroll-smooth bg-background text-foreground">
       {/* Navbar */}
       <nav className="w-full px-4 sm:px-6 py-4 sticky top-0 z-50 bg-background/70 backdrop-blur border-b border-border flex flex-row items-center justify-between gap-3 sm:gap-0">
-        <div className="flex items-center gap-2">
+        <a className="flex items-center gap-2" href="/">
           <img src={wordWizIcon} alt="Word Wiz Icon" className="h-8 w-8" />
           <span className="text-lg sm:text-xl font-semibold">Word Wiz AI</span>
-        </div>
+        </a>
         <div className="flex flex-row items-center gap-2 w-auto">
           <Link to="/login" className="w-full sm:w-auto">
             <Button
@@ -121,7 +121,7 @@ const LandingPage = () => {
 
       {/* What Makes Word Wiz Unique */}
       <motion.section
-        className="px-6 py-20 bg-muted/50"
+        className="px-6 py-20 bg-background"
         variants={fadeUpVariant}
         initial="hidden"
         whileInView="visible"
@@ -354,21 +354,17 @@ const LandingPage = () => {
             <p className="text-sm">Read smarter. Grow faster.</p>
           </div>
           <div className="flex flex-wrap justify-center md:justify-start gap-4 text-sm">
-            <a href="#about" className="hover:underline">
-              About
-            </a>
-            <a href="#contact" className="hover:underline">
-              Contact
-            </a>
-            <a href="#privacy" className="hover:underline">
-              Privacy
-            </a>
-            <a href="#terms" className="hover:underline">
-              Terms
-            </a>
-            <a href="#educators" className="hover:underline">
-              For Educators
-            </a>
+            {["About", "Contact", "Privacy", "Terms", "For Educators"].map(
+              (link, index) => (
+                <button
+                  key={index}
+                  onClick={() => alert("This page is not available yet.")}
+                  className="hover:underline bg-transparent border-none cursor-pointer text-primary-foreground"
+                >
+                  {link}
+                </button>
+              ),
+            )}
           </div>
         </div>
       </footer>

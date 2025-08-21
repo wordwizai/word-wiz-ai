@@ -12,6 +12,7 @@ import { SettingsProvider } from "./contexts/SettingsContext.tsx";
 import PracticeRouter from "./pages/PracticeRouter.tsx";
 import PracticeDashboard from "./pages/PracticeDashboard.tsx";
 import LandingPage from "./pages/LandingPage.tsx";
+import UnderConstructionPage from "./pages/UnderConstructionPage.tsx";
 
 function App() {
   return (
@@ -22,7 +23,7 @@ function App() {
             <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
               <Routes>
                 <Route path="/" element={<LandingPage />} />
-                <Route path="/login" element={<Login />} />
+                {/*  <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="/oauth-callback" element={<OAuthRedirect />} />
                 <Route
@@ -40,7 +41,8 @@ function App() {
                   <Route path="/progress" element={<ProgressDashboard />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/practice" element={<PracticeDashboard />} />
-                </Route>
+                </Route>*/}
+                <Route path="*" element={<UnderConstructionPage />} />
               </Routes>
             </ThemeProvider>
           </SettingsProvider>

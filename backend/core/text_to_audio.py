@@ -1,10 +1,12 @@
 import os
 import html
+import json
 
 from dotenv import load_dotenv
 from elevenlabs import stream
 from elevenlabs.client import ElevenLabs
 from google.cloud import texttospeech as texttospeech
+from google.oauth2 import service_account
 
 
 class ElevenLabsAPIClient:
@@ -37,7 +39,10 @@ class ElevenLabsAPIClient:
 class GoogleTTSAPIClient:
     def __init__(self):
         load_dotenv()
-        self.client = texttospeech.TextToSpeechClient()
+        creds_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+        credentials = service_account.Credentials.from_service_account_file(creds_path)
+
+        self.client = texttospeech.TextToSpeechClient(credentials=credentials)
 
     def getAudio(self, text, is_ssml=False):
         # Check if text contains SSML tags or if explicitly marked as SSML

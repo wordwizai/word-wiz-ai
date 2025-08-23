@@ -13,7 +13,7 @@ import { SettingsProvider } from "./contexts/SettingsContext.tsx";
 // import PracticeDashboard from "./pages/PracticeDashboard.tsx";
 import LandingPage from "./pages/LandingPage.tsx";
 import UnderConstructionPage from "./pages/UnderConstructionPage.tsx";
-import { Analytics } from "@vercel/analytics/next";
+import { Analytics } from "@vercel/analytics/react";
 
 function App() {
   return (

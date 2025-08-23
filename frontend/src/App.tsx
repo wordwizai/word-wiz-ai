@@ -13,6 +13,7 @@ import { SettingsProvider } from "./contexts/SettingsContext.tsx";
 // import PracticeDashboard from "./pages/PracticeDashboard.tsx";
 import LandingPage from "./pages/LandingPage.tsx";
 import UnderConstructionPage from "./pages/UnderConstructionPage.tsx";
+import { Analytics } from "@vercel/analytics/next";
 
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
           </SettingsProvider>
         </AuthProvider>
       </BrowserRouter>
+      <Analytics />
     </div>
   );
 }

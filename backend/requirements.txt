@@ -3,6 +3,7 @@ uvicorn
 gunicorn
 pydantic
 sqlalchemy
+pymysql
 databases
 python-jose[cryptography]
 passlib[bcrypt]
@@ -22,7 +23,6 @@ elevenlabs
 noisereduce
 IPython
 editdistance
-webrtcvad
 optree>=0.13.0
 alembic
 authlib[starlette]

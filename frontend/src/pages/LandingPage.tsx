@@ -109,11 +109,11 @@ const LandingPage = () => {
             </div>
           </div>
           <div className="flex-1 max-w-full">
-            <div className="bg-muted border border-border rounded-2xl aspect-[4/3] flex items-center justify-center max-w-full">
+            <div className="border border-border rounded-2xl aspect-[4/3] flex items-center justify-center max-w-full bg-background">
               <img
                 src={demoScreenshot}
                 alt="Word Wiz AI Demo"
-                className="w-full h-full object-cover rounded-2xl p-2 bg-background"
+                className="w-full h-full object-cover rounded-2xl p-2 bg-background m-2"
               />
             </div>
           </div>

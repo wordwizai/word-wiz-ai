@@ -1,16 +1,16 @@
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
-import Dashboard from "./pages/Dashboard.tsx";
-import Layout from "./components/Layout.tsx";
-import Login from "./pages/Login.tsx";
-import SignUp from "./pages/SignUp.tsx";
-import ProgressDashboard from "./pages/ProgressDashboard.tsx";
-import Settings from "./pages/Settings.tsx";
+import { BrowserRouter, Routes, Route /*Outlet*/ } from "react-router-dom";
+// import Dashboard from "./pages/Dashboard.tsx";
+// import Layout from "./components/Layout.tsx";
+// import Login from "./pages/Login.tsx";
+// import SignUp from "./pages/SignUp.tsx";
+// import ProgressDashboard from "./pages/ProgressDashboard.tsx";
+// import Settings from "./pages/Settings.tsx";
 import { AuthProvider } from "./contexts/AuthContext.tsx";
-import OAuthRedirect from "./components/OAuthRedirect.tsx";
+// import OAuthRedirect from "./components/OAuthRedirect.tsx";
 import { ThemeProvider } from "./contexts/ThemeContext.tsx";
 import { SettingsProvider } from "./contexts/SettingsContext.tsx";
-import PracticeRouter from "./pages/PracticeRouter.tsx";
-import PracticeDashboard from "./pages/PracticeDashboard.tsx";
+// import PracticeRouter from "./pages/PracticeRouter.tsx";
+// import PracticeDashboard from "./pages/PracticeDashboard.tsx";
 import LandingPage from "./pages/LandingPage.tsx";
 import UnderConstructionPage from "./pages/UnderConstructionPage.tsx";
 

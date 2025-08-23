@@ -79,7 +79,8 @@ const LandingPage = () => {
             </h1>
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-full sm:max-w-xl mx-auto md:mx-0">
               Word Wiz AI helps you become a better reader by analyzing your
-              mistakes and recommending engaging texts that sharpen your skills.
+              mistakes and generating customized passages that sharpen your
+              reading skills.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
               <Link to="/signup" className="w-full sm:w-auto">
@@ -142,8 +143,8 @@ const LandingPage = () => {
             {[
               {
                 icon: "📊",
-                title: "Spot Reading Patterns",
-                text: "Get instant feedback on where you pause, stumble, or misread.",
+                title: "Efficient reading practice",
+                text: "Get customized practice sentences based on specific struggle areas.",
               },
               {
                 icon: "✍️",
@@ -153,7 +154,7 @@ const LandingPage = () => {
               {
                 icon: "💰",
                 title: "Completely Free",
-                text: "No ads, no subscriptions. Our mission is to help kids across the country read better *without* cost",
+                text: "No ads, no subscriptions. Our mission is to help kids across the country read better for free",
               },
             ].map((feature, i) => (
               <motion.div
@@ -192,17 +193,17 @@ const LandingPage = () => {
               {
                 icon: "🧒",
                 title: "Young Readers",
-                text: "Boost reading confidence with personalized feedback.",
+                text: "Boost reading confidence with personalized practice and feedback.",
               },
               {
                 icon: "🧑‍🏫",
                 title: "Educators",
-                text: "Integrate AI reading feedback into your classroom reading programs.",
+                text: "Integrate AI powered reading practice into your classroom reading programs.",
               },
               {
                 icon: "🧑",
                 title: "Parents",
-                text: "Empower your kids with personalized reading feedback.",
+                text: "Empower your kids with personalized reading practice.",
               },
             ].map((target, i) => (
               <motion.div
@@ -249,16 +250,16 @@ const LandingPage = () => {
               {
                 step: "2",
                 title: "AI Analysis",
-                text: "We highlight misread words, pauses, and fluency metrics.",
+                text: "We highlight misread words and analyze what sounds and types of words you misread or stuggle on the most",
               },
               {
                 step: "3",
                 title: "Personal Feedback",
-                text: "You get guidance, scores, and recommended practice.",
+                text: "You get feedback, guidance, and customized practice sentences to target areas where you struggle. Vocalized through text to speech technology",
               },
             ].map((step, i) => (
-              <motion.div key={i} variants={childVariant}>
-                <Card className="p-6 rounded-2xl shadow-md bg-muted">
+              <motion.div key={i} variants={childVariant} className="h-full">
+                <Card className="p-6 rounded-2xl shadow-md bg-muted h-full">
                   <CardHeader>
                     <div className="bg-primary text-white w-12 h-12 flex items-center justify-center rounded-full mb-4">
                       {step.step}

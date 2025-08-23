@@ -18,6 +18,7 @@ import { Analytics } from "@vercel/analytics/next";
 function App() {
   return (
     <div className="font-body">
+      <Analytics />
       <BrowserRouter>
         <AuthProvider>
           <SettingsProvider>
@@ -49,7 +50,6 @@ function App() {
           </SettingsProvider>
         </AuthProvider>
       </BrowserRouter>
-      <Analytics />
     </div>
   );
 }

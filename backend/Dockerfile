@@ -19,7 +19,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
 
 # Install dependencies in a separate folder to copy later
-RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # -------------------------
 # Stage 2: Final stage
@@ -29,7 +29,7 @@ FROM python:3.12-slim
 WORKDIR /app
 
 # Copy installed Python packages from builder
-COPY --from=builder /install /usr/local
+COPY --from=builder /usr/local /usr/local
 
 # Copy project files (excluding large or sensitive files via .dockerignore)
 COPY . .

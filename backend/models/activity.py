@@ -6,11 +6,11 @@ from sqlalchemy.orm import relationship
 class Activity(Base):
     __tablename__ = "activities"
     id = Column(Integer, primary_key=True)
-    title = Column(String, nullable=False)
+    title = Column(String(225), nullable=False)
     description = Column(Text, nullable=False)
-    emoji_icon = Column(String, nullable=True, default="")  # e.g., "🎮"
+    emoji_icon = Column(String(10), nullable=True, default="")  # e.g., "🎮"
     activity_type = Column(
-        String, nullable=False
+        String(225), nullable=False
     )  # e.g., 'choice-story', 'unlimited', etc.
     activity_settings = Column(
         JSON, default={}

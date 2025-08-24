@@ -2,17 +2,24 @@ services:
   backend:
     build: .
     container_name: fastapi_backend
-    restart: always
     ports:
       - "8000:8000"
     env_file:
       - .env
     volumes:
       - ./credentials/service-account.json:/app/credentials/service-account.json
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0" # Max 1 CPU core
+          memory: 2g # Max 1 GB RAM
+        reservations:
+          cpus: "0.5" # Guaranteed 0.5 CPU
+          memory: 512m # Guaranteed 512 MB RAM
+
   nginx:
     image: nginx:alpine
     container_name: fastapi_nginx
-    restart: always
     ports:
       - "80:80"
     volumes:

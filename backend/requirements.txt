@@ -1,3 +1,4 @@
+torch
 fastapi
 uvicorn
 gunicorn
@@ -15,7 +16,6 @@ sounddevice
 numpy<2.0.0
 dotenv
 pandas
-torch
 librosa
 transformers>=4.30.0
 eng_to_ipa

@@ -1,24 +1,41 @@
-# Start from official lightweight Python image
-FROM python:3.12-slim
+# -------------------------
+# Stage 1: Build stage
+# -------------------------
+FROM python:3.12-slim AS builder
 
 # Set working directory
 WORKDIR /app
-# Install system dependencies for building Python packages
-RUN apt-get update && apt-get install -y \
+
+# Install system dependencies needed for building Python packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-
-# Install dependencies
+# Copy only requirements to leverage Docker cache
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project files
+# Install CPU-only PyTorch
+RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+
+# Install dependencies in a separate folder to copy later
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+# -------------------------
+# Stage 2: Final stage
+# -------------------------
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Copy installed Python packages from builder
+COPY --from=builder /install /usr/local
+
+# Copy project files (excluding large or sensitive files via .dockerignore)
 COPY . .
 
-# Expose FastAPI’s port
+# Expose FastAPI port
 EXPOSE 8000
 
-# Use Gunicorn with Uvicorn workers
-CMD ["gunicorn",  "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "main:app", "--bind", "0.0.0.0:8000"]
+# Run the app with Gunicorn and Uvicorn workers
+CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "main:app", "--bind", "0.0.0.0:8000"]

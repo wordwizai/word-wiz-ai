@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.log
+./ai/
+.env
+credentials/
+node_modules/
+.git
+*.tar

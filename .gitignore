@@ -30,3 +30,6 @@ venv/
 temp_audio/
 
 backend/credentials/
+
+# large files
+*.tar

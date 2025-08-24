@@ -31,3 +31,4 @@ itsdangerous
 pydub
 google-genai
 google-cloud-texttospeech
+typing_extensions

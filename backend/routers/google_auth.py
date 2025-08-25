@@ -7,7 +7,12 @@ import os
 
 from sqlalchemy.orm import Session
 
-from auth.auth_handler import ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token, create_user, get_user
+from auth.auth_handler import (
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    create_access_token,
+    create_user,
+    get_user,
+)
 from database import get_db
 from models import User
 
@@ -73,8 +78,8 @@ async def google_auth_callback(request: Request, db: Session = Depends(get_db)):
         data={"sub": db_user.email}, expires_delta=access_token_expires
     )
 
+    frontend_url = os.getenv("FRONTEND_URL")
+
     # Send the token back to the frontend (e.g., in a redirect or JSON)
-    response = RedirectResponse(
-        url=f"http://localhost:5173/oauth-callback?token={jwt_token}"
-    )
+    response = RedirectResponse(url=f"{frontend_url}/oauth-callback?token={jwt_token}")
     return response

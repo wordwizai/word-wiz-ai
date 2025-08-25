@@ -355,17 +355,27 @@ const LandingPage = () => {
             <p className="text-sm">Read smarter. Grow faster.</p>
           </div>
           <div className="flex flex-wrap justify-center md:justify-start gap-4 text-sm">
-            {["About", "Contact", "Privacy", "Terms", "For Educators"].map(
-              (link, index) => (
-                <button
-                  key={index}
-                  onClick={() => alert("This page is not available yet.")}
-                  className="hover:underline bg-transparent border-none cursor-pointer text-primary-foreground"
-                >
-                  {link}
-                </button>
-              ),
-            )}
+            {[
+              { name: "About", path: "/about" },
+              { name: "Contact", path: "#" },
+              { name: "Privacy", path: "#" },
+              { name: "Terms", path: "#" },
+              { name: "For Educators", path: "#" },
+            ].map((link, index) => (
+              <Link
+                key={index}
+                to={link.path}
+                className="hover:underline text-primary-foreground"
+                onClick={(e) => {
+                  if (link.path === "#") {
+                    e.preventDefault();
+                    alert("This page is not available yet.");
+                  }
+                }}
+              >
+                {link.name}
+              </Link>
+            ))}
           </div>
         </div>
       </footer>

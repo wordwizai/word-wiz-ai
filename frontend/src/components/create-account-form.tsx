@@ -36,7 +36,7 @@ export function CreateAccountForm({
     try {
       await register(username, email, password, fullName);
       await loginWithEmailAndPassword(username, password);
-      window.location.href = "/login";
+      window.location.href = "/dashboard";
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);

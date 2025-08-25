@@ -26,7 +26,8 @@ export function CreateAccountForm({
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  const { register } = useContext<AuthContextType>(AuthContext);
+  const { register, loginWithEmailAndPassword } =
+    useContext<AuthContextType>(AuthContext);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -34,7 +35,8 @@ export function CreateAccountForm({
     setError(null);
     try {
       await register(username, email, password, fullName);
-      window.location.href = "/dashboard";
+      await loginWithEmailAndPassword(username, password);
+      window.location.href = "/login";
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);

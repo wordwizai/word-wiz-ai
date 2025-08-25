@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button";
 import { demoScreenshot, wordWizIcon } from "@/assets";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import LandingPageNavbar from "@/components/LandingPageNavbar";
+import LandingPageFooter from "@/components/LandingPageFooter";
+import LandingPageCTA from "@/components/LandingPageCTA";
 
 const fadeUpVariant = {
   hidden: { opacity: 0, y: 30 },
@@ -33,35 +36,7 @@ const LandingPage = () => {
   return (
     <main className="scroll-smooth bg-background text-foreground">
       {/* Navbar */}
-      <nav className="w-full px-4 sm:px-6 py-4 sticky top-0 z-50 bg-background/70 backdrop-blur border-b border-border flex flex-row items-center justify-between gap-3 sm:gap-0">
-        <a className="flex items-center gap-2" href="/">
-          <img src={wordWizIcon} alt="Word Wiz Icon" className="h-8 w-8" />
-          <span className="text-lg sm:text-xl font-semibold">Word Wiz AI</span>
-        </a>
-        <div className="flex flex-row items-center gap-2 w-auto">
-          <Link to="/login" className="w-full sm:w-auto">
-            <Button
-              variant="ghost"
-              className="w-full min-h-[44px]"
-              as={motion.button}
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              Log In
-            </Button>
-          </Link>
-          <Link to="/signup" className="w-full sm:w-auto">
-            <Button
-              className="w-full min-h-[44px]"
-              as={motion.button}
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              Sign Up
-            </Button>
-          </Link>
-        </div>
-      </nav>
+      <LandingPageNavbar />
 
       {/* Hero Section */}
       <motion.section
@@ -320,65 +295,9 @@ const LandingPage = () => {
       </motion.section>*}
 
       {/* CTA button */}
-      <motion.section
-        className="px-6 py-20 bg-muted/50"
-        variants={fadeUpVariant}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.3 }}
-        transition={{ duration: 0.6 }}
-      >
-        <div className="max-w-4xl mx-auto text-center space-y-6">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold">
-            Start Reading Smarter Today
-          </h2>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            Get personalized feedback on your reading for free.
-          </p>
-          <Link
-            className="inline-block bg-primary text-primary-foreground py-3 px-8 rounded-lg font-semibold transition-all duration-300 hover:shadow-md w-full max-w-xs mx-auto md:mx-0"
-            to="/signup"
-            as={motion.a}
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            📖 Create a Word Wiz account
-          </Link>
-        </div>
-      </motion.section>
-
+      <LandingPageCTA fadeUpVariant={fadeUpVariant} />
       {/* Footer */}
-      <footer className="bg-primary text-primary-foreground py-8 px-6 mt-12">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0">
-          <div className="mb-4 md:mb-0 text-center md:text-left">
-            <h3 className="text-xl font-bold">Word Wiz AI</h3>
-            <p className="text-sm">Read smarter. Grow faster.</p>
-          </div>
-          <div className="flex flex-wrap justify-center md:justify-start gap-4 text-sm">
-            {[
-              { name: "About", path: "/about" },
-              { name: "Contact", path: "#" },
-              { name: "Privacy", path: "#" },
-              { name: "Terms", path: "#" },
-              { name: "For Educators", path: "#" },
-            ].map((link, index) => (
-              <Link
-                key={index}
-                to={link.path}
-                className="hover:underline text-primary-foreground"
-                onClick={(e) => {
-                  if (link.path === "#") {
-                    e.preventDefault();
-                    alert("This page is not available yet.");
-                  }
-                }}
-              >
-                {link.name}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </footer>
+      <LandingPageFooter />
     </main>
   );
 };

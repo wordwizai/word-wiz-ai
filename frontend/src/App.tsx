@@ -12,7 +12,6 @@ import { SettingsProvider } from "./contexts/SettingsContext.tsx";
 import PracticeRouter from "./pages/PracticeRouter.tsx";
 import PracticeDashboard from "./pages/PracticeDashboard.tsx";
 import LandingPage from "./pages/LandingPage.tsx";
-import About from "./pages/About.tsx";
 import UnderConstructionPage from "./pages/UnderConstructionPage.tsx";
 import { Analytics } from "@vercel/analytics/react";
 
@@ -26,7 +25,6 @@ function App() {
             <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
               <Routes>
                 <Route path="/" element={<LandingPage />} />
-                <Route path="/about" element={<About />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="/oauth-callback" element={<OAuthRedirect />} />

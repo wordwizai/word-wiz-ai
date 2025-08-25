@@ -15,7 +15,6 @@ origins = [
     "http://localhost:5173",
     "https://wordwizai.com",
     "https://www.wordwizai.com",
-    # Add more origins here
 ]
 
 app.add_middleware(

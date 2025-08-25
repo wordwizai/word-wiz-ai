@@ -14,6 +14,7 @@ import PracticeDashboard from "./pages/PracticeDashboard.tsx";
 import LandingPage from "./pages/LandingPage.tsx";
 import UnderConstructionPage from "./pages/UnderConstructionPage.tsx";
 import { Analytics } from "@vercel/analytics/react";
+import About from "./pages/About.tsx";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/about" element={<About />} />
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="/oauth-callback" element={<OAuthRedirect />} />
                 <Route

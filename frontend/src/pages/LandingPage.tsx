@@ -78,9 +78,9 @@ const LandingPage = () => {
               Your Personal Reading Companion
             </h1>
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-full sm:max-w-xl mx-auto md:mx-0">
-              Word Wiz AI helps you become a better reader by analyzing your
-              mistakes and generating customized passages that sharpen your
-              reading skills.
+              Word Wiz AI helps kids learn how to read by analyzing thier
+              mistakes and generating customized passages tailored to their
+              strengths and weaknesses.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
               <Link to="/signup" className="w-full sm:w-auto">

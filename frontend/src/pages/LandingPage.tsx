@@ -333,7 +333,7 @@ const LandingPage = () => {
             Start Reading Smarter Today
           </h2>
           <p className="text-muted-foreground max-w-md mx-auto">
-            Get personalized feedback and book recommendations in just minutes.
+            Get personalized feedback on your reading for free.
           </p>
           <Link
             className="inline-block bg-primary text-primary-foreground py-3 px-8 rounded-lg font-semibold transition-all duration-300 hover:shadow-md w-full max-w-xs mx-auto md:mx-0"

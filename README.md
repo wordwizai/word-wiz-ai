@@ -30,8 +30,9 @@ It combines **generated decodable practice sentences** with **phoneme-level audi
 - [X] Add **customizable difficulty for different reading levels**
 - [X] Make a **quality** frontend
 - [X] Implement three engaging modes
-- [ ] Polish
-- [ ] DEPLOY!!!
+- [X] Polish
+- [X] DEPLOY!!!
+- [ ] Improve
 
 ---
 

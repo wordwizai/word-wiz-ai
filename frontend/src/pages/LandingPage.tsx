@@ -6,12 +6,13 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { demoScreenshot, wordWizIcon } from "@/assets";
+import { demoScreenshot } from "@/assets";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import LandingPageFooter from "@/components/LandingPageFooter";
 import LandingPageCTA from "@/components/LandingPageCTA";
+import { BookOpen, Search, BarChart3, PenTool, DollarSign, Users, GraduationCap, User } from "lucide-react";
 
 const fadeUpVariant = {
   hidden: { opacity: 0, y: 30 },
@@ -61,24 +62,26 @@ const LandingPage = () => {
               <Link to="/signup" className="w-full sm:w-auto">
                 <Button
                   size="lg"
-                  className="w-full sm:w-auto min-h-[48px]"
+                  className="w-full sm:w-auto min-h-[48px] flex items-center gap-2"
                   as={motion.button}
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
-                  📖 Create an Account
+                  <BookOpen className="w-5 h-5" />
+                  Create an Account
                 </Button>
               </Link>
               <a href="#how-it-works-section" className="w-full sm:w-auto">
                 <Button
                   variant="outline"
                   size="lg"
-                  className="w-full sm:w-auto min-h-[48px]"
+                  className="w-full sm:w-auto min-h-[48px] flex items-center gap-2"
                   as={motion.button}
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
-                  🔍 How It Works
+                  <Search className="w-5 h-5" />
+                  How It Works
                 </Button>
               </a>
             </div>
@@ -117,17 +120,17 @@ const LandingPage = () => {
           >
             {[
               {
-                icon: "📊",
+                icon: <BarChart3 className="w-8 h-8 text-blue-600" />,
                 title: "Efficient reading practice",
                 text: "Get customized practice sentences based on specific struggle areas.",
               },
               {
-                icon: "✍️",
+                icon: <PenTool className="w-8 h-8 text-green-600" />,
                 title: "Improve Pronunciation",
                 text: "Receive tailored pronunciation tips to enhance fluency.",
               },
               {
-                icon: "💰",
+                icon: <DollarSign className="w-8 h-8 text-purple-600" />,
                 title: "Completely Free",
                 text: "No ads, no subscriptions. Our mission is to help kids across the country read better for free",
               },
@@ -137,7 +140,7 @@ const LandingPage = () => {
                 className="bg-card p-6 rounded-2xl shadow-md text-left"
                 variants={childVariant}
               >
-                <div className="text-3xl mb-4">{feature.icon}</div>
+                <div className="mb-4">{feature.icon}</div>
                 <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
                 <p className="text-muted-foreground">{feature.text}</p>
               </motion.div>
@@ -166,17 +169,17 @@ const LandingPage = () => {
           >
             {[
               {
-                icon: "🧒",
+                icon: <Users className="w-8 h-8 text-orange-600" />,
                 title: "Young Readers",
                 text: "Boost reading confidence with personalized practice and feedback.",
               },
               {
-                icon: "🧑‍🏫",
+                icon: <GraduationCap className="w-8 h-8 text-blue-600" />,
                 title: "Educators",
                 text: "Integrate AI powered reading practice into your classroom reading programs.",
               },
               {
-                icon: "🧑",
+                icon: <User className="w-8 h-8 text-green-600" />,
                 title: "Parents",
                 text: "Empower your kids with personalized reading practice.",
               },
@@ -186,7 +189,7 @@ const LandingPage = () => {
                 className="bg-muted p-6 rounded-2xl shadow-md"
                 variants={childVariant}
               >
-                <div className="text-3xl mb-4">{target.icon}</div>
+                <div className="mb-4">{target.icon}</div>
                 <h3 className="text-xl font-semibold mb-2">{target.title}</h3>
                 <p className="text-muted-foreground">{target.text}</p>
               </motion.div>

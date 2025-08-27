@@ -8,6 +8,7 @@ import pandas as pd
 import soundfile as sf
 import torch
 from core.grapheme_to_phoneme import grapheme_to_phoneme
+from core.optimization_config import config
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -18,8 +19,8 @@ from .word_extractor import WordExtractor, WordExtractorOnline
 
 
 class PhonemeAssistant:
-    def __init__(self):
-        # Load the API keys
+    def __init__(self, use_optimized_model: bool = None):
+        # Load the API keys and environment variables
         load_dotenv()
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -31,10 +32,35 @@ class PhonemeAssistant:
             self.device = torch.device("cpu")
             print("Using CPU for processing.")
 
-        # load the models
-        self.phoneme_extractor = PhonemeExtractor()
+        # Determine optimization settings from environment or parameter
+        if use_optimized_model is None:
+            use_optimized_model = config.get('use_optimized_model', True)
+
+        # Load optimized models for better performance
+        if use_optimized_model:
+            print("Initializing optimized PhonemeExtractor...")
+            if config.get('enable_performance_logging', False):
+                print(config.summary())
+            self.phoneme_extractor = PhonemeExtractor()
+        else:
+            print("Using standard PhonemeExtractor...")
+            self.phoneme_extractor = PhonemeExtractor(
+                use_quantization=False,
+                use_fast_model=False
+            )
+            
         self.word_extractor = WordExtractorOnline()
         self.tts = GoogleTTSAPIClient()
+    
+    def get_performance_info(self) -> dict:
+        """Get performance information about the current configuration."""
+        model_info = self.phoneme_extractor.get_model_info()
+        return {
+            'device': str(self.device),
+            'cuda_available': torch.cuda.is_available(),
+            'model_info': model_info,
+            'config_summary': config.summary()
+        }
 
         # load in our prompt
 

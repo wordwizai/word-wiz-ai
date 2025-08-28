@@ -12,7 +12,19 @@ import { motion } from "framer-motion";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import LandingPageFooter from "@/components/LandingPageFooter";
 import LandingPageCTA from "@/components/LandingPageCTA";
-import { BookOpen, Search, BarChart3, PenTool, DollarSign, Users, GraduationCap, User } from "lucide-react";
+import {
+  BookOpen,
+  Search,
+  BarChart3,
+  PenTool,
+  DollarSign,
+  Users,
+  GraduationCap,
+  User,
+  Speech,
+  WholeWord,
+  CircleDollarSign,
+} from "lucide-react";
 
 const fadeUpVariant = {
   hidden: { opacity: 0, y: 30 },
@@ -125,22 +137,22 @@ const LandingPage = () => {
                 text: "Get customized practice sentences based on specific struggle areas.",
               },
               {
-                icon: <PenTool className="w-8 h-8 text-green-600" />,
+                icon: <WholeWord className="w-8 h-8 text-rose-400" />,
                 title: "Improve Pronunciation",
                 text: "Receive tailored pronunciation tips to enhance fluency.",
               },
               {
-                icon: <DollarSign className="w-8 h-8 text-purple-600" />,
+                icon: <CircleDollarSign className="w-8 h-8 text-green-600" />,
                 title: "Completely Free",
                 text: "No ads, no subscriptions. Our mission is to help kids across the country read better for free",
               },
             ].map((feature, i) => (
               <motion.div
                 key={i}
-                className="bg-card p-6 rounded-2xl shadow-md text-left"
+                className="bg-card p-6 rounded-2xl shadow-md text-center"
                 variants={childVariant}
               >
-                <div className="mb-4">{feature.icon}</div>
+                <div className="mb-4 flex justify-center">{feature.icon}</div>
                 <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
                 <p className="text-muted-foreground">{feature.text}</p>
               </motion.div>
@@ -189,7 +201,7 @@ const LandingPage = () => {
                 className="bg-muted p-6 rounded-2xl shadow-md"
                 variants={childVariant}
               >
-                <div className="mb-4">{target.icon}</div>
+                <div className="mb-4 flex justify-center">{target.icon}</div>
                 <h3 className="text-xl font-semibold mb-2">{target.title}</h3>
                 <p className="text-muted-foreground">{target.text}</p>
               </motion.div>

@@ -166,7 +166,7 @@ const Dashboard = () => {
                             <DynamicIcon 
                               name={session.activity.emoji_icon} 
                               className="w-5 h-5 text-gray-700" 
-                              fallback="star"
+                              fallback="Star"
                             />
                             {session.activity.title}
                           </div>

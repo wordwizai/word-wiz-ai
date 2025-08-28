@@ -57,7 +57,7 @@ const ActivityCard = ({ activity, onActivityClick }: ActivityCardProps) => {
             <DynamicIcon 
               name={activity.emoji_icon} 
               className="text-6xl w-16 h-16 text-gray-700" 
-              fallback="star"
+              fallback="Star"
             />
           </div>
 

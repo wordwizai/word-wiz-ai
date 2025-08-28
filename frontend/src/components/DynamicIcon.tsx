@@ -6,8 +6,7 @@ type LucideIconComponent = React.ComponentType<React.SVGProps<SVGSVGElement>>;
 
 export interface DynamicIconProps {
   /**
-   * The name of the lucide icon to display
-   * Can be kebab-case (e.g., "book-open") or PascalCase (e.g., "BookOpen")
+   * The name of the lucide icon to display (PascalCase, e.g., "BookOpen")
    */
   name: string;
   /**
@@ -30,20 +29,20 @@ export interface DynamicIconProps {
 
 /**
  * DynamicIcon component that renders lucide icons based on string names
- * Supports all lucide icons with automatic name conversion from kebab-case to PascalCase
+ * Uses the exact case that lucide exports (PascalCase)
  * 
  * @example
- * <DynamicIcon name="play" size="24" className="text-blue-500" />
+ * <DynamicIcon name="Play" size="24" className="text-blue-500" />
  * <DynamicIcon name="BookOpen" size="6xl" />
- * <DynamicIcon name="book-open" size="6xl" />
- * <DynamicIcon name="invalid-icon" fallback="circle" />
+ * <DynamicIcon name="Star" size="6xl" />
+ * <DynamicIcon name="InvalidIcon" fallback="Circle" />
  */
 export const DynamicIcon: React.FC<DynamicIconProps> = ({
   name,
   size = 24,
   className = '',
   color,
-  fallback = 'circle'
+  fallback = 'Circle'
 }) => {
   // Get the icon component
   let IconComponent = getIconComponent(name);

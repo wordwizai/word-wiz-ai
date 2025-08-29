@@ -9,6 +9,7 @@ import {
   Twitter,
   Mail,
   Instagram,
+  DollarSign,
 } from "lucide-react";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import LandingPageFooter from "@/components/LandingPageFooter";
@@ -108,7 +109,7 @@ const About = () => {
                 text: "Every child learns differently. Our AI adapts to individual reading levels and learning styles to provide targeted support.",
               },
               {
-                icon: <Heart className="w-6 h-6 text-red-500" />,
+                icon: <DollarSign className="w-6 h-6 text-red-500" />,
                 iconBg: "from-red-200 to-pink-200",
                 title: "Completely Free",
                 text: "Reading support shouldn't be a privilege. We're committed to providing our platform free of charge to all students and educators.",

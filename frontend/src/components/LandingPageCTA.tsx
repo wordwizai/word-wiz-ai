@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { BookOpen } from "lucide-react";
 
 interface LandingPageCTAProps {
   fadeUpVariant: {
@@ -26,13 +27,14 @@ const LandingPageCTA = ({ fadeUpVariant }: LandingPageCTAProps) => {
           Get personalized feedback on your reading for free.
         </p>
         <Link
-          className="inline-block bg-primary text-primary-foreground py-3 px-8 rounded-lg font-semibold transition-all duration-300 hover:shadow-md w-full max-w-xs mx-auto md:mx-0"
+          className="inline-flex items-center gap-2 bg-primary text-primary-foreground py-3 px-8 rounded-lg font-semibold transition-all duration-300 hover:shadow-md w-full max-w-xs mx-auto md:mx-0 justify-center"
           to="/signup"
           as={motion.a}
           whileHover={{ scale: 1.05 }}
           transition={{ type: "spring", stiffness: 300 }}
         >
-          📖 Create a Word Wiz account
+          <BookOpen className="w-5 h-5" />
+          Create a Word Wiz account
         </Link>
       </div>
     </motion.section>

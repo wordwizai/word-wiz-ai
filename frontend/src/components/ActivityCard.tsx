@@ -1,9 +1,9 @@
-import { Play, Star } from "lucide-react";
+import { Play } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
-import { useTheme } from "@/contexts/ThemeContext";
 import { Badge } from "./ui/badge";
+import DynamicIcon from "./DynamicIcon";
 
 interface ActivityCardProps {
   activity: {
@@ -32,7 +32,6 @@ const activityColors = [
 const ActivityCard = ({ activity, onActivityClick }: ActivityCardProps) => {
   const colorIndex = Math.abs(activity.id) % activityColors.length;
   const cardColor = activityColors[colorIndex];
-  const { theme } = useTheme();
 
   return (
     <motion.div
@@ -55,6 +54,11 @@ const ActivityCard = ({ activity, onActivityClick }: ActivityCardProps) => {
       >
         <CardHeader className="flex flex-col items-start gap-4 px-6 pt-6">
           <div className="relative">
+            {/*<DynamicIcon 
+              name={activity.emoji_icon} 
+              className="text-6xl w-16 h-16 text-gray-700" 
+              fallback="Star"
+            />*/}
             <div className="text-6xl relative z-10">{activity.emoji_icon}</div>
           </div>
 

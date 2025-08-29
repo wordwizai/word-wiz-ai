@@ -13,10 +13,8 @@ import PracticeRouter from "./pages/PracticeRouter.tsx";
 import PracticeDashboard from "./pages/PracticeDashboard.tsx";
 import LandingPage from "./pages/LandingPage.tsx";
 import UnderConstructionPage from "./pages/UnderConstructionPage.tsx";
-import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import { Analytics } from "@vercel/analytics/react";
 import About from "./pages/About.tsx";
-import Contact from "./pages/Contact.tsx";
 
 function App() {
   return (
@@ -30,24 +28,17 @@ function App() {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/about" element={<About />} />
-                <Route path="/contact" element={<Contact />} />
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="/oauth-callback" element={<OAuthRedirect />} />
                 <Route
                   path="/practice/:sessionId"
-                  element={
-                    <ProtectedRoute>
-                      <PracticeRouter />
-                    </ProtectedRoute>
-                  }
+                  element={<PracticeRouter />}
                 />
                 <Route
                   element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Outlet />
-                      </Layout>
-                    </ProtectedRoute>
+                    <Layout>
+                      <Outlet />
+                    </Layout>
                   }
                 >
                   <Route path="/dashboard" element={<Dashboard />} />

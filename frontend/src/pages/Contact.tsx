@@ -47,22 +47,25 @@ const Contact = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
-    
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setSubmitted(true);
-    setLoading(false);
-    
-    // Reset form after 3 seconds
-    setTimeout(() => {
-      setSubmitted(false);
-      setName("");
-      setEmail("");
-      setSubject("");
-      setMessage("");
-    }, 3000);
+    alert(
+      "This system is not yet implemented. Please feel free to reach out to us via email. We look forward to hearing form you!",
+    );
+    // setLoading(true);
+    //
+    // // Simulate form submission
+    // await new Promise((resolve) => setTimeout(resolve, 1000));
+    //
+    // setSubmitted(true);
+    // setLoading(false);
+    //
+    // // Reset form after 3 seconds
+    // setTimeout(() => {
+    //   setSubmitted(false);
+    //   setName("");
+    //   setEmail("");
+    //   setSubject("");
+    //   setMessage("");
+    // }, 3000);
   };
 
   return (
@@ -86,7 +89,7 @@ const Contact = () => {
           >
             <MessageCircle className="w-14 h-14 text-white" />
           </motion.div>
-          <motion.h1 
+          <motion.h1
             className="text-4xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -94,14 +97,14 @@ const Contact = () => {
           >
             Contact Us
           </motion.h1>
-          <motion.p 
+          <motion.p
             className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.8 }}
           >
-            Have questions or feedback? We'd love to hear from you! 
-            Reach out to our team and we'll get back to you as soon as possible.
+            Have questions or feedback? We'd love to hear from you! Reach out to
+            our team and we'll get back to you as soon as possible.
           </motion.p>
         </div>
       </motion.section>
@@ -141,7 +144,9 @@ const Contact = () => {
                       <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
                         <Heart className="w-8 h-8 text-green-600" />
                       </div>
-                      <h3 className="text-xl font-semibold text-green-700">Message Sent!</h3>
+                      <h3 className="text-xl font-semibold text-green-700">
+                        Message Sent!
+                      </h3>
                       <p className="text-muted-foreground">
                         Thank you for reaching out. We'll get back to you soon!
                       </p>
@@ -221,9 +226,9 @@ const Contact = () => {
               <div>
                 <h2 className="text-3xl font-bold mb-6">Get in Touch</h2>
                 <p className="text-muted-foreground text-lg leading-relaxed">
-                  Whether you're a teacher looking for reading support tools, 
-                  a parent wanting to help your child, or a fellow educator 
-                  with ideas, we're here to listen and help.
+                  Whether you're a teacher looking for reading support tools, a
+                  parent wanting to help your child, or a fellow educator with
+                  ideas, we're here to listen and help.
                 </p>
               </div>
 
@@ -232,34 +237,24 @@ const Contact = () => {
                   {
                     icon: <Mail className="w-6 h-6" />,
                     title: "Email",
-                    content: "contact@wordwizai.com",
-                    action: "mailto:contact@wordwizai.com",
+                    content: "wordwizai.com@gmail.com",
+                    action: "mailto:wordwizai.com@gmail.com",
                     color: "from-blue-400 to-cyan-600",
-                  },
-                  {
-                    icon: <MessageCircle className="w-6 h-6" />,
-                    title: "Support",
-                    content: "General inquiries and support",
-                    action: "mailto:support@wordwizai.com",
-                    color: "from-green-400 to-blue-500",
-                  },
-                  {
-                    icon: <MapPin className="w-6 h-6" />,
-                    title: "Location",
-                    content: "Making reading accessible worldwide",
-                    action: null,
-                    color: "from-purple-400 to-pink-500",
                   },
                 ].map((item, i) => (
                   <motion.div key={i} variants={childVariant}>
                     <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
-                          <div className={`p-3 bg-gradient-to-br ${item.color} rounded-xl text-white shadow-lg`}>
+                          <div
+                            className={`p-3 bg-gradient-to-br ${item.color} rounded-xl text-white shadow-lg`}
+                          >
                             {item.icon}
                           </div>
                           <div className="flex-1">
-                            <h3 className="font-semibold text-lg">{item.title}</h3>
+                            <h3 className="font-semibold text-lg">
+                              {item.title}
+                            </h3>
                             {item.action ? (
                               <a
                                 href={item.action}
@@ -268,7 +263,9 @@ const Contact = () => {
                                 {item.content}
                               </a>
                             ) : (
-                              <p className="text-muted-foreground">{item.content}</p>
+                              <p className="text-muted-foreground">
+                                {item.content}
+                              </p>
                             )}
                           </div>
                         </div>
@@ -293,15 +290,17 @@ const Contact = () => {
       >
         <div className="max-w-4xl mx-auto text-center space-y-10">
           <div className="space-y-4">
-            <h2 className="text-3xl md:text-4xl font-bold">Follow Our Journey</h2>
+            <h2 className="text-3xl md:text-4xl font-bold">
+              Follow Our Journey
+            </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Stay connected with Word Wiz AI on social media for updates, 
+              Stay connected with Word Wiz AI on social media for updates,
               educational tips, and community highlights.
             </p>
           </div>
 
           <motion.div
-            className="grid grid-cols-2 md:grid-cols-4 gap-6"
+            className="grid grid-cols-2 gap-6 max-w-2xl mx-auto"
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
@@ -322,20 +321,6 @@ const Contact = () => {
                 color: "from-gray-600 to-gray-800",
                 description: "Open source contributions",
               },
-              {
-                icon: <Twitter className="w-8 h-8" />,
-                label: "Twitter",
-                href: "https://twitter.com/wordwizai",
-                color: "from-sky-400 to-blue-600",
-                description: "Latest news & updates",
-              },
-              {
-                icon: <Mail className="w-8 h-8" />,
-                label: "Newsletter",
-                href: "mailto:newsletter@wordwizai.com",
-                color: "from-emerald-400 to-teal-600",
-                description: "Monthly educational insights",
-              },
             ].map((social, i) => (
               <motion.div key={i} variants={childVariant}>
                 <a
@@ -355,8 +340,12 @@ const Contact = () => {
                         {social.icon}
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold mb-1">{social.label}</h3>
-                        <p className="text-xs opacity-90">{social.description}</p>
+                        <h3 className="text-lg font-bold mb-1">
+                          {social.label}
+                        </h3>
+                        <p className="text-xs opacity-90">
+                          {social.description}
+                        </p>
                       </div>
                     </div>
                   </motion.div>
@@ -377,3 +366,4 @@ const Contact = () => {
 };
 
 export default Contact;
+

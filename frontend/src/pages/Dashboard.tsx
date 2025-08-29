@@ -90,11 +90,9 @@ const Dashboard = () => {
             Hi, {userName}!
           </h1>
           <div className="flex items-center justify-center gap-3 mt-3">
-            <Sparkles className="w-5 h-5 text-purple-500" />
             <p className="text-sm sm:text-base md:text-lg text-muted-foreground font-medium text-center px-2">
               {motivational}
             </p>
-            <Sparkles className="w-5 h-5 text-purple-500" />
           </div>
         </div>
       </div>
@@ -163,9 +161,9 @@ const Dashboard = () => {
                         <CardContent className="relative">
                           <div className="absolute top-2 right-2 w-2 h-2 bg-white/60 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                           <div className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                            <DynamicIcon 
-                              name={session.activity.emoji_icon} 
-                              className="w-5 h-5 text-gray-700" 
+                            <DynamicIcon
+                              name={session.activity.emoji_icon}
+                              className="w-5 h-5 text-gray-700"
                               fallback="Star"
                             />
                             {session.activity.title}

@@ -3,12 +3,12 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import ActivitiesList from "@/components/ActivitiesList";
 import SentencePersChart from "@/components/SentencePersChart";
-import { Clock, Play, TrendingUp } from "lucide-react";
+import { Clock, Sparkles } from "lucide-react";
 import { getSessions } from "@/api";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNavigate } from "react-router-dom";
-import { wordWizIcon } from "@/assets";
 import { Button } from "@/components/ui/button";
+import DynamicIcon from "@/components/DynamicIcon";
 
 interface Session {
   id: string;
@@ -39,16 +39,16 @@ const Dashboard = () => {
 
   const userName = user?.full_name || "Guest";
   const motivationalQuotes = [
-    "🎉 Keep turning the page—every chapter brings you closer to your goals!",
-    "✨ Every word you read is a step forward. Keep going!",
-    "🚀 Reading today, leading tomorrow. Stay inspired!",
-    "🧠 Feed your mind—read something new every day!",
-    "💡 Each book is a new adventure. Dive in!",
-    "🎯 Consistency in reading leads to mastery. You've got this!",
-    "🌱 Grow your knowledge, one page at a time.",
-    "🔥 Ignite your passion for learning—read on!",
-    "🏆 Every page read is a victory. Celebrate your progress!",
-    "⭐ The more you read, the more you succeed. Keep it up!",
+    "Keep turning the page—every chapter brings you closer to your goals!",
+    "Every word you read is a step forward. Keep going!",
+    "Reading today, leading tomorrow. Stay inspired!",
+    "Feed your mind—read something new every day!",
+    "Each book is a new adventure. Dive in!",
+    "Consistency in reading leads to mastery. You've got this!",
+    "Grow your knowledge, one page at a time.",
+    "Ignite your passion for learning—read on!",
+    "Every page read is a victory. Celebrate your progress!",
+    "The more you read, the more you succeed. Keep it up!",
   ];
   const today = new Date();
   const quoteIndex = today.getDate() % motivationalQuotes.length;
@@ -90,9 +90,11 @@ const Dashboard = () => {
             Hi, {userName}!
           </h1>
           <div className="flex items-center justify-center gap-3 mt-3">
+            <Sparkles className="w-5 h-5 text-purple-500" />
             <p className="text-sm sm:text-base md:text-lg text-muted-foreground font-medium text-center px-2">
               {motivational}
             </p>
+            <Sparkles className="w-5 h-5 text-purple-500" />
           </div>
         </div>
       </div>
@@ -160,8 +162,12 @@ const Dashboard = () => {
                       >
                         <CardContent className="relative">
                           <div className="absolute top-2 right-2 w-2 h-2 bg-white/60 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                          <div className="text-lg font-bold text-gray-800">
-                            {session.activity.emoji_icon}{" "}
+                          <div className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                            <DynamicIcon 
+                              name={session.activity.emoji_icon} 
+                              className="w-5 h-5 text-gray-700" 
+                              fallback="Star"
+                            />
                             {session.activity.title}
                           </div>
                           <div className="text-sm text-gray-600 mt-1">

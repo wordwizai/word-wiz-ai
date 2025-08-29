@@ -54,11 +54,12 @@ const ActivityCard = ({ activity, onActivityClick }: ActivityCardProps) => {
       >
         <CardHeader className="flex flex-col items-start gap-4 px-6 pt-6">
           <div className="relative">
-            <DynamicIcon 
+            {/*<DynamicIcon 
               name={activity.emoji_icon} 
               className="text-6xl w-16 h-16 text-gray-700" 
               fallback="Star"
-            />
+            />*/}
+            <div className="text-6xl relative z-10">{activity.emoji_icon}</div>
           </div>
 
           <div className="space-y-2">

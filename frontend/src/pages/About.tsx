@@ -55,7 +55,7 @@ const About = () => {
           >
             <img src={wordWizIcon} alt="Word Wiz AI" className="w-14 h-14" />
           </motion.div>
-          <motion.h1 
+          <motion.h1
             className="text-4xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -63,7 +63,7 @@ const About = () => {
           >
             About Word Wiz AI
           </motion.h1>
-          <motion.p 
+          <motion.p
             className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -143,7 +143,7 @@ const About = () => {
       </motion.section>
 
       {/* Team Section */}
-      <motion.section
+      {/*}<motion.section
         className="px-6 py-20 bg-background"
         variants={fadeUpVariant}
         initial="hidden"
@@ -219,7 +219,7 @@ const About = () => {
             ))}
           </motion.div>
         </div>
-      </motion.section>
+      </motion.section>*/}
 
       {/* Connect With Us Section */}
       <motion.section
@@ -230,7 +230,7 @@ const About = () => {
         viewport={{ once: true, amount: 0.3 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="max-w-4xl mx-auto text-center space-y-10">
+        <div className="max-w-3xl mx-auto text-center space-y-10">
           <div className="space-y-4">
             <h2 className="text-3xl md:text-4xl font-bold">Connect With Us</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -240,7 +240,7 @@ const About = () => {
           </div>
 
           <motion.div
-            className="grid grid-cols-2 md:grid-cols-4 gap-4"
+            className="grid grid-cols-3 gap-4"
             id="contact"
             variants={staggerContainer}
             initial="hidden"
@@ -263,14 +263,8 @@ const About = () => {
               {
                 icon: <Mail className="w-6 h-6" />,
                 label: "Email",
-                href: "mailto:contact@wordwizai.com",
+                href: "mailto:wordwizai.com@gmail.com",
                 color: "from-blue-400 to-cyan-600",
-              },
-              {
-                icon: <Twitter className="w-6 h-6" />,
-                label: "Twitter",
-                href: "https://twitter.com/wordwizai",
-                color: "from-sky-400 to-blue-600",
               },
             ].map((social, i) => (
               <motion.div key={i} variants={childVariant}>

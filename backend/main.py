@@ -3,7 +3,7 @@ from database import Base, engine
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
-from routers import ai, auth, google_auth, session, user, activities, feedback
+from routers import ai, auth, google_auth, session, user, activities, feedback, health
 from starlette.middleware.sessions import SessionMiddleware
 
 app = FastAPI(debug=True)
@@ -35,6 +35,7 @@ app.include_router(google_auth.router, prefix="/auth/google")
 app.include_router(session.router, prefix="/session")
 app.include_router(activities.router, prefix="/activities")
 app.include_router(feedback.router, prefix="/feedback")
+app.include_router(health.router)  # Health check endpoints
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

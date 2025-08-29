@@ -33,3 +33,4 @@ google-genai
 google-cloud-texttospeech
 google-cloud-speech
 typing_extensions
+psutil

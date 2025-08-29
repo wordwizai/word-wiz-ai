@@ -11,7 +11,7 @@ const LandingPageFooter = () => {
         <div className="flex flex-wrap justify-center md:justify-start gap-4 text-sm">
           {[
             { name: "About", path: "/about" },
-            { name: "Contact", path: "/about#contact" },
+            { name: "Contact", path: "/contact" },
             { name: "Privacy", path: "#" },
             { name: "Terms", path: "#" },
             { name: "For Educators", path: "#" },

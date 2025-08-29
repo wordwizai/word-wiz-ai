@@ -13,7 +13,6 @@ import PracticeRouter from "./pages/PracticeRouter.tsx";
 import PracticeDashboard from "./pages/PracticeDashboard.tsx";
 import LandingPage from "./pages/LandingPage.tsx";
 import UnderConstructionPage from "./pages/UnderConstructionPage.tsx";
-import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import { Analytics } from "@vercel/analytics/react";
 import About from "./pages/About.tsx";
 
@@ -33,19 +32,13 @@ function App() {
                 <Route path="/oauth-callback" element={<OAuthRedirect />} />
                 <Route
                   path="/practice/:sessionId"
-                  element={
-                    <ProtectedRoute>
-                      <PracticeRouter />
-                    </ProtectedRoute>
-                  }
+                  element={<PracticeRouter />}
                 />
                 <Route
                   element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Outlet />
-                      </Layout>
-                    </ProtectedRoute>
+                    <Layout>
+                      <Outlet />
+                    </Layout>
                   }
                 >
                   <Route path="/dashboard" element={<Dashboard />} />

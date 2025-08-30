@@ -6,12 +6,25 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { demoScreenshot, wordWizIcon } from "@/assets";
+import { demoScreenshot } from "@/assets";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import LandingPageFooter from "@/components/LandingPageFooter";
 import LandingPageCTA from "@/components/LandingPageCTA";
+import {
+  BookOpen,
+  Search,
+  BarChart3,
+  PenTool,
+  DollarSign,
+  Users,
+  GraduationCap,
+  User,
+  Speech,
+  WholeWord,
+  CircleDollarSign,
+} from "lucide-react";
 
 const fadeUpVariant = {
   hidden: { opacity: 0, y: 30 },
@@ -61,24 +74,26 @@ const LandingPage = () => {
               <Link to="/signup" className="w-full sm:w-auto">
                 <Button
                   size="lg"
-                  className="w-full sm:w-auto min-h-[48px]"
+                  className="w-full sm:w-auto min-h-[48px] flex items-center gap-2"
                   as={motion.button}
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
-                  📖 Create an Account
+                  <BookOpen className="w-5 h-5" />
+                  Create an Account
                 </Button>
               </Link>
               <a href="#how-it-works-section" className="w-full sm:w-auto">
                 <Button
                   variant="outline"
                   size="lg"
-                  className="w-full sm:w-auto min-h-[48px]"
+                  className="w-full sm:w-auto min-h-[48px] flex items-center gap-2"
                   as={motion.button}
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
-                  🔍 How It Works
+                  <Search className="w-5 h-5" />
+                  How It Works
                 </Button>
               </a>
             </div>
@@ -97,7 +112,7 @@ const LandingPage = () => {
 
       {/* What Makes Word Wiz Unique */}
       <motion.section
-        className="px-6 py-20 bg-background"
+        className="px-6 py-20 bg-gradient-to-br from-background to-purple-50/50"
         variants={fadeUpVariant}
         initial="hidden"
         whileInView="visible"
@@ -110,34 +125,40 @@ const LandingPage = () => {
           </h2>
           <motion.div
             className="grid grid-cols-1 md:grid-cols-3 gap-6"
-            variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.3 }}
           >
             {[
               {
-                icon: "📊",
+                icon: <BarChart3 className="w-6 h-6 text-blue-600" />,
+                iconBg: "from-blue-200 to-purple-200",
                 title: "Efficient reading practice",
                 text: "Get customized practice sentences based on specific struggle areas.",
               },
               {
-                icon: "✍️",
+                icon: <WholeWord className="w-6 h-6 text-rose-500" />,
+                iconBg: "from-rose-200 to-pink-200",
                 title: "Improve Pronunciation",
                 text: "Receive tailored pronunciation tips to enhance fluency.",
               },
               {
-                icon: "💰",
+                icon: <CircleDollarSign className="w-6 h-6 text-green-600" />,
+                iconBg: "from-green-200 to-blue-200",
                 title: "Completely Free",
                 text: "No ads, no subscriptions. Our mission is to help kids across the country read better for free",
               },
             ].map((feature, i) => (
               <motion.div
                 key={i}
-                className="bg-card p-6 rounded-2xl shadow-md text-left"
+                className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl text-center h-full hover:shadow-2xl hover:-translate-y-2 hover:scale-105 transition-all duration-300 rounded-3xl p-6"
                 variants={childVariant}
               >
-                <div className="text-3xl mb-4">{feature.icon}</div>
+                <div
+                  className={`w-12 h-12 bg-gradient-to-r ${feature.iconBg} rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg`}
+                >
+                  {feature.icon}
+                </div>
                 <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
                 <p className="text-muted-foreground">{feature.text}</p>
               </motion.div>
@@ -148,7 +169,7 @@ const LandingPage = () => {
 
       {/* Who It's For Section */}
       <motion.section
-        className="px-6 py-20 bg-background border-t border-border"
+        className="px-6 py-20 bg-muted/50"
         variants={fadeUpVariant}
         initial="hidden"
         whileInView="visible"
@@ -166,27 +187,34 @@ const LandingPage = () => {
           >
             {[
               {
-                icon: "🧒",
+                icon: <Users className="w-6 h-6 text-orange-600" />,
+                iconBg: "from-orange-200 to-yellow-200",
                 title: "Young Readers",
                 text: "Boost reading confidence with personalized practice and feedback.",
               },
               {
-                icon: "🧑‍🏫",
+                icon: <GraduationCap className="w-6 h-6 text-blue-600" />,
+                iconBg: "from-blue-200 to-cyan-200",
                 title: "Educators",
                 text: "Integrate AI powered reading practice into your classroom reading programs.",
               },
               {
-                icon: "🧑",
+                icon: <User className="w-6 h-6 text-green-600" />,
+                iconBg: "from-green-200 to-emerald-200",
                 title: "Parents",
                 text: "Empower your kids with personalized reading practice.",
               },
             ].map((target, i) => (
               <motion.div
                 key={i}
-                className="bg-muted p-6 rounded-2xl shadow-md"
+                className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl text-center h-full hover:shadow-2xl hover:-translate-y-2 hover:scale-105 transition-all duration-300 rounded-3xl p-6"
                 variants={childVariant}
               >
-                <div className="text-3xl mb-4">{target.icon}</div>
+                <div
+                  className={`w-12 h-12 bg-gradient-to-r ${target.iconBg} rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg`}
+                >
+                  {target.icon}
+                </div>
                 <h3 className="text-xl font-semibold mb-2">{target.title}</h3>
                 <p className="text-muted-foreground">{target.text}</p>
               </motion.div>
@@ -198,7 +226,7 @@ const LandingPage = () => {
       {/* How It Works */}
       <motion.section
         id="how-it-works-section"
-        className="px-6 py-20 bg-background border-t border-border"
+        className="px-6 py-20 bg-gradient-to-br from-background to-purple-50/50"
         variants={fadeUpVariant}
         initial="hidden"
         whileInView="visible"
@@ -221,26 +249,35 @@ const LandingPage = () => {
                 step: "1",
                 title: "Read Aloud",
                 text: "Practice reading passages aloud and let Word Wiz listen.",
+                gradient: "from-blue-400 to-purple-500",
               },
               {
                 step: "2",
                 title: "AI Analysis",
                 text: "We highlight misread words and analyze what sounds and types of words you misread or stuggle on the most",
+                gradient: "from-purple-400 to-pink-500",
               },
               {
                 step: "3",
                 title: "Personal Feedback",
                 text: "You get feedback, guidance, and customized practice sentences to target areas where you struggle. Vocalized through text to speech technology",
+                gradient: "from-green-400 to-blue-500",
               },
             ].map((step, i) => (
               <motion.div key={i} variants={childVariant} className="h-full">
-                <Card className="p-6 rounded-2xl shadow-md bg-muted h-full">
+                <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl hover:shadow-2xl hover:-translate-y-2 hover:scale-105 transition-all duration-300 rounded-3xl h-full p-6">
                   <CardHeader>
-                    <div className="bg-primary text-white w-12 h-12 flex items-center justify-center rounded-full mb-4">
+                    <div
+                      className={`bg-gradient-to-br ${step.gradient} text-white w-12 h-12 flex items-center justify-center rounded-full mb-4 shadow-lg font-bold text-lg`}
+                    >
                       {step.step}
                     </div>
-                    <CardTitle>{step.title}</CardTitle>
-                    <CardDescription>{step.text}</CardDescription>
+                    <CardTitle className="text-xl font-semibold">
+                      {step.title}
+                    </CardTitle>
+                    <CardDescription className="text-muted-foreground">
+                      {step.text}
+                    </CardDescription>
                   </CardHeader>
                 </Card>
               </motion.div>

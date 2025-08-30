@@ -16,6 +16,7 @@ import UnderConstructionPage from "./pages/UnderConstructionPage.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import { Analytics } from "@vercel/analytics/react";
 import About from "./pages/About.tsx";
+import Contact from "./pages/Contact.tsx";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="/oauth-callback" element={<OAuthRedirect />} />
                 <Route

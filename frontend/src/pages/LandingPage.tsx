@@ -125,7 +125,6 @@ const LandingPage = () => {
           </h2>
           <motion.div
             className="grid grid-cols-1 md:grid-cols-3 gap-6"
-            variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.3 }}
@@ -154,8 +153,6 @@ const LandingPage = () => {
                 key={i}
                 className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl text-center h-full hover:shadow-2xl hover:-translate-y-2 hover:scale-105 transition-all duration-300 rounded-3xl p-6"
                 variants={childVariant}
-                whileHover={{ scale: 1.05, y: -4 }}
-                transition={{ type: "spring", stiffness: 300 }}
               >
                 <div
                   className={`w-12 h-12 bg-gradient-to-r ${feature.iconBg} rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg`}
@@ -212,8 +209,6 @@ const LandingPage = () => {
                 key={i}
                 className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl text-center h-full hover:shadow-2xl hover:-translate-y-2 hover:scale-105 transition-all duration-300 rounded-3xl p-6"
                 variants={childVariant}
-                whileHover={{ scale: 1.05, y: -4 }}
-                transition={{ type: "spring", stiffness: 300 }}
               >
                 <div
                   className={`w-12 h-12 bg-gradient-to-r ${target.iconBg} rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg`}
@@ -269,20 +264,20 @@ const LandingPage = () => {
                 gradient: "from-green-400 to-blue-500",
               },
             ].map((step, i) => (
-              <motion.div 
-                key={i} 
-                variants={childVariant} 
-                className="h-full"
-                whileHover={{ scale: 1.05, y: -4 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
+              <motion.div key={i} variants={childVariant} className="h-full">
                 <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl hover:shadow-2xl hover:-translate-y-2 hover:scale-105 transition-all duration-300 rounded-3xl h-full p-6">
                   <CardHeader>
-                    <div className={`bg-gradient-to-br ${step.gradient} text-white w-12 h-12 flex items-center justify-center rounded-full mb-4 shadow-lg font-bold text-lg`}>
+                    <div
+                      className={`bg-gradient-to-br ${step.gradient} text-white w-12 h-12 flex items-center justify-center rounded-full mb-4 shadow-lg font-bold text-lg`}
+                    >
                       {step.step}
                     </div>
-                    <CardTitle className="text-xl font-semibold">{step.title}</CardTitle>
-                    <CardDescription className="text-muted-foreground">{step.text}</CardDescription>
+                    <CardTitle className="text-xl font-semibold">
+                      {step.title}
+                    </CardTitle>
+                    <CardDescription className="text-muted-foreground">
+                      {step.text}
+                    </CardDescription>
                   </CardHeader>
                 </Card>
               </motion.div>

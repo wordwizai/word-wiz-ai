@@ -26,17 +26,18 @@ async def analyze_audio(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
+    print("Received request to /analyze-audio")
+
+    session = get_session(db, session_id)
 
     # Process the audio file
     try:
-        audio_array = await load_and_preprocess_audio_file(audio_file)
+        audio_array, cache_session_id = await load_and_preprocess_audio_file(audio_file, str(session_id))
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Failed to process audio file: {str(e)}",
         )
-
-    session = get_session(db, session_id)
 
     # Build the activity object based on the mode
     if session is None or session.activity is None:

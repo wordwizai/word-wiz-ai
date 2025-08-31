@@ -13,8 +13,11 @@ def default_model_output_processing(transcription):
     # Filter out our transcription
     filtered_transcription = transcription[0]
 
-    # split by words
-    filtered_transcription = re.split(r" |-", filtered_transcription)
+    # Remove punctuation and convert to lowercase
+    filtered_transcription = re.sub(r"[\W_]+", " ", filtered_transcription).lower()
+
+    # Split by words
+    filtered_transcription = filtered_transcription.split()
 
     return filtered_transcription
 

@@ -26,6 +26,7 @@ async def analyze_audio(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
+    print("Received request to /analyze-audio")
 
     # Process the audio file
     try:

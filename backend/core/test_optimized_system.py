@@ -46,7 +46,9 @@ def test_optimized_extractor():
         configs_to_test = [
             {
                 'name': 'Optimized Configuration',
-                'params': {}  # Use defaults from environment
+                'params': {
+                    'use_fast_model': False,
+                }  # Use defaults from environment
             },
             {
                 'name': 'Conservative Configuration',

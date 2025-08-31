@@ -91,15 +91,16 @@ class PhonemeExtractor:
                 # Apply optimizations
                 self._optimize_model()
                 
-                self.blank_token_id = self.processor.tokenizer.pad_token_id
+                #Removing it for a second
+                #self.blank_token_id = self.processor.tokenizer.pad_token_id
                 
                 # Cache the model components if caching is enabled
-                if self.config.get('model_cache_enabled', True):
-                    self._model_cache[cache_key] = {
-                        'processor': self.processor,
-                        'model': self.model,
-                        'blank_token_id': self.blank_token_id
-                    }
+                # if self.config.get('model_cache_enabled', True):
+                #     self._model_cache[cache_key] = {
+                #         'processor': self.processor,
+                #         'model': self.model,
+                #         'blank_token_id': self.blank_token_id
+                #     }
                 
                 load_time = time.time() - start_time
                 if self._performance_logging:
@@ -127,6 +128,7 @@ class PhonemeExtractor:
     def _optimize_model(self):
         """Apply various optimizations to the model."""
         # Set model to evaluation mode
+        print("Evaluating model...")
         self.model.eval()
         
         # Apply dynamic quantization if requested

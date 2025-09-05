@@ -7,13 +7,13 @@ interface FeedbackAnimatedTextProps {
 export const FeedbackAnimatedText = ({
   feedback,
 }: FeedbackAnimatedTextProps) => (
-  <div className="flex min-h-12 items-end justify-center relative flex-wrap w-full mt-auto">
+  <div className="flex min-h-12 items-center justify-center relative flex-wrap w-full mt-auto">
     <AnimatePresence>
       {typeof feedback === "string" &&
         feedback.split(" ").map((word, idx) => (
           <motion.span
             key={word + idx}
-            className="inline-block mx-1 text-lg font-medium text-gray-500"
+            className="inline-block mx-1 text-lg font-medium text-gray-700 leading-relaxed"
             initial={{ opacity: 0, y: 12 }}
             animate={{
               opacity: 1,

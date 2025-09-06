@@ -111,8 +111,8 @@ const ActivitiesList = ({
                   </CarouselItem>
                 ))}
         </CarouselContent>
-        <CarouselPrevious className="bg-white/80 border-2 border-gray-200 hover:bg-white hover:border-gray-300 transition-all duration-200" />
-        <CarouselNext className="bg-white/80 border-2 border-gray-200 hover:bg-white hover:border-gray-300 transition-all duration-200" />
+        <CarouselPrevious className="bg-gradient-to-r from-white to-purple-50 border-2 border-purple-200 hover:from-purple-50 hover:to-purple-100 hover:border-purple-300 transition-all duration-300 shadow-lg hover:shadow-xl" />
+        <CarouselNext className="bg-gradient-to-r from-white to-purple-50 border-2 border-purple-200 hover:from-purple-50 hover:to-purple-100 hover:border-purple-300 transition-all duration-300 shadow-lg hover:shadow-xl" />
       </Carousel>
     );
   }
@@ -121,10 +121,10 @@ const ActivitiesList = ({
     <div className={"space-y-6 flex flex-col " + className}>
       {/* Header section */}
       <div className="flex items-center gap-3 mb-4 sm:mb-6">
-        <div className="p-2 bg-gradient-to-r from-blue-200 to-purple-200 rounded-xl">
-          <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+        <div className="p-3 bg-gradient-to-r from-blue-200 to-purple-200 rounded-xl shadow-lg">
+          <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
         </div>
-        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">
+        <h2 className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
           Choose Your Practice
         </h2>
       </div>

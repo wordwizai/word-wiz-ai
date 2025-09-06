@@ -9,32 +9,7 @@ from .grapheme_to_phoneme import grapheme_to_phoneme as g2p
 from .evaluation.accuracy_metrics import compute_phoneme_error_rate
 from .speech_problem_classifier import SpeechProblemClassifier
 from .audio_preprocessing import preprocess_audio
-
-def process_audio_array_verbose(audio_array, sampling_rate=16000, extraction_model=None, sample=None):
-    """
-    Use the phoneme extractor to transcribe an audio array.
-    @returns: phoneme error rate, accuracy, ground truth text, transcription
-    """
-    # ground_truth_phonemes = am.normalize_phonemes([ph for word in sample["words"] for ph in word["phones"]])
-    ground_truth_phonemes = g2p(sample["text"].lower())
-    transcription, per = process_audio_array(ground_truth_phonemes, audio_array, sampling_rate, phoneme_extraction_model=extraction_model)
-    
-    ipd.display(ipd.Audio(data=audio_array, rate=sampling_rate))
-
-    print("model name", extraction_model.model_name, "\n")
-
-    print("Ground truth text:", sample["text"])
-    print("Transcription:", transcription)
-
-    print("\nGround truth phonemes:", ground_truth_phonemes)
-    print("Predicted phonemes:", transcription)
-    print(f"Phoneme Error Rate: {per}")
-    print(f"Ground truth accuracy: {sample['accuracy']/10.0:.2%}")
-
-    # print("Ground truth phoneme", [word["phones"] for word in sample["words"]])
-    print("\nTranslated grapheme", g2p(sample["text"].lower()))
-
-    return transcription, per, sample["accuracy"]/10.0, sample["text"]
+import asyncio
 
 def compute_per(gt_phonemes, pred_phonemes):
     """
@@ -102,16 +77,16 @@ def align_phonemes_to_words(pred_phonemes: list, gt_words_phonemes: list[tuple[s
     for i in range(1, m + 1):
         gt_word, gt_phs = gt_words_phonemes[i - 1]
         
-        # Optimize search bounds based on expected word lengths
-        min_j = max(i, sum(word_lengths[:i-1]))
-        max_j = min(n + 1, sum(word_lengths[:i]) + 5)  # Allow some flexibility
+        # More relaxed search bounds to avoid missing valid alignments
+        min_j = max(1, i)  # Start from at least position 1 or word index
+        max_j = min(n + 1, n + 1)  # Allow full range
         
         for j in range(min_j, max_j):
             best_cost = np.inf
             best_k = -1
             
-            # Further optimize inner loop bounds
-            min_k = max(i - 1, j - len(gt_phs) - 3)
+            # More relaxed inner loop bounds
+            min_k = max(0, j - len(gt_phs) * 2 - 5)  # Allow more flexibility
             max_k = min(j, n)
             
             for k in range(min_k, max_k):
@@ -120,9 +95,9 @@ def align_phonemes_to_words(pred_phonemes: list, gt_words_phonemes: list[tuple[s
                     
                 pred_segment = pred_phonemes[k:j]
                 
-                # Quick length-based pruning
+                # Quick length-based pruning - be more lenient
                 len_diff = abs(len(gt_phs) - len(pred_segment))
-                if len_diff > max(len(gt_phs), 1):  # Simple heuristic
+                if len(pred_segment) > len(gt_phs) * 3:  # Allow up to 3x the expected length
                     continue
                
                 # Use distance for the cost
@@ -218,7 +193,7 @@ def align_sequences(gt, pred):
     operations.reverse()
     return operations
 
-def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=16000, phoneme_extraction_model=None, word_extraction_model=None) -> list[dict]:
+async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=16000, phoneme_extraction_model=None, word_extraction_model=None) -> list[dict]:
     """
     Use the phoneme extractor to transcribe an audio array.
     """
@@ -234,11 +209,29 @@ def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=16000,
     # preprocess the audio
     audio_array = preprocess_audio(audio=audio_array, sr=sampling_rate)
     
-    # get information from extraction
-    phoneme_predictions = phoneme_extraction_model.extract_phoneme(audio=audio_array, sampling_rate=sampling_rate) # output in [[phoneme1, phoneme2, ...], [phoneme1, phoneme2, ...], ...]
-    predicted_words = word_extraction_model.extract_words(audio=audio_array, sampling_rate=sampling_rate) # output in [word1, word2, ...]
 
-    if phoneme_predictions == None or predicted_words == None or len(phoneme_predictions) <= 1 or len(predicted_words) <= 1:
+    async def extract_data():
+        print("Starting concurrent extraction tasks...")
+        phoneme_predictions_task = asyncio.create_task(asyncio.to_thread(
+            phoneme_extraction_model.extract_phoneme, audio=audio_array, sampling_rate=sampling_rate
+        ))
+        predicted_words_task = asyncio.create_task(asyncio.to_thread(
+            word_extraction_model.extract_words, audio=audio_array, sampling_rate=sampling_rate
+        ))
+
+        print("Waiting for phoneme extraction...")
+        phoneme_predictions = await phoneme_predictions_task
+        print("Phoneme extraction completed")
+        
+        print("Waiting for word extraction...")
+        predicted_words = await predicted_words_task
+        print("Word extraction completed")
+
+        return phoneme_predictions, predicted_words
+
+    phoneme_predictions, predicted_words = await extract_data()
+
+    if phoneme_predictions is None or predicted_words is None or len(phoneme_predictions) <= 1 or len(predicted_words) <= 1:
         raise ValueError("The audio provided has no speech inside")
 
     print("unaligned phoneme predictions: ", phoneme_predictions)
@@ -396,7 +389,7 @@ if __name__ == "__main__":
     ground_truth_phonemes = grapheme_to_phoneme("the quick brown fox jumped over the lazy dog")
 
     # Process the audio
-    results = process_audio_array(ground_truth_phonemes, audio, sampling_rate, phoneme_extraction_model=extractor)
+    results = asyncio.run(process_audio_array(ground_truth_phonemes, audio, sampling_rate, phoneme_extraction_model=extractor))
 
     # Print the results
     print("Results:")
@@ -408,7 +401,3 @@ if __name__ == "__main__":
     print()
     df, highest_per, problem_summary, per_summary = analyze_results(results)
     print(df)
-    print(f"Sentence PER: {per_summary:.4f}")
-
-    print({"pronunciation": results, "highest_per_word": highest_per, "problem_summary": problem_summary})
-    print("Most Common Problems:", problem_summary)

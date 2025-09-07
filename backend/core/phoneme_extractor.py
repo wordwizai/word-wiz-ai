@@ -91,16 +91,19 @@ class PhonemeExtractor:
                 # Apply optimizations
                 self._optimize_model()
                 
-                #Removing it for a second
-                #self.blank_token_id = self.processor.tokenizer.pad_token_id
+                # Set blank token id
+                try:
+                    self.blank_token_id = self.processor.tokenizer.pad_token_id
+                except AttributeError:
+                    self.blank_token_id = 0  # Fallback value
                 
                 # Cache the model components if caching is enabled
-                # if self.config.get('model_cache_enabled', True):
-                #     self._model_cache[cache_key] = {
-                #         'processor': self.processor,
-                #         'model': self.model,
-                #         'blank_token_id': self.blank_token_id
-                #     }
+                if self.config.get('model_cache_enabled', True):
+                    self._model_cache[cache_key] = {
+                        'processor': self.processor,
+                        'model': self.model,
+                        'blank_token_id': self.blank_token_id
+                    }
                 
                 load_time = time.time() - start_time
                 if self._performance_logging:
@@ -231,6 +234,11 @@ class PhonemeExtractor:
         transcription = self.processor.batch_decode(predicted_ids)
         transcription = self.model_output_processing(transcription)
 
+        # Explicit cleanup of tensors to prevent memory leaks
+        del input_values, outputs, logits, predicted_ids
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        
         if self._performance_logging and start_time:
             inference_time = time.time() - start_time
             print(f"Phoneme extraction took {inference_time:.3f}s")

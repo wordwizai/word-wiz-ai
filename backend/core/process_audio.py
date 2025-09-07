@@ -77,16 +77,16 @@ def align_phonemes_to_words(pred_phonemes: list, gt_words_phonemes: list[tuple[s
     for i in range(1, m + 1):
         gt_word, gt_phs = gt_words_phonemes[i - 1]
         
-        # More relaxed search bounds to avoid missing valid alignments
-        min_j = max(1, i)  # Start from at least position 1 or word index
-        max_j = min(n + 1, n + 1)  # Allow full range
+        # Optimize search bounds based on expected word lengths
+        min_j = max(i, sum(word_lengths[:i-1]))
+        max_j = min(n + 1, sum(word_lengths[:i]) + 5)  # Allow some flexibility
         
         for j in range(min_j, max_j):
             best_cost = np.inf
             best_k = -1
             
-            # More relaxed inner loop bounds
-            min_k = max(0, j - len(gt_phs) * 2 - 5)  # Allow more flexibility
+            # Further optimize inner loop bounds
+            min_k = max(i - 1, j - len(gt_phs) - 3)
             max_k = min(j, n)
             
             for k in range(min_k, max_k):
@@ -95,9 +95,9 @@ def align_phonemes_to_words(pred_phonemes: list, gt_words_phonemes: list[tuple[s
                     
                 pred_segment = pred_phonemes[k:j]
                 
-                # Quick length-based pruning - be more lenient
+                # Quick length-based pruning
                 len_diff = abs(len(gt_phs) - len(pred_segment))
-                if len(pred_segment) > len(gt_phs) * 3:  # Allow up to 3x the expected length
+                if len_diff > max(len(gt_phs), 1):  # Simple heuristic
                     continue
                
                 # Use distance for the cost

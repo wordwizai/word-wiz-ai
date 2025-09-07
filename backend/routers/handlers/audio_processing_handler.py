@@ -12,6 +12,7 @@ from core.modes.base_mode import BaseMode
 from core.phoneme_assistant import PhonemeAssistant
 from core.temp_audio_cache import audio_cache
 from core.memory_utils import MemoryTracker, get_memory_info, force_cleanup
+from core.memory_config import should_enable_memory_logging, should_use_aggressive_cleanup, get_cleanup_interval
 from crud.feedback_entry import create_feedback_entry, get_feedback_entries_by_session
 from crud.session import get_session
 from fastapi import HTTPException, UploadFile, status
@@ -133,8 +134,9 @@ async def analyze_audio_file_event_stream(
 ):
     import gc  # Add explicit garbage collection import
     
-    # Enable memory monitoring for debugging
-    enable_memory_logging = True  # Set to False for production
+    # Enable memory monitoring based on configuration
+    enable_memory_logging = should_enable_memory_logging()
+    use_aggressive_cleanup = should_use_aggressive_cleanup()
     
     with MemoryTracker("Audio Analysis Pipeline", enable_memory_logging):
         try:
@@ -166,7 +168,8 @@ async def analyze_audio_file_event_stream(
             
             # Clear analysis data from memory after yielding
             del pronunciation_dataframe
-            gc.collect()  # Force garbage collection after analysis
+            if use_aggressive_cleanup:
+                gc.collect()  # Force garbage collection after analysis
 
             # STEP 2: GET GPT RESPONSE
             with MemoryTracker("GPT Response Generation", enable_memory_logging):
@@ -254,7 +257,8 @@ async def analyze_audio_file_event_stream(
             
             # Clean up large objects after final response
             del response_audio_file, feedback_audio_bytes, audio_array
-            gc.collect()  # Final garbage collection
+            if use_aggressive_cleanup:
+                gc.collect()  # Final garbage collection
 
         except Exception as e:
             error_payload = {

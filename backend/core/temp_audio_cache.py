@@ -15,6 +15,7 @@ import numpy as np
 import soundfile as sf
 import json
 import dotenv
+from .memory_config import get_cleanup_interval, MEMORY_CONFIG
 
 
 class TempAudioCache:
@@ -88,8 +89,10 @@ class TempAudioCache:
         else:
             self._cleanup_counter = 1
         
-        if self._cleanup_counter % 10 == 0:  # Cleanup every 10 saves
-            self.cleanup_old_files(hours_old=1)  # More aggressive cleanup (1 hour)
+        cleanup_interval = get_cleanup_interval()
+        if self._cleanup_counter % cleanup_interval == 0:  # Cleanup every N saves
+            cleanup_hours = MEMORY_CONFIG["audio_cache_cleanup_hours"]
+            self.cleanup_old_files(hours_old=cleanup_hours)
         
         # Generate filename
         timestamp = datetime.now().strftime('%H%M%S')

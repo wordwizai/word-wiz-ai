@@ -36,7 +36,7 @@ services:
     volumes:
       - letsencrypt:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
-    command: certonly --webroot --webroot-path=/var/www/certbot --email brucebpeters12@gmail.com -d api.wordwizai.com10.0.0.1 --agree-tos --non-interactive
+    command: certonly --webroot --webroot-path=/var/www/certbot --email brucebpeters12@gmail.com -d api.wordwizai.com --agree-tos --non-interactive
 
 volumes:
   letsencrypt:

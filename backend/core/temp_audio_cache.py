@@ -82,6 +82,15 @@ class TempAudioCache:
             print("Audio caching is not enabled via environment variable.")
             return ""
         
+        # Periodic cleanup to prevent disk space issues that can cause memory pressure
+        if hasattr(self, '_cleanup_counter'):
+            self._cleanup_counter += 1
+        else:
+            self._cleanup_counter = 1
+        
+        if self._cleanup_counter % 10 == 0:  # Cleanup every 10 saves
+            self.cleanup_old_files(hours_old=1)  # More aggressive cleanup (1 hour)
+        
         # Generate filename
         timestamp = datetime.now().strftime('%H%M%S')
         suffix = f"_{filename_suffix}" if filename_suffix else ""

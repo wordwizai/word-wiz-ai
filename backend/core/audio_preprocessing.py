@@ -7,9 +7,21 @@ import noisereduce as nr
 
 
 def preprocess_audio(audio, sr=16000):
-    audio = nr.reduce_noise(y=audio, sr=sr)
-    audio = librosa.util.normalize(audio)
-    return audio
+    """Preprocess audio with memory-efficient operations"""
+    import gc
+    
+    # Apply noise reduction
+    audio_processed = nr.reduce_noise(y=audio, sr=sr)
+    
+    # Normalize audio (in-place when possible)
+    audio_processed = librosa.util.normalize(audio_processed)
+    
+    # Clean up original audio reference if it's different
+    if audio is not audio_processed:
+        del audio
+        gc.collect()
+    
+    return audio_processed
 
 
 def display_spectrogram(audio, sr=16000):

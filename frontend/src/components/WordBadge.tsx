@@ -175,26 +175,31 @@ export const WordBadge = ({
     }
   }, [word]);
 
-  let initialBg = "rgb(255,255,255)";
-  let targetBg = "rgb(255,255,255)";
+  const [textClass, setTextClass] = useState("");
+  const [targetBg, setTargetBg] = useState("rgb(255,255,255)");
+
   const baseBgClass = "bg-white dark:bg-zinc-900";
-  const baseTextClass = "text-black dark:text-white";
-  let textClass = `rounded-xl px-2 md:px-4 py-1 md:py-2 text-4xl font-medium ${baseTextClass}`;
-  if (typeof analysisPer === "number" && showHighlighted) {
-    const p = Math.max(0, Math.min(1, analysisPer));
-    let r, g;
-    const b = 100;
-    if (p < 0.5) {
-      r = Math.round(2 * 255 * p);
-      g = 255;
-    } else {
-      r = 255;
-      g = Math.round(255 * (1 - 2 * (p - 0.5)));
+
+  useEffect(() => {
+    const baseTextClass = "text-black dark:text-white";
+    let tempTextClass = `rounded-xl px-2 md:px-4 py-1 md:py-2 text-4xl font-medium ${baseTextClass}`;
+    if (typeof analysisPer === "number" && showHighlighted) {
+      const p = Math.max(0, Math.min(1, analysisPer));
+      let r, g;
+      const b = 100;
+      if (p < 0.5) {
+        r = Math.round(2 * 255 * p);
+        g = 255;
+      } else {
+        r = 255;
+        g = Math.round(255 * (1 - 2 * (p - 0.5)));
+      }
+      setTargetBg(`rgb(${r},${g},${b})`);
+      tempTextClass +=
+        p > 0.5 ? " text-white dark:text-white" : " text-black dark:text-black";
     }
-    targetBg = `rgb(${r},${g},${b})`;
-    textClass +=
-      p > 0.5 ? " text-white dark:text-white" : " text-black dark:text-black";
-  }
+    setTextClass(tempTextClass);
+  }, [analysisPer, showHighlighted]);
 
   const { speak } = useSpeechSynthesis();
   const [isGraphemes, setIsGraphemes] = useState(false);

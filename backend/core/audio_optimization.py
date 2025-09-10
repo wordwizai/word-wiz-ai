@@ -42,15 +42,6 @@ class OptimizedAudioPreprocessor:
         if len(audio.shape) > 1:
             audio = np.mean(audio, axis=1)
         
-        # Resample if necessary (optimized)
-        if sr != self.target_sr:
-            # Use faster resampling for real-time applications
-            audio = librosa.resample(audio, orig_sr=sr, target_sr=self.target_sr, res_type='linear')
-        
-        # Normalize audio
-        if normalize:
-            audio = self._fast_normalize(audio)
-        
         # Trim silence (optimized)
         if trim_silence:
             audio = self._fast_trim_silence(audio)

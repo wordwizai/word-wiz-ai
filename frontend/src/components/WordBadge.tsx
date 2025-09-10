@@ -248,7 +248,7 @@ export const WordBadge = ({
           if (!isGraphemes) {
             speak(word, { rate: 1 });
           } else {
-            speak(phonicsChunks.join(" "), { rate: 0.6 });
+            speak(word, { rate: 0.3 });
           }
         }}
       >

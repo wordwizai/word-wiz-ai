@@ -49,7 +49,11 @@ export function useAudioRecorder(onFinish: (audioFile: File) => void) {
         silenceTimer = setTimeout(stopRecording, SILENCE_DELAY);
       });
 
+      let isStopping = false;
+
       const stopHandler = async () => {
+        if (isStopping) return;
+        isStopping = true;
         processor.disconnect();
         source.disconnect();
         stream.getTracks().forEach((track) => track.stop());

@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useAudioAnalysisStream } from "@/hooks/useAudioAnalysisStream";
+import { useIOSCompatibleAudio } from "@/hooks/useIOSCompatibleAudio";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getCurrentSessionState, type Session } from "@/api";
 
@@ -35,6 +36,7 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
   const [showNextButton, setShowNextButton] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const { token } = useContext(AuthContext);
+  const { initializeAudioContext, playAudio } = useIOSCompatibleAudio();
 
   useEffect(() => {
     const getCurrentSentence = async () => {
@@ -72,8 +74,7 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
       }, 1000);
     },
     onAudioFeedback: (url) => {
-      const audio = new Audio(url);
-      audio.play();
+      playAudio(url);
     },
     onError: (err) => {
       console.error("Stream error:", err);
@@ -87,6 +88,13 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
       start(audioFile, currentSentence ?? "");
     },
   );
+
+  // Enhanced startRecording that initializes audio context for iOS compatibility
+  const handleStartRecording = () => {
+    // Initialize audio context during user gesture for iOS compatibility
+    initializeAudioContext();
+    startRecording();
+  };
 
   const displayNextSentence = () => {
     setShowHighlightedWords(false);
@@ -111,7 +119,7 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
     showHighlightedWords,
     isRecording,
     isProcessing,
-    onStartRecording: startRecording,
+    onStartRecording: handleStartRecording,
     onStopRecording: stopRecording,
     displayNextSentence,
     nextSentence,

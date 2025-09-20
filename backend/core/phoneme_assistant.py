@@ -288,6 +288,7 @@ class PhonemeAssistant:
                 "data": str (base64-encoded)
             }
         """
+        import gc  # Import gc for explicit memory management
 
         # Use SSML version if available, otherwise use plain text
         text_to_convert = feedback_ssml if feedback_ssml else feedback
@@ -306,6 +307,9 @@ class PhonemeAssistant:
             # Ensure audio_bytes is treated as PCM data
             audio_array = np.frombuffer(audio_bytes, dtype=np.int16)  # Assuming PCM 16-bit depth
             sf.write(audio_buffer, audio_array, sample_rate, format="WAV")
+            
+            # Clean up audio_array immediately after use
+            del audio_array
         except Exception as e:
             print(f"Audio processing error: {str(e)}")
             # fallback: just write the raw bytes if conversion fails
@@ -314,6 +318,10 @@ class PhonemeAssistant:
         audio_buffer.seek(0)
         audio_bytes_final = audio_buffer.read()
         audio_b64 = base64.b64encode(audio_bytes_final).decode("utf-8")
+        
+        # Clean up intermediate objects
+        del audio_bytes, audio_buffer, audio_bytes_final
+        gc.collect()  # Force garbage collection
 
         return {"filename": "feedback.wav", "mimetype": "audio/wav", "data": audio_b64}
 

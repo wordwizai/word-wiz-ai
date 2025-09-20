@@ -15,6 +15,7 @@ import numpy as np
 import soundfile as sf
 import json
 import dotenv
+from .memory_config import get_cleanup_interval, MEMORY_CONFIG
 
 
 class TempAudioCache:
@@ -81,6 +82,17 @@ class TempAudioCache:
         if os.getenv("ENABLE_AUDIO_CACHE", "0") not in ("1", "true", "yes", "on"):
             print("Audio caching is not enabled via environment variable.")
             return ""
+        
+        # Periodic cleanup to prevent disk space issues that can cause memory pressure
+        if hasattr(self, '_cleanup_counter'):
+            self._cleanup_counter += 1
+        else:
+            self._cleanup_counter = 1
+        
+        cleanup_interval = get_cleanup_interval()
+        if self._cleanup_counter % cleanup_interval == 0:  # Cleanup every N saves
+            cleanup_hours = MEMORY_CONFIG["audio_cache_cleanup_hours"]
+            self.cleanup_old_files(hours_old=cleanup_hours)
         
         # Generate filename
         timestamp = datetime.now().strftime('%H%M%S')

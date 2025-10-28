@@ -48,7 +48,7 @@ const Contact = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     alert(
-      "This system is not yet implemented. Please feel free to reach out to us via email. We look forward to hearing form you!",
+      "This system is not yet implemented. Please feel free to reach out to us via email. We look forward to hearing form you!"
     );
     // setLoading(true);
     //
@@ -237,8 +237,8 @@ const Contact = () => {
                   {
                     icon: <Mail className="w-6 h-6" />,
                     title: "Email",
-                    content: "wordwizai.com@gmail.com",
-                    action: "mailto:wordwizai.com@gmail.com",
+                    content: "contact@wordwizai.com",
+                    action: "mailto:contact@wordwizai.com",
                     color: "from-blue-400 to-cyan-600",
                   },
                 ].map((item, i) => (
@@ -366,4 +366,3 @@ const Contact = () => {
 };
 
 export default Contact;
-

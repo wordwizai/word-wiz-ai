@@ -243,7 +243,7 @@ class PhonemeAssistant:
         )
 
         ground_truth_phonemes = grapheme_to_phoneme(attempted_sentence)
-        pronunciation_data = process_audio_array(
+        pronunciation_data = await process_audio_array(
             ground_truth_phonemes=ground_truth_phonemes,
             audio_array=audio_array,
             sampling_rate=16000,

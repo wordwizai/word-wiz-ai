@@ -1,10 +1,9 @@
 # %%
 import torch
-import librosa
+import asyncio
 from transformers import Wav2Vec2Processor, Wav2Vec2ForCTC
 import re
 import os
-import io
 import numpy as np
 import google.cloud.speech as speech
 
@@ -41,12 +40,15 @@ class WordExtractor:
 
         self.model_output_processing = model_output_processing
 
-    def extract_words(self, audio, sampling_rate=16000):
+    async def extract_words(self, audio, sampling_rate=16000):
         # Load the audio file
         # Tokenize the audio file
         input_values = self.processor(
             audio, sampling_rate=sampling_rate, return_tensors="pt"
         ).input_values
+        # Simulating asynchronous work for I/O-bound tasks
+        await asyncio.sleep(0)  # Placeholder for real async I/O calls
+
         # retrieve logits from the model
         with torch.no_grad():
             logits = self.model(input_values).logits

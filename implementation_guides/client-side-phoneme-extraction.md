@@ -39,6 +39,7 @@
   - Created process_audio_with_client_phonemes function in process_audio.py
   - Implemented full hybrid processing flow with automatic fallback
   - Added comprehensive logging for debugging
+  - Refactored code to eliminate duplication in process_audio.py
   - Note: All QA testing requires runtime validation
 
 ### In Progress
@@ -111,7 +112,7 @@ Add database support for client-side processing preference and create new API en
 **File:** `backend/models/user_settings.py`
 
 - [x] Add `use_client_phoneme_extraction` boolean field (default: `True`)
-- [ ] Add migration script for new database column
+- [x] Migration script created in Phase 1.2
 
 **Code changes:**
 
@@ -127,6 +128,7 @@ class UserSettings(Base):
 
 - [x] Generate new Alembic migration
 - [x] Add upgrade/downgrade functions for new column
+- [x] Add migration script for new database column
 
 **Command:**
 
@@ -154,7 +156,7 @@ alembic upgrade head
   - `client_phonemes` (JSON array of extracted phonemes in eSpeak format)
 - [x] Reuse existing processing logic but skip phoneme extraction step
 - [x] Add validation to ensure client phonemes match expected format
-- [ ] **NEW:** Add phoneme format normalization (eSpeak → IPA) before processing
+- [x] Add phoneme format normalization (eSpeak → IPA) before processing
 
 **New endpoint structure:**
 
@@ -363,7 +365,8 @@ const start = (
   2. Check if model is ready
   3. If yes: extract phonemes locally, send to backend
   4. If no: send audio directly to backend
-- [ ] Add performance metrics tracking (optional - deferred to Phase 5)
+- [x] Basic performance tracking implemented (console.log statements in useHybridAudioAnalysis)
+- [ ] Advanced metrics tracking (optional - deferred to Phase 5)
 
 **Flow logic:**
 
@@ -427,8 +430,8 @@ const Practice = () => {
 
 **File:** `frontend/src/utils/performanceMonitor.ts`
 
-- [ ] Track client vs server processing times (deferred to Phase 5)
-- [ ] Log to console in development (deferred to Phase 5)
+- [x] Track client vs server processing times (implemented with console.log in useHybridAudioAnalysis)
+- [x] Log to console in development (implemented with console.log in useHybridAudioAnalysis)
 - [ ] Send anonymized metrics to analytics (optional - deferred to Phase 5)
 
 **Note:** Performance monitoring is implemented within useHybridAudioAnalysis with console.log statements. A dedicated monitoring utility can be added in Phase 5.
@@ -521,7 +524,7 @@ def normalize_espeak_to_ipa(phonemes: list[list[str]]) -> list[list[str]]:
 **File:** `backend/routers/handlers/audio_processing_handler.py`
 
 - [x] Add optional `client_phonemes` parameter to `analyze_audio_file_event_stream`
-- [x] **NEW:** Normalize eSpeak phonemes to IPA before processing
+- [x] Normalize eSpeak phonemes to IPA before processing
 - [x] Skip phoneme extraction step if valid client phonemes provided
 - [x] Log whether client or server phonemes were used
 - [x] Maintain backward compatibility with existing flow

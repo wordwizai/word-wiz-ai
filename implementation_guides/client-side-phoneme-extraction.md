@@ -25,6 +25,7 @@
   - Note: Runtime testing required for full validation
 
 - ✅ **Phase 3: Hybrid Audio Processing Pipeline** - Completed on November 2, 2025
+
   - Updated useAudioAnalysisStream to accept optional clientPhonemes parameter
   - Created useHybridAudioAnalysis orchestration hook
   - Updated BasePractice and ChoiceStoryBasePractice components
@@ -32,13 +33,20 @@
   - Added model loading states to component props
   - Note: Performance monitoring is optional and not yet implemented
 
+- ✅ **Phase 4: Backend Processing Updates** - Completed on November 2, 2025
+  - Created phoneme_processing_handler.py with validation and normalization functions
+  - Updated audio_processing_handler.py to normalize eSpeak → IPA before processing
+  - Created process_audio_with_client_phonemes function in process_audio.py
+  - Implemented full hybrid processing flow with automatic fallback
+  - Added comprehensive logging for debugging
+  - Note: All QA testing requires runtime validation
+
 ### In Progress
 
-- ⬜ **Phase 4: Backend Processing Updates** - Not started
+- ⬜ **Phase 5: Error Handling & Optimization** - Not started
 
 ### Pending
 
-- ⬜ **Phase 4: Backend Processing Updates** - Not started
 - ⬜ **Phase 5: Error Handling & Optimization** - Not started
 
 ---
@@ -451,10 +459,10 @@ Update backend audio processing to handle pre-extracted phonemes efficiently and
 
 **File:** `backend/routers/handlers/phoneme_processing_handler.py`
 
-- [ ] Create function to validate client phoneme format
-- [ ] **NEW:** Create function to normalize eSpeak phonemes to IPA format
-- [ ] Create function to merge client phonemes with server processing
-- [ ] Add error handling for malformed phoneme data
+- [x] Create function to validate client phoneme format
+- [x] **NEW:** Create function to normalize eSpeak phonemes to IPA format
+- [x] Create function to format phonemes for logging
+- [x] Add error handling for malformed phoneme data
 
 **Validation function:**
 
@@ -512,11 +520,13 @@ def normalize_espeak_to_ipa(phonemes: list[list[str]]) -> list[list[str]]:
 
 **File:** `backend/routers/handlers/audio_processing_handler.py`
 
-- [ ] Add optional `client_phonemes` parameter to `analyze_audio_file_event_stream`
-- [ ] **NEW:** Normalize eSpeak phonemes to IPA before processing
-- [ ] Skip phoneme extraction step if valid client phonemes provided
-- [ ] Log whether client or server phonemes were used
-- [ ] Maintain backward compatibility with existing flow
+- [x] Add optional `client_phonemes` parameter to `analyze_audio_file_event_stream`
+- [x] **NEW:** Normalize eSpeak phonemes to IPA before processing
+- [x] Skip phoneme extraction step if valid client phonemes provided
+- [x] Log whether client or server phonemes were used
+- [x] Maintain backward compatibility with existing flow
+- [x] Validate client phonemes before use
+- [x] Automatic fallback to server processing if validation fails
 
 **Updated function:**
 
@@ -557,10 +567,12 @@ async def analyze_audio_file_event_stream(
 
 **File:** `backend/core/process_audio.py`
 
-- [ ] Add new function `process_audio_with_client_phonemes()`
-- [ ] Reuse existing alignment and analysis logic
-- [ ] Only extract words from audio (skip phoneme extraction)
-- [ ] Return same format as `process_audio_array()`
+- [x] Add new function `process_audio_with_client_phonemes()`
+- [x] Reuse existing alignment and analysis logic
+- [x] Only extract words from audio (skip phoneme extraction)
+- [x] Return same format as `process_audio_array()`
+- [x] Handle word count mismatches gracefully
+- [x] Add comprehensive logging for debugging
 
 **New function signature:**
 

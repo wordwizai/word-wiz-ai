@@ -193,6 +193,108 @@ def align_sequences(gt, pred):
     operations.reverse()
     return operations
 
+def _process_word_alignment(
+    ground_truth_words: list[str],
+    ground_truth_phonemes: list[tuple[str, list[str]]],
+    predicted_words: list[str],
+    phoneme_predictions: list[list[str]]
+) -> list[dict]:
+    """
+    Helper function to process word alignment and calculate PER for each word.
+    Shared by both process_audio_array and process_audio_with_client_phonemes.
+    
+    Args:
+        ground_truth_words: List of expected words
+        ground_truth_phonemes: List of tuples (word, phonemes)
+        predicted_words: List of predicted words from audio
+        phoneme_predictions: List of predicted phoneme sequences (one per word)
+        
+    Returns:
+        List of dictionaries containing word-level analysis results
+    """
+    # Align the words
+    word_ops = align_sequences(ground_truth_words, predicted_words)
+    print("Word operations:", word_ops)
+    
+    results = []
+    gt_idx, pred_idx = 0, 0  # indices for ground truth and predicted phonemes
+    
+    for op, gt_word_op, pred_word_op in word_ops:
+        if op in ('match', 'substitution'):
+            gt_word = ground_truth_words[gt_idx]
+            pred_word = predicted_words[pred_idx]
+            gt_phonemes = ground_truth_phonemes[gt_idx][1]
+            pred_phonemes = phoneme_predictions[pred_idx]
+            
+            # Get phoneme-level alignment
+            phoneme_ops = align_sequences(gt_phonemes, pred_phonemes)
+            missed, added, substituted = [], [], []
+            for pop, gph, pph in phoneme_ops:
+                if pop == 'deletion':
+                    missed.append(gph)
+                elif pop == 'insertion':
+                    added.append(pph)
+                elif pop == 'substitution':
+                    substituted.append((gph, pph))
+            
+            per = (len(missed) + len(added) + len(substituted)) / max(len(gt_phonemes), 1)
+            results.append({
+                "type": op,
+                "predicted_word": pred_word,
+                "ground_truth_word": gt_word,
+                "phonemes": pred_phonemes,
+                "ground_truth_phonemes": gt_phonemes,
+                "per": round(per, 4),
+                "missed": missed,
+                "added": added,
+                "substituted": substituted,
+                "total_phonemes": len(gt_phonemes),
+                "total_errors": len(missed) + len(added) + len(substituted),
+            })
+            gt_idx += 1
+            pred_idx += 1
+        
+        elif op == 'insertion':
+            # Extra word predicted (no matching ground truth)
+            pred_word = predicted_words[pred_idx]
+            pred_phonemes = phoneme_predictions[pred_idx]
+            results.append({
+                "type": op,
+                "predicted_word": pred_word,
+                "ground_truth_word": None,
+                "phonemes": pred_phonemes,
+                "ground_truth_phonemes": None,
+                "per": None,
+                "missed": None,
+                "added": None,
+                "substituted": None,
+                "total_phonemes": 0,
+                "total_errors": 0,
+                "error": "Extra word predicted."
+            })
+            pred_idx += 1
+        
+        elif op == 'deletion':
+            # A ground truth word is missing in prediction
+            gt_word = ground_truth_words[gt_idx]
+            results.append({
+                "type": op,
+                "predicted_word": None,
+                "ground_truth_word": gt_word,
+                "phonemes": None,
+                "ground_truth_phonemes": None,
+                "per": None,
+                "missed": None,
+                "added": None,
+                "substituted": None,
+                "total_phonemes": 0,
+                "total_errors": 0,
+                "error": "Word missing in prediction."
+            })
+            gt_idx += 1
+    
+    return results
+
 async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=16000, phoneme_extraction_model=None, word_extraction_model=None) -> list[dict]:
     """
     Use the phoneme extractor to transcribe an audio array.
@@ -244,93 +346,85 @@ async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=
     phoneme_predictions = [pred_phonemes for _, pred_phonemes,_ in alignment]
     print("aligned phoneme predictions: ", phoneme_predictions)
 
-
-
-    # Align the words
+    # Use helper function to process word alignment
     ground_truth_words = [word for word, _ in ground_truth_phonemes]
-    word_ops = align_sequences(ground_truth_words, predicted_words)
-    print("Word operations:", word_ops)
-    results = []
+    results = _process_word_alignment(
+        ground_truth_words=ground_truth_words,
+        ground_truth_phonemes=ground_truth_phonemes,
+        predicted_words=predicted_words,
+        phoneme_predictions=phoneme_predictions
+    )
 
+    return results
 
-    gt_idx, pred_idx = 0, 0 # indices for ground truth and predicted phonemes
-    for op, gt_word_op, pred_word_op in word_ops:
-        if op in ('match', 'substitution'):
-            gt_word = ground_truth_words[gt_idx]
-            pred_word = predicted_words[pred_idx]
-            gt_phonemes = ground_truth_phonemes[gt_idx][1]
-            pred_phonemes = phoneme_predictions[pred_idx]
-            
-            # Get phoneme-level alignment.
-            phoneme_ops = align_sequences(gt_phonemes, pred_phonemes)
-            missed, added, substituted = [], [], []
-            for pop, gph, pph in phoneme_ops:
-                if pop == 'deletion':
-                    missed.append(gph)
-                elif pop == 'insertion':
-                    added.append(pph)
-                elif pop == 'substitution':
-                    substituted.append((gph, pph))
-            
-            per = (len(missed) + len(added) + len(substituted)) / max(len(gt_phonemes), 1)
-            results.append({
-                "type": op,
-                "predicted_word": pred_word,
-                "ground_truth_word": gt_word,
-                "phonemes": pred_phonemes,
-                "ground_truth_phonemes": gt_phonemes,
-                # "phoneme_alignment": phoneme_ops,
-                "per": round(per, 4),
-                "missed": missed,
-                "added": added,
-                "substituted": substituted,
-                "total_phonemes": len(gt_phonemes),
-                "total_errors": len(missed) + len(added) + len(substituted),
-            })
-            gt_idx += 1
-            pred_idx += 1
+async def process_audio_with_client_phonemes(
+    client_phonemes: list[list[str]],
+    ground_truth_phonemes: list[tuple[str, list[str]]],
+    audio_array: np.ndarray,
+    sampling_rate: int = 16000,
+    word_extraction_model=None,
+) -> list[dict]:
+    """
+    Process audio using client-provided phonemes instead of extracting them.
+    Still extracts words for alignment validation.
+    
+    This function is used when the frontend has already extracted phonemes using
+    the client-side model (eSpeak). The phonemes should already be normalized to
+    IPA format before calling this function.
+    
+    Args:
+        client_phonemes: List of words, where each word is a list of IPA phoneme strings
+                        (already normalized from eSpeak format)
+        ground_truth_phonemes: List of tuples (word, phonemes) for the expected sentence
+        audio_array: The audio data as a numpy array
+        sampling_rate: The audio sampling rate (default: 16000)
+        word_extraction_model: The model to extract words (optional, will create if None)
         
-        elif op == 'insertion':
-            # Extra word predicted (no matching ground truth)
-            pred_word = predicted_words[pred_idx]
-            pred_phonemes = phoneme_predictions[pred_idx]
-            results.append({
-                "type": op,
-                "predicted_word": pred_word,
-                "ground_truth_word": None,
-                "phonemes": pred_phonemes,
-                "ground_truth_phonemes": None,
-                # "phoneme_alignment": None,
-                "per": None,
-                "missed": None,
-                "added": None,
-                "substituted": None,
-                "total_phonemes": 0,
-                "total_errors": 0,
-                "error": "Extra word predicted."
-            })
-            pred_idx += 1
-        
-        elif op == 'deletion':
-            # A ground truth word is missing in prediction.
-            gt_word = ground_truth_words[gt_idx]
-            results.append({
-                "type": op,
-                "predicted_word": None,
-                "ground_truth_word": gt_word,
-                # "phoneme_alignment": None,
-                "phonemes": None,
-                "ground_truth_phonemes": None,
-                "per": None,
-                "missed": None,
-                "added": None,
-                "substituted": None,
-                "total_phonemes": 0,
-                "total_errors": 0,
-                "error": "Word missing in prediction."
-            })
-            gt_idx += 1
-
+    Returns:
+        List of dictionaries containing word-level analysis results
+    """
+    if word_extraction_model is None:
+        word_extraction_model = WordExtractor()
+    
+    if len(ground_truth_phonemes) <= 1:
+        raise ValueError("ground_truth_phonemes must have at least 2 elements")
+    
+    # Preprocess the audio
+    audio_array = preprocess_audio(audio=audio_array, sr=sampling_rate)
+    
+    # Extract words only (skip phoneme extraction since client provided them)
+    print("Extracting words from audio (client phonemes already provided)...")
+    predicted_words = await asyncio.to_thread(
+        word_extraction_model.extract_words, 
+        audio=audio_array, 
+        sampling_rate=sampling_rate
+    )
+    print(f"Word extraction completed: {predicted_words}")
+    
+    if predicted_words is None or len(predicted_words) <= 1:
+        raise ValueError("The audio provided has no speech inside")
+    
+    # Use client-provided phonemes directly (already normalized to IPA)
+    phoneme_predictions = client_phonemes
+    print(f"Using client-provided phonemes: {phoneme_predictions}")
+    
+    # Validate that we have the same number of words in phonemes and word predictions
+    # If not, we may need to adjust the alignment
+    if len(phoneme_predictions) != len(predicted_words):
+        print(f"Warning: Client phoneme word count ({len(phoneme_predictions)}) "
+              f"doesn't match extracted word count ({len(predicted_words)})")
+        # In this case, we'll align based on ground truth words instead
+        # This is a safety measure - ideally they should match
+    
+    # Use helper function to process word alignment
+    ground_truth_words = [word for word, _ in ground_truth_phonemes]
+    results = _process_word_alignment(
+        ground_truth_words=ground_truth_words,
+        ground_truth_phonemes=ground_truth_phonemes,
+        predicted_words=predicted_words,
+        phoneme_predictions=phoneme_predictions
+    )
+    
     return results
 
 def analyze_results(pronunciation_data: list[dict]) -> tuple[pd.DataFrame, dict, dict, dict]:

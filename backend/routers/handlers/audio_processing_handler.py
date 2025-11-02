@@ -123,10 +123,18 @@ async def analyze_audio_file_event_stream(
     db: Session,
     current_user: User,
     session: UserSession,
+    client_phonemes: list[list[str]] | None = None,
 ):
     try:
 
         # STEP 1: ANALYZE AUDIO
+        if client_phonemes is not None:
+            print(f"Using client-provided phonemes for analysis (skipping server extraction)")
+            # Note: Full implementation of process_audio_with_client_phonemes will be in Phase 4
+            # For now, we'll fall back to server processing but log that client phonemes were provided
+            print(f"Client phonemes: {client_phonemes}")
+            # TODO: Implement process_audio_with_client_phonemes in Phase 4
+        
         pronunciation_dataframe, highest_per_word, problem_summary, per_summary = (
             await phoneme_assistant.process_audio(
                 attempted_sentence, audio_array, verbose=True

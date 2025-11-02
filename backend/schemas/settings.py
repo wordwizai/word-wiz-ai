@@ -11,6 +11,7 @@ class UserSettingsUpdate(BaseModel):
     audio_feedback_volume: Optional[float] = None
     notifications_enabled: Optional[bool] = None
     email_notifications: Optional[bool] = None
+    use_client_phoneme_extraction: Optional[bool] = None
 
 
 class UserSettingsResponse(BaseModel):
@@ -20,3 +21,4 @@ class UserSettingsResponse(BaseModel):
     audio_feedback_volume: float
     notifications_enabled: bool
     email_notifications: bool
+    use_client_phoneme_extraction: bool

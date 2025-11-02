@@ -15,5 +15,6 @@ class UserSettings(Base):
     audio_feedback_volume = Column(Float, default=True)
     notifications_enabled = Column(Boolean, default=True)
     email_notifications = Column(Boolean, default=True)
+    use_client_phoneme_extraction = Column(Boolean, default=True)
 
     user = relationship("User", back_populates="settings")

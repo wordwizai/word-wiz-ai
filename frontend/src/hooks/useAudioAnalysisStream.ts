@@ -9,12 +9,12 @@ interface AudioAnalysisEvents {
   mimetype?: string;
 }
 
-interface UseAudioAnalysisStreamOptions {
+export interface UseAudioAnalysisStreamOptions {
   onAnalysis?: (data: any) => void;
   onGptResponse?: (data: any) => void;
   onAudioFeedback?: (
     objectUrl: string,
-    meta: { filename: string; mimetype: string },
+    meta: { filename: string; mimetype: string }
   ) => void;
   onError?: (err: string) => void;
   onProcessingStart?: () => void;
@@ -23,12 +23,16 @@ interface UseAudioAnalysisStreamOptions {
 }
 
 export const useAudioAnalysisStream = (
-  options?: UseAudioAnalysisStreamOptions,
+  options?: UseAudioAnalysisStreamOptions
 ) => {
   const { token } = useContext(AuthContext);
   const eventSourceRef = useRef<EventSource | null>(null);
 
-  const start = (file: File, sentence: string) => {
+  const start = (
+    file: File,
+    sentence: string,
+    clientPhonemes?: string[][] | null
+  ) => {
     if (!token) {
       options?.onError?.("Not authenticated");
       return;
@@ -42,7 +46,15 @@ export const useAudioAnalysisStream = (
     formData.append("attempted_sentence", sentence);
     formData.append("session_id", options?.sessionId?.toString() || "");
 
-    const url = `${API_URL}/ai/analyze-audio`;
+    // Determine which endpoint to use based on whether client phonemes are provided
+    const url = clientPhonemes
+      ? `${API_URL}/ai/analyze-audio-with-phonemes`
+      : `${API_URL}/ai/analyze-audio`;
+
+    // Add client phonemes to FormData if available
+    if (clientPhonemes) {
+      formData.append("client_phonemes", JSON.stringify(clientPhonemes));
+    }
 
     // Create a manual fetch POST to initialize the SSE
     fetch(url, {
@@ -75,7 +87,7 @@ export const useAudioAnalysisStream = (
             if (rawEvent.startsWith("data: ")) {
               try {
                 const parsed: AudioAnalysisEvents = JSON.parse(
-                  rawEvent.slice(6),
+                  rawEvent.slice(6)
                 );
                 if (parsed.type === "analysis") {
                   options?.onAnalysis?.(parsed.data);
@@ -86,12 +98,12 @@ export const useAudioAnalysisStream = (
                 } else if (parsed.type === "audio_feedback_file") {
                   console.log(
                     "Received base64 audio length:",
-                    parsed.data.length,
+                    parsed.data.length
                   );
                   console.log("First 100 chars:", parsed.data.slice(0, 100));
                   const audioBlob = b64toBlob(
                     parsed.data,
-                    parsed.mimetype || "audio/wav",
+                    parsed.mimetype || "audio/wav"
                   );
                   const objectUrl = URL.createObjectURL(audioBlob);
                   options?.onAudioFeedback?.(objectUrl, {

@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
-import { useAudioAnalysisStream } from "@/hooks/useAudioAnalysisStream";
+import { useHybridAudioAnalysis } from "@/hooks/useHybridAudioAnalysis";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getCurrentSessionState, type Session } from "@/api";
 
@@ -16,6 +16,8 @@ interface BasePracticeProps {
     showHighlightedWords: boolean;
     isRecording: boolean;
     isProcessing: boolean;
+    isModelLoading: boolean;
+    modelLoadProgress: number;
     onStartRecording: () => void;
     onStopRecording: () => void;
     displayNextSentence: () => void;
@@ -36,24 +38,14 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { token } = useContext(AuthContext);
 
-  useEffect(() => {
-    const getCurrentSentence = async () => {
-      const fetchedSentence = await getCurrentSessionState(
-        token ?? "",
-        session.id,
-      );
-      if (fetchedSentence.type === "full-feedback-state") {
-        setCurrentSentence(fetchedSentence.data.gpt_response.sentence);
-      } else if (session.activity.activity_settings?.first_sentence) {
-        setCurrentSentence(session.activity.activity_settings?.first_sentence);
-      } else {
-        setCurrentSentence("The quick brown fox jumped over the lazy dog");
-      }
-    };
-    getCurrentSentence();
-  }, [session.id, token]);
-
-  const { start } = useAudioAnalysisStream({
+  // Initialize hybrid audio analysis
+  const {
+    processAudio,
+    initializeModel,
+    isModelLoading,
+    modelLoadProgress,
+    isClientExtractionEnabled,
+  } = useHybridAudioAnalysis({
     onProcessingStart: () => {
       setIsProcessing(true);
     },
@@ -77,22 +69,46 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
     },
     onError: (err) => {
       console.error("Stream error:", err);
-      setIsProcessing(false); // Make sure to clear processing state on error
+      setIsProcessing(false);
     },
     sessionId: session.id,
   });
 
+  // Initialize the phoneme model when component mounts (if client extraction is enabled)
+  useEffect(() => {
+    if (isClientExtractionEnabled) {
+      initializeModel();
+    }
+  }, [isClientExtractionEnabled]);
+
+  useEffect(() => {
+    const getCurrentSentence = async () => {
+      const fetchedSentence = await getCurrentSessionState(
+        token ?? "",
+        session.id
+      );
+      if (fetchedSentence.type === "full-feedback-state") {
+        setCurrentSentence(fetchedSentence.data.gpt_response.sentence);
+      } else if (session.activity.activity_settings?.first_sentence) {
+        setCurrentSentence(session.activity.activity_settings?.first_sentence);
+      } else {
+        setCurrentSentence("The quick brown fox jumped over the lazy dog");
+      }
+    };
+    getCurrentSentence();
+  }, [session.id, token]);
+
   const { isRecording, startRecording, stopRecording } = useAudioRecorder(
     (audioFile: File) => {
-      start(audioFile, currentSentence ?? "");
-    },
+      processAudio(audioFile, currentSentence ?? "");
+    }
   );
 
   const displayNextSentence = () => {
     setShowHighlightedWords(false);
     setAnalysisData(null);
     setCurrentSentence(
-      nextSentence || "The quick brown fox jumped over the lazy dog",
+      nextSentence || "The quick brown fox jumped over the lazy dog"
     );
     setNextSentence(null);
     setFeedback(null);
@@ -111,6 +127,8 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
     showHighlightedWords,
     isRecording,
     isProcessing,
+    isModelLoading,
+    modelLoadProgress,
     onStartRecording: startRecording,
     onStopRecording: stopRecording,
     displayNextSentence,

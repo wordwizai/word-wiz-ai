@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
-import { useAudioAnalysisStream } from "@/hooks/useAudioAnalysisStream";
+import { useHybridAudioAnalysis } from "@/hooks/useHybridAudioAnalysis";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getCurrentSessionState, type Session } from "@/api";
 
@@ -27,6 +27,8 @@ interface ChoiceStoryBasePracticeProps {
     showHighlightedWords: boolean;
     isRecording: boolean;
     isProcessing: boolean;
+    isModelLoading: boolean;
+    modelLoadProgress: number;
     onStartRecording: () => void;
     onStopRecording: () => void;
     displayNextSentence: (nextSentence: string) => void;
@@ -51,33 +53,14 @@ const ChoiceStoryBasePractice = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const { token } = useContext(AuthContext);
 
-  useEffect(() => {
-    const getCurrentSentence = async () => {
-      const fetchedSentence = await getCurrentSessionState(
-        token ?? "",
-        session.id,
-      );
-      console.log("Fetched sentence:", fetchedSentence);
-      if (fetchedSentence.type === "full-feedback-state") {
-        setCurrentSentence(fetchedSentence.data.sentence);
-        setFeedback(fetchedSentence.data.gpt_response.feedback);
-        setSentenceOptions(fetchedSentence.data.gpt_response.sentence);
-        setAnalysisData(fetchedSentence.data.phoneme_analysis);
-        setShowSentenceOptions(true);
-        setShowHighlightedWords(true);
-      } else if (fetchedSentence.type === "activity-settings") {
-        setCurrentSentence(fetchedSentence.data.first_sentence);
-        setFeedback(null);
-        setSentenceOptions(null);
-        setShowSentenceOptions(false);
-      } else {
-        setCurrentSentence("The quick brown fox jumped over the lazy dog");
-      }
-    };
-    getCurrentSentence();
-  }, [session.id, token]);
-
-  const { start } = useAudioAnalysisStream({
+  // Initialize hybrid audio analysis
+  const {
+    processAudio,
+    initializeModel,
+    isModelLoading,
+    modelLoadProgress,
+    isClientExtractionEnabled,
+  } = useHybridAudioAnalysis({
     onProcessingStart: () => {
       setIsProcessing(true);
     },
@@ -101,15 +84,48 @@ const ChoiceStoryBasePractice = ({
     },
     onError: (err) => {
       console.error("Stream error:", err);
-      setIsProcessing(false); // Make sure to clear processing state on error
+      setIsProcessing(false);
     },
     sessionId: session.id,
   });
 
+  // Initialize the phoneme model when component mounts (if client extraction is enabled)
+  useEffect(() => {
+    if (isClientExtractionEnabled) {
+      initializeModel();
+    }
+  }, [isClientExtractionEnabled]);
+
+  useEffect(() => {
+    const getCurrentSentence = async () => {
+      const fetchedSentence = await getCurrentSessionState(
+        token ?? "",
+        session.id
+      );
+      console.log("Fetched sentence:", fetchedSentence);
+      if (fetchedSentence.type === "full-feedback-state") {
+        setCurrentSentence(fetchedSentence.data.sentence);
+        setFeedback(fetchedSentence.data.gpt_response.feedback);
+        setSentenceOptions(fetchedSentence.data.gpt_response.sentence);
+        setAnalysisData(fetchedSentence.data.phoneme_analysis);
+        setShowSentenceOptions(true);
+        setShowHighlightedWords(true);
+      } else if (fetchedSentence.type === "activity-settings") {
+        setCurrentSentence(fetchedSentence.data.first_sentence);
+        setFeedback(null);
+        setSentenceOptions(null);
+        setShowSentenceOptions(false);
+      } else {
+        setCurrentSentence("The quick brown fox jumped over the lazy dog");
+      }
+    };
+    getCurrentSentence();
+  }, [session.id, token]);
+
   const { isRecording, startRecording, stopRecording } = useAudioRecorder(
     (audioFile: File) => {
-      start(audioFile, currentSentence ?? "");
-    },
+      processAudio(audioFile, currentSentence ?? "");
+    }
   );
 
   const displayNextSentence = (nextSentence: string) => {
@@ -137,6 +153,8 @@ const ChoiceStoryBasePractice = ({
     showHighlightedWords,
     isRecording,
     isProcessing,
+    isModelLoading,
+    modelLoadProgress,
     onStartRecording: startRecording,
     onStopRecording: stopRecording,
     displayNextSentence,

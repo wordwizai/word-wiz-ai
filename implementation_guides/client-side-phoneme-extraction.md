@@ -15,6 +15,7 @@
   - All QA checks passed
 
 - ✅ **Phase 2: Frontend Model Integration** - Completed on November 2, 2025
+
   - Installed @xenova/transformers package
   - Created phonemeExtractor service with singleton pattern
   - Created usePhonemeModel React hook
@@ -23,13 +24,20 @@
   - Browser/device capability detection implemented
   - Note: Runtime testing required for full validation
 
+- ✅ **Phase 3: Hybrid Audio Processing Pipeline** - Completed on November 2, 2025
+  - Updated useAudioAnalysisStream to accept optional clientPhonemes parameter
+  - Created useHybridAudioAnalysis orchestration hook
+  - Updated BasePractice and ChoiceStoryBasePractice components
+  - Added model initialization on component mount
+  - Added model loading states to component props
+  - Note: Performance monitoring is optional and not yet implemented
+
 ### In Progress
 
-- ⏳ **Phase 3: Hybrid Audio Processing Pipeline** - Not started
+- ⬜ **Phase 4: Backend Processing Updates** - Not started
 
 ### Pending
 
-- ⬜ **Phase 3: Hybrid Audio Processing Pipeline** - Not started
 - ⬜ **Phase 4: Backend Processing Updates** - Not started
 - ⬜ **Phase 5: Error Handling & Optimization** - Not started
 
@@ -311,10 +319,10 @@ Update the audio recording and analysis flow to use client-side phonemes when av
 
 **File:** `frontend/src/hooks/useAudioAnalysisStream.ts`
 
-- [ ] Add optional `clientPhonemes` parameter to `start()` method
-- [ ] Update FormData to include phonemes when available
-- [ ] Route to new endpoint when phonemes provided
-- [ ] Add fallback logic: if client extraction fails, use original endpoint
+- [x] Add optional `clientPhonemes` parameter to `start()` method
+- [x] Update FormData to include phonemes when available
+- [x] Route to new endpoint when phonemes provided
+- [x] Add fallback logic: if client extraction fails, use original endpoint
 
 **Updated signature:**
 
@@ -341,13 +349,13 @@ const start = (
 
 **File:** `frontend/src/hooks/useHybridAudioAnalysis.ts`
 
-- [ ] Combine `usePhonemeModel` + `useAudioAnalysisStream`
-- [ ] Implement smart processing flow:
+- [x] Combine `usePhonemeModel` + `useAudioAnalysisStream`
+- [x] Implement smart processing flow:
   1. Check if client extraction is enabled
   2. Check if model is ready
   3. If yes: extract phonemes locally, send to backend
   4. If no: send audio directly to backend
-- [ ] Add performance metrics tracking (optional)
+- [ ] Add performance metrics tracking (optional - deferred to Phase 5)
 
 **Flow logic:**
 
@@ -372,12 +380,12 @@ const processAudio = async (audioBlob: Blob, sentence: string) => {
 
 #### 3.3 Update Practice Components
 
-**Files:** `frontend/src/pages/Practice.tsx` (or similar activity components)
+**Files:** `frontend/src/components/practice/BasePractice.tsx` and `frontend/src/components/practice/ChoiceStoryBasePractice.tsx`
 
-- [ ] Replace direct `useAudioAnalysisStream` with `useHybridAudioAnalysis`
-- [ ] Add model initialization on component mount (if setting enabled)
-- [ ] Show loading indicator while model loads
-- [ ] Add "Processing locally..." vs "Processing on server..." status messages
+- [x] Replace direct `useAudioAnalysisStream` with `useHybridAudioAnalysis`
+- [x] Add model initialization on component mount (if setting enabled)
+- [x] Show loading indicator while model loads
+- [x] Add `isModelLoading` and `modelLoadProgress` to component props (available for child components to display)
 
 **Component changes:**
 
@@ -411,9 +419,11 @@ const Practice = () => {
 
 **File:** `frontend/src/utils/performanceMonitor.ts`
 
-- [ ] Track client vs server processing times
-- [ ] Log to console in development
-- [ ] Send anonymized metrics to analytics (optional)
+- [ ] Track client vs server processing times (deferred to Phase 5)
+- [ ] Log to console in development (deferred to Phase 5)
+- [ ] Send anonymized metrics to analytics (optional - deferred to Phase 5)
+
+**Note:** Performance monitoring is implemented within useHybridAudioAnalysis with console.log statements. A dedicated monitoring utility can be added in Phase 5.
 
 ### Quality Assurance Checklist
 

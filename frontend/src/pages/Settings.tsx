@@ -38,6 +38,7 @@ type Settings = {
   audio_feedback_volume?: number | null;
   notifications_enabled?: boolean | null;
   email_notifications?: boolean | null;
+  use_client_phoneme_extraction?: boolean | null;
 };
 
 const initialSettings: Settings = {
@@ -47,6 +48,7 @@ const initialSettings: Settings = {
   audio_feedback_volume: 0.5,
   notifications_enabled: true,
   email_notifications: true,
+  use_client_phoneme_extraction: true,
 };
 
 const Settings = () => {
@@ -54,7 +56,7 @@ const Settings = () => {
   const { user } = useContext(AuthContext);
   const { settings, updateSettings } = useSettings();
   const [tempSettings, setTempSettings] = useState<Settings>(
-    settings || initialSettings,
+    settings || initialSettings
   );
   const [tab, setTab] = useState(() => {
     const hash =
@@ -75,14 +77,14 @@ const Settings = () => {
   };
 
   const handleSave = async () => {
-    const response = await updateSettings(tempSettings);
-    if (response) {
+    try {
+      await updateSettings(tempSettings);
       setSavedStatus("Settings saved successfully!");
       setTimeout(() => setSavedStatus(""), 3000);
-    } else {
+    } catch (error) {
       setSavedStatus("Failed to save settings.");
+      console.error("Settings update error:", error);
     }
-    console.log("Settings updated:", response);
   };
 
   return (
@@ -97,11 +99,12 @@ const Settings = () => {
         }}
         className="w-full"
       >
-        <TabsList className="grid grid-cols-4 mb-8">
+        <TabsList className="grid grid-cols-5 mb-8">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="account">Account</TabsTrigger>
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsTrigger value="performance">Performance</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile">
@@ -271,6 +274,52 @@ const Settings = () => {
                     handleChange("notifications_enabled", checked)
                   }
                 />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="performance">
+          <Card>
+            <CardHeader>
+              <CardTitle>Performance Settings</CardTitle>
+              <CardDescription>
+                Optimize how the application processes audio and AI features.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex-1 pr-4">
+                  <Label htmlFor="clientProcessing">
+                    Client-Side Phoneme Processing
+                  </Label>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Process phonemes in your browser for 50-70% faster results.
+                    Requires ~100MB model download on first use. Disable on
+                    slower devices or poor connections.
+                  </p>
+                </div>
+                <Switch
+                  id="clientProcessing"
+                  checked={!!tempSettings.use_client_phoneme_extraction}
+                  onCheckedChange={(checked) =>
+                    handleChange("use_client_phoneme_extraction", checked)
+                  }
+                />
+              </div>
+
+              <Separator />
+
+              <div className="rounded-lg bg-muted p-4">
+                <h4 className="text-sm font-medium mb-2">
+                  💡 Performance Tips
+                </h4>
+                <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                  <li>Model downloads once and caches for future sessions</li>
+                  <li>Automatically disabled on low-memory devices</li>
+                  <li>Falls back to server processing if any issues occur</li>
+                  <li>Best results on desktop with good internet connection</li>
+                </ul>
               </div>
             </CardContent>
           </Card>

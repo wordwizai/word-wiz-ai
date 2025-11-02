@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import {
   updateSettings as apiUpdateSettings,
@@ -13,6 +13,7 @@ type Settings = {
   audio_feedback_volume?: number | null;
   notifications_enabled?: boolean | null;
   email_notifications?: boolean | null;
+  use_client_phoneme_extraction?: boolean | null;
 };
 
 type SettingsContextType = {
@@ -24,7 +25,7 @@ type SettingsContextType = {
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(
-  undefined,
+  undefined
 );
 
 export const useSettings = () => {

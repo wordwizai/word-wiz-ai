@@ -10,6 +10,7 @@
     "preview": "vite preview --port 5173"
   },
   "dependencies": {
+    "@huggingface/transformers": "^3.7.6",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-dropdown-menu": "^2.1.15",

@@ -25,12 +25,20 @@ def upgrade() -> None:
     inspector = sa.inspect(connection)
     
     if 'user_settings' in inspector.get_table_names():
-        # Add use_client_phoneme_extraction column to user_settings table
-        op.add_column('user_settings', sa.Column('use_client_phoneme_extraction', sa.Boolean(), nullable=True))
-        # Set default value for existing rows
-        op.execute('UPDATE user_settings SET use_client_phoneme_extraction = TRUE WHERE use_client_phoneme_extraction IS NULL')
-        # Make column non-nullable after setting defaults
-        op.alter_column('user_settings', 'use_client_phoneme_extraction', nullable=False)
+        # Check if column already exists
+        columns = [col['name'] for col in inspector.get_columns('user_settings')]
+        if 'use_client_phoneme_extraction' not in columns:
+            # Add use_client_phoneme_extraction column to user_settings table
+            # Use server_default for MySQL compatibility
+            op.add_column('user_settings', 
+                sa.Column('use_client_phoneme_extraction', sa.Boolean(), 
+                         nullable=False, server_default='1'))
+            print("Added use_client_phoneme_extraction column with default TRUE")
+        else:
+            print("Column use_client_phoneme_extraction already exists")
+            # Update any NULL values to TRUE for existing rows
+            op.execute('UPDATE user_settings SET use_client_phoneme_extraction = 1 WHERE use_client_phoneme_extraction IS NULL')
+            print("Updated NULL values to TRUE")
     else:
         print("Warning: user_settings table does not exist, skipping migration")
 

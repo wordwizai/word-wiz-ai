@@ -1,11 +1,46 @@
 import {
   pipeline,
   AutomaticSpeechRecognitionPipeline,
-} from "@xenova/transformers";
+  env,
+} from "@huggingface/transformers";
+import {
+  checkDeviceCapabilities,
+  type DeviceCapabilities,
+} from "../utils/deviceCapabilities";
+
+// Configure HuggingFace authentication token globally
+const hfToken = import.meta.env.VITE_HUGGINGFACE_TOKEN;
+if (hfToken) {
+  // Set custom headers for authentication
+  (env as any).customHeaders = {
+    Authorization: `Bearer ${hfToken}`,
+  };
+  console.log("🔑 HuggingFace token configured");
+} else {
+  console.warn("⚠️ No HuggingFace token found - may encounter 401 errors");
+}
+
+// Performance optimizations for Transformers.js
+// Enable multi-threading for faster inference (requires crossOriginIsolated headers)
+if (env.backends?.onnx?.wasm) {
+  const numThreads = navigator.hardwareConcurrency || 4;
+  env.backends.onnx.wasm.numThreads = numThreads;
+  console.log(
+    `🚀 WASM configured for ${numThreads} threads (will fall back to single-thread if crossOriginIsolated not enabled)`
+  );
+}
+
+// Try to use WebGPU for even faster inference if available
+// WebGPU is 10-100x faster than WASM but only available in Chrome/Edge
+if ("gpu" in navigator) {
+  console.log("🎮 WebGPU detected - will attempt to use GPU acceleration");
+} else {
+  console.log("💻 WebGPU not available, using CPU (WASM)");
+}
 
 /**
  * Singleton client-side phoneme extractor.
- * Manages model lifecycle, caching, and extraction.
+ * Manages model lifecycle, caching, and extraction with resource detection.
  *
  * Model Options:
  * - "Xenova/wav2vec2-lv-60-espeak-cv-ft" - eSpeak phonemes (default, ~250MB)
@@ -22,13 +57,30 @@ class ClientPhonemeExtractor {
   private model: AutomaticSpeechRecognitionPipeline | null = null;
 
   // Model configuration - can be changed before loading
-  private modelName = "Xenova/wav2vec2-lv-60-espeak-cv-ft"; // ONNX-compatible phoneme model
+  // Using our custom ONNX-converted TIMIT-IPA model for IPA phoneme extraction
+  private modelName = "Bobcat9/wav2vec2-timit-ipa-onnx"; // ONNX-compatible IPA phoneme model
+
+  // Use quantized model for faster inference (4-5x speedup)
+  private useQuantized = true;
 
   private isLoading = false;
   private loadProgress = 0;
   private progressCallback: ((progress: number) => void) | null = null;
 
-  private constructor() {}
+  // Device capabilities cache
+  private deviceCapabilities: DeviceCapabilities | null = null;
+
+  private constructor() {
+    // Check device capabilities on initialization
+    this.deviceCapabilities = checkDeviceCapabilities();
+
+    if (!this.deviceCapabilities.canRunModel) {
+      console.warn(
+        "Device cannot run AI model:",
+        this.deviceCapabilities.warningMessage
+      );
+    }
+  }
 
   /**
    * Get the singleton instance.
@@ -41,63 +93,37 @@ class ClientPhonemeExtractor {
   }
 
   /**
+   * Get device capabilities assessment.
+   */
+  getDeviceCapabilities(): DeviceCapabilities {
+    if (!this.deviceCapabilities) {
+      this.deviceCapabilities = checkDeviceCapabilities();
+    }
+    return this.deviceCapabilities;
+  }
+
+  /**
    * Check if the browser supports WebAssembly and required features.
+   * @deprecated Use getDeviceCapabilities() instead for more comprehensive checks
    */
   checkBrowserSupport(): boolean {
-    try {
-      // Check WebAssembly support
-      if (typeof WebAssembly === "undefined") {
-        console.warn("WebAssembly not supported");
-        return false;
-      }
-
-      // Check if we can create audio context
-      if (
-        typeof AudioContext === "undefined" &&
-        typeof (window as any).webkitAudioContext === "undefined"
-      ) {
-        console.warn("AudioContext not supported");
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error("Browser support check failed:", error);
-      return false;
-    }
+    const capabilities = this.getDeviceCapabilities();
+    return capabilities.hasWebAssembly;
   }
 
   /**
    * Check if device has enough resources to run the model.
-   * Estimates based on available RAM and device type.
+   * @deprecated Use getDeviceCapabilities() instead for more comprehensive checks
    */
   async checkDeviceResources(): Promise<boolean> {
-    try {
-      // Check device memory (if available)
-      const deviceMemory = (navigator as any).deviceMemory;
-      if (deviceMemory && deviceMemory < 4) {
-        console.warn(`Low device memory: ${deviceMemory}GB`);
-        return false;
-      }
-
-      // Check if mobile device (may struggle with model)
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      if (isMobile && deviceMemory && deviceMemory < 6) {
-        console.warn("Mobile device with limited resources");
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error("Resource check failed:", error);
-      // If we can't check, assume it's okay
-      return true;
-    }
+    const capabilities = this.getDeviceCapabilities();
+    return capabilities.canRunModel;
   }
 
   /**
    * Load the phoneme extraction model.
    * @param onProgress - Callback for loading progress (0-100)
+   * @throws Error if device cannot run model
    */
   async loadModel(onProgress?: (progress: number) => void): Promise<void> {
     if (this.model) {
@@ -110,12 +136,28 @@ class ClientPhonemeExtractor {
       return;
     }
 
+    // Check device capabilities before attempting to load
+    const capabilities = this.getDeviceCapabilities();
+    if (!capabilities.canRunModel) {
+      const error = new Error(
+        capabilities.warningMessage ||
+          "Device does not meet minimum requirements for running AI model"
+      );
+      console.error("Cannot load model:", error.message);
+      throw error;
+    }
+
     this.isLoading = true;
     this.progressCallback = onProgress || null;
     this.loadProgress = 0;
 
     try {
       console.log("Loading phoneme extraction model...");
+      console.log(
+        `Device: ${capabilities.isMobile ? "Mobile" : "Desktop"}, RAM: ${
+          capabilities.estimatedRAM
+        }GB`
+      );
 
       // Update progress callback
       const updateProgress = (progress: number) => {
@@ -127,26 +169,85 @@ class ClientPhonemeExtractor {
 
       updateProgress(10);
 
-      // Load the ASR pipeline with progress tracking
-      this.model = await pipeline(
-        "automatic-speech-recognition",
-        this.modelName,
-        {
-          progress_callback: (progressData: any) => {
-            // TransformersJS progress format: { progress, loaded, total, status }
-            if (progressData.progress !== undefined) {
-              const modelProgress = Math.min(
-                90,
-                Math.floor(10 + progressData.progress * 0.8)
-              );
-              updateProgress(modelProgress);
-            }
-          },
+      // Load the ASR pipeline with progress tracking and authentication
+      const hfToken = import.meta.env.VITE_HUGGINGFACE_TOKEN;
+
+      // Configure base settings
+      const baseConfig: any = {
+        // Pass HuggingFace token for model download authentication
+        token: hfToken,
+        // Use quantized model for 4-5x faster inference
+        quantized: this.useQuantized,
+        progress_callback: (progressData: any) => {
+          // TransformersJS progress format: { progress, loaded, total, status }
+          if (progressData.progress !== undefined) {
+            const modelProgress = Math.min(
+              90,
+              Math.floor(10 + progressData.progress * 0.8)
+            );
+            updateProgress(modelProgress);
+          }
+        },
+      };
+
+      // Try WebGPU first, fallback to WASM if it fails
+      let loadSuccess = false;
+
+      // Attempt 1: Try WebGPU (10-100x faster)
+      // WebGPU is available in Chrome/Edge 113+, Safari 18+
+      // In production (HTTPS), it should work automatically
+      // In development, users may need to enable chrome://flags/#enable-unsafe-webgpu
+      if ("gpu" in navigator) {
+        try {
+          console.log("🎮 Attempting WebGPU acceleration...");
+          const adapter = await (navigator as any).gpu?.requestAdapter();
+          if (adapter) {
+            const webgpuConfig = {
+              ...baseConfig,
+              device: "webgpu",
+              dtype: "fp32",
+            };
+            this.model = await pipeline(
+              "automatic-speech-recognition",
+              this.modelName,
+              webgpuConfig as any
+            );
+            console.log("✅ Using WebGPU acceleration! (10-100x faster)");
+            loadSuccess = true;
+          } else {
+            console.log("⚠️ WebGPU adapter not available, falling back to CPU");
+          }
+        } catch (webgpuError) {
+          console.warn("⚠️ WebGPU failed, falling back to CPU:", webgpuError);
+          if (import.meta.env.DEV) {
+            console.log(
+              "💡 Tip: Enable chrome://flags/#enable-unsafe-webgpu for faster inference in development"
+            );
+          }
         }
-      );
+      } else {
+        console.log("💻 WebGPU not supported in this browser, using CPU");
+      }
+
+      // Attempt 2: Fallback to WASM (CPU)
+      if (!loadSuccess) {
+        console.log("💻 Loading model on CPU (WASM)...");
+        const wasmConfig = { ...baseConfig, device: "wasm" };
+        this.model = await pipeline(
+          "automatic-speech-recognition",
+          this.modelName,
+          wasmConfig as any
+        );
+        console.log("✅ Using CPU (WASM) backend");
+      }
 
       updateProgress(100);
-      console.log("Phoneme extraction model loaded successfully");
+      console.log(
+        `Phoneme extraction model loaded successfully (quantized: ${this.useQuantized})`
+      );
+
+      // Explicitly return to ensure promise resolves
+      return;
     } catch (error) {
       console.error("Failed to load model:", error);
       this.model = null;
@@ -179,29 +280,48 @@ class ClientPhonemeExtractor {
       const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
       // Get audio data as Float32Array (mono, 16kHz)
-      let audioData = audioBuffer.getChannelData(0);
+      let audioData: Float32Array = audioBuffer.getChannelData(0);
 
       // Resample to 16kHz if needed
       if (audioBuffer.sampleRate !== 16000) {
         console.log(`Resampling from ${audioBuffer.sampleRate}Hz to 16000Hz`);
-        audioData = this.resampleAudio(
+        const resampled = this.resampleAudio(
           audioData,
           audioBuffer.sampleRate,
           16000
-        ) as Float32Array;
+        );
+        audioData = resampled as Float32Array;
       }
 
-      // Run model inference
+      // Run model inference with CTC decoding
+      // Calculate min/max without spread operator to avoid stack overflow
+      let min = audioData[0];
+      let max = audioData[0];
+      for (let i = 1; i < audioData.length; i++) {
+        if (audioData[i] < min) min = audioData[i];
+        if (audioData[i] > max) max = audioData[i];
+      }
+      console.log(
+        `Audio data: ${audioData.length} samples, min: ${min}, max: ${max}`
+      );
+
       const result = await this.model(audioData, {
         return_timestamps: false,
-        chunk_length_s: 30,
-        stride_length_s: 5,
+        // Optimized chunk settings for faster processing
+        chunk_length_s: 20, // Reduced from 30s for faster processing
+        stride_length_s: 3, // Reduced from 5s for less overlap
+        // Force greedy decoding (faster than beam search)
+        num_beams: 1,
       });
 
       console.log("Raw model output:", result);
 
-      // Parse the phoneme output
-      const phonemes = this.parsePhonemeOutput(result.text);
+      const text = Array.isArray(result)
+        ? result[0]?.text || ""
+        : (result as any).text || "";
+      console.log("Decoded text:", text);
+
+      const phonemes = this.parsePhonemeOutput(text);
 
       console.log("Extracted phonemes:", phonemes);
       return phonemes;
@@ -213,45 +333,40 @@ class ClientPhonemeExtractor {
 
   /**
    * Parse phoneme output from model into word->phonemes format.
-   * Model outputs IPA phonemes separated by spaces, words separated by spaces.
+   * Model outputs IPA phonemes with [PAD] tokens and "|" as word delimiters.
+   * Example: "[PAD]ðə k[PAD]w[PAD]ɪ[PAD]k [PAD]br[PAD]aʊ[PAD]n[PAD]"
    */
   private parsePhonemeOutput(text: string): string[][] {
     if (!text || text.trim() === "") {
       return [];
     }
 
-    // The model outputs phonemes like: "h ɛ l oʊ w ɜr l d"
-    // We need to group them by words
-    // For now, split by spaces and group based on typical phoneme patterns
+    console.log("Parsing phoneme output:", text);
 
-    const phonemes = text
+    // Step 1: Remove all [PAD] tokens
+    let cleaned = text.replace(/\[PAD\]/g, "");
+    console.log("After removing [PAD]:", cleaned);
+
+    // Step 2: Replace "|" with space (word delimiter)
+    cleaned = cleaned.replace(/\|/g, " ");
+
+    // Step 3: Split by spaces to get individual phonemes
+    const phonemes = cleaned
       .trim()
       .split(/\s+/)
       .filter((p) => p.length > 0);
 
-    // Simple heuristic: group phonemes into words
-    // This is a basic implementation - you may need to adjust based on actual model output
-    const words: string[][] = [];
-    let currentWord: string[] = [];
+    console.log("Individual phoneme words:", phonemes);
 
-    for (const phoneme of phonemes) {
-      currentWord.push(phoneme);
+    // Step 4: Split each word into individual phoneme characters
+    // Each word like "ðə" needs to become ["ð", "ə"]
+    const words: string[][] = phonemes.map((word) => {
+      // Split the word into individual characters (phonemes)
+      return word.split("");
+    });
 
-      // Simple heuristic: vowels often end words
-      // This is approximate and may need refinement
-      const isVowel = /[aeiouəɛɪɔʊʌæ]/i.test(phoneme);
-      if (isVowel && currentWord.length >= 2) {
-        words.push([...currentWord]);
-        currentWord = [];
-      }
-    }
-
-    // Add remaining phonemes
-    if (currentWord.length > 0) {
-      words.push(currentWord);
-    }
-
-    return words.length > 0 ? words : [phonemes]; // Fallback: treat all as one word
+    console.log("Parsed into words:", words);
+    return words;
   }
 
   /**

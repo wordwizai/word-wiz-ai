@@ -53,7 +53,11 @@ export const useAudioAnalysisStream = (
 
     // Add client phonemes to FormData if available
     if (clientPhonemes) {
+      console.log("📤 Sending client-extracted phonemes to:", url);
+      console.log("Phonemes:", clientPhonemes.length, "words");
       formData.append("client_phonemes", JSON.stringify(clientPhonemes));
+    } else {
+      console.log("📤 No client phonemes, using standard endpoint:", url);
     }
 
     // Create a manual fetch POST to initialize the SSE

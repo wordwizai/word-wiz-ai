@@ -78,6 +78,7 @@ export function usePhonemeModel(): UsePhonemeModelReturn {
       return;
     }
 
+    console.log("🚀 Starting model load...");
     setIsLoading(true);
     setError(null);
     setLoadProgress(0);
@@ -89,11 +90,14 @@ export function usePhonemeModel(): UsePhonemeModelReturn {
         }
       });
 
+      console.log("✅ Model load completed, updating state...");
+
       if (isMountedRef.current) {
         setIsReady(true);
         setIsLoading(false);
         setLoadProgress(100);
         setShouldFallbackToServer(false);
+        console.log("✅ State updated: isReady=true");
       }
     } catch (err) {
       console.error("Failed to load model:", err);
@@ -115,8 +119,9 @@ export function usePhonemeModel(): UsePhonemeModelReturn {
    */
   const extractPhonemes = useCallback(
     async (audio: Blob): Promise<string[][] | null> => {
-      if (!isReady) {
-        console.warn("Model not ready, cannot extract phonemes");
+      // Check if model is actually loaded (not relying on React state to avoid timing issues)
+      if (!phonemeExtractor.isModelLoaded()) {
+        console.warn("Model not loaded, cannot extract phonemes");
         setShouldFallbackToServer(true);
         return null;
       }

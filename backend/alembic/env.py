@@ -4,10 +4,22 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
+import os
+import dotenv
+
+# Load environment variables
+dotenv.load_dotenv()
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+# Override sqlalchemy.url with environment variable if available
+database_url = os.getenv("DATABASE_URL")
+if database_url:
+    # Escape % characters for ConfigParser (replace % with %%)
+    escaped_url = database_url.replace('%', '%%')
+    config.set_main_option("sqlalchemy.url", escaped_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

@@ -33,3 +33,7 @@ backend/credentials/
 
 # large files
 *.tar
+
+# ONNX model conversion directories
+wav2vec2-timit-ipa-onnx/
+backend/wav2vec2-timit-ipa-onnx/

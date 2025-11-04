@@ -20,6 +20,7 @@ def validate_client_phonemes(
 ) -> tuple[bool, str]:
     """
     Validate that client phonemes match expected format.
+    Lenient validation - trust the frontend, just check basic structure.
     
     Args:
         phonemes: List of words, where each word is a list of phoneme strings
@@ -33,7 +34,6 @@ def validate_client_phonemes(
     Validation checks:
     - Top-level is a list
     - Each word is a list of strings
-    - Number of words matches sentence
     - Each word has at least one phoneme
     - Each phoneme is a string
     """
@@ -41,13 +41,13 @@ def validate_client_phonemes(
     if not isinstance(phonemes, list):
         return False, "Phonemes must be an array"
     
-    # Get expected word count from sentence
+    # Get expected word count from sentence (just for logging)
     expected_words = sentence.strip().split()
     expected_count = len(expected_words)
     
-    # Check word count matches
+    # Log word count difference but don't reject
     if len(phonemes) != expected_count:
-        return False, f"Expected {expected_count} words, got {len(phonemes)}"
+        logger.info(f"Phoneme word count ({len(phonemes)}) differs from sentence words ({expected_count}) - continuing anyway")
     
     # Validate each word's phonemes
     for i, word_phonemes in enumerate(phonemes):
@@ -57,16 +57,16 @@ def validate_client_phonemes(
         
         # Check word has phonemes
         if len(word_phonemes) == 0:
-            return False, f"Word {i} has no phonemes"
+            logger.warning(f"Word {i} has no phonemes - accepting anyway")
         
         # Check each phoneme is a string
         for j, phoneme in enumerate(word_phonemes):
             if not isinstance(phoneme, str):
                 return False, f"Word {i}, phoneme {j} must be a string, got {type(phoneme).__name__}"
             
-            # Check phoneme is not empty
+            # Allow empty phonemes (some words might be silent or have special handling)
             if len(phoneme) == 0:
-                return False, f"Word {i}, phoneme {j} is empty"
+                logger.debug(f"Word {i}, phoneme {j} is empty - continuing")
     
     return True, ""
 
@@ -103,18 +103,18 @@ def validate_client_words(
     if len(words) != len(phonemes):
         logger.info(f"Word count ({len(words)}) differs from phoneme count ({len(phonemes)}) - backend will align")
     
-    # Check each word is a non-empty string
+    # Check each word is a string (allow empty strings)
     for i, word in enumerate(words):
         if not isinstance(word, str):
             return False, f"Word {i} is not a string"
         if len(word) == 0:
-            return False, f"Word {i} is empty"
+            logger.debug(f"Word {i} is empty - continuing")
     
     # Fuzzy match against attempted sentence (optional - allows minor variations)
     # This is a warning, not an error, since ASR may produce slightly different text
     expected_words = sentence.lower().split()
     if len(words) != len(expected_words):
-        logger.warning(f"Word count mismatch: got {len(words)}, expected {len(expected_words)}")
+        logger.info(f"Word count differs from sentence: got {len(words)}, expected {len(expected_words)}")
     
     return True, ""
 

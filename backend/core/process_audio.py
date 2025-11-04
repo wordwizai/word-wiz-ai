@@ -390,8 +390,11 @@ async def process_audio_with_client_phonemes(
     if len(ground_truth_phonemes) <= 1:
         raise ValueError("ground_truth_phonemes must have at least 2 elements")
     
-    # Preprocess the audio
-    audio_array = preprocess_audio(audio=audio_array, sr=sampling_rate)
+    # Only preprocess audio if we need to extract words from it
+    # If client provided both phonemes and words, we don't need the audio at all
+    if client_words is None or len(client_words) == 0:
+        # Preprocess the audio (needed for word extraction)
+        audio_array = preprocess_audio(audio=audio_array, sr=sampling_rate)
     
     # Determine if we need to extract words
     if client_words is not None and len(client_words) > 0:

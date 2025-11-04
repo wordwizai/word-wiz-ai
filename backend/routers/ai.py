@@ -172,10 +172,12 @@ async def analyze_audio_with_phonemes(
                 print("Invalid client words: not an array")
                 words_data = None
             elif phonemes_data and len(words_data) != len(phonemes_data):
-                print(f"Word count mismatch: {len(words_data)} words vs {len(phonemes_data)} phoneme groups")
-                words_data = None
-            else:
-                # Validate each word is a non-empty string
+                # Log the mismatch but don't reject - backend will handle alignment
+                print(f"Word count ({len(words_data)}) differs from phoneme count ({len(phonemes_data)}) - backend will align")
+                # Don't set to None - trust the frontend data
+            
+            # Validate each word is a non-empty string
+            if words_data:
                 for i, word in enumerate(words_data):
                     if not isinstance(word, str) or len(word) == 0:
                         print(f"Invalid word at index {i}")

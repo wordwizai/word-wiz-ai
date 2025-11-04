@@ -142,6 +142,16 @@ async def analyze_audio_file_event_stream(
     try:
         # STEP 1: ANALYZE AUDIO
         
+        # Check if we received empty audio (client sent it to save bandwidth)
+        if len(audio_array) == 0:
+            # Empty audio is only valid if we have client phonemes and words
+            if client_phonemes is None or client_words is None:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Empty audio received but client extraction data is incomplete. Please try again."
+                )
+            print("📭 Empty audio received - using full client extraction")
+        
         # Determine if we should use client phonemes/words or extract on server
         use_client_phonemes = False
         use_client_words = False

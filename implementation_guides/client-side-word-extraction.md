@@ -1083,6 +1083,534 @@ def validate_client_words(
 
 ---
 
+## Appendix D: Model Loading Progress Alert
+
+### Goal
+
+Add a real-time, non-intrusive alert that shows model loading progress at the top of the screen, giving users visibility into what's happening during the initial model download.
+
+### Implementation Steps
+
+#### D.1 Create Loading Alert Component
+
+**File:** `frontend/src/components/ui/ModelLoadingAlert.tsx`
+
+```typescript
+import { useEffect, useState } from "react";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Loader2, X, CheckCircle2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface ModelLoadingAlertProps {
+  isLoading: boolean;
+  progress: number;
+  onDismiss?: () => void;
+  canDismiss?: boolean;
+}
+
+export const ModelLoadingAlert = ({
+  isLoading,
+  progress,
+  onDismiss,
+  canDismiss = false,
+}: ModelLoadingAlertProps) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    if (isLoading) {
+      setIsVisible(true);
+      // Trigger animation after mount
+      setTimeout(() => setIsAnimating(true), 10);
+    } else {
+      // Slide up before hiding
+      setIsAnimating(false);
+      setTimeout(() => setIsVisible(false), 300);
+    }
+  }, [isLoading]);
+
+  const handleDismiss = () => {
+    if (canDismiss && onDismiss) {
+      setIsAnimating(false);
+      setTimeout(() => {
+        setIsVisible(false);
+        onDismiss();
+      }, 300);
+    }
+  };
+
+  if (!isVisible) return null;
+
+  const isComplete = progress >= 100;
+
+  return (
+    <div
+      className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-out",
+        isAnimating ? "translate-y-0" : "-translate-y-full"
+      )}
+    >
+      <Alert
+        className={cn(
+          "rounded-none border-0 border-b shadow-lg",
+          isComplete
+            ? "bg-green-600 text-white border-green-700"
+            : "bg-primary text-primary-foreground border-primary"
+        )}
+      >
+        <div className="container mx-auto px-4">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 mt-0.5">
+              {isComplete ? (
+                <CheckCircle2 className="h-5 w-5" />
+              ) : (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              )}
+            </div>
+
+            <div className="flex-1 min-w-0 space-y-2">
+              <AlertTitle className="text-sm font-semibold">
+                {isComplete
+                  ? "Model ready!"
+                  : "Loading speech recognition model..."}
+              </AlertTitle>
+
+              <AlertDescription className="text-xs opacity-90">
+                {isComplete
+                  ? "You can now use faster local processing"
+                  : "This happens once and will be cached for future use"}
+              </AlertDescription>
+
+              {!isComplete && (
+                <>
+                  <Progress
+                    value={progress}
+                    className="h-2 bg-primary-foreground/20"
+                  />
+                  <p className="text-xs opacity-75">{progress}%</p>
+                </>
+              )}
+            </div>
+
+            {canDismiss && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleDismiss}
+                className="flex-shrink-0 h-8 w-8 hover:bg-primary-foreground/20"
+                aria-label="Dismiss"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </div>
+      </Alert>
+    </div>
+  );
+};
+```
+
+#### D.2 Update Root Layout or App Component
+
+**File:** `frontend/src/App.tsx` or `frontend/src/components/layout/RootLayout.tsx`
+
+```typescript
+import { ModelLoadingAlert } from "@/components/ui/ModelLoadingAlert";
+import { usePhonemeModel } from "@/hooks/usePhonemeModel";
+import { useSettings } from "@/contexts/SettingsContext";
+
+export const App = () => {
+  const { settings } = useSettings();
+  const { isLoading, loadProgress, isReady } = usePhonemeModel();
+
+  // Show alert when model is loading and client extraction is enabled
+  const showLoadingAlert =
+    settings?.use_client_phoneme_extraction && (isLoading || isReady);
+
+  return (
+    <>
+      <ModelLoadingAlert
+        isLoading={isLoading || isReady}
+        progress={loadProgress}
+        canDismiss={isReady} // Allow dismissing when complete
+      />
+
+      {/* Rest of your app */}
+      <Routes>{/* ... routes ... */}</Routes>
+    </>
+  );
+};
+```
+
+#### D.3 Alternative: Toast-Style Notification
+
+**File:** `frontend/src/hooks/useModelLoadingToast.ts`
+
+For a less intrusive approach, use shadcn/ui toast in the corner:
+
+```typescript
+import { useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2, CheckCircle2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+
+export const useModelLoadingToast = () => {
+  const { toast, dismiss } = useToast();
+
+  const showLoadingToast = (progress: number) => {
+    const toastId = "model-loading";
+
+    if (progress < 100) {
+      toast({
+        id: toastId,
+        title: (
+          <div className="flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Loading AI Model</span>
+          </div>
+        ),
+        description: (
+          <div className="space-y-2 mt-2">
+            <Progress value={progress} className="h-2" />
+            <p className="text-xs text-muted-foreground">
+              {progress}% - This will be cached for future use
+            </p>
+          </div>
+        ),
+        duration: Infinity, // Don't auto-dismiss
+      });
+    } else {
+      // Show success
+      dismiss(toastId);
+      toast({
+        title: (
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 text-green-500" />
+            <span>Model Ready!</span>
+          </div>
+        ),
+        description: "Local speech processing is now available",
+        duration: 3000,
+        variant: "default",
+      });
+    }
+  };
+
+  return { showLoadingToast };
+};
+```
+
+**Usage in component:**
+
+```typescript
+import { useModelLoadingToast } from "@/hooks/useModelLoadingToast";
+import { usePhonemeModel } from "@/hooks/usePhonemeModel";
+
+const Practice = () => {
+  const { isLoading, loadProgress } = usePhonemeModel();
+  const { showLoadingToast } = useModelLoadingToast();
+
+  useEffect(() => {
+    if (isLoading || loadProgress === 100) {
+      showLoadingToast(loadProgress);
+    }
+  }, [isLoading, loadProgress, showLoadingToast]);
+
+  // ... rest of component
+};
+```
+
+#### D.4 Enhanced Progress Details (Optional)
+
+**File:** `frontend/src/components/ui/DetailedModelLoadingAlert.tsx`
+
+For power users who want more information:
+
+```typescript
+import { useState } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Loader2, ChevronDown, ChevronUp, CheckCircle2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface DetailedModelLoadingAlertProps {
+  isLoading: boolean;
+  progress: number;
+  modelSize?: string;
+  estimatedTime?: number;
+}
+
+export const DetailedModelLoadingAlert = ({
+  isLoading,
+  progress,
+  modelSize = "~250 MB",
+  estimatedTime,
+}: DetailedModelLoadingAlertProps) => {
+  const [showDetails, setShowDetails] = useState(false);
+  const isComplete = progress >= 100;
+
+  const getStage = (progress: number) => {
+    if (progress < 10) return "Initializing...";
+    if (progress < 30) return "Downloading model weights...";
+    if (progress < 60) return "Loading model into memory...";
+    if (progress < 90) return "Optimizing for your device...";
+    if (progress < 100) return "Finalizing...";
+    return "Complete!";
+  };
+
+  const remainingTime =
+    estimatedTime && progress < 100
+      ? Math.ceil((estimatedTime * (100 - progress)) / 100)
+      : null;
+
+  return (
+    <div className="fixed top-0 left-0 right-0 z-50">
+      <Alert
+        className={cn(
+          "rounded-none border-0 border-b shadow-lg",
+          isComplete
+            ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white"
+            : "bg-gradient-to-r from-primary to-blue-600 text-primary-foreground"
+        )}
+      >
+        <div className="container mx-auto px-4">
+          <Collapsible open={showDetails} onOpenChange={setShowDetails}>
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 mt-1">
+                {isComplete ? (
+                  <CheckCircle2 className="h-5 w-5" />
+                ) : (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                )}
+              </div>
+
+              <div className="flex-1 min-w-0 space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <AlertTitle className="text-sm font-semibold">
+                      {getStage(progress)}
+                    </AlertTitle>
+                    <AlertDescription className="text-xs opacity-90 mt-1">
+                      {progress}% complete
+                      {remainingTime && (
+                        <span className="ml-2">
+                          • ~{remainingTime}s remaining
+                        </span>
+                      )}
+                    </AlertDescription>
+                  </div>
+
+                  <CollapsibleTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto py-1 px-2 text-xs hover:bg-primary-foreground/20"
+                    >
+                      {showDetails ? (
+                        <>
+                          Less <ChevronUp className="ml-1 h-3 w-3" />
+                        </>
+                      ) : (
+                        <>
+                          Details <ChevronDown className="ml-1 h-3 w-3" />
+                        </>
+                      )}
+                    </Button>
+                  </CollapsibleTrigger>
+                </div>
+
+                {!isComplete && (
+                  <Progress
+                    value={progress}
+                    className="h-2 bg-primary-foreground/20"
+                  />
+                )}
+
+                <CollapsibleContent className="space-y-1">
+                  <div className="text-xs opacity-90 space-y-1 pt-2 border-t border-primary-foreground/20">
+                    <p>• Model size: {modelSize}</p>
+                    <p>• Storage: Cached in browser (persistent)</p>
+                    <p>• This download happens once per device</p>
+                    <p>• Enables 70-90% faster processing</p>
+                  </div>
+                </CollapsibleContent>
+              </div>
+            </div>
+          </Collapsible>
+        </div>
+      </Alert>
+    </div>
+  );
+};
+```
+
+### Quality Assurance Checklist
+
+- [ ] **Alert appears when model loading starts**
+- [ ] **Progress updates smoothly** (not jumpy)
+- [ ] **Alert slides down from top** with smooth animation
+- [ ] **Alert slides up when dismissed** or loading completes
+- [ ] **Success state shows briefly** before dismissing
+- [ ] **Alert doesn't block UI interaction** (positioned properly)
+- [ ] **Dismiss button works** when enabled
+- [ ] **Alert persists across route changes** during loading
+- [ ] **Alert doesn't show** if client extraction is disabled
+- [ ] **Alert is accessible** (keyboard navigation, screen readers)
+
+### Styling Variations
+
+All variations use shadcn/ui theming and work with your existing design system:
+
+#### Minimal Style (Subtle):
+
+```tsx
+<Alert className="rounded-none border-0 border-b bg-muted text-foreground">
+  {/* Subtle, blends with existing UI */}
+</Alert>
+```
+
+#### Bold Style (Eye-catching):
+
+```tsx
+<Alert className="rounded-none border-0 border-b bg-gradient-to-r from-primary via-blue-600 to-primary bg-[length:200%_100%] animate-gradient text-primary-foreground">
+  {/* Vibrant, animated gradient */}
+</Alert>
+
+{/* Add to your global CSS: */}
+@keyframes gradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.animate-gradient {
+  animation: gradient 3s ease infinite;
+}
+```
+
+#### Success State:
+
+```tsx
+<Alert className="rounded-none border-0 border-b bg-green-600 text-white border-green-700">
+  {/* Success/completion state */}
+</Alert>
+```
+
+#### With Card (Elevated):
+
+```tsx
+import { Card } from "@/components/ui/card";
+
+<div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4">
+  <Card className="shadow-xl">
+    <Alert className="border-0">{/* Centered, card-style alert */}</Alert>
+  </Card>
+</div>;
+```
+
+### Integration Tips
+
+1. **Auto-dismiss on success**: Hide alert 3 seconds after reaching 100%
+2. **Persist across routes**: Mount at root level, not in individual pages
+3. **Show only once per session**: Add flag to localStorage to skip on subsequent visits
+4. **Graceful degradation**: If progress API unavailable, show indeterminate spinner
+5. **Mobile optimization**: Reduce padding and font size on small screens
+
+### Example: Complete Integration
+
+```typescript
+// In App.tsx or RootLayout.tsx
+import { useEffect, useState } from "react";
+import { ModelLoadingAlert } from "@/components/ui/ModelLoadingAlert";
+import { useSettings } from "@/contexts/SettingsContext";
+import { usePhonemeModel } from "@/hooks/usePhonemeModel";
+
+export const App = () => {
+  const { settings } = useSettings();
+  const { isLoading, loadProgress, isReady } = usePhonemeModel();
+  const [showAlert, setShowAlert] = useState(true);
+
+  // Auto-dismiss 3 seconds after loading completes
+  useEffect(() => {
+    if (isReady && loadProgress === 100) {
+      const timer = setTimeout(() => setShowAlert(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isReady, loadProgress]);
+
+  const shouldShowAlert =
+    settings?.use_client_phoneme_extraction &&
+    showAlert &&
+    (isLoading || isReady);
+
+  return (
+    <>
+      {shouldShowAlert && (
+        <ModelLoadingAlert
+          isLoading={isLoading || isReady}
+          progress={loadProgress}
+          onDismiss={() => setShowAlert(false)}
+          canDismiss={isReady && loadProgress === 100}
+        />
+      )}
+
+      {/* Main app content with top spacing when alert is visible */}
+      <div className={shouldShowAlert ? "pt-20" : ""}>
+        <Routes>{/* ... */}</Routes>
+      </div>
+    </>
+  );
+};
+```
+
+### Optional: Add Sonner Toast Integration
+
+If you prefer using [Sonner](https://sonner.emilkowal.ski/) (popular toast library that works great with shadcn):
+
+```typescript
+import { toast } from "sonner";
+import { Loader2, CheckCircle2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+
+export const useModelLoadingSonner = () => {
+  const showLoadingToast = (progress: number) => {
+    if (progress < 100) {
+      toast.loading(
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="font-medium">Loading AI Model</span>
+          </div>
+          <Progress value={progress} className="h-2" />
+          <p className="text-xs text-muted-foreground">
+            {progress}% - Cached for future use
+          </p>
+        </div>,
+        { id: "model-loading" }
+      );
+    } else {
+      toast.success("Model Ready!", {
+        id: "model-loading",
+        description: "Local speech processing is now available",
+        duration: 3000,
+        icon: <CheckCircle2 className="h-4 w-4" />,
+      });
+    }
+  };
+
+  return { showLoadingToast };
+};
+```
+
+---
+
 **End of Implementation Guide**
 
 _Last Updated: November 2, 2025_

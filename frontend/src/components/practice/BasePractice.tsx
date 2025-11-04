@@ -41,7 +41,7 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
   // Initialize hybrid audio analysis
   const {
     processAudio,
-    initializeModel,
+    initializeModels,
     isModelLoading,
     modelLoadProgress,
     isClientExtractionEnabled,
@@ -74,10 +74,10 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
     sessionId: session.id,
   });
 
-  // Initialize the phoneme model when component mounts (if client extraction is enabled)
+  // Initialize both models when component mounts (if client extraction is enabled)
   useEffect(() => {
     if (isClientExtractionEnabled) {
-      initializeModel();
+      initializeModels();
     }
   }, [isClientExtractionEnabled]);
 

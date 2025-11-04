@@ -31,7 +31,8 @@ export const useAudioAnalysisStream = (
   const start = (
     file: File,
     sentence: string,
-    clientPhonemes?: string[][] | null
+    clientPhonemes?: string[][] | null,
+    clientWords?: string[] | null
   ) => {
     if (!token) {
       options?.onError?.("Not authenticated");
@@ -58,6 +59,16 @@ export const useAudioAnalysisStream = (
       formData.append("client_phonemes", JSON.stringify(clientPhonemes));
     } else {
       console.log("📤 No client phonemes, using standard endpoint:", url);
+    }
+
+    // Add client words to FormData if available
+    if (clientWords) {
+      console.log(
+        "📤 Sending client-extracted words:",
+        clientWords.length,
+        "words"
+      );
+      formData.append("client_words", JSON.stringify(clientWords));
     }
 
     // Create a manual fetch POST to initialize the SSE

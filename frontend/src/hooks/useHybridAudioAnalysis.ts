@@ -1,9 +1,11 @@
 import { useSettings } from "@/contexts/SettingsContext";
 import { usePhonemeModel } from "./usePhonemeModel";
+import { useWordModel } from "./useWordModel";
 import { useAudioAnalysisStream } from "./useAudioAnalysisStream";
 import type { UseAudioAnalysisStreamOptions } from "./useAudioAnalysisStream";
 import { performanceTracker } from "@/services/performanceTracker";
 import phonemeExtractor from "@/services/phonemeExtractor";
+import wordExtractor from "@/services/wordExtractor";
 
 interface UseHybridAudioAnalysisOptions extends UseAudioAnalysisStreamOptions {
   /** Maximum number of retries for client extraction (default: 2) */
@@ -68,113 +70,179 @@ export const useHybridAudioAnalysis = (
   const { settings } = useSettings();
   const audioAnalysisStream = useAudioAnalysisStream(options);
   const phonemeModel = usePhonemeModel();
+  const wordModel = useWordModel();
+
+  /**
+   * Initialize both models in parallel if client extraction is enabled
+   */
+  const initializeModels = async () => {
+    const shouldUseClientExtraction =
+      settings?.use_client_phoneme_extraction &&
+      phonemeExtractor.isModelLoaded() !== null &&
+      wordExtractor.isModelLoaded() !== null;
+
+    if (!shouldUseClientExtraction) {
+      console.log(
+        "[HybridAudioAnalysis] Client extraction disabled or not supported"
+      );
+      return;
+    }
+
+    try {
+      console.log("[HybridAudioAnalysis] Loading both models in parallel...");
+      const startTime = performance.now();
+
+      // Load both models in parallel
+      const [phonemeResult, wordResult] = await Promise.allSettled([
+        phonemeModel.loadModel(),
+        wordModel.loadModel(),
+      ]);
+
+      const loadTime = performance.now() - startTime;
+
+      // Check results
+      const phonemeSuccess = phonemeResult.status === "fulfilled";
+      const wordSuccess = wordResult.status === "fulfilled";
+
+      if (phonemeSuccess && wordSuccess) {
+        console.log(
+          `[HybridAudioAnalysis] ✅ Both models loaded successfully in ${loadTime.toFixed(
+            0
+          )}ms`
+        );
+      } else if (phonemeSuccess || wordSuccess) {
+        console.warn(
+          `[HybridAudioAnalysis] ⚠️ Partial model loading - Phonemes: ${phonemeSuccess}, Words: ${wordSuccess}`
+        );
+        if (phonemeResult.status === "rejected") {
+          console.error(
+            "[HybridAudioAnalysis] Phoneme model error:",
+            phonemeResult.reason
+          );
+        }
+        if (wordResult.status === "rejected") {
+          console.error(
+            "[HybridAudioAnalysis] Word model error:",
+            wordResult.reason
+          );
+        }
+      } else {
+        console.error("[HybridAudioAnalysis] ❌ Both models failed to load");
+        throw new Error("Failed to load both models");
+      }
+    } catch (error) {
+      console.error("[HybridAudioAnalysis] Error loading models:", error);
+      throw error;
+    }
+  };
 
   /**
    * Process audio using hybrid approach with retry logic:
-   * - Try client-side phoneme extraction if enabled and ready
+   * - Try client-side phoneme and word extraction in parallel if enabled
    * - Retry with exponential backoff on failure
    * - Fallback to full server processing if all retries fail
+   * - Support partial success (e.g., phonemes work but words fail)
    */
   const processAudio = async (audioFile: File, sentence: string) => {
     let clientPhonemes: string[][] | null = null;
+    let clientWords: string[] | null = null;
 
-    // Attempt client-side extraction if enabled and model is actually loaded
-    // Check phonemeExtractor.isModelLoaded() directly instead of relying on React state
-    // to avoid race conditions with state updates
+    // Check if both models are loaded
     const shouldUseClientExtraction =
       settings?.use_client_phoneme_extraction &&
       phonemeExtractor.isModelLoaded() &&
-      !phonemeModel.shouldFallbackToServer;
+      wordExtractor.isModelLoaded() &&
+      !phonemeModel.shouldFallbackToServer &&
+      !wordModel.shouldFallbackToServer;
 
     if (shouldUseClientExtraction) {
       const maxRetries = options?.maxRetries ?? 2;
       const enableBackoff = options?.enableBackoff ?? true;
 
       try {
-        console.log("Attempting client-side phoneme extraction with retry...");
+        console.log(
+          "[HybridAudioAnalysis] Attempting client-side extraction (phonemes + words) with retry..."
+        );
         const startTime = performance.now();
 
-        // Wrap extraction in retry logic
-        clientPhonemes = await retryWithBackoff(
-          () => phonemeModel.extractPhonemes(audioFile),
-          maxRetries,
-          enableBackoff
-        );
+        // Extract both phonemes and words in parallel with retry logic
+        const [phonemeResult, wordResult] = await Promise.allSettled([
+          retryWithBackoff(
+            () => phonemeModel.extractPhonemes(audioFile),
+            maxRetries,
+            enableBackoff
+          ),
+          retryWithBackoff(
+            () => wordModel.extractWords(audioFile),
+            maxRetries,
+            enableBackoff
+          ),
+        ]);
 
         const extractionTime = performance.now() - startTime;
-        console.log(
-          `✅ Client phoneme extraction completed in ${extractionTime.toFixed(
-            2
-          )}ms`
-        );
 
-        // Track successful extraction
-        performanceTracker.recordClientExtraction(
-          extractionTime,
-          true,
-          undefined // Audio duration not available here
-        );
+        // Handle results
+        const phonemeSuccess = phonemeResult.status === "fulfilled";
+        const wordSuccess = wordResult.status === "fulfilled";
 
-        if (clientPhonemes) {
-          console.log(
-            "Successfully extracted phonemes on client:",
-            clientPhonemes.length,
-            "words"
+        if (phonemeSuccess) {
+          clientPhonemes = phonemeResult.value;
+        }
+        if (wordSuccess) {
+          clientWords = wordResult.value;
+        }
+
+        // Validate alignment if both succeeded
+        if (clientPhonemes && clientWords) {
+          const phonemeWordCount = clientPhonemes.length;
+          const wordCount = clientWords.length;
+
+          if (phonemeWordCount !== wordCount) {
+            console.warn(
+              `[HybridAudioAnalysis] ⚠️ Word/phoneme count mismatch: ${wordCount} words vs ${phonemeWordCount} phoneme groups. Using server extraction.`
+            );
+            clientPhonemes = null;
+            clientWords = null;
+          } else {
+            console.log(
+              `[HybridAudioAnalysis] ✅ Both extractions completed in ${extractionTime.toFixed(
+                2
+              )}ms (${wordCount} words aligned)`
+            );
+            performanceTracker.recordClientExtraction(extractionTime, true);
+          }
+        } else if (clientPhonemes || clientWords) {
+          // Partial success
+          console.warn(
+            `[HybridAudioAnalysis] ⚠️ Partial extraction success - Phonemes: ${!!clientPhonemes}, Words: ${!!clientWords} (${extractionTime.toFixed(
+              2
+            )}ms)`
           );
+          performanceTracker.recordClientExtraction(extractionTime, true);
+        } else {
+          // Both failed
+          console.error(
+            `[HybridAudioAnalysis] ❌ Both extractions failed after retries`
+          );
+          if (phonemeResult.status === "rejected") {
+            console.error("Phoneme error:", phonemeResult.reason);
+          }
+          if (wordResult.status === "rejected") {
+            console.error("Word error:", wordResult.reason);
+          }
+          performanceTracker.recordClientExtraction(extractionTime, false);
         }
       } catch (error) {
-        console.warn(
-          "❌ Client extraction failed after retries, falling back to server:",
+        console.error(
+          "[HybridAudioAnalysis] Unexpected error during extraction:",
           error
         );
-
-        // Track failed extraction
-        performanceTracker.recordClientExtraction(
-          0,
-          false,
-          undefined,
-          error instanceof Error ? error.message : String(error)
-        );
-
-        clientPhonemes = null;
-      }
-    } else {
-      const reason = !settings?.use_client_phoneme_extraction
-        ? "disabled in settings"
-        : !phonemeModel.isReady
-        ? "model not ready"
-        : "fallback flag set";
-      console.log(`ℹ️ Skipping client extraction: ${reason}`);
-    }
-
-    // Send to backend with or without client phonemes
-    audioAnalysisStream.start(audioFile, sentence, clientPhonemes);
-  };
-
-  /**
-   * Load the phoneme model if client extraction is enabled.
-   * Tracks model load time for performance monitoring.
-   */
-  const initializeModel = async () => {
-    if (settings?.use_client_phoneme_extraction && !phonemeModel.isReady) {
-      try {
-        console.log("🔄 Initializing client-side phoneme model...");
-        const startTime = performance.now();
-
-        await phonemeModel.loadModel();
-
-        const loadTime = performance.now() - startTime;
-        performanceTracker.recordModelLoad(loadTime);
-
-        console.log(
-          `✅ Model initialized successfully in ${(loadTime / 1000).toFixed(
-            2
-          )}s`
-        );
-      } catch (error) {
-        console.warn("❌ Failed to initialize model:", error);
+        performanceTracker.recordClientExtraction(0, false);
       }
     }
+
+    // Send to backend (with or without client-extracted data)
+    audioAnalysisStream.start(audioFile, sentence, clientPhonemes, clientWords);
   };
 
   return {
@@ -183,17 +251,26 @@ export const useHybridAudioAnalysis = (
     stop: audioAnalysisStream.stop,
 
     // Model management
-    initializeModel,
-    loadModel: phonemeModel.loadModel,
-    unloadModel: phonemeModel.unloadModel,
+    initializeModels,
+    loadModel: async () => {
+      await Promise.all([phonemeModel.loadModel(), wordModel.loadModel()]);
+    },
+    unloadModel: async () => {
+      await Promise.all([phonemeModel.unloadModel(), wordModel.unloadModel()]);
+    },
 
-    // Model state
-    isModelSupported: phonemeModel.isSupported,
-    isModelLoading: phonemeModel.isLoading,
-    isModelReady: phonemeModel.isReady,
-    modelLoadProgress: phonemeModel.loadProgress,
-    modelError: phonemeModel.error,
-    shouldFallbackToServer: phonemeModel.shouldFallbackToServer,
+    // Model state - combined status
+    isModelSupported: phonemeModel.isSupported && wordModel.isSupported,
+    isModelLoading: phonemeModel.isLoading || wordModel.isLoading,
+    isModelReady: phonemeModel.isReady && wordModel.isReady,
+    modelLoadProgress: Math.round(
+      (phonemeModel.loadProgress + wordModel.loadProgress) / 2
+    ),
+    phonemeModelProgress: phonemeModel.loadProgress,
+    wordModelProgress: wordModel.loadProgress,
+    modelError: phonemeModel.error || wordModel.error,
+    shouldFallbackToServer:
+      phonemeModel.shouldFallbackToServer || wordModel.shouldFallbackToServer,
 
     // Settings state
     isClientExtractionEnabled: settings?.use_client_phoneme_extraction ?? false,

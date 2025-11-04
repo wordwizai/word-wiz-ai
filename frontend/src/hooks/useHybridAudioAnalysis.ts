@@ -6,6 +6,8 @@ import type { UseAudioAnalysisStreamOptions } from "./useAudioAnalysisStream";
 import { performanceTracker } from "@/services/performanceTracker";
 import phonemeExtractor from "@/services/phonemeExtractor";
 import wordExtractor from "@/services/wordExtractor";
+import { validateAlignment } from "@/utils/extractionValidation";
+import type { ExtractionType } from "@/services/performanceTracker";
 
 interface UseHybridAudioAnalysisOptions extends UseAudioAnalysisStreamOptions {
   /** Maximum number of retries for client extraction (default: 2) */
@@ -194,22 +196,43 @@ export const useHybridAudioAnalysis = (
 
         // Validate alignment if both succeeded
         if (clientPhonemes && clientWords) {
-          const phonemeWordCount = clientPhonemes.length;
           const wordCount = clientWords.length;
 
-          if (phonemeWordCount !== wordCount) {
+          // Use comprehensive validation
+          const validationResult = validateAlignment(
+            clientWords,
+            clientPhonemes
+          );
+
+          if (!validationResult.isValid) {
             console.warn(
-              `[HybridAudioAnalysis] ⚠️ Word/phoneme count mismatch: ${wordCount} words vs ${phonemeWordCount} phoneme groups. Using server extraction.`
+              `[HybridAudioAnalysis] ⚠️ Validation failed: ${validationResult.error}. Using server extraction.`
             );
+            if (validationResult.warning) {
+              console.warn(`  ${validationResult.warning}`);
+            }
             clientPhonemes = null;
             clientWords = null;
+            performanceTracker.recordClientExtraction(
+              extractionTime,
+              false,
+              undefined,
+              validationResult.error,
+              "failed" as ExtractionType
+            );
           } else {
             console.log(
-              `[HybridAudioAnalysis] ✅ Both extractions completed in ${extractionTime.toFixed(
+              `[HybridAudioAnalysis] ✅ Full extraction completed in ${extractionTime.toFixed(
                 2
               )}ms (${wordCount} words aligned)`
             );
-            performanceTracker.recordClientExtraction(extractionTime, true);
+            performanceTracker.recordClientExtraction(
+              extractionTime,
+              true,
+              undefined,
+              undefined,
+              "full" as ExtractionType
+            );
           }
         } else if (clientPhonemes || clientWords) {
           // Partial success
@@ -218,7 +241,13 @@ export const useHybridAudioAnalysis = (
               2
             )}ms)`
           );
-          performanceTracker.recordClientExtraction(extractionTime, true);
+          performanceTracker.recordClientExtraction(
+            extractionTime,
+            true,
+            undefined,
+            undefined,
+            "partial" as ExtractionType
+          );
         } else {
           // Both failed
           console.error(
@@ -230,7 +259,19 @@ export const useHybridAudioAnalysis = (
           if (wordResult.status === "rejected") {
             console.error("Word error:", wordResult.reason);
           }
-          performanceTracker.recordClientExtraction(extractionTime, false);
+          const errorMsg =
+            phonemeResult.status === "rejected"
+              ? String(phonemeResult.reason)
+              : wordResult.status === "rejected"
+              ? String(wordResult.reason)
+              : "Unknown error";
+          performanceTracker.recordClientExtraction(
+            extractionTime,
+            false,
+            undefined,
+            errorMsg,
+            "failed" as ExtractionType
+          );
         }
       } catch (error) {
         console.error(

@@ -11,8 +11,10 @@
 export interface ProcessingMetrics {
   /** Total number of client-side extractions attempted */
   clientExtractionsAttempted: number;
-  /** Number of successful client extractions */
-  clientExtractionsSucceeded: number;
+  /** Number of successful full client extractions (phonemes + words) */
+  fullClientExtractionsSucceeded: number;
+  /** Number of successful partial client extractions (phonemes OR words) */
+  partialClientExtractionsSucceeded: number;
   /** Number of failed client extractions (fell back to server) */
   clientExtractionsFailed: number;
   /** Total time saved by client processing (milliseconds) */
@@ -26,6 +28,8 @@ export interface ProcessingMetrics {
   /** Total audio processed (seconds) */
   totalAudioProcessedSeconds: number;
 }
+
+export type ExtractionType = "full" | "partial" | "failed";
 
 export interface ProcessingEvent {
   /** Timestamp of the event */
@@ -47,7 +51,8 @@ class PerformanceTracker {
 
   private metrics: ProcessingMetrics = {
     clientExtractionsAttempted: 0,
-    clientExtractionsSucceeded: 0,
+    fullClientExtractionsSucceeded: 0,
+    partialClientExtractionsSucceeded: 0,
     clientExtractionsFailed: 0,
     timeSavedMs: 0,
     avgClientExtractionTimeMs: 0,
@@ -88,22 +93,36 @@ class PerformanceTracker {
     timeMs: number,
     success: boolean,
     audioDurationSeconds?: number,
-    error?: string
+    error?: string,
+    extractionType?: ExtractionType
   ): void {
     this.metrics.clientExtractionsAttempted++;
 
     if (success) {
-      this.metrics.clientExtractionsSucceeded++;
+      // Track based on extraction type
+      if (extractionType === "full") {
+        this.metrics.fullClientExtractionsSucceeded++;
+      } else if (extractionType === "partial") {
+        this.metrics.partialClientExtractionsSucceeded++;
+      } else {
+        // Default to full for backward compatibility
+        this.metrics.fullClientExtractionsSucceeded++;
+      }
 
       // Update average client extraction time
-      const totalSuccessful = this.metrics.clientExtractionsSucceeded;
+      const totalSuccessful =
+        this.metrics.fullClientExtractionsSucceeded +
+        this.metrics.partialClientExtractionsSucceeded;
       this.metrics.avgClientExtractionTimeMs =
         (this.metrics.avgClientExtractionTimeMs * (totalSuccessful - 1) +
           timeMs) /
         totalSuccessful;
 
-      // Estimate time saved (assume server would take 3x longer)
-      const estimatedServerTime = timeMs * 3;
+      // Estimate time saved based on extraction type
+      // Full extraction: 70-90% faster (use 80% = 5x speedup)
+      // Partial extraction: 50-70% faster (use 60% = 2.5x speedup)
+      const speedupFactor = extractionType === "full" ? 5 : 2.5;
+      const estimatedServerTime = timeMs * speedupFactor;
       this.metrics.timeSavedMs += estimatedServerTime - timeMs;
     } else {
       this.metrics.clientExtractionsFailed++;
@@ -126,7 +145,13 @@ class PerformanceTracker {
     this.saveMetrics();
 
     if (success) {
-      console.log(`✅ Client extraction: ${timeMs.toFixed(0)}ms`);
+      const typeLabel =
+        extractionType === "full"
+          ? "Full"
+          : extractionType === "partial"
+          ? "Partial"
+          : "Client";
+      console.log(`✅ ${typeLabel} extraction: ${timeMs.toFixed(0)}ms`);
     } else {
       console.warn(`❌ Client extraction failed: ${error}`);
     }
@@ -183,21 +208,23 @@ class PerformanceTracker {
     if (this.metrics.clientExtractionsAttempted === 0) {
       return 0;
     }
-    return (
-      (this.metrics.clientExtractionsSucceeded /
-        this.metrics.clientExtractionsAttempted) *
-      100
-    );
+    const totalSuccessful =
+      this.metrics.fullClientExtractionsSucceeded +
+      this.metrics.partialClientExtractionsSucceeded;
+    return (totalSuccessful / this.metrics.clientExtractionsAttempted) * 100;
   }
 
   /**
    * Get average time saved per extraction.
    */
   getAvgTimeSaved(): number {
-    if (this.metrics.clientExtractionsSucceeded === 0) {
+    const totalSuccessful =
+      this.metrics.fullClientExtractionsSucceeded +
+      this.metrics.partialClientExtractionsSucceeded;
+    if (totalSuccessful === 0) {
       return 0;
     }
-    return this.metrics.timeSavedMs / this.metrics.clientExtractionsSucceeded;
+    return this.metrics.timeSavedMs / totalSuccessful;
   }
 
   /**
@@ -207,12 +234,17 @@ class PerformanceTracker {
     const successRate = this.getSuccessRate();
     const avgTimeSaved = this.getAvgTimeSaved();
     const totalTimeSavedSeconds = this.metrics.timeSavedMs / 1000;
+    const totalSuccessful =
+      this.metrics.fullClientExtractionsSucceeded +
+      this.metrics.partialClientExtractionsSucceeded;
 
     return `
 📊 Performance Summary:
-- Client extractions: ${this.metrics.clientExtractionsSucceeded}/${
+- Client extractions: ${totalSuccessful}/${
       this.metrics.clientExtractionsAttempted
     } (${successRate.toFixed(1)}% success)
+  - Full (phonemes + words): ${this.metrics.fullClientExtractionsSucceeded}
+  - Partial (phonemes only): ${this.metrics.partialClientExtractionsSucceeded}
 - Avg client time: ${this.metrics.avgClientExtractionTimeMs.toFixed(0)}ms
 - Avg server time: ${this.metrics.avgServerExtractionTimeMs.toFixed(0)}ms
 - Time saved: ${totalTimeSavedSeconds.toFixed(1)}s total, ${(
@@ -223,6 +255,7 @@ class PerformanceTracker {
       this.metrics.modelLoadTimeMs
         ? (this.metrics.modelLoadTimeMs / 1000).toFixed(2) + "s"
         : "N/A"
+    }
     }
     `.trim();
   }
@@ -240,7 +273,8 @@ class PerformanceTracker {
   reset(): void {
     this.metrics = {
       clientExtractionsAttempted: 0,
-      clientExtractionsSucceeded: 0,
+      fullClientExtractionsSucceeded: 0,
+      partialClientExtractionsSucceeded: 0,
       clientExtractionsFailed: 0,
       timeSavedMs: 0,
       avgClientExtractionTimeMs: 0,

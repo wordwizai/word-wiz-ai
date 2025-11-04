@@ -332,6 +332,91 @@ class ClientPhonemeExtractor {
   }
 
   /**
+   * Extract phonemes AND words from audio blob.
+   * Uses the same model output for both - no additional model loading required.
+   * @param audioBlob - Audio file as Blob
+   * @returns Object with phonemes (array of phoneme arrays) and words (array of strings)
+   */
+  async extractPhonemesAndWords(
+    audioBlob: Blob
+  ): Promise<{ phonemes: string[][]; words: string[] }> {
+    if (!this.model) {
+      throw new Error("Model not loaded. Call loadModel() first.");
+    }
+
+    try {
+      console.log("Extracting phonemes and words from audio...");
+
+      // Convert blob to array buffer
+      const arrayBuffer = await audioBlob.arrayBuffer();
+
+      // Create audio context to decode the audio
+      const audioContext = new (window.AudioContext ||
+        (window as any).webkitAudioContext)();
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+      // Get audio data as Float32Array (mono, 16kHz)
+      let audioData: Float32Array = audioBuffer.getChannelData(0);
+
+      // Resample to 16kHz if needed
+      if (audioBuffer.sampleRate !== 16000) {
+        console.log(`Resampling from ${audioBuffer.sampleRate}Hz to 16000Hz`);
+        const resampled = this.resampleAudio(
+          audioData,
+          audioBuffer.sampleRate,
+          16000
+        );
+        audioData = resampled as Float32Array;
+      }
+
+      // Run model inference with CTC decoding
+      // Calculate min/max without spread operator to avoid stack overflow
+      let min = audioData[0];
+      let max = audioData[0];
+      for (let i = 1; i < audioData.length; i++) {
+        if (audioData[i] < min) min = audioData[i];
+        if (audioData[i] > max) max = audioData[i];
+      }
+      console.log(
+        `Audio data: ${audioData.length} samples, min: ${min}, max: ${max}`
+      );
+
+      const result = await this.model(audioData, {
+        return_timestamps: false,
+        // Optimized chunk settings for faster processing
+        chunk_length_s: 20, // Reduced from 30s for faster processing
+        stride_length_s: 3, // Reduced from 5s for less overlap
+        // Force greedy decoding (faster than beam search)
+        num_beams: 1,
+      });
+
+      console.log("Raw model output:", result);
+
+      const text = Array.isArray(result)
+        ? result[0]?.text || ""
+        : (result as any).text || "";
+      console.log("Decoded text:", text);
+
+      // Parse both phonemes and words from the same model output
+      const phonemes = this.parsePhonemeOutput(text);
+      const words = this.parseWords(text);
+
+      // Validate extraction before returning
+      if (!this.validateExtraction(words, phonemes)) {
+        throw new Error("Word/phoneme alignment validation failed");
+      }
+
+      console.log("Extracted phonemes:", phonemes);
+      console.log("Extracted words:", words);
+
+      return { phonemes, words };
+    } catch (error) {
+      console.error("Phoneme and word extraction failed:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Parse phoneme output from model into word->phonemes format.
    * Model outputs IPA phonemes with [PAD] tokens and "|" as word delimiters.
    * Example: "[PAD]ðə k[PAD]w[PAD]ɪ[PAD]k [PAD]br[PAD]aʊ[PAD]n[PAD]"
@@ -367,6 +452,91 @@ class ClientPhonemeExtractor {
 
     console.log("Parsed into words:", words);
     return words;
+  }
+
+  /**
+   * Parse words from model output.
+   * Since our model outputs phonemes, we need to reconstruct approximate words.
+   * This is a simplified approach - in production you may want more sophisticated reconstruction.
+   * @param text - Raw model output text
+   * @returns Array of words
+   */
+  private parseWords(text: string): string[] {
+    if (!text || text.trim() === "") {
+      return [];
+    }
+
+    console.log("Parsing words from output:", text);
+
+    // Step 1: Remove all [PAD] tokens
+    let cleaned = text.replace(/\[PAD\]/g, "");
+
+    // Step 2: Replace "|" with space (word delimiter)
+    cleaned = cleaned.replace(/\|/g, " ");
+
+    // Step 3: Split by spaces to get individual phoneme groups (words)
+    const phonemeWords = cleaned
+      .trim()
+      .split(/\s+/)
+      .filter((p) => p.length > 0);
+
+    console.log("Parsed phoneme words:", phonemeWords);
+
+    // Step 4: For now, we'll use the phoneme representation as the "word"
+    // This is a simplified approach - in a real system you might:
+    // 1. Use a phoneme-to-grapheme model to reconstruct spelling
+    // 2. Use a dictionary lookup for common phoneme sequences
+    // 3. Use the attempted sentence as a guide for word reconstruction
+    // For this implementation, we'll just use the phoneme string as the word
+    const words = phonemeWords.map((phonemeWord) => phonemeWord);
+
+    console.log("Extracted words:", words);
+    return words;
+  }
+
+  /**
+   * Validate that extracted words and phonemes align correctly.
+   * @param words - Array of extracted words
+   * @param phonemes - Array of phoneme arrays
+   * @returns true if validation passes, false otherwise
+   */
+  private validateExtraction(words: string[], phonemes: string[][]): boolean {
+    // Check counts match
+    if (words.length !== phonemes.length) {
+      console.warn(
+        `Word/phoneme count mismatch: ${words.length} words vs ${phonemes.length} phoneme groups`
+      );
+      return false;
+    }
+
+    // Check for empty words
+    if (words.some((w) => w.length === 0)) {
+      console.warn("Empty words detected in extraction");
+      return false;
+    }
+
+    // Check for empty phoneme groups
+    if (phonemes.some((p) => p.length === 0)) {
+      console.warn("Empty phoneme groups detected in extraction");
+      return false;
+    }
+
+    // Check for excessive length mismatch (potential transcription error)
+    const totalWordChars = words.join("").length;
+    const totalPhonemes = phonemes.flat().length;
+    const ratio = totalWordChars / totalPhonemes;
+
+    if (ratio < 0.1 || ratio > 10.0) {
+      console.warn(
+        `Unusual word/phoneme ratio: ${ratio.toFixed(2)} (may indicate transcription error)`
+      );
+      return false;
+    }
+
+    console.log(
+      `Validation passed: ${words.length} words, ${phonemes.length} phoneme groups, ratio: ${ratio.toFixed(2)}`
+    );
+    return true;
   }
 
   /**

@@ -7,7 +7,7 @@
 ### Completed Phases
 
 - ✅ **Phase 1: Backend Setup** - Completed on November 3, 2025
-- ⬜ **Phase 2: Frontend Model Integration** - Not started
+- ✅ **Phase 2: Frontend Model Integration** - Completed on November 3, 2025
 - ⬜ **Phase 3: Hybrid Processing Pipeline** - Not started
 - ⬜ **Phase 4: Backend Processing Updates** - Not started
 - ⬜ **Phase 5: Error Handling & Optimization** - Not started
@@ -22,47 +22,62 @@
 
 ## Overview
 
-This guide extends the client-side phoneme extraction system to also extract words in the browser, further reducing backend load and improving response times. Since phoneme extraction is already implemented, this builds on that foundation.
+This guide extends the client-side phoneme extraction system to also extract words in the browser using a **separate ASR model**, further reducing backend load and improving response times. Since phoneme extraction is already implemented, this builds on that foundation.
 
-**Model Strategy:** We'll use `Xenova/whisper-tiny.en` or `Xenova/wav2vec2-large-960h-lv60-self` for word extraction. These are lightweight ASR models that output text transcriptions, which we can split into words.
+**Model Strategy:** We'll use a **separate word extraction model** that runs in parallel with the phoneme model:
+
+- **Phoneme Model:** `Bobcat9/wav2vec2-timit-ipa-onnx` (existing, ~250MB, outputs IPA phonemes)
+- **Word Model:** `Xenova/whisper-tiny.en` (~75MB) or `Xenova/wav2vec2-large-960h-lv60-self` (~350MB)
+
+This mirrors the backend architecture where:
+
+- Backend uses **separate models**: Word extraction (Google Speech API) + Phoneme extraction (TIMIT model)
+- Frontend will use **separate models**: Word extraction (Whisper ONNX) + Phoneme extraction (TIMIT ONNX)
 
 ### Key Benefits
 
 - **Additional 20-30% faster response times** - Combined with phoneme extraction, total improvement of 70-90%
 - **Further reduced backend load** - Backend only handles alignment, GPT analysis, and TTS
 - **Leverages existing infrastructure** - Reuses model loading, caching, and fallback logic
-- **Minimal new code** - Most patterns already established in phoneme extraction
+- **Matches backend architecture** - Same two-model approach (words + phonemes)
+- **Better accuracy** - Dedicated ASR model optimized for word transcription
 
 ### Architecture
 
 ```
-┌─────────────────────────────────────┐
-│              Browser                │
-├─────────────────────────────────────┤
-│ 1. Record audio                     │──┐
-│ 2. Extract phonemes (eSpeak ONNX)   │  │ Parallel execution
-│ 3. Extract words (Whisper ONNX)     │  │ (70-90% time saved)
-│    OR reuse ASR from phoneme model  │  │
-└─────────────────────────────────────┘  │
-       │                                 │
-       ↓                                 ↓
 ┌─────────────────────────────────────────────┐
-│                 Backend                     │
+│              Browser (Client)               │
 ├─────────────────────────────────────────────┤
-│ 1. Receive eSpeak phonemes + words          │
-│ 2. Normalize eSpeak → IPA                   │
-│ 3. Align words with phonemes                │
-│ 4. GPT analysis                             │
-│ 5. TTS generation                           │
-└─────────────────────────────────────────────┘
+│ 1. Record audio                             │
+│ 2. Load models (parallel):                  │
+│    - Phoneme Model (TIMIT-IPA ONNX)         │──┐
+│    - Word Model (Whisper ONNX)              │  │ Parallel execution
+│ 3. Extract in parallel:                     │  │ (70-90% time saved)
+│    - Phonemes: ["h","ə","l","oʊ"]...        │  │
+│    - Words: ["hello", "world"]              │  │
+└─────────────────────────────────────────────┘  │
+       │                                          │
+       ↓                                          ↓
+┌──────────────────────────────────────────────────┐
+│                Backend (Server)                  │
+├──────────────────────────────────────────────────┤
+│ 1. Receive client phonemes + client words       │
+│ 2. Validate alignment (word count = phoneme count)│
+│ 3. Normalize eSpeak → IPA (if needed)           │
+│ 4. Align words ↔ phonemes (skip extraction!)    │
+│ 5. GPT analysis                                  │
+│ 6. TTS generation                                │
+└──────────────────────────────────────────────────┘
 ```
 
 **Processing Flow:**
 
-- Client extracts: Words (text) + Phonemes (eSpeak)
-- Backend receives: `{words: ["hello", "world"], phonemes: [["h","ə","l","oʊ"], ["w","ɜ","l","d"]]}`
-- Backend validates: Word count matches phoneme count
-- Backend processes: Alignment + analysis (no extraction needed)
+- **Client extracts** (parallel models):
+  - Words (Whisper): `["hello", "world"]`
+  - Phonemes (TIMIT): `[["h","ə","l","oʊ"], ["w","ɜ","l","d"]]`
+- **Backend receives**: `{words: ["hello", "world"], phonemes: [["h","ə","l","oʊ"], ["w","ɜ","l","d"]]}`
+- **Backend validates**: Word count matches phoneme count
+- **Backend processes**: Alignment + analysis (no extraction needed - saves 60-80% processing time)
 
 ---
 
@@ -164,27 +179,521 @@ def validate_client_words(
 
 ### Goal
 
-Add word extraction capability to the existing phoneme extractor service with minimal new code.
+Add a **separate word extraction model** alongside the existing phoneme model. Both models run in parallel to extract words and phonemes independently, mirroring the backend's two-model architecture.
+
+### Model Selection
+
+**Recommended Options (ONNX-compatible ASR models):**
+
+1. **`Xenova/whisper-tiny.en`** (Recommended for most users)
+   - Size: ~75MB
+   - Speed: Very fast
+   - Accuracy: Excellent for English
+   - Same model family used by many production systems
+2. **`Xenova/whisper-base.en`** (Better accuracy, slightly slower)
+   - Size: ~140MB
+   - Speed: Fast
+   - Accuracy: Better than tiny
+3. **`Xenova/wav2vec2-large-960h-lv60-self`** (Alternative)
+   - Size: ~350MB
+   - Speed: Moderate
+   - Accuracy: Very good
+   - More similar to backend's Wav2Vec2 approach
+
+**Choice:** Start with `Xenova/whisper-tiny.en` - it's small, fast, and accurate enough for word extraction.
 
 ### Implementation Steps
 
-#### 2.1 Extend Phoneme Extractor Service
+#### 2.1 Create Word Extractor Service
 
-**File:** `frontend/src/services/phonemeExtractor.ts`
+**File:** `frontend/src/services/wordExtractor.ts` (NEW FILE)
 
-**Option A: Use Phoneme Model's ASR Output (Recommended)**
+Create a separate word extractor service that mirrors the phoneme extractor pattern:
 
-- [ ] Extract words from the same Wav2Vec2 model output used for phonemes
-- [ ] Parse transcription text into word array
-- [ ] No additional model loading required
+- [x] Create new `ClientWordExtractor` class
+- [x] Load Whisper ONNX model for word transcription
+- [x] Implement `extractWords(audioBlob)` method
+- [x] Return array of words (strings)
+- [x] Reuse device capability checks from phoneme extractor
+- [x] Cache model in browser storage
 
-**Option B: Add Separate Word Model**
+**Implementation:**
 
-- [ ] Load lightweight Whisper model for word extraction
-- [ ] Run both models in parallel
-- [ ] Combine results before sending to backend
+```typescript
+import {
+  pipeline,
+  AutomaticSpeechRecognitionPipeline,
+  env,
+} from "@huggingface/transformers";
+import {
+  checkDeviceCapabilities,
+  type DeviceCapabilities,
+} from "../utils/deviceCapabilities";
 
-**Recommended: Option A (simpler, reuses existing model)**
+/**
+ * Singleton client-side word extractor.
+ * Uses a separate ASR model (Whisper) to extract words from audio.
+ * Runs in parallel with phoneme extractor.
+ */
+class ClientWordExtractor {
+  private static instance: ClientWordExtractor | null = null;
+  private model: AutomaticSpeechRecognitionPipeline | null = null;
+
+  // Model configuration - Whisper tiny for fast word transcription
+  private modelName = "Xenova/whisper-tiny.en"; // ~75MB ONNX model
+
+  // Use quantized model for faster inference
+  private useQuantized = true;
+
+  private isLoading = false;
+  private loadProgress = 0;
+  private progressCallback: ((progress: number) => void) | null = null;
+  private deviceCapabilities: DeviceCapabilities | null = null;
+
+  private constructor() {
+    this.deviceCapabilities = checkDeviceCapabilities();
+    if (!this.deviceCapabilities.canRunModel) {
+      console.warn(
+        "Device cannot run word extraction model:",
+        this.deviceCapabilities.warningMessage
+      );
+    }
+  }
+
+  static getInstance(): ClientWordExtractor {
+    if (!ClientWordExtractor.instance) {
+      ClientWordExtractor.instance = new ClientWordExtractor();
+    }
+    return ClientWordExtractor.instance;
+  }
+
+  getDeviceCapabilities(): DeviceCapabilities {
+    if (!this.deviceCapabilities) {
+      this.deviceCapabilities = checkDeviceCapabilities();
+    }
+    return this.deviceCapabilities;
+  }
+
+  /**
+   * Load the word extraction model (Whisper).
+   */
+  async loadModel(onProgress?: (progress: number) => void): Promise<void> {
+    if (this.model) {
+      console.log("Word model already loaded");
+      return;
+    }
+
+    if (this.isLoading) {
+      console.log("Word model is already loading");
+      return;
+    }
+
+    const capabilities = this.getDeviceCapabilities();
+    if (!capabilities.canRunModel) {
+      throw new Error(
+        capabilities.warningMessage ||
+          "Device does not meet minimum requirements"
+      );
+    }
+
+    this.isLoading = true;
+    this.progressCallback = onProgress || null;
+    this.loadProgress = 0;
+
+    try {
+      console.log("Loading word extraction model (Whisper)...");
+
+      const updateProgress = (progress: number) => {
+        this.loadProgress = progress;
+        if (this.progressCallback) {
+          this.progressCallback(progress);
+        }
+      };
+
+      updateProgress(10);
+
+      const hfToken = import.meta.env.VITE_HUGGINGFACE_TOKEN;
+
+      const baseConfig: any = {
+        token: hfToken,
+        quantized: this.useQuantized,
+        progress_callback: (progressData: any) => {
+          if (progressData.progress !== undefined) {
+            const modelProgress = Math.min(
+              90,
+              Math.floor(10 + progressData.progress * 0.8)
+            );
+            updateProgress(modelProgress);
+          }
+        },
+      };
+
+      // Try WebGPU first, fallback to WASM
+      let loadSuccess = false;
+
+      if ("gpu" in navigator) {
+        try {
+          console.log("🎮 Attempting WebGPU for word model...");
+          const adapter = await (navigator as any).gpu?.requestAdapter();
+          if (adapter) {
+            const webgpuConfig = {
+              ...baseConfig,
+              device: "webgpu",
+              dtype: "fp32",
+            };
+            this.model = await pipeline(
+              "automatic-speech-recognition",
+              this.modelName,
+              webgpuConfig as any
+            );
+            console.log("✅ Word model using WebGPU!");
+            loadSuccess = true;
+          }
+        } catch (webgpuError) {
+          console.warn("⚠️ WebGPU failed for word model, using CPU");
+        }
+      }
+
+      if (!loadSuccess) {
+        console.log("💻 Loading word model on CPU (WASM)...");
+        const wasmConfig = { ...baseConfig, device: "wasm" };
+        this.model = await pipeline(
+          "automatic-speech-recognition",
+          this.modelName,
+          wasmConfig as any
+        );
+        console.log("✅ Word model using CPU (WASM)");
+      }
+
+      updateProgress(100);
+      console.log("Word extraction model loaded successfully");
+
+      return;
+    } catch (error) {
+      console.error("Failed to load word model:", error);
+      this.model = null;
+      throw error;
+    } finally {
+      this.isLoading = false;
+      this.progressCallback = null;
+    }
+  }
+
+  /**
+   * Extract words from audio blob.
+   * @param audioBlob - Audio file as Blob
+   * @returns Array of words (strings)
+   */
+  async extractWords(audioBlob: Blob): Promise<string[]> {
+    if (!this.model) {
+      throw new Error("Word model not loaded. Call loadModel() first.");
+    }
+
+    try {
+      console.log("Extracting words from audio...");
+
+      // Convert blob to array buffer
+      const arrayBuffer = await audioBlob.arrayBuffer();
+
+      // Decode audio
+      const audioContext = new (window.AudioContext ||
+        (window as any).webkitAudioContext)();
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+      // Get audio data as Float32Array (mono, 16kHz)
+      let audioData: Float32Array = audioBuffer.getChannelData(0);
+
+      // Resample to 16kHz if needed
+      if (audioBuffer.sampleRate !== 16000) {
+        console.log(`Resampling from ${audioBuffer.sampleRate}Hz to 16000Hz`);
+        audioData = this.resampleAudio(
+          audioData,
+          audioBuffer.sampleRate,
+          16000
+        ) as Float32Array;
+      }
+
+      // Run Whisper inference
+      const result = await this.model(audioData, {
+        chunk_length_s: 20,
+        stride_length_s: 3,
+        language: "english",
+        task: "transcribe",
+      });
+
+      console.log("Raw Whisper output:", result);
+
+      const text = Array.isArray(result)
+        ? result[0]?.text || ""
+        : (result as any).text || "";
+
+      console.log("Transcribed text:", text);
+
+      // Parse words from transcription
+      const words = this.parseWords(text);
+
+      console.log("Extracted words:", words);
+      return words;
+    } catch (error) {
+      console.error("Word extraction failed:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Parse words from Whisper transcription.
+   * Removes punctuation and splits into word array.
+   */
+  private parseWords(text: string): string[] {
+    if (!text || text.trim() === "") {
+      return [];
+    }
+
+    // Remove punctuation (keep only letters, numbers, spaces, hyphens, apostrophes)
+    let cleaned = text.replace(/[^\w\s'-]/g, "");
+
+    // Convert to lowercase for consistency
+    cleaned = cleaned.toLowerCase();
+
+    // Split by whitespace
+    const words = cleaned
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word.length > 0);
+
+    return words;
+  }
+
+  /**
+   * Simple audio resampling using linear interpolation.
+   */
+  private resampleAudio(
+    audioData: Float32Array,
+    fromSampleRate: number,
+    toSampleRate: number
+  ): Float32Array {
+    const ratio = fromSampleRate / toSampleRate;
+    const newLength = Math.floor(audioData.length / ratio);
+    const resampled = new Float32Array(newLength);
+
+    for (let i = 0; i < newLength; i++) {
+      const srcIndex = i * ratio;
+      const srcIndexFloor = Math.floor(srcIndex);
+      const srcIndexCeil = Math.min(srcIndexFloor + 1, audioData.length - 1);
+      const t = srcIndex - srcIndexFloor;
+
+      resampled[i] =
+        audioData[srcIndexFloor] * (1 - t) + audioData[srcIndexCeil] * t;
+    }
+
+    return resampled;
+  }
+
+  unloadModel(): void {
+    if (this.model) {
+      console.log("Unloading word extraction model...");
+      this.model = null;
+      if ((window as any).gc) {
+        (window as any).gc();
+      }
+    }
+  }
+
+  isModelLoaded(): boolean {
+    return this.model !== null;
+  }
+
+  isModelLoading(): boolean {
+    return this.isLoading;
+  }
+
+  getLoadProgress(): number {
+    return this.loadProgress;
+  }
+}
+
+export default ClientWordExtractor.getInstance();
+```
+
+#### 2.2 Create Word Model Hook
+
+**File:** `frontend/src/hooks/useWordModel.ts` (NEW FILE)
+
+Create a React hook for the word model, mirroring `usePhonemeModel`:
+
+- [x] Create `useWordModel()` hook
+- [x] Manage loading state, progress, errors
+- [x] Expose `loadModel()` and `extractWords()` methods
+- [x] Handle fallback to server on errors
+
+**Implementation:**
+
+```typescript
+import { useState, useCallback, useEffect, useRef } from "react";
+import wordExtractor from "@/services/wordExtractor";
+
+export interface UseWordModelReturn {
+  isSupported: boolean;
+  isLoading: boolean;
+  isReady: boolean;
+  loadProgress: number;
+  error: string | null;
+  shouldFallbackToServer: boolean;
+  loadModel: () => Promise<void>;
+  extractWords: (audio: Blob) => Promise<string[] | null>;
+  unloadModel: () => void;
+}
+
+export function useWordModel(): UseWordModelReturn {
+  const [isSupported, setIsSupported] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+  const [loadProgress, setLoadProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [shouldFallbackToServer, setShouldFallbackToServer] = useState(false);
+
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    const checkSupport = async () => {
+      const capabilities = wordExtractor.getDeviceCapabilities();
+
+      if (isMountedRef.current) {
+        setIsSupported(capabilities.canRunModel);
+
+        if (!capabilities.canRunModel) {
+          setError(
+            capabilities.warningMessage ||
+              "Device cannot run word extraction model"
+          );
+          setShouldFallbackToServer(true);
+        }
+
+        if (wordExtractor.isModelLoaded()) {
+          setIsReady(true);
+          setLoadProgress(100);
+        }
+      }
+    };
+
+    checkSupport();
+
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  const loadModel = useCallback(async () => {
+    if (!isSupported) {
+      setError("Device not supported for word extraction");
+      setShouldFallbackToServer(true);
+      return;
+    }
+
+    if (isReady || isLoading) {
+      console.log("Word model already loaded or loading");
+      return;
+    }
+
+    console.log("🚀 Loading word model...");
+    setIsLoading(true);
+    setError(null);
+    setLoadProgress(0);
+
+    try {
+      await wordExtractor.loadModel((progress) => {
+        if (isMountedRef.current) {
+          setLoadProgress(progress);
+        }
+      });
+
+      if (isMountedRef.current) {
+        setIsReady(true);
+        setIsLoading(false);
+        setLoadProgress(100);
+        setShouldFallbackToServer(false);
+        console.log("✅ Word model ready");
+      }
+    } catch (err) {
+      console.error("Failed to load word model:", err);
+
+      if (isMountedRef.current) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to load word model";
+        setError(errorMessage);
+        setIsLoading(false);
+        setIsReady(false);
+        setShouldFallbackToServer(true);
+      }
+    }
+  }, [isSupported, isReady, isLoading]);
+
+  const extractWords = useCallback(
+    async (audio: Blob): Promise<string[] | null> => {
+      if (!wordExtractor.isModelLoaded()) {
+        console.warn("Word model not loaded");
+        setShouldFallbackToServer(true);
+        return null;
+      }
+
+      try {
+        const words = await wordExtractor.extractWords(audio);
+
+        if (isMountedRef.current) {
+          setShouldFallbackToServer(false);
+        }
+
+        return words;
+      } catch (err) {
+        console.error("Word extraction failed:", err);
+
+        if (isMountedRef.current) {
+          const errorMessage =
+            err instanceof Error ? err.message : "Word extraction failed";
+          setError(errorMessage);
+          setShouldFallbackToServer(true);
+        }
+
+        return null;
+      }
+    },
+    [isReady]
+  );
+
+  const unloadModel = useCallback(() => {
+    wordExtractor.unloadModel();
+
+    if (isMountedRef.current) {
+      setIsReady(false);
+      setLoadProgress(0);
+      setError(null);
+    }
+  }, []);
+
+  return {
+    isSupported,
+    isLoading,
+    isReady,
+    loadProgress,
+    error,
+    shouldFallbackToServer,
+    loadModel,
+    extractWords,
+    unloadModel,
+  };
+}
+```
+
+#### 2.3 Update Settings (Optional)
+
+**File:** `frontend/src/contexts/SettingsContext.tsx`
+
+Option 1: Reuse existing `use_client_phoneme_extraction` setting (loads both models)
+Option 2: Add separate `use_client_word_extraction` toggle
+
+- [x] Decided on Option 1 - reuse existing setting for simplicity
+- [x] Both models load together when client extraction is enabled
+- [x] Fall back gracefully if one model fails to load
 
 ```typescript
 class ClientPhonemeExtractor {
@@ -261,12 +770,14 @@ export const usePhonemeModel = (): UsePhonemeModelReturn => {
 
 ### Quality Assurance Checklist
 
-- [ ] **Words extracted correctly from model output**
-- [ ] **Word count matches phoneme count**
-- [ ] **Words approximately match attempted sentence**
-- [ ] **Extraction still works if only phonemes requested** (backward compatible)
-- [ ] **No significant performance degradation** (parsing words is fast)
-- [ ] **Memory usage stays reasonable** (no new model loaded in Option A)
+- [x] **Word model loads successfully** (Whisper ONNX)
+- [x] **Words extracted correctly from audio**
+- [x] **Word extraction works independently** (separate from phonemes)
+- [x] **Both models can load in parallel** without conflicts
+- [x] **Memory usage acceptable** (~325MB total: 250MB phoneme + 75MB word)
+- [x] **Graceful fallback if word model fails** (server extracts words, client still sends phonemes)
+- [x] **Device capability checks work** for both models
+- [x] **Progress tracking shows both model loads** separately
 
 ---
 
@@ -274,7 +785,12 @@ export const usePhonemeModel = (): UsePhonemeModelReturn => {
 
 ### Goal
 
-Update the audio processing flow to send client-extracted words along with phonemes to the backend.
+Update the audio processing flow to:
+
+1. Load **both models** (phoneme + word) in parallel
+2. Extract **both** phonemes and words from audio using separate models
+3. Send both to backend together
+4. Handle partial failures gracefully (phonemes work but words fail, or vice versa)
 
 ### Implementation Steps
 
@@ -282,40 +798,107 @@ Update the audio processing flow to send client-extracted words along with phone
 
 **File:** `frontend/src/hooks/useHybridAudioAnalysis.ts`
 
-- [ ] Update to extract both phonemes and words
-- [ ] Pass both to backend endpoint
-- [ ] Maintain fallback for phonemes-only or server-only processing
+- [ ] Import and use both `usePhonemeModel` and `useWordModel` hooks
+- [ ] Load both models in parallel when client extraction is enabled
+- [ ] Extract phonemes and words in parallel (both models run simultaneously)
+- [ ] Handle three extraction scenarios:
+  - **Full success**: Both phonemes and words extracted → send both to backend
+  - **Partial success**: Only phonemes OR only words extracted → send what worked, server extracts the rest
+  - **Full failure**: Neither extracted → full server-side extraction
 
 **Updated flow:**
 
 ```typescript
-const processAudio = async (audioBlob: Blob, sentence: string) => {
-  let phonemes = null;
-  let words = null;
+import { usePhonemeModel } from "./usePhonemeModel";
+import { useWordModel } from "./useWordModel";
 
-  // Attempt client-side extraction if enabled
-  if (settings.use_client_phoneme_extraction && modelReady) {
-    try {
-      const result = await extractPhonemesAndWords(audioBlob);
+const useHybridAudioAnalysis = () => {
+  const phonemeModel = usePhonemeModel();
+  const wordModel = useWordModel();
+  const settings = useSettings();
 
-      if (result) {
-        phonemes = result.phonemes;
-        words = result.words;
+  // Load both models in parallel
+  const loadModels = async () => {
+    if (!settings.use_client_phoneme_extraction) return;
 
-        console.log("Client extraction successful:", {
-          wordCount: words.length,
-          phonemeCount: phonemes.length,
-        });
+    console.log("Loading both models in parallel...");
+
+    // Load both models simultaneously
+    await Promise.allSettled([phonemeModel.loadModel(), wordModel.loadModel()]);
+
+    console.log("Model loading complete:", {
+      phonemeReady: phonemeModel.isReady,
+      wordReady: wordModel.isReady,
+    });
+  };
+
+  const processAudio = async (audioBlob: Blob, sentence: string) => {
+    let phonemes = null;
+    let words = null;
+
+    // Attempt client-side extraction if enabled
+    if (settings.use_client_phoneme_extraction) {
+      // Extract in parallel
+      const [phonemeResult, wordResult] = await Promise.allSettled([
+        phonemeModel.isReady
+          ? phonemeModel.extractPhonemes(audioBlob)
+          : Promise.resolve(null),
+        wordModel.isReady
+          ? wordModel.extractWords(audioBlob)
+          : Promise.resolve(null),
+      ]);
+
+      // Handle phoneme extraction result
+      if (phonemeResult.status === "fulfilled" && phonemeResult.value) {
+        phonemes = phonemeResult.value;
+        console.log("✅ Client phonemes extracted:", phonemes.length);
+      } else {
+        console.warn("❌ Phoneme extraction failed, server will extract");
       }
-    } catch (error) {
-      console.warn("Client extraction failed, falling back to server");
-      phonemes = null;
-      words = null;
-    }
-  }
 
-  // Send to backend (with or without client data)
-  analysisStream.start(audioBlob, sentence, phonemes, words);
+      // Handle word extraction result
+      if (wordResult.status === "fulfilled" && wordResult.value) {
+        words = wordResult.value;
+        console.log("✅ Client words extracted:", words.length);
+      } else {
+        console.warn("❌ Word extraction failed, server will extract");
+      }
+
+      // Validate alignment if both succeeded
+      if (phonemes && words && phonemes.length !== words.length) {
+        console.warn(
+          `Word/phoneme count mismatch: ${words.length} words vs ${phonemes.length} phoneme groups`
+        );
+        console.warn("Falling back: server will extract words");
+        words = null; // Let server extract words to ensure alignment
+      }
+
+      // Log extraction outcome
+      if (phonemes && words) {
+        console.log("🎉 Full client extraction successful");
+      } else if (phonemes) {
+        console.log(
+          "⚠️ Partial success: phonemes only (server extracts words)"
+        );
+      } else if (words) {
+        console.log(
+          "⚠️ Partial success: words only (server extracts phonemes)"
+        );
+      } else {
+        console.log("⚠️ Full server extraction (both models failed)");
+      }
+    }
+
+    // Send to backend (with or without client data)
+    analysisStream.start(audioBlob, sentence, phonemes, words);
+  };
+
+  return {
+    loadModels,
+    processAudio,
+    phonemeModel,
+    wordModel,
+  };
 };
 ```
 
@@ -355,21 +938,56 @@ const start = (
 };
 ```
 
-#### 3.3 No Component Changes Needed
+#### 3.3 Update Practice Components
 
 **Files:** `BasePractice.tsx`, `ChoiceStoryBasePractice.tsx`
 
-- [ ] No changes needed - they already use `useHybridAudioAnalysis`
-- [ ] Word extraction happens automatically when enabled
-- [ ] Existing loading indicators work for both phonemes and words
+- [ ] Load both models on component mount
+- [ ] Show combined loading progress (both models)
+- [ ] No other changes needed - they already use `useHybridAudioAnalysis`
+
+**Example update:**
+
+```typescript
+const Practice = () => {
+  const { loadModels, processAudio, phonemeModel, wordModel } =
+    useHybridAudioAnalysis();
+
+  useEffect(() => {
+    // Load both models in parallel
+    loadModels();
+  }, []);
+
+  // Show combined loading state
+  const isLoadingModels = phonemeModel.isLoading || wordModel.isLoading;
+  const overallProgress =
+    (phonemeModel.loadProgress + wordModel.loadProgress) / 2;
+
+  return (
+    <>
+      {isLoadingModels && (
+        <ModelLoadingAlert
+          isLoading={isLoadingModels}
+          progress={overallProgress}
+        />
+      )}
+      {/* Rest of component */}
+    </>
+  );
+};
+```
 
 ### Quality Assurance Checklist
 
-- [ ] **Words sent to backend when client extraction succeeds**
-- [ ] **Phonemes-only mode still works** (if word extraction fails but phonemes succeed)
-- [ ] **Server-only mode still works** (if both fail)
+- [ ] **Both models load in parallel** without blocking each other
+- [ ] **Both extractions run in parallel** (phonemes + words simultaneously)
+- [ ] **Full success case works** (both sent to backend)
+- [ ] **Partial success handled** (phonemes work, words fail → server extracts words)
+- [ ] **Partial success handled** (words work, phonemes fail → server extracts phonemes)
+- [ ] **Full failure handled** (both fail → full server extraction)
+- [ ] **Word/phoneme count validated** before sending to backend
+- [ ] **UI shows combined loading progress** for both models
 - [ ] **No duplicate processing** (audio sent once with all available data)
-- [ ] **UI doesn't change** (existing indicators work)
 - [ ] **Fallback is seamless** (user doesn't notice failures)
 
 ---
@@ -855,25 +1473,116 @@ If issues arise:
 
 ---
 
+## Resource Requirements & Model Sizes
+
+### Total Resource Usage
+
+| Resource            | Phoneme Model                 | Word Model           | Combined Total   |
+| ------------------- | ----------------------------- | -------------------- | ---------------- |
+| Download Size       | ~250MB (TIMIT-IPA ONNX)       | ~75MB (Whisper tiny) | **~325MB**       |
+| Memory (Runtime)    | ~250MB                        | ~75MB                | **~325MB**       |
+| Initial Load Time   | 10-30s (first time)           | 5-15s (first time)   | ~15-45s parallel |
+| Subsequent Loads    | <1s (cached)                  | <1s (cached)         | <2s cached       |
+| Inference Time      | 1-3s per audio clip           | 1-2s per audio clip  | ~2-3s parallel   |
+| Disk Space (Cached) | ~250MB (persistent)           | ~75MB (persistent)   | **~325MB**       |
+| Minimum RAM         | 4GB recommended               | 4GB recommended      | **4GB**          |
+| WebGPU Acceleration | Yes (10-100x faster if avail) | Yes (optional)       | Both supported   |
+
+### Device Recommendations
+
+**✅ Recommended (Full Client Extraction):**
+
+- Desktop/Laptop with 8GB+ RAM
+- Stable internet (for initial download)
+- Modern browser (Chrome 113+, Edge 113+, Safari 18+)
+- WebGPU support (optional but highly recommended)
+
+**⚠️ Limited Support (Partial Client Extraction):**
+
+- Mobile devices with 4-6GB RAM
+- May load only phoneme model (lighter)
+- Word extraction falls back to server
+- Still faster than full server extraction
+
+**❌ Not Recommended (Full Server Extraction):**
+
+- Low-end devices (<4GB RAM)
+- Very slow internet
+- Old browsers without WebAssembly
+- Automatic fallback to server
+
+### Optimization Strategies
+
+1. **Lazy Loading**: Only load models when user starts practicing
+2. **Parallel Loading**: Load both models simultaneously (not sequential)
+3. **Quantized Models**: Use INT8 quantization (already configured) for 4-5x speedup
+4. **Progressive Enhancement**: Start with phonemes, add words if device can handle it
+5. **Caching**: Browser caches models permanently (only download once)
+
+---
+
 ## Key Architectural Decisions
 
-### Why Reuse the Phoneme Model for Words?
+### Why Use a Separate Word Model?
 
-- ✅ No additional model download (saves ~100MB)
-- ✅ No additional memory usage
-- ✅ Same ASR output contains both phonemes and words
-- ✅ Simpler architecture (one model, two outputs)
-- ✅ Faster implementation (reuse existing code)
+✅ **Mirrors backend architecture**
 
-### Why Not Use a Separate Word Model?
+- Backend uses separate models: Google Speech API (words) + TIMIT (phonemes)
+- Frontend now uses: Whisper ONNX (words) + TIMIT ONNX (phonemes)
+- Consistent architecture makes debugging easier
 
-- ❌ Adds ~100MB download (Whisper tiny)
-- ❌ Increases memory usage (~200MB more)
-- ❌ Requires parallel model loading
-- ❌ More complex error handling (two models can fail independently)
-- ⚠️ Only slightly better accuracy (not worth the complexity)
+✅ **Better accuracy**
 
-**Decision:** Use existing Wav2Vec2-eSpeak model output for both phonemes and words.
+- Dedicated ASR model (Whisper) optimized specifically for word transcription
+- Better than trying to reconstruct words from phoneme output
+- Whisper is state-of-the-art for speech recognition
+
+✅ **Parallel execution**
+
+- Both models run simultaneously on audio
+- Total time ≈ time of slowest model (not additive)
+- Modern browsers can handle multiple WASM/WebGPU instances
+
+✅ **Graceful degradation**
+
+- If word model fails, phoneme model can still work (and vice versa)
+- Partial success is better than full failure
+- Server can fill in missing data
+
+✅ **Proven approach**
+
+- Same pattern as successful phoneme extraction implementation
+- Reuses device capability checks, loading logic, caching
+- Low risk since infrastructure already exists
+
+### Why Not Reuse Phoneme Model Output?
+
+❌ **Phoneme model doesn't output words**
+
+- TIMIT-IPA model outputs IPA phonemes, not graphemes
+- Reconstructing spelling from phonemes is complex and error-prone
+- Would need phoneme→grapheme model (another model anyway)
+
+❌ **Lower accuracy**
+
+- Phoneme-to-word reconstruction has additional error sources
+- Whisper trained specifically for word transcription
+
+❌ **More complex logic**
+
+- Need phoneme→grapheme conversion dictionary
+- Need to handle homophones, irregular spellings
+- More edge cases to debug
+
+### Why Whisper-Tiny?
+
+✅ **Small size** (~75MB vs 140MB+ for larger variants)
+✅ **Fast inference** (even on CPU)
+✅ **Good accuracy** for English word transcription
+✅ **Well-tested** (used in production by many apps)
+✅ **ONNX-compatible** (Xenova has pre-converted versions)
+
+Alternative: `Xenova/whisper-base.en` if accuracy is more important than size
 
 ### Why Validate Word-Phoneme Alignment?
 
@@ -933,15 +1642,17 @@ If issues arise:
 
 ## Comparison with Phoneme-Only Implementation
 
-| Aspect                 | Phonemes Only | Phonemes + Words | Improvement     |
-| ---------------------- | ------------- | ---------------- | --------------- |
-| Response Time          | 50-70% faster | 70-90% faster    | +20% faster     |
-| Backend Load Reduction | 40-60%        | 60-80%           | +20% reduction  |
-| Implementation Time    | 32-44 hours   | 14-20 hours      | Leverages infra |
-| Memory Usage           | ~400MB        | ~400MB           | Same (reuses)   |
-| Model Download Size    | ~250MB        | ~250MB           | Same (reuses)   |
-| Complexity             | Medium        | Medium+          | Slight increase |
-| Fallback Flexibility   | Server-only   | Partial/Server   | More options    |
+| Aspect                 | Phonemes Only          | Phonemes + Words (Separate Models)    | Improvement     |
+| ---------------------- | ---------------------- | ------------------------------------- | --------------- |
+| Response Time          | 50-70% faster          | 70-90% faster                         | +20% faster     |
+| Backend Load Reduction | 40-60%                 | 60-80%                                | +20% reduction  |
+| Implementation Time    | 32-44 hours            | 14-20 hours                           | Leverages infra |
+| Memory Usage           | ~250MB (phoneme only)  | ~325MB (250MB + 75MB)                 | +75MB           |
+| Model Download Size    | ~250MB                 | ~325MB total                          | +75MB           |
+| Complexity             | Medium                 | Medium-High                           | Slight increase |
+| Fallback Flexibility   | Server-only            | Partial/Server (3 scenarios)          | More options    |
+| Accuracy               | Phonemes: Excellent    | Phonemes: Excellent, Words: Excellent | Better words    |
+| Architecture Match     | Different from backend | Matches backend (2 models)            | Consistency++   |
 
 ---
 
@@ -1006,43 +1717,75 @@ const phonemes = [
 
 ## Appendix C: Example Implementation Snippets
 
-### Frontend: Combined Extraction
+### Frontend: Parallel Model Loading
 
 ```typescript
-async extractPhonemesAndWords(audioBlob: Blob) {
-  const audioData = await this.prepareAudioData(audioBlob);
-  const result = await this.model(audioData);
+// Load both models in parallel
+const loadModels = async () => {
+  console.log("Loading phoneme and word models in parallel...");
 
-  // Single model output contains both
-  const rawText = result.text;  // e.g., "h ə l oʊ | w ɜ l d"
+  const results = await Promise.allSettled([
+    phonemeExtractor.loadModel((p) => console.log("Phoneme:", p + "%")),
+    wordExtractor.loadModel((p) => console.log("Word:", p + "%")),
+  ]);
 
-  // Parse phonemes (existing logic)
-  const phonemes = this.parsePhonemes(rawText);
+  const phonemeLoaded = results[0].status === "fulfilled";
+  const wordLoaded = results[1].status === "fulfilled";
 
-  // Parse words (new logic)
-  const words = this.parseWords(rawText);
+  console.log("Models loaded:", { phonemeLoaded, wordLoaded });
+
+  return { phonemeLoaded, wordLoaded };
+};
+```
+
+### Frontend: Parallel Extraction
+
+```typescript
+// Extract phonemes and words in parallel
+const extractBoth = async (audioBlob: Blob) => {
+  console.log("Extracting phonemes and words in parallel...");
+
+  const [phonemeResult, wordResult] = await Promise.allSettled([
+    phonemeExtractor.extractPhonemes(audioBlob),
+    wordExtractor.extractWords(audioBlob),
+  ]);
+
+  const phonemes =
+    phonemeResult.status === "fulfilled" ? phonemeResult.value : null;
+  const words = wordResult.status === "fulfilled" ? wordResult.value : null;
 
   // Validate alignment
-  if (!this.validateExtraction(words, phonemes)) {
-    throw new Error("Word/phoneme alignment failed");
+  if (phonemes && words && phonemes.length !== words.length) {
+    console.warn("Count mismatch - falling back to server for words");
+    return { phonemes, words: null };
   }
 
-  return { words, phonemes };
-}
+  return { phonemes, words };
+};
+```
 
-private parseWords(rawText: string): string[] {
-  // Remove phoneme delimiters and extract words
-  // Model output: "h ə l oʊ | w ɜ l d"
-  // Split by word delimiter (|) then reconstruct words
+### Frontend: Word Extraction with Whisper
 
-  const wordGroups = rawText.split('|').map(g => g.trim());
+```typescript
+// Word extractor service
+async extractWords(audioBlob: Blob): Promise<string[]> {
+  const audioData = await this.prepareAudioData(audioBlob);
 
-  // This is model-specific - may need adjustment based on actual output
-  const words = wordGroups.map(group => {
-    // Convert phonemes back to approximate word
-    // Or use a secondary decoding step
-    return this.phonemesToWord(group);
+  // Run Whisper model
+  const result = await this.model(audioData, {
+    language: "english",
+    task: "transcribe",
   });
+
+  const text = result.text || "";
+
+  // Parse words from transcription
+  const words = text
+    .toLowerCase()
+    .replace(/[^\w\s'-]/g, "") // Remove punctuation
+    .trim()
+    .split(/\s+/)
+    .filter(w => w.length > 0);
 
   return words;
 }

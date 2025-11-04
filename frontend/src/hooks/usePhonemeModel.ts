@@ -10,6 +10,9 @@ export interface UsePhonemeModelReturn {
   shouldFallbackToServer: boolean;
   loadModel: () => Promise<void>;
   extractPhonemes: (audio: Blob) => Promise<string[][] | null>;
+  extractPhonemesAndWords: (
+    audio: Blob
+  ) => Promise<{ phonemes: string[][]; words: string[] } | null>;
   unloadModel: () => void;
 }
 
@@ -152,6 +155,49 @@ export function usePhonemeModel(): UsePhonemeModelReturn {
   );
 
   /**
+   * Extract both phonemes AND words from audio blob.
+   * Uses the same model output for both - no additional overhead.
+   * Returns null if extraction fails (caller should fallback to server).
+   */
+  const extractPhonemesAndWords = useCallback(
+    async (
+      audio: Blob
+    ): Promise<{ phonemes: string[][]; words: string[] } | null> => {
+      // Check if model is actually loaded
+      if (!phonemeExtractor.isModelLoaded()) {
+        console.warn("Model not loaded, cannot extract phonemes and words");
+        setShouldFallbackToServer(true);
+        return null;
+      }
+
+      try {
+        const result = await phonemeExtractor.extractPhonemesAndWords(audio);
+
+        // Reset fallback flag on successful extraction
+        if (isMountedRef.current) {
+          setShouldFallbackToServer(false);
+        }
+
+        return result;
+      } catch (err) {
+        console.error("Phoneme and word extraction failed:", err);
+
+        if (isMountedRef.current) {
+          const errorMessage =
+            err instanceof Error
+              ? err.message
+              : "Phoneme and word extraction failed";
+          setError(errorMessage);
+          setShouldFallbackToServer(true);
+        }
+
+        return null;
+      }
+    },
+    [isReady]
+  );
+
+  /**
    * Unload the model and free memory.
    */
   const unloadModel = useCallback(() => {
@@ -173,6 +219,7 @@ export function usePhonemeModel(): UsePhonemeModelReturn {
     shouldFallbackToServer,
     loadModel,
     extractPhonemes,
+    extractPhonemesAndWords,
     unloadModel,
   };
 }

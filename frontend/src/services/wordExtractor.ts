@@ -250,11 +250,10 @@ class ClientWordExtractor {
         ).toFixed(2)}s)`
       );
 
+      // Note: Don't specify language/task for English-only models like whisper-tiny.en
       const result = await this.model(audioData, {
         chunk_length_s: 20,
         stride_length_s: 3,
-        language: "english",
-        task: "transcribe",
         return_timestamps: false,
         // Force greedy decoding (faster)
         num_beams: 1,

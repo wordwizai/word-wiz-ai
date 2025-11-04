@@ -257,8 +257,25 @@ export const useHybridAudioAnalysis = (
       }
     }
 
+    // If both phonemes and words were extracted on client, send empty audio to save bandwidth
+    const audioToSend =
+      clientPhonemes && clientWords
+        ? new File([], "empty.wav", { type: "audio/wav" })
+        : audioFile;
+
+    if (clientPhonemes && clientWords) {
+      console.log(
+        "[HybridAudioAnalysis] 🚀 Full client extraction - sending empty audio to save bandwidth"
+      );
+    }
+
     // Send to backend (with or without client-extracted data)
-    audioAnalysisStream.start(audioFile, sentence, clientPhonemes, clientWords);
+    audioAnalysisStream.start(
+      audioToSend,
+      sentence,
+      clientPhonemes,
+      clientWords
+    );
   };
 
   return {

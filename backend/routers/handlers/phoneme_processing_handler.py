@@ -77,7 +77,8 @@ def validate_client_words(
     sentence: str
 ) -> tuple[bool, str]:
     """
-    Validate client words match expected format and align with phonemes.
+    Validate client words match expected format.
+    NOTE: Does NOT require word count to match phoneme count - backend will handle alignment.
     
     Args:
         words: List of word strings extracted from audio
@@ -91,7 +92,6 @@ def validate_client_words(
         
     Validation checks:
     - Words is a list
-    - Word count matches phoneme count
     - Each word is a non-empty string
     - Words approximately match attempted sentence (warning only)
     """
@@ -99,9 +99,9 @@ def validate_client_words(
     if not isinstance(words, list):
         return False, "Words must be array"
     
-    # Check count matches phonemes
+    # Log if counts don't match - backend will handle alignment
     if len(words) != len(phonemes):
-        return False, f"Word count ({len(words)}) doesn't match phoneme count ({len(phonemes)})"
+        logger.info(f"Word count ({len(words)}) differs from phoneme count ({len(phonemes)}) - backend will align")
     
     # Check each word is a non-empty string
     for i, word in enumerate(words):

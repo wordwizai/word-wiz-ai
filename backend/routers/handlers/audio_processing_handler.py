@@ -56,6 +56,12 @@ async def load_and_preprocess_audio_file(audio_file: UploadFile, session_id: str
     # Read audio file into numpy array
     audio_bytes = await audio_file.read()
     
+    # Check if this is an empty file (sent when client did full extraction)
+    if len(audio_bytes) == 0:
+        print("📭 Received empty audio - client performed full extraction")
+        # Return empty array - won't be used since client provided both phonemes and words
+        return np.array([]), session_id
+    
     # CACHE POINT 1: Save original uploaded audio
     audio_cache.save_audio_bytes(
         audio_bytes, 

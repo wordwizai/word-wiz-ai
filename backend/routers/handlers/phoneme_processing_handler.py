@@ -1,13 +1,17 @@
 """
-Handler for processing and normalizing client-extracted phonemes.
+Handler for processing and normalizing client-extracted phonemes and words.
 
 This module provides utilities for:
 - Validating client phoneme format
+- Validating client word format and alignment
 - Normalizing eSpeak phonemes to IPA format
-- Error handling for malformed phoneme data
+- Error handling for malformed phoneme/word data
 """
 
 from typing import Optional
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def validate_client_phonemes(
@@ -63,6 +67,54 @@ def validate_client_phonemes(
             # Check phoneme is not empty
             if len(phoneme) == 0:
                 return False, f"Word {i}, phoneme {j} is empty"
+    
+    return True, ""
+
+
+def validate_client_words(
+    words: list[str],
+    phonemes: list[list[str]],
+    sentence: str
+) -> tuple[bool, str]:
+    """
+    Validate client words match expected format and align with phonemes.
+    
+    Args:
+        words: List of word strings extracted from audio
+        phonemes: List of words, where each word is a list of phoneme strings
+        sentence: The attempted sentence (ground truth text)
+        
+    Returns:
+        Tuple of (is_valid, error_message)
+        - If valid: (True, "")
+        - If invalid: (False, "descriptive error message")
+        
+    Validation checks:
+    - Words is a list
+    - Word count matches phoneme count
+    - Each word is a non-empty string
+    - Words approximately match attempted sentence (warning only)
+    """
+    # Check type
+    if not isinstance(words, list):
+        return False, "Words must be array"
+    
+    # Check count matches phonemes
+    if len(words) != len(phonemes):
+        return False, f"Word count ({len(words)}) doesn't match phoneme count ({len(phonemes)})"
+    
+    # Check each word is a non-empty string
+    for i, word in enumerate(words):
+        if not isinstance(word, str):
+            return False, f"Word {i} is not a string"
+        if len(word) == 0:
+            return False, f"Word {i} is empty"
+    
+    # Fuzzy match against attempted sentence (optional - allows minor variations)
+    # This is a warning, not an error, since ASR may produce slightly different text
+    expected_words = sentence.lower().split()
+    if len(words) != len(expected_words):
+        logger.warning(f"Word count mismatch: got {len(words)}, expected {len(expected_words)}")
     
     return True, ""
 

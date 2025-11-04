@@ -84,6 +84,7 @@ async def process_audio_analysis(
     db: Session,
     current_user: User,
     client_phonemes: Optional[list[list[str]]] = None,
+    client_words: Optional[list[str]] = None,
 ) -> StreamingResponse:
     """
     Common logic for processing audio analysis with or without client phonemes.
@@ -114,6 +115,7 @@ async def process_audio_analysis(
             session=session,
             db=db,
             client_phonemes=client_phonemes,
+            client_words=client_words,
         ),
         media_type="text/event-stream",
     )
@@ -145,18 +147,47 @@ async def analyze_audio_with_phonemes(
     attempted_sentence: str = Form(...),
     session_id: int = Form(...),
     client_phonemes: str = Form(...),
+    client_words: Optional[str] = Form(None),
     audio_file: UploadFile = File(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
     """
-    Analyze audio with client-provided phonemes.
-    Falls back to server-side extraction if client phonemes are invalid.
+    Analyze audio with client-provided phonemes and optionally words.
+    Falls back to server-side extraction if client data is invalid.
     """
     print("Received request to /analyze-audio-with-phonemes")
     
     # Validate client phonemes (returns None if invalid)
     phonemes_data = validate_client_phonemes(client_phonemes)
+    
+    # Validate and parse client words if provided
+    words_data = None
+    if client_words:
+        try:
+            words_data = json.loads(client_words)
+            
+            # Basic validation
+            if not isinstance(words_data, list):
+                print("Invalid client words: not an array")
+                words_data = None
+            elif phonemes_data and len(words_data) != len(phonemes_data):
+                print(f"Word count mismatch: {len(words_data)} words vs {len(phonemes_data)} phoneme groups")
+                words_data = None
+            else:
+                # Validate each word is a non-empty string
+                for i, word in enumerate(words_data):
+                    if not isinstance(word, str) or len(word) == 0:
+                        print(f"Invalid word at index {i}")
+                        words_data = None
+                        break
+                
+                if words_data:
+                    print(f"Validated client words: {len(words_data)} words")
+        
+        except (json.JSONDecodeError, ValueError) as e:
+            print(f"Invalid client words, falling back to server extraction: {e}")
+            words_data = None
     
     return await process_audio_analysis(
         attempted_sentence=attempted_sentence,
@@ -165,5 +196,6 @@ async def analyze_audio_with_phonemes(
         db=db,
         current_user=current_user,
         client_phonemes=phonemes_data,
+        client_words=words_data,
     )
 

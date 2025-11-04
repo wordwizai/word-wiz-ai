@@ -131,12 +131,15 @@ async def analyze_audio_file_event_stream(
     current_user: User,
     session: UserSession,
     client_phonemes: list[list[str]] | None = None,
+    client_words: list[str] | None = None,
 ):
     try:
         # STEP 1: ANALYZE AUDIO
         
-        # Determine if we should use client phonemes or extract on server
+        # Determine if we should use client phonemes/words or extract on server
         use_client_phonemes = False
+        use_client_words = False
+        
         if client_phonemes is not None:
             # Validate client phonemes format
             is_valid, error_msg = validate_client_phonemes(client_phonemes, attempted_sentence)
@@ -151,33 +154,55 @@ async def analyze_audio_file_event_stream(
                 
                 use_client_phonemes = True
                 client_phonemes = normalized_phonemes  # Use normalized version
+                
+                # If client words also provided, validate them
+                if client_words is not None:
+                    from routers.handlers.phoneme_processing_handler import validate_client_words
+                    is_valid_words, error_msg_words = validate_client_words(
+                        client_words, client_phonemes, attempted_sentence
+                    )
+                    
+                    if is_valid_words:
+                        print(f"✓ Client words validated successfully: {client_words}")
+                        use_client_words = True
+                    else:
+                        print(f"✗ Client word validation failed: {error_msg_words}")
+                        print(f"  Falling back to server-side word extraction")
+                        client_words = None
             else:
                 print(f"✗ Client phoneme validation failed: {error_msg}")
                 print(f"  Falling back to server-side phoneme extraction")
                 client_phonemes = None
+                client_words = None  # Can't use words without phonemes
         
-        # Process audio based on whether we have valid client phonemes
+        # Log processing path
+        if use_client_phonemes and use_client_words:
+            print("→ Using full client extraction (phonemes + words) - Maximum speed! 🚀")
+        elif use_client_phonemes:
+            print("→ Using client phonemes only - Server will extract words")
+        else:
+            print("→ Using full server-side extraction (phonemes + words)")
+        
+        # Process audio based on what client data we have
         if use_client_phonemes and client_phonemes is not None:
-            print("→ Using client-provided phonemes (skipping server phoneme extraction)")
-            
             # Get ground truth phonemes for the sentence
             ground_truth_phonemes = g2p(attempted_sentence)
             
-            # Process audio with client phonemes
+            # Process audio with client phonemes (and optionally client words)
             pronunciation_data = await process_audio_with_client_phonemes(
                 client_phonemes=client_phonemes,
                 ground_truth_phonemes=ground_truth_phonemes,
                 audio_array=audio_array,
                 word_extraction_model=phoneme_assistant.word_extractor,
+                client_words=client_words if use_client_words else None,
             )
             
             # Analyze the results to get the same format as server processing
             pronunciation_dataframe, highest_per_word, problem_summary, per_summary = analyze_results(pronunciation_data)
             
-            print(f"✓ Client phoneme processing completed (PER: {per_summary.get('sentence_per', 0):.2%})")
+            extraction_mode = "full client" if use_client_words else "client phonemes only"
+            print(f"✓ {extraction_mode} processing completed (PER: {per_summary.get('sentence_per', 0):.2%})")
         else:
-            print("→ Using server-side phoneme extraction (client phonemes not provided or invalid)")
-            
             # Original server-side processing
             pronunciation_dataframe, highest_per_word, problem_summary, per_summary = (
                 await phoneme_assistant.process_audio(

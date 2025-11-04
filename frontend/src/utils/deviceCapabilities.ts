@@ -99,9 +99,10 @@ export function checkDeviceCapabilities(): DeviceCapabilities {
   const isMobile = isMobileDevice();
   const memory = estimateRAM();
 
-  // Minimum RAM requirements
-  const minRAMDesktop = 4; // 4GB for desktop
-  const minRAMMobile = 3; // 3GB for mobile
+  // Minimum RAM requirements - VERY permissive to allow mobile devices to try
+  // Models are ~325MB total, modern phones can handle this even with 2GB
+  const minRAMDesktop = 2; // 2GB for desktop (very low bar)
+  const minRAMMobile = 1; // 1GB for mobile (let them try, will fallback if fails)
   const minRAM = isMobile ? minRAMMobile : minRAMDesktop;
 
   const hasEnoughRAM = memory >= minRAM;
@@ -111,11 +112,9 @@ export function checkDeviceCapabilities(): DeviceCapabilities {
 
   // Should we recommend disabling?
   // Recommend disabling if:
-  // - Not enough RAM
-  // - Mobile with less than 4GB (will be slow)
-  // - No WebAssembly support
-  const shouldRecommendDisabling =
-    !hasWasm || !hasEnoughRAM || (isMobile && memory < 4);
+  // - No WebAssembly support (hard requirement)
+  // Very permissive - let devices try even if low RAM
+  const shouldRecommendDisabling = !hasWasm;
 
   // Generate warning message
   let warningMessage: string | undefined;

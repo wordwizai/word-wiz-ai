@@ -84,7 +84,7 @@ const updateSettings = async (
     audio_feedback_volume?: number | null;
     notifications_enabled?: boolean | null;
     email_notifications?: boolean | null;
-  },
+  }
 ) => {
   try {
     const response = await axios.put(`${API_URL}/users/me/settings`, settings, {
@@ -115,7 +115,7 @@ const fetchSettings = async (token: string) => {
 
 const getSession = async (
   token: string,
-  sessionId: number,
+  sessionId: number
 ): Promise<Session> => {
   try {
     const response = await axios.get(`${API_URL}/session/${sessionId}`, {
@@ -132,7 +132,7 @@ const getSession = async (
 
 const getCurrentSessionState = async (
   token: string,
-  sessionId: number,
+  sessionId: number
 ): Promise<any> => {
   try {
     const response = await axios.get(
@@ -141,7 +141,7 @@ const getCurrentSessionState = async (
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      },
+      }
     );
     return response.data;
   } catch (error) {
@@ -177,7 +177,7 @@ const createSession = async (token: string, activityId: number) => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      },
+      }
     );
     return response.data;
   } catch (error) {
@@ -230,7 +230,7 @@ const getSentencePers = async (token: string) => {
 
 const getPhonemesPerMistakeType = async (
   token: string,
-  errorType: "insertion" | "deletion" | "substitution",
+  errorType: "insertion" | "deletion" | "substitution"
 ) => {
   try {
     const response = await axios.get(
@@ -239,11 +239,32 @@ const getPhonemesPerMistakeType = async (
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      },
+      }
     );
     return response.data;
   } catch (error) {
     console.error("Fetch phonemes per mistake type error:", error);
+    throw error;
+  }
+};
+
+interface UserStatistics {
+  total_sessions: number;
+  current_streak: number;
+  longest_streak: number;
+  words_read: number;
+}
+
+const getUserStatistics = async (token: string): Promise<UserStatistics> => {
+  try {
+    const response = await axios.get(`${API_URL}/feedback/statistics`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Fetch user statistics error:", error);
     throw error;
   }
 };
@@ -264,5 +285,6 @@ export {
   getActivity,
   getSentencePers,
   getPhonemesPerMistakeType,
+  getUserStatistics,
 };
-export type { Session };
+export type { Session, UserStatistics };

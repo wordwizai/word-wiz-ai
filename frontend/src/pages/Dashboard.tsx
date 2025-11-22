@@ -8,10 +8,9 @@ import {
   Target,
   Flame,
   BookOpen,
-  Palette,
   type LucideIcon,
 } from "lucide-react";
-import { getSessions } from "@/api";
+import { getSessions, getUserStatistics, type UserStatistics } from "@/api";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -94,7 +93,10 @@ const Dashboard = () => {
   const motivational = motivationalQuotes[quoteIndex];
 
   const [pastSessions, setPastSessions] = useState<Session[]>([]);
+  const [statistics, setStatistics] = useState<UserStatistics | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
   const router = useNavigate();
+
   useEffect(() => {
     const fetchPastSessions = async () => {
       if (!token) return;
@@ -106,6 +108,25 @@ const Dashboard = () => {
       }
     };
     fetchPastSessions();
+  }, [token]);
+
+  // Fetch user statistics
+  useEffect(() => {
+    const fetchStatistics = async () => {
+      if (!token) return;
+
+      try {
+        setStatsLoading(true);
+        const stats = await getUserStatistics(token);
+        setStatistics(stats);
+      } catch (error) {
+        console.error("Error fetching statistics:", error);
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+
+    fetchStatistics();
   }, [token]);
 
   const formatActivityType = (type: string) => {
@@ -183,28 +204,36 @@ const Dashboard = () => {
         <StatCard
           icon={Target}
           label="Sessions"
-          value={pastSessions.length.toString()}
+          value={
+            statsLoading ? "..." : statistics?.total_sessions?.toString() || "0"
+          }
           color="bg-pastel-blue"
           iconColor="text-blue-600"
         />
         <StatCard
           icon={Flame}
-          label="Streak"
-          value="5 days"
+          label="Current Streak"
+          value={
+            statsLoading ? "..." : `${statistics?.current_streak || 0} days`
+          }
           color="bg-pastel-yellow"
           iconColor="text-orange-600"
         />
         <StatCard
           icon={BookOpen}
           label="Words Read"
-          value="342"
+          value={
+            statsLoading ? "..." : statistics?.words_read?.toString() || "0"
+          }
           color="bg-pastel-mint"
           iconColor="text-green-600"
         />
         <StatCard
-          icon={Palette}
-          label="Activities"
-          value="8"
+          icon={Target}
+          label="Longest Streak"
+          value={
+            statsLoading ? "..." : `${statistics?.longest_streak || 0} days`
+          }
           color="bg-pastel-coral"
           iconColor="text-pink-600"
         />

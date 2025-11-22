@@ -4,13 +4,15 @@ import { Card } from "@/components/ui/card";
 import {
   BarChart3,
   BookOpen,
-  Clock,
   Target,
   Flame,
   Star,
   TrendingUp,
   type LucideIcon,
 } from "lucide-react";
+import { useContext, useEffect, useState } from "react";
+import { AuthContext } from "@/contexts/AuthContext";
+import { getUserStatistics, type UserStatistics } from "@/api";
 
 interface ProgressStatProps {
   icon: LucideIcon;
@@ -41,6 +43,29 @@ const ProgressStat = ({
 );
 
 const ProgressDashboard = () => {
+  const { token } = useContext(AuthContext);
+  const [statistics, setStatistics] = useState<UserStatistics | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  // Fetch user statistics
+  useEffect(() => {
+    const fetchStatistics = async () => {
+      if (!token) return;
+
+      try {
+        setStatsLoading(true);
+        const stats = await getUserStatistics(token);
+        setStatistics(stats);
+      } catch (error) {
+        console.error("Error fetching statistics:", error);
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+
+    fetchStatistics();
+  }, [token]);
+
   return (
     <main className="flex-1 p-4 sm:p-6 bg-background space-y-6 overflow-auto flex flex-col min-h-0">
       <div className="text-center">
@@ -58,13 +83,17 @@ const ProgressDashboard = () => {
         <ProgressStat
           icon={BookOpen}
           label="Total Sessions"
-          value="24"
+          value={
+            statsLoading ? "..." : statistics?.total_sessions?.toString() || "0"
+          }
           iconColor="text-blue-600"
         />
         <ProgressStat
-          icon={Clock}
-          label="Practice Time"
-          value="3.5h"
+          icon={BookOpen}
+          label="Words Read"
+          value={
+            statsLoading ? "..." : statistics?.words_read?.toString() || "0"
+          }
           iconColor="text-purple-600"
         />
         <ProgressStat
@@ -76,13 +105,17 @@ const ProgressDashboard = () => {
         <ProgressStat
           icon={Flame}
           label="Current Streak"
-          value="5 days"
+          value={
+            statsLoading ? "..." : `${statistics?.current_streak || 0} days`
+          }
           iconColor="text-orange-600"
         />
         <ProgressStat
           icon={Star}
           label="Best Streak"
-          value="12 days"
+          value={
+            statsLoading ? "..." : `${statistics?.longest_streak || 0} days`
+          }
           iconColor="text-yellow-600"
         />
         <ProgressStat

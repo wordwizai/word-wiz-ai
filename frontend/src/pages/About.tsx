@@ -122,7 +122,7 @@ const About = () => {
               },
             ].map((mission, i) => (
               <motion.div key={i} variants={childVariant}>
-                <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl text-center h-full hover:shadow-2xl hover:-translate-y-2 hover:scale-105 transition-all duration-300 rounded-3xl">
+                <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl text-center h-full hover:shadow-2xl transition-shadow rounded-3xl">
                   <CardHeader className="pb-4">
                     <div
                       className={`w-12 h-12 bg-gradient-to-r ${mission.iconBg} rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg`}
@@ -196,7 +196,7 @@ const About = () => {
               },
             ].map((member, i) => (
               <motion.div key={i} variants={childVariant}>
-                <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl text-center h-full hover:shadow-2xl hover:-translate-y-2 hover:scale-105 transition-all duration-300 rounded-3xl">
+                <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl text-center h-full hover:shadow-2xl transition-shadow rounded-3xl">
                   <CardHeader className="pb-4">
                     <div className={`w-16 h-16 bg-gradient-to-br ${member.gradient} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg`}>
                       <span className="text-white font-bold text-lg">
@@ -276,7 +276,7 @@ const About = () => {
                   className="block"
                 >
                   <motion.div
-                    className={`p-6 bg-gradient-to-br ${social.color} rounded-2xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 group`}
+                    className={`p-6 bg-gradient-to-br ${social.color} rounded-2xl text-white shadow-xl hover:shadow-2xl transition-shadow group`}
                     whileHover={{ scale: 1.05, y: -4 }}
                     whileTap={{ scale: 0.95 }}
                     transition={{ type: "spring", stiffness: 300 }}

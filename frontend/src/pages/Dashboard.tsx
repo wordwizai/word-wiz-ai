@@ -120,7 +120,7 @@ const Dashboard = () => {
   };
 
   return (
-    <main className="flex-1 p-4 sm:p-6 bg-background space-y-4 sm:space-y-6 overflow-y-auto flex flex-col min-h-0 h-full">
+    <main className="flex-1 p-4 sm:p-6 bg-background space-y-6 overflow-y-auto flex flex-col min-h-0 h-full">
       {/* Main content */}
       {/* Header with enhanced styling */}
       <div className="relative text-center">
@@ -184,7 +184,7 @@ const Dashboard = () => {
             <Button
               variant="outline"
               size="sm"
-              className="text-foreground border-primary/30 hover:border-primary/60 hover:bg-primary/5 transition-all duration-200 px-6 py-2 min-h-[44px]"
+              className="text-foreground border-primary/30 hover:border-primary/60 hover:bg-primary/5 transition-colors px-6 py-2 min-h-[44px]"
               onClick={() => router("/practice")}
             >
               View All Activities
@@ -193,8 +193,8 @@ const Dashboard = () => {
         </div>
 
         {/* Practice Calendar / Sidebar with enhanced styling */}
-        <Card className="gap-4 pb-1 px-2 flex flex-col md:overflow-hidden md:min-h-0 rounded-2xl bg-card border-2 border-border shadow-md md:w-80">
-          <CardHeader>
+        <Card className="flex flex-col md:overflow-hidden md:min-h-0 rounded-2xl bg-card border-2 border-border shadow-md md:w-80">
+          <CardHeader className="p-4">
             <div className="flex items-center gap-3">
               <Clock className="w-5 h-5 text-primary" />
               <h3 className="text-lg font-bold text-foreground">
@@ -202,10 +202,10 @@ const Dashboard = () => {
               </h3>
             </div>
           </CardHeader>
-          <CardContent className="px-1 md:flex-1 flex flex-col overflow-hidden min-h-0">
+          <CardContent className="p-4 pt-0 md:flex-1 flex flex-col overflow-hidden min-h-0">
             {pastSessions.length > 0 ? (
               <ScrollArea className="rounded-xl h-full min-h-0">
-                <div className="flex flex-col gap-2 pr-3">
+                <div className="flex flex-col gap-3 pr-3">
                   {pastSessions.map((session) => {
                     const colorIndex =
                       Math.abs(session.activity.id) % activityColors.length;
@@ -241,7 +241,7 @@ const Dashboard = () => {
               </ScrollArea>
             ) : (
               <div className="flex flex-col items-center justify-center h-32 text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full flex items-center justify-center mb-3">
+                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-3">
                   <Clock className="w-8 h-8 text-gray-500" />
                 </div>
                 <p className="text-gray-500 font-medium">No sessions yet</p>

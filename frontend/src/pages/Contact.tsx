@@ -243,7 +243,7 @@ const Contact = () => {
                   },
                 ].map((item, i) => (
                   <motion.div key={i} variants={childVariant}>
-                    <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl">
+                    <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-lg hover:shadow-xl transition-shadow rounded-2xl">
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
                           <div
@@ -330,7 +330,7 @@ const Contact = () => {
                   className="block"
                 >
                   <motion.div
-                    className={`p-6 bg-gradient-to-br ${social.color} rounded-3xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 group h-full`}
+                    className={`p-6 bg-gradient-to-br ${social.color} rounded-3xl text-white shadow-xl hover:shadow-2xl transition-shadow group h-full`}
                     whileHover={{ scale: 1.05, y: -6 }}
                     whileTap={{ scale: 0.95 }}
                     transition={{ type: "spring", stiffness: 300 }}

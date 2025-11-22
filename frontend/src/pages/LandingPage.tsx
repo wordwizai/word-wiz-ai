@@ -151,7 +151,7 @@ const LandingPage = () => {
             ].map((feature, i) => (
               <motion.div
                 key={i}
-                className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl text-center h-full hover:shadow-2xl hover:-translate-y-2 hover:scale-105 transition-all duration-300 rounded-3xl p-6"
+                className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl text-center h-full hover:shadow-2xl transition-shadow rounded-3xl p-6"
                 variants={childVariant}
               >
                 <div
@@ -207,7 +207,7 @@ const LandingPage = () => {
             ].map((target, i) => (
               <motion.div
                 key={i}
-                className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl text-center h-full hover:shadow-2xl hover:-translate-y-2 hover:scale-105 transition-all duration-300 rounded-3xl p-6"
+                className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl text-center h-full hover:shadow-2xl transition-shadow rounded-3xl p-6"
                 variants={childVariant}
               >
                 <div
@@ -265,7 +265,7 @@ const LandingPage = () => {
               },
             ].map((step, i) => (
               <motion.div key={i} variants={childVariant} className="h-full">
-                <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl hover:shadow-2xl hover:-translate-y-2 hover:scale-105 transition-all duration-300 rounded-3xl h-full p-6">
+                <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl hover:shadow-2xl transition-shadow rounded-3xl h-full p-6">
                   <CardHeader>
                     <div
                       className={`bg-gradient-to-br ${step.gradient} text-white w-12 h-12 flex items-center justify-center rounded-full mb-4 shadow-lg font-bold text-lg`}

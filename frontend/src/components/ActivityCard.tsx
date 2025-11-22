@@ -34,7 +34,7 @@ const ActivityCard = ({ activity, onActivityClick }: ActivityCardProps) => {
 
   return (
     <Card
-      className="group cursor-pointer rounded-2xl border-2 border-white/80 shadow-sm hover:shadow-md transition-all hover:scale-[1.02] flex flex-col h-full"
+      className="group cursor-pointer rounded-2xl border-2 border-white/80 shadow-sm hover:shadow-md transition-shadow hover:scale-[1.02] flex flex-col h-full"
       style={{ backgroundColor: `var(--${cardColor})` }}
       onClick={() => onActivityClick(activity)}
       role="button"
@@ -43,8 +43,8 @@ const ActivityCard = ({ activity, onActivityClick }: ActivityCardProps) => {
         if (e.key === "Enter" || e.key === " ") onActivityClick(activity);
       }}
     >
-      <CardHeader className="p-5 pb-4">
-        <div className="flex items-start gap-4">
+      <CardHeader className="p-4">
+        <div className="flex items-start gap-3">
           {/* Icon - Use DynamicIcon component for lucide icons */}
           <div className="flex-shrink-0">
             <DynamicIcon
@@ -69,14 +69,16 @@ const ActivityCard = ({ activity, onActivityClick }: ActivityCardProps) => {
         </div>
       </CardHeader>
 
-      <CardContent className="px-5 pb-3 flex-1">
-        <p className="text-sm text-muted-foreground">{activity.description}</p>
+      <CardContent className="px-4 pb-3 flex-1">
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {activity.description}
+        </p>
       </CardContent>
 
-      <CardFooter className="px-5 pb-5 pt-2 mt-auto">
+      <CardFooter className="p-4 pt-0 mt-auto">
         <Button
           size="sm"
-          className="w-full bg-white/80 hover:bg-white text-foreground border-2 border-white/60 hover:border-white rounded-xl font-semibold shadow-sm hover:shadow-md transition-all"
+          className="w-full bg-white/80 hover:bg-white text-foreground border-2 border-white/60 hover:border-white rounded-xl font-semibold shadow-sm hover:shadow-md transition-shadow"
           aria-label={`Start activity ${activity.title}`}
         >
           <Play className="w-4 h-4 mr-2" fill="currentColor" />

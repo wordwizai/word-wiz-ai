@@ -111,26 +111,26 @@ const ActivitiesList = ({
                   </CarouselItem>
                 ))}
         </CarouselContent>
-        <CarouselPrevious className="bg-card/90 border-2 border-border hover:bg-card transition-all -left-12" />
-        <CarouselNext className="bg-card/90 border-2 border-border hover:bg-card transition-all -right-12" />
+        <CarouselPrevious className="bg-card/90 border-2 border-border hover:bg-card transition-colors -left-12" />
+        <CarouselNext className="bg-card/90 border-2 border-border hover:bg-card transition-colors -right-12" />
       </Carousel>
     );
   }
 
   return (
-    <div className={"space-y-6 flex flex-col " + className}>
+    <div className={"space-y-4 flex flex-col " + className}>
       {/* Header section */}
-      <div className="flex items-center gap-3 mb-4 sm:mb-6">
+      <div className="flex items-center gap-3 mb-6">
         <div className="p-2 bg-primary/10 rounded-xl">
-          <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+          <BookOpen className="w-5 h-5 text-primary" />
         </div>
-        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
+        <h2 className="text-xl md:text-2xl font-bold text-foreground">
           Choose Your Practice
         </h2>
       </div>
 
       {/* Activities grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 flex-1">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 flex-1">
         {activities.length === 0
           ? Array.from(
               { length: numberOfActivities === -1 ? 3 : numberOfActivities },

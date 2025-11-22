@@ -4,8 +4,8 @@ from typing import Dict, List
 
 from auth.auth_handler import get_current_user
 from database import get_db
-from crud.feedback_entry import get_feedback_entries_by_user
-from schemas.feedback_entry import FeedbackEntryOut
+from crud.feedback_entry import get_feedback_entries_by_user, get_user_statistics
+from schemas.feedback_entry import FeedbackEntryOut, UserStatistics
 from models.user import User
 
 router = APIRouter()
@@ -124,3 +124,29 @@ def get_mistake_type_phonemes_for_user(
         if isinstance(mistake, str):
             mistake_counts[mistake] = mistake_counts.get(mistake, 0) + 1
     return mistake_counts
+
+
+@router.get("/statistics", response_model=UserStatistics)
+def get_user_statistics_endpoint(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Get comprehensive user statistics for dashboard.
+    
+    Returns:
+        - total_sessions: Count of all practice sessions (completed or in-progress)
+        - current_streak: Consecutive days with sessions (from today backwards)
+        - longest_streak: Maximum streak ever achieved
+        - words_read: Total words practiced across all feedback entries
+    
+    Requires authentication.
+    """
+    try:
+        stats = get_user_statistics(db, user_id=current_user.id)
+        return UserStatistics(**stats)
+    except Exception as e:
+        # Log error in production
+        print(f"Error fetching user statistics: {e}")
+        # Return zeros instead of failing
+        return UserStatistics()

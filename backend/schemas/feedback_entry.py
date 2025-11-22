@@ -31,3 +31,13 @@ class AudioAnalysis(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
+
+
+class UserStatistics(BaseModel):
+    """User statistics for dashboard display"""
+    total_sessions: int = 0
+    current_streak: int = 0
+    longest_streak: int = 0
+    words_read: int = 0
+    
+    model_config = {"from_attributes": True}

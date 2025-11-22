@@ -129,24 +129,52 @@ const Dashboard = () => {
   return (
     <main className="flex-1 p-4 sm:p-6 bg-background space-y-6 overflow-y-auto flex flex-col min-h-0 h-full">
       {/* Main content */}
-      {/* Compact Header with subtle visual interest */}
-      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/20 p-4">
-        {/* Subtle decorative element */}
-        <Sparkles className="absolute -top-1 -right-1 w-16 h-16 text-primary/5 rotate-12" />
-        
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-1">
-            <p className="text-xs text-muted-foreground font-medium">
-              {getGreeting()}
-            </p>
-            <Sparkles className="w-3 h-3 text-accent" />
+      {/* Hero Header with visual appeal */}
+      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 via-accent/5 to-primary/5 border border-primary/20 p-6">
+        {/* Decorative background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Gradient orbs */}
+          <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-accent/10 rounded-full blur-3xl" />
+
+          {/* Floating icons */}
+          <BookOpen className="absolute top-4 right-16 w-8 h-8 text-primary/10 rotate-12" />
+          <Target className="absolute bottom-6 right-8 w-6 h-6 text-accent/10 -rotate-12" />
+          <Sparkles className="absolute top-8 left-1/3 w-6 h-6 text-primary/10 rotate-45" />
+        </div>
+
+        {/* Main content */}
+        <div className="relative z-10 flex items-center gap-6">
+          {/* Hero graphic - Abstract icon composition */}
+          <div className="hidden sm:flex relative shrink-0">
+            <div className="relative w-24 h-24 md:w-28 md:h-28">
+              {/* Layered circles with icons */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl rotate-6 transition-transform group-hover:rotate-12" />
+              <div className="absolute inset-0 bg-gradient-to-tl from-accent/20 to-primary/20 rounded-2xl -rotate-6 transition-transform group-hover:-rotate-12" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="relative">
+                  <BookOpen className="w-12 h-12 md:w-14 md:h-14 text-primary" />
+                  <Sparkles className="absolute -top-1 -right-1 w-5 h-5 text-accent animate-pulse" />
+                </div>
+              </div>
+            </div>
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent mb-2">
-            {userName}!
-          </h1>
-          <p className="text-sm text-muted-foreground/80 font-medium max-w-2xl">
-            {motivational}
-          </p>
+
+          {/* Text content */}
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <p className="text-xs text-muted-foreground font-medium">
+                {getGreeting()}
+              </p>
+              <Sparkles className="w-3 h-3 text-accent" />
+            </div>
+            <h1 className="text-2xl md:text-4xl font-bold text-foreground mb-2 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+              {userName}!
+            </h1>
+            <p className="text-sm md:text-base text-muted-foreground/80 font-medium max-w-2xl">
+              {motivational}
+            </p>
+          </div>
         </div>
       </div>
 

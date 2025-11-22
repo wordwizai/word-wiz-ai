@@ -10,7 +10,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "./ui/carousel";
-import { Target, BookOpen } from "lucide-react";
+import { BookOpen } from "lucide-react";
 
 interface Activity {
   id: number;
@@ -74,9 +74,9 @@ const ActivitiesList = ({
         opts={{
           align: "start",
         }}
-        className={className + " overflow-y-visible"}
+        className={className + " overflow-y-visible w-full"}
       >
-        <CarouselContent className="overflow-y-visible">
+        <CarouselContent className="overflow-y-visible -ml-4">
           {activities.length === 0
             ? Array.from(
                 {
@@ -85,11 +85,11 @@ const ActivitiesList = ({
                 (_, idx) => (
                   <CarouselItem
                     key={idx}
-                    className="xl:basis-1/4 lg:basis-1/3 md:basis-1/2 overflow-y-visible"
+                    className="xl:basis-1/4 lg:basis-1/3 md:basis-1/2 overflow-y-visible pl-4"
                   >
                     <Skeleton className="h-80 rounded-3xl" />
                   </CarouselItem>
-                ),
+                )
               )
             : activities
                 .filter((a) => (type ? a.activity_type === type : true))
@@ -97,12 +97,12 @@ const ActivitiesList = ({
                   0,
                   numberOfActivities === -1
                     ? activities.length
-                    : numberOfActivities,
+                    : numberOfActivities
                 )
                 .map((activity, idx) => (
                   <CarouselItem
                     key={idx}
-                    className="xl:basis-1/4 lg:basis-1/3 md:basis-1/2 overflow-y-visible"
+                    className="xl:basis-1/4 lg:basis-1/3 md:basis-1/2 overflow-y-visible pl-4"
                   >
                     <ActivityCard
                       activity={activity}
@@ -111,8 +111,8 @@ const ActivitiesList = ({
                   </CarouselItem>
                 ))}
         </CarouselContent>
-        <CarouselPrevious className="bg-white/80 border-2 border-gray-200 hover:bg-white hover:border-gray-300 transition-all duration-200" />
-        <CarouselNext className="bg-white/80 border-2 border-gray-200 hover:bg-white hover:border-gray-300 transition-all duration-200" />
+        <CarouselPrevious className="bg-card/90 border-2 border-border hover:bg-card transition-all -left-12" />
+        <CarouselNext className="bg-card/90 border-2 border-border hover:bg-card transition-all -right-12" />
       </Carousel>
     );
   }
@@ -121,10 +121,10 @@ const ActivitiesList = ({
     <div className={"space-y-6 flex flex-col " + className}>
       {/* Header section */}
       <div className="flex items-center gap-3 mb-4 sm:mb-6">
-        <div className="p-2 bg-gradient-to-r from-blue-200 to-purple-200 rounded-xl">
-          <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+        <div className="p-2 bg-primary/10 rounded-xl">
+          <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
         </div>
-        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">
+        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">
           Choose Your Practice
         </h2>
       </div>
@@ -139,7 +139,7 @@ const ActivitiesList = ({
                   key={idx}
                   className="h-64 sm:h-72 md:h-80 rounded-3xl"
                 />
-              ),
+              )
             )
           : activities
               .filter((a) => (type ? a.activity_type === type : true))
@@ -147,7 +147,7 @@ const ActivitiesList = ({
                 0,
                 numberOfActivities === -1
                   ? activities.length
-                  : numberOfActivities,
+                  : numberOfActivities
               )
               .map((activity, idx) => (
                 <ActivityCard

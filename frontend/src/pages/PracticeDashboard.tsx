@@ -45,25 +45,28 @@ const PracticeDashboard = () => {
   }, [token]);
 
   return (
-    <main className="flex-1 p-6 bg-background space-y-8 overflow-auto w-full">
+    <main className="flex-1 p-4 sm:p-6 bg-background space-y-6 overflow-auto w-full max-w-full">
       {/* Header */}
-      <div className="space-y-2 mx-auto w-fit text-center">
-        <h1 className="text-3xl font-bold">
-          <Target className="inline size-7 mr-2 mb-1.5" />
-          <span>Practice Dashboard</span>
+      <div className="text-center">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-3">
+          <Target className="w-8 h-8 text-primary" />
+        </div>
+        <h1 className="text-3xl font-bold text-foreground">
+          Practice Dashboard
         </h1>
-        <p className="text-muted-foreground">
-          Manage your practice sessions and activities.
+        <p className="text-muted-foreground mt-2">
+          Choose your practice activities and start learning!
         </p>
       </div>
+
       {/* Content */}
       {sections.map((section, idx) => (
-        <div key={idx} className="space-y-2 px-10">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-gradient-to-r from-blue-200 to-purple-200 rounded-xl">
+        <div key={idx} className="space-y-4 w-full px-4 sm:px-12">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-500/10 rounded-xl">
               <Target className="w-5 h-5 text-blue-600" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-800">
+            <h2 className="text-xl md:text-2xl font-bold text-foreground">
               {section.title}
             </h2>
           </div>

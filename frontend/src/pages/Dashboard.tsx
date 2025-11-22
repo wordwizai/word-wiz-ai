@@ -119,25 +119,34 @@ const Dashboard = () => {
     }
   };
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 18) return "Good Afternoon";
+    return "Good Evening";
+  };
+
   return (
     <main className="flex-1 p-4 sm:p-6 bg-background space-y-6 overflow-y-auto flex flex-col min-h-0 h-full">
       {/* Main content */}
-      {/* Header with enhanced styling */}
-      <div className="relative text-center">
+      {/* Compact Header with subtle visual interest */}
+      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/20 p-4">
+        {/* Subtle decorative element */}
+        <Sparkles className="absolute -top-1 -right-1 w-16 h-16 text-primary/5 rotate-12" />
+        
         <div className="relative z-10">
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-            Hi, {userName}!
-          </h1>
-          <div className="mt-4 max-w-2xl mx-auto">
-            <div className="bg-accent/10 border-2 border-accent/30 rounded-2xl p-4">
-              <div className="flex items-center justify-center gap-2">
-                <Sparkles className="w-5 h-5 text-accent shrink-0" />
-                <p className="text-base text-foreground/80 text-center font-medium">
-                  {motivational}
-                </p>
-              </div>
-            </div>
+          <div className="flex items-center gap-2 mb-1">
+            <p className="text-xs text-muted-foreground font-medium">
+              {getGreeting()}
+            </p>
+            <Sparkles className="w-3 h-3 text-accent" />
           </div>
+          <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-foreground to-primary bg-clip-text text-transparent mb-2">
+            {userName}!
+          </h1>
+          <p className="text-sm text-muted-foreground/80 font-medium max-w-2xl">
+            {motivational}
+          </p>
         </div>
       </div>
 

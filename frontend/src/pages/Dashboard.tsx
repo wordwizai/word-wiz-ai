@@ -2,7 +2,15 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import ActivitiesList from "@/components/ActivitiesList";
-import { Clock, Sparkles, Target, Flame, BookOpen, Palette, type LucideIcon } from "lucide-react";
+import {
+  Clock,
+  Sparkles,
+  Target,
+  Flame,
+  BookOpen,
+  Palette,
+  type LucideIcon,
+} from "lucide-react";
 import { getSessions } from "@/api";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNavigate } from "react-router-dom";
@@ -59,7 +67,9 @@ const StatCard = ({
         {label}
       </div>
     </div>
-    <Icon className={`absolute -right-2 -bottom-2 w-16 h-16 md:w-20 md:h-20 ${iconColor} opacity-20`} />
+    <Icon
+      className={`absolute -right-2 -bottom-2 w-16 h-16 md:w-20 md:h-20 ${iconColor} opacity-20`}
+    />
   </Card>
 );
 
@@ -187,7 +197,9 @@ const Dashboard = () => {
           <CardHeader>
             <div className="flex items-center gap-3">
               <Clock className="w-5 h-5 text-primary" />
-              <h3 className="text-lg font-bold text-foreground">Recent Sessions</h3>
+              <h3 className="text-lg font-bold text-foreground">
+                Recent Sessions
+              </h3>
             </div>
           </CardHeader>
           <CardContent className="px-1 md:flex-1 flex flex-col overflow-hidden min-h-0">
@@ -214,7 +226,9 @@ const Dashboard = () => {
                             className="w-4 h-4 shrink-0"
                             fallback="Star"
                           />
-                          <span className="line-clamp-1">{session.activity.title}</span>
+                          <span className="line-clamp-1">
+                            {session.activity.title}
+                          </span>
                         </div>
                         <div className="text-xs text-gray-600 mt-1">
                           {formatActivityType(session.activity.activity_type)} •{" "}

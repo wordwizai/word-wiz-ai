@@ -15,6 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import DynamicIcon from "@/components/DynamicIcon";
+import { useCountUp } from "@/hooks/useCountUp";
 
 interface Session {
   id: string;
@@ -40,37 +41,46 @@ const activityColors = [
   "pastel-teal",
 ];
 
-interface StatCardProps {
+interface AnimatedStatCardProps {
   icon: LucideIcon;
   label: string;
-  value: string;
+  value: number;
+  suffix?: string;
   color: string;
   iconColor: string;
+  isLoading: boolean;
 }
 
-const StatCard = ({
+const AnimatedStatCard = ({
   icon: Icon,
   label,
   value,
+  suffix = "",
   color,
   iconColor,
-}: StatCardProps) => (
-  <Card
-    className={`${color} rounded-xl border-2 border-white/80 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden`}
-  >
-    <div className="p-3 relative z-10">
-      <div className="text-xl md:text-2xl font-bold text-foreground">
-        {value}
+  isLoading,
+}: AnimatedStatCardProps) => {
+  const animatedValue = useCountUp(isLoading ? 0 : value, 1200);
+  const displayValue = isLoading ? "..." : `${animatedValue}${suffix}`;
+
+  return (
+    <Card
+      className={`${color} rounded-xl border-2 border-white/80 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden`}
+    >
+      <div className="p-3 relative z-10">
+        <div className="text-xl md:text-2xl font-bold text-foreground">
+          {displayValue}
+        </div>
+        <div className="text-xs text-muted-foreground font-medium mt-0.5">
+          {label}
+        </div>
       </div>
-      <div className="text-xs text-muted-foreground font-medium mt-0.5">
-        {label}
-      </div>
-    </div>
-    <Icon
-      className={`absolute -right-2 -bottom-2 w-16 h-16 md:w-20 md:h-20 ${iconColor} opacity-20`}
-    />
-  </Card>
-);
+      <Icon
+        className={`absolute -right-2 -bottom-2 w-16 h-16 md:w-20 md:h-20 ${iconColor} opacity-20`}
+      />
+    </Card>
+  );
+};
 
 const Dashboard = () => {
   const { user, token } = useContext(AuthContext);
@@ -201,41 +211,39 @@ const Dashboard = () => {
 
       {/* Quick Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
-        <StatCard
+        <AnimatedStatCard
           icon={Target}
           label="Sessions"
-          value={
-            statsLoading ? "..." : statistics?.total_sessions?.toString() || "0"
-          }
+          value={statistics?.total_sessions || 0}
           color="bg-pastel-blue"
           iconColor="text-blue-600"
+          isLoading={statsLoading}
         />
-        <StatCard
+        <AnimatedStatCard
           icon={Flame}
           label="Current Streak"
-          value={
-            statsLoading ? "..." : `${statistics?.current_streak || 0} days`
-          }
+          value={statistics?.current_streak || 0}
+          suffix=" days"
           color="bg-pastel-yellow"
           iconColor="text-orange-600"
+          isLoading={statsLoading}
         />
-        <StatCard
+        <AnimatedStatCard
           icon={BookOpen}
           label="Words Read"
-          value={
-            statsLoading ? "..." : statistics?.words_read?.toString() || "0"
-          }
+          value={statistics?.words_read || 0}
           color="bg-pastel-mint"
           iconColor="text-green-600"
+          isLoading={statsLoading}
         />
-        <StatCard
+        <AnimatedStatCard
           icon={Target}
           label="Longest Streak"
-          value={
-            statsLoading ? "..." : `${statistics?.longest_streak || 0} days`
-          }
+          value={statistics?.longest_streak || 0}
+          suffix=" days"
           color="bg-pastel-coral"
           iconColor="text-pink-600"
+          isLoading={statsLoading}
         />
       </div>
 

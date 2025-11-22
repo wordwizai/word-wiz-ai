@@ -13,34 +13,43 @@ import {
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getUserStatistics, type UserStatistics } from "@/api";
+import { useCountUp } from "@/hooks/useCountUp";
 
-interface ProgressStatProps {
+interface AnimatedProgressStatProps {
   icon: LucideIcon;
   label: string;
-  value: string;
+  value: number;
+  suffix?: string;
   iconColor: string;
+  isLoading: boolean;
 }
 
-const ProgressStat = ({
+const AnimatedProgressStat = ({
   icon: Icon,
   label,
   value,
+  suffix = "",
   iconColor,
-}: ProgressStatProps) => (
-  <Card className="bg-card rounded-xl border-2 border-border shadow-sm relative overflow-hidden">
-    <div className="p-3 relative z-10">
-      <div className="text-lg md:text-xl font-bold text-center text-foreground">
-        {value}
+  isLoading,
+}: AnimatedProgressStatProps) => {
+  const animatedValue = useCountUp(value, 1200);
+
+  return (
+    <Card className="bg-card rounded-xl border-2 border-border shadow-sm relative overflow-hidden">
+      <div className="p-3 relative z-10">
+        <div className="text-lg md:text-xl font-bold text-center text-foreground">
+          {isLoading ? "..." : `${Math.round(animatedValue)}${suffix}`}
+        </div>
+        <div className="text-xs text-center text-muted-foreground font-medium mt-0.5">
+          {label}
+        </div>
       </div>
-      <div className="text-xs text-center text-muted-foreground font-medium mt-0.5">
-        {label}
-      </div>
-    </div>
-    <Icon
-      className={`absolute -right-1 -bottom-1 w-12 h-12 md:w-14 md:h-14 ${iconColor} opacity-15`}
-    />
-  </Card>
-);
+      <Icon
+        className={`absolute -right-1 -bottom-1 w-12 h-12 md:w-14 md:h-14 ${iconColor} opacity-15`}
+      />
+    </Card>
+  );
+};
 
 const ProgressDashboard = () => {
   const { token } = useContext(AuthContext);
@@ -80,49 +89,51 @@ const ProgressDashboard = () => {
 
       {/* Progress Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 md:gap-3">
-        <ProgressStat
+        <AnimatedProgressStat
           icon={BookOpen}
           label="Total Sessions"
-          value={
-            statsLoading ? "..." : statistics?.total_sessions?.toString() || "0"
-          }
+          value={statistics?.total_sessions || 0}
           iconColor="text-blue-600"
+          isLoading={statsLoading}
         />
-        <ProgressStat
+        <AnimatedProgressStat
           icon={BookOpen}
           label="Words Read"
-          value={
-            statsLoading ? "..." : statistics?.words_read?.toString() || "0"
-          }
+          value={statistics?.words_read || 0}
           iconColor="text-purple-600"
+          isLoading={statsLoading}
         />
-        <ProgressStat
+        <AnimatedProgressStat
           icon={Target}
           label="Accuracy"
-          value="87%"
+          value={87}
+          suffix="%"
           iconColor="text-green-600"
+          isLoading={false}
         />
-        <ProgressStat
+        <AnimatedProgressStat
           icon={Flame}
           label="Current Streak"
-          value={
-            statsLoading ? "..." : `${statistics?.current_streak || 0} days`
-          }
+          value={statistics?.current_streak || 0}
+          suffix=" days"
           iconColor="text-orange-600"
+          isLoading={statsLoading}
         />
-        <ProgressStat
+        <AnimatedProgressStat
           icon={Star}
           label="Best Streak"
-          value={
-            statsLoading ? "..." : `${statistics?.longest_streak || 0} days`
-          }
+          value={statistics?.longest_streak || 0}
+          suffix=" days"
           iconColor="text-yellow-600"
+          isLoading={statsLoading}
         />
-        <ProgressStat
+        <AnimatedProgressStat
           icon={TrendingUp}
           label="Improvement"
-          value="+15%"
+          value={15}
+          suffix="%"
           iconColor="text-teal-600"
+          isLoading={false}
         />
       </div>
       <SentencePersChart />

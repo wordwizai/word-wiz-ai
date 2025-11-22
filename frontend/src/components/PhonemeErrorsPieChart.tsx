@@ -72,13 +72,15 @@ const PhonemeErrorsPieChart: React.FC<PhonemeErrorsPieChartProps> = ({
         label: d.phoneme,
         color: getColor(i),
       },
-    ]),
+    ])
   );
 
   return (
-    <Card className={`flex flex-col ${className}`}>
+    <Card
+      className={`flex flex-col bg-card rounded-2xl border-2 border-border shadow-sm ${className}`}
+    >
       <CardHeader className="items-center pb-0">
-        <CardTitle>
+        <CardTitle className="text-foreground">
           {errorType.charAt(0).toUpperCase() + errorType.slice(1)} Errors
         </CardTitle>
         <CardDescription>

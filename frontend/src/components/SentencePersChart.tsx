@@ -42,12 +42,22 @@ const SentencePersChart = ({
         per: item.per,
       }));
       // Calculate rolling average over groups of 5
-      const withAvg5 = processed.map((item: { date: Date; per: number }, idx: number, arr: { date: Date; per: number }[]) => {
-        const start = Math.max(0, idx - 4);
-        const window = arr.slice(start, idx + 1);
-        const avg = window.reduce((sum: number, v: { date: Date; per: number }) => sum + v.per, 0) / window.length;
-        return { ...item, avg5: avg };
-      });
+      const withAvg5 = processed.map(
+        (
+          item: { date: Date; per: number },
+          idx: number,
+          arr: { date: Date; per: number }[]
+        ) => {
+          const start = Math.max(0, idx - 4);
+          const window = arr.slice(start, idx + 1);
+          const avg =
+            window.reduce(
+              (sum: number, v: { date: Date; per: number }) => sum + v.per,
+              0
+            ) / window.length;
+          return { ...item, avg5: avg };
+        }
+      );
 
       setChartData(withAvg5);
     };
@@ -64,34 +74,40 @@ const SentencePersChart = ({
       color: "--var(--chart-3)",
     },
   } satisfies ChartConfig;
-  
+
   return (
     <Card
       className={
-        "w-full h-48 sm:h-56 md:h-64 flex flex-col space-y-0 gap-0 px-0 rounded-3xl border-2 border-purple-100/50 bg-gradient-to-br from-white to-purple-50/30 shadow-xl " +
+        "w-full h-48 sm:h-56 md:h-64 flex flex-col space-y-0 gap-0 px-0 rounded-2xl border-2 border-border bg-card shadow-sm " +
         className
       }
       style={{ minHeight: 0 }}
     >
       <CardHeader className="flex-shrink-0 p-3 sm:p-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-to-r from-purple-200 to-pink-200 rounded-full">
-            <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-purple-600" />
-          </div>
+          <TrendingUp className="w-5 h-5 text-primary" />
           <div>
-            <h3 className="text-lg sm:text-xl font-bold text-purple-800">Error Rate Progress</h3>
-            <p className="text-xs sm:text-sm text-purple-600">Track your improvement over time.</p>
+            <h3 className="text-lg font-bold text-foreground">
+              Error Rate Progress
+            </h3>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Track your improvement over time.
+            </p>
           </div>
         </div>
       </CardHeader>
       <CardContent className="flex-1 min-h-0 relative pt-0 px-2 sm:px-4 flex flex-col justify-end">
-        <ChartContainer config={chartConfig} className="h-full w-full min-h-0" style={{ minHeight: '120px' }}>
+        <ChartContainer
+          config={chartConfig}
+          className="h-full w-full min-h-0"
+          style={{ minHeight: "120px" }}
+        >
           <AreaChart
             accessibilityLayer
             data={chartData}
             height={undefined}
             width={undefined}
-            style={{ height: "100%", width: "100%", minHeight: '120px' }}
+            style={{ height: "100%", width: "100%", minHeight: "120px" }}
           >
             <defs>
               <linearGradient id="perGradient" x1="0" y1="0" x2="0" y2="1">

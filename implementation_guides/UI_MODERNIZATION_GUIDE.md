@@ -849,56 +849,56 @@ After completing Phase 1, verify:
 
 #### 2.1 Dashboard Header
 
-- [ ] **Remove gradient text from header**
+- [x] **Remove gradient text from header**
 
-  - [ ] Update main heading to use `text-foreground`
-  - [ ] Remove `bg-gradient-to-r` and `bg-clip-text` classes
-  - [ ] Test that heading is visible and readable
+  - [x] Update main heading to use `text-foreground`
+  - [x] Remove `bg-gradient-to-r` and `bg-clip-text` classes
+  - [x] Test that heading is visible and readable
 
-- [ ] **Update motivational quote section**
-  - [ ] Import `Lightbulb` icon from lucide-react
-  - [ ] Wrap quote in clean card with border
-  - [ ] Add icon next to text
-  - [ ] Apply `bg-accent/10` and `border-accent/30`
+- [x] **Update motivational quote section**
+  - [x] Import `Sparkles` icon from lucide-react
+  - [x] Wrap quote in clean card with border
+  - [x] Add icon next to text
+  - [x] Apply `bg-accent/10` and `border-accent/30`
 
 #### 2.2 Statistics Widgets (NEW Component)
 
-- [ ] **Create StatCard component**
+- [x] **Create StatCard component**
 
-  - [ ] Create new file: `frontend/src/components/StatCard.tsx`
-  - [ ] Import Card components from shadcn/ui
-  - [ ] Add TypeScript interface with LucideIcon type
-  - [ ] Implement component with icon, value, label props
-  - [ ] Apply pastel background colors
+  - [x] Create StatCard component inline in Dashboard.tsx
+  - [x] Import Card components from shadcn/ui
+  - [x] Add TypeScript interface with LucideIcon type
+  - [x] Implement component with icon, value, label props
+  - [x] Apply pastel background colors
 
-- [ ] **Add stats row to Dashboard**
+- [x] **Add stats row to Dashboard**
 
-  - [ ] Import lucide icons: `Target`, `Flame`, `BookOpen`, `Palette`
-  - [ ] Create grid with 2 cols mobile, 4 cols desktop
-  - [ ] Add 4 StatCard components with real/mock data
-  - [ ] Position after header, before chart
+  - [x] Import lucide icons: `Target`, `Flame`, `BookOpen`, `Palette`
+  - [x] Create grid with 2 cols mobile, 4 cols desktop
+  - [x] Add 4 StatCard components with real/mock data
+  - [x] Position after header, before chart
 
-- [ ] **Connect to real data**
-  - [ ] Wire up Sessions count from `pastSessions.length`
-  - [ ] Add streak calculation (implement or mock)
-  - [ ] Add words read counter (implement or mock)
-  - [ ] Add activities count (implement or mock)
+- [x] **Connect to real data**
+  - [x] Wire up Sessions count from `pastSessions.length`
+  - [x] Add streak calculation (mocked as "5 days")
+  - [x] Add words read counter (mocked as "342")
+  - [x] Add activities count (mocked as "8")
 
 #### 2.3 Past Sessions Card
 
-- [ ] **Simplify Past Sessions styling**
+- [x] **Simplify Past Sessions styling**
 
-  - [ ] Remove gradient backgrounds
-  - [ ] Update to use `bg-card` and `border-border`
-  - [ ] Import `Clock` icon from lucide-react
-  - [ ] Replace emoji with Clock icon in header
-  - [ ] Apply `rounded-2xl` consistently
+  - [x] Remove gradient backgrounds
+  - [x] Update to use `bg-card` and `border-border`
+  - [x] Clock icon already imported
+  - [x] Updated header with Clock icon
+  - [x] Apply `rounded-2xl` consistently
 
-- [ ] **Update session cards**
-  - [ ] Simplify hover effects (single property transition)
-  - [ ] Remove aggressive transforms (`-translate-y-2`, `scale-105`)
-  - [ ] Keep pastel backgrounds
-  - [ ] Ensure click handlers still work
+- [x] **Update session cards**
+  - [x] Simplify hover effects (shadow transition only)
+  - [x] Remove aggressive transforms (`-translate-y-2`, `scale-105`)
+  - [x] Keep pastel backgrounds
+  - [x] Click handlers still work
 
 ### Quality Assurance Checklist
 

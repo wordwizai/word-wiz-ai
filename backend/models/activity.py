@@ -8,7 +8,7 @@ class Activity(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String(225), nullable=False)
     description = Column(Text, nullable=False)
-    emoji_icon = Column(String(10), nullable=True, default="")  # e.g., "🎮"
+    emoji_icon = Column(String(100), nullable=True, default="")  # e.g., "🎮" or Lucide icon name
     activity_type = Column(
         String(225), nullable=False
     )  # e.g., 'choice-story', 'unlimited', etc.

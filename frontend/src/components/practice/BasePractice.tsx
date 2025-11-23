@@ -64,8 +64,46 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
       }, 1000);
     },
     onAudioFeedback: (url) => {
+      // Log audio details for debugging
+      console.log(
+        "[AudioFeedback] Received audio URL:",
+        url.substring(0, 50) + "..."
+      );
+
       const audio = new Audio(url);
-      audio.play();
+
+      // Add error handling for audio playback
+      audio.addEventListener("error", (e) => {
+        console.error("[AudioFeedback] Playback error:", e);
+        console.error("[AudioFeedback] Audio error code:", audio.error?.code);
+        console.error(
+          "[AudioFeedback] Audio error message:",
+          audio.error?.message
+        );
+      });
+
+      // Log when audio is ready to play
+      audio.addEventListener("canplaythrough", () => {
+        console.log("[AudioFeedback] Audio ready to play");
+      });
+
+      // Log playback events
+      audio.addEventListener("playing", () => {
+        console.log("[AudioFeedback] Audio started playing");
+      });
+
+      audio.addEventListener("ended", () => {
+        console.log("[AudioFeedback] Audio finished playing");
+      });
+
+      // Attempt to play with error handling
+      audio.play().catch((error) => {
+        console.error("[AudioFeedback] Failed to play audio:", error);
+        // Show user-friendly error message
+        alert(
+          "Failed to play audio feedback. Please check your device volume and try again."
+        );
+      });
     },
     onError: (err) => {
       console.error("Stream error:", err);

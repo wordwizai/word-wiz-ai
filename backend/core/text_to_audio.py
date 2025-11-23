@@ -19,6 +19,9 @@ class ElevenLabsAPIClient:
             # Wrap in SSML root element if not already wrapped
             if not text.strip().startswith("<speak>"):
                 text = f"<speak>{text}</speak>"
+        # Using 44.1kHz MP3 output (mp3_44100_128)
+        # This is a standard audio CD quality sample rate
+        # Note: Will be resampled to 24kHz in feedback_to_audio() for consistency
         audio = self.client.text_to_speech.convert(
             text=text,
             voice_id="nPczCjzI2devNBz1zQrb",
@@ -59,8 +62,11 @@ class GoogleTTSAPIClient:
             ssml_gender=texttospeech.SsmlVoiceGender.MALE,
         )
 
+        # Use 24kHz sample rate for consistent audio quality across all devices
+        # This is Google TTS's standard rate and ensures compatibility with mobile browsers
         audio_config = texttospeech.AudioConfig(
-            audio_encoding=texttospeech.AudioEncoding.MP3
+            audio_encoding=texttospeech.AudioEncoding.MP3,
+            sample_rate_hertz=24000
         )
 
         response = self.client.synthesize_speech(

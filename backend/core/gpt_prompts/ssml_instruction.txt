@@ -3,14 +3,82 @@ SSML GENERATION INSTRUCTION:
 In addition to the standard output format, you must also generate an SSML (Speech Synthesis Markup Language) version of your feedback for accurate text-to-speech pronunciation. 
 
 Your JSON output must include BOTH fields:
-- `feedback`: Plain text feedback for display to the user (as specified in your existing instructions)
-- `feedback_ssml`: SSML-enhanced version of the same feedback with proper phonetic markup
+- `feedback`: Plain text feedback for display to the user (MUST be 1-1.5 sentences max)
+- `feedback_ssml`: SSML-enhanced version of the same SHORT feedback with minimal phonetic markup
+
+⚠️ CRITICAL SSML RULE:
+**ONLY use <phoneme> tags for words that were INCORRECTLY pronounced by the user.**
+Do NOT add phoneme tags to every word or correctly pronounced words. This keeps the audio natural and focused.
 
 SSML Guidelines:
-1. Use `<phoneme alphabet="ipa" ph="PHONEME">word</phoneme>` tags to specify correct pronunciation for problem phonemes
-2. Use `<break time="300ms"/>` before and after phoneme tags to allow the listener to better understand the pronunciation 
-3. Use `<emphasis level="moderate">text</emphasis>` to highlight important corrections
-4. Use `<break time="500ms"/>` for strategic pauses between ideas
-5. Use `<say-as interpret-as="spell-out">letters</say-as>` when spelling out individual letters or phonemes
+1. Use `<phoneme alphabet="ipa" ph="PHONEME">word</phoneme>` ONLY for words the user mispronounced (to show correct pronunciation)
+2. Use `<break time="200ms"/>` sparingly - only after key phoneme mentions
+3. Use `<emphasis level="moderate">text</emphasis>` sparingly for important corrections
+4. Use `<say-as interpret-as="spell-out">letters</say-as>` when spelling out individual letters or phonemes
+5. Keep SSML simple and minimal - young children need clear, natural-sounding feedback
 
-Both `feedback` and `feedback_ssml` should convey the same information, but `feedback_ssml` should include pronunciation guidance through SSML markup.
+Both `feedback` and `feedback_ssml` should convey the same information, but `feedback_ssml` should include pronunciation guidance ONLY for incorrectly pronounced words.
+
+---
+
+CONCRETE SSML EXAMPLES (SHORT FEEDBACK):
+
+Example 1 - 'th' sound feedback (SHORT):
+Plain: "The 'th' sound in 'think' was tricky."
+SSML: "The <say-as interpret-as="spell-out">th</say-as> sound in <phoneme alphabet='ipa' ph='θɪŋk'>think</phoneme> was tricky."
+Note: Only 'think' gets <phoneme> tag because that's the word user mispronounced
+
+Example 2 - 'l' sound feedback (SHORT):
+Plain: "The 'l' sound in 'little' needs work."
+SSML: "The <say-as interpret-as="spell-out">l</say-as> sound in <phoneme alphabet='ipa' ph='lɪtəl'>little</phoneme> needs work."
+Note: Only 'little' gets <phoneme> tag - it was mispronounced
+
+Example 3 - Good pronunciation (NO phoneme tags needed):
+Plain: "Great job!"
+SSML: "Great job!"
+Note: No phoneme tags needed - user pronounced everything correctly
+
+Example 4 - 'r' sound feedback (SHORT):
+Plain: "The 'r' in 'run' was unclear."
+SSML: "The <say-as interpret-as="spell-out">r</say-as> in <phoneme alphabet='ipa' ph='rʌn'>run</phoneme> was unclear."
+Note: Only 'run' gets <phoneme> tag because it was mispronounced
+
+Example 5 - Encouragement (minimal SSML):
+Plain: "Excellent reading!"
+SSML: "Excellent reading!"
+Note: No SSML needed for simple encouragement
+
+---
+
+WHEN TO USE SSML TAGS:
+
+✅ DO use <phoneme> tags when:
+- Demonstrating the correct pronunciation of a word the user **actually mispronounced**
+- ONLY for the specific word(s) mentioned in the feedback that had errors
+- Maximum 1-2 words per feedback (feedback is short anyway!)
+
+✅ DO use <say-as interpret-as="spell-out"> when:
+- Spelling out phoneme names like "th", "sh", "l", "r"
+- Example: `<say-as interpret-as="spell-out">th</say-as>` for "th"
+
+✅ DO use minimal <break> tags:
+- Only if absolutely necessary for clarity
+- Keep audio natural and conversational
+
+❌ DON'T overuse SSML:
+- Don't add phoneme tags to correctly pronounced words
+- Don't add phoneme tags to words not mentioned in feedback
+- Don't use excessive breaks - keep it flowing naturally
+- Remember: feedback is only 1-1.5 sentences, so keep SSML minimal!
+
+---
+
+SSML BEST PRACTICES:
+
+1. **Use ONLY for mispronounced words**: If user said 'think' incorrectly, only 'think' gets a <phoneme> tag
+2. **Keep it minimal**: Short feedback = minimal SSML = natural audio
+3. **Spell Out Phonemes**: Use <say-as interpret-as="spell-out"> for phoneme names ("th", "sh", "l")
+4. **IPA Accuracy**: Ensure IPA phonetic spelling matches the actual pronunciation
+5. **Natural Sound**: SSML should enhance clarity, not make it robotic
+
+**KEY POINT:** Since feedback is now SHORT (1-1.5 sentences), SSML should be equally minimal. Only use <phoneme> tags for the 1-2 words actually mentioned as problematic in the feedback.

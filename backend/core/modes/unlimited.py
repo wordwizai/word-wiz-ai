@@ -2,6 +2,7 @@ import asyncio
 import json
 from typing import override
 
+from core.gpt_output_validator import validate_and_log
 from core.modes.base_mode import BaseMode
 from core.phoneme_assistant import PhonemeAssistant
 from models.session import Session as UserSession
@@ -39,11 +40,30 @@ class UnlimitedPractice(BaseMode):
                 entry.phoneme_analysis.get("problem_summary", {})
             )
 
-        # Create simplified data for LLM to reduce input size
-        simplified_problem_summary = {
+        # Enhance pronunciation data with phoneme breakdowns for better GPT context
+        enhanced_pronunciation = []
+        for word_data in pronunciation_data:
+            enhanced_word = {
+                **word_data,
+                # Add expected phoneme breakdown
+                "expected_phonemes": word_data.get("ground_truth_phonemes", []),
+                "actual_phonemes": word_data.get("phonemes", []),
+                # Create a readable word structure showing phoneme composition
+                "word_structure": f"{word_data.get('ground_truth_word', '')} = [{', '.join(word_data.get('ground_truth_phonemes', []))}]"
+            }
+            enhanced_pronunciation.append(enhanced_word)
+
+        # Send FULL problem_summary instead of simplified version
+        # This gives GPT complete context including articulatory info and difficulty levels
+        full_problem_summary = {
+            **problem_summary,  # Include ALL fields from problem_summary
+            # Explicitly highlight key fields for GPT attention
             "most_common_phoneme": problem_summary.get("most_common_phoneme"),
             "phoneme_error_counts": problem_summary.get("phoneme_error_counts", {}),
-            "recommended_focus_phoneme": problem_summary.get("recommended_focus_phoneme")
+            "recommended_focus_phoneme": problem_summary.get("recommended_focus_phoneme"),
+            "high_frequency_errors": problem_summary.get("high_frequency_errors", []),
+            "articulatory_info": problem_summary.get("articulatory_info", {}),
+            "difficulty_level": problem_summary.get("difficulty_level", "medium")
         }
 
         user_input = {
@@ -51,9 +71,9 @@ class UnlimitedPractice(BaseMode):
             "content": json.dumps(
                 {
                     "attempted_sentence": attempted_sentence,
-                    "pronunciation": pronunciation_data,
+                    "pronunciation": enhanced_pronunciation,  # Use enhanced version with phoneme breakdowns
                     "highest_per_word": highest_per_word_data,
-                    "problem_summary": simplified_problem_summary,
+                    "problem_summary": full_problem_summary,  # Use full version, not simplified
                     "per_summary": per_summary,
                 }
             ),
@@ -80,4 +100,12 @@ class UnlimitedPractice(BaseMode):
         # get the json from the response
         json_response = phoneme_assistant.extract_json(response)
 
-        return json_response
+        # Validate GPT output to catch hallucinations and ensure quality
+        validated_response = validate_and_log(
+            json_response,
+            enhanced_pronunciation,
+            full_problem_summary,
+            include_warnings_in_response=False  # Set to True for debugging
+        )
+
+        return validated_response

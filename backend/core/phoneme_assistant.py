@@ -1,6 +1,7 @@
 import base64
 import io
 import json
+import logging
 import os
 import re
 
@@ -12,10 +13,14 @@ from core.optimization_config import config
 from dotenv import load_dotenv
 from openai import OpenAI
 
+from .audio_validation import log_audio_characteristics, validate_audio_output
 from .phoneme_extractor import PhonemeExtractor
 from .process_audio import analyze_results, process_audio_array
 from .text_to_audio import ElevenLabsAPIClient, GoogleTTSAPIClient
 from .word_extractor import WordExtractor, WordExtractorOnline
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 
 class PhonemeAssistant:
@@ -297,22 +302,70 @@ class PhonemeAssistant:
 
         audio_bytes = b"".join(audio_generator)
 
-        sample_rate = getattr(self.tts, "sample_rate", 24000)
+        # Target sample rate for consistent mobile playback (24kHz is standard for TTS)
+        TARGET_SAMPLE_RATE = 24000
 
         audio_buffer = io.BytesIO()
         try:
+            import librosa
             import numpy as np
 
-            # Ensure audio_bytes is treated as PCM data
-            audio_array = np.frombuffer(audio_bytes, dtype=np.int16)  # Assuming PCM 16-bit depth
-            sf.write(audio_buffer, audio_array, sample_rate, format="WAV")
+            # Properly decode MP3 audio first using librosa
+            # This handles the MP3 format correctly instead of treating it as raw PCM
+            audio_array, original_sr = librosa.load(
+                io.BytesIO(audio_bytes), 
+                sr=None,  # Keep original sample rate initially
+                mono=True
+            )
+            
+            # Resample to target sample rate if needed
+            if original_sr != TARGET_SAMPLE_RATE:
+                audio_array = librosa.resample(
+                    audio_array, 
+                    orig_sr=original_sr, 
+                    target_sr=TARGET_SAMPLE_RATE
+                )
+            
+            # Normalize audio to prevent clipping
+            audio_array = librosa.util.normalize(audio_array)
+            
+            # Write as WAV with explicit format (PCM 16-bit for maximum compatibility)
+            sf.write(
+                audio_buffer, 
+                audio_array, 
+                TARGET_SAMPLE_RATE, 
+                format='WAV', 
+                subtype='PCM_16'
+            )
+            
         except Exception as e:
             print(f"Audio processing error: {str(e)}")
-            # fallback: just write the raw bytes if conversion fails
-            audio_buffer.write(audio_bytes)
+            print(f"Attempting fallback conversion...")
+            # Fallback: try to write directly as WAV (may not work properly but better than nothing)
+            try:
+                import numpy as np
+                audio_array = np.frombuffer(audio_bytes, dtype=np.int16)
+                sf.write(audio_buffer, audio_array, TARGET_SAMPLE_RATE, format="WAV", subtype='PCM_16')
+            except Exception as fallback_error:
+                print(f"Fallback also failed: {str(fallback_error)}")
+                # Last resort: just write the raw bytes
+                audio_buffer.write(audio_bytes)
 
         audio_buffer.seek(0)
         audio_bytes_final = audio_buffer.read()
+        
+        # Validate and log audio characteristics before sending
+        is_valid, validation_info = validate_audio_output(audio_bytes_final)
+        
+        if not is_valid:
+            logger.warning(f"Audio validation failed: {validation_info['errors']}")
+        
+        if validation_info.get('warnings'):
+            logger.info(f"Audio validation warnings: {validation_info['warnings']}")
+        
+        # Log audio characteristics for debugging
+        log_audio_characteristics(audio_bytes_final, context="TTS feedback")
+        
         audio_b64 = base64.b64encode(audio_bytes_final).decode("utf-8")
 
         return {"filename": "feedback.wav", "mimetype": "audio/wav", "data": audio_b64}

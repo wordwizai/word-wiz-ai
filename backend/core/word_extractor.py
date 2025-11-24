@@ -5,7 +5,6 @@ from transformers import Wav2Vec2Processor, Wav2Vec2ForCTC
 import re
 import os
 import numpy as np
-import google.cloud.speech as speech
 
 
 def default_model_output_processing(transcription):
@@ -73,21 +72,20 @@ class WordExtractor:
 class WordExtractorOnline:
     def __init__(self, model_output_processing=default_model_output_processing):
         """
-        Initialize Google Cloud Speech-to-Text client.
-        Requires GOOGLE_APPLICATION_CREDENTIALS environment variable to be set.
+        Initialize Deepgram Speech-to-Text client.
+        Requires DEEPGRAM_KEY environment variable to be set.
         """
-        # Set up Google Cloud credentials
-        credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-        if credentials_path:
-            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credentials_path
-
-        # Initialize the Speech-to-Text client
-        self.client = speech.SpeechClient()
+        # Get Deepgram API key from environment
+        self.api_key = os.getenv("DEEPGRAM_KEY")
+        if not self.api_key:
+            raise ValueError("DEEPGRAM_KEY environment variable is not set")
+        
         self.model_output_processing = model_output_processing
+        self.deepgram_url = "https://api.deepgram.com/v1/listen"
 
     def extract_words(self, audio, sampling_rate=16000, timeout=15, max_retries=2):
         """
-        Extract words from audio using Google Cloud Speech-to-Text API.
+        Extract words from audio using Deepgram Speech-to-Text API.
 
         Args:
             audio: numpy array of audio data or bytes
@@ -99,7 +97,7 @@ class WordExtractorOnline:
             List of words extracted from the audio
         """
         import time
-        from google.api_core import exceptions as google_exceptions
+        import requests
         
         # Convert numpy array to bytes if needed
         if isinstance(audio, np.ndarray):
@@ -118,23 +116,25 @@ class WordExtractorOnline:
             print("⚠️  Warning: Empty audio data received")
             return []
         
-        # Calculate audio duration for logging and validation
+        # Calculate audio duration for logging
         audio_duration = len(audio_bytes) / (sampling_rate * 2)  # 2 bytes per sample (16-bit)
-        print(f"📤 Sending {audio_duration:.2f}s audio to Google Cloud for transcription...")
-        
-        # Warn if audio is very long
-        if audio_duration > 30:
-            print(f"⚠️  Warning: Very long audio ({audio_duration:.1f}s) may timeout or have reduced accuracy")
+        print(f"📤 Sending {audio_duration:.2f}s audio to Deepgram for transcription...")
 
-        # Configure the audio settings
-        audio_config = speech.RecognitionAudio(content=audio_bytes)
-        config = speech.RecognitionConfig(
-            encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
-            sample_rate_hertz=sampling_rate,
-            language_code="en-US",
-            # Enable automatic punctuation for better word separation
-            enable_automatic_punctuation=True,
-        )
+        # Prepare headers
+        headers = {
+            "Authorization": f"Token {self.api_key}",
+            "Content-Type": "audio/wav"
+        }
+
+        # Prepare query parameters
+        params = {
+            "model": "nova-2",
+            "language": "en-US",
+            "punctuate": "true",
+            "smart_format": "true",
+            "encoding": "linear16",
+            "sample_rate": sampling_rate
+        }
 
         # Retry loop
         last_error = None
@@ -146,19 +146,32 @@ class WordExtractorOnline:
                 
                 # Perform the transcription with timeout
                 start_time = time.time()
-                response = self.client.recognize(
-                    config=config, 
-                    audio=audio_config,
+                response = requests.post(
+                    self.deepgram_url,
+                    headers=headers,
+                    params=params,
+                    data=audio_bytes,
                     timeout=timeout
                 )
                 elapsed_time = time.time() - start_time
-                print(f"✓ Google Cloud transcription completed in {elapsed_time:.2f}s")
+                
+                # Check if request was successful
+                response.raise_for_status()
+                
+                # Parse the JSON response
+                result = response.json()
+                
+                print(f"✓ Deepgram transcription completed in {elapsed_time:.2f}s")
 
                 # Extract transcription from response
                 transcriptions = []
-                for result in response.results:
-                    if result.alternatives:
-                        transcriptions.append(result.alternatives[0].transcript)
+                if result.get("results") and result["results"].get("channels"):
+                    for channel in result["results"]["channels"]:
+                        if channel.get("alternatives"):
+                            transcript = channel["alternatives"][0].get("transcript", "")
+                            if transcript:
+                                transcriptions.append(transcript)
+                
                 print(f"📝 Transcription results: {transcriptions}")
 
                 # If no transcription found, return empty list
@@ -174,23 +187,23 @@ class WordExtractorOnline:
 
                 return transcription
 
-            except google_exceptions.DeadlineExceeded as e:
+            except requests.exceptions.Timeout as e:
                 last_error = e
                 print(f"⏱️  Timeout after {timeout}s - audio may be too long or network is slow")
                 if attempt == max_retries:
                     print(f"❌ All {max_retries + 1} attempts failed due to timeout")
                     return []
             
-            except google_exceptions.GoogleAPICallError as e:
+            except requests.exceptions.HTTPError as e:
                 last_error = e
-                print(f"❌ Google Cloud API error: {e}")
+                print(f"❌ Deepgram API error: {e} - {response.text if 'response' in locals() else 'No response'}")
                 if attempt == max_retries:
                     print(f"❌ All {max_retries + 1} attempts failed due to API error")
                     return []
             
             except Exception as e:
                 last_error = e
-                print(f"❌ Unexpected error during Google Cloud transcription: {e}")
+                print(f"❌ Unexpected error during Deepgram transcription: {e}")
                 if attempt == max_retries:
                     print(f"❌ All {max_retries + 1} attempts failed")
                     return []

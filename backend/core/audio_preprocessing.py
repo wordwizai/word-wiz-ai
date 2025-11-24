@@ -6,8 +6,39 @@ import matplotlib.pyplot as plt
 import noisereduce as nr
 
 
-def preprocess_audio(audio, sr=16000):
-    audio = nr.reduce_noise(y=audio, sr=sr)
+def preprocess_audio(audio, sr=16000, audio_length_seconds=None):
+    """
+    Preprocess audio with adaptive noise reduction based on audio length.
+    
+    Args:
+        audio: Audio signal as numpy array
+        sr: Sample rate (default 16000)
+        audio_length_seconds: Duration of audio in seconds. If None, calculated from audio length.
+        
+    Returns:
+        Preprocessed audio array
+        
+    Note:
+        For longer audio (>8 seconds), uses lighter noise reduction to avoid distortion.
+        This improves model accuracy on longer recordings.
+    """
+    if audio_length_seconds is None:
+        audio_length_seconds = len(audio) / sr
+    
+    # Lighter noise reduction for longer audio to avoid distortion
+    if audio_length_seconds > 8:
+        print(f"⚠️  Long audio detected ({audio_length_seconds:.1f}s) - using lighter noise reduction")
+        # Less aggressive noise reduction for long audio
+        audio = nr.reduce_noise(
+            y=audio,
+            sr=sr,
+            stationary=True,
+            prop_decrease=0.5  # Reduce by 50% instead of 100%
+        )
+    else:
+        # Standard noise reduction for shorter audio
+        audio = nr.reduce_noise(y=audio, sr=sr, stationary=True, prop_decrease=1.0)
+    
     audio = librosa.util.normalize(audio)
     return audio
 

@@ -191,7 +191,7 @@ class PhonemeExtractor:
 
     def extract_phoneme(self, audio, sampling_rate=16000, use_optimized_preprocessing=True):
         """
-        Extract phonemes from audio with optimized inference.
+        Extract phonemes from audio with optimized inference and validation.
         
         Args:
             audio: Audio data as numpy array
@@ -200,8 +200,33 @@ class PhonemeExtractor:
             
         Returns:
             Processed phoneme transcription
+            
+        Raises:
+            ValueError: If audio is invalid (empty, silent, or too short)
         """
+        import numpy as np
+        
         start_time = time.time() if self._performance_logging else None
+        
+        # Validate audio input
+        if audio is None or len(audio) == 0:
+            raise ValueError("❌ Audio is empty - cannot extract phonemes")
+        
+        # Calculate audio duration
+        audio_duration = len(audio) / sampling_rate
+        
+        # Check minimum duration
+        if audio_duration < 0.3:
+            raise ValueError(f"❌ Audio too short ({audio_duration:.2f}s) - need at least 0.3s for phoneme extraction")
+        
+        # Check if audio contains speech (not just silence)
+        audio_rms = np.sqrt(np.mean(audio ** 2))
+        if audio_rms < 0.001:  # Very quiet threshold
+            raise ValueError(f"❌ Audio appears to be silent (RMS: {audio_rms:.6f}) - no speech detected")
+        
+        # Log audio statistics if performance logging enabled
+        if self._performance_logging:
+            print(f"📊 Audio validation: duration={audio_duration:.2f}s, RMS={audio_rms:.4f}, samples={len(audio)}")
         
         # Optimize audio preprocessing if enabled
         if use_optimized_preprocessing:

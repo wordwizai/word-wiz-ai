@@ -79,6 +79,21 @@ async def load_and_preprocess_audio_file(audio_file: UploadFile, session_id: str
     if len(audio_array.shape) == 2:
         audio_array = np.mean(audio_array, axis=1)
     
+    # Calculate audio duration
+    audio_duration = len(audio_array) / sample_rate
+    print(f"📊 Audio duration: {audio_duration:.2f}s ({len(audio_array)} samples @ {sample_rate}Hz)")
+    
+    # Validate audio length
+    if audio_duration > 10:
+        print(f"⚠️  Long audio detected ({audio_duration:.1f}s) - will use chunking strategy for better accuracy.")
+    
+    # Validate audio is not too short
+    if audio_duration < 5.0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Audio too short ({audio_duration:.1f}s). Please record at least 5 seconds of speech."
+        )
+    
     # CACHE POINT 2: Save audio after format conversion but before preprocessing
     audio_cache.save_audio(
         audio_array,
@@ -89,12 +104,13 @@ async def load_and_preprocess_audio_file(audio_file: UploadFile, session_id: str
         metadata={
             "stage": "after_format_conversion",
             "original_shape": str(audio_array.shape),
-            "sample_rate": sample_rate
+            "sample_rate": sample_rate,
+            "duration_seconds": audio_duration
         }
     )
     
-    # Apply preprocessing
-    audio_array = preprocess_audio(audio_array)
+    # Apply preprocessing with audio length for adaptive noise reduction
+    audio_array = preprocess_audio(audio_array, sr=sample_rate, audio_length_seconds=audio_duration)
     
     # CACHE POINT 3: Save preprocessed audio
     audio_cache.save_audio(
@@ -151,6 +167,18 @@ async def analyze_audio_file_event_stream(
                     detail="Empty audio received but client extraction data is incomplete. Please try again."
                 )
             print("📭 Empty audio received - using full client extraction")
+        else:
+            # Validate audio has speech content using VAD
+            from core.audio_chunking import estimate_speech_activity
+            speech_percentage = estimate_speech_activity(audio_array, sr=16000)
+            print(f"🎤 Speech activity: {speech_percentage:.1f}%")
+            
+            # Require at least 30% speech activity
+            if speech_percentage < 30:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Audio appears to be mostly silent ({speech_percentage:.1f}% speech activity). Please record clearer audio with speech."
+                )
         
         # Determine if we should use client phonemes/words or extract on server
         use_client_phonemes = False

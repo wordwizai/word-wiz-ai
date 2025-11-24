@@ -43,13 +43,22 @@ class UnlimitedPractice(BaseMode):
         # Enhance pronunciation data with phoneme breakdowns for better GPT context
         enhanced_pronunciation = []
         for word_data in pronunciation_data:
+            # Get ground truth phonemes - might be a list or tuple
+            gt_phonemes = word_data.get("ground_truth_phonemes", [])
+            # If it's a tuple (word, phonemes), extract just the phonemes
+            if isinstance(gt_phonemes, tuple) and len(gt_phonemes) == 2:
+                gt_phonemes = gt_phonemes[1]
+            # Ensure it's a list
+            if not isinstance(gt_phonemes, list):
+                gt_phonemes = []
+            
             enhanced_word = {
                 **word_data,
                 # Add expected phoneme breakdown
-                "expected_phonemes": word_data.get("ground_truth_phonemes", []),
+                "expected_phonemes": gt_phonemes,
                 "actual_phonemes": word_data.get("phonemes", []),
                 # Create a readable word structure showing phoneme composition
-                "word_structure": f"{word_data.get('ground_truth_word', '')} = [{', '.join(word_data.get('ground_truth_phonemes', []))}]"
+                "word_structure": f"{word_data.get('ground_truth_word', '')} = [{', '.join(gt_phonemes)}]"
             }
             enhanced_pronunciation.append(enhanced_word)
 

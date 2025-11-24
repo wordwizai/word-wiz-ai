@@ -59,9 +59,23 @@ def align_phonemes_to_words(pred_phonemes: list, gt_words_phonemes: list[tuple[s
     
     Returns:
     - alignment: List of tuples (word, aligned_pred_phonemes, per) representing the alignment.
+    
+    Note:
+    - Includes fallback handling for failed alignments
+    - Logs alignment confidence metrics
+    - Handles edge cases (length mismatches, empty predictions)
     """
     if not pred_phonemes or not gt_words_phonemes:
+        print("⚠️  Warning: Empty input to align_phonemes_to_words")
         return []
+    
+    # Calculate length ratio as confidence indicator
+    expected_phonemes = sum(len(phonemes) for _, phonemes in gt_words_phonemes)
+    length_ratio = len(pred_phonemes) / max(expected_phonemes, 1)
+    
+    # Log potential alignment issues
+    if length_ratio < 0.5 or length_ratio > 2.0:
+        print(f"⚠️  Alignment warning: Predicted phonemes ({len(pred_phonemes)}) vs expected ({expected_phonemes}), ratio={length_ratio:.2f}")
     
     n = len(pred_phonemes)
     m = len(gt_words_phonemes)
@@ -120,16 +134,41 @@ def align_phonemes_to_words(pred_phonemes: list, gt_words_phonemes: list[tuple[s
 
     # Backtracking to find the alignment
     alignment = []
+    failed_alignments = 0
     i, j = m, n
+    
     while i > 0:
         k = backtrack[i, j]
+        gt_word, gt_phs = gt_words_phonemes[i - 1]
+        
         if k == -1:
-            # Fallback for no valid alignment
-            alignment.append((gt_words_phonemes[i - 1][0], [], 1.0))
+            # Fallback for no valid alignment - log and use fallback strategy
+            failed_alignments += 1
+            
+            # Try to find closest match in remaining predicted phonemes
+            if j > 0:
+                # Use whatever predicted phonemes are left near this position
+                fallback_start = max(0, j - len(gt_phs) - 2)
+                fallback_end = min(j, len(pred_phonemes))
+                pred_segment = pred_phonemes[fallback_start:fallback_end]
+                
+                if pred_segment:
+                    distance = compute_per(gt_phs, pred_segment)
+                    alignment.append((gt_word, pred_segment, distance))
+                    print(f"⚠️  Fallback alignment for '{gt_word}': {pred_segment} (PER: {distance:.2f})")
+                else:
+                    # No predicted phonemes available at all
+                    alignment.append((gt_word, [], 1.0))
+                    print(f"❌ No phonemes found for '{gt_word}'")
+            else:
+                # No predicted phonemes left
+                alignment.append((gt_word, [], 1.0))
+                print(f"❌ No phonemes found for '{gt_word}'")
+            
             i -= 1
             continue
-            
-        gt_word, gt_phs = gt_words_phonemes[i - 1]
+        
+        # Normal alignment
         pred_segment = pred_phonemes[k:j]
         distance = compute_per(gt_phs, pred_segment)
         alignment.append((gt_word, pred_segment, distance))
@@ -137,6 +176,15 @@ def align_phonemes_to_words(pred_phonemes: list, gt_words_phonemes: list[tuple[s
         j = k
 
     alignment.reverse()
+    
+    # Log alignment quality metrics
+    if failed_alignments > 0:
+        print(f"⚠️  Alignment completed with {failed_alignments}/{m} failed word alignments")
+    
+    # Calculate overall alignment confidence
+    total_per = sum(per for _, _, per in alignment) / max(len(alignment), 1)
+    print(f"📊 Alignment confidence: avg PER={total_per:.2f}, length_ratio={length_ratio:.2f}, failed={failed_alignments}")
+    
     return alignment
 
 
@@ -295,10 +343,23 @@ def _process_word_alignment(
     
     return results
 
-async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=16000, phoneme_extraction_model=None, word_extraction_model=None) -> list[dict]:
+async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=16000, phoneme_extraction_model=None, word_extraction_model=None, use_chunking=True) -> list[dict]:
     """
     Use the phoneme extractor to transcribe an audio array.
+    
+    Args:
+        ground_truth_phonemes: Expected phonemes as list of (word, phonemes) tuples
+        audio_array: Audio signal as numpy array
+        sampling_rate: Sample rate (default 16000)
+        phoneme_extraction_model: Phoneme extraction model (optional)
+        word_extraction_model: Word extraction model (optional)
+        use_chunking: Whether to chunk long audio (default True)
+        
+    Returns:
+        List of dictionaries containing pronunciation analysis results
     """
+    from .audio_chunking import should_use_chunking, chunk_audio_at_silence, merge_chunk_results
+    
     if phoneme_extraction_model is None:
         phoneme_extraction_model = PhonemeExtractor()
     
@@ -308,36 +369,115 @@ async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=
     if len(ground_truth_phonemes) <= 1:
         raise ValueError("ground_truth_phonemes must have at least 2 elements)")
 
-    # preprocess the audio
-    audio_array = preprocess_audio(audio=audio_array, sr=sampling_rate)
+    # Calculate audio duration for logging
+    audio_duration = len(audio_array) / sampling_rate
     
-
-    async def extract_data():
-        print("Starting concurrent extraction tasks...")
-        phoneme_predictions_task = asyncio.create_task(asyncio.to_thread(
-            phoneme_extraction_model.extract_phoneme, audio=audio_array, sampling_rate=sampling_rate
-        ))
-        predicted_words_task = asyncio.create_task(asyncio.to_thread(
-            word_extraction_model.extract_words, audio=audio_array, sampling_rate=sampling_rate
-        ))
-
-        print("Waiting for phoneme extraction...")
-        phoneme_predictions = await phoneme_predictions_task
-        print("Phoneme extraction completed")
+    # preprocess the audio
+    audio_array = preprocess_audio(audio=audio_array, sr=sampling_rate, audio_length_seconds=audio_duration)
+    
+    # Check if audio should be chunked
+    if use_chunking and should_use_chunking(audio_array, sampling_rate, threshold_seconds=8):
+        print(f"🔪 Audio is {audio_duration:.1f}s - using chunking strategy")
+        chunks, chunk_metadata = chunk_audio_at_silence(audio_array, sampling_rate)
         
-        print("Waiting for word extraction...")
-        predicted_words = await predicted_words_task
-        print("Word extraction completed")
+        # Filter out chunks that are too short (< 0.3s) and merge with previous chunk
+        filtered_chunks = []
+        filtered_metadata = []
+        
+        for i, (chunk, metadata) in enumerate(zip(chunks, chunk_metadata)):
+            if metadata['duration'] < 0.3:
+                # Too short - merge with previous chunk if possible
+                if filtered_chunks:
+                    print(f"  ⚠️  Chunk {i+1} too short ({metadata['duration']:.2f}s) - merging with previous chunk")
+                    filtered_chunks[-1] = np.concatenate([filtered_chunks[-1], chunk])
+                    filtered_metadata[-1]['duration'] += metadata['duration']
+                    filtered_metadata[-1]['end_time'] = metadata['end_time']
+                    filtered_metadata[-1]['num_samples'] += metadata['num_samples']
+                else:
+                    # First chunk is too short - just add it anyway, validation will be skipped
+                    print(f"  ⚠️  Chunk {i+1} too short ({metadata['duration']:.2f}s) - keeping anyway")
+                    filtered_chunks.append(chunk)
+                    filtered_metadata.append(metadata)
+            else:
+                filtered_chunks.append(chunk)
+                filtered_metadata.append(metadata)
+        
+        chunks = filtered_chunks
+        chunk_metadata = filtered_metadata
+        
+        # Process each chunk
+        all_chunk_phonemes = []
+        all_chunk_words = []
+        
+        for i, (chunk, metadata) in enumerate(zip(chunks, chunk_metadata)):
+            print(f"  Processing chunk {i+1}/{len(chunks)} ({metadata['duration']:.1f}s)...")
+            
+            try:
+                # Extract phonemes and words for this chunk
+                phoneme_predictions = await asyncio.to_thread(
+                    phoneme_extraction_model.extract_phoneme, 
+                    audio=chunk, 
+                    sampling_rate=sampling_rate
+                )
+                predicted_words = await asyncio.to_thread(
+                    word_extraction_model.extract_words, 
+                    audio=chunk, 
+                    sampling_rate=sampling_rate
+                )
+                
+                all_chunk_phonemes.append(phoneme_predictions)
+                all_chunk_words.append(predicted_words)
+            except ValueError as e:
+                # If chunk still fails validation, skip it
+                print(f"  ⚠️  Skipping chunk {i+1}: {e}")
+                # Add empty results for this chunk
+                all_chunk_phonemes.append([])
+                all_chunk_words.append([])
+        
+        # Merge chunk results
+        print(f"✓ All chunks processed - merging results...")
+        phoneme_predictions, predicted_words = merge_chunk_results(
+            all_chunk_phonemes, 
+            all_chunk_words, 
+            chunk_metadata
+        )
+    else:
+        # Original processing for short audio
+        print(f"📝 Audio is {audio_duration:.1f}s - processing without chunking")
+        async def extract_data():
+            print("  Starting concurrent extraction tasks...")
+            phoneme_predictions_task = asyncio.create_task(asyncio.to_thread(
+                phoneme_extraction_model.extract_phoneme, audio=audio_array, sampling_rate=sampling_rate
+            ))
+            predicted_words_task = asyncio.create_task(asyncio.to_thread(
+                word_extraction_model.extract_words, audio=audio_array, sampling_rate=sampling_rate
+            ))
 
-        return phoneme_predictions, predicted_words
+            print("  Waiting for phoneme extraction...")
+            phoneme_predictions = await phoneme_predictions_task
+            print("  Phoneme extraction completed")
+            
+            print("  Waiting for word extraction...")
+            predicted_words = await predicted_words_task
+            print("  Word extraction completed")
 
-    phoneme_predictions, predicted_words = await extract_data()
+            return phoneme_predictions, predicted_words
+
+        phoneme_predictions, predicted_words = await extract_data()
 
     if phoneme_predictions is None or predicted_words is None or len(phoneme_predictions) <= 1 or len(predicted_words) <= 1:
         raise ValueError("The audio provided has no speech inside")
 
     print("unaligned phoneme predictions: ", phoneme_predictions)
 
+    # Validate predicted_words is a list of strings
+    if not isinstance(predicted_words, list):
+        raise ValueError(f"predicted_words is not a list: {type(predicted_words)}")
+    
+    # Filter out any non-string items and ensure we have valid words
+    predicted_words = [str(word) for word in predicted_words if word]
+    if not predicted_words:
+        raise ValueError("No valid words extracted from audio")
 
     # regroup the phonemes to reflect the words that were spoken
     flattened_phoneme_predictions = [item for sublist in phoneme_predictions for item in sublist]

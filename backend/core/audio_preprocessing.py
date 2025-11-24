@@ -1,5 +1,6 @@
 # %%
 import time
+import numpy as np
 import IPython.display as ipd
 import librosa
 import librosa.display
@@ -47,7 +48,11 @@ def preprocess_audio(audio, sr=16000, audio_length_seconds=None):
         print(f"⏱️  Noise reduction took {time.time() - noise_start:.3f}s")
     
     norm_start = time.time()
-    audio = librosa.util.normalize(audio)
+    # Replace slow librosa.util.normalize with fast numpy normalization
+    # librosa.util.normalize is calling scipy peak normalization which is extremely slow
+    max_val = np.max(np.abs(audio))
+    if max_val > 0:
+        audio = audio / max_val
     print(f"⏱️  Normalization took {time.time() - norm_start:.3f}s")
     
     print(f"⏱️  Total preprocessing took {time.time() - preprocess_start:.3f}s")

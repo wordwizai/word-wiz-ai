@@ -53,9 +53,9 @@ export const LocalProcessingAlert = () => {
 
   return (
     <div className="fixed top-4 right-4 z-50 w-96 max-w-[calc(100vw-2rem)] animate-in slide-in-from-top-5 duration-300">
-      <div className="rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50/50 dark:from-green-950/50 dark:to-emerald-950/30 border-2 border-green-200/50 dark:border-green-800/50 shadow-xl backdrop-blur-sm p-4">
+      <div className="rounded-2xl bg-green-50 dark:bg-green-950/50 border-2 border-green-200 dark:border-green-800 shadow-lg p-4">
         <div className="flex items-start gap-3">
-          <div className="p-2 bg-gradient-to-r from-green-400 to-emerald-500 rounded-xl shrink-0">
+          <div className="p-2 bg-green-500 rounded-xl shrink-0">
             <Zap className="w-5 h-5 text-white" />
           </div>
           <div className="flex-1 min-w-0">
@@ -65,7 +65,7 @@ export const LocalProcessingAlert = () => {
               </h3>
               <button
                 onClick={handleDismiss}
-                className="p-1 hover:bg-green-100/50 dark:hover:bg-green-900/50 rounded-lg transition-colors shrink-0"
+                className="p-1 hover:bg-green-100 dark:hover:bg-green-900 rounded-lg transition-colors shrink-0"
                 aria-label="Dismiss alert"
               >
                 <X className="w-4 h-4 text-muted-foreground" />
@@ -77,7 +77,7 @@ export const LocalProcessingAlert = () => {
             <Button
               onClick={handleEnableLocalProcessing}
               disabled={isEnabling}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-200 hover:scale-[1.02] hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
               size="sm"
             >
               {isEnabling ? (

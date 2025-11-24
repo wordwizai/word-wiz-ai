@@ -2,14 +2,15 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { useSpeechSynthesis } from "@/hooks/useSpeechSynthesis";
 import { useEffect, useState } from "react";
-import { Columns, Split, SplitSquareVertical, Text } from "lucide-react";
-import { useTheme } from "@/contexts/ThemeContext";
+import { Columns, Text } from "lucide-react";
 
 interface WordBadgeProps {
   word: string;
   idx: number;
   showHighlighted: boolean;
   analysisPer?: number;
+  isInsertion?: boolean;
+  isDeletion?: boolean;
 }
 
 export const WordBadge = ({
@@ -17,6 +18,8 @@ export const WordBadge = ({
   idx,
   showHighlighted,
   analysisPer,
+  isInsertion = false,
+  isDeletion = false,
 }: WordBadgeProps) => {
   const PHONICS_CHUNKS = [
     // Vowel teams & diphthongs
@@ -222,11 +225,20 @@ export const WordBadge = ({
                 scale: { delay: idx * 0.08, duration: 0.3 },
               },
             }
-          : { opacity: 1, scale: 1 }
+          : { opacity: isInsertion ? 0.4 : 1, scale: 1 }
       }
       exit={{ opacity: 0, scale: 0.8 }}
-      style={{ borderRadius: "0.75rem", position: "relative" }}
-      className="inline-block group bg-white dark:bg-zinc-900"
+      style={{
+        position: "relative",
+        ...(isInsertion && {
+          border: "2px dashed rgb(134, 239, 172)", // pastel mint green dashed border for ghosts
+          backgroundColor: "rgba(134, 239, 172, 0.1)", // subtle mint green background
+        }),
+        ...(isDeletion && {
+          backgroundColor: "rgba(248, 113, 113, 0.15)", // light red background for deletions
+        }),
+      }}
+      className="inline-block group bg-white dark:bg-zinc-900 rounded-xl"
     >
       {/* Toggle Grapheme Button */}
       <button
@@ -247,7 +259,13 @@ export const WordBadge = ({
       </button>
       <Badge
         variant="outline"
-        className={`${textClass} ${baseBgClass} cursor-pointer transition-colors hover:bg-muted relative`}
+        className={`${textClass} ${baseBgClass} cursor-pointer transition-colors hover:bg-muted relative rounded-xl ${
+          isInsertion ? "italic text-green-600 dark:text-green-400" : ""
+        } ${
+          isDeletion
+            ? "line-through text-red-400 dark:text-red-400 opacity-60"
+            : ""
+        }`}
         style={{ background: "transparent" }}
         onClick={() => {
           if (!isGraphemes) {
@@ -298,7 +316,7 @@ export const WordBadge = ({
                   <Badge
                     key={i}
                     variant="secondary"
-                    className="mx-0.5 text-2xl md:text-4xl font-medium px-3"
+                    className="mx-0.5 text-2xl md:text-4xl font-medium px-3 rounded-xl"
                   >
                     {g}
                   </Badge>

@@ -310,8 +310,10 @@ class ClientPhonemeExtractor {
         // Optimized chunk settings for faster processing
         chunk_length_s: 20, // Reduced from 30s for faster processing
         stride_length_s: 3, // Reduced from 5s for less overlap
-        // Force greedy decoding (faster than beam search)
-        num_beams: 1,
+        // Use beam search with small beam size for better stability
+        num_beams: 3, // Increased from 1 to prevent getting stuck in repetitive loops
+        // Add repetition penalty to discourage repeated tokens
+        repetition_penalty: 1.5, // Penalize repeated sequences
       });
 
       console.log("Raw model output:", result);
@@ -320,6 +322,16 @@ class ClientPhonemeExtractor {
         ? result[0]?.text || ""
         : (result as any).text || "";
       console.log("Decoded text:", text);
+
+      // Detect repetitive gibberish output
+      if (this.isRepetitiveGibberish(text)) {
+        console.error(
+          "Detected repetitive model output (gibberish) - rejecting result"
+        );
+        throw new Error(
+          "Model produced repetitive output. This usually means poor audio quality. Please try recording again with clearer audio."
+        );
+      }
 
       const phonemes = this.parsePhonemeOutput(text);
 
@@ -386,8 +398,10 @@ class ClientPhonemeExtractor {
         // Optimized chunk settings for faster processing
         chunk_length_s: 20, // Reduced from 30s for faster processing
         stride_length_s: 3, // Reduced from 5s for less overlap
-        // Force greedy decoding (faster than beam search)
-        num_beams: 1,
+        // Use beam search with small beam size for better stability
+        num_beams: 3, // Increased from 1 to prevent getting stuck in repetitive loops
+        // Add repetition penalty to discourage repeated tokens
+        repetition_penalty: 1.5, // Penalize repeated sequences
       });
 
       console.log("Raw model output:", result);
@@ -396,6 +410,16 @@ class ClientPhonemeExtractor {
         ? result[0]?.text || ""
         : (result as any).text || "";
       console.log("Decoded text:", text);
+
+      // Detect repetitive gibberish output
+      if (this.isRepetitiveGibberish(text)) {
+        console.error(
+          "Detected repetitive model output (gibberish) - rejecting result"
+        );
+        throw new Error(
+          "Model produced repetitive output. This usually means poor audio quality. Please try recording again with clearer audio."
+        );
+      }
 
       // Parse both phonemes and words from the same model output
       const phonemes = this.parsePhonemeOutput(text);
@@ -528,15 +552,72 @@ class ClientPhonemeExtractor {
 
     if (ratio < 0.1 || ratio > 10.0) {
       console.warn(
-        `Unusual word/phoneme ratio: ${ratio.toFixed(2)} (may indicate transcription error)`
+        `Unusual word/phoneme ratio: ${ratio.toFixed(
+          2
+        )} (may indicate transcription error)`
       );
       return false;
     }
 
     console.log(
-      `Validation passed: ${words.length} words, ${phonemes.length} phoneme groups, ratio: ${ratio.toFixed(2)}`
+      `Validation passed: ${words.length} words, ${
+        phonemes.length
+      } phoneme groups, ratio: ${ratio.toFixed(2)}`
     );
     return true;
+  }
+
+  /**
+   * Detect if the model output is repetitive gibberish.
+   * This happens when the model gets stuck in a loop, often due to poor audio quality.
+   * @param text - Raw model output text
+   * @returns true if the output appears to be repetitive gibberish
+   */
+  private isRepetitiveGibberish(text: string): boolean {
+    // Remove [PAD] tokens for analysis
+    const cleaned = text.replace(/\[PAD\]/g, "");
+
+    // Check 1: Look for repeated 2-character sequences (like "ʧə" repeated)
+    const twoCharPattern = /(.{2})\1{5,}/; // Same 2 chars repeated 5+ times
+    if (twoCharPattern.test(cleaned)) {
+      console.warn(
+        "Detected repeated 2-character pattern:",
+        cleaned.match(twoCharPattern)?.[0]
+      );
+      return true;
+    }
+
+    // Check 2: Look for repeated 3-5 character sequences
+    const shortPattern = /(.{3,5})\1{4,}/; // Same 3-5 chars repeated 4+ times
+    if (shortPattern.test(cleaned)) {
+      console.warn(
+        "Detected repeated short pattern:",
+        cleaned.match(shortPattern)?.[0]
+      );
+      return true;
+    }
+
+    // Check 3: Check if more than 50% of the output is the same phoneme
+    if (cleaned.length > 10) {
+      const phonemeCount = new Map<string, number>();
+      for (const char of cleaned) {
+        phonemeCount.set(char, (phonemeCount.get(char) || 0) + 1);
+      }
+
+      const maxCount = Math.max(...phonemeCount.values());
+      const repetitionRatio = maxCount / cleaned.length;
+
+      if (repetitionRatio > 0.5) {
+        console.warn(
+          `Detected excessive repetition: ${(repetitionRatio * 100).toFixed(
+            1
+          )}% of output is the same character`
+        );
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**

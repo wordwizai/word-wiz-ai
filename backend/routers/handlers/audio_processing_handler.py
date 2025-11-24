@@ -156,6 +156,15 @@ async def analyze_audio_file_event_stream(
     client_words: list[str] | None = None,
 ):
     try:
+        # Send immediate acknowledgment that processing has started
+        print("📤 Sending processing started event...")
+        processing_started_payload = {
+            "type": "processing_started",
+            "data": {"message": "Audio received, analyzing..."},
+        }
+        yield f"data: {json.dumps(processing_started_payload)}\n\n"
+        await asyncio.sleep(0.01)  # Ensure the event is flushed
+        
         # STEP 1: ANALYZE AUDIO
         
         # Check if we received empty audio (client sent it to save bandwidth)
@@ -222,12 +231,27 @@ async def analyze_audio_file_event_stream(
         # Log processing path
         if use_client_phonemes and use_client_words:
             print("→ Using full client extraction (phonemes + words) - Maximum speed! 🚀")
+            processing_mode = "client"
         elif use_client_phonemes:
             print("→ Using client phonemes only - Server will extract words")
+            processing_mode = "hybrid"
         else:
             print("→ Using full server-side extraction (phonemes + words)")
+            processing_mode = "server"
+        
+        # Send processing mode update
+        print(f"📤 Sending processing mode update ({processing_mode})...")
+        processing_mode_payload = {
+            "type": "processing_mode",
+            "data": {"mode": processing_mode, "message": "Analyzing pronunciation..."},
+        }
+        yield f"data: {json.dumps(processing_mode_payload)}\n\n"
+        await asyncio.sleep(0.01)
         
         # Process audio based on what client data we have
+        import time
+        processing_start = time.time()
+        
         if use_client_phonemes and client_phonemes is not None:
             # Get ground truth phonemes for the sentence
             ground_truth_phonemes = g2p(attempted_sentence)
@@ -242,10 +266,12 @@ async def analyze_audio_file_event_stream(
             )
             
             # Analyze the results to get the same format as server processing
+            analysis_start = time.time()
             pronunciation_dataframe, highest_per_word, problem_summary, per_summary = analyze_results(pronunciation_data)
+            print(f"⏱️  analyze_results() took {time.time() - analysis_start:.3f}s")
             
             extraction_mode = "full client" if use_client_words else "client phonemes only"
-            print(f"✓ {extraction_mode} processing completed (PER: {per_summary.get('sentence_per', 0):.2%})")
+            print(f"✓ {extraction_mode} processing completed in {time.time() - processing_start:.3f}s (PER: {per_summary.get('sentence_per', 0):.2%})")
         else:
             # Original server-side processing
             pronunciation_dataframe, highest_per_word, problem_summary, per_summary = (
@@ -254,7 +280,7 @@ async def analyze_audio_file_event_stream(
                 )
             )
             
-            print(f"✓ Server phoneme processing completed (PER: {per_summary.get('sentence_per', 0):.2%})")
+            print(f"✓ Server phoneme processing completed in {time.time() - processing_start:.3f}s (PER: {per_summary.get('sentence_per', 0):.2%})")
         
         # Create audio analysis object (same format regardless of processing path)
         audio_analysis_object = AudioAnalysis(

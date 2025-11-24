@@ -480,13 +480,17 @@ async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=
         raise ValueError("No valid words extracted from audio")
 
     # regroup the phonemes to reflect the words that were spoken
+    import time
+    alignment_start = time.time()
     flattened_phoneme_predictions = [item for sublist in phoneme_predictions for item in sublist]
     predicted_words_phonemes = g2p(" ".join(predicted_words)) # take the words our model thinks we said and get the phonemes for them
     alignment = align_phonemes_to_words(flattened_phoneme_predictions, predicted_words_phonemes)
     phoneme_predictions = [pred_phonemes for _, pred_phonemes,_ in alignment]
+    print(f"⏱️  Phoneme-to-word alignment took {time.time() - alignment_start:.3f}s")
     print("aligned phoneme predictions: ", phoneme_predictions)
 
     # Use helper function to process word alignment
+    word_alignment_start = time.time()
     ground_truth_words = [word for word, _ in ground_truth_phonemes]
     results = _process_word_alignment(
         ground_truth_words=ground_truth_words,
@@ -494,6 +498,7 @@ async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=
         predicted_words=predicted_words,
         phoneme_predictions=phoneme_predictions
     )
+    print(f"⏱️  Word alignment processing took {time.time() - word_alignment_start:.3f}s")
 
     return results
 

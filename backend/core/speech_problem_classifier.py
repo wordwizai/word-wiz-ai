@@ -125,18 +125,16 @@ class SpeechProblemClassifier:
         # Get articulatory information for problematic phonemes
         phoneme_articulatory_info = {}
         phoneme_difficulty_levels = {}
-        high_frequency_errors = []
         
         for phoneme, count in phoneme_errors.items():
             if phoneme in SpeechProblemClassifier.ARTICULATORY_INFO:
                 phoneme_articulatory_info[phoneme] = SpeechProblemClassifier.ARTICULATORY_INFO[phoneme]
             if phoneme in SpeechProblemClassifier.PHONEME_DIFFICULTY:
                 phoneme_difficulty_levels[phoneme] = SpeechProblemClassifier.PHONEME_DIFFICULTY[phoneme]
-            if phoneme in SpeechProblemClassifier.HIGH_FREQUENCY_PHONEMES:
-                high_frequency_errors.append((phoneme, count))
         
-        # Sort high frequency errors by count (most problematic first)
-        high_frequency_errors.sort(key=lambda x: x[1], reverse=True)
+        # Include ALL phoneme errors sorted by count (most problematic first)
+        # This ensures no phoneme is ignored regardless of whether it's in HIGH_FREQUENCY_PHONEMES
+        high_frequency_errors = [(phoneme, count) for phoneme, count in phoneme_errors.most_common()]
         
         # Determine recommended focus phoneme based on frequency, difficulty, and utility
         recommended_focus = SpeechProblemClassifier._determine_focus_phoneme(phoneme_errors)
@@ -170,7 +168,7 @@ class SpeechProblemClassifier:
     @staticmethod
     def _determine_focus_phoneme(phoneme_errors):
         """
-        Determines the recommended focus phoneme based on frequency, difficulty, and pedagogical utility.
+        Determines the recommended focus phoneme based on error count priority.
         
         Args:
             phoneme_errors (Counter): Counter of phoneme errors
@@ -180,28 +178,22 @@ class SpeechProblemClassifier:
         """
         if not phoneme_errors:
             return None
-            
-        # Priority 1: High-frequency phonemes with errors (most impactful for reading)
-        high_freq_with_errors = [
-            (phoneme, count) for phoneme, count in phoneme_errors.items()
-            if phoneme in SpeechProblemClassifier.HIGH_FREQUENCY_PHONEMES
-        ]
         
-        if high_freq_with_errors:
-            # Sort by error count, but prioritize lower difficulty for struggling readers
-            sorted_errors = sorted(high_freq_with_errors, key=lambda x: (
-                -x[1],  # Higher error count first
-                SpeechProblemClassifier.PHONEME_DIFFICULTY.get(x[0], 3)  # Lower difficulty preferred
-            ))
-            best_phoneme = sorted_errors[0][0]
-            return (best_phoneme, "high_frequency_phoneme")
+        # Get all errors sorted by count (highest first)
+        sorted_errors = phoneme_errors.most_common()
         
-        # Priority 2: Most frequent errors regardless of phoneme type
-        most_common = phoneme_errors.most_common(1)
-        if most_common:
-            return (most_common[0][0], "most_frequent_error")
-            
-        return None
+        if not sorted_errors:
+            return None
+        
+        # Get the phoneme with the most errors
+        most_errors_phoneme, most_errors_count = sorted_errors[0]
+        
+        # Check if it's a high-frequency phoneme (pedagogically valuable)
+        if most_errors_phoneme in SpeechProblemClassifier.HIGH_FREQUENCY_PHONEMES:
+            return (most_errors_phoneme, "high_frequency_phoneme")
+        
+        # Otherwise, it's just the most frequent error
+        return (most_errors_phoneme, "most_frequent_error")
 
 if __name__ == "__main__":
     from audio_recording import record_and_process_pronunciation

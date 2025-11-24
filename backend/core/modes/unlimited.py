@@ -62,17 +62,37 @@ class UnlimitedPractice(BaseMode):
             }
             enhanced_pronunciation.append(enhanced_word)
 
-        # Send FULL problem_summary instead of simplified version
-        # This gives GPT complete context including articulatory info and difficulty levels
+        # Create phoneme-to-word mapping showing which words actually had errors with each phoneme
+        phoneme_to_error_words = {}
+        for word_data in pronunciation_data:
+            # Only process words that have errors (per > 0)
+            if word_data.get("per", 0) > 0:
+                word = word_data.get("ground_truth_word", "")
+                # Check missed phonemes
+                for phoneme in word_data.get("missed", []):
+                    if phoneme not in phoneme_to_error_words:
+                        phoneme_to_error_words[phoneme] = []
+                    phoneme_to_error_words[phoneme].append({"word": word, "error_type": "missed"})
+                # Check added phonemes
+                for phoneme in word_data.get("added", []):
+                    if phoneme not in phoneme_to_error_words:
+                        phoneme_to_error_words[phoneme] = []
+                    phoneme_to_error_words[phoneme].append({"word": word, "error_type": "added"})
+                # Check substituted phonemes (first element is the expected phoneme)
+                for sub in word_data.get("substituted", []):
+                    expected_phoneme = sub[0] if isinstance(sub, (list, tuple)) and len(sub) > 0 else sub
+                    if expected_phoneme not in phoneme_to_error_words:
+                        phoneme_to_error_words[expected_phoneme] = []
+                    phoneme_to_error_words[expected_phoneme].append({"word": word, "error_type": "substituted"})
+
+        # Send focused problem_summary with only essential fields
         full_problem_summary = {
-            **problem_summary,  # Include ALL fields from problem_summary
-            # Explicitly highlight key fields for GPT attention
             "most_common_phoneme": problem_summary.get("most_common_phoneme"),
             "phoneme_error_counts": problem_summary.get("phoneme_error_counts", {}),
             "recommended_focus_phoneme": problem_summary.get("recommended_focus_phoneme"),
             "high_frequency_errors": problem_summary.get("high_frequency_errors", []),
-            "articulatory_info": problem_summary.get("articulatory_info", {}),
-            "difficulty_level": problem_summary.get("difficulty_level", "medium")
+            # NEW: Explicit mapping showing which words had errors with which phonemes
+            "phoneme_to_error_words": phoneme_to_error_words
         }
 
         user_input = {

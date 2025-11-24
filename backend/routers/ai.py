@@ -11,7 +11,7 @@ from models import User
 from models.session import Session as UserSession
 from routers.handlers.audio_processing_handler import (
     analyze_audio_file_event_stream,
-    load_and_preprocess_audio_file,
+    load_and_preprocess_audio_bytes,
 )
 from sqlalchemy.orm import Session
 from typing import Optional
@@ -94,12 +94,20 @@ async def process_audio_analysis(
     # Validate session and get activity object
     activity_object = get_activity_object(session)
 
+    # Read audio file bytes before passing to streaming response
+    # (UploadFile gets closed after request parsing, so we need to read it now)
+    audio_bytes = await audio_file.read()
+    audio_filename = audio_file.filename
+    audio_content_type = audio_file.content_type
+
     # Return StreamingResponse immediately - preprocessing will happen inside the stream
     return StreamingResponse(
         analyze_audio_file_event_stream(
             phoneme_assistant=phoneme_assistant,
             activity_object=activity_object,
-            audio_file=audio_file,  # Pass the file instead of processed array
+            audio_bytes=audio_bytes,
+            audio_filename=audio_filename,
+            audio_content_type=audio_content_type,
             attempted_sentence=attempted_sentence,
             current_user=current_user,
             session=session,

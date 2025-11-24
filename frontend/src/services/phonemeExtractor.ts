@@ -327,11 +327,13 @@ class ClientPhonemeExtractor {
         ? result[0]?.text || ""
         : (result as any).text || "";
       console.log("Decoded text:", text);
-      
+
       // Log [PAD] token occurrences for monitoring
       if (text.includes("[PAD]")) {
         const padCount = (text.match(/\[PAD\]/g) || []).length;
-        console.log(`📊 Found ${padCount} [PAD] separator tokens - will remove`);
+        console.log(
+          `📊 Found ${padCount} [PAD] separator tokens - will remove`
+        );
       }
 
       // Detect repetitive gibberish output
@@ -472,7 +474,7 @@ class ClientPhonemeExtractor {
     // CTC decoding produces [PAD] which could mean:
     // 1. Actual padding/separator tokens (should be removed)
     // 2. Incorrectly decoded 'l' phoneme (token ID 18 shown as [PAD] due to decoder bug)
-    // 
+    //
     // Strategy: If [PAD] appears BETWEEN phonemes frequently, it's likely separators (remove)
     // If [PAD] appears sporadically in word positions where 'l' makes sense, replace with 'l'
     //
@@ -601,7 +603,7 @@ class ClientPhonemeExtractor {
   private isRepetitiveGibberish(text: string): boolean {
     // Remove [PAD] tokens (separators) for analysis
     const cleaned = text.replace(/\[PAD\]/g, "").trim();
-    
+
     // If output is very short, it's probably not gibberish
     if (cleaned.length < 30) {
       return false;
@@ -609,17 +611,23 @@ class ClientPhonemeExtractor {
 
     // Check if the ENTIRE output (>80%) is repetitive
     // This is more lenient - allows some repetition at the start if it recovers later
-    
+
     // Check 1: Look for repeated 2-character sequences that dominate the output
     const twoCharPattern = /(.{2})\1{8,}/g; // Same 2 chars repeated 8+ times (increased threshold)
     const matches = cleaned.match(twoCharPattern);
     if (matches) {
-      const repetitiveLength = matches.reduce((sum, match) => sum + match.length, 0);
+      const repetitiveLength = matches.reduce(
+        (sum, match) => sum + match.length,
+        0
+      );
       const ratio = repetitiveLength / cleaned.length;
-      
-      if (ratio > 0.6) { // Only reject if >60% is repetitive
+
+      if (ratio > 0.6) {
+        // Only reject if >60% is repetitive
         console.warn(
-          `Detected repeated 2-character pattern dominating output (${(ratio * 100).toFixed(1)}%):`,
+          `Detected repeated 2-character pattern dominating output (${(
+            ratio * 100
+          ).toFixed(1)}%):`,
           matches[0]
         );
         return true;
@@ -630,12 +638,18 @@ class ClientPhonemeExtractor {
     const shortPattern = /(.{3,5})\1{6,}/g; // Same 3-5 chars repeated 6+ times (increased threshold)
     const shortMatches = cleaned.match(shortPattern);
     if (shortMatches) {
-      const repetitiveLength = shortMatches.reduce((sum, match) => sum + match.length, 0);
+      const repetitiveLength = shortMatches.reduce(
+        (sum, match) => sum + match.length,
+        0
+      );
       const ratio = repetitiveLength / cleaned.length;
-      
-      if (ratio > 0.6) { // Only reject if >60% is repetitive
+
+      if (ratio > 0.6) {
+        // Only reject if >60% is repetitive
         console.warn(
-          `Detected repeated short pattern dominating output (${(ratio * 100).toFixed(1)}%):`,
+          `Detected repeated short pattern dominating output (${(
+            ratio * 100
+          ).toFixed(1)}%):`,
           shortMatches[0]
         );
         return true;
@@ -646,19 +660,21 @@ class ClientPhonemeExtractor {
     if (cleaned.length > 10) {
       const phonemeCount = new Map<string, number>();
       for (const char of cleaned) {
-        if (char !== ' ') { // Ignore spaces
+        if (char !== " ") {
+          // Ignore spaces
           phonemeCount.set(char, (phonemeCount.get(char) || 0) + 1);
         }
       }
 
       const maxCount = Math.max(...phonemeCount.values());
-      const repetitionRatio = maxCount / cleaned.replace(/\s/g, '').length;
+      const repetitionRatio = maxCount / cleaned.replace(/\s/g, "").length;
 
-      if (repetitionRatio > 0.7) { // Increased threshold from 0.5 to 0.7
+      if (repetitionRatio > 0.7) {
+        // Increased threshold from 0.5 to 0.7
         console.warn(
-          `Detected excessive single character repetition: ${(repetitionRatio * 100).toFixed(
-            1
-          )}% of output is the same character`
+          `Detected excessive single character repetition: ${(
+            repetitionRatio * 100
+          ).toFixed(1)}% of output is the same character`
         );
         return true;
       }

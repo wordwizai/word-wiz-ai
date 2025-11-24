@@ -37,8 +37,11 @@ class PhonemeAssistant:
             self.device = torch.device("cpu")
             print("Using CPU for processing.")
 
-        torch.set_num_threads(1) # Limit to 1 thread for consistency
-        torch.set_num_interop_threads(1)
+        # Use all available CPU cores for better performance
+        num_cores = os.cpu_count() or 4
+        torch.set_num_threads(num_cores)
+        torch.set_num_interop_threads(num_cores)
+        print(f"Using {num_cores} CPU threads for PyTorch inference")
 
         # Determine optimization settings from environment or parameter
         if use_optimized_model is None:

@@ -29,12 +29,19 @@ from routers.handlers.phoneme_processing_handler import (
 )
 
 
-async def load_and_preprocess_audio_file(audio_file: UploadFile, session_id: str | None = None) -> tuple[np.ndarray, str]:
+async def load_and_preprocess_audio_bytes(
+    audio_bytes: bytes,
+    filename: str,
+    content_type: str,
+    session_id: str | None = None
+) -> tuple[np.ndarray, str]:
     """
-    Load and preprocess the audio file with caching at key stages.
+    Load and preprocess audio from bytes with caching at key stages.
 
     Args:
-        audio_file (UploadFile): The uploaded audio file.
+        audio_bytes (bytes): The audio file bytes.
+        filename (str): Original filename.
+        content_type (str): MIME type of the audio.
         session_id (str, optional): Session ID for caching. If None, generates one.
 
     Returns:
@@ -44,20 +51,10 @@ async def load_and_preprocess_audio_file(audio_file: UploadFile, session_id: str
     if session_id is None:
         session_id = audio_cache.generate_session_id()
 
-    # Read audio file into numpy array
-    read_start = time.time()
-    try:
-        audio_bytes = await audio_file.read()
-    except Exception as e:
-        # Handle case where file is already closed or empty (client-side processing)
-        print(f"⚠️  Could not read audio file: {str(e)}")
-        print("📭 Treating as empty audio - client likely performed full extraction")
-        return np.array([]), session_id
-    
-    print(f"⏱️  File read took {time.time() - read_start:.3f}s")
+    print(f"📋 Processing audio: filename={filename}, content_type={content_type}, size={len(audio_bytes)} bytes")
     
     # Validate content type only if we have actual audio data
-    if len(audio_bytes) > 0 and audio_file.content_type not in [
+    if len(audio_bytes) > 0 and content_type not in [
         "audio/wav",
         "audio/x-wav",
         "audio/mpeg",
@@ -79,10 +76,10 @@ async def load_and_preprocess_audio_file(audio_file: UploadFile, session_id: str
         audio_bytes, 
         "original", 
         session_id,
-        f"uploaded_{audio_file.filename}",
+        f"uploaded_{filename}",
         metadata={
-            "filename": audio_file.filename,
-            "content_type": audio_file.content_type,
+            "filename": filename,
+            "content_type": content_type,
             "size_bytes": len(audio_bytes)
         }
     )
@@ -167,7 +164,9 @@ def sanitize(obj):
 async def analyze_audio_file_event_stream(
     phoneme_assistant: PhonemeAssistant,
     activity_object: BaseMode,
-    audio_file: UploadFile,  # Changed from audio_array to audio_file
+    audio_bytes: bytes,
+    audio_filename: str,
+    audio_content_type: str,
     attempted_sentence: str,
     db: Session,
     current_user: User,
@@ -188,8 +187,8 @@ async def analyze_audio_file_event_stream(
         # NOW do the preprocessing after sending the first event
         print("🔄 Starting audio preprocessing...")
         try:
-            audio_array, cache_session_id = await load_and_preprocess_audio_file(
-                audio_file, str(session.id)
+            audio_array, cache_session_id = await load_and_preprocess_audio_bytes(
+                audio_bytes, audio_filename, audio_content_type, str(session.id)
             )
             print("✅ Audio preprocessing completed")
         except Exception as e:

@@ -15,6 +15,7 @@ from openai import OpenAI
 
 from .audio_validation import log_audio_characteristics, validate_audio_output
 from .phoneme_extractor import PhonemeExtractor
+from .phoneme_extractor_onnx import PhonemeExtractorONNX
 from .process_audio import analyze_results, process_audio_array
 from .text_to_audio import ElevenLabsAPIClient, GoogleTTSAPIClient
 from .word_extractor import WordExtractor, WordExtractorOnline
@@ -47,9 +48,20 @@ class PhonemeAssistant:
         if use_optimized_model is None:
             use_optimized_model = config.get('use_optimized_model', True)
 
+        # Check if we should use ONNX Runtime (faster)
+        use_onnx = os.getenv("USE_ONNX_BACKEND", "true").lower() == "true"
+        
         # Load optimized models for better performance
-        if use_optimized_model:
-            print("Initializing optimized PhonemeExtractor...")
+        if use_onnx:
+            print("Initializing ONNX-based PhonemeExtractor for faster inference...")
+            try:
+                self.phoneme_extractor = PhonemeExtractorONNX()
+                print("✅ ONNX Runtime backend loaded successfully")
+            except Exception as e:
+                print(f"⚠️  ONNX loading failed ({e}), falling back to PyTorch")
+                self.phoneme_extractor = PhonemeExtractor()
+        elif use_optimized_model:
+            print("Initializing optimized PyTorch PhonemeExtractor...")
             if config.get('enable_performance_logging', False):
                 print(config.summary())
             self.phoneme_extractor = PhonemeExtractor()

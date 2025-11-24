@@ -1,4 +1,6 @@
 torch
+onnxruntime
+huggingface-hub
 fastapi
 uvicorn
 gunicorn

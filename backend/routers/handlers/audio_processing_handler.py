@@ -375,11 +375,15 @@ async def analyze_audio_file_event_stream(
 
         # STEP 4: FEEDBACK AUDIO
         loop = asyncio.get_event_loop()
+        # Ensure feedback is never None - use empty string as fallback
+        feedback_text = response.get("feedback") or ""
+        feedback_ssml = response.get("feedback_ssml")
+        
         response_audio_file = await loop.run_in_executor(
             None, 
             phoneme_assistant.feedback_to_audio, 
-            response.get("feedback", ""),
-            response.get("feedback_ssml", None)
+            feedback_text,
+            feedback_ssml
         )
         
         # CACHE POINT 4: Save feedback audio
@@ -389,11 +393,11 @@ async def analyze_audio_file_event_stream(
         audio_cache.save_feedback_audio(
             feedback_audio_bytes,
             str(session.id),  # Convert session ID to string
-            response.get("feedback", ""),
+            feedback_text,
             metadata={
                 "stage": "tts_feedback",
-                "feedback_text": response.get("feedback", ""),
-                "has_ssml": response.get("feedback_ssml") is not None,
+                "feedback_text": feedback_text,
+                "has_ssml": feedback_ssml is not None,
                 "mimetype": response_audio_file["mimetype"]
             }
         )

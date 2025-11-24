@@ -272,8 +272,9 @@ async def analyze_audio_file_event_stream(
                 "per_summary": sanitize(per_summary),
             },
         }
+        print("📤 Sending analysis payload...")
         yield f"data: {json.dumps(analysis_payload)}\n\n"
-        await asyncio.sleep(0)  # Yield control to the event loop
+        await asyncio.sleep(0.01)  # Yield control to the event loop with small delay to ensure flush
 
         # STEP 2: GET GPT RESPONSE
 
@@ -299,8 +300,9 @@ async def analyze_audio_file_event_stream(
                 "metadata": response.get("metadata", {}),
             },
         }
+        print("📤 Sending GPT response payload...")
         yield f"data: {json.dumps(gpt_payload)}\n\n"
-        await asyncio.sleep(0)  # Yield control to the event loop
+        await asyncio.sleep(0.01)  # Yield control to the event loop with small delay to ensure flush
 
         # STEP 3: LOG THE ENTRY INTO THE DB
         # Store the full response including SSML for logging, but only send plain feedback to frontend
@@ -355,8 +357,9 @@ async def analyze_audio_file_event_stream(
         #         "url": f"/feedback-audio?session_id={session.id}&text={quote(response.get('feedback',''))}"
         #     },
         # }
+        print("📤 Sending audio feedback payload...")
         yield f"data: {json.dumps(audio_payload)}\n\n"
-        await asyncio.sleep(0)  # Yield control to the event loop
+        await asyncio.sleep(0.01)  # Yield control to the event loop with small delay to ensure flush
 
     except Exception as e:
         error_payload = {

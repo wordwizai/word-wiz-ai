@@ -118,6 +118,11 @@ async def process_audio_analysis(
             client_words=client_words,
         ),
         media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",  # Disable buffering in nginx/proxy
+            "Connection": "keep-alive",
+        },
     )
 
 

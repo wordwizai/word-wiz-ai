@@ -40,7 +40,24 @@ async def load_and_preprocess_audio_file(audio_file: UploadFile, session_id: str
     Returns:
         tuple[np.ndarray, str]: The preprocessed audio array and cache session ID.
     """
-    if audio_file.content_type not in [
+    # Generate session ID for caching if not provided
+    if session_id is None:
+        session_id = audio_cache.generate_session_id()
+
+    # Read audio file into numpy array
+    read_start = time.time()
+    try:
+        audio_bytes = await audio_file.read()
+    except Exception as e:
+        # Handle case where file is already closed or empty (client-side processing)
+        print(f"⚠️  Could not read audio file: {str(e)}")
+        print("📭 Treating as empty audio - client likely performed full extraction")
+        return np.array([]), session_id
+    
+    print(f"⏱️  File read took {time.time() - read_start:.3f}s")
+    
+    # Validate content type only if we have actual audio data
+    if len(audio_bytes) > 0 and audio_file.content_type not in [
         "audio/wav",
         "audio/x-wav",
         "audio/mpeg",
@@ -49,15 +66,6 @@ async def load_and_preprocess_audio_file(audio_file: UploadFile, session_id: str
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Unsupported audio format. Please upload a WAV or MP3 file.",
         )
-
-    # Generate session ID for caching if not provided
-    if session_id is None:
-        session_id = audio_cache.generate_session_id()
-
-    # Read audio file into numpy array
-    read_start = time.time()
-    audio_bytes = await audio_file.read()
-    print(f"⏱️  File read took {time.time() - read_start:.3f}s")
     
     # Check if this is an empty file (sent when client did full extraction)
     if len(audio_bytes) == 0:
@@ -196,11 +204,25 @@ async def analyze_audio_file_event_stream(
         
         # Check if we received empty audio (client sent it to save bandwidth)
         if len(audio_array) == 0:
-            # Empty audio is only valid if we have client phonemes and words
-            if client_phonemes is None or client_words is None:
+            # Empty audio is only valid if we have BOTH client phonemes and words
+            # If we have neither, it's an error
+            # If we have only words, we need audio for server-side phoneme extraction
+            if client_phonemes is None and client_words is None:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Empty audio received but client extraction data is incomplete. Please try again."
+                    detail="Empty audio received with no client extraction data. Please try again."
+                )
+            elif client_phonemes is None:
+                # Have words but not phonemes - need audio for phoneme extraction
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Empty audio received but phoneme extraction is needed. Audio file may be corrupted. Please try again."
+                )
+            elif client_words is None:
+                # Have phonemes but not words - need audio for word extraction
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Empty audio received but word extraction is needed. Audio file may be corrupted. Please try again."
                 )
             print("📭 Empty audio received - using full client extraction")
         else:

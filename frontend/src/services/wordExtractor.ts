@@ -252,11 +252,17 @@ class ClientWordExtractor {
 
       // Note: Don't specify language/task for English-only models like whisper-tiny.en
       const result = await this.model(audioData, {
-        chunk_length_s: 20,
-        stride_length_s: 3,
+        chunk_length_s: 30, // Increased for better accuracy
+        stride_length_s: 5, // Increased overlap for better boundary handling
         return_timestamps: false,
-        // Force greedy decoding (faster)
-        num_beams: 1,
+        // Use beam search for better accuracy
+        num_beams: 5, // Increased from 1 for more accurate transcription
+        // Repetition penalty to discourage repeated words/phrases
+        repetition_penalty: 1.5,
+        // No-repeat n-gram size to prevent exact repetitions
+        no_repeat_ngram_size: 3,
+        // Temperature for more conservative predictions
+        temperature: 0.4, // Lower = less hallucination (Whisper works well at low temps)
       });
 
       console.log("Raw Whisper output:", result);

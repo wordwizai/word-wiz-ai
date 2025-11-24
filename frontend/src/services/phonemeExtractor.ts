@@ -307,11 +307,18 @@ class ClientPhonemeExtractor {
 
       const result = await this.model(audioData, {
         return_timestamps: false,
-        // Optimized chunk settings for faster processing
-        chunk_length_s: 20, // Reduced from 30s for faster processing
-        stride_length_s: 3, // Reduced from 5s for less overlap
-        // Force greedy decoding (faster than beam search)
-        num_beams: 1,
+        // Chunk settings optimized for accuracy over speed
+        chunk_length_s: 30, // Increased for better context (more accurate)
+        stride_length_s: 5, // Increased overlap reduces boundary errors
+        // Beam search for better accuracy
+        num_beams: 5, // Increased from 3 - explores more hypotheses for better results
+        // Penalties to improve output quality
+        repetition_penalty: 1.8, // Increased to more strongly discourage repetition
+        no_repeat_ngram_size: 3, // Prevent 3-gram repetitions
+        // Temperature for more conservative predictions
+        temperature: 0.6, // Lower = more conservative, less hallucination (default is 1.0)
+        // Length penalty to prevent too-short outputs
+        length_penalty: 1.0,
       });
 
       console.log("Raw model output:", result);
@@ -320,6 +327,22 @@ class ClientPhonemeExtractor {
         ? result[0]?.text || ""
         : (result as any).text || "";
       console.log("Decoded text:", text);
+      
+      // Log [PAD] token occurrences for monitoring
+      if (text.includes("[PAD]")) {
+        const padCount = (text.match(/\[PAD\]/g) || []).length;
+        console.log(`📊 Found ${padCount} [PAD] separator tokens - will remove`);
+      }
+
+      // Detect repetitive gibberish output
+      if (this.isRepetitiveGibberish(text)) {
+        console.error(
+          "Detected repetitive model output (gibberish) - rejecting result"
+        );
+        throw new Error(
+          "Model produced repetitive output. This usually means poor audio quality. Please try recording again with clearer audio."
+        );
+      }
 
       const phonemes = this.parsePhonemeOutput(text);
 
@@ -383,11 +406,18 @@ class ClientPhonemeExtractor {
 
       const result = await this.model(audioData, {
         return_timestamps: false,
-        // Optimized chunk settings for faster processing
-        chunk_length_s: 20, // Reduced from 30s for faster processing
-        stride_length_s: 3, // Reduced from 5s for less overlap
-        // Force greedy decoding (faster than beam search)
-        num_beams: 1,
+        // Chunk settings optimized for accuracy over speed
+        chunk_length_s: 30, // Increased for better context (more accurate)
+        stride_length_s: 5, // Increased overlap reduces boundary errors
+        // Beam search for better accuracy
+        num_beams: 5, // Increased from 3 - explores more hypotheses for better results
+        // Penalties to improve output quality
+        repetition_penalty: 1.8, // Increased to more strongly discourage repetition
+        no_repeat_ngram_size: 3, // Prevent 3-gram repetitions
+        // Temperature for more conservative predictions
+        temperature: 0.6, // Lower = more conservative, less hallucination (default is 1.0)
+        // Length penalty to prevent too-short outputs
+        length_penalty: 1.0,
       });
 
       console.log("Raw model output:", result);
@@ -396,6 +426,16 @@ class ClientPhonemeExtractor {
         ? result[0]?.text || ""
         : (result as any).text || "";
       console.log("Decoded text:", text);
+
+      // Detect repetitive gibberish output
+      if (this.isRepetitiveGibberish(text)) {
+        console.error(
+          "Detected repetitive model output (gibberish) - rejecting result"
+        );
+        throw new Error(
+          "Model produced repetitive output. This usually means poor audio quality. Please try recording again with clearer audio."
+        );
+      }
 
       // Parse both phonemes and words from the same model output
       const phonemes = this.parsePhonemeOutput(text);
@@ -428,7 +468,16 @@ class ClientPhonemeExtractor {
 
     console.log("Parsing phoneme output:", text);
 
-    // Step 1: Remove all [PAD] tokens
+    // Step 1: Handle [PAD] tokens
+    // CTC decoding produces [PAD] which could mean:
+    // 1. Actual padding/separator tokens (should be removed)
+    // 2. Incorrectly decoded 'l' phoneme (token ID 18 shown as [PAD] due to decoder bug)
+    // 
+    // Strategy: If [PAD] appears BETWEEN phonemes frequently, it's likely separators (remove)
+    // If [PAD] appears sporadically in word positions where 'l' makes sense, replace with 'l'
+    //
+    // Current approach: Remove [PAD] as CTC padding tokens
+    // If words are missing 'l' sounds, this needs to be revisited
     let cleaned = text.replace(/\[PAD\]/g, "");
     console.log("After removing [PAD]:", cleaned);
 
@@ -468,7 +517,7 @@ class ClientPhonemeExtractor {
 
     console.log("Parsing words from output:", text);
 
-    // Step 1: Remove all [PAD] tokens
+    // Step 1: Remove [PAD] tokens - they are separators/padding, not phonemes
     let cleaned = text.replace(/\[PAD\]/g, "");
 
     // Step 2: Replace "|" with space (word delimiter)
@@ -528,15 +577,94 @@ class ClientPhonemeExtractor {
 
     if (ratio < 0.1 || ratio > 10.0) {
       console.warn(
-        `Unusual word/phoneme ratio: ${ratio.toFixed(2)} (may indicate transcription error)`
+        `Unusual word/phoneme ratio: ${ratio.toFixed(
+          2
+        )} (may indicate transcription error)`
       );
       return false;
     }
 
     console.log(
-      `Validation passed: ${words.length} words, ${phonemes.length} phoneme groups, ratio: ${ratio.toFixed(2)}`
+      `Validation passed: ${words.length} words, ${
+        phonemes.length
+      } phoneme groups, ratio: ${ratio.toFixed(2)}`
     );
     return true;
+  }
+
+  /**
+   * Detect if the model output is repetitive gibberish.
+   * This happens when the model gets stuck in a loop, often due to poor audio quality.
+   * @param text - Raw model output text
+   * @returns true if the output appears to be repetitive gibberish
+   */
+  private isRepetitiveGibberish(text: string): boolean {
+    // Remove [PAD] tokens (separators) for analysis
+    const cleaned = text.replace(/\[PAD\]/g, "").trim();
+    
+    // If output is very short, it's probably not gibberish
+    if (cleaned.length < 30) {
+      return false;
+    }
+
+    // Check if the ENTIRE output (>80%) is repetitive
+    // This is more lenient - allows some repetition at the start if it recovers later
+    
+    // Check 1: Look for repeated 2-character sequences that dominate the output
+    const twoCharPattern = /(.{2})\1{8,}/g; // Same 2 chars repeated 8+ times (increased threshold)
+    const matches = cleaned.match(twoCharPattern);
+    if (matches) {
+      const repetitiveLength = matches.reduce((sum, match) => sum + match.length, 0);
+      const ratio = repetitiveLength / cleaned.length;
+      
+      if (ratio > 0.6) { // Only reject if >60% is repetitive
+        console.warn(
+          `Detected repeated 2-character pattern dominating output (${(ratio * 100).toFixed(1)}%):`,
+          matches[0]
+        );
+        return true;
+      }
+    }
+
+    // Check 2: Look for repeated 3-5 character sequences that dominate
+    const shortPattern = /(.{3,5})\1{6,}/g; // Same 3-5 chars repeated 6+ times (increased threshold)
+    const shortMatches = cleaned.match(shortPattern);
+    if (shortMatches) {
+      const repetitiveLength = shortMatches.reduce((sum, match) => sum + match.length, 0);
+      const ratio = repetitiveLength / cleaned.length;
+      
+      if (ratio > 0.6) { // Only reject if >60% is repetitive
+        console.warn(
+          `Detected repeated short pattern dominating output (${(ratio * 100).toFixed(1)}%):`,
+          shortMatches[0]
+        );
+        return true;
+      }
+    }
+
+    // Check 3: Check if more than 70% of the output is the same single character (increased from 50%)
+    if (cleaned.length > 10) {
+      const phonemeCount = new Map<string, number>();
+      for (const char of cleaned) {
+        if (char !== ' ') { // Ignore spaces
+          phonemeCount.set(char, (phonemeCount.get(char) || 0) + 1);
+        }
+      }
+
+      const maxCount = Math.max(...phonemeCount.values());
+      const repetitionRatio = maxCount / cleaned.replace(/\s/g, '').length;
+
+      if (repetitionRatio > 0.7) { // Increased threshold from 0.5 to 0.7
+        console.warn(
+          `Detected excessive single character repetition: ${(repetitionRatio * 100).toFixed(
+            1
+          )}% of output is the same character`
+        );
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**

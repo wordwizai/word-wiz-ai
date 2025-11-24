@@ -9,6 +9,7 @@ import BasePractice from "@/components/practice/BasePractice";
 import ChoiceStoryBasePractice from "@/components/practice/ChoiceStoryBasePractice";
 import SentenceDisplay from "@/components/practice/SentenceDisplay";
 import FeedbackDisplay from "@/components/practice/FeedbackDisplay";
+import { LocalProcessingAlert } from "@/components/LocalProcessingAlert";
 import {
   getPracticeConfig,
   type PracticeTypeConfig,
@@ -28,8 +29,10 @@ const GenericPractice = ({
   const config = getPracticeConfig(activityType);
 
   const renderDefaultContent = (props: any) => (
-    <div className={config.styling?.containerStyle}>
-      <div className="w-full flex flex-row justify-between items-center">
+    <>
+      <LocalProcessingAlert />
+      <div className={config.styling?.containerStyle}>
+        <div className="w-full flex flex-row justify-between items-center">
         <Link to="/dashboard">
           <Button variant="ghost" className="text-muted-foreground group">
             <Home className="size-5" />
@@ -64,12 +67,15 @@ const GenericPractice = ({
       </div>
       <FeedbackDisplay feedback={props.feedback} />
       {customContent}
-    </div>
+      </div>
+    </>
   );
 
   const renderChoiceStoryContent = (props: any) => (
-    <div className={config.styling?.containerStyle}>
-      <div className="w-full flex justify-between items-center">
+    <>
+      <LocalProcessingAlert />
+      <div className={config.styling?.containerStyle}>
+        <div className="w-full flex justify-between items-center">
         <Link to="/dashboard">
           <Button variant="ghost" className="text-muted-foreground group">
             <Home className="size-5" />
@@ -136,7 +142,8 @@ const GenericPractice = ({
       </div>
       <FeedbackAnimatedText feedback={props.feedback} />
       {customContent}
-    </div>
+      </div>
+    </>
   );
 
   if (config.basePracticeComponent === "ChoiceStoryBasePractice") {

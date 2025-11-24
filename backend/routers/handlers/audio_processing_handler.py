@@ -88,10 +88,10 @@ async def load_and_preprocess_audio_file(audio_file: UploadFile, session_id: str
         print(f"⚠️  Long audio detected ({audio_duration:.1f}s) - will use chunking strategy for better accuracy.")
     
     # Validate audio is not too short
-    if audio_duration < 5.0:
+    if audio_duration < 0.5:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Audio too short ({audio_duration:.1f}s). Please record at least 5 seconds of speech."
+            detail=f"Audio too short ({audio_duration:.1f}s). Please record at least 0.5 seconds of speech."
         )
     
     # CACHE POINT 2: Save audio after format conversion but before preprocessing

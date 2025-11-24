@@ -307,13 +307,18 @@ class ClientPhonemeExtractor {
 
       const result = await this.model(audioData, {
         return_timestamps: false,
-        // Optimized chunk settings for faster processing
-        chunk_length_s: 20, // Reduced from 30s for faster processing
-        stride_length_s: 3, // Reduced from 5s for less overlap
-        // Use beam search with small beam size for better stability
-        num_beams: 3, // Increased from 1 to prevent getting stuck in repetitive loops
-        // Add repetition penalty to discourage repeated tokens
-        repetition_penalty: 1.5, // Penalize repeated sequences
+        // Chunk settings optimized for accuracy over speed
+        chunk_length_s: 30, // Increased for better context (more accurate)
+        stride_length_s: 5, // Increased overlap reduces boundary errors
+        // Beam search for better accuracy
+        num_beams: 5, // Increased from 3 - explores more hypotheses for better results
+        // Penalties to improve output quality
+        repetition_penalty: 1.8, // Increased to more strongly discourage repetition
+        no_repeat_ngram_size: 3, // Prevent 3-gram repetitions
+        // Temperature for more conservative predictions
+        temperature: 0.6, // Lower = more conservative, less hallucination (default is 1.0)
+        // Length penalty to prevent too-short outputs
+        length_penalty: 1.0,
       });
 
       console.log("Raw model output:", result);
@@ -322,6 +327,12 @@ class ClientPhonemeExtractor {
         ? result[0]?.text || ""
         : (result as any).text || "";
       console.log("Decoded text:", text);
+      
+      // Log [PAD] token occurrences for monitoring
+      if (text.includes("[PAD]")) {
+        const padCount = (text.match(/\[PAD\]/g) || []).length;
+        console.log(`📊 Found ${padCount} [PAD] separator tokens - will remove`);
+      }
 
       // Detect repetitive gibberish output
       if (this.isRepetitiveGibberish(text)) {
@@ -395,13 +406,18 @@ class ClientPhonemeExtractor {
 
       const result = await this.model(audioData, {
         return_timestamps: false,
-        // Optimized chunk settings for faster processing
-        chunk_length_s: 20, // Reduced from 30s for faster processing
-        stride_length_s: 3, // Reduced from 5s for less overlap
-        // Use beam search with small beam size for better stability
-        num_beams: 3, // Increased from 1 to prevent getting stuck in repetitive loops
-        // Add repetition penalty to discourage repeated tokens
-        repetition_penalty: 1.5, // Penalize repeated sequences
+        // Chunk settings optimized for accuracy over speed
+        chunk_length_s: 30, // Increased for better context (more accurate)
+        stride_length_s: 5, // Increased overlap reduces boundary errors
+        // Beam search for better accuracy
+        num_beams: 5, // Increased from 3 - explores more hypotheses for better results
+        // Penalties to improve output quality
+        repetition_penalty: 1.8, // Increased to more strongly discourage repetition
+        no_repeat_ngram_size: 3, // Prevent 3-gram repetitions
+        // Temperature for more conservative predictions
+        temperature: 0.6, // Lower = more conservative, less hallucination (default is 1.0)
+        // Length penalty to prevent too-short outputs
+        length_penalty: 1.0,
       });
 
       console.log("Raw model output:", result);
@@ -452,7 +468,16 @@ class ClientPhonemeExtractor {
 
     console.log("Parsing phoneme output:", text);
 
-    // Step 1: Remove all [PAD] tokens
+    // Step 1: Handle [PAD] tokens
+    // CTC decoding produces [PAD] which could mean:
+    // 1. Actual padding/separator tokens (should be removed)
+    // 2. Incorrectly decoded 'l' phoneme (token ID 18 shown as [PAD] due to decoder bug)
+    // 
+    // Strategy: If [PAD] appears BETWEEN phonemes frequently, it's likely separators (remove)
+    // If [PAD] appears sporadically in word positions where 'l' makes sense, replace with 'l'
+    //
+    // Current approach: Remove [PAD] as CTC padding tokens
+    // If words are missing 'l' sounds, this needs to be revisited
     let cleaned = text.replace(/\[PAD\]/g, "");
     console.log("After removing [PAD]:", cleaned);
 
@@ -492,7 +517,7 @@ class ClientPhonemeExtractor {
 
     console.log("Parsing words from output:", text);
 
-    // Step 1: Remove all [PAD] tokens
+    // Step 1: Remove [PAD] tokens - they are separators/padding, not phonemes
     let cleaned = text.replace(/\[PAD\]/g, "");
 
     // Step 2: Replace "|" with space (word delimiter)
@@ -574,42 +599,64 @@ class ClientPhonemeExtractor {
    * @returns true if the output appears to be repetitive gibberish
    */
   private isRepetitiveGibberish(text: string): boolean {
-    // Remove [PAD] tokens for analysis
-    const cleaned = text.replace(/\[PAD\]/g, "");
-
-    // Check 1: Look for repeated 2-character sequences (like "ʧə" repeated)
-    const twoCharPattern = /(.{2})\1{5,}/; // Same 2 chars repeated 5+ times
-    if (twoCharPattern.test(cleaned)) {
-      console.warn(
-        "Detected repeated 2-character pattern:",
-        cleaned.match(twoCharPattern)?.[0]
-      );
-      return true;
+    // Remove [PAD] tokens (separators) for analysis
+    const cleaned = text.replace(/\[PAD\]/g, "").trim();
+    
+    // If output is very short, it's probably not gibberish
+    if (cleaned.length < 30) {
+      return false;
     }
 
-    // Check 2: Look for repeated 3-5 character sequences
-    const shortPattern = /(.{3,5})\1{4,}/; // Same 3-5 chars repeated 4+ times
-    if (shortPattern.test(cleaned)) {
-      console.warn(
-        "Detected repeated short pattern:",
-        cleaned.match(shortPattern)?.[0]
-      );
-      return true;
+    // Check if the ENTIRE output (>80%) is repetitive
+    // This is more lenient - allows some repetition at the start if it recovers later
+    
+    // Check 1: Look for repeated 2-character sequences that dominate the output
+    const twoCharPattern = /(.{2})\1{8,}/g; // Same 2 chars repeated 8+ times (increased threshold)
+    const matches = cleaned.match(twoCharPattern);
+    if (matches) {
+      const repetitiveLength = matches.reduce((sum, match) => sum + match.length, 0);
+      const ratio = repetitiveLength / cleaned.length;
+      
+      if (ratio > 0.6) { // Only reject if >60% is repetitive
+        console.warn(
+          `Detected repeated 2-character pattern dominating output (${(ratio * 100).toFixed(1)}%):`,
+          matches[0]
+        );
+        return true;
+      }
     }
 
-    // Check 3: Check if more than 50% of the output is the same phoneme
+    // Check 2: Look for repeated 3-5 character sequences that dominate
+    const shortPattern = /(.{3,5})\1{6,}/g; // Same 3-5 chars repeated 6+ times (increased threshold)
+    const shortMatches = cleaned.match(shortPattern);
+    if (shortMatches) {
+      const repetitiveLength = shortMatches.reduce((sum, match) => sum + match.length, 0);
+      const ratio = repetitiveLength / cleaned.length;
+      
+      if (ratio > 0.6) { // Only reject if >60% is repetitive
+        console.warn(
+          `Detected repeated short pattern dominating output (${(ratio * 100).toFixed(1)}%):`,
+          shortMatches[0]
+        );
+        return true;
+      }
+    }
+
+    // Check 3: Check if more than 70% of the output is the same single character (increased from 50%)
     if (cleaned.length > 10) {
       const phonemeCount = new Map<string, number>();
       for (const char of cleaned) {
-        phonemeCount.set(char, (phonemeCount.get(char) || 0) + 1);
+        if (char !== ' ') { // Ignore spaces
+          phonemeCount.set(char, (phonemeCount.get(char) || 0) + 1);
+        }
       }
 
       const maxCount = Math.max(...phonemeCount.values());
-      const repetitionRatio = maxCount / cleaned.length;
+      const repetitionRatio = maxCount / cleaned.replace(/\s/g, '').length;
 
-      if (repetitionRatio > 0.5) {
+      if (repetitionRatio > 0.7) { // Increased threshold from 0.5 to 0.7
         console.warn(
-          `Detected excessive repetition: ${(repetitionRatio * 100).toFixed(
+          `Detected excessive single character repetition: ${(repetitionRatio * 100).toFixed(
             1
           )}% of output is the same character`
         );

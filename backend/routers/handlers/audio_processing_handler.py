@@ -204,11 +204,25 @@ async def analyze_audio_file_event_stream(
         
         # Check if we received empty audio (client sent it to save bandwidth)
         if len(audio_array) == 0:
-            # Empty audio is only valid if we have client phonemes and words
-            if client_phonemes is None or client_words is None:
+            # Empty audio is only valid if we have BOTH client phonemes and words
+            # If we have neither, it's an error
+            # If we have only words, we need audio for server-side phoneme extraction
+            if client_phonemes is None and client_words is None:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Empty audio received but client extraction data is incomplete. Please try again."
+                    detail="Empty audio received with no client extraction data. Please try again."
+                )
+            elif client_phonemes is None:
+                # Have words but not phonemes - need audio for phoneme extraction
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Empty audio received but phoneme extraction is needed. Audio file may be corrupted. Please try again."
+                )
+            elif client_words is None:
+                # Have phonemes but not words - need audio for word extraction
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Empty audio received but word extraction is needed. Audio file may be corrupted. Please try again."
                 )
             print("📭 Empty audio received - using full client extraction")
         else:

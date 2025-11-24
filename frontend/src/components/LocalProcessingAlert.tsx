@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Zap } from "lucide-react";
+import { X, Zap, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { checkDeviceCapabilities } from "@/utils/deviceCapabilities";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -72,7 +72,7 @@ export const LocalProcessingAlert = () => {
               </button>
             </div>
             <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
-              Your device has good specs! Enable local processing for much quicker results with better computers.
+              Your device has good specs! Enable local processing for much quicker results.
             </p>
             <Button
               onClick={handleEnableLocalProcessing}
@@ -82,7 +82,7 @@ export const LocalProcessingAlert = () => {
             >
               {isEnabling ? (
                 <>
-                  <span className="inline-block animate-spin mr-2">⚙️</span>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Enabling...
                 </>
               ) : (

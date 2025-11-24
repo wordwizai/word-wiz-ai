@@ -2,6 +2,7 @@ import asyncio
 import io
 import json
 import math
+import time
 from urllib.parse import quote
 
 import numpy as np
@@ -54,7 +55,9 @@ async def load_and_preprocess_audio_file(audio_file: UploadFile, session_id: str
         session_id = audio_cache.generate_session_id()
 
     # Read audio file into numpy array
+    read_start = time.time()
     audio_bytes = await audio_file.read()
+    print(f"⏱️  File read took {time.time() - read_start:.3f}s")
     
     # Check if this is an empty file (sent when client did full extraction)
     if len(audio_bytes) == 0:
@@ -63,6 +66,7 @@ async def load_and_preprocess_audio_file(audio_file: UploadFile, session_id: str
         return np.array([]), session_id
     
     # CACHE POINT 1: Save original uploaded audio
+    cache_start = time.time()
     audio_cache.save_audio_bytes(
         audio_bytes, 
         "original", 
@@ -74,10 +78,13 @@ async def load_and_preprocess_audio_file(audio_file: UploadFile, session_id: str
             "size_bytes": len(audio_bytes)
         }
     )
+    print(f"⏱️  Cache save (original) took {time.time() - cache_start:.3f}s")
     
+    decode_start = time.time()
     audio_array, sample_rate = sf.read(io.BytesIO(audio_bytes), dtype="float32")
     if len(audio_array.shape) == 2:
         audio_array = np.mean(audio_array, axis=1)
+    print(f"⏱️  Audio decode took {time.time() - decode_start:.3f}s")
     
     # Calculate audio duration
     audio_duration = len(audio_array) / sample_rate
@@ -95,6 +102,7 @@ async def load_and_preprocess_audio_file(audio_file: UploadFile, session_id: str
         )
     
     # CACHE POINT 2: Save audio after format conversion but before preprocessing
+    cache_start = time.time()
     audio_cache.save_audio(
         audio_array,
         "analysis",
@@ -108,11 +116,14 @@ async def load_and_preprocess_audio_file(audio_file: UploadFile, session_id: str
             "duration_seconds": audio_duration
         }
     )
+    print(f"⏱️  Cache save (pre-preprocessing) took {time.time() - cache_start:.3f}s")
     
     # Apply preprocessing with audio length for adaptive noise reduction
+    print("🔊 Starting audio preprocessing...")
     audio_array = preprocess_audio(audio_array, sr=sample_rate, audio_length_seconds=audio_duration)
     
     # CACHE POINT 3: Save preprocessed audio
+    cache_start = time.time()
     audio_cache.save_audio(
         audio_array,
         "preprocessed",
@@ -126,6 +137,7 @@ async def load_and_preprocess_audio_file(audio_file: UploadFile, session_id: str
             "sample_rate": sample_rate
         }
     )
+    print(f"⏱️  Cache save (preprocessed) took {time.time() - cache_start:.3f}s")
     
     return audio_array, session_id
 
@@ -147,7 +159,7 @@ def sanitize(obj):
 async def analyze_audio_file_event_stream(
     phoneme_assistant: PhonemeAssistant,
     activity_object: BaseMode,
-    audio_array: np.ndarray,
+    audio_file: UploadFile,  # Changed from audio_array to audio_file
     attempted_sentence: str,
     db: Session,
     current_user: User,
@@ -164,6 +176,21 @@ async def analyze_audio_file_event_stream(
         }
         yield f"data: {json.dumps(processing_started_payload)}\n\n"
         await asyncio.sleep(0.01)  # Ensure the event is flushed
+        
+        # NOW do the preprocessing after sending the first event
+        print("🔄 Starting audio preprocessing...")
+        try:
+            audio_array, cache_session_id = await load_and_preprocess_audio_file(
+                audio_file, str(session.id)
+            )
+            print("✅ Audio preprocessing completed")
+        except Exception as e:
+            error_payload = {
+                "type": "error",
+                "data": {"message": f"Failed to process audio file: {str(e)}"},
+            }
+            yield f"data: {json.dumps(error_payload)}\n\n"
+            return
         
         # STEP 1: ANALYZE AUDIO
         

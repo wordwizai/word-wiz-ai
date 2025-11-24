@@ -1,4 +1,5 @@
 # %%
+import time
 import IPython.display as ipd
 import librosa
 import librosa.display
@@ -22,6 +23,8 @@ def preprocess_audio(audio, sr=16000, audio_length_seconds=None):
         For longer audio (>8 seconds), uses lighter noise reduction to avoid distortion.
         This improves model accuracy on longer recordings.
     """
+    preprocess_start = time.time()
+    
     if audio_length_seconds is None:
         audio_length_seconds = len(audio) / sr
     
@@ -29,17 +32,25 @@ def preprocess_audio(audio, sr=16000, audio_length_seconds=None):
     if audio_length_seconds > 8:
         print(f"⚠️  Long audio detected ({audio_length_seconds:.1f}s) - using lighter noise reduction")
         # Less aggressive noise reduction for long audio
+        noise_start = time.time()
         audio = nr.reduce_noise(
             y=audio,
             sr=sr,
             stationary=True,
             prop_decrease=0.5  # Reduce by 50% instead of 100%
         )
+        print(f"⏱️  Noise reduction took {time.time() - noise_start:.3f}s")
     else:
         # Standard noise reduction for shorter audio
+        noise_start = time.time()
         audio = nr.reduce_noise(y=audio, sr=sr, stationary=True, prop_decrease=1.0)
+        print(f"⏱️  Noise reduction took {time.time() - noise_start:.3f}s")
     
+    norm_start = time.time()
     audio = librosa.util.normalize(audio)
+    print(f"⏱️  Normalization took {time.time() - norm_start:.3f}s")
+    
+    print(f"⏱️  Total preprocessing took {time.time() - preprocess_start:.3f}s")
     return audio
 
 

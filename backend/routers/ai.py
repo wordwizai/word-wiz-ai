@@ -94,22 +94,12 @@ async def process_audio_analysis(
     # Validate session and get activity object
     activity_object = get_activity_object(session)
 
-    # Process the audio file
-    try:
-        audio_array, cache_session_id = await load_and_preprocess_audio_file(
-            audio_file, str(session_id)
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to process audio file: {str(e)}",
-        )
-
+    # Return StreamingResponse immediately - preprocessing will happen inside the stream
     return StreamingResponse(
         analyze_audio_file_event_stream(
             phoneme_assistant=phoneme_assistant,
             activity_object=activity_object,
-            audio_array=audio_array,
+            audio_file=audio_file,  # Pass the file instead of processed array
             attempted_sentence=attempted_sentence,
             current_user=current_user,
             session=session,

@@ -16,5 +16,6 @@ class UserSettings(Base):
     notifications_enabled = Column(Boolean, default=True)
     email_notifications = Column(Boolean, default=True)
     use_client_phoneme_extraction = Column(Boolean, default=False)
+    use_websocket = Column(Boolean, default=True)  
 
     user = relationship("User", back_populates="settings")

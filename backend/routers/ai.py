@@ -232,10 +232,7 @@ async def analyze_audio_with_phonemes(
 
 
 @router.websocket("/ws/audio-analysis")
-async def websocket_audio_analysis(
-    websocket: WebSocket,
-    token: Optional[str] = None,
-):
+async def websocket_audio_analysis(websocket: WebSocket):
     """
     WebSocket endpoint for audio analysis with persistent connection.
     
@@ -262,17 +259,20 @@ async def websocket_audio_analysis(
     }
     """
     
-    # Authenticate user from token
-    if not token:
-        await websocket.close(code=1008, reason="Missing authentication token")
-        return
+    # Extract token from query parameters
+    query_params = dict(websocket.query_params)
+    token = query_params.get("token")
     
-    # Get database session
+    # Validate authentication BEFORE accepting connection
+    current_user = None
     db = next(get_db())
+    
+    if not token:
+        print("❌ No token provided")
+        return  # Just return, don't try to close
     
     try:
         # Validate token and get user
-        from auth.auth_handler import get_current_active_user
         from jose import jwt, JWTError
         import os
         from dotenv import load_dotenv
@@ -280,29 +280,35 @@ async def websocket_audio_analysis(
         load_dotenv()
         secret_key = os.getenv("SECRET_KEY")
         
-        try:
-            payload = jwt.decode(token, secret_key, algorithms=["HS256"])
-            username: str = payload.get("sub")
-            if username is None:
-                await websocket.close(code=1008, reason="Invalid authentication token")
-                return
+        payload = jwt.decode(token, secret_key, algorithms=["HS256"])
+        user_identifier: str = payload.get("sub")
+        
+        if user_identifier is None:
+            print("❌ No user identifier in token")
+            return  # Just return, don't try to close
+        
+        # Get user from database (try email first, then username)
+        current_user = db.query(User).filter(
+            (User.email == user_identifier) | (User.username == user_identifier)
+        ).first()
+        
+        if current_user is None:
+            print(f"❌ User not found: {user_identifier}")
+            return  # Just return, don't try to close
             
-            # Get user from database
-            current_user = db.query(User).filter(User.username == username).first()
-            if current_user is None:
-                await websocket.close(code=1008, reason="User not found")
-                return
-                
-        except JWTError:
-            await websocket.close(code=1008, reason="Invalid authentication token")
-            return
-    
+    except JWTError as e:
+        print(f"❌ JWT Error: {e}")
+        return  # Just return, don't try to close
     except Exception as e:
-        await websocket.close(code=1008, reason=f"Authentication failed: {str(e)}")
-        return
+        print(f"❌ Authentication exception: {e}")
+        return  # Just return, don't try to close
     
-    # Connect the WebSocket
-    await manager.connect(websocket, current_user.id)
+    # Accept the WebSocket connection (only after successful authentication)
+    await websocket.accept()
+    print(f"✅ WebSocket accepted for user {current_user.username} (ID: {current_user.id})")
+    
+    # Add to connection manager
+    manager.active_connections[current_user.id] = websocket
     
     try:
         while True:

@@ -39,6 +39,7 @@ type Settings = {
   notifications_enabled?: boolean | null;
   email_notifications?: boolean | null;
   use_client_phoneme_extraction?: boolean | null;
+  use_websocket?: boolean | null;
 };
 
 const initialSettings: Settings = {
@@ -49,6 +50,7 @@ const initialSettings: Settings = {
   notifications_enabled: true,
   email_notifications: true,
   use_client_phoneme_extraction: true,
+  use_websocket: false,
 };
 
 const Settings = () => {
@@ -304,6 +306,29 @@ const Settings = () => {
                   checked={!!tempSettings.use_client_phoneme_extraction}
                   onCheckedChange={(checked) =>
                     handleChange("use_client_phoneme_extraction", checked)
+                  }
+                />
+              </div>
+
+              <Separator />
+
+              <div className="flex items-center justify-between">
+                <div className="flex-1 pr-4">
+                  <Label htmlFor="websocketConnection">
+                    WebSocket Connection (Experimental)
+                  </Label>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Use persistent WebSocket connection instead of creating new
+                    connections for each request. Eliminates 5-second connection
+                    overhead on subsequent recordings. Recommended for faster
+                    experience.
+                  </p>
+                </div>
+                <Switch
+                  id="websocketConnection"
+                  checked={!!tempSettings.use_websocket}
+                  onCheckedChange={(checked) =>
+                    handleChange("use_websocket", checked)
                   }
                 />
               </div>

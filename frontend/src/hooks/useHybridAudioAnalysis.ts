@@ -1,14 +1,17 @@
 import { useSettings } from "@/contexts/SettingsContext";
 import { usePhonemeModel } from "./usePhonemeModel";
 import { useWordModel } from "./useWordModel";
-import { useAudioAnalysisStream } from "./useAudioAnalysisStream";
-import type { UseAudioAnalysisStreamOptions } from "./useAudioAnalysisStream";
+import { useAudioTransport } from "./useAudioTransport";
+import type { UseAudioTransportOptions } from "./useAudioTransport";
 import { performanceTracker } from "@/services/performanceTracker";
 import phonemeExtractor from "@/services/phonemeExtractor";
 import wordExtractor from "@/services/wordExtractor";
 import type { ExtractionType } from "@/services/performanceTracker";
 
-interface UseHybridAudioAnalysisOptions extends UseAudioAnalysisStreamOptions {
+interface UseHybridAudioAnalysisOptions
+  extends Omit<UseAudioTransportOptions, "useWebSocket" | "sessionId"> {
+  /** Session ID for this audio analysis session */
+  sessionId: number;
   /** Maximum number of retries for client extraction (default: 2) */
   maxRetries?: number;
   /** Enable exponential backoff for retries (default: true) */
@@ -66,10 +69,19 @@ async function retryWithBackoff<T>(
  * 5. Automatic fallback to server if client extraction fails
  */
 export const useHybridAudioAnalysis = (
-  options?: UseHybridAudioAnalysisOptions
+  options: UseHybridAudioAnalysisOptions
 ) => {
   const { settings } = useSettings();
-  const audioAnalysisStream = useAudioAnalysisStream(options);
+
+  // Determine whether to use WebSocket based on settings (default: false for gradual rollout)
+  const useWebSocket = settings?.use_websocket ?? false;
+
+  // Initialize transport with WebSocket or SSE based on settings
+  const audioTransport = useAudioTransport({
+    ...options,
+    useWebSocket,
+  });
+
   const phonemeModel = usePhonemeModel();
   const wordModel = useWordModel();
 
@@ -77,10 +89,9 @@ export const useHybridAudioAnalysis = (
    * Initialize both models in parallel if client extraction is enabled
    */
   const initializeModels = async () => {
+    // Always enable client extraction if supported
     const shouldUseClientExtraction =
-      settings?.use_client_phoneme_extraction &&
-      phonemeExtractor.isModelLoaded() !== null &&
-      wordExtractor.isModelLoaded() !== null;
+      settings?.use_client_phoneme_extraction ?? false;
 
     if (!shouldUseClientExtraction) {
       console.log(
@@ -148,7 +159,7 @@ export const useHybridAudioAnalysis = (
     let clientPhonemes: string[][] | null = null;
     let clientWords: string[] | null = null;
 
-    // Check if both models are loaded
+    // Check if both models are loaded (always enabled if models are ready)
     const shouldUseClientExtraction =
       settings?.use_client_phoneme_extraction &&
       phonemeExtractor.isModelLoaded() &&
@@ -270,7 +281,7 @@ export const useHybridAudioAnalysis = (
     }
 
     // Send to backend (with or without client-extracted data)
-    audioAnalysisStream.start(
+    await audioTransport.sendAudio(
       audioToSend,
       sentence,
       clientPhonemes,
@@ -281,7 +292,11 @@ export const useHybridAudioAnalysis = (
   return {
     // Audio processing
     processAudio,
-    stop: audioAnalysisStream.stop,
+    stop: audioTransport.disconnect,
+
+    // Transport state
+    isConnected: audioTransport.isConnected,
+    isProcessing: audioTransport.isProcessing,
 
     // Model management
     initializeModels,

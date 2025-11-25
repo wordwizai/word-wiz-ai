@@ -12,6 +12,7 @@ class UserSettingsUpdate(BaseModel):
     notifications_enabled: Optional[bool] = None
     email_notifications: Optional[bool] = None
     use_client_phoneme_extraction: Optional[bool] = None
+    use_websocket: Optional[bool] = None
 
 
 class UserSettingsResponse(BaseModel):
@@ -22,3 +23,4 @@ class UserSettingsResponse(BaseModel):
     notifications_enabled: bool
     email_notifications: bool
     use_client_phoneme_extraction: bool
+    use_websocket: bool

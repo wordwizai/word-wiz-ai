@@ -137,7 +137,7 @@ def validate_gpt_feedback(
             is_valid = False
     
     # Validation 2: Check that feedback mentions specific words from pronunciation_data
-    if "feedback" in feedback_dict and feedback_dict["feedback"]:
+    if "feedback" in feedback_dict and feedback_dict["feedback"] and isinstance(feedback_dict["feedback"], str):
         feedback_text = feedback_dict["feedback"].lower()
         mentioned_any_word = False
         
@@ -154,7 +154,7 @@ def validate_gpt_feedback(
             )
     
     # Validation 3: Log for manual review if feedback seems generic
-    if "feedback" in feedback_dict and feedback_dict["feedback"]:
+    if "feedback" in feedback_dict and feedback_dict["feedback"] and isinstance(feedback_dict["feedback"], str):
         feedback_text = feedback_dict["feedback"].lower()
         generic_phrases = [
             "you had trouble",

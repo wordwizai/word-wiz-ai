@@ -14,6 +14,7 @@ type Settings = {
   notifications_enabled?: boolean | null;
   email_notifications?: boolean | null;
   use_client_phoneme_extraction?: boolean | null;
+  use_websocket?: boolean | null;
 };
 
 type SettingsContextType = {

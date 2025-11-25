@@ -19,6 +19,7 @@ import asyncio
 import json
 import numpy as np
 import base64
+import time
 
 router = APIRouter()
 phoneme_assistant = PhonemeAssistant()
@@ -344,9 +345,19 @@ async def websocket_audio_analysis(websocket: WebSocket):
                 })
                 continue
             
-            # Decode audio
+            # Send immediate acknowledgment BEFORE decoding audio
+            print("📤 Sending immediate processing_started acknowledgment...")
+            await websocket.send_json({
+                "type": "processing_started",
+                "data": {"message": "Audio received, processing..."}
+            })
+            await asyncio.sleep(0)  # Ensure the message is sent
+            
+            # Decode audio (this can take a few seconds for large files)
             try:
+                decode_start = time.time()
                 audio_bytes = base64.b64decode(audio_base64)
+                print(f"⏱️  Base64 decode took {time.time() - decode_start:.3f}s")
             except Exception as e:
                 await websocket.send_json({
                     "type": "error",

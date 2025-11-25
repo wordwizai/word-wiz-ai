@@ -7,13 +7,18 @@ import { useSettings } from "@/contexts/SettingsContext";
 const LOCAL_PROCESSING_ALERT_DISMISSED_KEY = "local_processing_alert_dismissed";
 
 export const LocalProcessingAlert = () => {
+  // Disabled for now
+  return null;
+
   const [isVisible, setIsVisible] = useState(false);
   const [isEnabling, setIsEnabling] = useState(false);
   const { settings, updateSettings } = useSettings();
 
   useEffect(() => {
     // Check if alert was already dismissed
-    const dismissed = localStorage.getItem(LOCAL_PROCESSING_ALERT_DISMISSED_KEY);
+    const dismissed = localStorage.getItem(
+      LOCAL_PROCESSING_ALERT_DISMISSED_KEY
+    );
     if (dismissed === "true") {
       return;
     }
@@ -72,7 +77,8 @@ export const LocalProcessingAlert = () => {
               </button>
             </div>
             <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
-              Your device has good specs! Enable local processing for much quicker results.
+              Your device has good specs! Enable local processing for much
+              quicker results.
             </p>
             <Button
               onClick={handleEnableLocalProcessing}

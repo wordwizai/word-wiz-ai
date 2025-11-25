@@ -15,6 +15,7 @@ from routers.handlers.audio_processing_handler import (
 )
 from sqlalchemy.orm import Session
 from typing import Optional
+import asyncio
 import json
 import numpy as np
 import base64
@@ -383,6 +384,8 @@ async def websocket_audio_analysis(websocket: WebSocket):
                     if event.startswith("data: "):
                         event_data = json.loads(event[6:])
                         await websocket.send_json(event_data)
+                        # Yield control to ensure message is sent immediately
+                        await asyncio.sleep(0)
             
             except Exception as e:
                 await websocket.send_json({

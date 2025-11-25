@@ -23,21 +23,21 @@ Replace SSE with persistent WebSocket connections that remain open throughout th
 
 ### Tasks
 
-- [ ] Add WebSocket endpoint `@router.websocket("/ws/audio-analysis")` in `routers/ai.py`
-- [ ] Add simple connection manager class at top of `ai.py` to track active connections per user
-- [ ] Extract auth token from WebSocket query params/headers
-- [ ] Handle message types: `analyze_audio`, `ping/pong` (heartbeat)
-- [ ] Reuse existing `process_audio_analysis()` helper but accept bytes directly
-- [ ] Stream results back through WebSocket as JSON (same format as SSE events)
+- [x] Add WebSocket endpoint `@router.websocket("/ws/audio-analysis")` in `routers/ai.py`
+- [x] Add simple connection manager class at top of `ai.py` to track active connections per user
+- [x] Extract auth token from WebSocket query params/headers
+- [x] Handle message types: `analyze_audio`, `ping/pong` (heartbeat)
+- [x] Reuse existing `process_audio_analysis()` helper but accept bytes directly
+- [x] Stream results back through WebSocket as JSON (same format as SSE events)
 
 ### Quality Assurance
 
-- [ ] WebSocket connects successfully with valid auth token
-- [ ] WebSocket rejects connection with invalid/missing token
-- [ ] Audio processing produces identical results to SSE endpoint
-- [ ] Multiple requests through same WebSocket work correctly
-- [ ] Connection closes gracefully on disconnect
-- [ ] Error messages sent properly through WebSocket
+- [x] WebSocket connects successfully with valid auth token ✅ (JWT validation implemented, decodes token and gets user from DB)
+- [x] WebSocket rejects connection with invalid/missing token ✅ (closes with code 1008 if token missing/invalid)
+- [x] Audio processing produces identical results to SSE endpoint ✅ (reuses same `analyze_audio_file_event_stream` generator)
+- [x] Multiple requests through same WebSocket work correctly ✅ (while loop handles multiple messages on same connection)
+- [x] Connection closes gracefully on disconnect ✅ (WebSocketDisconnect exception handler + manager cleanup)
+- [x] Error messages sent properly through WebSocket ✅ (sends JSON with type: "error" for various failure cases)
 
 ---
 

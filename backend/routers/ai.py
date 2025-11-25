@@ -5,7 +5,7 @@ from core.modes.choice_story import ChoiceStoryPractice
 from core.phoneme_assistant import PhonemeAssistant
 from crud.session import get_session
 from database import get_db
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
 from models import User
 from models.session import Session as UserSession
@@ -17,9 +17,35 @@ from sqlalchemy.orm import Session
 from typing import Optional
 import json
 import numpy as np
+import base64
 
 router = APIRouter()
 phoneme_assistant = PhonemeAssistant()
+
+
+# WebSocket Connection Manager
+class ConnectionManager:
+    """Manages active WebSocket connections per user."""
+    
+    def __init__(self):
+        self.active_connections: dict[int, WebSocket] = {}  # user_id -> websocket
+    
+    async def connect(self, websocket: WebSocket, user_id: int):
+        await websocket.accept()
+        self.active_connections[user_id] = websocket
+        print(f"🔌 WebSocket connected for user {user_id}")
+    
+    def disconnect(self, user_id: int):
+        if user_id in self.active_connections:
+            del self.active_connections[user_id]
+            print(f"🔌 WebSocket disconnected for user {user_id}")
+    
+    async def send_json(self, user_id: int, data: dict):
+        if user_id in self.active_connections:
+            await self.active_connections[user_id].send_json(data)
+
+
+manager = ConnectionManager()
 
 
 def validate_client_phonemes(client_phonemes: str) -> Optional[list[list[str]]]:
@@ -203,4 +229,167 @@ async def analyze_audio_with_phonemes(
         client_phonemes=phonemes_data,
         client_words=words_data,
     )
+
+
+@router.websocket("/ws/audio-analysis")
+async def websocket_audio_analysis(
+    websocket: WebSocket,
+    token: Optional[str] = None,
+):
+    """
+    WebSocket endpoint for audio analysis with persistent connection.
+    
+    Message format (client -> server):
+    {
+        "type": "analyze_audio",
+        "audio_base64": "<base64 encoded audio>",
+        "attempted_sentence": "the sentence",
+        "session_id": 123,
+        "filename": "recording.wav",
+        "content_type": "audio/wav",
+        "client_phonemes": [[...]], // optional
+        "client_words": [...] // optional
+    }
+    
+    {
+        "type": "ping"
+    }
+    
+    Response format (server -> client):
+    {
+        "type": "processing_started" | "analysis" | "gpt_response" | "audio_feedback_file" | "error",
+        "data": {...}
+    }
+    """
+    
+    # Authenticate user from token
+    if not token:
+        await websocket.close(code=1008, reason="Missing authentication token")
+        return
+    
+    # Get database session
+    db = next(get_db())
+    
+    try:
+        # Validate token and get user
+        from auth.auth_handler import get_current_active_user
+        from jose import jwt, JWTError
+        import os
+        from dotenv import load_dotenv
+        
+        load_dotenv()
+        secret_key = os.getenv("SECRET_KEY")
+        
+        try:
+            payload = jwt.decode(token, secret_key, algorithms=["HS256"])
+            username: str = payload.get("sub")
+            if username is None:
+                await websocket.close(code=1008, reason="Invalid authentication token")
+                return
+            
+            # Get user from database
+            current_user = db.query(User).filter(User.username == username).first()
+            if current_user is None:
+                await websocket.close(code=1008, reason="User not found")
+                return
+                
+        except JWTError:
+            await websocket.close(code=1008, reason="Invalid authentication token")
+            return
+    
+    except Exception as e:
+        await websocket.close(code=1008, reason=f"Authentication failed: {str(e)}")
+        return
+    
+    # Connect the WebSocket
+    await manager.connect(websocket, current_user.id)
+    
+    try:
+        while True:
+            # Wait for messages from client
+            data = await websocket.receive_json()
+            
+            if data.get("type") == "ping":
+                # Heartbeat
+                await websocket.send_json({"type": "pong"})
+                continue
+            
+            if data.get("type") != "analyze_audio":
+                await websocket.send_json({
+                    "type": "error",
+                    "data": {"message": f"Unknown message type: {data.get('type')}"}
+                })
+                continue
+            
+            # Extract request data
+            audio_base64 = data.get("audio_base64")
+            attempted_sentence = data.get("attempted_sentence")
+            session_id = data.get("session_id")
+            filename = data.get("filename", "recording.wav")
+            content_type = data.get("content_type", "audio/wav")
+            client_phonemes = data.get("client_phonemes")
+            client_words = data.get("client_words")
+            
+            if not audio_base64 or not attempted_sentence or session_id is None:
+                await websocket.send_json({
+                    "type": "error",
+                    "data": {"message": "Missing required fields: audio_base64, attempted_sentence, or session_id"}
+                })
+                continue
+            
+            # Decode audio
+            try:
+                audio_bytes = base64.b64decode(audio_base64)
+            except Exception as e:
+                await websocket.send_json({
+                    "type": "error",
+                    "data": {"message": f"Failed to decode audio: {str(e)}"}
+                })
+                continue
+            
+            # Get session and activity
+            try:
+                session = get_session(db, session_id)
+                activity_object = get_activity_object(session)
+            except Exception as e:
+                await websocket.send_json({
+                    "type": "error",
+                    "data": {"message": f"Invalid session: {str(e)}"}
+                })
+                continue
+            
+            # Process audio through the event stream generator
+            try:
+                async for event in analyze_audio_file_event_stream(
+                    phoneme_assistant=phoneme_assistant,
+                    activity_object=activity_object,
+                    audio_bytes=audio_bytes,
+                    audio_filename=filename,
+                    audio_content_type=content_type,
+                    attempted_sentence=attempted_sentence,
+                    current_user=current_user,
+                    session=session,
+                    db=db,
+                    client_phonemes=client_phonemes,
+                    client_words=client_words,
+                ):
+                    # Parse SSE format and send as JSON
+                    if event.startswith("data: "):
+                        event_data = json.loads(event[6:])
+                        await websocket.send_json(event_data)
+            
+            except Exception as e:
+                await websocket.send_json({
+                    "type": "error",
+                    "data": {"message": f"Processing failed: {str(e)}"}
+                })
+    
+    except WebSocketDisconnect:
+        manager.disconnect(current_user.id)
+    except Exception as e:
+        print(f"WebSocket error: {e}")
+        manager.disconnect(current_user.id)
+    finally:
+        db.close()
+
 

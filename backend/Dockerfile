@@ -34,9 +34,11 @@ COPY --from=builder /usr/local /usr/local
 # Copy project files (excluding large or sensitive files via .dockerignore)
 COPY . .
 
-# Expose FastAPI port
-EXPOSE 8000
+# Expose HTTPS port for direct WebSocket access
+EXPOSE 8443
 
-# Run the app with pure Uvicorn (better for WebSocket/SSE streaming)
-# --timeout-keep-alive 86400 for long-lived WebSocket connections
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--timeout-keep-alive", "86400"]
+# Run Uvicorn with SSL on port 8443
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8443", \
+     "--timeout-keep-alive", "86400", \
+     "--ssl-keyfile", "/etc/letsencrypt/live/api.wordwizai.com/privkey.pem", \
+     "--ssl-certfile", "/etc/letsencrypt/live/api.wordwizai.com/fullchain.pem"]

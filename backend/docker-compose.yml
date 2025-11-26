@@ -4,11 +4,12 @@ services:
     container_name: fastapi_backend
     restart: no
     ports:
-      - "8000:8000"
+      - "8443:8443"
     env_file:
       - .env
     volumes:
       - ./credentials/service-account.json:/credentials/service-account.json
+      - letsencrypt:/etc/letsencrypt:ro
     deploy:
       resources:
         limits:

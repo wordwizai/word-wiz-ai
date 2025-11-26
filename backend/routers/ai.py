@@ -367,8 +367,10 @@ async def websocket_audio_analysis(websocket: WebSocket):
             
             # Get session and activity
             try:
+                session_start = time.time()
                 session = get_session(db, session_id)
                 activity_object = get_activity_object(session)
+                print(f"⏱️  Session/activity lookup took {time.time() - session_start:.3f}s")
             except Exception as e:
                 await websocket.send_json({
                     "type": "error",
@@ -377,6 +379,8 @@ async def websocket_audio_analysis(websocket: WebSocket):
                 continue
             
             # Process audio through the event stream generator
+            print("🔄 Starting event stream generator...")
+            generator_start = time.time()
             try:
                 async for event in analyze_audio_file_event_stream(
                     phoneme_assistant=phoneme_assistant,
@@ -391,6 +395,10 @@ async def websocket_audio_analysis(websocket: WebSocket):
                     client_phonemes=client_phonemes,
                     client_words=client_words,
                 ):
+                    if 'first_event' not in locals():
+                        first_event = True
+                        print(f"⏱️  Time to first event from generator: {time.time() - generator_start:.3f}s")
+                    
                     # Parse SSE format and send as JSON
                     if event.startswith("data: "):
                         event_data = json.loads(event[6:])

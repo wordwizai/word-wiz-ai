@@ -72,7 +72,9 @@ async def load_and_preprocess_audio_bytes(
     
     # CACHE POINT 1: Save original uploaded audio
     cache_start = time.time()
-    audio_cache.save_audio_bytes(
+    # Run cache I/O in thread pool to avoid blocking event loop
+    await asyncio.to_thread(
+        audio_cache.save_audio_bytes,
         audio_bytes, 
         "original", 
         session_id,
@@ -86,9 +88,14 @@ async def load_and_preprocess_audio_bytes(
     print(f"⏱️  Cache save (original) took {time.time() - cache_start:.3f}s")
     
     decode_start = time.time()
-    audio_array, sample_rate = sf.read(io.BytesIO(audio_bytes), dtype="float32")
-    if len(audio_array.shape) == 2:
-        audio_array = np.mean(audio_array, axis=1)
+    # Run soundfile decoding in thread pool to avoid blocking event loop
+    def _decode_audio():
+        array, sr = sf.read(io.BytesIO(audio_bytes), dtype="float32")
+        if len(array.shape) == 2:
+            array = np.mean(array, axis=1)
+        return array, sr
+    
+    audio_array, sample_rate = await asyncio.to_thread(_decode_audio)
     print(f"⏱️  Audio decode took {time.time() - decode_start:.3f}s")
     
     # Calculate audio duration
@@ -108,7 +115,9 @@ async def load_and_preprocess_audio_bytes(
     
     # CACHE POINT 2: Save audio after format conversion but before preprocessing
     cache_start = time.time()
-    audio_cache.save_audio(
+    # Run cache I/O in thread pool to avoid blocking event loop
+    await asyncio.to_thread(
+        audio_cache.save_audio,
         audio_array,
         "analysis",
         session_id,
@@ -125,11 +134,16 @@ async def load_and_preprocess_audio_bytes(
     
     # Apply preprocessing with audio length for adaptive noise reduction
     print("🔊 Starting audio preprocessing...")
-    audio_array = preprocess_audio(audio_array, sr=sample_rate, audio_length_seconds=audio_duration)
+    # Run preprocessing in thread pool to avoid blocking event loop
+    audio_array = await asyncio.to_thread(
+        preprocess_audio, audio_array, sr=sample_rate, audio_length_seconds=audio_duration
+    )
     
     # CACHE POINT 3: Save preprocessed audio
     cache_start = time.time()
-    audio_cache.save_audio(
+    # Run cache I/O in thread pool to avoid blocking event loop
+    await asyncio.to_thread(
+        audio_cache.save_audio,
         audio_array,
         "preprocessed",
         session_id,

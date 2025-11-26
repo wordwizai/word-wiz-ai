@@ -315,7 +315,11 @@ async def websocket_audio_analysis(websocket: WebSocket):
     try:
         while True:
             # Wait for messages from client
+            print(f"⏳ [{time.time()}] Waiting for WebSocket message...")
+            receive_start = time.time()
             data = await websocket.receive_json()
+            receive_time = time.time() - receive_start
+            print(f"📨 [{time.time()}] Message received in {receive_time:.3f}s, size: {len(str(data))} bytes")
             
             if data.get("type") == "ping":
                 # Heartbeat
@@ -329,6 +333,7 @@ async def websocket_audio_analysis(websocket: WebSocket):
                 })
                 continue
             
+            print(f"🎯 [{time.time()}] Processing analyze_audio request")
             # Extract request data
             audio_base64 = data.get("audio_base64")
             attempted_sentence = data.get("attempted_sentence")
@@ -346,11 +351,13 @@ async def websocket_audio_analysis(websocket: WebSocket):
                 continue
             
             # Send immediate acknowledgment BEFORE decoding audio
-            print("📤 Sending immediate processing_started acknowledgment...")
+            ack_start = time.time()
+            print(f"📤 [{time.time()}] Sending immediate processing_started acknowledgment...")
             await websocket.send_json({
                 "type": "processing_started",
                 "data": {"message": "Audio received, processing..."}
             })
+            print(f"✅ [{time.time()}] Acknowledgment sent in {time.time() - ack_start:.3f}s")
             await asyncio.sleep(0)  # Ensure the message is sent
             
             # Decode audio (this can take a few seconds for large files)

@@ -37,5 +37,8 @@ COPY . .
 # Expose FastAPI port
 EXPOSE 8000
 
-# Run the app with Gunicorn and Uvicorn workers
-CMD ["gunicorn", "-w", "1", "-k", "uvicorn.workers.UvicornWorker", "main:app", "--bind", "0.0.0.0:8000", "-t", "120"]
+# Run the app with pure Uvicorn (better for WebSocket/SSE streaming)
+# --timeout-keep-alive 86400 for long-lived WebSocket connections
+# --limit-max-requests 0 to prevent worker restarts
+# --no-access-log to reduce overhead
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--timeout-keep-alive", "86400", "--limit-max-requests", "0"]

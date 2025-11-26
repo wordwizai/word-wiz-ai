@@ -1,6 +1,8 @@
 import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+// Separate WebSocket URL to bypass nginx buffering
+const WS_URL = import.meta.env.VITE_WS_URL || API_URL;
 
 interface Session {
   id: number;
@@ -288,3 +290,4 @@ export {
   getUserStatistics,
 };
 export type { Session, UserStatistics };
+export { WS_URL };

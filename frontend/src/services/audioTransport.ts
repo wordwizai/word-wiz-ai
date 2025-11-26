@@ -5,7 +5,7 @@
  * via either WebSocket (persistent connection) or SSE (per-request connection).
  */
 
-import { API_URL } from "@/api";
+import { API_URL, WS_URL } from "@/api";
 
 export interface AudioAnalysisEvent {
   type:
@@ -60,9 +60,10 @@ export class WebSocketTransport implements AudioTransport {
     return new Promise((resolve, reject) => {
       try {
         // Construct WebSocket URL with token as query param
+        // Use WS_URL (direct connection) to bypass nginx buffering
         const wsProtocol =
           window.location.protocol === "https:" ? "wss:" : "ws:";
-        const wsUrl = API_URL.replace(/^https?:/, wsProtocol);
+        const wsUrl = WS_URL.replace(/^https?:/, wsProtocol);
         const url = `${wsUrl}/ai/ws/audio-analysis?token=${encodeURIComponent(
           options.token
         )}`;

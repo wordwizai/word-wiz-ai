@@ -1,0 +1,323 @@
+{
+  "words_phonemes": {
+    "type": {
+      "0": "match",
+      "1": "match",
+      "2": "match",
+      "3": "match",
+      "4": "match",
+      "5": "match",
+      "6": "match",
+      "7": "match",
+      "8": "match"
+    },
+    "predicted_word": {
+      "0": "the",
+      "1": "quick",
+      "2": "brown",
+      "3": "fox",
+      "4": "jumped",
+      "5": "over",
+      "6": "the",
+      "7": "lazy",
+      "8": "dog"
+    },
+    "ground_truth_word": {
+      "0": "the",
+      "1": "quick",
+      "2": "brown",
+      "3": "fox",
+      "4": "jumped",
+      "5": "over",
+      "6": "the",
+      "7": "lazy",
+      "8": "dog"
+    },
+    "phonemes": {
+      "0": [
+        "\u0259"
+      ],
+      "1": [
+        "k",
+        "w",
+        "\u026a",
+        "k"
+      ],
+      "2": [
+        "r",
+        "a",
+        "\u028a",
+        "n",
+        "d"
+      ],
+      "3": [
+        "f",
+        "\u0251",
+        "k",
+        "s"
+      ],
+      "4": [
+        "\u02a4",
+        "\u0259",
+        "m",
+        "p",
+        "t"
+      ],
+      "5": [
+        "o",
+        "\u028a",
+        "v",
+        "\u0259",
+        "r"
+      ],
+      "6": [
+        "\u00f0",
+        "\u0259"
+      ],
+      "7": [
+        "l",
+        "e",
+        "\u026a",
+        "z",
+        "i"
+      ],
+      "8": [
+        "d",
+        "\u0254"
+      ]
+    },
+    "ground_truth_phonemes": {
+      "0": [
+        "\u00f0",
+        "\u0259"
+      ],
+      "1": [
+        "k",
+        "w",
+        "\u026a",
+        "k"
+      ],
+      "2": [
+        "b",
+        "r",
+        "a",
+        "\u028a",
+        "n"
+      ],
+      "3": [
+        "f",
+        "\u0251",
+        "k",
+        "s"
+      ],
+      "4": [
+        "\u02a4",
+        "\u0259",
+        "m",
+        "p",
+        "t"
+      ],
+      "5": [
+        "o",
+        "\u028a",
+        "v",
+        "\u0259",
+        "r"
+      ],
+      "6": [
+        "\u00f0",
+        "\u0259"
+      ],
+      "7": [
+        "l",
+        "e",
+        "\u026a",
+        "z",
+        "i"
+      ],
+      "8": [
+        "d",
+        "\u0254",
+        "g"
+      ]
+    },
+    "per": {
+      "0": 0.5,
+      "1": 0.0,
+      "2": 0.4,
+      "3": 0.0,
+      "4": 0.0,
+      "5": 0.0,
+      "6": 0.0,
+      "7": 0.0,
+      "8": 0.3333
+    },
+    "missed": {
+      "0": [
+        "\u00f0"
+      ],
+      "1": [],
+      "2": [
+        "b"
+      ],
+      "3": [],
+      "4": [],
+      "5": [],
+      "6": [],
+      "7": [],
+      "8": [
+        "g"
+      ]
+    },
+    "added": {
+      "0": [],
+      "1": [],
+      "2": [
+        "d"
+      ],
+      "3": [],
+      "4": [],
+      "5": [],
+      "6": [],
+      "7": [],
+      "8": []
+    },
+    "substituted": {
+      "0": [],
+      "1": [],
+      "2": [],
+      "3": [],
+      "4": [],
+      "5": [],
+      "6": [],
+      "7": [],
+      "8": []
+    },
+    "total_phonemes": {
+      "0": 2,
+      "1": 4,
+      "2": 5,
+      "3": 4,
+      "4": 5,
+      "5": 5,
+      "6": 2,
+      "7": 5,
+      "8": 3
+    },
+    "total_errors": {
+      "0": 1,
+      "1": 0,
+      "2": 2,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 1
+    }
+  },
+  "analysis": {
+    "highest_per_word": {
+      "type": "match",
+      "predicted_word": "the",
+      "ground_truth_word": "the",
+      "phonemes": [
+        "\u0259"
+      ],
+      "ground_truth_phonemes": [
+        "\u00f0",
+        "\u0259"
+      ],
+      "per": 0.5,
+      "missed": [
+        "\u00f0"
+      ],
+      "added": [],
+      "substituted": [],
+      "total_phonemes": 2,
+      "total_errors": 1
+    },
+    "problem_summary": {
+      "most_common_phoneme": [
+        "\u00f0",
+        1
+      ],
+      "most_common_word": null,
+      "phoneme_error_counts": {
+        "\u00f0": 1,
+        "b": 1,
+        "d": 1,
+        "g": 1
+      },
+      "word_error_counts": {},
+      "phoneme_group_errors": {
+        "fricatives": 1,
+        "plosives": 3
+      },
+      "phoneme_articulatory_info": {
+        "\u00f0": {
+          "place": "tongue and teeth",
+          "manner": "fricative",
+          "voice": "voiced",
+          "description": "Put your tongue between your teeth and hum (like 'th' in this)"
+        },
+        "b": {
+          "place": "lips",
+          "manner": "stop",
+          "voice": "voiced",
+          "description": "Press your lips together, then release with vibration in your throat"
+        },
+        "d": {
+          "place": "tongue tip",
+          "manner": "stop",
+          "voice": "voiced",
+          "description": "Touch your tongue tip to the roof of your mouth, then release with throat vibration"
+        },
+        "g": {
+          "place": "back of tongue",
+          "manner": "stop",
+          "voice": "voiced",
+          "description": "Lift the back of your tongue to the roof of your mouth, then release with throat vibration"
+        }
+      },
+      "phoneme_difficulty_levels": {
+        "\u00f0": 3,
+        "b": 1,
+        "d": 1,
+        "g": 1
+      },
+      "high_frequency_errors": [
+        [
+          "\u00f0",
+          1
+        ],
+        [
+          "b",
+          1
+        ],
+        [
+          "d",
+          1
+        ],
+        [
+          "g",
+          1
+        ]
+      ],
+      "recommended_focus_phoneme": [
+        "\u00f0",
+        "most_frequent_error"
+      ]
+    },
+    "per_summary": {
+      "total_phonemes": 35,
+      "total_errors": 4,
+      "sentence_per": 0.11428571428571428
+    }
+  },
+  "gpt_feedback": {
+    "feedback": "You had trouble with the 'th' sound in 'the' and the 'b' sound in 'brown,' and you missed the 'g' in 'dog.'",
+    "feedback_ssml": "You had trouble with the <say-as interpret-as=\"spell-out\">th</say-as> sound in <phoneme alphabet='ipa' ph='\u00f0\u0259'>the</phoneme> and the <say-as interpret-as=\"spell-out\">b</say-as> sound in <phoneme alphabet='ipa' ph='bra\u028an'>brown</phoneme>, and you missed the <say-as interpret-as=\"spell-out\">g</say-as> in <phoneme alphabet='ipa' ph='d\u0254g'>dog</phoneme>.",
+    "sentence": "The quick brown fox jumped over the lazy dog again and again."
+  }
+}

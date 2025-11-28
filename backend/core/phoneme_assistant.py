@@ -88,15 +88,22 @@ class PhonemeAssistant:
         # load in our prompt
 
     def load_prompt(self, prompt_path: str) -> str:
-        with open(prompt_path, encoding="utf-8") as file:
+        # Always resolve prompt_path relative to backend root
+        backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        resolved_prompt_path = (
+            prompt_path if os.path.isabs(prompt_path)
+            else os.path.join(backend_root, prompt_path)
+        )
+        with open(resolved_prompt_path, encoding="utf-8") as file:
             lines = file.readlines()
             content = [
                 line for line in lines if not line.strip().startswith("//")
-            ]  # // is how we are going to comments in the txt file
+            ]
             text = "".join(content)
-        
+
         # Automatically append SSML instruction to all prompts
-        ssml_instruction_path = "core/gpt_prompts/ssml_instruction.txt"
+        ssml_instruction_rel = "core/gpt_prompts/ssml_instruction.txt"
+        ssml_instruction_path = os.path.join(backend_root, ssml_instruction_rel)
         try:
             with open(ssml_instruction_path, encoding="utf-8") as ssml_file:
                 ssml_lines = ssml_file.readlines()

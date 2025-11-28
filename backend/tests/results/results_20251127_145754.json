@@ -1,0 +1,12 @@
+[
+  {
+    "name": "test_case_01",
+    "status": "FAIL",
+    "details": "No result.json output"
+  },
+  {
+    "name": "__pycache__",
+    "status": "FAIL",
+    "details": "No result.json output"
+  }
+]

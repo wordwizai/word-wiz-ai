@@ -1,0 +1,12 @@
+[
+  {
+    "name": "test_case_01",
+    "status": "FAIL",
+    "details": "Exception: Audio must be 16kHz, got 48000\nTraceback (most recent call last):\n  File \"C:\\Users\\bruce\\Documents\\Coding\\phoneme-assistant-app\\tests\\run_tests.py\", line 52, in run_test_case\n    run_system_tests.run_system_test(case_path, run_system_tests.StoryPractice)\n  File \"C:\\Users\\bruce\\Documents\\Coding\\phoneme-assistant-app\\tests\\system\\run_system_tests.py\", line 48, in run_system_test\n    audio = load_audio(audio_path)\n            ^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\bruce\\Documents\\Coding\\phoneme-assistant-app\\tests\\system\\run_system_tests.py\", line 34, in load_audio\n    raise ValueError(f\"Audio must be 16kHz, got {sr}\")\nValueError: Audio must be 16kHz, got 48000\n"
+  },
+  {
+    "name": "__pycache__",
+    "status": "FAIL",
+    "details": "No result.json output"
+  }
+]

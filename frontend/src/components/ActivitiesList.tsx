@@ -32,11 +32,18 @@ interface ActivitiesListProps {
   shuffleDaily?: boolean; // if true, shuffle activities based on date seed
 }
 
-// Seeded random number generator
+// Seeded random number generator using mulberry32 algorithm
+// Provides excellent distribution and fast performance
 const seededRandom = (seed: number) => {
-  const x = Math.sin(seed) * 10000;
-  return x - Math.floor(x);
+  let t = seed + 0x6D2B79F5;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  const result = ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  return result;
 };
+
+// Seed offset to ensure different selections for different activity types
+const CHOICE_STORY_SEED_OFFSET = 1000;
 
 // Get date-based seed (changes daily)
 const getDailySeed = () => {
@@ -118,7 +125,7 @@ const ActivitiesList = ({
 
     // Use daily seed (with offset) to select one choice-story activity
     if (choiceStoryActivities.length > 0) {
-      const seed = getDailySeed() + 1; // Add offset for different selection
+      const seed = getDailySeed() + CHOICE_STORY_SEED_OFFSET;
       const randomValue = seededRandom(seed);
       const index = Math.floor(randomValue * choiceStoryActivities.length);
       featured.push(choiceStoryActivities[index]);

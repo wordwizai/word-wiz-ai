@@ -5,6 +5,7 @@ import Login from "./pages/Login.tsx";
 import SignUp from "./pages/SignUp.tsx";
 import ProgressDashboard from "./pages/ProgressDashboard.tsx";
 import Settings from "./pages/Settings.tsx";
+import ClassesPage from "./pages/ClassesPage.tsx";
 import { AuthProvider } from "./contexts/AuthContext.tsx";
 import OAuthRedirect from "./components/OAuthRedirect.tsx";
 import { ThemeProvider } from "./contexts/ThemeContext.tsx";
@@ -54,6 +55,7 @@ function App() {
                   <Route path="/progress" element={<ProgressDashboard />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/practice" element={<PracticeDashboard />} />
+                  <Route path="/classes" element={<ClassesPage />} />
                 </Route>
                 <Route path="*" element={<UnderConstructionPage />} />
               </Routes>

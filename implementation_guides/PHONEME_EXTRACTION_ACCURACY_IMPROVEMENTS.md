@@ -556,10 +556,10 @@ class OptimizedAudioPreprocessor:
 ### Tasks
 
 #### Task 3.1: Implement Flexible Alignment with Confidence Scoring
-- [ ] Update `process_audio.py` alignment function
-- [ ] Add adaptive search bounds based on phoneme variance
-- [ ] Implement alignment confidence scoring
-- [ ] Add fallback strategies for low-confidence alignments
+- [x] Update `process_audio.py` alignment function
+- [x] Add adaptive search bounds based on phoneme variance
+- [x] Implement alignment confidence scoring
+- [x] Add fallback strategies for low-confidence alignments
 
 **Files to Modify**:
 ```

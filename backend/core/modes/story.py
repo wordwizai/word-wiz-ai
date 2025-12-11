@@ -1,6 +1,6 @@
 import asyncio
 import json
-from typing import override
+from typing_extensions import override
 import os
 
 from core.gpt_output_validator import validate_and_log

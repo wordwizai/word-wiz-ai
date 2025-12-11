@@ -51,7 +51,10 @@ def compute_per(gt_phonemes, pred_phonemes):
 
 def align_phonemes_to_words(pred_phonemes: list, gt_words_phonemes: list[tuple[str, list[str]]]):
     """
-    Align predicted phonemes to ground truth words using optimized dynamic programming.
+    Align predicted phonemes to ground truth words using robust dynamic programming.
+    
+    Phase 3 enhancement: Includes confidence scoring, adaptive search bounds,
+    and fallback strategies for improved resilience to extraction errors.
     
     Parameters:
     - pred_phonemes: List of predicted phonemes.
@@ -61,7 +64,9 @@ def align_phonemes_to_words(pred_phonemes: list, gt_words_phonemes: list[tuple[s
     - alignment: List of tuples (word, aligned_pred_phonemes, per) representing the alignment.
     
     Note:
-    - Includes fallback handling for failed alignments
+    - Adaptive search bounds based on phoneme variance (Phase 3)
+    - Confidence scoring per word alignment (Phase 3)
+    - Fallback handling for failed alignments
     - Logs alignment confidence metrics
     - Handles edge cases (length mismatches, empty predictions)
     """
@@ -77,30 +82,42 @@ def align_phonemes_to_words(pred_phonemes: list, gt_words_phonemes: list[tuple[s
     if length_ratio < 0.5 or length_ratio > 2.0:
         print(f"⚠️  Alignment warning: Predicted phonemes ({len(pred_phonemes)}) vs expected ({expected_phonemes}), ratio={length_ratio:.2f}")
     
+    # Phase 3: Check if we should use fallback alignment strategy
+    if length_ratio > 2.5 or length_ratio < 0.4:
+        print(f"⚠️  Extreme phoneme variance ({length_ratio:.2f}x) - using fallback alignment")
+        return _fallback_proportional_alignment(pred_phonemes, gt_words_phonemes, length_ratio)
+    
     n = len(pred_phonemes)
     m = len(gt_words_phonemes)
     
     # Use more efficient data types and initialization
     dp = np.full((m + 1, n + 1), np.inf, dtype=np.float32)
     backtrack = np.full((m + 1, n + 1), -1, dtype=np.int32)
+    # Phase 3: Add confidence tracking
+    confidence = np.zeros((m + 1, n + 1), dtype=np.float32)
     dp[0, 0] = 0
+    confidence[0, 0] = 1.0
     
     # Precompute word lengths for smarter bounds
     word_lengths = [len(phonemes) for _, phonemes in gt_words_phonemes]
 
     for i in range(1, m + 1):
         gt_word, gt_phs = gt_words_phonemes[i - 1]
+        expected_length = len(gt_phs)
         
-        # Optimize search bounds based on expected word lengths
-        min_j = max(i, sum(word_lengths[:i-1]))
-        max_j = min(n + 1, sum(word_lengths[:i]) + 5)  # Allow some flexibility
+        # Phase 3: Adaptive search bounds based on phoneme variance
+        # Instead of fixed +5, use variance-based flexibility
+        flexibility = max(8, int(expected_length * abs(length_ratio - 1.0) + 5))
+        min_j = max(i, sum(word_lengths[:i-1]) - flexibility)
+        max_j = min(n + 1, sum(word_lengths[:i]) + flexibility)
         
         for j in range(min_j, max_j):
             best_cost = np.inf
             best_k = -1
+            best_conf = 0.0  # Phase 3: Track confidence
             
-            # Further optimize inner loop bounds
-            min_k = max(i - 1, j - len(gt_phs) - 3)
+            # Phase 3: Wider search for k based on variance
+            min_k = max(0, j - expected_length - flexibility)
             max_k = min(j, n)
             
             for k in range(min_k, max_k):
@@ -109,33 +126,50 @@ def align_phonemes_to_words(pred_phonemes: list, gt_words_phonemes: list[tuple[s
                     
                 pred_segment = pred_phonemes[k:j]
                 
-                # Quick length-based pruning
+                # Quick length-based pruning (Phase 3: more lenient)
                 len_diff = abs(len(gt_phs) - len(pred_segment))
-                if len_diff > max(len(gt_phs), 1):  # Simple heuristic
+                if len_diff > max(len(gt_phs) * 1.5, 2):  # Phase 3: More lenient threshold
                     continue
                
                 # Use distance for the cost
                 distance = compute_per(gt_phs, pred_segment) * max(len(gt_phs), 1)
                 
+                # Phase 3: Calculate confidence for this segment
+                # Confidence based on: 1) PER, 2) length match, 3) previous confidence
+                per = distance / max(len(gt_phs), 1)
+                length_match = 1.0 - min(len_diff / max(expected_length, 1), 1.0)
+                segment_confidence = (
+                    0.5 * (1.0 - min(per, 1.0)) +  # PER contribution
+                    0.3 * length_match +             # Length match contribution
+                    0.2 * confidence[i-1, k]         # Previous confidence contribution
+                )
+                
                 # Early termination for perfect matches
                 if distance == 0.0:
                     best_cost = dp[i - 1, k]
                     best_k = k
+                    best_conf = segment_confidence
                     break
                 
                 cost = dp[i - 1, k] + distance
                 if cost < best_cost:
                     best_cost = cost
                     best_k = k
+                    best_conf = segment_confidence
             
             if best_k != -1:
                 dp[i, j] = best_cost
                 backtrack[i, j] = best_k
+                confidence[i, j] = best_conf  # Phase 3: Store confidence
 
     # Backtracking to find the alignment
     alignment = []
     failed_alignments = 0
+    low_confidence_alignments = 0
     i, j = m, n
+    
+    # Phase 3: Track per-word confidence
+    word_confidences = []
     
     while i > 0:
         k = backtrack[i, j]
@@ -145,24 +179,44 @@ def align_phonemes_to_words(pred_phonemes: list, gt_words_phonemes: list[tuple[s
             # Fallback for no valid alignment - log and use fallback strategy
             failed_alignments += 1
             
-            # Try to find closest match in remaining predicted phonemes
+            # Phase 3: Improved fallback - try to find best match in remaining phonemes
             if j > 0:
-                # Use whatever predicted phonemes are left near this position
-                fallback_start = max(0, j - len(gt_phs) - 2)
-                fallback_end = min(j, len(pred_phonemes))
-                pred_segment = pred_phonemes[fallback_start:fallback_end]
+                # Search for best matching segment in a wider window
+                best_fallback_per = float('inf')
+                best_fallback_segment = []
+                best_fallback_start = j
                 
-                if pred_segment:
-                    distance = compute_per(gt_phs, pred_segment)
-                    alignment.append((gt_word, pred_segment, distance))
-                    print(f"⚠️  Fallback alignment for '{gt_word}': {pred_segment} (PER: {distance:.2f})")
+                # Try different segment lengths around expected length
+                for seg_len in range(max(1, len(gt_phs) - 3), min(j, len(gt_phs) + 8) + 1):
+                    for start in range(max(0, j - seg_len - 5), j - seg_len + 1):
+                        if start < 0:
+                            continue
+                        end = start + seg_len
+                        if end > j or end > len(pred_phonemes):
+                            continue
+                        
+                        segment = pred_phonemes[start:end]
+                        if segment:
+                            per = compute_per(gt_phs, segment)
+                            if per < best_fallback_per:
+                                best_fallback_per = per
+                                best_fallback_segment = segment
+                                best_fallback_start = start
+                
+                if best_fallback_segment:
+                    alignment.append((gt_word, best_fallback_segment, best_fallback_per))
+                    word_confidences.append(0.2)  # Low confidence for fallback
+                    j = best_fallback_start
+                    print(f"⚠️  Fallback alignment for '{gt_word}': {best_fallback_segment} (PER: {best_fallback_per:.2f})")
                 else:
                     # No predicted phonemes available at all
                     alignment.append((gt_word, [], 1.0))
+                    word_confidences.append(0.0)
                     print(f"❌ No phonemes found for '{gt_word}'")
             else:
                 # No predicted phonemes left
                 alignment.append((gt_word, [], 1.0))
+                word_confidences.append(0.0)
                 print(f"❌ No phonemes found for '{gt_word}'")
             
             i -= 1
@@ -171,20 +225,88 @@ def align_phonemes_to_words(pred_phonemes: list, gt_words_phonemes: list[tuple[s
         # Normal alignment
         pred_segment = pred_phonemes[k:j]
         distance = compute_per(gt_phs, pred_segment)
+        word_conf = confidence[i, j]
+        
         alignment.append((gt_word, pred_segment, distance))
+        word_confidences.append(word_conf)
+        
+        # Phase 3: Flag low confidence alignments
+        if word_conf < 0.3:
+            low_confidence_alignments += 1
+        
         i -= 1
         j = k
 
     alignment.reverse()
+    word_confidences.reverse()
     
-    # Log alignment quality metrics
+    # Phase 3: Enhanced alignment quality metrics
     if failed_alignments > 0:
         print(f"⚠️  Alignment completed with {failed_alignments}/{m} failed word alignments")
+    if low_confidence_alignments > 0:
+        print(f"⚠️  {low_confidence_alignments}/{m} alignments have low confidence (<0.3)")
     
     # Calculate overall alignment confidence
     total_per = sum(per for _, _, per in alignment) / max(len(alignment), 1)
-    print(f"📊 Alignment confidence: avg PER={total_per:.2f}, length_ratio={length_ratio:.2f}, failed={failed_alignments}")
+    avg_confidence = sum(word_confidences) / max(len(word_confidences), 1)
+    print(f"📊 Alignment confidence: avg PER={total_per:.2f}, avg_conf={avg_confidence:.2f}, length_ratio={length_ratio:.2f}, failed={failed_alignments}")
     
+    return alignment
+
+
+def _fallback_proportional_alignment(
+    pred_phonemes: list,
+    gt_words_phonemes: list[tuple[str, list[str]]],
+    length_ratio: float
+) -> list:
+    """
+    Fallback alignment strategy when standard alignment fails due to extreme phoneme variance.
+    
+    Phase 3: Uses proportional distribution of phonemes across words based on expected lengths.
+    
+    Args:
+        pred_phonemes: Predicted phonemes from model
+        gt_words_phonemes: Ground truth words with expected phonemes
+        length_ratio: Ratio of predicted to expected phonemes
+        
+    Returns:
+        List of (word, aligned_phonemes, per) tuples
+    """
+    print(f"🔄 Using proportional fallback alignment (ratio: {length_ratio:.2f})")
+    
+    expected_phonemes = sum(len(phonemes) for _, phonemes in gt_words_phonemes)
+    alignment = []
+    start_idx = 0
+    
+    for i, (word, gt_phs) in enumerate(gt_words_phonemes):
+        # Allocate phonemes proportionally based on expected length
+        expected_count = len(gt_phs)
+        
+        if length_ratio > 1.0:
+            # More phonemes than expected - allocate proportionally more
+            allocated_count = int(expected_count * length_ratio)
+        else:
+            # Fewer phonemes than expected - allocate proportionally
+            allocated_count = max(1, int(expected_count * length_ratio))
+        
+        # Ensure we don't go past the end
+        end_idx = min(start_idx + allocated_count, len(pred_phonemes))
+        
+        # For last word, use all remaining phonemes
+        if i == len(gt_words_phonemes) - 1:
+            end_idx = len(pred_phonemes)
+        
+        aligned_phonemes = pred_phonemes[start_idx:end_idx]
+        
+        if aligned_phonemes:
+            per = compute_per(gt_phs, aligned_phonemes)
+        else:
+            per = 1.0
+        
+        alignment.append((word, aligned_phonemes, per))
+        start_idx = end_idx
+    
+    print(f"✓ Proportional fallback complete - check alignment quality carefully")
     return alignment
 
 

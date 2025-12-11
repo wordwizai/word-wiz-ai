@@ -1,19 +1,37 @@
 """
 Audio preprocessing optimizations for faster phoneme extraction.
+
+Updated to use phoneme-aware trimming for better edge preservation.
 """
 
 import numpy as np
 import librosa
 from typing import Optional, Tuple
 import time
+from .phoneme_aware_trimming import PhonemeAwareTrimmer
 
 
 class OptimizedAudioPreprocessor:
     """Optimized audio preprocessing for faster phoneme extraction."""
     
-    def __init__(self, target_sr: int = 16000, enable_logging: bool = False):
+    def __init__(self, target_sr: int = 16000, enable_logging: bool = False, 
+                 use_phoneme_aware_trim: bool = True):
+        """
+        Initialize the audio preprocessor.
+        
+        Args:
+            target_sr: Target sample rate
+            enable_logging: Whether to enable performance logging
+            use_phoneme_aware_trim: Whether to use new phoneme-aware trimming
+                                   (default True). Set to False for legacy behavior.
+        """
         self.target_sr = target_sr
         self.enable_logging = enable_logging
+        self.use_phoneme_aware_trim = use_phoneme_aware_trim
+        
+        # Initialize phoneme-aware trimmer if enabled
+        if self.use_phoneme_aware_trim:
+            self.phoneme_trimmer = PhonemeAwareTrimmer(sr=target_sr)
     
     def preprocess_audio(self, 
                         audio: np.ndarray, 
@@ -42,9 +60,18 @@ class OptimizedAudioPreprocessor:
         if len(audio.shape) > 1:
             audio = np.mean(audio, axis=1)
         
-        # Trim silence (optimized)
+        # Trim silence
         if trim_silence:
-            audio = self._fast_trim_silence(audio)
+            if self.use_phoneme_aware_trim:
+                # NEW: Use phoneme-aware trimming with padding
+                audio = self.phoneme_trimmer.trim_with_speech_detection(
+                    audio,
+                    padding_ms=150,  # Generous padding to preserve edge phonemes
+                    use_zcr=True     # Use zero-crossing rate for consonant detection
+                )
+            else:
+                # LEGACY: Fast energy-based trimming (may cut phonemes)
+                audio = self._fast_trim_silence(audio)
         
         # Ensure audio is not empty
         if len(audio) == 0:

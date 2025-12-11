@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import soundfile as sf
 from core.audio_preprocessing import preprocess_audio
+from core.audio_quality_analyzer import AudioQualityAnalyzer
 from core.modes.base_mode import BaseMode
 from core.phoneme_assistant import PhonemeAssistant
 from core.temp_audio_cache import audio_cache
@@ -132,11 +133,61 @@ async def load_and_preprocess_audio_bytes(
     )
     print(f"⏱️  Cache save (pre-preprocessing) took {time.time() - cache_start:.3f}s")
     
+    # QUALITY VALIDATION: Analyze audio quality before preprocessing
+    print("🔍 Analyzing audio quality...")
+    quality_start = time.time()
+    analyzer = AudioQualityAnalyzer(sr=sample_rate)
+    quality_info = await asyncio.to_thread(
+        analyzer.analyze_audio_quality, audio_array
+    )
+    print(f"⏱️  Quality analysis took {time.time() - quality_start:.3f}s")
+    
+    # Log quality metrics
+    print(f"📊 Audio Quality Report:")
+    print(f"   - Quality Level: {quality_info['quality_level'].upper()}")
+    print(f"   - Quality Score: {quality_info['quality_score']:.1f}/100")
+    print(f"   - SNR: {quality_info['snr_db']:.1f} dB")
+    print(f"   - Clipping: {quality_info['clipping_percentage']:.2f}%")
+    print(f"   - Silence: {quality_info['silence_percentage']:.1f}%")
+    
+    # Check for critical quality issues
+    if quality_info['snr_db'] < 5.0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Audio quality too low (SNR: {quality_info['snr_db']:.1f} dB). "
+                   "Please record in a quieter environment or use a better microphone."
+        )
+    
+    if quality_info['clipping_percentage'] > 10.0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Audio is severely clipped ({quality_info['clipping_percentage']:.1f}% of samples). "
+                   "Please reduce microphone gain or speak further from the microphone."
+        )
+    
+    if quality_info['silence_percentage'] > 85.0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Audio is mostly silence ({quality_info['silence_percentage']:.1f}%). "
+                   "Please ensure you are speaking into the microphone."
+        )
+    
+    # Warn about quality issues but continue processing
+    if quality_info['issues']:
+        print(f"⚠️  Quality issues detected:")
+        for issue in quality_info['issues']:
+            print(f"   - {issue}")
+    
+    if quality_info['recommendations']:
+        print(f"💡 Recommendations:")
+        for rec in quality_info['recommendations']:
+            print(f"   - {rec}")
+    
     # Apply preprocessing with audio length for adaptive noise reduction
     print("🔊 Starting audio preprocessing...")
     # Run preprocessing in thread pool to avoid blocking event loop
     audio_array = await asyncio.to_thread(
-        preprocess_audio, audio_array, sr=sample_rate, audio_length_seconds=audio_duration
+        preprocess_audio, audio_array, sr=sample_rate, audio_length_seconds=audio_duration, use_adaptive=True
     )
     
     # CACHE POINT 3: Save preprocessed audio

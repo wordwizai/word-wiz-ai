@@ -92,8 +92,9 @@ const ActivitiesList = ({
 
   // Select featured activities for daily display
   const getDisplayedActivities = () => {
+    // Don't shuffle if explicitly disabled or if showing all activities
+    // When numberOfActivities === -1, we want to show all activities unshuffled
     if (!shuffleDaily || numberOfActivities === -1) {
-      // If not shuffling or showing all, return filtered activities
       return activities.filter((a) => (type ? a.activity_type === type : true));
     }
 

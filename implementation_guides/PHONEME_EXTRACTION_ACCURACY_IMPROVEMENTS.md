@@ -797,10 +797,10 @@ backend/schemas/feedback_entry.py (add alignment metadata schema)
 ### Tasks
 
 #### Task 4.1: Implement Device Fingerprinting
-- [x] Create `device_calibration.py` module
-- [x] Capture device audio characteristics
-- [x] Store device profiles in memory (database integration ready)
-- [x] Apply device-specific preprocessing
+- [ ] Create `device_calibration.py` module
+- [ ] Capture device audio characteristics
+- [ ] Store device profiles in database
+- [ ] Apply device-specific preprocessing
 
 **Files to Create**:
 ```
@@ -843,9 +843,9 @@ class DeviceCalibrator:
 ```
 
 #### Task 4.2: Frontend Device Identification
-- [x] Add device ID support to audio metadata (implementation ready)
-- [x] Implement calibration flow API endpoints (backend ready)
-- [ ] Frontend UI for calibration flow (deferred - requires UI changes)
+- [ ] Add device ID to audio metadata
+- [ ] Implement calibration flow for new devices
+- [ ] Store device preferences in user settings
 
 ### Quality Assurance Checklist
 

@@ -373,10 +373,10 @@ frontend/src/components/practice/BasePractice.tsx (display quality warnings)
 ### Tasks
 
 #### Task 2.1: Implement Phoneme-Aware Trimming
-- [ ] Create `phoneme_aware_trimming.py` module
-- [ ] Use zero-crossing rate for better edge detection
-- [ ] Add configurable padding after trimming
-- [ ] Make trimming adaptive based on audio dynamics
+- [x] Create `phoneme_aware_trimming.py` module
+- [x] Use zero-crossing rate for better edge detection
+- [x] Add configurable padding after trimming
+- [x] Make trimming adaptive based on audio dynamics
 
 **Files to Create**:
 ```
@@ -488,9 +488,9 @@ class PhonemeAwareTrimmer:
 ```
 
 #### Task 2.2: Update Audio Optimization Module
-- [ ] Replace `_fast_trim_silence` with phoneme-aware version
-- [ ] Add configurable trimming strategy
-- [ ] Maintain performance (should be <100ms)
+- [x] Replace `_fast_trim_silence` with phoneme-aware version
+- [x] Add configurable trimming strategy
+- [x] Maintain performance (should be <100ms)
 
 **Implementation Guide**:
 Update `backend/core/audio_optimization.py`:

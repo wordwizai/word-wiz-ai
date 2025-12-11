@@ -90,15 +90,13 @@ const CreateClassDialog = ({
                   <Label htmlFor="className">Class Name</Label>
                   <Input
                     id="className"
-                    placeholder="e.g., Grade 5 Reading"
+                    placeholder="e.g., Grade 1 Reading"
                     value={className}
                     onChange={(e) => setClassName(e.target.value)}
                     disabled={loading}
                   />
                 </div>
-                {error && (
-                  <p className="text-sm text-destructive">{error}</p>
-                )}
+                {error && <p className="text-sm text-destructive">{error}</p>}
               </div>
               <DialogFooter>
                 <Button
@@ -127,9 +125,7 @@ const CreateClassDialog = ({
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
                 <Label>Class Name</Label>
-                <div className="font-semibold text-lg">
-                  {createdClass.name}
-                </div>
+                <div className="font-semibold text-lg">{createdClass.name}</div>
               </div>
               <div className="grid gap-2">
                 <Label>Join Code</Label>

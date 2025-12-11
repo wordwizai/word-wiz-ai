@@ -32,6 +32,9 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 from database import Base
 
+# Import all models so Alembic can detect them
+import models  # noqa
+
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,

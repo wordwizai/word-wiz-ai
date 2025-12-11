@@ -253,6 +253,7 @@ const Dashboard = () => {
           <ActivitiesList
             numberOfActivities={3}
             className="w-full md:h-full flex-1"
+            shuffleDaily={true}
           />
           <div className="flex justify-center mt-4">
             <Button

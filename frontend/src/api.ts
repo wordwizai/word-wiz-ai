@@ -257,6 +257,53 @@ interface UserStatistics {
   words_read: number;
 }
 
+interface Class {
+  id: number;
+  name: string;
+  join_code: string;
+  teacher_id: number;
+  created_at: string;
+  student_count?: number;
+}
+
+interface ClassWithTeacher extends Class {
+  teacher: {
+    id: number;
+    full_name: string | null;
+    email: string;
+  };
+}
+
+interface StudentStatistics {
+  total_sessions: number;
+  words_read: number;
+  average_per: number;
+  last_session_date: string | null;
+  current_streak: number;
+}
+
+interface StudentWithStats {
+  id: number;
+  full_name: string | null;
+  email: string;
+  joined_at: string;
+  statistics: StudentStatistics;
+}
+
+interface ClassStudentsResponse {
+  class_id: number;
+  class_name: string;
+  join_code: string;
+  students: StudentWithStats[];
+}
+
+interface ClassMembership {
+  id: number;
+  class_id: number;
+  student_id: number;
+  joined_at: string;
+}
+
 const getUserStatistics = async (token: string): Promise<UserStatistics> => {
   try {
     const response = await axios.get(`${API_URL}/feedback/statistics`, {
@@ -267,6 +314,111 @@ const getUserStatistics = async (token: string): Promise<UserStatistics> => {
     return response.data;
   } catch (error) {
     console.error("Fetch user statistics error:", error);
+    throw error;
+  }
+};
+
+// Class API functions
+const createClass = async (token: string, name: string): Promise<Class> => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/classes/`,
+      { name },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Create class error:", error);
+    throw error;
+  }
+};
+
+const getMyClasses = async (token: string): Promise<Class[]> => {
+  try {
+    const response = await axios.get(`${API_URL}/classes/my-classes`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Fetch my classes error:", error);
+    throw error;
+  }
+};
+
+const getMyStudentClasses = async (token: string): Promise<ClassWithTeacher[]> => {
+  try {
+    const response = await axios.get(`${API_URL}/classes/my-student-classes`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Fetch my student classes error:", error);
+    throw error;
+  }
+};
+
+const joinClass = async (token: string, joinCode: string): Promise<ClassMembership> => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/classes/join`,
+      { join_code: joinCode.toUpperCase() },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Join class error:", error);
+    throw error;
+  }
+};
+
+const getClassStudents = async (token: string, classId: number): Promise<ClassStudentsResponse> => {
+  try {
+    const response = await axios.get(`${API_URL}/classes/${classId}/students`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Fetch class students error:", error);
+    throw error;
+  }
+};
+
+const leaveClass = async (token: string, classId: number): Promise<void> => {
+  try {
+    await axios.delete(`${API_URL}/classes/${classId}/leave`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  } catch (error) {
+    console.error("Leave class error:", error);
+    throw error;
+  }
+};
+
+const deleteClass = async (token: string, classId: number): Promise<void> => {
+  try {
+    await axios.delete(`${API_URL}/classes/${classId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  } catch (error) {
+    console.error("Delete class error:", error);
     throw error;
   }
 };
@@ -288,6 +440,22 @@ export {
   getSentencePers,
   getPhonemesPerMistakeType,
   getUserStatistics,
+  createClass,
+  getMyClasses,
+  getMyStudentClasses,
+  joinClass,
+  getClassStudents,
+  leaveClass,
+  deleteClass,
 };
-export type { Session, UserStatistics };
+export type { 
+  Session, 
+  UserStatistics, 
+  Class, 
+  ClassWithTeacher,
+  StudentStatistics,
+  StudentWithStats,
+  ClassStudentsResponse,
+  ClassMembership,
+};
 export { WS_URL };

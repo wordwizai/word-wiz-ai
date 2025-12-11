@@ -16,3 +16,5 @@ class User(Base):
 
     settings = relationship("UserSettings", back_populates="user", uselist=False)
     sessions = relationship("Session", back_populates="user")
+    classes = relationship("Class", back_populates="teacher")
+    class_memberships = relationship("ClassMembership", back_populates="student")

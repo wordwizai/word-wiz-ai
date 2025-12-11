@@ -14,6 +14,7 @@ import {
   Moon,
   PanelLeftClose,
   PanelLeft,
+  Users,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
@@ -207,6 +208,43 @@ const Sidebar = ({ className }: SidebarProps) => {
                 className="bg-card border-2 border-border text-foreground"
               >
                 <p>Progress</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+
+          <Tooltip delayDuration={300}>
+            <TooltipTrigger asChild>
+              <Link to="/classes">
+                <Button
+                  variant="ghost"
+                  className={`${
+                    isExpanded ? "w-full justify-start" : "w-12 h-12"
+                  } rounded-xl hover:bg-orange-100/50 transition-colors ${
+                    isActive("/classes")
+                      ? "bg-orange-100/70 border-2 border-orange-300"
+                      : ""
+                  }`}
+                >
+                  <Users
+                    className={`w-5 h-5 text-orange-600 ${
+                      isExpanded ? "mr-3" : ""
+                    }`}
+                  />
+                  {isExpanded && (
+                    <span className="font-medium text-foreground">
+                      Classes
+                    </span>
+                  )}
+                  {!isExpanded && <span className="sr-only">Classes</span>}
+                </Button>
+              </Link>
+            </TooltipTrigger>
+            {!isExpanded && (
+              <TooltipContent
+                side="right"
+                className="bg-card border-2 border-border text-foreground"
+              >
+                <p>Classes</p>
               </TooltipContent>
             )}
           </Tooltip>

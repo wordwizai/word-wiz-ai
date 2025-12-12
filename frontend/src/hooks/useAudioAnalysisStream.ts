@@ -1,6 +1,7 @@
 import { useContext, useRef } from "react";
 import { AuthContext } from "@/contexts/AuthContext"; // adjust to your project path
 import { API_URL } from "@/api";
+import { showAuthError, showErrorToast, showNetworkError } from "@/utils/errorHandling";
 
 interface AudioAnalysisEvents {
   type: "analysis" | "gpt_response" | "audio_feedback_file";
@@ -35,6 +36,7 @@ export const useAudioAnalysisStream = (
     clientWords?: string[] | null
   ) => {
     if (!token) {
+      showAuthError("Not authenticated");
       options?.onError?.("Not authenticated");
       return;
     }
@@ -129,6 +131,7 @@ export const useAudioAnalysisStream = (
                   console.error("SSE Error:", parsed.data);
                 }
               } catch (err) {
+                showErrorToast("Failed to parse server response");
                 options?.onError?.("Failed to parse SSE message");
               }
             }
@@ -138,6 +141,7 @@ export const useAudioAnalysisStream = (
         }
       })
       .catch((err) => {
+        showNetworkError(err.message);
         options?.onError?.(err.message);
         // Signal that processing has ended on error
         options?.onProcessingEnd?.();

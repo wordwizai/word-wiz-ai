@@ -3,6 +3,7 @@ import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useHybridAudioAnalysis } from "@/hooks/useHybridAudioAnalysis";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getCurrentSessionState, type Session } from "@/api";
+import { showErrorToast, showAudioPlaybackError } from "@/utils/errorHandling";
 
 interface BasePracticeProps {
   session: Session;
@@ -99,14 +100,12 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
       // Attempt to play with error handling
       audio.play().catch((error) => {
         console.error("[AudioFeedback] Failed to play audio:", error);
-        // Show user-friendly error message
-        alert(
-          "Failed to play audio feedback. Please check your device volume and try again."
-        );
+        showAudioPlaybackError(error);
       });
     },
     onError: (err) => {
       console.error("Stream error:", err);
+      showErrorToast(err);
       setIsProcessing(false);
     },
     sessionId: session.id,

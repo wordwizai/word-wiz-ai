@@ -7,6 +7,7 @@ import { performanceTracker } from "@/services/performanceTracker";
 import phonemeExtractor from "@/services/phonemeExtractor";
 import wordExtractor from "@/services/wordExtractor";
 import type { ExtractionType } from "@/services/performanceTracker";
+import { showModelError, showAudioError } from "@/utils/errorHandling";
 
 interface UseHybridAudioAnalysisOptions
   extends Omit<UseAudioTransportOptions, "useWebSocket" | "sessionId"> {
@@ -140,6 +141,7 @@ export const useHybridAudioAnalysis = (
         }
       } else {
         console.error("[HybridAudioAnalysis] ❌ Both models failed to load");
+        showModelError("Failed to load speech recognition models");
         throw new Error("Failed to load both models");
       }
     } catch (error) {
@@ -264,6 +266,7 @@ export const useHybridAudioAnalysis = (
           "[HybridAudioAnalysis] Unexpected error during extraction:",
           error
         );
+        showAudioError(error as Error);
         performanceTracker.recordClientExtraction(0, false);
       }
     }

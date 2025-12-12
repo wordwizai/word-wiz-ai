@@ -16,6 +16,7 @@ import type {
   AudioTransport,
   AudioAnalysisEvent,
 } from "@/services/audioTransport";
+import { showErrorToast, showNetworkError } from "@/utils/errorHandling";
 
 export interface UseAudioTransportOptions {
   onAnalysis?: (data: any) => void;
@@ -71,6 +72,7 @@ export function useAudioTransport(options: UseAudioTransportOptions) {
       case "error":
         setIsProcessing(false);
         opts.onProcessingEnd?.();
+        showErrorToast(event.data);
         opts.onError?.(event.data);
         break;
 
@@ -98,6 +100,7 @@ export function useAudioTransport(options: UseAudioTransportOptions) {
         onEvent: handleEvent,
         onError: (error) => {
           console.error("Transport error:", error);
+          showErrorToast(error);
           optionsRef.current.onError?.(error);
         },
         onConnect: () => {
@@ -111,6 +114,7 @@ export function useAudioTransport(options: UseAudioTransportOptions) {
       })
       .catch((err) => {
         console.error("Failed to initialize transport:", err);
+        showNetworkError(err);
         optionsRef.current.onError?.("Failed to connect. Please try again.");
       });
 

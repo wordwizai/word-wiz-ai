@@ -3,6 +3,7 @@ import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useHybridAudioAnalysis } from "@/hooks/useHybridAudioAnalysis";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getCurrentSessionState, type Session } from "@/api";
+import { showErrorToast } from "@/utils/errorHandling";
 
 interface SentenceOption {
   sentence: string;
@@ -84,6 +85,7 @@ const ChoiceStoryBasePractice = ({
     },
     onError: (err) => {
       console.error("Stream error:", err);
+      showErrorToast(err);
       setIsProcessing(false);
     },
     sessionId: session.id,

@@ -18,11 +18,13 @@ import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import { Analytics } from "@vercel/analytics/react";
 import About from "./pages/About.tsx";
 import Contact from "./pages/Contact.tsx";
+import { Toaster } from "./components/ui/toaster.tsx";
 
 function App() {
   return (
     <div className="font-body">
       <Analytics />
+      <Toaster />
       <BrowserRouter>
         <AuthProvider>
           <SettingsProvider>

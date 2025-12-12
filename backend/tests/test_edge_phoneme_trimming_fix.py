@@ -180,6 +180,7 @@ def test_comparison_old_vs_new():
     new_end_sample = last_frame_idx * hop_length + frame_length
     
     difference = new_end_sample - old_end_sample
+    expected_difference = frame_length - hop_length
     
     print(f"\nComparison of old vs new calculation:")
     print(f"Last speech frame index: {last_frame_idx}")
@@ -189,8 +190,8 @@ def test_comparison_old_vs_new():
     print(f"\n⚠️  The bug was cutting off {difference} samples (~{difference/sr*1000:.1f}ms) from the end!")
     print(f"This is enough to lose final consonants and parts of the last word.")
     
-    assert difference == frame_length - hop_length == 1536, \
-        "Calculation error in demonstration"
+    assert difference == expected_difference, \
+        f"Calculation error: expected {expected_difference}, got {difference}"
     
     print("✅ Demonstration complete")
 

@@ -23,6 +23,8 @@ This guide outlines a pragmatic, phased approach to improving the Classes page i
 
 ### Key Objectives
 
+- **Student-First Design**: Build the main classes page optimized for student view
+- **Teacher View Toggle**: Provide teachers with an easy way to switch to management view
 - **Optimize Layout**: Improve the visual organization and hierarchy of the classes page
 - **Detailed Class View**: Create a comprehensive view showing detailed class information and analytics
 - **Detailed Student View**: Provide teachers with in-depth student performance data
@@ -31,6 +33,7 @@ This guide outlines a pragmatic, phased approach to improving the Classes page i
 
 ### Core Principles
 
+- **Student-First**: Design primarily for students, with teacher features as an enhancement
 - **80/20 Rule**: Focus on features that provide 80% of value with 20% of effort
 - **No Overengineering**: Keep solutions simple and maintainable
 - **Consistent Design**: Follow existing UI patterns and component library (shadcn/ui)
@@ -48,23 +51,27 @@ This guide outlines a pragmatic, phased approach to improving the Classes page i
    - Displays two sections: "Classes I Teach" and "Classes I'm Enrolled In"
    - Lists classes using ClassCard components
    - Simple loading and empty states
+   - **Needs Update**: Should default to student view for all users
 
 2. **ClassCard.tsx**
    - Shows class name, join code, student count
    - Expandable student list (teachers only)
    - Delete/leave class actions
    - Pastel purple background with rounded corners
+   - **Needs Update**: Should show student-focused information by default
 
 3. **StudentList.tsx**
    - Fetches and displays students for a class
    - Uses StudentCard components
    - Shows loading and error states
+   - **Teacher-only component**: Only visible in teacher view
 
 4. **StudentCard.tsx**
    - Displays student name, email, joined date
    - Shows 4 key metrics: sessions, words read, streak, last activity
    - Shows average accuracy (calculated from PER)
    - Compact card layout with icons
+   - **Teacher-only component**: Only visible in teacher view
 
 ### Current Strengths
 
@@ -76,10 +83,12 @@ This guide outlines a pragmatic, phased approach to improving the Classes page i
 
 ### Current Limitations
 
+- ❌ Page is teacher-focused, not optimized for student experience
+- ❌ No view toggle for teachers to switch between student and management views
 - ❌ No detailed view for individual classes
 - ❌ No detailed view for individual students
 - ❌ Limited analytics and insights
-- ❌ All information crammed in expandable sections
+- ❌ All teacher information crammed in expandable sections
 - ❌ No sorting or filtering options
 - ❌ No visual charts or progress indicators
 - ❌ Difficult to compare student performance
@@ -87,18 +96,31 @@ This guide outlines a pragmatic, phased approach to improving the Classes page i
 
 ---
 
-## Improvement Goals
-
 ### Primary Goals (Must Have - Phase 2)
 
-1. **Detailed Class View**
+1. **Student-Focused Class View**
+   - Design main classes page for student experience
+   - Show classes student is enrolled in prominently
+   - Display relevant student metrics (their own progress, assignments, etc.)
+   - Clean, simple interface focused on learning
+
+2. **Teacher View Toggle**
+   - Add view switcher for teachers (Student View / Teacher View)
+   - Persist teacher's view preference (localStorage or user settings)
+   - Seamless transition between views
+   - Teacher view shows management features (student roster, analytics, etc.)
+
+3. **Optimized Student Layout**
+   - Better card layout showing student's progress in each class
+   - Display teacher name, class name, personal stats
+   - Quick access to class materials or activities
+   - Motivating progress indicators
+
+4. **Detailed Class View (Teacher Mode)**
    - Dedicated page/modal for viewing a single class in detail
    - Class overview with statistics (total students, average performance, activity trends)
    - Student roster with sortable columns
-   - Quick actions (add/remove students, edit class details)
-
-2. **Optimized List Layout**
-   - Better card layout with improved visual hierarchy
+   - Quick actions (add/remove students, edit class details)isual hierarchy
    - Preview of key metrics without expanding
    - Quick navigation to detailed views
 
@@ -136,48 +158,182 @@ This guide outlines a pragmatic, phased approach to improving the Classes page i
 
 - [x] Analyze existing ClassesPage, ClassCard, StudentList, StudentCard components
 - [x] Review backend API endpoints and data structures
-- [x] Identify data already available vs. data that needs new endpoints
-- [x] Create implementation guide document
-- [x] Define phases and deliverables
+### Phase 2: Student-First View with Teacher Toggle
 
-#### QA Checklist
-
-- [x] All existing components reviewed and understood
-- [x] Backend API capabilities documented
-- [x] Implementation phases clearly defined
-- [x] Guide follows 80/20 principle
-
----
-
-### Phase 2: Detailed Class View
-
-**Goal**: Create a comprehensive view for a single class with enhanced layout and detailed student information
+**Goal**: Redesign the main classes page for students, with a view toggle for teachers
 
 #### Todos
 
-- [ ] **Create ClassDetailView component** (`frontend/src/components/classes/ClassDetailView.tsx`)
+- [ ] **Update ClassesPage component** (`frontend/src/pages/ClassesPage.tsx`)
+  - Add view state: `student` or `teacher` (default: `student`)
+  - Add view toggle button in header (visible only for teachers)
+  - Persist view preference in localStorage
+  - Conditionally render based on current view
+
+- [ ] **Create ViewToggle component** (`frontend/src/components/classes/ViewToggle.tsx`)
+  - Toggle switch or segmented control: "Student View" / "Teacher View"
+  - Only visible for users who are teachers (have classes they teach)
+  - Smooth transition between views
+  - Clear visual indication of current view
+
+- [ ] **Update ClassCard for Student View** (`frontend/src/components/classes/ClassCard.tsx`)
+  - When in student view:
+    - Show class name prominently
+    - Show teacher name
+    - Show student's personal progress in that class (sessions, accuracy, streak)
+    - Remove join code, student count, management features
+    - Focus on encouraging and motivating design
+  - When in teacher view:
+    - Show existing teacher features (student count, join code, etc.)
+    - Add "View Details" button for detailed class management
+
+- [ ] **Create StudentClassCard component** (`frontend/src/components/classes/StudentClassCard.tsx`)
+  - New component specifically for student view of their classes
+  - Displays: class name, teacher name, personal stats, recent activity
+  - Visual progress indicators for motivation
+  - Click to view class details (student perspective)
+
+- [ ] **Update Classes Layout**
+  - In student view: Single section "My Classes" (classes enrolled in)
+  - In teacher view: Two sections "Classes I Teach" and "Classes I'm Enrolled In"
+  - Better visual hierarchy and spacing
+  - Responsive grid layout
+
+- [ ] **Create ClassDetailView component (Teacher Mode)** (`frontend/src/components/classes/ClassDetailView.tsx`)
   - Route: `/classes/:classId` or modal overlay on ClassesPage
+  - Only accessible in teacher view
   - Header section with class name, join code, and quick stats
   - Student roster table with sortable columns
   - Navigation back to classes list
+---
 
-- [ ] **Add Class Statistics Section**
-  - Total students enrolled
-  - Average accuracy across all students
-  - Total sessions completed by class
-  - Total words read by class
-  - Most active students (top 3-5)
-  - Recent activity timeline
+### Phase 2: Detailed Class View
+#### Implementation Details
 
-- [ ] **Enhance Student Roster Display**
-  - Table view with columns: Name, Email, Sessions, Words Read, Accuracy, Last Active, Streak
-  - Make columns sortable (click header to sort)
-  - Add search/filter by student name
-  - Click student row to view detailed student view (Phase 3)
+**File: `frontend/src/pages/ClassesPage.tsx`**
 
-- [ ] **Update ClassCard Component**
-  - Add "View Details" button
-  - Show preview of top 3 students
+```tsx
+// Suggested structure (not final code)
+type ViewMode = 'student' | 'teacher';
+
+const ClassesPage = () => {
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    // Load from localStorage, default to 'student'
+    return (localStorage.getItem('classesViewMode') as ViewMode) || 'student';
+  });
+  
+  const isTeacher = taughtClasses.length > 0;
+  
+  const handleViewChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    localStorage.setItem('classesViewMode', mode);
+  };
+  
+  return (
+    <div>
+      {isTeacher && <ViewToggle mode={viewMode} onChange={handleViewChange} />}
+      
+      {viewMode === 'student' ? (
+        <StudentView enrolledClasses={enrolledClasses} />
+      ) : (
+        <TeacherView taughtClasses={taughtClasses} enrolledClasses={enrolledClasses} />
+**Backend Requirements**
+
+No new endpoints needed! All data available from:
+- `GET /classes/my-classes` - Returns classes with student count (for teacher view)
+- `GET /classes/enrolled` - Returns classes student is enrolled in (for student view)
+- `GET /classes/{class_id}/students` - Returns detailed student list with stats (for teacher view)
+
+**Note**: May need to enhance enrolled classes endpoint to include student's own stats for each class
+
+**File: `frontend/src/components/classes/ViewToggle.tsx`**
+
+```tsx
+// Suggested structure (not final code)
+interface ViewToggleProps {
+  mode: 'student' | 'teacher';
+  onChange: (mode: 'student' | 'teacher') => void;
+}
+
+const ViewToggle = ({ mode, onChange }: ViewToggleProps) => {
+  return (
+    <div className="flex items-center gap-2 mb-4">
+      <Button
+        variant={mode === 'student' ? 'default' : 'outline'}
+        onClick={() => onChange('student')}
+      >
+        Student View
+      </Button>
+      <Button
+        variant={mode === 'teacher' ? 'default' : 'outline'}
+        onClick={() => onChange('teacher')}
+      >
+        Teacher View
+      </Button>
+    </div>
+  );
+};
+```
+
+**File: `frontend/src/components/classes/StudentClassCard.tsx`**
+
+```tsx
+// Suggested structure (not final code)
+#### QA Checklist
+
+- [ ] Page defaults to student view for all users
+- [ ] View toggle only appears for teachers
+- [ ] View preference persists across sessions
+- [ ] Smooth transition between student and teacher views
+- [ ] StudentClassCard displays correct student-specific data
+- [ ] Student view is motivating and easy to understand
+- [ ] Teacher view maintains all existing management features
+- [ ] ClassDetailView (teacher mode) created and displays correctly
+- [ ] Navigation between list and detail view works smoothly
+- [ ] Class statistics section shows accurate data
+- [ ] Student roster is sortable by each column
+- [ ] Search/filter functionality works
+- [ ] Mobile responsive design works well for both views
+- [ ] Loading and error states handled properly
+- [ ] All existing functionality still works
+- [ ] Visual design consistent with app style
+- [ ] Students cannot access teacher-only features
+      <div className="mt-4 space-y-2">
+        <StatItem icon={BookOpen} label="Sessions" value={userStats.total_sessions} />
+        <StatItem icon={Target} label="Accuracy" value={`${(userStats.average_per * 100).toFixed(1)}%`} />
+        <StatItem icon={Flame} label="Streak" value={`${userStats.current_streak} days`} />
+      </div>
+    </Card>
+  );
+};
+```
+
+**File: `frontend/src/components/classes/ClassCard.tsx`**
+
+```tsx
+// Updates to ClassCard for teacher view
+- Keep expandable student list for teacher view
+- Add "View Details" button that navigates to ClassDetailView
+- Show 3-4 key metrics directly on card
+- Show preview of top students (e.g., "Alice, Bob, +3 more")
+```
+
+**File: `frontend/src/components/classes/ClassDetailView.tsx`**
+
+```tsx
+// Suggested structure (not final code) - Teacher only
+interface ClassDetailViewProps {
+  classId: number;
+  onBack: () => void;
+}
+
+const ClassDetailView = ({ classId, onBack }: ClassDetailViewProps) => {
+  // Fetch class details and students
+  // Display class header with stats
+  // Display student roster table
+  // Handle sorting and filtering
+};
+``` Show preview of top 3 students
   - Display key class metrics directly on card (average accuracy, total sessions)
   - Remove expandable section (use detail view instead)
 
@@ -361,26 +517,41 @@ def get_student_details(
 
 - [ ] **Add Class Analytics Dashboard**
   - Simple bar chart or visualization for class performance distribution
-  - Activity timeline (sessions per day/week)
-  - Leaderboard (optional, if educationally appropriate)
+### Component Architecture
 
-- [ ] **Improve Empty and Loading States**
-  - Better empty state illustrations
-  - Skeleton loaders for better perceived performance
-  - Helpful onboarding tooltips
+```
+ClassesPage
+├── ViewToggle (NEW - teachers only)
+│   └── Switches between Student View and Teacher View
+│
+├── Student View (DEFAULT)
+│   └── StudentClassCard (NEW)
+│       ├── Class name, teacher name
+│       ├── Student's personal stats
+│       └── Progress indicators
+│
+└── Teacher View
+    ├── Classes I Teach Section
+    │   └── ClassCard (enhanced)
+    │       ├── Shows student count, join code
+    │       ├── Preview of top students
+    │       └── "View Details" button → ClassDetailView
+    │
+    ├── Classes I'm Enrolled In Section
+    │   └── StudentClassCard (same as student view)
+    │
+    └── ClassDetailView (NEW - Modal/Route)
+        ├── ClassHeader (name, join code, quick stats)
+        ├── ClassStatistics (analytics section)
+        └── StudentRoster (sortable table)
+            └── StudentRow (clickable) → StudentDetailView
 
-- [ ] **Add Quick Actions**
-  - Copy join code with one click
-  - Quick view student details from anywhere
-  - Export class roster (CSV) for record keeping
-
-- [ ] **Performance Optimizations**
-  - Lazy loading for large student lists
-  - Memoization for expensive calculations
-  - Debounced search inputs
-
-#### Implementation Details
-
+StudentDetailView (NEW - Teacher only)
+├── StudentHeader (profile info)
+├── PerformanceMetrics (key statistics)
+├── SessionHistory (recent sessions)
+└── ProblemAreas (challenging phonemes)
+```
 **Visual Enhancements**
 
 ```tsx
@@ -470,26 +641,35 @@ ClassesPage
 └── ClassDetailView (NEW)
     ├── ClassHeader (name, join code, quick stats)
     ├── ClassStatistics (analytics section)
-    └── StudentRoster (sortable table)
-        └── StudentRow (clickable) → StudentDetailView
+### Data Flow
 
-StudentDetailView (NEW)
-├── StudentHeader (profile info)
-├── PerformanceMetrics (key statistics)
-├── SessionHistory (recent sessions)
-└── ProblemAreas (challenging phonemes)
 ```
+1. User views ClassesPage
+   → Page defaults to Student View
+   → Fetches GET /classes/enrolled (classes student is in)
+   → Displays StudentClassCard for each class with personal stats
 
-### Navigation Strategy
+2. Teacher clicks View Toggle
+   → Switches to Teacher View
+   → Fetches GET /classes/my-classes (classes they teach)
+   → Displays ClassCard for taught classes
+   → Displays StudentClassCard for enrolled classes
+   → Saves preference to localStorage
 
-**Option A: Modal-Based (Recommended for simplicity)**
-- ClassDetailView and StudentDetailView render as modal overlays
-- Maintains context, no routing needed
-- Simpler implementation
-- Good for mobile
+3. Teacher clicks "View Details" on ClassCard (Teacher View only)
+   → Opens ClassDetailView modal with classId
+   → Fetches GET /classes/{classId}/students
+   → Displays class header, stats, and student roster
 
-**Option B: Route-Based**
-- Add routes: `/classes/:classId` and `/classes/:classId/students/:studentId`
+4. Teacher clicks on student in roster
+   → Opens StudentDetailView modal with classId and studentId
+   → Uses data from students endpoint (already loaded)
+   → Optionally fetches GET /classes/{classId}/students/{studentId} for more details
+
+5. User clicks back
+   → Closes modal, returns to previous view
+   → View mode (student/teacher) persists
+```dd routes: `/classes/:classId` and `/classes/:classId/students/:studentId`
 - More traditional SPA navigation
 - Shareable URLs
 - Better for bookmarking
@@ -608,16 +788,18 @@ interface StudentWithStats {
   email: string;
   joined_at: string;
   statistics: {
-    total_sessions: number;
-    words_read: number;
-    average_per: number;  // Phoneme Error Rate (0-1, lower is better)
-    last_session_date: string | null;
-    current_streak: number;  // Days
-  };
-}
-```
+## Implementation Timeline Estimate
 
-### Class (from backend)
+Following the 80/20 rule:
+
+- **Phase 1**: ✓ Completed (Planning)
+- **Phase 2**: ~6-8 hours (Student-First View with Teacher Toggle)
+  - 2 hours: Update ClassesPage with view toggle logic
+  - 1 hour: Create ViewToggle component
+  - 2 hours: Create StudentClassCard component
+  - 1 hour: Update ClassCard for teacher view
+  - 1 hour: ClassDetailView component (teacher mode)
+  - 1-2 hours: Testing and polish
 
 ```typescript
 interface Class {

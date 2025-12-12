@@ -9,12 +9,14 @@ import {
   getMyStudentClasses,
   type Class,
   type ClassWithTeacher,
+  type StudentWithStats,
 } from "@/api";
 import CreateClassDialog from "@/components/classes/CreateClassDialog";
 import JoinClassDialog from "@/components/classes/JoinClassDialog";
 import ClassCard from "@/components/classes/ClassCard";
 import ViewToggle from "@/components/classes/ViewToggle";
 import ClassDetailView from "@/components/classes/ClassDetailView";
+import StudentDetailView from "@/components/classes/StudentDetailView";
 
 type ViewMode = "student" | "teacher";
 
@@ -36,6 +38,9 @@ const ClassesPage = () => {
   const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
   const [selectedClassName, setSelectedClassName] = useState<string>("");
   const [selectedJoinCode, setSelectedJoinCode] = useState<string>("");
+  
+  // Student detail view state
+  const [selectedStudent, setSelectedStudent] = useState<StudentWithStats | null>(null);
 
   useEffect(() => {
     fetchClasses();
@@ -92,10 +97,31 @@ const ClassesPage = () => {
     setSelectedClassId(null);
     setSelectedClassName("");
     setSelectedJoinCode("");
+    setSelectedStudent(null);
+  };
+
+  const handleViewStudent = (student: StudentWithStats) => {
+    setSelectedStudent(student);
+  };
+
+  const handleBackToClassDetail = () => {
+    setSelectedStudent(null);
   };
 
   // Check if user is a teacher
   const isTeacher = myClasses.length > 0;
+
+  // If viewing student details, show student detail view
+  if (selectedStudent !== null) {
+    return (
+      <main className="flex-1 p-4 sm:p-6 bg-background space-y-6 overflow-y-auto flex flex-col min-h-0 h-full">
+        <StudentDetailView
+          student={selectedStudent}
+          onBack={handleBackToClassDetail}
+        />
+      </main>
+    );
+  }
 
   // If viewing class details, show detail view
   if (selectedClassId !== null) {
@@ -106,6 +132,7 @@ const ClassesPage = () => {
           className={selectedClassName}
           joinCode={selectedJoinCode}
           onBack={handleBackToList}
+          onViewStudent={handleViewStudent}
         />
       </main>
     );

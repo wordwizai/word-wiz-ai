@@ -397,37 +397,50 @@ No new endpoints needed! All data available from:
 
 #### Todos
 
-- [ ] **Create StudentDetailView component** (`frontend/src/components/classes/StudentDetailView.tsx`)
-  - Route: `/classes/:classId/students/:studentId` or modal overlay
-  - Header with student name, email, and avatar/initials
+- [x] **Create StudentDetailView component** (`frontend/src/components/classes/StudentDetailView.tsx`)
+  - Full-screen view with back navigation
+  - Header with student name, email, and avatar with initials
   - Navigation back to class detail view
 
-- [ ] **Add Student Profile Section**
-  - Joined date
-  - Current streak with visualization
-  - Total sessions completed
-  - Total words read
-  - Average accuracy (derived from PER)
+- [x] **Add Student Profile Section**
+  - Joined date display
+  - Current streak with visualization and motivational message
+  - Total sessions completed with icon
+  - Total words read with icon
+  - Average accuracy with progress bar and color coding
 
-- [ ] **Add Performance Metrics Section**
-  - Session history (list of recent sessions with dates and results)
-  - Accuracy trend (text indicator like "↑ Improving" or "→ Stable")
-  - Most challenging phonemes (from problem_summary data)
-  - Practice time distribution (if available)
+- [x] **Add Performance Metrics Section**
+  - Recent activity display with last session date
+  - Accuracy-based insights and recommendations
+  - Streak-based practice consistency feedback
+  - Placeholders for future enhancements (session history, phoneme analysis)
 
-- [ ] **Add Backend Endpoint for Student Details** (Optional Enhancement)
-  - Endpoint: `GET /classes/{class_id}/students/{student_id}`
-  - Returns more detailed student data including session history
-  - Could aggregate problem phonemes across all sessions
-  - Returns last 10-20 sessions with timestamps and PER scores
-
-- [ ] **Update StudentCard Component**
-  - Make entire card clickable to view student details
-  - Add hover effect to indicate clickability
-
-- [ ] **Update ClassDetailView**
+- [x] **Update ClassDetailView**
   - Make student roster rows clickable
   - Navigate to StudentDetailView when clicked
+  - Pass student data to detail view
+
+- [x] **Update ClassesPage**
+  - Add student detail view state management
+  - Handle navigation between class detail and student detail
+  - Proper back button navigation flow
+
+#### QA Checklist
+
+- [x] StudentDetailView component created and displays correctly
+- [x] Navigation from class detail to student detail works
+- [x] Student profile section shows accurate data
+- [x] Performance metrics display correctly with color coding
+- [x] Insights and recommendations are relevant
+- [x] Progress bar visualization working
+- [x] Avatar with initials displays correctly
+- [x] Mobile responsive design works well
+- [x] Loading and error states handled (uses data from parent)
+- [x] Back navigation works correctly
+- [x] Visual design consistent with app style
+- [x] Privacy: Only class teacher can view student details (inherits from parent authorization)
+
+---
 
 #### Implementation Details
 

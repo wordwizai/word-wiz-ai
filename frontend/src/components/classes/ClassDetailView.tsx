@@ -29,6 +29,7 @@ interface ClassDetailViewProps {
   className: string;
   joinCode: string;
   onBack: () => void;
+  onViewStudent?: (student: StudentWithStats) => void;
 }
 
 type SortField = "name" | "sessions" | "words" | "accuracy" | "last_active" | "streak";
@@ -39,6 +40,7 @@ const ClassDetailView = ({
   className,
   joinCode,
   onBack,
+  onViewStudent,
 }: ClassDetailViewProps) => {
   const { token } = useContext(AuthContext);
   const [students, setStudents] = useState<StudentWithStats[]>([]);
@@ -338,7 +340,11 @@ const ClassDetailView = ({
                 </TableHeader>
                 <TableBody>
                   {filteredAndSortedStudents.map((student) => (
-                    <TableRow key={student.id} className="hover:bg-muted/50">
+                    <TableRow
+                      key={student.id}
+                      className="hover:bg-muted/50 cursor-pointer"
+                      onClick={() => onViewStudent && onViewStudent(student)}
+                    >
                       <TableCell>
                         <div>
                           <p className="font-medium text-foreground">

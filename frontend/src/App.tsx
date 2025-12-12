@@ -19,6 +19,7 @@ import { Analytics } from "@vercel/analytics/react";
 import About from "./pages/About.tsx";
 import Contact from "./pages/Contact.tsx";
 import { Toaster } from "./components/ui/toaster.tsx";
+import ToastTestPage from "./pages/ToastTestPage.tsx";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/signup" element={<SignUp />} />
+                <Route path="/toast-test" element={<ToastTestPage />} />
                 <Route path="/oauth-callback" element={<OAuthRedirect />} />
                 <Route
                   path="/practice/:sessionId"

@@ -220,89 +220,53 @@ const ClassesPage = () => {
             </Card>
           )}
 
-          {/* Teacher View - Show both taught and enrolled classes */}
+          {/* Teacher View - Show taught classes only */}
           {viewMode === "teacher" && (
-            <>
-              {/* Teacher's Classes */}
-              <Card className="rounded-2xl bg-card border-2 border-border shadow-md">
-                <CardHeader className="p-4">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-bold text-foreground">
-                      Classes I Teach
-                    </h2>
-                    <Button
-                      onClick={() => setShowCreateDialog(true)}
-                      variant="default"
-                      size="sm"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Create Class
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4 pt-0">
-                  {loading ? (
-                    <div className="text-center text-muted-foreground py-8">
-                      Loading...
-                    </div>
-                  ) : myClasses.length > 0 ? (
-                    <div className="space-y-3">
-                      {myClasses.map((classItem) => (
-                        <ClassCard
-                          key={classItem.id}
-                          classItem={classItem}
-                          isTeacher={true}
-                          viewMode="teacher"
-                          onDeleted={handleClassDeleted}
-                          onLeft={handleClassLeft}
-                          onViewDetails={handleViewClassDetails}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center text-muted-foreground py-8">
-                      <p>You haven't created any classes yet.</p>
-                      <p className="text-sm mt-2">
-                        Click "Create Class" to get started!
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Student's Enrolled Classes */}
-              <Card className="rounded-2xl bg-card border-2 border-border shadow-md">
-                <CardHeader className="p-4">
+            <Card className="rounded-2xl bg-card border-2 border-border shadow-md">
+              <CardHeader className="p-4">
+                <div className="flex items-center justify-between">
                   <h2 className="text-lg font-bold text-foreground">
-                    Classes I'm Enrolled In
+                    Classes I Teach
                   </h2>
-                </CardHeader>
-                <CardContent className="p-4 pt-0">
-                  {loading ? (
-                    <div className="text-center text-muted-foreground py-8">
-                      Loading...
-                    </div>
-                  ) : studentClasses.length > 0 ? (
-                    <div className="space-y-3">
-                      {studentClasses.map((classItem) => (
-                        <ClassCard
-                          key={classItem.id}
-                          classItem={classItem}
-                          isTeacher={false}
-                          viewMode="teacher"
-                          onDeleted={handleClassDeleted}
-                          onLeft={handleClassLeft}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center text-muted-foreground py-8">
-                      <p>You haven't joined any classes yet.</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </>
+                  <Button
+                    onClick={() => setShowCreateDialog(true)}
+                    variant="default"
+                    size="sm"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Class
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-4 pt-0">
+                {loading ? (
+                  <div className="text-center text-muted-foreground py-8">
+                    Loading...
+                  </div>
+                ) : myClasses.length > 0 ? (
+                  <div className="space-y-3">
+                    {myClasses.map((classItem) => (
+                      <ClassCard
+                        key={classItem.id}
+                        classItem={classItem}
+                        isTeacher={true}
+                        viewMode="teacher"
+                        onDeleted={handleClassDeleted}
+                        onLeft={handleClassLeft}
+                        onViewDetails={handleViewClassDetails}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center text-muted-foreground py-8">
+                    <p>You haven't created any classes yet.</p>
+                    <p className="text-sm mt-2">
+                      Click "Create Class" to get started!
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           )}
         </TabsContent>
       </Tabs>

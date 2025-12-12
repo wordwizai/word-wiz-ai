@@ -141,7 +141,7 @@ export const useHybridAudioAnalysis = (
         }
       } else {
         console.error("[HybridAudioAnalysis] ❌ Both models failed to load");
-        showModelError("Failed to load speech recognition models");
+        showModelError(new Error("Failed to load both models"));
         throw new Error("Failed to load both models");
       }
     } catch (error) {

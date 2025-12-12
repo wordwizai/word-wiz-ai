@@ -100,7 +100,6 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
       // Attempt to play with error handling
       audio.play().catch((error) => {
         console.error("[AudioFeedback] Failed to play audio:", error);
-        // Show user-friendly error message
         showAudioPlaybackError(error);
       });
     },

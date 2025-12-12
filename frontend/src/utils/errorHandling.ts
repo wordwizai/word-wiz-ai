@@ -67,15 +67,18 @@ export function categorizeError(error: string | Error): ErrorCategory {
   if (lowerMessage.includes("network") || lowerMessage.includes("connect") || lowerMessage.includes("timeout")) {
     return ErrorCategory.NETWORK;
   }
-  if (lowerMessage.includes("audio") && lowerMessage.includes("play")) {
+  // Check for playback errors before general audio errors (more specific first)
+  if (lowerMessage.includes("play") && lowerMessage.includes("audio")) {
     return ErrorCategory.AUDIO_PLAYBACK;
   }
+  // Check for model/loading errors before general audio errors
   if (lowerMessage.includes("model") || lowerMessage.includes("load")) {
     return ErrorCategory.MODEL_LOADING;
   }
   if (lowerMessage.includes("parse") || lowerMessage.includes("sse")) {
     return ErrorCategory.STREAM_PARSING;
   }
+  // General audio errors checked last
   if (lowerMessage.includes("audio") || lowerMessage.includes("recording")) {
     return ErrorCategory.AUDIO_PROCESSING;
   }
@@ -90,12 +93,14 @@ export function showErrorToast(error: string | Error, category?: ErrorCategory) 
   const errorCategory = category || categorizeError(error);
   const errorMessage = ERROR_MESSAGES[errorCategory];
 
-  const descriptionWithAction = errorMessage.action
-    ? `${errorMessage.description}\n\n${errorMessage.action}`
-    : errorMessage.description;
+  // Build description with action on separate line if present
+  const descriptionParts = [errorMessage.description];
+  if (errorMessage.action) {
+    descriptionParts.push(errorMessage.action);
+  }
 
   toast.error(errorMessage.title, {
-    description: descriptionWithAction,
+    description: descriptionParts.join("\n\n"),
   });
 
   // Log detailed error for debugging

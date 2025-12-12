@@ -166,12 +166,6 @@ const ClassesPage = () => {
 
       {/* Tabs */}
       <Tabs defaultValue="my-classes" className="flex-1 flex flex-col min-h-0">
-        {viewMode === "teacher" && (
-          <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="my-classes">My Classes</TabsTrigger>
-            <TabsTrigger value="join">Join Class</TabsTrigger>
-          </TabsList>
-        )}
 
         {/* My Classes Tab */}
         <TabsContent
@@ -304,9 +298,6 @@ const ClassesPage = () => {
                   ) : (
                     <div className="text-center text-muted-foreground py-8">
                       <p>You haven't joined any classes yet.</p>
-                      <p className="text-sm mt-2">
-                        Use the "Join Class" tab to join a class!
-                      </p>
                     </div>
                   )}
                 </CardContent>
@@ -314,16 +305,6 @@ const ClassesPage = () => {
             </>
           )}
         </TabsContent>
-
-        {/* Join Class Tab - Only in teacher view */}
-        {viewMode === "teacher" && (
-          <TabsContent value="join" className="flex-1">
-            <JoinClassDialog
-              onJoined={handleClassJoined}
-              showAsCard={true}
-            />
-          </TabsContent>
-        )}
       </Tabs>
 
       {/* Dialogs */}

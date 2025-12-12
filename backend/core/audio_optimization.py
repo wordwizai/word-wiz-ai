@@ -66,7 +66,7 @@ class OptimizedAudioPreprocessor:
                 # NEW: Use phoneme-aware trimming with padding
                 audio = self.phoneme_trimmer.trim_with_speech_detection(
                     audio,
-                    padding_ms=150,  # Generous padding to preserve edge phonemes
+                    padding_ms=200,  # Extra generous padding to preserve edge phonemes (especially final consonants)
                     use_zcr=True     # Use zero-crossing rate for consonant detection
                 )
             else:

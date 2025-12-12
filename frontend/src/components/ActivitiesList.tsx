@@ -29,7 +29,28 @@ interface ActivitiesListProps {
   useInputActivities?: boolean; // if true, use inputActivities prop instead of fetching
   inputActivities?: Activity[];
   className?: string; // additional class names for styling
+  shuffleDaily?: boolean; // if true, shuffle activities based on date seed
 }
+
+// Seeded random number generator using mulberry32 algorithm
+// Provides excellent distribution and fast performance
+const seededRandom = (seed: number) => {
+  let t = seed + 0x6D2B79F5;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  const result = ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  return result;
+};
+
+// Seed offset to ensure different selections for different activity types
+const CHOICE_STORY_SEED_OFFSET = 1000;
+
+// Get date-based seed (changes daily)
+const getDailySeed = () => {
+  const today = new Date();
+  // Use year, month, and day to create a unique seed for each day
+  return today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+};
 
 const ActivitiesList = ({
   numberOfActivities = -1,
@@ -38,6 +59,7 @@ const ActivitiesList = ({
   useInputActivities = false, // if true, use inputActivities prop instead of fetching
   inputActivities,
   className = "",
+  shuffleDaily = false,
 }: ActivitiesListProps) => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const { token } = useContext(AuthContext);
@@ -68,6 +90,53 @@ const ActivitiesList = ({
     window.location.href = `/practice/${response.id}`;
   };
 
+  // Select featured activities for daily display
+  const getDisplayedActivities = () => {
+    // Don't shuffle if explicitly disabled or if showing all activities
+    // When numberOfActivities === -1, we want to show all activities unshuffled
+    if (!shuffleDaily || numberOfActivities === -1) {
+      return activities.filter((a) => (type ? a.activity_type === type : true));
+    }
+
+    // Separate activities by type
+    const unlimitedActivities = activities.filter(
+      (a) => a.activity_type === "unlimited"
+    );
+    const storyActivities = activities.filter(
+      (a) => a.activity_type === "story"
+    );
+    const choiceStoryActivities = activities.filter(
+      (a) => a.activity_type === "choice-story"
+    );
+
+    const featured: Activity[] = [];
+
+    // Always show the first unlimited activity
+    if (unlimitedActivities.length > 0) {
+      featured.push(unlimitedActivities[0]);
+    }
+
+    // Use daily seed to select one story activity
+    if (storyActivities.length > 0) {
+      const seed = getDailySeed();
+      const randomValue = seededRandom(seed);
+      const index = Math.floor(randomValue * storyActivities.length);
+      featured.push(storyActivities[index]);
+    }
+
+    // Use daily seed (with offset) to select one choice-story activity
+    if (choiceStoryActivities.length > 0) {
+      const seed = getDailySeed() + CHOICE_STORY_SEED_OFFSET;
+      const randomValue = seededRandom(seed);
+      const index = Math.floor(randomValue * choiceStoryActivities.length);
+      featured.push(choiceStoryActivities[index]);
+    }
+
+    return featured;
+  };
+
+  const displayedActivities = getDisplayedActivities();
+
   if (displayMode === "carousel") {
     return (
       <Carousel
@@ -91,12 +160,11 @@ const ActivitiesList = ({
                   </CarouselItem>
                 )
               )
-            : activities
-                .filter((a) => (type ? a.activity_type === type : true))
+            : displayedActivities
                 .slice(
                   0,
                   numberOfActivities === -1
-                    ? activities.length
+                    ? displayedActivities.length
                     : numberOfActivities
                 )
                 .map((activity, idx) => (
@@ -141,12 +209,11 @@ const ActivitiesList = ({
                 />
               )
             )
-          : activities
-              .filter((a) => (type ? a.activity_type === type : true))
+          : displayedActivities
               .slice(
                 0,
                 numberOfActivities === -1
-                  ? activities.length
+                  ? displayedActivities.length
                   : numberOfActivities
               )
               .map((activity, idx) => (

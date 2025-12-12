@@ -46,14 +46,6 @@ const ClassesPage = () => {
     fetchClasses();
   }, [token]);
 
-  // Reset view to student if user has no classes to teach
-  useEffect(() => {
-    if (myClasses.length === 0 && viewMode === "teacher") {
-      setViewMode("student");
-      localStorage.setItem("classesViewMode", "student");
-    }
-  }, [myClasses, viewMode]);
-
   const fetchClasses = async () => {
     if (!token) return;
 
@@ -165,12 +157,10 @@ const ClassesPage = () => {
         </div>
       </div>
 
-      {/* View Toggle - Only shown for teachers */}
-      {isTeacher && (
-        <div className="flex justify-center">
-          <ViewToggle mode={viewMode} onChange={handleViewChange} />
-        </div>
-      )}
+      {/* View Toggle - Always shown */}
+      <div className="flex justify-center">
+        <ViewToggle mode={viewMode} onChange={handleViewChange} />
+      </div>
 
       {/* Tabs */}
       <Tabs defaultValue="my-classes" className="flex-1 flex flex-col min-h-0">

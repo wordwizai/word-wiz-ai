@@ -14,6 +14,7 @@ import CreateClassDialog from "@/components/classes/CreateClassDialog";
 import JoinClassDialog from "@/components/classes/JoinClassDialog";
 import ClassCard from "@/components/classes/ClassCard";
 import ViewToggle from "@/components/classes/ViewToggle";
+import ClassDetailView from "@/components/classes/ClassDetailView";
 
 type ViewMode = "student" | "teacher";
 
@@ -30,6 +31,11 @@ const ClassesPage = () => {
     const savedMode = localStorage.getItem("classesViewMode");
     return (savedMode as ViewMode) || "student";
   });
+
+  // Detail view state
+  const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
+  const [selectedClassName, setSelectedClassName] = useState<string>("");
+  const [selectedJoinCode, setSelectedJoinCode] = useState<string>("");
 
   useEffect(() => {
     fetchClasses();
@@ -76,8 +82,34 @@ const ClassesPage = () => {
     localStorage.setItem("classesViewMode", mode);
   };
 
+  const handleViewClassDetails = (classItem: Class) => {
+    setSelectedClassId(classItem.id);
+    setSelectedClassName(classItem.name);
+    setSelectedJoinCode(classItem.join_code);
+  };
+
+  const handleBackToList = () => {
+    setSelectedClassId(null);
+    setSelectedClassName("");
+    setSelectedJoinCode("");
+  };
+
   // Check if user is a teacher
   const isTeacher = myClasses.length > 0;
+
+  // If viewing class details, show detail view
+  if (selectedClassId !== null) {
+    return (
+      <main className="flex-1 p-4 sm:p-6 bg-background space-y-6 overflow-y-auto flex flex-col min-h-0 h-full">
+        <ClassDetailView
+          classId={selectedClassId}
+          className={selectedClassName}
+          joinCode={selectedJoinCode}
+          onBack={handleBackToList}
+        />
+      </main>
+    );
+  }
 
   return (
     <main className="flex-1 p-4 sm:p-6 bg-background space-y-6 overflow-y-auto flex flex-col min-h-0 h-full">
@@ -202,6 +234,7 @@ const ClassesPage = () => {
                           viewMode="teacher"
                           onDeleted={handleClassDeleted}
                           onLeft={handleClassLeft}
+                          onViewDetails={handleViewClassDetails}
                         />
                       ))}
                     </div>

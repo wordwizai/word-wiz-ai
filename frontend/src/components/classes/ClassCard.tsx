@@ -31,6 +31,7 @@ interface ClassCardProps {
   viewMode: "student" | "teacher";
   onDeleted: () => void;
   onLeft: () => void;
+  onViewDetails?: (classItem: Class) => void;
 }
 
 const ClassCard = ({
@@ -39,6 +40,7 @@ const ClassCard = ({
   viewMode,
   onDeleted,
   onLeft,
+  onViewDetails,
 }: ClassCardProps) => {
   const { token } = useContext(AuthContext);
   const [copied, setCopied] = useState(false);
@@ -200,19 +202,29 @@ const ClassCard = ({
 
         {/* Expand Students Button (Teachers Only in Teacher View) */}
         {isTeacher && viewMode === "teacher" && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setExpanded(!expanded)}
-            className="w-full justify-between hover:bg-white/40"
-          >
-            <span>View Students</span>
-            {expanded ? (
-              <ChevronUp className="w-4 h-4" />
-            ) : (
-              <ChevronDown className="w-4 h-4" />
-            )}
-          </Button>
+          <>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => onViewDetails && onViewDetails(classItem as Class)}
+              className="w-full mb-2"
+            >
+              View Details
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setExpanded(!expanded)}
+              className="w-full justify-between hover:bg-white/40"
+            >
+              <span>Quick View Students</span>
+              {expanded ? (
+                <ChevronUp className="w-4 h-4" />
+              ) : (
+                <ChevronDown className="w-4 h-4" />
+              )}
+            </Button>
+          </>
         )}
 
         {/* Student List (Expandable - Teacher View Only) */}

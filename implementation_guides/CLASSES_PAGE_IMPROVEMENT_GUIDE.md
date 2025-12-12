@@ -198,12 +198,13 @@ This guide outlines a pragmatic, phased approach to improving the Classes page i
   - Better visual hierarchy and spacing
   - Responsive grid layout
 
-- [ ] **Create ClassDetailView component (Teacher Mode)** (`frontend/src/components/classes/ClassDetailView.tsx`)
-  - Route: `/classes/:classId` or modal overlay on ClassesPage
+- [x] **Create ClassDetailView component (Teacher Mode)** (`frontend/src/components/classes/ClassDetailView.tsx`)
+  - Modal overlay or full-screen view on ClassesPage
   - Only accessible in teacher view
   - Header section with class name, join code, and quick stats
   - Student roster table with sortable columns
   - Navigation back to classes list
+  - Search functionality for filtering students
 ---
 
 ### Phase 2: Detailed Class View
@@ -280,23 +281,23 @@ const ViewToggle = ({ mode, onChange }: ViewToggleProps) => {
 // Suggested structure (not final code)
 #### QA Checklist
 
-- [ ] Page defaults to student view for all users
-- [ ] View toggle only appears for teachers
-- [ ] View preference persists across sessions
-- [ ] Smooth transition between student and teacher views
-- [ ] StudentClassCard displays correct student-specific data
-- [ ] Student view is motivating and easy to understand
-- [ ] Teacher view maintains all existing management features
-- [ ] ClassDetailView (teacher mode) created and displays correctly
-- [ ] Navigation between list and detail view works smoothly
-- [ ] Class statistics section shows accurate data
-- [ ] Student roster is sortable by each column
-- [ ] Search/filter functionality works
-- [ ] Mobile responsive design works well for both views
-- [ ] Loading and error states handled properly
-- [ ] All existing functionality still works
-- [ ] Visual design consistent with app style
-- [ ] Students cannot access teacher-only features
+- [x] Page defaults to student view for all users
+- [x] View toggle only appears for teachers
+- [x] View preference persists across sessions
+- [x] Smooth transition between student and teacher views
+- [ ] StudentClassCard displays correct student-specific data (optional - using ClassCard for now)
+- [x] Student view is motivating and easy to understand
+- [x] Teacher view maintains all existing management features
+- [x] ClassDetailView (teacher mode) created and displays correctly
+- [x] Navigation between list and detail view works smoothly
+- [x] Class statistics section shows accurate data
+- [x] Student roster is sortable by each column
+- [x] Search/filter functionality works
+- [x] Mobile responsive design works well for both views
+- [x] Loading and error states handled properly
+- [x] All existing functionality still works
+- [x] Visual design consistent with app style
+- [x] Students cannot access teacher-only features
       <div className="mt-4 space-y-2">
         <StatItem icon={BookOpen} label="Sessions" value={userStats.total_sessions} />
         <StatItem icon={Target} label="Accuracy" value={`${(userStats.average_per * 100).toFixed(1)}%`} />

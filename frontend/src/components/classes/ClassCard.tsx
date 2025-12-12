@@ -28,6 +28,7 @@ import StudentList from "./StudentList";
 interface ClassCardProps {
   classItem: Class | ClassWithTeacher;
   isTeacher: boolean;
+  viewMode: "student" | "teacher";
   onDeleted: () => void;
   onLeft: () => void;
 }
@@ -35,6 +36,7 @@ interface ClassCardProps {
 const ClassCard = ({
   classItem,
   isTeacher,
+  viewMode,
   onDeleted,
   onLeft,
 }: ClassCardProps) => {
@@ -89,7 +91,7 @@ const ClassCard = ({
           <div className="flex-1">
             <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
               {classItem.name}
-              {isTeacher && studentCount !== undefined && (
+              {isTeacher && viewMode === "teacher" && studentCount !== undefined && (
                 <span className="text-xs font-normal text-gray-600 bg-white/60 px-2 py-1 rounded-full">
                   <Users className="w-3 h-3 inline mr-1" />
                   {studentCount} {studentCount === 1 ? "student" : "students"}
@@ -103,94 +105,101 @@ const ClassCard = ({
             )}
           </div>
           <div className="flex items-center gap-2">
-            {isTeacher ? (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-red-600 hover:text-red-700 hover:bg-red-100"
-                    disabled={deleting}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Class</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to delete "{classItem.name}"? This
-                      will remove all students from the class. This action
-                      cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleDelete}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    >
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            ) : (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-gray-600 hover:text-gray-700 hover:bg-gray-100"
-                    disabled={leaving}
-                  >
-                    <LogOut className="w-4 h-4" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Leave Class</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to leave "{classItem.name}"? You can
-                      rejoin later using the join code.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleLeave}>
-                      Leave
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+            {/* Only show delete/leave actions in teacher view */}
+            {viewMode === "teacher" && (
+              <>
+                {isTeacher ? (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-100"
+                        disabled={deleting}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Class</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete "{classItem.name}"? This
+                          will remove all students from the class. This action
+                          cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleDelete}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                ) : (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-gray-600 hover:text-gray-700 hover:bg-gray-100"
+                        disabled={leaving}
+                      >
+                        <LogOut className="w-4 h-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Leave Class</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to leave "{classItem.name}"? You can
+                          rejoin later using the join code.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleLeave}>
+                          Leave
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+              </>
             )}
           </div>
         </div>
 
-        {/* Join Code */}
-        <div className="flex items-center gap-2 mb-3">
-          <div className="flex-1 bg-white/60 p-2 rounded-lg border border-gray-200">
-            <p className="text-xs text-gray-600 mb-1">Join Code</p>
-            <p className="font-mono font-bold text-lg tracking-wider text-gray-800">
-              {classItem.join_code}
-            </p>
+        {/* Join Code - Only show in teacher view */}
+        {viewMode === "teacher" && (
+          <div className="flex items-center gap-2 mb-3">
+            <div className="flex-1 bg-white/60 p-2 rounded-lg border border-gray-200">
+              <p className="text-xs text-gray-600 mb-1">Join Code</p>
+              <p className="font-mono font-bold text-lg tracking-wider text-gray-800">
+                {classItem.join_code}
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleCopyCode}
+              className="shrink-0"
+            >
+              {copied ? (
+                <Check className="w-4 h-4 text-green-600" />
+              ) : (
+                <Copy className="w-4 h-4" />
+              )}
+            </Button>
           </div>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handleCopyCode}
-            className="shrink-0"
-          >
-            {copied ? (
-              <Check className="w-4 h-4 text-green-600" />
-            ) : (
-              <Copy className="w-4 h-4" />
-            )}
-          </Button>
-        </div>
+        )}
 
-        {/* Expand Students Button (Teachers Only) */}
-        {isTeacher && (
+        {/* Expand Students Button (Teachers Only in Teacher View) */}
+        {isTeacher && viewMode === "teacher" && (
           <Button
             variant="ghost"
             size="sm"
@@ -206,8 +215,8 @@ const ClassCard = ({
           </Button>
         )}
 
-        {/* Student List (Expandable) */}
-        {isTeacher && expanded && (
+        {/* Student List (Expandable - Teacher View Only) */}
+        {isTeacher && viewMode === "teacher" && expanded && (
           <div className="mt-3 pt-3 border-t border-gray-200">
             <StudentList classId={classItem.id} />
           </div>

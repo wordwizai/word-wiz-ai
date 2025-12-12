@@ -2,7 +2,7 @@
 
 **Version:** 1.0  
 **Created:** December 2024  
-**Status:** Planning
+**Status:** In Progress - Phase 2
 
 ---
 
@@ -164,28 +164,27 @@ This guide outlines a pragmatic, phased approach to improving the Classes page i
 
 #### Todos
 
-- [ ] **Update ClassesPage component** (`frontend/src/pages/ClassesPage.tsx`)
+- [x] **Update ClassesPage component** (`frontend/src/pages/ClassesPage.tsx`)
   - Add view state: `student` or `teacher` (default: `student`)
   - Add view toggle button in header (visible only for teachers)
   - Persist view preference in localStorage
   - Conditionally render based on current view
 
-- [ ] **Create ViewToggle component** (`frontend/src/components/classes/ViewToggle.tsx`)
+- [x] **Create ViewToggle component** (`frontend/src/components/classes/ViewToggle.tsx`)
   - Toggle switch or segmented control: "Student View" / "Teacher View"
   - Only visible for users who are teachers (have classes they teach)
   - Smooth transition between views
   - Clear visual indication of current view
 
-- [ ] **Update ClassCard for Student View** (`frontend/src/components/classes/ClassCard.tsx`)
+- [x] **Update ClassCard for Student View** (`frontend/src/components/classes/ClassCard.tsx`)
   - When in student view:
     - Show class name prominently
     - Show teacher name
-    - Show student's personal progress in that class (sessions, accuracy, streak)
-    - Remove join code, student count, management features
+    - Hide join code, student count, management features
     - Focus on encouraging and motivating design
   - When in teacher view:
     - Show existing teacher features (student count, join code, etc.)
-    - Add "View Details" button for detailed class management
+    - Add "View Details" button for detailed class management (to be implemented)
 
 - [ ] **Create StudentClassCard component** (`frontend/src/components/classes/StudentClassCard.tsx`)
   - New component specifically for student view of their classes
@@ -193,7 +192,7 @@ This guide outlines a pragmatic, phased approach to improving the Classes page i
   - Visual progress indicators for motivation
   - Click to view class details (student perspective)
 
-- [ ] **Update Classes Layout**
+- [x] **Update Classes Layout**
   - In student view: Single section "My Classes" (classes enrolled in)
   - In teacher view: Two sections "Classes I Teach" and "Classes I'm Enrolled In"
   - Better visual hierarchy and spacing

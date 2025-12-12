@@ -147,8 +147,10 @@ class PhonemeAwareTrimmer:
         end_frame = speech_frames[-1]
         
         # Convert to samples
+        # IMPORTANT: For end_frame, we need to include the entire frame duration (frame_length),
+        # not just hop forward by hop_length. This ensures we don't cut off the last phonemes.
         start_sample = start_frame * hop_length
-        end_sample = min((end_frame + 1) * hop_length, len(audio))
+        end_sample = min(end_frame * hop_length + frame_length, len(audio))
         
         logger.debug(f"Detected speech boundaries: {start_sample} to {end_sample} "
                     f"({(end_sample - start_sample) / self.sr:.2f}s)")

@@ -1,0 +1,14 @@
+[
+  {
+    "name": "test_case_03",
+    "status": "FAIL",
+    "details": "Exception: No module named 'soundfile'\nTraceback (most recent call last):\n  File \"/home/runner/work/word-wiz-ai/word-wiz-ai/backend/tests/run_tests.py\", line 80, in run_test_in_subprocess\n    spec.loader.exec_module(run_system_tests)\n  File \"<frozen importlib._bootstrap_external>\", line 995, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/home/runner/work/word-wiz-ai/word-wiz-ai/backend/tests/system/run_system_tests.py\", line 5, in <module>\n    import soundfile as sf\nModuleNotFoundError: No module named 'soundfile'\n",
+    "mode": "system"
+  },
+  {
+    "name": "test_case_02",
+    "status": "FAIL",
+    "details": "Exception: No module named 'soundfile'\nTraceback (most recent call last):\n  File \"/home/runner/work/word-wiz-ai/word-wiz-ai/backend/tests/run_tests.py\", line 80, in run_test_in_subprocess\n    spec.loader.exec_module(run_system_tests)\n  File \"<frozen importlib._bootstrap_external>\", line 995, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/home/runner/work/word-wiz-ai/word-wiz-ai/backend/tests/system/run_system_tests.py\", line 5, in <module>\n    import soundfile as sf\nModuleNotFoundError: No module named 'soundfile'\n",
+    "mode": "system"
+  }
+]

@@ -123,16 +123,17 @@ class PhonemeAwareTrimmer:
             # Normalize ZCR to similar range as energy
             zcr_normalized = (zcr - np.min(zcr)) / (np.max(zcr) - np.min(zcr) + 1e-10)
             
-            # Combine metrics (weight energy more heavily)
-            combined = 0.7 * energy / (np.max(energy) + 1e-10) + 0.3 * zcr_normalized
+            # Combine metrics - increased ZCR weight to better detect final consonants
+            # ZCR is particularly important for unvoiced consonants (s, t, k, p, f) at sentence ends
+            combined = 0.5 * energy / (np.max(energy) + 1e-10) + 0.5 * zcr_normalized
             logger.debug("Using combined energy + ZCR for boundary detection")
         else:
             combined = energy
             logger.debug("Using energy only for boundary detection")
         
-        # Adaptive thresholding based on distribution
-        # Use median + std to be robust to outliers
-        threshold = np.median(combined) + 0.5 * np.std(combined)
+        # More conservative thresholding to preserve final phonemes
+        # Use median + 0.3*std instead of 0.5*std to catch quieter speech at edges
+        threshold = np.median(combined) + 0.3 * np.std(combined)
         
         # Find speech regions
         above_threshold = combined > threshold
@@ -147,8 +148,10 @@ class PhonemeAwareTrimmer:
         end_frame = speech_frames[-1]
         
         # Convert to samples
+        # IMPORTANT: For end_frame, we need to include the entire frame duration (frame_length),
+        # not just hop forward by hop_length. This ensures we don't cut off the last phonemes.
         start_sample = start_frame * hop_length
-        end_sample = min((end_frame + 1) * hop_length, len(audio))
+        end_sample = min(end_frame * hop_length + frame_length, len(audio))
         
         logger.debug(f"Detected speech boundaries: {start_sample} to {end_sample} "
                     f"({(end_sample - start_sample) / self.sr:.2f}s)")
@@ -157,7 +160,7 @@ class PhonemeAwareTrimmer:
     
     def trim_with_speech_detection(self,
                                    audio: np.ndarray,
-                                   padding_ms: int = 150,
+                                   padding_ms: int = 200,
                                    use_zcr: bool = True) -> np.ndarray:
         """
         Trim audio using intelligent speech boundary detection.
@@ -167,7 +170,7 @@ class PhonemeAwareTrimmer:
         
         Args:
             audio: Input audio signal
-            padding_ms: Padding to add on each side (default 150ms)
+            padding_ms: Padding to add on each side (default 200ms, increased to preserve final phonemes)
             use_zcr: Whether to use zero-crossing rate (default True)
             
         Returns:
@@ -214,7 +217,7 @@ class PhonemeAwareTrimmer:
 def smart_trim_audio(audio: np.ndarray, 
                     sr: int = 16000,
                     method: str = 'adaptive',
-                    padding_ms: int = 150) -> np.ndarray:
+                    padding_ms: int = 200) -> np.ndarray:
     """
     Convenience function for smart audio trimming.
     

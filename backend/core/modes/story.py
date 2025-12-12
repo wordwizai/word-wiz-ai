@@ -141,7 +141,8 @@ class StoryPractice(BaseMode):
                 "expected_phonemes": gt_phonemes,
                 "actual_phonemes": word_data.get("phonemes", []),
                 # Create a readable word structure showing phoneme composition
-                "word_structure": f"{word_data.get('ground_truth_word', '')} = [{', '.join(gt_phonemes)}]"
+                # Note: ground_truth_word can be None for insertion word alignment types
+                "word_structure": f"{word_data.get('ground_truth_word') or ''} = [{', '.join(gt_phonemes)}]"
             }
             enhanced_pronunciation.append(enhanced_word)
 
@@ -150,7 +151,8 @@ class StoryPractice(BaseMode):
         for word_data in pronunciation_data:
             # Only process words that have errors (per > 0)
             if word_data.get("per", 0) > 0:
-                word = word_data.get("ground_truth_word", "")
+                # ground_truth_word can be None for insertion word alignment types
+                word = word_data.get("ground_truth_word") or ""
                 # Check missed phonemes
                 for phoneme in word_data.get("missed", []):
                     if phoneme not in phoneme_to_error_words:

@@ -142,8 +142,10 @@ def validate_gpt_feedback(
         mentioned_any_word = False
         
         for word_data in pronunciation_data:
-            ground_truth_word = word_data.get("ground_truth_word", "").lower()
-            if ground_truth_word and ground_truth_word in feedback_text:
+            # ground_truth_word can be None for insertion/deletion word alignment types
+            ground_truth_word = word_data.get("ground_truth_word") or ""
+            ground_truth_word_lower = ground_truth_word.lower() if ground_truth_word else ""
+            if ground_truth_word_lower and ground_truth_word_lower in feedback_text:
                 mentioned_any_word = True
                 break
         

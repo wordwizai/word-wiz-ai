@@ -53,25 +53,26 @@ const LandingPage = () => {
     const structuredData = {
       "@context": "https://schema.org",
       "@type": "WebApplication",
-      "name": "Word Wiz AI",
-      "applicationCategory": "EducationalApplication",
-      "offers": {
+      name: "Word Wiz AI",
+      applicationCategory: "EducationalApplication",
+      offers: {
         "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
+        price: "0",
+        priceCurrency: "USD",
       },
-      "description": "AI-powered reading tutor that helps children learn to read with personalized phonics practice and pronunciation feedback",
-      "operatingSystem": "Web Browser",
-      "url": "https://wordwizai.com",
-      "author": {
+      description:
+        "AI-powered reading tutor that helps children learn to read with personalized phonics practice and pronunciation feedback",
+      operatingSystem: "Web Browser",
+      url: "https://wordwizai.com",
+      author: {
         "@type": "Organization",
-        "name": "Word Wiz AI",
-        "url": "https://wordwizai.com"
-      }
+        name: "Word Wiz AI",
+        url: "https://wordwizai.com",
+      },
     };
 
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
     script.text = JSON.stringify(structuredData);
     document.head.appendChild(script);
 
@@ -97,10 +98,12 @@ const LandingPage = () => {
         <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-8 md:gap-12">
           <div className="flex-1 space-y-4 sm:space-y-6 text-center md:text-left">
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-extrabold leading-tight text-primary">
-              Free AI Reading Tutor - Help Kids Learn to Read with Phonics
+              Your Personalized Reading Companion
             </h1>
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-full sm:max-w-xl mx-auto md:mx-0">
-              Word Wiz AI helps children ages 5-8 learn to read through AI-powered pronunciation feedback and personalized phonics practice. 100% free, no ads, no subscriptions.
+              Word Wiz AI helps children ages 5-8 learn to read through
+              AI-powered pronunciation feedback and personalized phonics
+              practice. 100% free, no ads, no subscriptions.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
               <Link to="/signup" className="w-full sm:w-auto">
@@ -157,7 +160,8 @@ const LandingPage = () => {
               What Makes Word Wiz Unique?
             </h2>
             <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
-              Powered by GPT-4 and advanced speech recognition technology. Trusted by parents and teachers nationwide.
+              Powered by GPT-4 and advanced speech recognition technology.
+              Trusted by parents and teachers nationwide.
             </p>
           </div>
           <motion.div

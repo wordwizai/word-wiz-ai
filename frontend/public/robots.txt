@@ -1,0 +1,9 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /practice
+Disallow: /settings
+Disallow: /classes
+
+Sitemap: https://wordwizai.com/sitemap.xml

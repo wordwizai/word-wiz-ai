@@ -21,10 +21,10 @@ const LandingPageCTA = ({ fadeUpVariant }: LandingPageCTAProps) => {
     >
       <div className="max-w-4xl mx-auto text-center space-y-6">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold">
-          Start Reading Smarter Today
+          Help Your Child Learn to Read - 100% Free
         </h2>
-        <p className="text-muted-foreground max-w-md mx-auto">
-          Get personalized feedback on your reading for free.
+        <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+          Join thousands of families using Word Wiz AI for personalized phonics practice with AI-powered pronunciation feedback. No credit card required, no ads, no subscriptions.
         </p>
         <Link
           className="inline-flex items-center gap-2 bg-primary text-primary-foreground py-3 px-8 rounded-lg font-semibold transition-all duration-300 hover:shadow-md w-full max-w-xs mx-auto md:mx-0 justify-center"
@@ -34,7 +34,7 @@ const LandingPageCTA = ({ fadeUpVariant }: LandingPageCTAProps) => {
           transition={{ type: "spring", stiffness: 300 }}
         >
           <BookOpen className="w-5 h-5" />
-          Create a Word Wiz account
+          Start Free Reading Practice
         </Link>
       </div>
     </motion.section>

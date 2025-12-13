@@ -12,6 +12,8 @@ import { motion } from "framer-motion";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import LandingPageFooter from "@/components/LandingPageFooter";
 import LandingPageCTA from "@/components/LandingPageCTA";
+import FAQ from "@/components/FAQ";
+import React from "react";
 import {
   BookOpen,
   Search,
@@ -46,6 +48,38 @@ const childVariant = {
 };
 
 const LandingPage = () => {
+  // Add structured data for SEO
+  React.useEffect(() => {
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Word Wiz AI",
+      "applicationCategory": "EducationalApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "AI-powered reading tutor that helps children learn to read with personalized phonics practice and pronunciation feedback",
+      "operatingSystem": "Web Browser",
+      "url": "https://wordwizai.com",
+      "author": {
+        "@type": "Organization",
+        "name": "Word Wiz AI",
+        "url": "https://wordwizai.com"
+      }
+    };
+
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.text = JSON.stringify(structuredData);
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
+
   return (
     <main className="scroll-smooth bg-background text-foreground">
       {/* Navbar */}
@@ -63,12 +97,10 @@ const LandingPage = () => {
         <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-8 md:gap-12">
           <div className="flex-1 space-y-4 sm:space-y-6 text-center md:text-left">
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-extrabold leading-tight text-primary">
-              Your Personal Reading Companion
+              Free AI Reading Tutor - Help Kids Learn to Read with Phonics
             </h1>
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-full sm:max-w-xl mx-auto md:mx-0">
-              Word Wiz AI helps kids learn how to read by analyzing thier
-              mistakes and generating customized passages tailored to their
-              strengths and weaknesses.
+              Word Wiz AI helps children ages 5-8 learn to read through AI-powered pronunciation feedback and personalized phonics practice. 100% free, no ads, no subscriptions - just better reading skills for your child.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
               <Link to="/signup" className="w-full sm:w-auto">
@@ -102,7 +134,7 @@ const LandingPage = () => {
             <div className="border border-border rounded-2xl aspect-[4/3] flex items-center justify-center max-w-full bg-background">
               <img
                 src={demoScreenshot}
-                alt="Word Wiz AI Demo"
+                alt="Word Wiz AI reading practice interface showing real-time phoneme-level pronunciation feedback for children learning to read"
                 className="w-full h-full object-cover rounded-2xl p-2 bg-background m-2"
               />
             </div>
@@ -120,9 +152,14 @@ const LandingPage = () => {
         transition={{ duration: 0.6 }}
       >
         <div className="max-w-6xl mx-auto text-center space-y-10">
-          <h2 className="text-3xl md:text-4xl font-bold">
-            What Makes Word Wiz Unique?
-          </h2>
+          <div className="space-y-4">
+            <h2 className="text-3xl md:text-4xl font-bold">
+              What Makes Word Wiz Unique?
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
+              Powered by GPT-4 and advanced speech recognition technology. Trusted by parents and teachers nationwide.
+            </p>
+          </div>
           <motion.div
             className="grid grid-cols-1 md:grid-cols-3 gap-6"
             initial="hidden"
@@ -133,20 +170,20 @@ const LandingPage = () => {
               {
                 icon: <BarChart3 className="w-6 h-6 text-blue-600" />,
                 iconBg: "from-blue-200 to-purple-200",
-                title: "Efficient reading practice",
-                text: "Get customized practice sentences based on specific struggle areas.",
+                title: "Personalized Reading Practice",
+                text: "Get customized practice sentences targeting specific phonics patterns and letter sounds your child struggles with.",
               },
               {
                 icon: <WholeWord className="w-6 h-6 text-rose-500" />,
                 iconBg: "from-rose-200 to-pink-200",
-                title: "Improve Pronunciation",
-                text: "Receive tailored pronunciation tips to enhance fluency.",
+                title: "Phoneme-Level Pronunciation Feedback",
+                text: "Advanced speech recognition identifies exact sounds misread—more precise than whole-word feedback.",
               },
               {
                 icon: <CircleDollarSign className="w-6 h-6 text-green-600" />,
                 iconBg: "from-green-200 to-blue-200",
-                title: "Completely Free",
-                text: "No ads, no subscriptions. Our mission is to help kids across the country read better for free",
+                title: "100% Free Forever",
+                text: "No ads, no subscriptions, no hidden fees. Our mission is helping every child learn to read better.",
               },
             ].map((feature, i) => (
               <motion.div
@@ -189,20 +226,20 @@ const LandingPage = () => {
               {
                 icon: <Users className="w-6 h-6 text-orange-600" />,
                 iconBg: "from-orange-200 to-yellow-200",
-                title: "Young Readers",
-                text: "Boost reading confidence with personalized practice and feedback.",
+                title: "Young Readers (Ages 5-8)",
+                text: "Perfect for Kindergarten through 3rd grade. Build reading confidence with personalized phonics practice and instant feedback.",
               },
               {
                 icon: <GraduationCap className="w-6 h-6 text-blue-600" />,
                 iconBg: "from-blue-200 to-cyan-200",
-                title: "Educators",
-                text: "Integrate AI powered reading practice into your classroom reading programs.",
+                title: "Teachers & Educators",
+                text: "Integrate AI-powered reading practice into your classroom. Track student progress and target intervention areas.",
               },
               {
                 icon: <User className="w-6 h-6 text-green-600" />,
                 iconBg: "from-green-200 to-emerald-200",
-                title: "Parents",
-                text: "Empower your kids with personalized reading practice.",
+                title: "Parents & Homeschoolers",
+                text: "Support your child's reading journey at home with professional-grade phonics instruction and pronunciation coaching.",
               },
             ].map((target, i) => (
               <motion.div
@@ -248,19 +285,19 @@ const LandingPage = () => {
               {
                 step: "1",
                 title: "Read Aloud",
-                text: "Practice reading passages aloud and let Word Wiz listen.",
+                text: "Your child reads practice sentences aloud while Word Wiz AI listens using advanced speech recognition technology.",
                 gradient: "from-blue-400 to-purple-500",
               },
               {
                 step: "2",
-                title: "AI Analysis",
-                text: "We highlight misread words and analyze what sounds and types of words you misread or stuggle on the most",
+                title: "AI Pronunciation Analysis",
+                text: "Our AI analyzes every phoneme (individual sound) to identify which letter sounds and word patterns need more practice.",
                 gradient: "from-purple-400 to-pink-500",
               },
               {
                 step: "3",
-                title: "Personal Feedback",
-                text: "You get feedback, guidance, and customized practice sentences to target areas where you struggle. Vocalized through text to speech technology",
+                title: "Personalized Phonics Feedback",
+                text: "Get instant feedback with pronunciation tips and customized practice sentences targeting specific phonics skills. Guidance is provided through text-to-speech audio.",
                 gradient: "from-green-400 to-blue-500",
               },
             ].map((step, i) => (
@@ -329,7 +366,10 @@ const LandingPage = () => {
             ))}
           </motion.div>
         </div>
-      </motion.section>*}
+      </motion.section>
+
+      {/* FAQ Section */}
+      <FAQ />
 
       {/* CTA button */}
       <LandingPageCTA fadeUpVariant={fadeUpVariant} />

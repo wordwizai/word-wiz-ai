@@ -15,6 +15,7 @@ from schemas.class_membership_schema import (
     StudentWithStats,
     StudentStatistics,
     ClassStudentsResponse,
+    StudentInsightsResponse,
 )
 from sqlalchemy.orm import Session as DBSession
 from typing import List
@@ -100,10 +101,13 @@ def join_class(
 @router.get("/{class_id}/students", response_model=ClassStudentsResponse)
 def get_class_students(
     class_id: int,
+    use_recent_window: bool = True,
     db: DBSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
     """Get all students in a class with their statistics (teacher only)."""
+    from datetime import datetime, timedelta
+    
     # Verify class exists
     db_class = class_crud.get_class_by_id(db, class_id)
     if not db_class:
@@ -127,39 +131,56 @@ def get_class_students(
     for membership in memberships:
         student = membership.student
         
-        # Get all sessions for this student
-        sessions = db.query(UserSession).filter(
-            UserSession.user_id == student.id
-        ).all()
+        # Get sessions (all or recent based on parameter)
+        if use_recent_window:
+            # Use recent window (last 14 days or 15 sessions)
+            cutoff_date = datetime.now() - timedelta(days=14)
+            sessions = db.query(UserSession).filter(
+                UserSession.user_id == student.id,
+                UserSession.created_at >= cutoff_date
+            ).order_by(UserSession.created_at.desc()).limit(15).all()
+        else:
+            # Get all sessions (backward compatibility)
+            sessions = db.query(UserSession).filter(
+                UserSession.user_id == student.id
+            ).all()
         
-        # Get all feedback entries for this student
-        feedback_entries = db.query(FeedbackEntry).join(UserSession).filter(
-            UserSession.user_id == student.id
-        ).all()
+        # Get feedback entries for these sessions
+        session_ids = [s.id for s in sessions]
+        feedback_entries = db.query(FeedbackEntry).filter(
+            FeedbackEntry.session_id.in_(session_ids)
+        ).all() if session_ids else []
         
         # Calculate statistics
         total_sessions = len(sessions)
         
-        # Count words read
+        # Count words read and extract PER values
         words_read = 0
         per_values = []
         for entry in feedback_entries:
             if entry.sentence:
                 words_read += len(entry.sentence.split())
             if entry.phoneme_analysis and isinstance(entry.phoneme_analysis, dict):
-                per_summary = entry.phoneme_analysis.get('per_summary', 0)
-                if per_summary is not None:
-                    try:
-                        per_values.append(float(per_summary))
-                    except (ValueError, TypeError):
-                        pass
+                per_summary = entry.phoneme_analysis.get('per_summary', {})
+                if isinstance(per_summary, dict):
+                    sentence_per = per_summary.get('sentence_per', 0)
+                    if sentence_per is not None:
+                        try:
+                            per_values.append(float(sentence_per))
+                        except (ValueError, TypeError):
+                            pass
         
         average_per = sum(per_values) / len(per_values) if per_values else 0.0
         
-        last_session_date = max([s.created_at for s in sessions]) if sessions else None
+        # Get all sessions for streak calculation (not just recent window)
+        all_sessions = db.query(UserSession).filter(
+            UserSession.user_id == student.id
+        ).all()
+        
+        last_session_date = max([s.created_at for s in all_sessions]) if all_sessions else None
         
         # Calculate current streak
-        current_streak = class_membership_crud.calculate_student_streak(sessions)
+        current_streak = class_membership_crud.calculate_student_streak(all_sessions)
         
         # Create student with stats
         student_stats = StudentWithStats(
@@ -246,3 +267,54 @@ def delete_class(
     class_crud.delete_class(db, class_id)
     
     return None
+
+
+@router.get("/{class_id}/students/{student_id}/insights", response_model=StudentInsightsResponse)
+def get_student_insights_endpoint(
+    class_id: int,
+    student_id: int,
+    days: int = 14,
+    max_sessions: int = 15,
+    db: DBSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Get detailed insights for a specific student in a class (teacher only).
+    
+    Returns session history, recent accuracy metrics, phoneme-level insights,
+    and actionable recommendations for teachers.
+    
+    Args:
+        class_id: ID of the class
+        student_id: ID of the student
+        days: Number of recent days to analyze (default 14)
+        max_sessions: Maximum sessions to analyze (default 15)
+    """
+    from crud.feedback_entry import get_student_insights
+    
+    # Verify class exists
+    db_class = class_crud.get_class_by_id(db, class_id)
+    if not db_class:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Class not found"
+        )
+    
+    # Verify current user is the teacher
+    if db_class.teacher_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only the class teacher can view student insights"
+        )
+    
+    # Verify student is in the class
+    if not class_membership_crud.is_member(db, class_id, student_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Student is not a member of this class"
+        )
+    
+    # Get insights
+    insights = get_student_insights(db, student_id, days, max_sessions)
+    
+    return StudentInsightsResponse(**insights)

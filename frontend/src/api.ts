@@ -304,6 +304,37 @@ interface ClassMembership {
   joined_at: string;
 }
 
+interface SessionActivity {
+  session_id: number;
+  date: string;
+  sentence_count: number;
+  accuracy: number;
+  per: number;
+}
+
+interface PhonemeInsight {
+  phoneme: string;
+  error_count: number;
+  error_types: {
+    substitution: number;
+    deletion: number;
+    insertion: number;
+  };
+  description?: string;
+  difficulty_level?: number;
+}
+
+interface StudentInsights {
+  student_id: number;
+  recent_sessions: SessionActivity[];
+  recent_accuracy: number;
+  recent_per: number;
+  total_sentences_practiced: number;
+  phoneme_insights: PhonemeInsight[];
+  recommendations: string[];
+  calculation_window: string;
+}
+
 const getUserStatistics = async (token: string): Promise<UserStatistics> => {
   try {
     const response = await axios.get(`${API_URL}/feedback/statistics`, {
@@ -351,7 +382,9 @@ const getMyClasses = async (token: string): Promise<Class[]> => {
   }
 };
 
-const getMyStudentClasses = async (token: string): Promise<ClassWithTeacher[]> => {
+const getMyStudentClasses = async (
+  token: string
+): Promise<ClassWithTeacher[]> => {
   try {
     const response = await axios.get(`${API_URL}/classes/my-student-classes`, {
       headers: {
@@ -365,7 +398,10 @@ const getMyStudentClasses = async (token: string): Promise<ClassWithTeacher[]> =
   }
 };
 
-const joinClass = async (token: string, joinCode: string): Promise<ClassMembership> => {
+const joinClass = async (
+  token: string,
+  joinCode: string
+): Promise<ClassMembership> => {
   try {
     const response = await axios.post(
       `${API_URL}/classes/join`,
@@ -383,7 +419,10 @@ const joinClass = async (token: string, joinCode: string): Promise<ClassMembersh
   }
 };
 
-const getClassStudents = async (token: string, classId: number): Promise<ClassStudentsResponse> => {
+const getClassStudents = async (
+  token: string,
+  classId: number
+): Promise<ClassStudentsResponse> => {
   try {
     const response = await axios.get(`${API_URL}/classes/${classId}/students`, {
       headers: {
@@ -393,6 +432,27 @@ const getClassStudents = async (token: string, classId: number): Promise<ClassSt
     return response.data;
   } catch (error) {
     console.error("Fetch class students error:", error);
+    throw error;
+  }
+};
+
+const getStudentInsights = async (
+  token: string,
+  classId: number,
+  studentId: number
+): Promise<StudentInsights> => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/classes/${classId}/students/${studentId}/insights`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Fetch student insights error:", error);
     throw error;
   }
 };
@@ -447,15 +507,19 @@ export {
   getClassStudents,
   leaveClass,
   deleteClass,
+  getStudentInsights,
 };
-export type { 
-  Session, 
-  UserStatistics, 
-  Class, 
+export type {
+  Session,
+  UserStatistics,
+  Class,
   ClassWithTeacher,
   StudentStatistics,
   StudentWithStats,
   ClassStudentsResponse,
   ClassMembership,
+  SessionActivity,
+  PhonemeInsight,
+  StudentInsights,
 };
 export { WS_URL };

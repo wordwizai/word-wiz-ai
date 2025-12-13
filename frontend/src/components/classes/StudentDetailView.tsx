@@ -1,7 +1,16 @@
-import { type StudentWithStats } from "@/api";
+import { useContext, useEffect, useState } from "react";
+import { AuthContext } from "@/contexts/AuthContext";
+import {
+  getStudentInsights,
+  type StudentWithStats,
+  type StudentInsights,
+} from "@/api";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import SessionHistoryList from "./SessionHistoryList";
+import PhonemeInsightsCard from "./PhonemeInsightsCard";
+import RecommendationsCard from "./RecommendationsCard";
 import {
   ArrowLeft,
   BookOpen,
@@ -14,10 +23,40 @@ import {
 
 interface StudentDetailViewProps {
   student: StudentWithStats;
+  classId: number;
   onBack: () => void;
 }
 
-const StudentDetailView = ({ student, onBack }: StudentDetailViewProps) => {
+const StudentDetailView = ({
+  student,
+  classId,
+  onBack,
+}: StudentDetailViewProps) => {
+  const { token } = useContext(AuthContext);
+  const [insights, setInsights] = useState<StudentInsights | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetchInsights();
+  }, [student.id, classId, token]);
+
+  const fetchInsights = async () => {
+    if (!token) return;
+
+    setLoading(true);
+    setError("");
+    try {
+      const data = await getStudentInsights(token, classId, student.id);
+      setInsights(data);
+    } catch (err: any) {
+      setError(err.response?.data?.detail || "Failed to load insights");
+      console.error("Error fetching insights:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "Never";
     const date = new Date(dateString);
@@ -27,10 +66,6 @@ const StudentDetailView = ({ student, onBack }: StudentDetailViewProps) => {
       year: "numeric",
     });
   };
-
-  const accuracy = student.statistics.average_per > 0
-    ? ((1 - student.statistics.average_per) * 100).toFixed(1)
-    : "N/A";
 
   const getAccuracyColor = (per: number) => {
     if (per < 0.1) return "text-green-600";
@@ -57,6 +92,19 @@ const StudentDetailView = ({ student, onBack }: StudentDetailViewProps) => {
     }
     return email.substring(0, 2).toUpperCase();
   };
+
+  // Use insights.recent_accuracy if available, fallback to student.statistics
+  const accuracy = insights
+    ? insights.recent_accuracy.toFixed(1)
+    : student.statistics.average_per > 0
+    ? ((1 - student.statistics.average_per) * 100).toFixed(1)
+    : "N/A";
+
+  const accuracyNumber = insights
+    ? insights.recent_accuracy
+    : student.statistics.average_per > 0
+    ? (1 - student.statistics.average_per) * 100
+    : 0;
 
   return (
     <div className="space-y-6">
@@ -102,9 +150,16 @@ const StudentDetailView = ({ student, onBack }: StudentDetailViewProps) => {
       {/* Performance Overview */}
       <Card className="rounded-2xl bg-card border-2 border-border shadow-md">
         <div className="p-6">
-          <h2 className="text-lg font-bold text-foreground mb-4">
-            Performance Overview
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-foreground">
+              Performance Overview
+            </h2>
+            {insights && (
+              <span className="text-xs text-muted-foreground">
+                {insights.calculation_window}
+              </span>
+            )}
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Total Sessions */}
@@ -139,27 +194,24 @@ const StudentDetailView = ({ student, onBack }: StudentDetailViewProps) => {
             <div className="bg-muted rounded-lg p-4">
               <div className="flex items-center gap-2 text-muted-foreground mb-2">
                 <TrendingUp className="w-5 h-5" />
-                <span className="text-sm font-medium">Average Accuracy</span>
+                <span className="text-sm font-medium">Recent Accuracy</span>
               </div>
               <p
                 className={`text-3xl font-bold ${getAccuracyColor(
-                  student.statistics.average_per
+                  accuracyNumber / 100
                 )}`}
               >
                 {accuracy !== "N/A" ? `${accuracy}%` : accuracy}
               </p>
               {accuracy !== "N/A" && (
                 <div className="mt-2">
-                  <Progress
-                    value={parseFloat(accuracy)}
-                    className="h-2"
-                  />
+                  <Progress value={parseFloat(accuracy)} className="h-2" />
                 </div>
               )}
               <p className="text-xs text-muted-foreground mt-1">
-                {student.statistics.average_per < 0.1
+                {accuracyNumber >= 90
                   ? "Excellent accuracy!"
-                  : student.statistics.average_per < 0.2
+                  : accuracyNumber >= 80
                   ? "Good progress"
                   : "Room for improvement"}
               </p>
@@ -190,90 +242,63 @@ const StudentDetailView = ({ student, onBack }: StudentDetailViewProps) => {
             Recent Activity
           </h2>
 
-          <div className="space-y-3">
-            {/* Last Session */}
-            <div className="bg-muted rounded-lg p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-muted-foreground" />
-                  <span className="font-medium text-foreground">
-                    Last Active
-                  </span>
-                </div>
-                <span className="text-sm text-muted-foreground">
-                  {formatDate(student.statistics.last_session_date)}
-                </span>
-              </div>
+          {loading ? (
+            <div className="text-center text-muted-foreground py-8">
+              Loading session history...
             </div>
-
-            {/* Placeholder for future session history */}
-            {student.statistics.total_sessions === 0 ? (
-              <div className="text-center text-muted-foreground py-8">
-                <User className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>No practice sessions yet</p>
-                <p className="text-sm mt-1">
-                  Encourage this student to start practicing!
-                </p>
-              </div>
-            ) : (
-              <div className="bg-muted/50 rounded-lg p-4 border-2 border-dashed border-muted-foreground/20">
-                <p className="text-sm text-muted-foreground text-center">
-                  Detailed session history coming soon
-                </p>
-              </div>
-            )}
-          </div>
+          ) : error ? (
+            <div className="text-center text-destructive py-8">{error}</div>
+          ) : insights ? (
+            <SessionHistoryList
+              sessions={insights.recent_sessions}
+              calculationWindow={insights.calculation_window}
+            />
+          ) : (
+            <div className="text-center text-muted-foreground py-8">
+              <User className="w-12 h-12 mx-auto mb-2 opacity-50" />
+              <p>No recent activity data available</p>
+            </div>
+          )}
         </div>
       </Card>
 
-      {/* Insights & Recommendations */}
+      {/* Problem Areas */}
       <Card className="rounded-2xl bg-card border-2 border-border shadow-md">
         <div className="p-6">
           <h2 className="text-lg font-bold text-foreground mb-4">
-            Insights & Recommendations
+            Problem Areas
           </h2>
-
-          <div className="space-y-3">
-            {/* Based on accuracy */}
-            {student.statistics.average_per > 0 && (
-              <div className="bg-muted rounded-lg p-4">
-                <h3 className="font-medium text-foreground mb-2">
-                  Reading Accuracy
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  {student.statistics.average_per < 0.1
-                    ? "This student is doing excellent! Their accuracy is very high. Consider introducing more challenging material."
-                    : student.statistics.average_per < 0.2
-                    ? "This student is making good progress. Continue with consistent practice to improve further."
-                    : "This student would benefit from more practice. Consider focusing on foundational phonemes and providing additional support."}
-                </p>
-              </div>
-            )}
-
-            {/* Based on streak */}
-            <div className="bg-muted rounded-lg p-4">
-              <h3 className="font-medium text-foreground mb-2">
-                Practice Consistency
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {student.statistics.current_streak === 0
-                  ? "This student hasn't established a practice routine yet. Encourage daily practice to build momentum."
-                  : student.statistics.current_streak < 7
-                  ? "This student is building a practice habit. Encourage them to keep it up!"
-                  : "This student shows excellent practice consistency! They're building strong habits."}
-              </p>
+          {loading ? (
+            <div className="text-center text-muted-foreground py-8">
+              Analyzing phoneme errors...
             </div>
-
-            {/* Placeholder for phoneme analysis */}
-            <div className="bg-muted/50 rounded-lg p-4 border-2 border-dashed border-muted-foreground/20">
-              <h3 className="font-medium text-foreground mb-2">
-                Problem Areas
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Detailed phoneme analysis coming soon
-              </p>
+          ) : insights ? (
+            <PhonemeInsightsCard insights={insights.phoneme_insights} />
+          ) : (
+            <div className="text-center text-muted-foreground py-8">
+              No data available
             </div>
-          </div>
+          )}
+        </div>
+      </Card>
+
+      {/* Teaching Recommendations */}
+      <Card className="rounded-2xl bg-card border-2 border-border shadow-md">
+        <div className="p-6">
+          <h2 className="text-lg font-bold text-foreground mb-4">
+            Teaching Recommendations
+          </h2>
+          {loading ? (
+            <div className="text-center text-muted-foreground py-8">
+              Generating recommendations...
+            </div>
+          ) : insights ? (
+            <RecommendationsCard recommendations={insights.recommendations} />
+          ) : (
+            <div className="text-center text-muted-foreground py-8">
+              No recommendations available
+            </div>
+          )}
         </div>
       </Card>
     </div>

@@ -56,3 +56,33 @@ class ClassStudentsResponse(BaseModel):
     class_name: str
     join_code: str
     students: list[StudentWithStats]
+
+
+class SessionActivity(BaseModel):
+    """Individual session activity record."""
+    session_id: int
+    date: datetime
+    sentence_count: int = Field(description="Number of sentences practiced")
+    accuracy: float = Field(description="Session accuracy percentage (0-100)")
+    per: float = Field(description="Session Phoneme Error Rate")
+
+
+class PhonemeInsight(BaseModel):
+    """Phoneme-level insight with error analysis."""
+    phoneme: str = Field(description="IPA phoneme symbol")
+    error_count: int = Field(description="Number of times this phoneme was mispronounced")
+    error_types: dict = Field(description="Breakdown by substitution, deletion, insertion")
+    description: Optional[str] = Field(default=None, description="How to pronounce this phoneme")
+    difficulty_level: Optional[int] = Field(default=None, description="Difficulty level 1-5")
+
+
+class StudentInsightsResponse(BaseModel):
+    """Comprehensive student insights for teacher view."""
+    student_id: int
+    recent_sessions: list[SessionActivity] = Field(description="Last 20 sessions")
+    recent_accuracy: float = Field(description="Average accuracy from recent sessions (0-100)")
+    recent_per: float = Field(description="Average PER from recent sessions")
+    total_sentences_practiced: int = Field(description="Total sentences in recent window")
+    phoneme_insights: list[PhonemeInsight] = Field(description="Top problematic phonemes")
+    recommendations: list[str] = Field(description="Actionable teaching recommendations")
+    calculation_window: str = Field(description="E.g., 'Last 15 sessions' or 'Last 7 days'")

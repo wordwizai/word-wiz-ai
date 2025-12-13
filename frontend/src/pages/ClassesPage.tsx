@@ -27,7 +27,7 @@ const ClassesPage = () => {
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showJoinDialog, setShowJoinDialog] = useState(false);
-  
+
   // View mode state - defaults to student view
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     const savedMode = localStorage.getItem("classesViewMode");
@@ -38,9 +38,10 @@ const ClassesPage = () => {
   const [selectedClassId, setSelectedClassId] = useState<number | null>(null);
   const [selectedClassName, setSelectedClassName] = useState<string>("");
   const [selectedJoinCode, setSelectedJoinCode] = useState<string>("");
-  
+
   // Student detail view state
-  const [selectedStudent, setSelectedStudent] = useState<StudentWithStats | null>(null);
+  const [selectedStudent, setSelectedStudent] =
+    useState<StudentWithStats | null>(null);
 
   useEffect(() => {
     fetchClasses();
@@ -112,11 +113,12 @@ const ClassesPage = () => {
   const isTeacher = myClasses.length > 0;
 
   // If viewing student details, show student detail view
-  if (selectedStudent !== null) {
+  if (selectedStudent !== null && selectedClassId !== null) {
     return (
       <main className="flex-1 p-4 sm:p-6 bg-background space-y-6 overflow-y-auto flex flex-col min-h-0 h-full">
         <StudentDetailView
           student={selectedStudent}
+          classId={selectedClassId}
           onBack={handleBackToClassDetail}
         />
       </main>
@@ -148,7 +150,7 @@ const ClassesPage = () => {
               Classes
             </h1>
             <p className="text-sm md:text-base text-muted-foreground/80">
-              {viewMode === "student" 
+              {viewMode === "student"
                 ? "Your learning journey"
                 : "Manage your classes and view student progress"}
             </p>
@@ -164,7 +166,6 @@ const ClassesPage = () => {
 
       {/* Tabs */}
       <Tabs defaultValue="my-classes" className="flex-1 flex flex-col min-h-0">
-
         {/* My Classes Tab */}
         <TabsContent
           value="my-classes"

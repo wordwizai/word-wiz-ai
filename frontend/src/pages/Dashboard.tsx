@@ -139,7 +139,9 @@ const Dashboard = () => {
     fetchStatistics();
   }, [token]);
 
-  const formatActivityType = (type: string) => {
+  const formatActivityType = (type: string | undefined) => {
+    if (!type) return "Unknown";
+    
     switch (type.toLowerCase()) {
       case "unlimited":
         return "Unlimited";

@@ -75,9 +75,35 @@ const ChoiceStoryBasePractice = ({
     },
     onGptResponse: (data) => {
       console.log("GPT:", data);
-      setSentenceOptions(data.sentence);
-      setFeedback(data.feedback);
-      setShowSentenceOptions(true);
+      
+      // Validate GPT response structure
+      if (!data || typeof data !== 'object') {
+        console.error("Invalid GPT response: not an object", data);
+        showErrorToast("Invalid response from server");
+        return;
+      }
+
+      // Validate sentence options structure
+      if (data.sentence) {
+        const hasValidOption1 = data.sentence.option_1 && 
+          typeof data.sentence.option_1.sentence === 'string' &&
+          typeof data.sentence.option_1.action === 'string';
+        
+        const hasValidOption2 = data.sentence.option_2 && 
+          typeof data.sentence.option_2.sentence === 'string' &&
+          typeof data.sentence.option_2.action === 'string';
+
+        if (!hasValidOption1 || !hasValidOption2) {
+          console.error("Invalid sentence options structure", data.sentence);
+          showErrorToast("Invalid sentence options received");
+          return;
+        }
+        
+        setSentenceOptions(data.sentence);
+      }
+      
+      setFeedback(data.feedback || null);
+      setShowSentenceOptions(!!data.sentence);
     },
     onAudioFeedback: (url) => {
       const audio = new Audio(url);
@@ -107,10 +133,20 @@ const ChoiceStoryBasePractice = ({
       console.log("Fetched sentence:", fetchedSentence);
       if (fetchedSentence.type === "full-feedback-state") {
         setCurrentSentence(fetchedSentence.data.sentence);
-        setFeedback(fetchedSentence.data.gpt_response.feedback);
-        setSentenceOptions(fetchedSentence.data.gpt_response.sentence);
+        setFeedback(fetchedSentence.data.gpt_response?.feedback || null);
+        
+        // Validate sentence options before setting
+        const sentenceOptions = fetchedSentence.data.gpt_response?.sentence;
+        if (sentenceOptions?.option_1?.sentence && sentenceOptions?.option_2?.sentence) {
+          setSentenceOptions(sentenceOptions);
+          setShowSentenceOptions(true);
+        } else {
+          console.warn("Invalid or missing sentence options in session state");
+          setSentenceOptions(null);
+          setShowSentenceOptions(false);
+        }
+        
         setAnalysisData(fetchedSentence.data.phoneme_analysis);
-        setShowSentenceOptions(true);
         setShowHighlightedWords(true);
       } else if (fetchedSentence.type === "activity-settings") {
         setCurrentSentence(fetchedSentence.data.first_sentence);

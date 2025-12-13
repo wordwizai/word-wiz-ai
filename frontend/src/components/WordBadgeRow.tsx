@@ -19,7 +19,9 @@ const WordBadgeRow = ({
   analysisData,
   wordArray,
 }: WordBadgeRowProps & {}) => {
-  const formatWord = (word: string) => {
+  const formatWord = (word: string | null | undefined) => {
+    // Handle null/undefined values (e.g., insertions/deletions)
+    if (!word) return "";
     // Format the word to remove any special characters or spaces
     return word.replace(/[^a-zA-Z]/g, "").toLowerCase();
   };

@@ -127,14 +127,32 @@ def validate_gpt_feedback(
     # Validation 1: Check if practice sentence has enough instances of target phoneme
     if "sentence" in feedback_dict and target_phoneme:
         sentence = feedback_dict["sentence"]
-        phoneme_count = count_phoneme_in_sentence(sentence, target_phoneme)
         
-        if phoneme_count < min_phoneme_instances:
-            warnings.append(
-                f"Practice sentence may not have enough '{target_phoneme}' sounds "
-                f"(found ~{phoneme_count}, expected {min_phoneme_instances}+)"
-            )
-            is_valid = False
+        # Handle both string (regular modes) and dict (choice story mode)
+        sentences_to_check = []
+        if isinstance(sentence, str):
+            sentences_to_check = [sentence]
+        elif isinstance(sentence, dict):
+            # Choice story mode: validate both options
+            if "option_1" in sentence and isinstance(sentence["option_1"], dict):
+                opt1_sentence = sentence["option_1"].get("sentence")
+                if isinstance(opt1_sentence, str):
+                    sentences_to_check.append(opt1_sentence)
+            if "option_2" in sentence and isinstance(sentence["option_2"], dict):
+                opt2_sentence = sentence["option_2"].get("sentence")
+                if isinstance(opt2_sentence, str):
+                    sentences_to_check.append(opt2_sentence)
+        
+        # Validate each sentence
+        for sent in sentences_to_check:
+            phoneme_count = count_phoneme_in_sentence(sent, target_phoneme)
+            
+            if phoneme_count < min_phoneme_instances:
+                warnings.append(
+                    f"Practice sentence may not have enough '{target_phoneme}' sounds "
+                    f"(found ~{phoneme_count}, expected {min_phoneme_instances}+): '{sent[:50]}...'"
+                )
+                is_valid = False
     
     # Validation 2: Check that feedback mentions specific words from pronunciation_data
     if "feedback" in feedback_dict and feedback_dict["feedback"] and isinstance(feedback_dict["feedback"], str):

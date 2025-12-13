@@ -100,7 +100,7 @@ const LandingPage = () => {
               Free AI Reading Tutor - Help Kids Learn to Read with Phonics
             </h1>
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-full sm:max-w-xl mx-auto md:mx-0">
-              Word Wiz AI helps children ages 5-8 learn to read through AI-powered pronunciation feedback and personalized phonics practice. 100% free, no ads, no subscriptions - just better reading skills for your child.
+              Word Wiz AI helps children ages 5-8 learn to read through AI-powered pronunciation feedback and personalized phonics practice. 100% free, no ads, no subscriptions.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
               <Link to="/signup" className="w-full sm:w-auto">

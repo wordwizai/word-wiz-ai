@@ -21,10 +21,10 @@ const LandingPageCTA = ({ fadeUpVariant }: LandingPageCTAProps) => {
     >
       <div className="max-w-4xl mx-auto text-center space-y-6">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold">
-          Help Your Child Learn to Read - 100% Free
+          Start Reading Practice Today
         </h2>
         <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-          Join thousands of families using Word Wiz AI for personalized phonics practice with AI-powered pronunciation feedback. No credit card required, no ads, no subscriptions.
+          Join families using Word Wiz AI for personalized phonics practice. No credit card required, completely free.
         </p>
         <Link
           className="inline-flex items-center gap-2 bg-primary text-primary-foreground py-3 px-8 rounded-lg font-semibold transition-all duration-300 hover:shadow-md w-full max-w-xs mx-auto md:mx-0 justify-center"

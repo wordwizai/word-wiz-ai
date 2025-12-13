@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { wordWizIcon } from "@/assets";
+import React from "react";
 import {
   Heart,
   Users,
@@ -35,6 +36,34 @@ const childVariant = {
 };
 
 const About = () => {
+  // Add structured data for SEO
+  React.useEffect(() => {
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@type": "AboutPage",
+      mainEntity: {
+        "@type": "Organization",
+        name: "Word Wiz AI",
+        description:
+          "Free AI-powered reading tutor helping children learn to read with phoneme-level pronunciation feedback",
+        url: "https://wordwizai.com",
+        sameAs: [
+          "https://instagram.com/wordwizai",
+          "https://github.com/wordwizai",
+        ],
+      },
+    };
+
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.text = JSON.stringify(structuredData);
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
+
   return (
     <main className="scroll-smooth bg-background text-foreground">
       {/* Navbar */}
@@ -70,8 +99,8 @@ const About = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.8 }}
           >
-            Empowering young readers to achieve their full potential through
-            personalized AI-powered reading assistance.
+            Empowering young readers through AI-powered phonics instruction and
+            pronunciation feedback.
           </motion.p>
         </div>
       </motion.section>
@@ -89,8 +118,8 @@ const About = () => {
           <div className="text-center space-y-4">
             <h2 className="text-3xl md:text-4xl font-bold">Our Mission</h2>
             <p className="text-muted-foreground max-w-3xl mx-auto">
-              We believe every child deserves access to personalized reading
-              support that helps them grow into confident, capable readers.
+              Every child deserves access to personalized reading support that
+              helps them become confident readers.
             </p>
           </div>
 
@@ -106,19 +135,19 @@ const About = () => {
                 icon: <Target className="w-6 h-6 text-blue-600" />,
                 iconBg: "from-blue-200 to-purple-200",
                 title: "Personalized Learning",
-                text: "Every child learns differently. Our AI adapts to individual reading levels and learning styles to provide targeted support.",
+                text: "Our AI adapts to individual reading levels and learning styles to provide targeted support.",
               },
               {
                 icon: <DollarSign className="w-6 h-6 text-red-500" />,
                 iconBg: "from-red-200 to-pink-200",
                 title: "Completely Free",
-                text: "Reading support shouldn't be a privilege. We're committed to providing our platform free of charge to all students and educators.",
+                text: "Quality reading support for all students and educators, with no cost or subscriptions.",
               },
               {
                 icon: <Users className="w-6 h-6 text-green-600" />,
                 iconBg: "from-green-200 to-blue-200",
                 title: "Empowering Educators",
-                text: "We provide teachers and parents with insights and tools to better support their students' reading journey.",
+                text: "Tools and insights to help teachers and parents support their students' reading journey.",
               },
             ].map((mission, i) => (
               <motion.div key={i} variants={childVariant}>
@@ -235,8 +264,8 @@ const About = () => {
           <div className="space-y-4">
             <h2 className="text-3xl md:text-4xl font-bold">Connect With Us</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Stay updated on our progress, share feedback, or get in touch with
-              our team. We'd love to hear from you!
+              Share feedback or get in touch with our team. We'd love to hear
+              from you!
             </p>
           </div>
 

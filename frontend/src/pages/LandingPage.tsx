@@ -100,7 +100,7 @@ const LandingPage = () => {
               Free AI Reading Tutor - Help Kids Learn to Read with Phonics
             </h1>
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-full sm:max-w-xl mx-auto md:mx-0">
-              Word Wiz AI helps children ages 5-8 learn to read through AI-powered pronunciation feedback and personalized phonics practice. 100% free, no ads, no subscriptions - just better reading skills for your child.
+              Word Wiz AI helps children ages 5-8 learn to read through AI-powered pronunciation feedback and personalized phonics practice. 100% free, no ads, no subscriptions.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
               <Link to="/signup" className="w-full sm:w-auto">
@@ -177,7 +177,7 @@ const LandingPage = () => {
                 icon: <WholeWord className="w-6 h-6 text-rose-500" />,
                 iconBg: "from-rose-200 to-pink-200",
                 title: "Phoneme-Level Pronunciation Feedback",
-                text: "Advanced speech recognition identifies exact sounds misread—more precise than whole-word feedback.",
+                text: "Advanced speech recognition identifies exact sounds misread, more precise than whole-word feedback.",
               },
               {
                 icon: <CircleDollarSign className="w-6 h-6 text-green-600" />,
@@ -239,7 +239,7 @@ const LandingPage = () => {
                 icon: <User className="w-6 h-6 text-green-600" />,
                 iconBg: "from-green-200 to-emerald-200",
                 title: "Parents & Homeschoolers",
-                text: "Support your child's reading journey at home with professional-grade phonics instruction and pronunciation coaching.",
+                text: "Support your child's reading journey at home with phonics instruction and pronunciation coaching.",
               },
             ].map((target, i) => (
               <motion.div

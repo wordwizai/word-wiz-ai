@@ -45,6 +45,29 @@ const Contact = () => {
   const [loading, setLoading] = React.useState(false);
   const [submitted, setSubmitted] = React.useState(false);
 
+  // Add structured data for SEO
+  React.useEffect(() => {
+    const structuredData = {
+      "@context": "https://schema.org",
+      "@type": "ContactPage",
+      mainEntity: {
+        "@type": "Organization",
+        name: "Word Wiz AI",
+        email: "contact@wordwizai.com",
+        url: "https://wordwizai.com",
+      },
+    };
+
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.text = JSON.stringify(structuredData);
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     alert(
@@ -103,8 +126,8 @@ const Contact = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.8 }}
           >
-            Have questions or feedback? We'd love to hear from you! Reach out to
-            our team and we'll get back to you as soon as possible.
+            Have questions about Word Wiz AI? We're here to help teachers,
+            parents, and students with reading support.
           </motion.p>
         </div>
       </motion.section>
@@ -226,9 +249,8 @@ const Contact = () => {
               <div>
                 <h2 className="text-3xl font-bold mb-6">Get in Touch</h2>
                 <p className="text-muted-foreground text-lg leading-relaxed">
-                  Whether you're a teacher looking for reading support tools, a
-                  parent wanting to help your child, or a fellow educator with
-                  ideas, we're here to listen and help.
+                  Whether you're a teacher, parent, or educator, we're here to
+                  help with reading support questions and feedback.
                 </p>
               </div>
 
@@ -294,8 +316,8 @@ const Contact = () => {
               Follow Our Journey
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Stay connected with Word Wiz AI on social media for updates,
-              educational tips, and community highlights.
+              Stay connected with Word Wiz AI for updates, tips, and community
+              highlights.
             </p>
           </div>
 

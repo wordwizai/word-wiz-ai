@@ -107,29 +107,33 @@ const LandingPage = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
               <Link to="/signup" className="w-full sm:w-auto">
-                <Button
-                  size="lg"
-                  className="w-full sm:w-auto min-h-[48px] flex items-center gap-2"
-                  as={motion.button}
+                <motion.div
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
-                  <BookOpen className="w-5 h-5" />
-                  Create an Account
-                </Button>
+                  <Button
+                    size="lg"
+                    className="w-full sm:w-auto min-h-[48px] flex items-center gap-2"
+                  >
+                    <BookOpen className="w-5 h-5" />
+                    Create an Account
+                  </Button>
+                </motion.div>
               </Link>
               <a href="#how-it-works-section" className="w-full sm:w-auto">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="w-full sm:w-auto min-h-[48px] flex items-center gap-2"
-                  as={motion.button}
+                <motion.div
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
-                  <Search className="w-5 h-5" />
-                  How It Works
-                </Button>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="w-full sm:w-auto min-h-[48px] flex items-center gap-2"
+                  >
+                    <Search className="w-5 h-5" />
+                    How It Works
+                  </Button>
+                </motion.div>
               </a>
             </div>
           </div>

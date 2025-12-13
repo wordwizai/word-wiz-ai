@@ -28,16 +28,19 @@ const LandingPageCTA = ({ fadeUpVariant }: LandingPageCTAProps) => {
           practice with AI-powered pronunciation feedback. No credit card
           required, no ads, no subscriptions.
         </p>
-        <Link
-          className="inline-flex items-center gap-2 bg-primary text-primary-foreground py-3 px-8 rounded-lg font-semibold transition-all duration-300 hover:shadow-md w-full max-w-xs mx-auto md:mx-0 justify-center"
-          to="/signup"
-          as={motion.a}
+        <motion.div
           whileHover={{ scale: 1.05 }}
           transition={{ type: "spring", stiffness: 300 }}
+          className="inline-block"
         >
-          <BookOpen className="w-5 h-5" />
-          Start Free Reading Practice
-        </Link>
+          <Link
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground py-3 px-8 rounded-lg font-semibold transition-all duration-300 hover:shadow-md w-full max-w-xs mx-auto md:mx-0 justify-center"
+            to="/signup"
+          >
+            <BookOpen className="w-5 h-5" />
+            Start Free Reading Practice
+          </Link>
+        </motion.div>
       </div>
     </motion.section>
   );

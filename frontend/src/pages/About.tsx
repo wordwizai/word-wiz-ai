@@ -125,10 +125,10 @@ const About = () => {
 
           <motion.div
             className="grid grid-cols-1 md:grid-cols-3 gap-6"
-            variants={staggerContainer}
-            initial="hidden"
-            whileInView="visible"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6 }}
           >
             {[
               {
@@ -150,7 +150,7 @@ const About = () => {
                 text: "Tools and insights to help teachers and parents support their students' reading journey.",
               },
             ].map((mission, i) => (
-              <motion.div key={i} variants={childVariant}>
+              <div key={i}>
                 <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl text-center h-full hover:shadow-2xl transition-shadow rounded-3xl">
                   <CardHeader className="pb-4">
                     <div
@@ -166,7 +166,7 @@ const About = () => {
                     <p className="text-muted-foreground">{mission.text}</p>
                   </CardContent>
                 </Card>
-              </motion.div>
+              </div>
             ))}
           </motion.div>
         </div>
@@ -272,10 +272,10 @@ const About = () => {
           <motion.div
             className="grid grid-cols-3 gap-4"
             id="contact"
-            variants={staggerContainer}
-            initial="hidden"
-            whileInView="visible"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6 }}
           >
             {[
               {
@@ -297,7 +297,7 @@ const About = () => {
                 color: "from-blue-400 to-cyan-600",
               },
             ].map((social, i) => (
-              <motion.div key={i} variants={childVariant}>
+              <div key={i}>
                 <a
                   href={social.href}
                   target="_blank"
@@ -320,7 +320,7 @@ const About = () => {
                     </div>
                   </motion.div>
                 </a>
-              </motion.div>
+              </div>
             ))}
           </motion.div>
         </div>

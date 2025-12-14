@@ -357,6 +357,7 @@ const HookedOnPhonicsComparison = () => {
       wordWizDetails={wordWizDetails}
       metaTitle="Hooked on Phonics vs Word Wiz AI (2025): Which Phonics Program is Better?"
       metaDescription="Detailed comparison of Hooked on Phonics and Word Wiz AI. Compare speech recognition, pricing, effectiveness, and features to find the best phonics program for your child."
+      canonicalUrl="https://wordwizai.com/comparisons/hooked-on-phonics-vs-word-wiz-ai"
       h1Title="Hooked on Phonics vs Word Wiz AI: Which Phonics Program is Better? (2025)"
       introText="Choosing between Hooked on Phonics' trusted 35-year approach or Word Wiz AI's modern speech recognition technology? This comprehensive comparison covers everything you need to decide which phonics program delivers the best results for your child."
       verdict={verdict}

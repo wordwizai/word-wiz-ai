@@ -434,6 +434,7 @@ const BestFreeReadingAppsComparison = () => {
       wordWizDetails={wordWizDetails}
       metaTitle="Best Free Reading Apps 2025: Starfall vs Khan Academy Kids vs Word Wiz AI"
       metaDescription="Compare the best free reading apps for kids. See Starfall, Khan Academy Kids, and Word Wiz AI features, speech recognition, and which is best for your child."
+      canonicalUrl="https://wordwizai.com/comparisons/best-free-reading-apps"
       h1Title="Best Free Reading Apps: Starfall vs Khan Academy Kids vs Word Wiz AI (2025)"
       introText="Looking for the best free reading app? Compare Starfall's dyslexia-friendly approach, Khan Academy Kids' comprehensive curriculum, and Word Wiz AI's speech recognition technology. Find the perfect free option for your child."
       verdict={verdict}

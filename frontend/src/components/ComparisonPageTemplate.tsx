@@ -65,6 +65,7 @@ interface ComparisonPageProps {
   wordWizDetails: ProductDetails;
   metaTitle: string;
   metaDescription: string;
+  canonicalUrl: string;
   h1Title: string;
   introText: string;
   verdict: {
@@ -87,6 +88,7 @@ const ComparisonPage: React.FC<ComparisonPageProps> = ({
   wordWizDetails,
   metaTitle,
   metaDescription,
+  canonicalUrl,
   h1Title,
   introText,
   verdict,
@@ -111,6 +113,8 @@ const ComparisonPage: React.FC<ComparisonPageProps> = ({
       <Helmet>
         <title>{metaTitle}</title>
         <meta name="description" content={metaDescription} />
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:url" content={canonicalUrl} />
         <meta property="og:title" content={metaTitle} />
         <meta property="og:description" content={metaDescription} />
         <meta property="og:type" content="article" />

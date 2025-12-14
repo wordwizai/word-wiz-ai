@@ -26,6 +26,7 @@ const UnderConstructionPage = lazy(
 );
 const About = lazy(() => import("./pages/About.tsx"));
 const Contact = lazy(() => import("./pages/Contact.tsx"));
+const Privacy = lazy(() => import("./pages/Privacy.tsx"));
 const ToastTestPage = lazy(() => import("./pages/ToastTestPage.tsx"));
 
 // Lazy load comparison pages
@@ -67,6 +68,7 @@ function App() {
                   <Route path="/login" element={<Login />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/contact" element={<Contact />} />
+                  <Route path="/privacy" element={<Privacy />} />
                   <Route path="/signup" element={<SignUp />} />
 
                   {/* Comparison Pages */}

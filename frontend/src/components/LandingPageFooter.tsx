@@ -44,14 +44,7 @@ const LandingPageFooter = () => {
               >
                 For Educators
               </Link>
-              <Link
-                to="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  alert("Coming soon");
-                }}
-                className="hover:underline"
-              >
+              <Link to="/privacy" className="hover:underline">
                 Privacy Policy
               </Link>
               <Link

@@ -67,7 +67,39 @@
     <meta name="author" content="Word Wiz AI" />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Fallback content for crawlers that don't execute JavaScript -->
+      <noscript>
+        <div
+          style="
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            font-family: system-ui, -apple-system, sans-serif;
+          "
+        >
+          <h1 style="font-size: 2em; margin-bottom: 0.5em">
+            Word Wiz AI - Free AI Reading Tutor for Kids
+          </h1>
+          <p style="font-size: 1.1em; color: #666; margin-bottom: 2em">
+            Help your child learn to read with AI-powered phoneme-level
+            feedback. Free, forever.
+          </p>
+          <h2 style="font-size: 1.5em; margin-top: 1.5em">Features</h2>
+          <ul style="line-height: 1.8; color: #333">
+            <li>Real-time pronunciation feedback with speech recognition</li>
+            <li>Phoneme-level analysis to identify specific sound errors</li>
+            <li>AI-powered personalized reading practice</li>
+            <li>Decodable stories and interactive exercises</li>
+            <li>100% free - no subscriptions or credit card required</li>
+          </ul>
+          <p style="margin-top: 2em; font-size: 1.1em">
+            <strong>Please enable JavaScript to use Word Wiz AI.</strong> This
+            app requires JavaScript for interactive reading practice.
+          </p>
+        </div>
+      </noscript>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

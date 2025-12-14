@@ -1,30 +1,56 @@
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
-import Dashboard from "./pages/Dashboard.tsx";
-import Layout from "./components/Layout.tsx";
-import Login from "./pages/Login.tsx";
-import SignUp from "./pages/SignUp.tsx";
-import ProgressDashboard from "./pages/ProgressDashboard.tsx";
-import Settings from "./pages/Settings.tsx";
-import ClassesPage from "./pages/ClassesPage.tsx";
+import { lazy, Suspense } from "react";
 import { AuthProvider } from "./contexts/AuthContext.tsx";
-import OAuthRedirect from "./components/OAuthRedirect.tsx";
 import { ThemeProvider } from "./contexts/ThemeContext.tsx";
 import { SettingsProvider } from "./contexts/SettingsContext.tsx";
-import PracticeRouter from "./pages/PracticeRouter.tsx";
-import PracticeDashboard from "./pages/PracticeDashboard.tsx";
-import LandingPage from "./pages/LandingPage.tsx";
-import UnderConstructionPage from "./pages/UnderConstructionPage.tsx";
-import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import { Analytics } from "@vercel/analytics/react";
-import About from "./pages/About.tsx";
-import Contact from "./pages/Contact.tsx";
 import { Toaster } from "./components/ui/sonner.tsx";
-import ToastTestPage from "./pages/ToastTestPage.tsx";
-import ABCmouseHookedOnPhonicsComparison from "./pages/comparisons/ABCmouseVsHookedOnPhonics.tsx";
-import ReadingEggsStarfallComparison from "./pages/comparisons/ReadingEggsVsStarfall.tsx";
-import HomerKhanAcademyKidsComparison from "./pages/comparisons/HomerVsKhanAcademyKids.tsx";
-import HookedOnPhonicsComparison from "./pages/comparisons/HookedOnPhonicsVsWordWizAI.tsx";
-import BestFreeReadingAppsComparison from "./pages/comparisons/BestFreeReadingApps.tsx";
+
+// Critical components - load immediately
+import LandingPage from "./pages/LandingPage.tsx";
+import Login from "./pages/Login.tsx";
+import SignUp from "./pages/SignUp.tsx";
+import Layout from "./components/Layout.tsx";
+import ProtectedRoute from "./components/ProtectedRoute.tsx";
+
+// Lazy load non-critical routes for better initial load
+const Dashboard = lazy(() => import("./pages/Dashboard.tsx"));
+const ProgressDashboard = lazy(() => import("./pages/ProgressDashboard.tsx"));
+const Settings = lazy(() => import("./pages/Settings.tsx"));
+const ClassesPage = lazy(() => import("./pages/ClassesPage.tsx"));
+const OAuthRedirect = lazy(() => import("./components/OAuthRedirect.tsx"));
+const PracticeRouter = lazy(() => import("./pages/PracticeRouter.tsx"));
+const PracticeDashboard = lazy(() => import("./pages/PracticeDashboard.tsx"));
+const UnderConstructionPage = lazy(
+  () => import("./pages/UnderConstructionPage.tsx")
+);
+const About = lazy(() => import("./pages/About.tsx"));
+const Contact = lazy(() => import("./pages/Contact.tsx"));
+const ToastTestPage = lazy(() => import("./pages/ToastTestPage.tsx"));
+
+// Lazy load comparison pages
+const ABCmouseHookedOnPhonicsComparison = lazy(
+  () => import("./pages/comparisons/ABCmouseVsHookedOnPhonics.tsx")
+);
+const ReadingEggsStarfallComparison = lazy(
+  () => import("./pages/comparisons/ReadingEggsVsStarfall.tsx")
+);
+const HomerKhanAcademyKidsComparison = lazy(
+  () => import("./pages/comparisons/HomerVsKhanAcademyKids.tsx")
+);
+const HookedOnPhonicsComparison = lazy(
+  () => import("./pages/comparisons/HookedOnPhonicsVsWordWizAI.tsx")
+);
+const BestFreeReadingAppsComparison = lazy(
+  () => import("./pages/comparisons/BestFreeReadingApps.tsx")
+);
+
+// Loading fallback component
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+  </div>
+);
 
 function App() {
   return (
@@ -35,61 +61,63 @@ function App() {
         <AuthProvider>
           <SettingsProvider>
             <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-              <Routes>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/signup" element={<SignUp />} />
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/signup" element={<SignUp />} />
 
-                {/* Comparison Pages */}
-                <Route
-                  path="/comparisons/abcmouse-vs-hooked-on-phonics-vs-word-wiz-ai"
-                  element={<ABCmouseHookedOnPhonicsComparison />}
-                />
-                <Route
-                  path="/comparisons/reading-eggs-vs-starfall-vs-word-wiz-ai"
-                  element={<ReadingEggsStarfallComparison />}
-                />
-                <Route
-                  path="/comparisons/homer-vs-khan-academy-kids-vs-word-wiz-ai"
-                  element={<HomerKhanAcademyKidsComparison />}
-                />
-                <Route
-                  path="/comparisons/hooked-on-phonics-vs-word-wiz-ai"
-                  element={<HookedOnPhonicsComparison />}
-                />
-                <Route
-                  path="/comparisons/best-free-reading-apps"
-                  element={<BestFreeReadingAppsComparison />}
-                />
-                <Route path="/toast-test" element={<ToastTestPage />} />
-                <Route path="/oauth-callback" element={<OAuthRedirect />} />
-                <Route
-                  path="/practice/:sessionId"
-                  element={
-                    <ProtectedRoute>
-                      <PracticeRouter />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <Layout>
-                        <Outlet />
-                      </Layout>
-                    </ProtectedRoute>
-                  }
-                >
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/progress" element={<ProgressDashboard />} />
-                  <Route path="/settings" element={<Settings />} />
-                  <Route path="/practice" element={<PracticeDashboard />} />
-                  <Route path="/classes" element={<ClassesPage />} />
-                </Route>
-                <Route path="*" element={<UnderConstructionPage />} />
-              </Routes>
+                  {/* Comparison Pages */}
+                  <Route
+                    path="/comparisons/abcmouse-vs-hooked-on-phonics-vs-word-wiz-ai"
+                    element={<ABCmouseHookedOnPhonicsComparison />}
+                  />
+                  <Route
+                    path="/comparisons/reading-eggs-vs-starfall-vs-word-wiz-ai"
+                    element={<ReadingEggsStarfallComparison />}
+                  />
+                  <Route
+                    path="/comparisons/homer-vs-khan-academy-kids-vs-word-wiz-ai"
+                    element={<HomerKhanAcademyKidsComparison />}
+                  />
+                  <Route
+                    path="/comparisons/hooked-on-phonics-vs-word-wiz-ai"
+                    element={<HookedOnPhonicsComparison />}
+                  />
+                  <Route
+                    path="/comparisons/best-free-reading-apps"
+                    element={<BestFreeReadingAppsComparison />}
+                  />
+                  <Route path="/toast-test" element={<ToastTestPage />} />
+                  <Route path="/oauth-callback" element={<OAuthRedirect />} />
+                  <Route
+                    path="/practice/:sessionId"
+                    element={
+                      <ProtectedRoute>
+                        <PracticeRouter />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    element={
+                      <ProtectedRoute>
+                        <Layout>
+                          <Outlet />
+                        </Layout>
+                      </ProtectedRoute>
+                    }
+                  >
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/progress" element={<ProgressDashboard />} />
+                    <Route path="/settings" element={<Settings />} />
+                    <Route path="/practice" element={<PracticeDashboard />} />
+                    <Route path="/classes" element={<ClassesPage />} />
+                  </Route>
+                  <Route path="*" element={<UnderConstructionPage />} />
+                </Routes>
+              </Suspense>
             </ThemeProvider>
           </SettingsProvider>
         </AuthProvider>

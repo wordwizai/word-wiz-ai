@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense } from "react";
 import { AuthProvider } from "./contexts/AuthContext.tsx";
 import { ThemeProvider } from "./contexts/ThemeContext.tsx";
 import { SettingsProvider } from "./contexts/SettingsContext.tsx";
@@ -53,13 +53,6 @@ const PageLoader = () => (
 );
 
 function App() {
-  // Initialize Web Vitals monitoring after component mounts
-  useEffect(() => {
-    import("./utils/webVitals").then(({ initWebVitals }) => {
-      initWebVitals();
-    });
-  }, []);
-
   return (
     <div className="font-body">
       <Analytics />

@@ -70,14 +70,32 @@ function handleMetric(metric: Metric) {
 
 // Initialize Web Vitals monitoring
 export function initWebVitals() {
-  // Core Web Vitals
-  onLCP(handleMetric); // Largest Contentful Paint
-  onINP(handleMetric); // Interaction to Next Paint (replaces FID)
-  onCLS(handleMetric); // Cumulative Layout Shift
+  // Only run in browser environment
+  if (typeof window === "undefined" || typeof document === "undefined") {
+    return;
+  }
 
-  // Additional metrics
-  onFCP(handleMetric); // First Contentful Paint
-  onTTFB(handleMetric); // Time to First Byte
+  // Wait for document to be ready
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", startMonitoring);
+  } else {
+    startMonitoring();
+  }
+}
+
+function startMonitoring() {
+  try {
+    // Core Web Vitals
+    onLCP(handleMetric); // Largest Contentful Paint
+    onINP(handleMetric); // Interaction to Next Paint (replaces FID)
+    onCLS(handleMetric); // Cumulative Layout Shift
+
+    // Additional metrics
+    onFCP(handleMetric); // First Contentful Paint
+    onTTFB(handleMetric); // Time to First Byte
+  } catch (error) {
+    console.error("[Web Vitals] Failed to initialize:", error);
+  }
 }
 
 // Declare global types for analytics

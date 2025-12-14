@@ -20,6 +20,11 @@ import About from "./pages/About.tsx";
 import Contact from "./pages/Contact.tsx";
 import { Toaster } from "./components/ui/sonner.tsx";
 import ToastTestPage from "./pages/ToastTestPage.tsx";
+import ABCmouseHookedOnPhonicsComparison from "./pages/comparisons/ABCmouseVsHookedOnPhonics.tsx";
+import ReadingEggsStarfallComparison from "./pages/comparisons/ReadingEggsVsStarfall.tsx";
+import HomerKhanAcademyKidsComparison from "./pages/comparisons/HomerVsKhanAcademyKids.tsx";
+import HookedOnPhonicsComparison from "./pages/comparisons/HookedOnPhonicsVsWordWizAI.tsx";
+import BestFreeReadingAppsComparison from "./pages/comparisons/BestFreeReadingApps.tsx";
 
 function App() {
   return (
@@ -36,6 +41,28 @@ function App() {
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/signup" element={<SignUp />} />
+
+                {/* Comparison Pages */}
+                <Route
+                  path="/comparisons/abcmouse-vs-hooked-on-phonics-vs-word-wiz-ai"
+                  element={<ABCmouseHookedOnPhonicsComparison />}
+                />
+                <Route
+                  path="/comparisons/reading-eggs-vs-starfall-vs-word-wiz-ai"
+                  element={<ReadingEggsStarfallComparison />}
+                />
+                <Route
+                  path="/comparisons/homer-vs-khan-academy-kids-vs-word-wiz-ai"
+                  element={<HomerKhanAcademyKidsComparison />}
+                />
+                <Route
+                  path="/comparisons/hooked-on-phonics-vs-word-wiz-ai"
+                  element={<HookedOnPhonicsComparison />}
+                />
+                <Route
+                  path="/comparisons/best-free-reading-apps"
+                  element={<BestFreeReadingAppsComparison />}
+                />
                 <Route path="/toast-test" element={<ToastTestPage />} />
                 <Route path="/oauth-callback" element={<OAuthRedirect />} />
                 <Route

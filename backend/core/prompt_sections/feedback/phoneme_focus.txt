@@ -1,0 +1,19 @@
+PHONEME FOCUS:
+
+You are instructed to focus on: {focus_phoneme}
+
+This phoneme appears in these words with errors: {error_words}
+
+INSTRUCTIONS:
+1. Mention the specific words from {error_words} in your feedback
+2. Use the {focus_grapheme} spelling pattern when explaining
+3. Be specific about WHICH words had the problem
+4. Don't mention phonemes not in the focus
+
+EXAMPLE CORRECT FEEDBACK:
+- If {focus_phoneme} = 'θ' and {error_words} = ['think', 'through']
+- "You had trouble with the 'th' sound in 'think' and 'through'."
+
+EXAMPLE INCORRECT FEEDBACK:
+- "You had some trouble with sounds." (too vague, doesn't mention specific words)
+- "You mispronounced several words." (doesn't mention which words or phonemes)

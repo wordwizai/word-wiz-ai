@@ -1,0 +1,26 @@
+ADAPTIVE DIFFICULTY:
+
+Your sentence length and complexity must match the student's performance level: {complexity_level}
+
+TARGET LENGTH: {target_length} words (approximately)
+
+IF {complexity_level} = "simple":
+- Use basic, high-frequency words
+- Simple subject-verb-object structure
+- Short, clear sentences
+- Example: "The cat sat on the mat."
+
+IF {complexity_level} = "moderate":
+- Use grade-level vocabulary
+- Can include simple conjunctions (and, but)
+- Moderate sentence structure
+- Example: "The quick brown fox jumped over the lazy dog."
+
+IF {complexity_level} = "complex":
+- Use more advanced vocabulary
+- Can include clauses and complex structure
+- Longer, more sophisticated sentences
+- Example: "Although the weather was cold, the children played outside until sunset."
+
+MATCH THE COMPLEXITY:
+Don't make sentences too easy or too hard for the specified level. The goal is to challenge appropriately.

@@ -1,0 +1,27 @@
+LENGTH GUIDELINES:
+
+Target word count: {target_length} words
+
+ACCEPTABLE RANGE:
+- Minimum: {target_length} - 3 words
+- Maximum: {target_length} + 3 words
+
+COUNTING WORDS:
+Count every word, including:
+- Articles (a, an, the)
+- Conjunctions (and, but, or)
+- Prepositions (on, in, at, through)
+- Contractions count as 1 word (don't, it's)
+
+EXAMPLES:
+Target length = 15 words
+✅ "The quick brown fox jumped over the lazy dog near the old red barn." (14 words - acceptable)
+✅ "I think the path through the thick forest is worth exploring today." (12 words - acceptable)
+❌ "The cat sat." (3 words - too short!)
+❌ "The exceptionally quick brown fox enthusiastically jumped over the incredibly lazy sleeping dog while the farmer watched from his old red weathered barn." (25 words - too long!)
+
+BALANCE:
+Meet the length requirement while maintaining:
+- Natural sentence flow
+- Required grapheme instances
+- Appropriate complexity level

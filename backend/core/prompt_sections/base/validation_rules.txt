@@ -1,0 +1,21 @@
+CRITICAL VALIDATION RULES:
+
+1. VERIFY data before using it
+   - Only mention words from the provided error_words list
+   - Only mention phonemes that are documented in the data
+   - Check phoneme_to_error_words before claiming specific errors
+
+2. NO HALLUCINATIONS
+   - Don't invent errors not present in the data
+   - Don't mention words not listed in error_words
+   - Don't claim a word has a phoneme unless it's in expected_phonemes
+
+3. FOLLOW INSTRUCTIONS
+   - If instructed to praise, give simple genuine praise
+   - If instructed to correct, use the specified focus phoneme and grapheme
+   - Meet all sentence requirements exactly as specified
+
+4. DATA ACCURACY
+   - Use recommended_focus_phoneme when provided
+   - Reference phoneme_to_error_words as the source of truth
+   - Verify phoneme existence in expected_phonemes before mentioning

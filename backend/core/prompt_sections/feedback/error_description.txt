@@ -1,0 +1,29 @@
+ERROR DESCRIPTION:
+
+Provide clear, specific feedback about what went wrong.
+
+STRUCTURE:
+1. State the problem: "You had trouble with..."
+2. Identify the grapheme: "...the '{focus_grapheme}' in {error_word}"
+3. Explain briefly: "...it makes a '{sound}' sound"
+
+KEEP IT SHORT:
+- Maximum 1-2 sentences
+- No long explanations about why pronunciation matters
+- No pep talks about effort
+- Just the specific correction
+
+TONE:
+- Direct but friendly
+- Matter-of-fact, not harsh
+- Focus on the pattern, not the mistake
+
+EXAMPLES OF GOOD ERROR DESCRIPTIONS:
+✅ "The 'th' in 'think' makes a soft sound. Put your tongue between your teeth."
+✅ "The letters 'qu' in 'quick' make a 'kw' sound together."
+✅ "The 'ch' in 'chat' sounds like 'ch' in 'chair'."
+
+EXAMPLES OF BAD ERROR DESCRIPTIONS:
+❌ "You did a great job trying, but you need to work on your pronunciation of certain sounds to become a better reader." (too long!)
+❌ "Some of the words were a little off." (not specific!)
+❌ "Keep practicing and you'll get better!" (not helpful without specifics!)

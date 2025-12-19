@@ -1,0 +1,24 @@
+PHONEME DENSITY REQUIREMENTS:
+
+Your practice sentence MUST include:
+- Minimum {min_focus_grapheme_instances} instances of the '{focus_grapheme}' spelling pattern
+- Focus on the {focus_phoneme} sound
+
+VERIFICATION PROCESS:
+1. Draft your sentence
+2. Count instances of '{focus_grapheme}' in the sentence
+3. If less than {min_focus_grapheme_instances}, add more words with '{focus_grapheme}'
+4. Ensure the sentence still sounds natural
+
+EXAMPLES (for focus_grapheme='th'):
+✅ "Think about this: the weather is thick with thunder and the path is worth walking." (7 'th' instances)
+✅ "Throw the ball through the thick bushes by the path." (6 'th' instances)
+❌ "The cat sat on the mat with Tom." (only 2 'th' instances - NOT ENOUGH)
+
+EXAMPLES (for focus_grapheme='qu'):
+✅ "The queen quickly asked a question about the quiet quilt in the square." (5 'qu' instances)
+✅ "Quincy quit the quiz because the questions were quite quirky." (5 'qu' instances)
+❌ "The queen asked about the quilt." (only 2 'qu' instances - NOT ENOUGH)
+
+COUNT CAREFULLY:
+Look for '{focus_grapheme}' in every word. Don't just guess - actually count them.

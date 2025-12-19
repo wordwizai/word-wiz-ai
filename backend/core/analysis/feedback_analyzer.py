@@ -50,9 +50,17 @@ class FeedbackAnalyzer:
     4. Assess error severity
     """
     
-    def __init__(self):
-        """Initialize the feedback analyzer."""
-        pass
+    def __init__(self, grapheme_mapper=None):
+        """
+        Initialize the feedback analyzer.
+        
+        Args:
+            grapheme_mapper: Optional GraphemePhonemeMapper instance. If None, creates one.
+        """
+        if grapheme_mapper is None:
+            from core.grapheme_to_phoneme import GraphemePhonemeMapper
+            grapheme_mapper = GraphemePhonemeMapper()
+        self.grapheme_mapper = grapheme_mapper
     
     def analyze_for_feedback(
         self,
@@ -95,7 +103,8 @@ class FeedbackAnalyzer:
         focus_phoneme, focus_grapheme, error_words, error_type = self._determine_focus(
             problem_summary,
             phoneme_to_error_words,
-            ground_truth_errors
+            ground_truth_errors,
+            pronunciation_data
         )
         
         # Assess severity
@@ -192,7 +201,8 @@ class FeedbackAnalyzer:
         self,
         problem_summary: Dict,
         phoneme_to_error_words: Dict,
-        ground_truth_errors: Dict
+        ground_truth_errors: Dict,
+        pronunciation_data: List[Dict]
     ) -> Tuple[Optional[str], Optional[str], List[str], str]:
         """
         Determine which phoneme/grapheme to focus on for correction.
@@ -206,6 +216,7 @@ class FeedbackAnalyzer:
             problem_summary: Problem summary with recommended focus
             phoneme_to_error_words: Phoneme to error words mapping
             ground_truth_errors: Ground truth error dictionary
+            pronunciation_data: List of word pronunciation dictionaries
             
         Returns:
             Tuple of (focus_phoneme, focus_grapheme, error_words, error_type)
@@ -223,8 +234,14 @@ class FeedbackAnalyzer:
             # Determine error type
             error_type = self._determine_error_type(focus_phoneme, ground_truth_errors)
             
-            # For now, grapheme is None - will be filled in by GraphemePhonemeMapper in Phase 3
-            return focus_phoneme, None, error_words, error_type
+            # Find grapheme for this phoneme using the mapper
+            focus_grapheme = self._find_grapheme_for_error(
+                focus_phoneme,
+                error_words,
+                pronunciation_data
+            )
+            
+            return focus_phoneme, focus_grapheme, error_words, error_type
         
         # Priority 2: Find most consistent error (appears in most words)
         if phoneme_to_error_words:
@@ -240,7 +257,14 @@ class FeedbackAnalyzer:
                 error_words = [e['word'] for e in error_list]
                 error_type = self._determine_error_type(focus_phoneme, ground_truth_errors)
                 
-                return focus_phoneme, None, error_words, error_type
+                # Find grapheme
+                focus_grapheme = self._find_grapheme_for_error(
+                    focus_phoneme,
+                    error_words,
+                    pronunciation_data
+                )
+                
+                return focus_phoneme, focus_grapheme, error_words, error_type
         
         # Priority 3: Fall back to most common error
         most_common = problem_summary.get('most_common_phoneme')
@@ -248,12 +272,58 @@ class FeedbackAnalyzer:
             focus_phoneme = most_common[0]
             error_words = []
             error_type = 'mixed'
+            focus_grapheme = None
             
-            return focus_phoneme, None, error_words, error_type
+            return focus_phoneme, focus_grapheme, error_words, error_type
         
         # No clear focus
         logger.warning("Could not determine focus phoneme")
         return None, None, [], 'mixed'
+    
+    def _find_grapheme_for_error(
+        self,
+        focus_phoneme: str,
+        error_words: List[str],
+        pronunciation_data: List[Dict]
+    ) -> Optional[str]:
+        """
+        Find the grapheme that corresponds to the focus phoneme in error words.
+        
+        Args:
+            focus_phoneme: The phoneme to find grapheme for
+            error_words: List of words with errors
+            pronunciation_data: Full pronunciation data
+            
+        Returns:
+            The most common grapheme for this phoneme, or None
+        """
+        if not error_words:
+            return None
+        
+        # Try to find grapheme from the first error word
+        for word_data in pronunciation_data:
+            word = word_data.get('ground_truth_word', '')
+            if word in error_words:
+                # Get expected phonemes for this word
+                expected_phonemes = word_data.get('expected_phonemes', [])
+                
+                # Try to find grapheme
+                grapheme = self.grapheme_mapper.find_grapheme_for_phoneme(
+                    word,
+                    focus_phoneme,
+                    expected_phonemes
+                )
+                
+                if grapheme:
+                    logger.info(f"Found grapheme '{grapheme}' for phoneme '{focus_phoneme}' in word '{word}'")
+                    return grapheme
+        
+        # Fallback: get common grapheme patterns for this phoneme
+        patterns = self.grapheme_mapper.get_grapheme_patterns_for_phoneme(focus_phoneme)
+        if patterns:
+            return patterns[0]  # Return most common pattern
+        
+        return None
     
     def _determine_error_type(self, phoneme: str, ground_truth_errors: Dict) -> str:
         """

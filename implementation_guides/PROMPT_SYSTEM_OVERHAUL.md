@@ -437,36 +437,36 @@ class StoryPractice(BaseMode):
 
 ---
 
-### Phase 2: Analysis Logic (8-10 hours) ⏸️ PENDING
+### Phase 2: Analysis Logic (8-10 hours) ✅ COMPLETE
 
 **Goal:** Implement pre-analysis that determines feedback strategy
 
 **Tasks:**
 
 1. **Create `core/analysis/` package**
-   - [ ] `__init__.py`
-   - [ ] `feedback_analyzer.py`
-   - [ ] `sentence_generator.py`
+   - [x] `__init__.py`
+   - [x] `feedback_analyzer.py`
+   - [x] `sentence_generator.py`
 
 2. **Implement `FeedbackAnalyzer`**
-   - [ ] `analyze_for_feedback()` - Main analysis method
-   - [ ] `get_ground_truth_errors()` - Filter to missed/substituted only
-   - [ ] `determine_praise_eligibility()` - Smart praise logic
+   - [x] `analyze_for_feedback()` - Main analysis method
+   - [x] `get_ground_truth_errors()` - Filter to missed/substituted only
+   - [x] `determine_praise_eligibility()` - Smart praise logic
 
 3. **Implement `SentenceGenerator`**
-   - [ ] `calculate_sentence_params()` - PER-based parameters
-   - [ ] `get_difficulty_guidelines()` - PER to complexity mapping
+   - [x] `calculate_sentence_params()` - PER-based parameters
+   - [x] `get_difficulty_guidelines()` - PER to complexity mapping
 
 4. **Update `SpeechProblemClassifier`** (if needed)
-   - [ ] Ensure `recommended_focus_phoneme` prioritizes ground truth errors
-   - [ ] Add logic to filter out addition errors
+   - [x] Existing implementation already prioritizes ground truth errors
+   - [x] No changes needed
 
 **Quality Assurance:**
-- [ ] `get_ground_truth_errors()` excludes addition errors
-- [ ] `determine_praise_eligibility()` only praises when PER <= 0.2 AND no consistent errors
-- [ ] Sentence parameters scale correctly with PER (0.0-1.0 range)
-- [ ] Edge cases handled (empty data, all errors, perfect pronunciation)
-- [ ] Manually verify with sample data
+- [x] `get_ground_truth_errors()` excludes addition errors
+- [x] `determine_praise_eligibility()` only praises when PER <= 0.2 AND no consistent errors
+- [x] Sentence parameters scale correctly with PER (0.0-1.0 range)
+- [x] Edge cases handled (empty data, all errors, perfect pronunciation)
+- [x] Manually verified with sample data
 
 ---
 
@@ -1118,14 +1118,14 @@ VALIDATION:
 **Estimated Total: 38-52 hours (Testing phase removed)**
 
 - Phase 1: Core Infrastructure - 6-8 hours ✅ COMPLETE
-- Phase 2: Analysis Logic - 8-10 hours ⏳ IN PROGRESS
-- Phase 3: Grapheme Mapping - 6-8 hours ⏸️ PENDING
+- Phase 2: Analysis Logic - 8-10 hours ✅ COMPLETE
+- Phase 3: Grapheme Mapping - 6-8 hours ⏳ IN PROGRESS
 - Phase 4: Prompt Content - 8-10 hours ⏸️ PENDING
 - Phase 5: Mode Integration - 6-8 hours ⏸️ PENDING
 - Phase 6: User Input Enhancement - 4-6 hours ⏸️ PENDING
 
 **Recommended Schedule:**
-- Week 1: Phases 1-2 (Foundation)
+- Week 1: Phases 1-2 (Foundation) ✅
 - Week 2: Phases 3-4 (Content)
 - Week 3: Phases 5-6 (Integration + Manual Validation)
 

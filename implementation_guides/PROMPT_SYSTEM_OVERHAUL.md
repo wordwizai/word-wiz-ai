@@ -1,9 +1,10 @@
 # Prompt System Overhaul - Implementation Guide
 
-**Version:** 1.0  
+**Version:** 1.1  
 **Created:** December 2024  
-**Status:** Draft - Ready for Implementation  
-**Estimated Effort:** 20-30 hours (Phases 1-5)
+**Last Updated:** December 2024  
+**Status:** In Progress  
+**Estimated Effort:** 38-52 hours (Phases 1-6, testing removed)
 
 ---
 
@@ -407,102 +408,97 @@ class StoryPractice(BaseMode):
 
 ## Implementation Phases
 
-### Phase 1: Core Infrastructure (6-8 hours)
+### Phase 1: Core Infrastructure (6-8 hours) ⏳ IN PROGRESS
 
 **Goal:** Create the prompt builder system and new directory structure
 
 **Tasks:**
 
 1. **Create `core/prompt_builder.py`**
-   - Implement `PromptSection` class
-   - Implement `PromptBuilder` class with template rendering
-   - Add tests for template variable substitution
+   - [ ] Implement `PromptSection` class
+   - [ ] Implement `PromptBuilder` class with template rendering
+   - [ ] Verify template variable substitution works
 
 2. **Create prompt sections directory**
-   - Create `core/prompt_sections/` with subdirectories
-   - Migrate content from existing prompts to sections
-   - Split monolithic prompts into logical sections
+   - [ ] Create `core/prompt_sections/` with subdirectories
+   - [ ] Migrate content from existing prompts to sections
+   - [ ] Split monolithic prompts into logical sections
 
 3. **Create base sections** (from existing prompts)
-   - `base/system_role.txt` - Extract role definition
-   - `base/output_format.txt` - JSON schema
-   - `base/validation_rules.txt` - Critical rules
+   - [ ] `base/system_role.txt` - Extract role definition
+   - [ ] `base/output_format.txt` - JSON schema
+   - [ ] `base/validation_rules.txt` - Critical rules
 
 **Quality Assurance:**
 - [ ] PromptBuilder can load all sections without errors
 - [ ] Template variable substitution works correctly
 - [ ] All sections are valid UTF-8 text files
-- [ ] Test building a prompt with multiple sections
-
-**Testing:**
-```python
-# Test prompt builder
-builder = PromptBuilder()
-prompt = builder.build_prompt(
-    sections=['base/system_role', 'base/output_format'],
-    context={'mode': 'test'},
-    include_ssml=True
-)
-assert 'system_role' content in prompt
-assert 'output_format' content in prompt
-```
+- [ ] Manually verify building a prompt with multiple sections works
 
 ---
 
-### Phase 2: Analysis Logic (8-10 hours)
+### Phase 2: Analysis Logic (8-10 hours) ⏸️ PENDING
 
 **Goal:** Implement pre-analysis that determines feedback strategy
 
 **Tasks:**
 
 1. **Create `core/analysis/` package**
-   - `__init__.py`
-   - `feedback_analyzer.py`
-   - `sentence_generator.py`
+   - [ ] `__init__.py`
+   - [ ] `feedback_analyzer.py`
+   - [ ] `sentence_generator.py`
 
 2. **Implement `FeedbackAnalyzer`**
-   - `analyze_for_feedback()` - Main analysis method
-   - `get_ground_truth_errors()` - Filter to missed/substituted only
-   - `determine_praise_eligibility()` - Smart praise logic
-   - Add comprehensive unit tests
+   - [ ] `analyze_for_feedback()` - Main analysis method
+   - [ ] `get_ground_truth_errors()` - Filter to missed/substituted only
+   - [ ] `determine_praise_eligibility()` - Smart praise logic
 
 3. **Implement `SentenceGenerator`**
-   - `calculate_sentence_params()` - PER-based parameters
-   - `get_difficulty_guidelines()` - PER to complexity mapping
-   - Add tests with various PER values
+   - [ ] `calculate_sentence_params()` - PER-based parameters
+   - [ ] `get_difficulty_guidelines()` - PER to complexity mapping
 
 4. **Update `SpeechProblemClassifier`** (if needed)
-   - Ensure `recommended_focus_phoneme` prioritizes ground truth errors
-   - Add logic to filter out addition errors
+   - [ ] Ensure `recommended_focus_phoneme` prioritizes ground truth errors
+   - [ ] Add logic to filter out addition errors
 
 **Quality Assurance:**
 - [ ] `get_ground_truth_errors()` excludes addition errors
 - [ ] `determine_praise_eligibility()` only praises when PER <= 0.2 AND no consistent errors
 - [ ] Sentence parameters scale correctly with PER (0.0-1.0 range)
 - [ ] Edge cases handled (empty data, all errors, perfect pronunciation)
-
-**Testing:**
-```python
-# Test feedback analyzer
-analyzer = FeedbackAnalyzer()
-
-# Case 1: Should praise (PER=0.1, no consistent errors)
-strategy = analyzer.analyze_for_feedback(data1, summary1, per1)
-assert strategy.should_praise == True
-
-# Case 2: Should correct (PER=0.15, consistent 'th' errors)
-strategy = analyzer.analyze_for_feedback(data2, summary2, per2)
-assert strategy.should_praise == False
-assert strategy.focus_phoneme == 'θ'
-
-# Case 3: Only ground truth errors counted
-errors = analyzer.get_ground_truth_errors(data3)
-assert 'added' not in errors  # Additions excluded
-```
+- [ ] Manually verify with sample data
 
 ---
 
-### Phase 3: Grapheme-Phoneme Mapping (6-8 hours)
+### Phase 3: Grapheme-Phoneme Mapping (6-8 hours) ⏸️ PENDING
+
+**Goal:** Connect phonemes to their spelling patterns
+
+**Tasks:**
+
+1. **Enhance `core/grapheme_to_phoneme.py`**
+   - [ ] Create `GraphemePhonemeMapper` class
+   - [ ] Add `GRAPHEME_PATTERNS` dictionary (common patterns)
+   - [ ] Implement `find_grapheme_for_phoneme()`
+   - [ ] Implement `get_example_words()`
+   - [ ] Implement `get_phoneme_description()`
+
+2. **Integrate with `FeedbackAnalyzer`**
+   - [ ] Use mapper to find focus_grapheme from focus_phoneme
+   - [ ] Include grapheme info in FeedbackStrategy
+
+3. **Create comprehensive pattern database**
+   - [ ] Common digraphs: ch, sh, th, ph, gh, wh
+   - [ ] Common vowel teams: ea, oo, ai, ay, oi, oy, ou, ow
+   - [ ] Consonant clusters: qu, ck, ng, -tch
+   - [ ] R-controlled: ar, er, ir, or, ur
+
+**Quality Assurance:**
+- [ ] `find_grapheme_for_phoneme()` correctly maps phonemes to graphemes
+- [ ] Handles multi-character graphemes (qu, ch, sh)
+- [ ] Returns None when no clear grapheme mapping exists
+- [ ] Example words are age-appropriate
+- [ ] Manually verify with common words
 
 **Goal:** Connect phonemes to their spelling patterns
 
@@ -555,32 +551,32 @@ assert grapheme == 'ch'
 
 ---
 
-### Phase 4: Prompt Sections Content (8-10 hours)
+### Phase 4: Prompt Sections Content (8-10 hours) ⏸️ PENDING
 
 **Goal:** Create high-quality prompt section content
 
 **Tasks:**
 
 1. **Create feedback sections**
-   - `feedback/praise_criteria.txt` - Clear praise rules
-   - `feedback/phoneme_focus.txt` - Use recommended_focus_phoneme
-   - `feedback/grapheme_instruction.txt` - Teach grapheme-phoneme
-   - `feedback/error_description.txt` - Describe what went wrong
+   - [ ] `feedback/praise_criteria.txt` - Clear praise rules
+   - [ ] `feedback/phoneme_focus.txt` - Use recommended_focus_phoneme
+   - [ ] `feedback/grapheme_instruction.txt` - Teach grapheme-phoneme
+   - [ ] `feedback/error_description.txt` - Describe what went wrong
 
 2. **Create sentence generation sections**
-   - `sentence_generation/adaptive_difficulty.txt` - PER scaling
-   - `sentence_generation/phoneme_density.txt` - 5+ target instances
-   - `sentence_generation/grapheme_patterns.txt` - Include target grapheme
-   - `sentence_generation/length_guidelines.txt` - Length by PER
+   - [ ] `sentence_generation/adaptive_difficulty.txt` - PER scaling
+   - [ ] `sentence_generation/phoneme_density.txt` - 5+ target instances
+   - [ ] `sentence_generation/grapheme_patterns.txt` - Include target grapheme
+   - [ ] `sentence_generation/length_guidelines.txt` - Length by PER
 
 3. **Create mode-specific sections**
-   - `modes/unlimited_context.txt` - Unlimited mode behavior
-   - `modes/story_context.txt` - Story continuation rules
-   - `modes/choice_story_context.txt` - Choice story specific
+   - [ ] `modes/unlimited_context.txt` - Unlimited mode behavior
+   - [ ] `modes/story_context.txt` - Story continuation rules
+   - [ ] `modes/choice_story_context.txt` - Choice story specific
 
 4. **Update SSML sections**
-   - `ssml/ssml_minimal.txt` - For short feedback (1-2 sentences)
-   - Keep existing `ssml/ssml_base.txt` for reference
+   - [ ] `ssml/ssml_minimal.txt` - For short feedback (1-2 sentences)
+   - [ ] Keep existing `ssml/ssml_base.txt` for reference
 
 **Quality Assurance:**
 - [ ] Each section is focused and single-purpose
@@ -617,32 +613,32 @@ If no grapheme is provided, fall back to phoneme-only feedback.
 
 ---
 
-### Phase 5: Mode Integration (6-8 hours)
+### Phase 5: Mode Integration (6-8 hours) ⏸️ PENDING
 
 **Goal:** Integrate new system into existing modes
 
 **Tasks:**
 
 1. **Update `core/modes/base_mode.py`**
-   - Add prompt_builder, feedback_analyzer, sentence_generator
-   - Implement enhanced `get_feedback_and_next_sentence()`
-   - Add `_get_prompt_sections()` abstract method
-   - Add `_build_user_input()` helper
+   - [ ] Add prompt_builder, feedback_analyzer, sentence_generator
+   - [ ] Implement enhanced `get_feedback_and_next_sentence()`
+   - [ ] Add `_get_prompt_sections()` abstract method
+   - [ ] Add `_build_user_input()` helper
 
 2. **Update `core/modes/unlimited.py`**
-   - Override `_get_prompt_sections()`
-   - Update `_build_user_input()` to include new fields
-   - Test with sample audio
+   - [ ] Override `_get_prompt_sections()`
+   - [ ] Update `_build_user_input()` to include new fields
+   - [ ] Manually verify with sample audio
 
 3. **Update `core/modes/story.py`**
-   - Override `_get_prompt_sections()`
-   - Update `_build_user_input()` with story context
-   - Test with sample audio
+   - [ ] Override `_get_prompt_sections()`
+   - [ ] Update `_build_user_input()` with story context
+   - [ ] Manually verify with sample audio
 
 4. **Update `core/modes/choice_story.py`**
-   - Override `_get_prompt_sections()`
-   - Update `_build_user_input()` appropriately
-   - Test with sample audio
+   - [ ] Override `_get_prompt_sections()`
+   - [ ] Update `_build_user_input()` appropriately
+   - [ ] Manually verify with sample audio
 
 **Quality Assurance:**
 - [ ] All modes build prompts without errors
@@ -650,137 +646,34 @@ If no grapheme is provided, fall back to phoneme-only feedback.
 - [ ] SentenceParams are calculated and passed to GPT
 - [ ] GPT receives focused instructions
 - [ ] Existing functionality is preserved (no regressions)
-
-**Testing:**
-```python
-# Test unlimited mode
-mode = UnlimitedPractice()
-result = await mode.get_feedback_and_next_sentence(
-    attempted_sentence="the cat sat",
-    analysis=mock_analysis,
-    phoneme_assistant=mock_assistant,
-    session=mock_session
-)
-assert 'feedback' in result
-assert 'sentence' in result
-
-# Verify prompt was built correctly
-assert mode.last_prompt_used  # Track for debugging
-assert 'focus_phoneme' in mode.last_prompt_used
-```
+- [ ] Manually test with real audio samples
 
 ---
 
-### Phase 6: User Input Enhancement (4-6 hours)
+### Phase 6: User Input Enhancement (4-6 hours) ⏸️ PENDING
 
 **Goal:** Send structured instructions to GPT, not just data
 
 **Tasks:**
 
 1. **Update user input format**
-   - Add `feedback_instructions` field
-   - Add `sentence_requirements` field
-   - Keep existing `pronunciation`, `problem_summary`, etc.
+   - [ ] Add `feedback_instructions` field
+   - [ ] Add `sentence_requirements` field
+   - [ ] Keep existing `pronunciation`, `problem_summary`, etc.
 
 2. **Create instruction templates**
-   - Praise instruction template
-   - Correction instruction template
-   - Sentence generation template
+   - [ ] Praise instruction template
+   - [ ] Correction instruction template
+   - [ ] Sentence generation template
 
 3. **Update all modes to use new format**
+   - [ ] Verify all modes use new format
 
 **Quality Assurance:**
 - [ ] Instructions are clear and specific
 - [ ] GPT receives both data AND what to do with it
 - [ ] Reduces GPT's decision-making burden
-
-**Example User Input:**
-```json
-{
-  "feedback_instructions": {
-    "action": "correct",
-    "focus_phoneme": "θ",
-    "focus_grapheme": "th",
-    "error_words": ["think", "through"],
-    "error_type": "substituted",
-    "reason": "User consistently substituted 'θ' with 'f' in 2 words"
-  },
-  "sentence_requirements": {
-    "target_length": "15-20 words",
-    "min_focus_grapheme_instances": 5,
-    "complexity": "moderate",
-    "other_phonemes_difficulty": "low",
-    "focus_grapheme": "th",
-    "focus_phoneme": "θ"
-  },
-  "pronunciation_data": [...],
-  "problem_summary": {...}
-}
-```
-
----
-
-### Phase 7: Testing & Validation (6-8 hours)
-
-**Goal:** Ensure system works correctly end-to-end
-
-**Tasks:**
-
-1. **Create test cases**
-   - Perfect pronunciation (should praise)
-   - Single word error (should correct specifically)
-   - Consistent error (should correct with multiple examples)
-   - High PER (should give simple sentence)
-   - Low PER (should give complex sentence)
-
-2. **Create integration tests**
-   - Test full pipeline for each mode
-   - Test with real audio samples
-   - Test with pre-extracted phonemes
-
-3. **Create GPT output validation tests**
-   - Verify GPT follows instructions
-   - Check feedback mentions correct grapheme
-   - Verify sentence has required phoneme/grapheme instances
-   - Validate SSML correctness
-
-4. **Update existing test suite**
-   - Ensure backward compatibility
-   - Update test expectations for new format
-
-**Quality Assurance:**
-- [ ] All unit tests pass
-- [ ] All integration tests pass
-- [ ] GPT output validation catches issues
-- [ ] No regressions in existing functionality
-- [ ] Performance is maintained or improved
-
-**Test Scenarios:**
-```python
-# Scenario 1: Perfect pronunciation
-test_perfect_pronunciation():
-    # User says sentence perfectly
-    # Expected: should_praise=True, simple encouragement
-    # Expected sentence: longer, more complex
-
-# Scenario 2: Consistent 'th' substitution
-test_th_substitution():
-    # User says 'fink' instead of 'think', 'frough' instead of 'through'
-    # Expected: should_praise=False, focus on 'th' grapheme
-    # Expected feedback: mentions 'th' letters
-    # Expected sentence: 5+ 'th' instances
-
-# Scenario 3: High PER (0.6)
-test_high_per():
-    # User struggles significantly
-    # Expected sentence: 8-12 words, simple vocab
-    # Expected: focus on one clear problem
-
-# Scenario 4: Addition errors ignored
-test_additions_ignored():
-    # User adds extra sounds but gets ground truth correct
-    # Expected: Focus only on ground truth errors, not additions
-```
+- [ ] Manually verify GPT follows instructions
 
 ---
 
@@ -1006,34 +899,50 @@ EXAMPLE (focus_grapheme='qu'):
 
 ---
 
-## Testing Strategy
+## Manual Validation Strategy
 
-### Unit Tests
+After each phase, manually verify functionality:
 
-- `test_prompt_builder.py` - Test section loading and assembly
-- `test_feedback_analyzer.py` - Test analysis logic
-- `test_sentence_generator.py` - Test parameter calculation
-- `test_grapheme_mapper.py` - Test phoneme-grapheme mapping
+### Manual Verification Steps
 
-### Integration Tests
+1. **Phase 1 - Prompt Builder**
+   - Verify sections load without errors
+   - Check template variable substitution
+   - Inspect generated prompts for correctness
 
-- `test_unlimited_mode.py` - Test unlimited mode end-to-end
-- `test_story_mode.py` - Test story mode end-to-end
-- `test_choice_story_mode.py` - Test choice story mode end-to-end
+2. **Phase 2 - Analysis Logic**
+   - Test with sample pronunciation data
+   - Verify ground truth error filtering
+   - Check praise eligibility logic
+   - Validate sentence parameters scaling
 
-### System Tests
+3. **Phase 3 - Grapheme Mapping**
+   - Test common words (quick, chat, think, etc.)
+   - Verify grapheme-phoneme mappings
+   - Check edge cases (no clear mapping)
 
-- `test_perfect_pronunciation.py` - Perfect reading scenario
-- `test_consistent_errors.py` - Consistent error pattern
-- `test_high_per.py` - Struggling reader scenario
-- `test_low_per.py` - Advanced reader scenario
-- `test_grapheme_feedback.py` - Verify grapheme mentioned
+4. **Phase 4 - Prompt Content**
+   - Review all section content for clarity
+   - Verify template variables are correct
+   - Check for contradictions across sections
 
-### GPT Output Tests
+5. **Phase 5 - Mode Integration**
+   - Run each mode with sample audio
+   - Verify GPT responses are appropriate
+   - Check no regressions in existing functionality
 
-- `test_gpt_follows_instructions.py` - Verify GPT obeys directives
-- `test_phoneme_counting.py` - Verify sentence has required instances
-- `test_ssml_validation.py` - Verify SSML is valid
+6. **Phase 6 - User Input Enhancement**
+   - Inspect GPT input format
+   - Verify instructions are clear
+   - Check GPT follows directives
+
+### Success Indicators
+
+- ✅ No Python errors during execution
+- ✅ Prompts are coherent and well-structured
+- ✅ GPT provides specific, helpful feedback
+- ✅ Sentences include target graphemes
+- ✅ System performs as well or better than before
 
 ---
 
@@ -1206,21 +1115,19 @@ VALIDATION:
 
 ## Implementation Timeline
 
-**Estimated Total: 44-62 hours**
+**Estimated Total: 38-52 hours (Testing phase removed)**
 
-- Phase 1: Core Infrastructure - 6-8 hours
-- Phase 2: Analysis Logic - 8-10 hours
-- Phase 3: Grapheme Mapping - 6-8 hours
-- Phase 4: Prompt Content - 8-10 hours
-- Phase 5: Mode Integration - 6-8 hours
-- Phase 6: User Input Enhancement - 4-6 hours
-- Phase 7: Testing & Validation - 6-8 hours
+- Phase 1: Core Infrastructure - 6-8 hours ⏳ IN PROGRESS
+- Phase 2: Analysis Logic - 8-10 hours ⏸️ PENDING
+- Phase 3: Grapheme Mapping - 6-8 hours ⏸️ PENDING
+- Phase 4: Prompt Content - 8-10 hours ⏸️ PENDING
+- Phase 5: Mode Integration - 6-8 hours ⏸️ PENDING
+- Phase 6: User Input Enhancement - 4-6 hours ⏸️ PENDING
 
 **Recommended Schedule:**
 - Week 1: Phases 1-2 (Foundation)
 - Week 2: Phases 3-4 (Content)
-- Week 3: Phases 5-6 (Integration)
-- Week 4: Phase 7 (Testing) + Buffer
+- Week 3: Phases 5-6 (Integration + Manual Validation)
 
 ---
 

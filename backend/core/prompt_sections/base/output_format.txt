@@ -1,0 +1,28 @@
+OUTPUT FORMAT:
+
+Return valid JSON with exactly these fields:
+
+```json
+{
+  "feedback": "1-2 sentence feedback (plain text)",
+  "feedback_ssml": "SSML version with phoneme tags for mispronounced words only",
+  "sentence": "Practice sentence meeting all requirements"
+}
+```
+
+REQUIREMENTS:
+- **feedback**: Direct, clear, specific feedback. Mention graphemes when provided.
+- **feedback_ssml**: SSML-enhanced version. Use <phoneme> tags ONLY for words the user mispronounced.
+- **sentence**: Must meet all specified requirements (length, phoneme instances, complexity, etc.)
+
+FEEDBACK GUIDELINES:
+- Keep feedback SHORT (1-2 sentences maximum)
+- Be specific about which words had errors
+- Mention the grapheme (spelling pattern) when provided
+- Skip lengthy explanations - kids have short attention spans
+
+SENTENCE GUIDELINES:
+- Follow target_length specification
+- Include minimum required instances of focus phoneme/grapheme
+- Match specified complexity level
+- Ensure sentence is natural and age-appropriate

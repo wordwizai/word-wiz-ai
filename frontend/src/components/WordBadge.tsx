@@ -218,6 +218,8 @@ export const WordBadge = ({
 
   const { speak } = useSpeechSynthesis();
   const [isGraphemes, setIsGraphemes] = useState(false);
+  // Show letter level by default if there are errors
+  const hasErrors = graphemeErrors && Object.keys(graphemeErrors).length > 0;
   const [showLetterLevel, setShowLetterLevel] = useState(false);
 
   /**
@@ -229,19 +231,19 @@ export const WordBadge = ({
     }
 
     return (
-      <span className="inline-flex gap-0">
+      <span className="inline-flex gap-1">
         {graphemes.map((grapheme, g_idx) => {
           const error = graphemeErrors[g_idx];
 
-          let bgColor = "transparent";
+          let textColor = "text-gray-800 dark:text-gray-200"; // default color
           let tooltip = "";
 
           if (error) {
             if (error.type === "missed") {
-              bgColor = "rgba(248, 113, 113, 0.3)"; // light red
+              textColor = "text-red-600 dark:text-red-500"; // solid red text
               tooltip = `You missed the "${grapheme}" sound (/${error.phoneme}/)`;
             } else if (error.type === "substituted") {
-              bgColor = "rgba(251, 146, 60, 0.3)"; // light orange
+              textColor = "text-orange-600 dark:text-orange-500"; // solid orange text
               tooltip = `You said /${error.detected_phoneme}/ instead of /${error.expected_phoneme}/`;
             }
           }
@@ -253,8 +255,7 @@ export const WordBadge = ({
               animate={
                 showHighlighted && error
                   ? {
-                      scale: [1, 1.2, 1],
-                      backgroundColor: ["transparent", bgColor, bgColor],
+                      scale: [1, 1.15, 1],
                       transition: {
                         delay: g_idx * 0.1,
                         duration: 0.6,
@@ -262,13 +263,8 @@ export const WordBadge = ({
                     }
                   : {}
               }
-              style={{
-                backgroundColor: showHighlighted && error ? bgColor : "transparent",
-                padding: "2px 1px",
-                borderRadius: "4px",
-              }}
+              className={`${textColor} cursor-pointer hover:scale-110 transition-transform font-bold text-2xl md:text-4xl px-0.5`}
               title={tooltip}
-              className="cursor-pointer hover:scale-110 transition-transform"
               onClick={(e) => {
                 e.stopPropagation();
                 speak(grapheme, { rate: 0.5 });
@@ -287,15 +283,8 @@ export const WordBadge = ({
               <motion.span
                 key={`added-${key}`}
                 initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 0.5, scale: 1 }}
-                style={{
-                  color: "rgb(134, 239, 172)",
-                  border: "2px dashed rgb(134, 239, 172)",
-                  padding: "2px 4px",
-                  borderRadius: "4px",
-                  fontStyle: "italic",
-                  marginLeft: "2px",
-                }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-green-600 dark:text-green-500 border-2 border-dashed border-green-600 dark:border-green-500 px-1 rounded font-bold text-2xl md:text-4xl italic"
                 title={`You added the /${error.phoneme}/ sound`}
               >
                 ?
@@ -329,7 +318,7 @@ export const WordBadge = ({
         scale: 0.8,
       }}
       animate={
-        showHighlighted && typeof analysisPer === "number"
+        showHighlighted && typeof analysisPer === "number" && !hasErrors
           ? {
               opacity: 1,
               scale: 1,
@@ -340,7 +329,7 @@ export const WordBadge = ({
                 scale: { delay: idx * 0.08, duration: 0.3 },
               },
             }
-          : { opacity: isInsertion ? 0.4 : 1, scale: 1 }
+          : { opacity: isInsertion ? 0.4 : 1, scale: 1, backgroundColor: "white" }
       }
       exit={{ opacity: 0, scale: 0.8 }}
       style={{
@@ -395,16 +384,16 @@ export const WordBadge = ({
       </button>
       <Badge
         variant="outline"
-        className={`${textClass} ${baseBgClass} cursor-pointer transition-colors hover:bg-muted relative rounded-xl ${
+        className={`${hasErrors ? 'bg-white dark:bg-zinc-900' : textClass} ${baseBgClass} cursor-pointer transition-colors hover:bg-muted relative rounded-xl ${
           isInsertion ? "italic text-green-600 dark:text-green-400" : ""
         } ${
           isDeletion
             ? "line-through text-red-400 dark:text-red-400 opacity-60"
             : ""
         }`}
-        style={{ background: "transparent" }}
+        style={{ background: hasErrors ? "white" : "transparent" }}
         onClick={() => {
-          if (showLetterLevel) {
+          if ((hasErrors && !isGraphemes) || showLetterLevel) {
             // Don't speak on click in letter mode, let individual letters handle it
             return;
           }
@@ -464,8 +453,8 @@ export const WordBadge = ({
               ))}
             </AnimatePresence>
           </span>
-        ) : showLetterLevel ? (
-          // NEW: Letter-level error view
+        ) : (hasErrors && !isGraphemes) || showLetterLevel ? (
+          // Show letter-level by default when there are errors
           renderLetterHighlights()
         ) : (
           // Whole word view

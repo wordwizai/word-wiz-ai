@@ -2,7 +2,15 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { useSpeechSynthesis } from "@/hooks/useSpeechSynthesis";
 import { useEffect, useState } from "react";
-import { Columns, Text } from "lucide-react";
+import { Columns, Text, Target } from "lucide-react";
+
+interface GraphemeError {
+  type: "missed" | "substituted" | "added";
+  phoneme?: string;
+  expected_phoneme?: string;
+  detected_phoneme?: string;
+  grapheme?: string | null;
+}
 
 interface WordBadgeProps {
   word: string;
@@ -11,6 +19,8 @@ interface WordBadgeProps {
   analysisPer?: number;
   isInsertion?: boolean;
   isDeletion?: boolean;
+  graphemes?: string[];
+  graphemeErrors?: Record<number, GraphemeError>;
 }
 
 export const WordBadge = ({
@@ -20,6 +30,8 @@ export const WordBadge = ({
   analysisPer,
   isInsertion = false,
   isDeletion = false,
+  graphemes,
+  graphemeErrors,
 }: WordBadgeProps) => {
   const PHONICS_CHUNKS = [
     // Vowel teams & diphthongs
@@ -206,6 +218,109 @@ export const WordBadge = ({
 
   const { speak } = useSpeechSynthesis();
   const [isGraphemes, setIsGraphemes] = useState(false);
+  const [showLetterLevel, setShowLetterLevel] = useState(false);
+
+  /**
+   * Render letter-level highlights for phoneme errors
+   */
+  const renderLetterHighlights = () => {
+    if (!graphemes || !graphemeErrors || Object.keys(graphemeErrors).length === 0) {
+      return renderWholeWord();
+    }
+
+    return (
+      <span className="inline-flex gap-0">
+        {graphemes.map((grapheme, g_idx) => {
+          const error = graphemeErrors[g_idx];
+
+          let bgColor = "transparent";
+          let tooltip = "";
+
+          if (error) {
+            if (error.type === "missed") {
+              bgColor = "rgba(248, 113, 113, 0.3)"; // light red
+              tooltip = `You missed the "${grapheme}" sound (/${error.phoneme}/)`;
+            } else if (error.type === "substituted") {
+              bgColor = "rgba(251, 146, 60, 0.3)"; // light orange
+              tooltip = `You said /${error.detected_phoneme}/ instead of /${error.expected_phoneme}/`;
+            }
+          }
+
+          return (
+            <motion.span
+              key={g_idx}
+              initial={{ scale: 1 }}
+              animate={
+                showHighlighted && error
+                  ? {
+                      scale: [1, 1.2, 1],
+                      backgroundColor: ["transparent", bgColor, bgColor],
+                      transition: {
+                        delay: g_idx * 0.1,
+                        duration: 0.6,
+                      },
+                    }
+                  : {}
+              }
+              style={{
+                backgroundColor: showHighlighted && error ? bgColor : "transparent",
+                padding: "2px 1px",
+                borderRadius: "4px",
+              }}
+              title={tooltip}
+              className="cursor-pointer hover:scale-110 transition-transform"
+              onClick={(e) => {
+                e.stopPropagation();
+                speak(grapheme, { rate: 0.5 });
+              }}
+            >
+              {grapheme}
+            </motion.span>
+          );
+        })}
+
+        {/* Render added phonemes as phantom letters */}
+        {Object.entries(graphemeErrors).map(([key, error]) => {
+          const keyNum = parseInt(key);
+          if (keyNum < 0 && error.type === "added") {
+            return (
+              <motion.span
+                key={`added-${key}`}
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 0.5, scale: 1 }}
+                style={{
+                  color: "rgb(134, 239, 172)",
+                  border: "2px dashed rgb(134, 239, 172)",
+                  padding: "2px 4px",
+                  borderRadius: "4px",
+                  fontStyle: "italic",
+                  marginLeft: "2px",
+                }}
+                title={`You added the /${error.phoneme}/ sound`}
+              >
+                ?
+              </motion.span>
+            );
+          }
+          return null;
+        })}
+      </span>
+    );
+  };
+
+  const renderWholeWord = () => {
+    return (
+      <motion.span
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        key="whole-word"
+        className="text-2xl md:text-4xl font-medium px-1 md:px-3"
+      >
+        {word}
+      </motion.span>
+    );
+  };
 
   return (
     <motion.div
@@ -240,6 +355,26 @@ export const WordBadge = ({
       }}
       className="inline-block group bg-white dark:bg-zinc-900 rounded-xl"
     >
+      {/* Toggle Letter-Level Button */}
+      {graphemes && graphemeErrors && Object.keys(graphemeErrors).length > 0 && (
+        <button
+          type="button"
+          aria-label="Toggle letter-level error view"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowLetterLevel((s) => !s);
+            if (!showLetterLevel) setIsGraphemes(false); // Turn off graphemes when showing letters
+          }}
+          className="absolute top-[-8px] left-[-8px] z-10 p-1.5 rounded-full bg-white/80 hover:bg-muted shadow transition-opacity opacity-0 group-hover:opacity-100"
+          tabIndex={0}
+        >
+          {showLetterLevel ? (
+            <Text className="h-5 w-5 text-red-500" />
+          ) : (
+            <Target className="h-5 w-5" />
+          )}
+        </button>
+      )}
       {/* Toggle Grapheme Button */}
       <button
         type="button"
@@ -247,6 +382,7 @@ export const WordBadge = ({
         onClick={(e) => {
           e.stopPropagation();
           setIsGraphemes((s) => !s);
+          if (!isGraphemes) setShowLetterLevel(false); // Turn off letter view when showing graphemes
         }}
         className="absolute top-[-8px] right-[-8px] z-10 p-1.5 rounded-full bg-white/80 hover:bg-muted shadow transition-opacity opacity-0 group-hover:opacity-100"
         tabIndex={0}
@@ -268,6 +404,10 @@ export const WordBadge = ({
         }`}
         style={{ background: "transparent" }}
         onClick={() => {
+          if (showLetterLevel) {
+            // Don't speak on click in letter mode, let individual letters handle it
+            return;
+          }
           if (!isGraphemes) {
             speak(word, { rate: 1 });
           } else {
@@ -324,16 +464,12 @@ export const WordBadge = ({
               ))}
             </AnimatePresence>
           </span>
+        ) : showLetterLevel ? (
+          // NEW: Letter-level error view
+          renderLetterHighlights()
         ) : (
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            key="whole-word"
-            className="text-2xl md:text-4xl font-medium px-1 md:px-3"
-          >
-            {word}
-          </motion.span>
+          // Whole word view
+          renderWholeWord()
         )}
       </Badge>
     </motion.div>

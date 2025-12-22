@@ -9,6 +9,8 @@ interface WordBadgeRowProps {
       per: Record<number, number | null>;
       ground_truth_word: Record<number, string | null>;
       predicted_word: Record<number, string | null>;
+      graphemes?: Record<number, string[]>;
+      grapheme_errors?: Record<number, Record<number, any>>;
     };
   } | null;
   wordArray: string[];
@@ -164,6 +166,16 @@ const WordBadgeRow = ({
               analysisPer={item.per ?? undefined}
               isInsertion={item.isInsertion}
               isDeletion={item.isDeletion}
+              graphemes={
+                item.analysisIdx !== null
+                  ? analysisData?.pronunciation_dataframe.graphemes?.[item.analysisIdx]
+                  : undefined
+              }
+              graphemeErrors={
+                item.analysisIdx !== null
+                  ? analysisData?.pronunciation_dataframe.grapheme_errors?.[item.analysisIdx]
+                  : undefined
+              }
               key={`${item.word}-${item.analysisIdx ?? displayIdx}`}
             />
           );

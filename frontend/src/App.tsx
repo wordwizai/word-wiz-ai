@@ -45,6 +45,15 @@ const HookedOnPhonicsComparison = lazy(
 const BestFreeReadingAppsComparison = lazy(
   () => import("./pages/comparisons/BestFreeReadingApps.tsx")
 );
+const LexiaRazKidsComparison = lazy(
+  () => import("./pages/comparisons/LexiaVsRazKids.tsx")
+);
+const TeachMonsterABCyaComparison = lazy(
+  () => import("./pages/comparisons/TeachMonsterVsABCya.tsx")
+);
+const IXLDuolingoABCComparison = lazy(
+  () => import("./pages/comparisons/IXLVsDuolingoABC.tsx")
+);
 
 // Loading fallback component
 const PageLoader = () => (
@@ -91,6 +100,18 @@ function App() {
                   <Route
                     path="/comparisons/best-free-reading-apps"
                     element={<BestFreeReadingAppsComparison />}
+                  />
+                  <Route
+                    path="/comparisons/lexia-vs-raz-kids-vs-word-wiz-ai"
+                    element={<LexiaRazKidsComparison />}
+                  />
+                  <Route
+                    path="/comparisons/teach-your-monster-vs-abcya-vs-word-wiz-ai"
+                    element={<TeachMonsterABCyaComparison />}
+                  />
+                  <Route
+                    path="/comparisons/ixl-vs-duolingo-abc-vs-word-wiz-ai"
+                    element={<IXLDuolingoABCComparison />}
                   />
                   <Route path="/toast-test" element={<ToastTestPage />} />
                   <Route path="/oauth-callback" element={<OAuthRedirect />} />

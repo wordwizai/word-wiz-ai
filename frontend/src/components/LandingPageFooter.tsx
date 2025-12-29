@@ -85,6 +85,24 @@ const LandingPageFooter = () => {
                 HOMER vs Khan Kids
               </Link>
               <Link
+                to="/comparisons/lexia-vs-raz-kids-vs-word-wiz-ai"
+                className="hover:underline"
+              >
+                Lexia vs Raz-Kids
+              </Link>
+              <Link
+                to="/comparisons/teach-your-monster-vs-abcya-vs-word-wiz-ai"
+                className="hover:underline"
+              >
+                Teach Monster vs ABCya
+              </Link>
+              <Link
+                to="/comparisons/ixl-vs-duolingo-abc-vs-word-wiz-ai"
+                className="hover:underline"
+              >
+                IXL vs Duolingo ABC
+              </Link>
+              <Link
                 to="/comparisons/best-free-reading-apps"
                 className="hover:underline"
               >

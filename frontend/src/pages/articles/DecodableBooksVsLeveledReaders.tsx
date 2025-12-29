@@ -7,7 +7,7 @@ const DecodableBooksVsLeveledReaders = () => {
     {
       type: "paragraph",
       content:
-        "The reading wars debate simplified: Should your child read decodable books or leveled readers? This question confuses many parents, but understanding the difference is crucial for reading success.",
+        "The reading wars debate simplified: Should your child read decodable books or leveled readers? This question confuses many parents who want to make the best choices for their children's literacy development, but understanding the difference is crucial for reading success. The answer is not as simple as choosing one over the other. Both types of books serve important purposes in a child's reading journey, but they work in fundamentally different ways and are best used at different stages or for different purposes. By the end of this article, you will understand exactly when to use each type of book, how to evaluate whether a book is truly decodable, and how to create a balanced reading diet that supports your child's development as a confident, skilled reader. This knowledge will empower you to make informed decisions that align with the Science of Reading research while meeting your child's individual needs.",
     },
     {
       type: "heading",
@@ -18,7 +18,7 @@ const DecodableBooksVsLeveledReaders = () => {
     {
       type: "paragraph",
       content:
-        "Decodable books contain controlled vocabulary matched to the phonics skills your child has already learned. For example:",
+        "Decodable books contain carefully controlled vocabulary matched precisely to the phonics skills your child has already been explicitly taught and practiced. This is not coincidental or accidental. These books are specifically designed to provide practice opportunities for applying recently learned phonics patterns in a reading context. The vocabulary selection is intentional and systematic, ensuring that children can successfully decode nearly every word using their existing phonics knowledge. For example, if your child has been taught CVC words (consonant-vowel-consonant patterns like 'cat,' 'sit,' 'run') and consonant digraphs (like sh, ch, th, wh), a decodable book at this level might include sentences like: 'The cat sat on the mat. The fish is in the dish.' Every single word in these sentences follows patterns the child has already learned. There are no surprises, no words that require guessing, and no vocabulary that is beyond their current skill level. This controlled approach builds confidence and automaticity.",
     },
     {
       type: "paragraph",
@@ -54,7 +54,7 @@ const DecodableBooksVsLeveledReaders = () => {
     {
       type: "paragraph",
       content:
-        "Leveled readers are books organized by difficulty (Level A-Z or similar systems). They're designed for 'just right' independent reading but don't control vocabulary by phonics patterns.",
+        "Leveled readers are books organized by difficulty using systems like Fountas and Pinnell levels (A through Z) or similar leveling frameworks. These books are designed to provide 'just right' independent reading experiences where children can read with approximately 90-95% accuracy. However, there is a crucial difference: leveled readers do not control vocabulary based on phonics patterns the child has been taught. Instead, they control difficulty through factors like sentence length, word count, repetition, picture support, and concept complexity. This means leveled readers often include high-frequency words and vocabulary that may not be phonetically regular or may use patterns the child has not yet learned through phonics instruction. The expectation is that children will use a combination of strategies to read these books, including phonics, sight word memory, picture clues, and context. This 'balanced literacy' approach differs significantly from the systematic phonics approach embodied in decodable texts.",
     },
     {
       type: "paragraph",

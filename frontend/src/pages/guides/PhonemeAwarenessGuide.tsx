@@ -7,7 +7,7 @@ const PhonemeAwarenessGuide = () => {
     {
       type: "paragraph",
       content:
-        "Phoneme awareness is the superpower that predicts reading success, yet it's often overlooked or misunderstood by parents. This guide explains what phoneme awareness is, why it matters, and exactly how to develop it at home.",
+        "Phoneme awareness is the superpower skill that predicts reading success better than almost any other factor, yet it remains often overlooked or fundamentally misunderstood by parents and even some educators. Research consistently shows that phoneme awareness in kindergarten is one of the strongest predictors of reading achievement in elementary school, more predictive than vocabulary size, letter knowledge, or even general intelligence. Despite this clear research evidence, many children do not receive adequate phoneme awareness instruction, leaving them to struggle unnecessarily with reading later. This comprehensive guide explains exactly what phoneme awareness is, why it matters so profoundly for reading development, how it develops across childhood, and most importantly, exactly how to develop it at home through simple, engaging activities that take just minutes per day. Whether your child is struggling with reading or you simply want to give them the strongest possible foundation, understanding and developing phoneme awareness is one of the most valuable investments you can make in their literacy future.",
     },
     {
       type: "heading",
@@ -18,7 +18,7 @@ const PhonemeAwarenessGuide = () => {
     {
       type: "paragraph",
       content:
-        "Phoneme awareness is the ability to hear, identify, and manipulate individual sounds (phonemes) in spoken words. It's an auditory skill, no letters involved yet.",
+        "Phoneme awareness is the ability to hear, identify, and manipulate the individual sounds, called phonemes, in spoken words. This is purely an auditory skill performed entirely with sounds heard and spoken aloud. There are no letters, no print, no visual component involved at this stage. That makes it fundamentally different from phonics, which connects sounds to written letters. Phoneme awareness is about what you hear, not what you see. For example, when working on phoneme awareness, you might ask a child to tell you the sounds in the spoken word 'dog' without ever showing them the written word. A child with good phoneme awareness can do this successfully, identifying the three individual sounds: /d/ /o/ /g/. This auditory foundation is essential before children can successfully learn to connect sounds to letters in phonics instruction.",
     },
     {
       type: "heading",

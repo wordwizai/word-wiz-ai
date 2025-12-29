@@ -8,7 +8,7 @@ const ChoosingReadingApp = () => {
     {
       type: "paragraph",
       content:
-        "With hundreds of reading apps available, choosing the right one for your child can feel overwhelming. This guide will help you cut through the marketing noise and select an app that actually helps your child become a better reader.",
+        "With hundreds of reading apps available and aggressive marketing campaigns promoting each one as 'the best,' choosing the right one for your child can feel overwhelming and confusing. The stakes feel high because you want to make the right choice for your child's education, and many of these apps require significant financial investment or time commitment. Some apps cost hundreds of dollars per year, while others are free but may not be effective. How do you know which app will actually help your child learn to read versus just keeping them entertained? This comprehensive guide will help you cut through the marketing noise and select an app that actually helps your child become a better, more confident reader. By the end of this guide, you will have a clear decision-making framework based on research and practical considerations rather than advertising claims.",
     },
     {
       type: "heading",
@@ -19,7 +19,7 @@ const ChoosingReadingApp = () => {
     {
       type: "paragraph",
       content:
-        "Not all reading apps are created equal. Before downloading anything, check for these essential features:",
+        "Not all reading apps are created equal, and many apps that appear educational are actually just games wrapped in academic language. The difference between an effective reading app and an entertaining distraction can be subtle but crucial for your child's learning outcomes. Before downloading anything or paying for a subscription, take time to evaluate whether the app includes these essential features that research shows actually support reading development:",
     },
     {
       type: "heading",
@@ -29,7 +29,7 @@ const ChoosingReadingApp = () => {
     {
       type: "paragraph",
       content:
-        "The app should teach systematic, explicit phonics based on the Science of Reading. Red flags include apps that encourage guessing from pictures or context clues instead of decoding.",
+        "The app should teach systematic, explicit phonics instruction based on the Science of Reading research. This means teaching letter-sound correspondences in a logical, sequential order rather than randomly introducing words or patterns. The app should build from simple to complex, starting with basic consonant-vowel-consonant words before moving to more advanced patterns. Major red flags include apps that encourage guessing from pictures or using context clues instead of actually decoding words. These approaches, sometimes called '3-cueing,' have been thoroughly debunked by reading research but unfortunately still appear in many popular apps. Look for apps that explicitly and systematically teach letter-sound relationships and require children to apply those relationships to decode words.",
     },
     {
       type: "callout",
@@ -48,7 +48,7 @@ const ChoosingReadingApp = () => {
     {
       type: "paragraph",
       content:
-        "This is the most important feature parents often overlook. Apps with speech recognition can actually listen to your child read and provide feedback on pronunciation. This catches errors that would otherwise become habits.",
+        "This is perhaps the most important feature that parents often overlook when evaluating reading apps, yet it can make the difference between an app that truly improves reading skills versus one that just provides practice. Apps equipped with speech recognition technology can actually listen to your child read aloud and provide immediate, specific feedback on their pronunciation accuracy. This is incredibly valuable because it catches pronunciation errors early, before they become ingrained habits that are harder to correct later. Without speech recognition, children may practice reading incorrectly for months without anyone noticing or correcting their mistakes. This technology essentially provides a patient, tireless tutor who listens carefully every single time and provides consistent feedback.",
     },
     {
       type: "paragraph",

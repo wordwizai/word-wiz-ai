@@ -7,7 +7,7 @@ const IsTeacherTeachingPhonics = () => {
     {
       type: "paragraph",
       content:
-        "You have a nagging feeling your child's reading instruction isn't quite right. Maybe they're guessing at words, relying heavily on pictures, or struggling despite being in school all year. Your concern is valid, and you have the right to ask questions about phonics instruction.",
+        "You have a nagging feeling your child's reading instruction is not quite right. Maybe they are guessing at words based on pictures, relying heavily on context clues rather than actually reading, or struggling with basic decoding despite being in school all year. Your concern is valid, important, and deserves investigation. You have the right and responsibility to ask questions about the quality of phonics instruction your child is receiving. This guide will empower you to evaluate your child's reading instruction objectively, identify red flags that indicate inadequate phonics teaching, and take appropriate action to ensure your child receives the systematic, explicit phonics instruction that research shows is essential for reading success. You will learn exactly what to look for, what questions to ask, and how to have productive conversations with teachers and administrators about your child's reading education.",
     },
     {
       type: "heading",
@@ -18,7 +18,7 @@ const IsTeacherTeachingPhonics = () => {
     {
       type: "paragraph",
       content:
-        "Quality phonics instruction has specific, observable characteristics:",
+        "Quality phonics instruction has specific, observable characteristics that you can watch for when you observe your child's classroom or review their homework and materials. These characteristics are not subtle or debatable. They should be clearly evident in the daily instruction, the curriculum materials being used, and the work your child brings home. Understanding what to look for empowers you to objectively evaluate whether your child is receiving research-based, systematic phonics instruction or something less effective:",
     },
     {
       type: "heading",
@@ -28,7 +28,7 @@ const IsTeacherTeachingPhonics = () => {
     {
       type: "paragraph",
       content:
-        "The teacher explicitly teaches letter-sound relationships, not through discovery or guessing, but through direct instruction. Example: 'This letter makes the /s/ sound. Let's practice: /s/ /s/ /s/.'",
+        "The teacher should explicitly and directly teach letter-sound relationships through clear, direct instruction, not through discovery learning or guessing games. Students should not be left to figure out patterns on their own or infer relationships from context. The teacher states the relationship clearly and then provides immediate practice. For example, effective explicit instruction sounds like this: 'This letter 's' makes the /s/ sound, like the sound at the beginning of snake. Let's all practice together: /s/ /s/ /s/. Now let's find some words that start with /s/.' This directness removes ambiguity and ensures all students learn the concept, not just those who might figure it out independently.",
     },
     {
       type: "heading",

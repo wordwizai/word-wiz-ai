@@ -7,7 +7,7 @@ const TeachingPhonicsAtHome = () => {
     {
       type: "paragraph",
       content:
-        "Watching your child struggle with reading is heartbreaking. The good news? Phonics instruction is systematic and teachable, even by parents with no teaching experience. This guide provides everything you need to help your child become a confident reader.",
+        "Watching your child struggle with reading is heartbreaking for any parent. The good news is that phonics instruction is systematic, structured, and highly teachable, even by parents with absolutely no formal teaching experience or education background. You do not need a teaching degree or special training to help your child become a confident, skilled reader. This comprehensive guide provides everything you need to successfully teach phonics at home, including specific activities, a suggested daily routine, common mistakes to avoid, and troubleshooting strategies for when things are not going as planned. Whether you are supplementing classroom instruction, homeschooling, or trying to fill gaps from inadequate school phonics programs, this guide will give you the knowledge and confidence to make a real difference in your child's reading development. Thousands of parents have successfully taught their children to read using systematic phonics instruction at home, and you can too.",
     },
     {
       type: "heading",
@@ -23,7 +23,7 @@ const TeachingPhonicsAtHome = () => {
     {
       type: "paragraph",
       content:
-        "Phonemes are the smallest units of sound in language. English has 44 phonemes despite having only 26 letters. For example:",
+        "Phonemes are the smallest individual units of sound in spoken language that change the meaning of words. Understanding phonemes is fundamental to phonics instruction because reading is essentially the process of matching written letters and letter combinations to these sounds. English has 44 distinct phonemes despite having only 26 letters in the alphabet. This mismatch between sounds and letters is one reason English can be challenging to learn to read. Some phonemes are represented by single letters, while others require combinations of letters. For example, consider these words and their phoneme breakdown:",
     },
     {
       type: "list",
@@ -41,7 +41,7 @@ const TeachingPhonicsAtHome = () => {
     {
       type: "paragraph",
       content:
-        "Phonics means decoding words using letter-sound relationships. Sight words are memorized words (like 'the,' 'was,' 'said'). Research shows phonics should come first, teach the system before the exceptions.",
+        "Phonics instruction teaches children to decode words by applying letter-sound relationships systematically. This approach gives children a reliable strategy for figuring out unfamiliar words. Sight words, on the other hand, are words that children memorize and recognize instantly without sounding out. Common sight words include function words like 'the,' 'was,' 'said,' and 'could.' These words are often phonetically irregular or appear so frequently that instant recognition is beneficial for reading fluency. However, research in the Science of Reading strongly shows that phonics should be the primary approach, with sight words taught as needed for genuinely irregular words. Many words traditionally taught as sight words are actually decodable once children learn the relevant patterns. Teach the systematic phonics rules first, then introduce the genuine exceptions. This approach builds strong decoding skills rather than encouraging guessing.",
     },
     {
       type: "callout",

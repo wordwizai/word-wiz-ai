@@ -7,7 +7,7 @@ const ChildPronounceWordsWrong = () => {
     {
       type: "paragraph",
       content:
-        "Your child can read the words on the page—but they're not saying them correctly. Maybe they pronounce 'three' as 'free,' or 'ship' as 'sip.' This is surprisingly common and, thankfully, fixable with the right approach.",
+        "Your child can read the words on the page, but they are not saying them correctly. Maybe they pronounce 'three' as 'free,' or 'ship' as 'sip.' This is surprisingly common among early readers and, thankfully, fixable with the right approach. When children learn to read, they are mastering two separate skills: decoding the written symbols into words, and pronouncing those words correctly. Sometimes these skills develop at different rates, leading to situations where a child can identify and understand a word on the page but struggles to say it properly out loud. The good news is that pronunciation errors are highly responsive to targeted practice and feedback, especially when that feedback is consistent and specific.",
     },
     {
       type: "heading",
@@ -18,7 +18,7 @@ const ChildPronounceWordsWrong = () => {
     {
       type: "paragraph",
       content:
-        "Children develop pronunciation errors when they learn to decode without anyone checking if they're saying words correctly. Common causes include:",
+        "Children develop pronunciation errors when they learn to decode without anyone checking if they are saying words correctly. This happens more frequently than many parents realize, particularly in households where children spend a lot of time reading independently or when parents are not closely monitoring oral reading practice. The root causes of pronunciation errors are varied and often interconnected. Understanding why these errors develop is the first step toward correcting them effectively. Common causes include:",
     },
     {
       type: "list",
@@ -243,7 +243,7 @@ const ChildPronounceWordsWrong = () => {
     {
       type: "paragraph",
       content:
-        "This is where Word Wiz AI becomes invaluable. It listens to your child read and provides immediate, specific feedback on pronunciation errors—something that's hard for parents to do consistently.",
+        "This is where Word Wiz AI becomes invaluable for busy families. The platform listens to your child read aloud and provides immediate, specific feedback on pronunciation errors. This kind of consistent, objective feedback is something that can be hard for parents to provide on their own, especially when managing multiple children, work responsibilities, and household tasks. Word Wiz AI never gets tired, never gets frustrated, and catches every error with the same level of attention every single time. This consistency is what makes technology-assisted pronunciation practice so effective for modern families.",
     },
     {
       type: "callout",
@@ -323,7 +323,7 @@ const ChildPronounceWordsWrong = () => {
     {
       type: "paragraph",
       content:
-        "Most apps with speech recognition cost $10-20/month. Word Wiz AI offers phoneme-level pronunciation feedback completely free—making it accessible to every family regardless of budget.",
+        "Most apps with speech recognition capabilities cost between $10 and $20 per month, which can add up quickly for families with multiple children or tight budgets. Word Wiz AI offers phoneme-level pronunciation feedback completely free of charge, making it accessible to every family regardless of their financial situation. This commitment to accessibility ensures that high-quality pronunciation feedback is not limited to families who can afford expensive subscription services. Every child deserves the opportunity to develop clear, confident pronunciation, and Word Wiz AI makes that possible without financial barriers.",
     },
     {
       type: "heading",

@@ -53,7 +53,7 @@ const ChoosingReadingApp = () => {
     {
       type: "paragraph",
       content:
-        "Word Wiz AI is currently the only free app offering phoneme-level speech recognition—most apps with this feature cost $10-20/month.",
+        "Word Wiz AI is currently the only free app offering phoneme-level speech recognition, most apps with this feature cost $10-20/month.",
     },
     {
       type: "heading",
@@ -105,7 +105,7 @@ const ChoosingReadingApp = () => {
     {
       type: "paragraph",
       content:
-        "However, Word Wiz AI breaks this pattern by offering advanced speech recognition completely free—a feature typically reserved for premium apps.",
+        "However, Word Wiz AI breaks this pattern by offering advanced speech recognition completely free, a feature typically reserved for premium apps.",
     },
     {
       type: "heading",
@@ -380,7 +380,7 @@ const ChoosingReadingApp = () => {
     {
       type: "paragraph",
       content:
-        "Free apps with constant ads or paywalls every 5 minutes aren't truly free—they're frustrating.",
+        "Free apps with constant ads or paywalls every 5 minutes aren't truly free, they're frustrating.",
     },
     {
       type: "heading",
@@ -539,7 +539,7 @@ const ChoosingReadingApp = () => {
       content: [
         "Day 1-3: Let child explore freely, note their natural interest",
         "Day 4-7: Look at progress reports, is learning happening?",
-        "Day 8-14: Check sustainability—are they still engaged?",
+        "Day 8-14: Check sustainability, are they still engaged?",
         "Day 14: Make decision based on data, not marketing",
       ],
     },
@@ -642,7 +642,7 @@ const ChoosingReadingApp = () => {
     {
       type: "paragraph",
       content:
-        "Parents often don't realize speech technology exists. It's the single most valuable feature for pronunciation and reading confidence—yet most apps don't have it.",
+        "Parents often don't realize speech technology exists. It's the single most valuable feature for pronunciation and reading confidence, yet most apps don't have it.",
     },
     {
       type: "heading",
@@ -693,7 +693,7 @@ const ChoosingReadingApp = () => {
         "It provides specific, actionable feedback on pronunciation",
         "It's based on the Science of Reading (systematic phonics)",
         "It works on any device (browser-based, no app download needed)",
-        "It's designed specifically for pronunciation—something most apps ignore",
+        "It's designed specifically for pronunciation, something most apps ignore",
       ],
     },
     {
@@ -739,7 +739,7 @@ const ChoosingReadingApp = () => {
       afterSection: 10,
       title: "Try Speech Recognition for Free",
       description:
-        "Word Wiz AI offers phoneme-level pronunciation feedback at no cost—a feature most apps charge $10-20/month for",
+        "Word Wiz AI offers phoneme-level pronunciation feedback at no cost, a feature most apps charge $10-20/month for",
       buttonText: "Start Free",
       buttonHref: "/signup",
     },

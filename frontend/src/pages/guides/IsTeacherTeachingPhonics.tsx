@@ -7,7 +7,7 @@ const IsTeacherTeachingPhonics = () => {
     {
       type: "paragraph",
       content:
-        "You have a nagging feeling your child's reading instruction isn't quite right. Maybe they're guessing at words, relying heavily on pictures, or struggling despite being in school all year. Your concern is valid—and you have the right to ask questions about phonics instruction.",
+        "You have a nagging feeling your child's reading instruction isn't quite right. Maybe they're guessing at words, relying heavily on pictures, or struggling despite being in school all year. Your concern is valid, and you have the right to ask questions about phonics instruction.",
     },
     {
       type: "heading",
@@ -28,7 +28,7 @@ const IsTeacherTeachingPhonics = () => {
     {
       type: "paragraph",
       content:
-        "The teacher explicitly teaches letter-sound relationships—not through discovery or guessing, but through direct instruction. Example: 'This letter makes the /s/ sound. Let's practice: /s/ /s/ /s/.'",
+        "The teacher explicitly teaches letter-sound relationships, not through discovery or guessing, but through direct instruction. Example: 'This letter makes the /s/ sound. Let's practice: /s/ /s/ /s/.'",
     },
     {
       type: "heading",
@@ -57,7 +57,7 @@ const IsTeacherTeachingPhonics = () => {
     {
       type: "paragraph",
       content:
-        "Phonics instruction happens daily for 15-30 minutes in K-2 classrooms. It's not occasional or incidental—it's systematic and prioritized.",
+        "Phonics instruction happens daily for 15-30 minutes in K-2 classrooms. It's not occasional or incidental, it's systematic and prioritized.",
     },
     {
       type: "heading",
@@ -77,7 +77,7 @@ const IsTeacherTeachingPhonics = () => {
     {
       type: "paragraph",
       content:
-        "Teachers do NOT say: 'Look at the picture,' 'Think about what would make sense,' or 'Skip words you don't know.' These are three-cueing strategies—now proven ineffective by research.",
+        "Teachers do NOT say: 'Look at the picture,' 'Think about what would make sense,' or 'Skip words you don't know.' These are three-cueing strategies, now proven ineffective by research.",
     },
     {
       type: "callout",
@@ -147,7 +147,7 @@ const IsTeacherTeachingPhonics = () => {
     {
       type: "paragraph",
       content:
-        "Balanced literacy sounds good but often lacks systematic phonics. Ask specifically about the phonics component—it should be explicit and sequential.",
+        "Balanced literacy sounds good but often lacks systematic phonics. Ask specifically about the phonics component, it should be explicit and sequential.",
     },
     {
       type: "callout",
@@ -616,7 +616,7 @@ const IsTeacherTeachingPhonics = () => {
     {
       type: "paragraph",
       content:
-        "Remember: You have the right to ask questions about your child's education. You're not being 'difficult'—you're being a good parent. And while you advocate for systemic change, Word Wiz AI and home phonics practice can fill gaps immediately.",
+        "Remember: You have the right to ask questions about your child's education. You're not being 'difficult', you're being a good parent. And while you advocate for systemic change, Word Wiz AI and home phonics practice can fill gaps immediately.",
     },
   ];
 
@@ -647,7 +647,7 @@ const IsTeacherTeachingPhonics = () => {
       afterSection: 12,
       title: "Assess Your Child's Pronunciation",
       description:
-        "Word Wiz AI provides objective pronunciation assessment—helping you understand exactly what skills need work",
+        "Word Wiz AI provides objective pronunciation assessment, helping you understand exactly what skills need work",
       buttonText: "Try Free",
       buttonHref: "/signup",
     },
@@ -710,7 +710,7 @@ const IsTeacherTeachingPhonics = () => {
       heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1920&h=1080&fit=crop"
       heroImageAlt="Teacher teaching phonics to elementary students in classroom"
       headline="Is My Child's Teacher Teaching Enough Phonics?"
-      subheadline="How to assess reading instruction quality and advocate for your child—without alienating the teacher"
+      subheadline="How to assess reading instruction quality and advocate for your child, without alienating the teacher"
       author={{
         name: "Word Wiz AI Team",
         bio: "Educational technology experts specializing in Science of Reading instruction and literacy advocacy.",

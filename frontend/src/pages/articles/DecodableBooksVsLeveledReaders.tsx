@@ -28,7 +28,7 @@ const DecodableBooksVsLeveledReaders = () => {
     {
       type: "paragraph",
       content:
-        "Every word follows patterns they've been taught. No guessing required—just applying learned skills.",
+        "Every word follows patterns they've been taught. No guessing required, just applying learned skills.",
     },
     {
       type: "heading",
@@ -110,7 +110,7 @@ const DecodableBooksVsLeveledReaders = () => {
     {
       type: "paragraph",
       content:
-        "**Decodable:** 90%+ decodable based on taught patterns  \n**Leveled:** Mixed—decodable and sight words together",
+        "**Decodable:** 90%+ decodable based on taught patterns  \n**Leveled:** Mixed, decodable and sight words together",
     },
     {
       type: "heading",
@@ -410,7 +410,7 @@ const DecodableBooksVsLeveledReaders = () => {
     {
       type: "paragraph",
       content:
-        "Word Wiz AI listens to your child read decodable sentences and provides immediate feedback. This ensures they're not just decoding but pronouncing correctly—building proper reading habits.",
+        "Word Wiz AI listens to your child read decodable sentences and provides immediate feedback. This ensures they're not just decoding but pronouncing correctly, building proper reading habits.",
     },
     {
       type: "heading",
@@ -486,7 +486,7 @@ const DecodableBooksVsLeveledReaders = () => {
         type: "success",
         title: "Remember",
         content:
-          "The goal isn't decodables forever—it's using decodables strategically during phonics instruction, then transitioning to authentic texts once decoding is automatic.",
+          "The goal isn't decodables forever, it's using decodables strategically during phonics instruction, then transitioning to authentic texts once decoding is automatic.",
       },
     },
     {
@@ -542,7 +542,7 @@ const DecodableBooksVsLeveledReaders = () => {
       afterSection: 12,
       title: "Practice Decodable Reading with Feedback",
       description:
-        "Word Wiz AI provides pronunciation feedback on decodable sentences—ensuring proper habits from the start",
+        "Word Wiz AI provides pronunciation feedback on decodable sentences, ensuring proper habits from the start",
       buttonText: "Try Free",
       buttonHref: "/signup",
     },

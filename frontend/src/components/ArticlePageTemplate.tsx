@@ -246,7 +246,7 @@ const TableOfContents: React.FC<{ sections: ArticleSection[] }> = ({
   if (headings.length === 0) return null;
 
   return (
-    <Card className="mb-6 sticky top-4">
+    <Card className="mb-6">
       <CardHeader>
         <CardTitle className="text-base">Table of Contents</CardTitle>
       </CardHeader>
@@ -480,8 +480,8 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
           | "h6";
         const headingClasses =
           section.level === 2
-            ? "text-2xl md:text-3xl font-bold mt-12 mb-4 text-foreground"
-            : "text-xl md:text-2xl font-semibold mt-8 mb-3 text-foreground";
+            ? "text-3xl md:text-4xl font-bold mt-12 mb-6 text-foreground border-b-2 border-primary/20 pb-3"
+            : "text-lg md:text-xl font-semibold mt-8 mb-4 text-foreground/90 pl-4 border-l-4 border-primary/40";
 
         return (
           <React.Fragment key={idx}>
@@ -624,7 +624,7 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
 
               {/* Sidebar */}
               <aside className="lg:col-span-4">
-                <div className="lg:sticky lg:top-4 space-y-6">
+                <div className="space-y-6">
                   <TableOfContents sections={content} />
                   <ShareButtons url={canonicalUrl} title={headline} />
                   <AuthorBio author={author} />

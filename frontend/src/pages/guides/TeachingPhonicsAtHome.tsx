@@ -7,7 +7,7 @@ const TeachingPhonicsAtHome = () => {
     {
       type: "paragraph",
       content:
-        "Watching your child struggle with reading is heartbreaking. The good news? Phonics instruction is systematic and teachable—even by parents with no teaching experience. This guide provides everything you need to help your child become a confident reader.",
+        "Watching your child struggle with reading is heartbreaking. The good news? Phonics instruction is systematic and teachable, even by parents with no teaching experience. This guide provides everything you need to help your child become a confident reader.",
     },
     {
       type: "heading",
@@ -41,7 +41,7 @@ const TeachingPhonicsAtHome = () => {
     {
       type: "paragraph",
       content:
-        "Phonics means decoding words using letter-sound relationships. Sight words are memorized words (like 'the,' 'was,' 'said'). Research shows phonics should come first—teach the system before the exceptions.",
+        "Phonics means decoding words using letter-sound relationships. Sight words are memorized words (like 'the,' 'was,' 'said'). Research shows phonics should come first, teach the system before the exceptions.",
     },
     {
       type: "callout",
@@ -237,7 +237,7 @@ const TeachingPhonicsAtHome = () => {
     {
       type: "paragraph",
       content:
-        "Don't rush to complex patterns before mastering basics. Ensure 90%+ accuracy before progressing. Stay on CVC words for weeks if needed—mastery matters more than speed.",
+        "Don't rush to complex patterns before mastering basics. Ensure 90%+ accuracy before progressing. Stay on CVC words for weeks if needed, mastery matters more than speed.",
     },
     {
       type: "heading",
@@ -257,7 +257,7 @@ const TeachingPhonicsAtHome = () => {
     {
       type: "paragraph",
       content:
-        "Pronunciation errors become habits if not corrected early. Listen carefully and correct gently. Word Wiz AI provides objective pronunciation feedback—catching errors you might miss.",
+        "Pronunciation errors become habits if not corrected early. Listen carefully and correct gently. Word Wiz AI provides objective pronunciation feedback, catching errors you might miss.",
     },
     {
       type: "callout",
@@ -483,7 +483,7 @@ const TeachingPhonicsAtHome = () => {
     {
       type: "paragraph",
       content:
-        "This means consistent, objective feedback on every practice session—something impossible for busy parents to provide alone.",
+        "This means consistent, objective feedback on every practice session, something impossible for busy parents to provide alone.",
     },
     {
       type: "heading",
@@ -557,7 +557,7 @@ const TeachingPhonicsAtHome = () => {
     {
       type: "paragraph",
       content:
-        "You don't need a teaching degree—just consistency, patience, and the right resources. Start with 15 minutes today, and watch your child's reading confidence grow.",
+        "You don't need a teaching degree, just consistency, patience, and the right resources. Start with 15 minutes today, and watch your child's reading confidence grow.",
     },
   ];
 
@@ -588,7 +588,7 @@ const TeachingPhonicsAtHome = () => {
       afterSection: 15,
       title: "Practice Pronunciation with Word Wiz AI",
       description:
-        "Free speech recognition provides instant feedback on pronunciation—catching errors you might miss",
+        "Free speech recognition provides instant feedback on pronunciation, catching errors you might miss",
       buttonText: "Try Free",
       buttonHref: "/signup",
     },
@@ -650,7 +650,7 @@ const TeachingPhonicsAtHome = () => {
       heroImage="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=1920&h=1080&fit=crop"
       heroImageAlt="Parent teaching child to read with phonics book"
       headline="A Parent's Complete Guide to Teaching Phonics at Home"
-      subheadline="Everything you need to help your child become a confident reader—no teaching degree required"
+      subheadline="Everything you need to help your child become a confident reader, no teaching degree required"
       author={{
         name: "Word Wiz AI Team",
         bio: "Educational technology experts specializing in phonics instruction and early literacy based on the Science of Reading.",

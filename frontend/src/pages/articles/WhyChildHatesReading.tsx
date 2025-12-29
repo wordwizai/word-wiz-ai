@@ -7,7 +7,7 @@ const WhyChildHatesReading = () => {
     {
       type: "paragraph",
       content:
-        "If your child groans, makes excuses, or outright refuses when it's time to read, you're not alone. Many parents face this frustrating challenge. The good news? Reading reluctance is almost always fixable once you identify and address the root cause.",
+        "If your child groans, makes excuses, or outright refuses when it is time to read, you are not alone in this struggle. Many parents across the country face this frustrating challenge on a daily basis, watching their children resist what should be an enjoyable activity. The good news is that reading reluctance is almost always fixable once you identify and address the root cause. Reading should be a source of joy and discovery, not a battleground between parent and child. When children hate reading, there is always a reason behind it, and understanding that reason is the key to turning their attitude around. This comprehensive guide will help you identify why your child resists reading and provide concrete, actionable solutions to transform them from a reluctant reader into an engaged one.",
     },
     {
       type: "heading",
@@ -18,7 +18,7 @@ const WhyChildHatesReading = () => {
     {
       type: "paragraph",
       content:
-        "Understanding why your child resists reading is the first step to turning things around. Most reading avoidance falls into one of five categories:",
+        "Understanding why your child resists reading is the first and most critical step to turning things around. Without this understanding, you will be implementing solutions that do not address the actual problem, leading to continued frustration for both you and your child. Most reading avoidance falls into one of five distinct categories, each requiring a different approach and intervention strategy. By carefully observing your child's behavior and responses to reading, you can pinpoint which category their resistance falls into and then apply targeted solutions that actually work:",
     },
     {
       type: "heading",
@@ -28,7 +28,7 @@ const WhyChildHatesReading = () => {
     {
       type: "paragraph",
       content:
-        "This is the most common reason children hate reading. If decoding feels like hard work instead of flowing naturally, reading becomes a chore. Signs include:",
+        "This is by far the most common reason children hate reading, and it is often overlooked by well-meaning parents who assume their child is simply being difficult or unmotivated. If decoding feels like hard work instead of flowing naturally and automatically, reading becomes an exhausting chore rather than an enjoyable activity. Imagine trying to enjoy a movie when you have to pause every few seconds to figure out what is happening on screen. That is what reading feels like for struggling readers. The cognitive load of decoding leaves little mental energy for comprehension or enjoyment. Signs that reading is genuinely difficult for your child include:",
     },
     {
       type: "list",
@@ -57,7 +57,7 @@ const WhyChildHatesReading = () => {
     {
       type: "paragraph",
       content:
-        "Sometimes kids can read just fine—they simply find the available books uninteresting. This happens when:",
+        "Sometimes kids can read just fine, they simply find the available books uninteresting. This happens when:",
     },
     {
       type: "list",
@@ -173,7 +173,7 @@ const WhyChildHatesReading = () => {
     {
       type: "paragraph",
       content:
-        "If you answered 'no' to any of these, it's likely a skills problem. Word Wiz AI can help assess pronunciation accuracy with its speech recognition technology—you'll know immediately if pronunciation is the issue.",
+        "If you answered 'no' to any of these, it's likely a skills problem. Word Wiz AI can help assess pronunciation accuracy with its speech recognition technology, you'll know immediately if pronunciation is the issue.",
     },
     {
       type: "heading",
@@ -196,7 +196,7 @@ const WhyChildHatesReading = () => {
     {
       type: "paragraph",
       content:
-        "If yes, motivation might be the issue—they need better book matches, not more skills practice.",
+        "If yes, motivation might be the issue, they need better book matches, not more skills practice.",
     },
     {
       type: "heading",
@@ -249,7 +249,7 @@ const WhyChildHatesReading = () => {
     {
       type: "paragraph",
       content:
-        "Many struggling readers can decode but mispronounce words, which affects comprehension and spelling. Word Wiz AI provides real-time pronunciation feedback using speech recognition technology—something parents can't always catch consistently.",
+        "Many struggling readers can decode but mispronounce words, which affects comprehension and spelling. Word Wiz AI provides real-time pronunciation feedback using speech recognition technology, something parents can't always catch consistently.",
     },
     {
       type: "callout",
@@ -268,7 +268,7 @@ const WhyChildHatesReading = () => {
     {
       type: "paragraph",
       content:
-        "Better to practice 10 minutes successfully than 30 minutes with frustration. End each session on a positive note—even if that means stopping mid-page to celebrate progress.",
+        "Better to practice 10 minutes successfully than 30 minutes with frustration. End each session on a positive note, even if that means stopping mid-page to celebrate progress.",
     },
     {
       type: "heading",
@@ -283,7 +283,7 @@ const WhyChildHatesReading = () => {
       type: "list",
       content: [
         "'You sounded out that word all by yourself!'",
-        "'I noticed you caught that pronunciation error—great job!'",
+        "'I noticed you caught that pronunciation error, great job!'",
         "'You read for 8 minutes today, that's 2 minutes longer than yesterday!'",
       ],
     },
@@ -318,7 +318,7 @@ const WhyChildHatesReading = () => {
     {
       type: "paragraph",
       content:
-        "All reading counts—graphic novels, magazines, comic books, instruction manuals. Stop gatekeeping what 'real reading' is.",
+        "All reading counts, graphic novels, magazines, comic books, instruction manuals. Stop gatekeeping what 'real reading' is.",
     },
     {
       type: "heading",
@@ -419,7 +419,7 @@ const WhyChildHatesReading = () => {
     {
       type: "paragraph",
       content:
-        "Cuddle up and read aloud to them, even if they're 'too old.' No questions, no quizzes—just enjoying stories together.",
+        "Cuddle up and read aloud to them, even if they're 'too old.' No questions, no quizzes, just enjoying stories together.",
     },
     {
       type: "heading",
@@ -439,7 +439,7 @@ const WhyChildHatesReading = () => {
     {
       type: "paragraph",
       content:
-        "Use apps like Word Wiz AI that have game-like elements. Track progress with sticker charts or reading logs—but reward effort, not just completion.",
+        "Use apps like Word Wiz AI that have game-like elements. Track progress with sticker charts or reading logs, but reward effort, not just completion.",
     },
     {
       type: "heading",
@@ -578,7 +578,7 @@ const WhyChildHatesReading = () => {
     {
       type: "list",
       content: [
-        "Word Wiz AI (free speech recognition for pronunciation practice—builds skills and confidence simultaneously)",
+        "Word Wiz AI (free speech recognition for pronunciation practice, builds skills and confidence simultaneously)",
         "Decodable book libraries (many free online)",
         "Reading specialists or tutors for persistent difficulties",
       ],
@@ -633,7 +633,7 @@ const WhyChildHatesReading = () => {
     {
       type: "paragraph",
       content:
-        "Remember: a child who hates reading today can become a reader tomorrow. Focus on progress, not perfection, and keep the long view in mind. The goal isn't just reading proficiency—it's raising a child who chooses to read.",
+        "Remember: a child who hates reading today can become a reader tomorrow. Focus on progress, not perfection, and keep the long view in mind. The goal isn't just reading proficiency, it's raising a child who chooses to read.",
     },
   ];
 
@@ -664,7 +664,7 @@ const WhyChildHatesReading = () => {
       afterSection: 15,
       title: "Build Reading Confidence with Word Wiz AI",
       description:
-        "Private pronunciation practice with instant AI feedback—no judgment, just improvement",
+        "Private pronunciation practice with instant AI feedback, no judgment, just improvement",
       buttonText: "Try Free",
       buttonHref: "/signup",
     },
@@ -726,7 +726,7 @@ const WhyChildHatesReading = () => {
       heroImage="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=1920&h=1080&fit=crop"
       heroImageAlt="Frustrated child refusing to read with parent nearby"
       headline="Why Your Child Hates Reading (And How to Turn It Around)"
-      subheadline="The 5 real reasons kids resist reading—and exactly what to do about each one"
+      subheadline="The 5 real reasons kids resist reading, and exactly what to do about each one"
       author={{
         name: "Word Wiz AI Team",
         bio: "Educational technology experts specializing in early literacy and reading instruction based on the Science of Reading.",

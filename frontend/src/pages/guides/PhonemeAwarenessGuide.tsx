@@ -7,7 +7,7 @@ const PhonemeAwarenessGuide = () => {
     {
       type: "paragraph",
       content:
-        "Phoneme awareness is the superpower that predicts reading success—yet it's often overlooked or misunderstood by parents. This guide explains what phoneme awareness is, why it matters, and exactly how to develop it at home.",
+        "Phoneme awareness is the superpower that predicts reading success, yet it's often overlooked or misunderstood by parents. This guide explains what phoneme awareness is, why it matters, and exactly how to develop it at home.",
     },
     {
       type: "heading",
@@ -18,7 +18,7 @@ const PhonemeAwarenessGuide = () => {
     {
       type: "paragraph",
       content:
-        "Phoneme awareness is the ability to hear, identify, and manipulate individual sounds (phonemes) in spoken words. It's an auditory skill—no letters involved yet.",
+        "Phoneme awareness is the ability to hear, identify, and manipulate individual sounds (phonemes) in spoken words. It's an auditory skill, no letters involved yet.",
     },
     {
       type: "heading",
@@ -60,7 +60,7 @@ const PhonemeAwarenessGuide = () => {
         type: "info",
         title: "Why English Is Tricky",
         content:
-          "English has 44 phonemes but only 26 letters. 'Ship' has 4 letters but 3 phonemes: /sh/ /i/ /p/. This is why phoneme awareness matters—kids must hear sounds, not just see letters.",
+          "English has 44 phonemes but only 26 letters. 'Ship' has 4 letters but 3 phonemes: /sh/ /i/ /p/. This is why phoneme awareness matters, kids must hear sounds, not just see letters.",
       },
     },
     {
@@ -254,7 +254,7 @@ const PhonemeAwarenessGuide = () => {
     {
       type: "paragraph",
       content:
-        "'What rhymes with cat?' or 'I spy something that rhymes with door.' Make it playful—silly rhymes count!",
+        "'What rhymes with cat?' or 'I spy something that rhymes with door.' Make it playful, silly rhymes count!",
     },
     {
       type: "heading",
@@ -294,7 +294,7 @@ const PhonemeAwarenessGuide = () => {
     {
       type: "paragraph",
       content:
-        "'Say cat. Now say it without /k/.' → 'at.' Advanced skill—comes after blending/segmenting mastery.",
+        "'Say cat. Now say it without /k/.' → 'at.' Advanced skill, comes after blending/segmenting mastery.",
     },
     {
       type: "heading",
@@ -402,7 +402,7 @@ const PhonemeAwarenessGuide = () => {
         type: "success",
         title: "5-10 Minutes Daily",
         content:
-          "Brief, consistent practice beats long sporadic sessions. Make it playful—phoneme awareness activities should feel like games, not drills.",
+          "Brief, consistent practice beats long sporadic sessions. Make it playful, phoneme awareness activities should feel like games, not drills.",
       },
     },
     {
@@ -426,7 +426,7 @@ const PhonemeAwarenessGuide = () => {
         "Start with 2 sounds (at, it, up)",
         "Say sounds closer together gradually",
         "Use hand motion (slide sounds together)",
-        "Practice daily—blending takes time",
+        "Practice daily, blending takes time",
       ],
     },
     {
@@ -468,7 +468,7 @@ const PhonemeAwarenessGuide = () => {
     {
       type: "paragraph",
       content:
-        "Word Wiz AI specifically helps here—it identifies which phonemes your child mispronounces, allowing targeted practice before expecting them to manipulate those sounds.",
+        "Word Wiz AI specifically helps here, it identifies which phonemes your child mispronounces, allowing targeted practice before expecting them to manipulate those sounds.",
     },
     {
       type: "heading",
@@ -544,7 +544,7 @@ const PhonemeAwarenessGuide = () => {
     {
       type: "paragraph",
       content:
-        "This is why phoneme awareness is the foundation—without hearing sounds, connecting them to letters is meaningless.",
+        "This is why phoneme awareness is the foundation, without hearing sounds, connecting them to letters is meaningless.",
     },
     {
       type: "heading",
@@ -554,7 +554,7 @@ const PhonemeAwarenessGuide = () => {
     {
       type: "paragraph",
       content:
-        "Don't stop phoneme awareness activities when phonics begins. Continue oral activities while teaching letters—they reinforce each other.",
+        "Don't stop phoneme awareness activities when phonics begins. Continue oral activities while teaching letters, they reinforce each other.",
     },
     {
       type: "heading",
@@ -730,7 +730,7 @@ const PhonemeAwarenessGuide = () => {
       afterSection: 15,
       title: "Check Phoneme Pronunciation",
       description:
-        "Word Wiz AI assesses if your child produces individual phonemes correctly—critical for phoneme awareness",
+        "Word Wiz AI assesses if your child produces individual phonemes correctly, critical for phoneme awareness",
       buttonText: "Try Free",
       buttonHref: "/signup",
     },
@@ -793,7 +793,7 @@ const PhonemeAwarenessGuide = () => {
       heroImage="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=1920&h=1080&fit=crop"
       heroImageAlt="Parent teaching child phoneme awareness activities"
       headline="The Ultimate Guide to Phoneme Awareness"
-      subheadline="The often-overlooked superpower that predicts reading success—and how to build it at home"
+      subheadline="The often-overlooked superpower that predicts reading success, and how to build it at home"
       author={{
         name: "Word Wiz AI Team",
         bio: "Educational technology experts specializing in phoneme awareness, phonics instruction, and early literacy.",

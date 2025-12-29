@@ -45,6 +45,40 @@ const HookedOnPhonicsComparison = lazy(
 const BestFreeReadingAppsComparison = lazy(
   () => import("./pages/comparisons/BestFreeReadingApps.tsx")
 );
+const LexiaRazKidsComparison = lazy(
+  () => import("./pages/comparisons/LexiaVsRazKids.tsx")
+);
+const TeachMonsterABCyaComparison = lazy(
+  () => import("./pages/comparisons/TeachMonsterVsABCya.tsx")
+);
+const IXLDuolingoABCComparison = lazy(
+  () => import("./pages/comparisons/IXLVsDuolingoABC.tsx")
+);
+
+// Lazy load article pages
+const WhyChildHatesReading = lazy(
+  () => import("./pages/articles/WhyChildHatesReading.tsx")
+);
+const ChildPronounceWordsWrong = lazy(
+  () => import("./pages/articles/ChildPronounceWordsWrong.tsx")
+);
+const DecodableBooksVsLeveledReaders = lazy(
+  () => import("./pages/articles/DecodableBooksVsLeveledReaders.tsx")
+);
+
+// Lazy load guide pages
+const ChoosingReadingApp = lazy(
+  () => import("./pages/guides/ChoosingReadingApp.tsx")
+);
+const TeachingPhonicsAtHome = lazy(
+  () => import("./pages/guides/TeachingPhonicsAtHome.tsx")
+);
+const IsTeacherTeachingPhonics = lazy(
+  () => import("./pages/guides/IsTeacherTeachingPhonics.tsx")
+);
+const PhonemeAwarenessGuide = lazy(
+  () => import("./pages/guides/PhonemeAwarenessGuide.tsx")
+);
 
 // Loading fallback component
 const PageLoader = () => (
@@ -92,6 +126,51 @@ function App() {
                     path="/comparisons/best-free-reading-apps"
                     element={<BestFreeReadingAppsComparison />}
                   />
+                  <Route
+                    path="/comparisons/lexia-vs-raz-kids-vs-word-wiz-ai"
+                    element={<LexiaRazKidsComparison />}
+                  />
+                  <Route
+                    path="/comparisons/teach-your-monster-vs-abcya-vs-word-wiz-ai"
+                    element={<TeachMonsterABCyaComparison />}
+                  />
+                  <Route
+                    path="/comparisons/ixl-vs-duolingo-abc-vs-word-wiz-ai"
+                    element={<IXLDuolingoABCComparison />}
+                  />
+
+                  {/* Article Pages */}
+                  <Route
+                    path="/articles/why-child-hates-reading"
+                    element={<WhyChildHatesReading />}
+                  />
+                  <Route
+                    path="/articles/child-pronounces-words-wrong"
+                    element={<ChildPronounceWordsWrong />}
+                  />
+                  <Route
+                    path="/articles/decodable-books-vs-leveled-readers"
+                    element={<DecodableBooksVsLeveledReaders />}
+                  />
+
+                  {/* Guide Pages */}
+                  <Route
+                    path="/guides/how-to-choose-reading-app"
+                    element={<ChoosingReadingApp />}
+                  />
+                  <Route
+                    path="/guides/how-to-teach-phonics-at-home"
+                    element={<TeachingPhonicsAtHome />}
+                  />
+                  <Route
+                    path="/guides/is-teacher-teaching-enough-phonics"
+                    element={<IsTeacherTeachingPhonics />}
+                  />
+                  <Route
+                    path="/guides/phoneme-awareness-complete-guide"
+                    element={<PhonemeAwarenessGuide />}
+                  />
+
                   <Route path="/toast-test" element={<ToastTestPage />} />
                   <Route path="/oauth-callback" element={<OAuthRedirect />} />
                   <Route

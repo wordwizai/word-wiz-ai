@@ -110,6 +110,66 @@ const LandingPageFooter = () => {
               </Link>
             </div>
           </div>
+
+          {/* Guides */}
+          <div>
+            <h4 className="font-semibold mb-3 text-sm uppercase">
+              Guides
+            </h4>
+            <div className="flex flex-col gap-2 text-sm">
+              <Link
+                to="/guides/how-to-teach-phonics-at-home"
+                className="hover:underline"
+              >
+                Teaching Phonics at Home
+              </Link>
+              <Link
+                to="/guides/is-teacher-teaching-enough-phonics"
+                className="hover:underline"
+              >
+                Is Teacher Teaching Phonics?
+              </Link>
+              <Link
+                to="/guides/phoneme-awareness-complete-guide"
+                className="hover:underline"
+              >
+                Phoneme Awareness Guide
+              </Link>
+              <Link
+                to="/guides/how-to-choose-reading-app"
+                className="hover:underline"
+              >
+                Choosing Reading Apps
+              </Link>
+            </div>
+          </div>
+
+          {/* Articles */}
+          <div>
+            <h4 className="font-semibold mb-3 text-sm uppercase">
+              Articles
+            </h4>
+            <div className="flex flex-col gap-2 text-sm">
+              <Link
+                to="/articles/why-child-hates-reading"
+                className="hover:underline"
+              >
+                Why Child Hates Reading
+              </Link>
+              <Link
+                to="/articles/child-pronounces-words-wrong"
+                className="hover:underline"
+              >
+                Pronunciation Errors
+              </Link>
+              <Link
+                to="/articles/decodable-books-vs-leveled-readers"
+                className="hover:underline"
+              >
+                Decodable vs Leveled Books
+              </Link>
+            </div>
+          </div>
         </div>
 
         {/* Copyright */}

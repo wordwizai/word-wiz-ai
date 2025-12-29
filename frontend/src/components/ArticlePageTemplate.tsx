@@ -2,19 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { 
-  Clock, 
-  Calendar, 
-  ArrowRight, 
+import {
+  Clock,
+  Calendar,
+  ArrowRight,
   BookOpen,
   Share2,
   Facebook,
@@ -24,7 +18,7 @@ import {
   AlertCircle,
   CheckCircle,
   Info as InfoIcon,
-  Lightbulb
+  Lightbulb,
 } from "lucide-react";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import LandingPageFooter from "@/components/LandingPageFooter";
@@ -111,7 +105,9 @@ interface ArticlePageProps {
 
 // ===== SUBCOMPONENTS =====
 
-const BreadcrumbNav: React.FC<{ breadcrumbs: Breadcrumb[] }> = ({ breadcrumbs }) => (
+const BreadcrumbNav: React.FC<{ breadcrumbs: Breadcrumb[] }> = ({
+  breadcrumbs,
+}) => (
   <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
     {breadcrumbs.map((crumb, idx) => (
       <React.Fragment key={idx}>
@@ -119,7 +115,10 @@ const BreadcrumbNav: React.FC<{ breadcrumbs: Breadcrumb[] }> = ({ breadcrumbs })
         {idx === breadcrumbs.length - 1 ? (
           <span className="text-foreground">{crumb.label}</span>
         ) : (
-          <Link to={crumb.href} className="hover:text-foreground transition-colors">
+          <Link
+            to={crumb.href}
+            className="hover:text-foreground transition-colors"
+          >
             {crumb.label}
           </Link>
         )}
@@ -137,7 +136,16 @@ const ArticleHero: React.FC<{
   author: Author;
   publishDate: string;
   readTime: number;
-}> = ({ heroImage, heroImageAlt, headline, subheadline, category, author, publishDate, readTime }) => {
+}> = ({
+  heroImage,
+  heroImageAlt,
+  headline,
+  subheadline,
+  category,
+  author,
+  publishDate,
+  readTime,
+}) => {
   const formattedDate = new Date(publishDate).toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -203,7 +211,9 @@ const ArticleHero: React.FC<{
   );
 };
 
-const TableOfContents: React.FC<{ sections: ArticleSection[] }> = ({ sections }) => {
+const TableOfContents: React.FC<{ sections: ArticleSection[] }> = ({
+  sections,
+}) => {
   const [activeId, setActiveId] = useState<string>("");
 
   // Extract headings for TOC
@@ -261,7 +271,9 @@ const TableOfContents: React.FC<{ sections: ArticleSection[] }> = ({ sections })
   );
 };
 
-const CalloutBoxComponent: React.FC<{ callout: CalloutBox }> = ({ callout }) => {
+const CalloutBoxComponent: React.FC<{ callout: CalloutBox }> = ({
+  callout,
+}) => {
   const icons = {
     info: <InfoIcon className="w-5 h-5" />,
     tip: <Lightbulb className="w-5 h-5" />,
@@ -310,7 +322,9 @@ const InlineCTAComponent: React.FC<{ cta: InlineCTA }> = ({ cta }) => (
   </Card>
 );
 
-const RelatedArticlesComponent: React.FC<{ articles: RelatedArticle[] }> = ({ articles }) => (
+const RelatedArticlesComponent: React.FC<{ articles: RelatedArticle[] }> = ({
+  articles,
+}) => (
   <Card className="mb-6">
     <CardHeader>
       <CardTitle className="text-base">Related Articles</CardTitle>
@@ -340,12 +354,23 @@ const RelatedArticlesComponent: React.FC<{ articles: RelatedArticle[] }> = ({ ar
   </Card>
 );
 
-const ShareButtons: React.FC<{ url: string; title: string }> = ({ url, title }) => {
+const ShareButtons: React.FC<{ url: string; title: string }> = ({
+  url,
+  title,
+}) => {
   const shareUrls = {
-    twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`,
-    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
-    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
-    email: `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(url)}`,
+    twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+      url
+    )}&text=${encodeURIComponent(title)}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+      url
+    )}`,
+    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+      url
+    )}`,
+    email: `mailto:?subject=${encodeURIComponent(
+      title
+    )}&body=${encodeURIComponent(url)}`,
   };
 
   return (
@@ -359,17 +384,29 @@ const ShareButtons: React.FC<{ url: string; title: string }> = ({ url, title }) 
       <CardContent>
         <div className="flex gap-2">
           <Button size="sm" variant="outline" asChild>
-            <a href={shareUrls.twitter} target="_blank" rel="noopener noreferrer">
+            <a
+              href={shareUrls.twitter}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Twitter className="w-4 h-4" />
             </a>
           </Button>
           <Button size="sm" variant="outline" asChild>
-            <a href={shareUrls.facebook} target="_blank" rel="noopener noreferrer">
+            <a
+              href={shareUrls.facebook}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Facebook className="w-4 h-4" />
             </a>
           </Button>
           <Button size="sm" variant="outline" asChild>
-            <a href={shareUrls.linkedin} target="_blank" rel="noopener noreferrer">
+            <a
+              href={shareUrls.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Linkedin className="w-4 h-4" />
             </a>
           </Button>
@@ -434,7 +471,13 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
 
     switch (section.type) {
       case "heading":
-        const HeadingTag = `h${section.level}` as keyof JSX.IntrinsicElements;
+        const HeadingTag = `h${section.level}` as
+          | "h1"
+          | "h2"
+          | "h3"
+          | "h4"
+          | "h5"
+          | "h6";
         const headingClasses =
           section.level === 2
             ? "text-2xl md:text-3xl font-bold mt-12 mb-4 text-foreground"
@@ -465,7 +508,10 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
           <React.Fragment key={idx}>
             <ul className="list-disc list-outside ml-6 mb-6 space-y-2">
               {items.map((item, itemIdx) => (
-                <li key={itemIdx} className="text-base md:text-lg text-foreground/90">
+                <li
+                  key={itemIdx}
+                  className="text-base md:text-lg text-foreground/90"
+                >
                   {item}
                 </li>
               ))}
@@ -563,7 +609,8 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
                       Ready to Help Your Child Read Better?
                     </h3>
                     <p className="mb-6 text-primary-foreground/90">
-                      Try Word Wiz AI's free pronunciation feedback and phonics practice
+                      Try Word Wiz AI's free pronunciation feedback and phonics
+                      practice
                     </p>
                     <Button size="lg" variant="secondary" asChild>
                       <Link to="/signup">

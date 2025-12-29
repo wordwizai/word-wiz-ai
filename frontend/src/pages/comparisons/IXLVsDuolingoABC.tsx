@@ -1,4 +1,3 @@
-import React from "react";
 import ComparisonPage from "@/components/ComparisonPageTemplate";
 
 const IXLDuolingoABCComparison = () => {
@@ -193,12 +192,15 @@ const IXLDuolingoABCComparison = () => {
       "Supplementing school across all language arts",
       "Parents who can afford ongoing subscription",
     ],
-    description: "IXL Language Arts is a comprehensive PreK-12 curriculum with 8,000+ skills covering phonics, reading comprehension, grammar, vocabulary, and writing. It's thorough and adaptive but expensive, and it doesn't offer speech recognition technology for pronunciation practice.",
+    description:
+      "IXL Language Arts is a comprehensive PreK-12 curriculum with 8,000+ skills covering phonics, reading comprehension, grammar, vocabulary, and writing. It's thorough and adaptive but expensive, and it doesn't offer speech recognition technology for pronunciation practice.",
   };
 
   const product2Details = {
     pros: [
-      { text: "Completely free (no ads, no in-app purchases, no subscriptions)" },
+      {
+        text: "Completely free (no ads, no in-app purchases, no subscriptions)",
+      },
       { text: "From trusted Duolingo brand" },
       { text: "Highly engaging for young children (ages 3-7)" },
       { text: "Systematic phonics progression" },
@@ -219,7 +221,8 @@ const IXLDuolingoABCComparison = () => {
       "Kids who love Duolingo's style",
       "Making phonics fun and engaging",
     ],
-    description: "Duolingo ABC is a completely free early literacy app (ages 3-7) from the makers of Duolingo. It offers systematic phonics instruction in a fun, gamified format. However, it's iOS-only and doesn't include speech recognition to check pronunciation.",
+    description:
+      "Duolingo ABC is a completely free early literacy app (ages 3-7) from the makers of Duolingo. It offers systematic phonics instruction in a fun, gamified format. However, it's iOS-only and doesn't include speech recognition to check pronunciation.",
   };
 
   const wordWizDetails = {
@@ -228,12 +231,16 @@ const IXLDuolingoABCComparison = () => {
       { text: "ONLY option among these three with pronunciation feedback" },
       { text: "AI-powered with GPT-4 (most advanced technology)" },
       { text: "Works on all devices via web browser (not platform-limited)" },
-      { text: "Phoneme-level analysis identifies specific pronunciation errors" },
+      {
+        text: "Phoneme-level analysis identifies specific pronunciation errors",
+      },
       { text: "Science of Reading aligned" },
       { text: "Immediate, personalized feedback" },
     ],
     cons: [
-      { text: "Narrower focus (pronunciation only, not full curriculum like IXL)" },
+      {
+        text: "Narrower focus (pronunciation only, not full curriculum like IXL)",
+      },
       { text: "Not as comprehensive as IXL for all language arts" },
       { text: "Less game-like than Duolingo ABC" },
       { text: "Requires microphone access" },
@@ -246,103 +253,115 @@ const IXLDuolingoABCComparison = () => {
       "Cross-device access (works on any device)",
       "Kids who can decode but mispronounce words",
     ],
-    description: "Word Wiz AI is the specialist among these options—it does one thing excellently: pronunciation feedback through speech recognition. While not as comprehensive as IXL or as game-like as Duolingo ABC, it's the only free tool that actually listens and corrects pronunciation at the phoneme level.",
+    description:
+      "Word Wiz AI is the specialist among these options—it does one thing excellently: pronunciation feedback through speech recognition. While not as comprehensive as IXL or as game-like as Duolingo ABC, it's the only free tool that actually listens and corrects pronunciation at the phoneme level.",
   };
 
   const verdict = {
-    product1: "Best for families wanting comprehensive language arts curriculum that grows from PreK through 12th grade. The breadth is unmatched (8,000+ skills), but at $20/month, it's a significant investment. Worth it if you need full curriculum coverage, but doesn't include speech recognition.",
-    product2: "Best for early literacy fun (ages 3-7) on a $0 budget. Kids love Duolingo's style, and it's completely free. Perfect for preschool through first grade, but limited to iOS devices and doesn't provide pronunciation feedback.",
-    wordWiz: "Best for pronunciation feedback and speech technology. It's the only free option with actual speech recognition among these three. While narrower in scope than IXL, it's the most advanced technologically (GPT-4, phoneme-level analysis) and works on all devices.",
-    overall: "These three serve different needs: IXL is comprehensive but expensive, Duolingo ABC is fun and free for early readers, and Word Wiz AI provides unique pronunciation feedback. The best free combination is Duolingo ABC (ages 3-7) + Word Wiz AI for pronunciation practice. If budget allows, add IXL for comprehensive coverage, using Word Wiz AI to fill IXL's pronunciation gap.",
+    product1:
+      "Best for families wanting comprehensive language arts curriculum that grows from PreK through 12th grade. The breadth is unmatched (8,000+ skills), but at $20/month, it's a significant investment. Worth it if you need full curriculum coverage, but doesn't include speech recognition.",
+    product2:
+      "Best for early literacy fun (ages 3-7) on a $0 budget. Kids love Duolingo's style, and it's completely free. Perfect for preschool through first grade, but limited to iOS devices and doesn't provide pronunciation feedback.",
+    wordWiz:
+      "Best for pronunciation feedback and speech technology. It's the only free option with actual speech recognition among these three. While narrower in scope than IXL, it's the most advanced technologically (GPT-4, phoneme-level analysis) and works on all devices.",
+    overall:
+      "These three serve different needs: IXL is comprehensive but expensive, Duolingo ABC is fun and free for early readers, and Word Wiz AI provides unique pronunciation feedback. The best free combination is Duolingo ABC (ages 3-7) + Word Wiz AI for pronunciation practice. If budget allows, add IXL for comprehensive coverage, using Word Wiz AI to fill IXL's pronunciation gap.",
   };
 
   const faqs = [
     {
       question: "Is IXL worth the $20/month cost?",
-      answer: "IXL is worth it if you need comprehensive PreK-12 coverage across all language arts areas with detailed progress tracking. However, for pronunciation practice specifically, Word Wiz AI offers free speech recognition that IXL doesn't have. Consider combining both: Word Wiz AI (free, pronunciation) + IXL (paid, comprehensive).",
+      answer:
+        "IXL is worth it if you need comprehensive PreK-12 coverage across all language arts areas with detailed progress tracking. However, for pronunciation practice specifically, Word Wiz AI offers free speech recognition that IXL doesn't have. Consider combining both: Word Wiz AI (free, pronunciation) + IXL (paid, comprehensive).",
     },
     {
       question: "Is Duolingo ABC really 100% free?",
-      answer: "Yes! Duolingo ABC is completely free with no ads, in-app purchases, or subscriptions. It's funded by Duolingo's main app revenue. The only limitation is that it's iOS-only (iPad/iPhone).",
+      answer:
+        "Yes! Duolingo ABC is completely free with no ads, in-app purchases, or subscriptions. It's funded by Duolingo's main app revenue. The only limitation is that it's iOS-only (iPad/iPhone).",
     },
     {
       question: "Which has the best technology?",
-      answer: "Word Wiz AI has the most advanced technology with GPT-4 AI and speech recognition for pronunciation feedback. Neither IXL nor Duolingo ABC can listen to your child read or provide pronunciation corrections—Word Wiz AI is the only option with this capability.",
+      answer:
+        "Word Wiz AI has the most advanced technology with GPT-4 AI and speech recognition for pronunciation feedback. Neither IXL nor Duolingo ABC can listen to your child read or provide pronunciation corrections—Word Wiz AI is the only option with this capability.",
     },
     {
       question: "Can I use these together?",
-      answer: "Absolutely! Many families use Duolingo ABC for fun early literacy + Word Wiz AI for pronunciation feedback (both free), or IXL for comprehensive curriculum + Word Wiz AI for pronunciation practice. These tools complement rather than compete with each other.",
+      answer:
+        "Absolutely! Many families use Duolingo ABC for fun early literacy + Word Wiz AI for pronunciation feedback (both free), or IXL for comprehensive curriculum + Word Wiz AI for pronunciation practice. These tools complement rather than compete with each other.",
     },
     {
       question: "Which is best for a 5-year-old?",
-      answer: "For ages 5-7, Duolingo ABC is perfect for engaging, systematic phonics. Add Word Wiz AI (also free) to practice pronunciation and ensure your child is saying sounds correctly. Together, they provide comprehensive early literacy support at $0 cost.",
+      answer:
+        "For ages 5-7, Duolingo ABC is perfect for engaging, systematic phonics. Add Word Wiz AI (also free) to practice pronunciation and ensure your child is saying sounds correctly. Together, they provide comprehensive early literacy support at $0 cost.",
     },
     {
       question: "Does any of these check pronunciation?",
-      answer: "Only Word Wiz AI has speech recognition to check pronunciation. Neither IXL nor Duolingo ABC can listen to your child read or identify pronunciation errors. If pronunciation feedback is important to you, Word Wiz AI is your only free option.",
+      answer:
+        "Only Word Wiz AI has speech recognition to check pronunciation. Neither IXL nor Duolingo ABC can listen to your child read or identify pronunciation errors. If pronunciation feedback is important to you, Word Wiz AI is your only free option.",
     },
   ];
 
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "ComparisonPage",
-    "name": "IXL vs Duolingo ABC vs Word Wiz AI",
-    "description": "Compare IXL Language Arts, Duolingo ABC, and Word Wiz AI for teaching reading. See pricing, features, and which is right for your child.",
-    "mainEntity": [
+    name: "IXL vs Duolingo ABC vs Word Wiz AI",
+    description:
+      "Compare IXL Language Arts, Duolingo ABC, and Word Wiz AI for teaching reading. See pricing, features, and which is right for your child.",
+    mainEntity: [
       {
         "@type": "Product",
-        "name": "IXL Language Arts",
-        "description": "Comprehensive PreK-12 language arts curriculum",
-        "offers": {
+        name: "IXL Language Arts",
+        description: "Comprehensive PreK-12 language arts curriculum",
+        offers: {
           "@type": "Offer",
-          "price": "19.95",
-          "priceCurrency": "USD",
-          "priceSpecification": {
+          price: "19.95",
+          priceCurrency: "USD",
+          priceSpecification: {
             "@type": "UnitPriceSpecification",
-            "referenceQuantity": {
+            referenceQuantity: {
               "@type": "QuantitativeValue",
-              "value": "1",
-              "unitText": "month"
-            }
-          }
+              value: "1",
+              unitText: "month",
+            },
+          },
         },
-        "aggregateRating": {
+        aggregateRating: {
           "@type": "AggregateRating",
-          "ratingValue": "4.1",
-          "reviewCount": "2800"
-        }
+          ratingValue: "4.1",
+          reviewCount: "2800",
+        },
       },
       {
         "@type": "Product",
-        "name": "Duolingo ABC",
-        "description": "Free early literacy app for ages 3-7",
-        "offers": {
+        name: "Duolingo ABC",
+        description: "Free early literacy app for ages 3-7",
+        offers: {
           "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "USD"
+          price: "0",
+          priceCurrency: "USD",
         },
-        "aggregateRating": {
+        aggregateRating: {
           "@type": "AggregateRating",
-          "ratingValue": "4.6",
-          "reviewCount": "15000"
-        }
+          ratingValue: "4.6",
+          reviewCount: "15000",
+        },
       },
       {
         "@type": "Product",
-        "name": "Word Wiz AI",
-        "description": "Free AI-powered pronunciation feedback",
-        "offers": {
+        name: "Word Wiz AI",
+        description: "Free AI-powered pronunciation feedback",
+        offers: {
           "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "USD"
+          price: "0",
+          priceCurrency: "USD",
         },
-        "aggregateRating": {
+        aggregateRating: {
           "@type": "AggregateRating",
-          "ratingValue": "4.8",
-          "reviewCount": "250"
-        }
-      }
-    ]
+          ratingValue: "4.8",
+          reviewCount: "250",
+        },
+      },
+    ],
   };
 
   return (

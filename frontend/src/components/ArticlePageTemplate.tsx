@@ -444,6 +444,23 @@ const AuthorBio: React.FC<{ author: Author }> = ({ author }) => (
   </Card>
 );
 
+// ===== HELPER FUNCTIONS =====
+
+/**
+ * Parses markdown bold syntax (**text**) and returns React elements with <strong> tags
+ */
+const parseMarkdownBold = (text: string): React.ReactNode => {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  
+  return parts.map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      const boldText = part.slice(2, -2);
+      return <strong key={index}>{boldText}</strong>;
+    }
+    return part;
+  });
+};
+
 // ===== MAIN COMPONENT =====
 
 const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
@@ -481,7 +498,7 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
         const headingClasses =
           section.level === 2
             ? "text-3xl md:text-4xl font-bold mt-12 mb-6 text-foreground border-b-2 border-primary/20 pb-3"
-            : "text-lg md:text-xl font-semibold mt-8 mb-4 text-foreground/90 pl-4 border-l-4 border-primary/40";
+            : "text-lg md:text-xl font-semibold mt-8 mb-4 text-foreground/90";
 
         return (
           <React.Fragment key={idx}>
@@ -496,7 +513,7 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
         return (
           <React.Fragment key={idx}>
             <p className="text-base md:text-lg leading-relaxed text-foreground/90 mb-4">
-              {section.content as string}
+              {parseMarkdownBold(section.content as string)}
             </p>
             {ctaAfterSection && <InlineCTAComponent cta={ctaAfterSection} />}
           </React.Fragment>
@@ -512,7 +529,7 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
                   key={itemIdx}
                   className="text-base md:text-lg text-foreground/90"
                 >
-                  {item}
+                  {parseMarkdownBold(item)}
                 </li>
               ))}
             </ul>

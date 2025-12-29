@@ -28,7 +28,7 @@ const WhyChildHatesReading = () => {
     {
       type: "paragraph",
       content:
-        "This is by far the most common reason children hate reading, and it is often overlooked by well-meaning parents who assume their child is simply being difficult or unmotivated. If decoding feels like hard work instead of flowing naturally and automatically, reading becomes an exhausting chore rather than an enjoyable activity. Imagine trying to enjoy a movie when you have to pause every few seconds to figure out what is happening on screen. That is what reading feels like for struggling readers. The cognitive load of decoding leaves little mental energy for comprehension or enjoyment. Signs that reading is genuinely difficult for your child include:",
+        "This is by far the **most common reason** children hate reading, and it is often overlooked by well-meaning parents who assume their child is simply being difficult or unmotivated. If decoding feels like hard work instead of flowing naturally and automatically, reading becomes an exhausting chore rather than an enjoyable activity. **Imagine trying to enjoy a movie when you have to pause every few seconds** to figure out what is happening on screen. That is what reading feels like for struggling readers. The cognitive load of decoding leaves little mental energy for comprehension or enjoyment. Signs that reading is genuinely difficult for your child include:",
     },
     {
       type: "list",

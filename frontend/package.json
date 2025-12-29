@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "build:only": "vite build",
+    "build:prerender": "vite build && node scripts/prerender.mjs",
     "lint": "eslint .",
     "preview": "vite preview --port 5173"
   },

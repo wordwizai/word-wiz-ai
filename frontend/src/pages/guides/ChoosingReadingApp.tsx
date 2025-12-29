@@ -1,6 +1,6 @@
 import React from "react";
 import ArticlePageTemplate, {
-  ArticleSection,
+  type ArticleSection,
 } from "@/components/ArticlePageTemplate";
 
 const ChoosingReadingApp = () => {

@@ -421,28 +421,7 @@ const ShareButtons: React.FC<{ url: string; title: string }> = ({
   );
 };
 
-const AuthorBio: React.FC<{ author: Author }> = ({ author }) => (
-  <Card className="mb-6">
-    <CardHeader>
-      <CardTitle className="text-base">About the Author</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="flex items-start gap-3">
-        {author.avatar && (
-          <img
-            src={author.avatar}
-            alt={author.name}
-            className="w-12 h-12 rounded-full flex-shrink-0"
-          />
-        )}
-        <div>
-          <h4 className="font-semibold mb-1">{author.name}</h4>
-          <p className="text-sm text-muted-foreground">{author.bio}</p>
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-);
+
 
 // ===== HELPER FUNCTIONS =====
 
@@ -644,7 +623,6 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
                 <div className="space-y-6">
                   <TableOfContents sections={content} />
                   <ShareButtons url={canonicalUrl} title={headline} />
-                  <AuthorBio author={author} />
                   {relatedArticles && relatedArticles.length > 0 && (
                     <RelatedArticlesComponent articles={relatedArticles} />
                   )}

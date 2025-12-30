@@ -608,7 +608,7 @@ const DecodableBooksVsLeveledReaders = () => {
       subheadline="Understanding the difference and making the right choice for your child's reading journey"
       author={{
         name: "Word Wiz AI Team",
-        bio: "Educational technology experts specializing in Science of Reading instruction and early literacy.",
+        bio: "Passionate about Science of Reading instruction and early literacy.",
       }}
       publishDate="2024-12-29"
       readTime={9}

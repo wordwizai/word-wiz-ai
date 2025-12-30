@@ -611,7 +611,7 @@ const ChildPronounceWordsWrong = () => {
       subheadline="Why pronunciation errors happen and exactly how to fix them with practice and technology"
       author={{
         name: "Word Wiz AI Team",
-        bio: "Educational technology experts specializing in pronunciation feedback and phonics instruction.",
+        bio: "Passionate about pronunciation feedback and phonics instruction.",
       }}
       publishDate="2024-12-29"
       readTime={10}

@@ -68,6 +68,9 @@ const DecodableBooksVsLeveledReaders = lazy(
 const CantBlendSounds = lazy(
   () => import("./pages/articles/CantBlendSounds.tsx")
 );
+const GuessesWords = lazy(
+  () => import("./pages/articles/GuessesWords.tsx")
+);
 
 // Lazy load guide pages
 const ChoosingReadingApp = lazy(
@@ -164,6 +167,10 @@ function App() {
                   <Route
                     path="/articles/child-cant-blend-sounds-into-words"
                     element={<CantBlendSounds />}
+                  />
+                  <Route
+                    path="/articles/kindergartener-guesses-words-instead-sounding-out"
+                    element={<GuessesWords />}
                   />
 
                   {/* Guide Pages */}

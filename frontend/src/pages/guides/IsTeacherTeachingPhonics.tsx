@@ -713,7 +713,7 @@ const IsTeacherTeachingPhonics = () => {
       subheadline="How to assess reading instruction quality and advocate for your child, without alienating the teacher"
       author={{
         name: "Word Wiz AI Team",
-        bio: "Educational technology experts specializing in Science of Reading instruction and literacy advocacy.",
+        bio: "Passionate about Science of Reading instruction and literacy advocacy.",
       }}
       publishDate="2024-12-29"
       readTime={11}

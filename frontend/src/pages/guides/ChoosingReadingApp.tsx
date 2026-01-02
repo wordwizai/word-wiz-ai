@@ -805,7 +805,7 @@ const ChoosingReadingApp = () => {
       subheadline="A systematic framework for evaluating 100+ reading apps and finding the perfect fit"
       author={{
         name: "Word Wiz AI Team",
-        bio: "Educational technology experts specializing in reading apps and early literacy instruction.",
+        bio: "Passionate about reading apps and early literacy instruction.",
       }}
       publishDate="2024-12-29"
       readTime={13}

@@ -653,7 +653,7 @@ const TeachingPhonicsAtHome = () => {
       subheadline="Everything you need to help your child become a confident reader, no teaching degree required"
       author={{
         name: "Word Wiz AI Team",
-        bio: "Educational technology experts specializing in phonics instruction and early literacy based on the Science of Reading.",
+        bio: "Passionate about phonics instruction and early literacy based on the Science of Reading.",
       }}
       publishDate="2024-12-29"
       readTime={12}

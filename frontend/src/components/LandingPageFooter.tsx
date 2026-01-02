@@ -262,7 +262,7 @@ const LandingPageFooter = () => {
         {/* Copyright */}
         <div className="border-t border-primary-foreground/20 pt-6 text-center text-sm">
           <p>
-            &copy; {new Date().getFullYear()} Word Wiz AI. All rights reserved.
+            {new Date().getFullYear()} Word Wiz AI
           </p>
         </div>
       </div>

@@ -101,6 +101,12 @@
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+  <url>
+    <loc>https://wordwizai.com/articles/child-cant-blend-sounds-into-words</loc>
+    <lastmod>2025-01-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
 
   <!-- Guide Pages -->
   <url>
@@ -124,6 +130,18 @@
   <url>
     <loc>https://wordwizai.com/guides/phoneme-awareness-complete-guide</loc>
     <lastmod>2025-12-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://wordwizai.com/guides/how-to-teach-cvc-words-to-struggling-readers</loc>
+    <lastmod>2025-01-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://wordwizai.com/guides/teaching-consonant-blends-kindergarten-at-home</loc>
+    <lastmod>2025-01-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

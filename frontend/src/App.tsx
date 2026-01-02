@@ -65,6 +65,9 @@ const ChildPronounceWordsWrong = lazy(
 const DecodableBooksVsLeveledReaders = lazy(
   () => import("./pages/articles/DecodableBooksVsLeveledReaders.tsx")
 );
+const CantBlendSounds = lazy(
+  () => import("./pages/articles/CantBlendSounds.tsx")
+);
 
 // Lazy load guide pages
 const ChoosingReadingApp = lazy(
@@ -78,6 +81,12 @@ const IsTeacherTeachingPhonics = lazy(
 );
 const PhonemeAwarenessGuide = lazy(
   () => import("./pages/guides/PhonemeAwarenessGuide.tsx")
+);
+const TeachCVCWords = lazy(
+  () => import("./pages/guides/TeachCVCWords.tsx")
+);
+const TeachConsonantBlends = lazy(
+  () => import("./pages/guides/TeachConsonantBlends.tsx")
 );
 
 // Loading fallback component
@@ -152,6 +161,10 @@ function App() {
                     path="/articles/decodable-books-vs-leveled-readers"
                     element={<DecodableBooksVsLeveledReaders />}
                   />
+                  <Route
+                    path="/articles/child-cant-blend-sounds-into-words"
+                    element={<CantBlendSounds />}
+                  />
 
                   {/* Guide Pages */}
                   <Route
@@ -169,6 +182,14 @@ function App() {
                   <Route
                     path="/guides/phoneme-awareness-complete-guide"
                     element={<PhonemeAwarenessGuide />}
+                  />
+                  <Route
+                    path="/guides/how-to-teach-cvc-words-to-struggling-readers"
+                    element={<TeachCVCWords />}
+                  />
+                  <Route
+                    path="/guides/teaching-consonant-blends-kindergarten-at-home"
+                    element={<TeachConsonantBlends />}
                   />
 
                   <Route path="/toast-test" element={<ToastTestPage />} />

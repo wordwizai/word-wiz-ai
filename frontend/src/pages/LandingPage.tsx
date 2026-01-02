@@ -24,6 +24,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import AnimatedPracticeDemo from "@/components/AnimatedPracticeDemo";
+import TrustBadgeCarousel from "@/components/TrustBadgeCarousel";
 import { googleLogin } from "@/api";
 import { GoogleIcon } from "@/components/GoogleIcon";
 
@@ -113,21 +114,8 @@ const LandingPage = () => {
                 </p>
               </div>
 
-              {/* Trust badges */}
-              <div className="flex flex-wrap gap-3 justify-center lg:justify-start text-sm text-muted-foreground">
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-md border">
-                  <CircleDollarSign className="w-4 h-4 text-green-600" />
-                  <span className="font-medium">No Ads</span>
-                </div>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-md border">
-                  <Sparkles className="w-4 h-4 text-primary" />
-                  <span className="font-medium">AI-Powered</span>
-                </div>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-md border">
-                  <BookOpen className="w-4 h-4 text-blue-600" />
-                  <span className="font-medium">Instant Feedback</span>
-                </div>
-              </div>
+              {/* Trust badges carousel */}
+              <TrustBadgeCarousel />
 
               {/* CTAs */}
               <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start items-center">

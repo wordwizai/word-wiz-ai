@@ -15,7 +15,7 @@ interface LandingPageCTAProps {
 const LandingPageCTA = ({ fadeUpVariant }: LandingPageCTAProps) => {
   return (
     <motion.section
-      className="px-6 py-20 bg-gradient-to-br from-purple-50 via-pink-50/30 to-blue-50/20"
+      className="px-6 py-20 bg-muted/30"
       variants={fadeUpVariant}
       initial="hidden"
       whileInView="visible"
@@ -31,36 +31,24 @@ const LandingPageCTA = ({ fadeUpVariant }: LandingPageCTAProps) => {
           practice with AI-powered pronunciation feedback. No credit card
           required, no ads, no subscriptions.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 400 }}
+        <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+          <Button
+            size="lg"
+            className="min-h-[56px] px-8 text-base font-semibold"
+            onClick={() => googleLogin()}
           >
-            <Button
-              size="lg"
-              className="min-h-[56px] px-8 text-lg font-semibold shadow-xl hover:shadow-2xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0"
-              onClick={() => googleLogin()}
-            >
-              <GoogleIcon className="w-6 h-6 mr-2" />
-              Sign in with Google
-            </Button>
-          </motion.div>
+            <GoogleIcon className="w-5 h-5 mr-2" />
+            Sign in with Google
+          </Button>
           <Link to="/signup">
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 400 }}
+            <Button
+              variant="outline"
+              size="lg"
+              className="min-h-[56px] px-8 text-base font-semibold"
             >
-              <Button
-                variant="outline"
-                size="lg"
-                className="min-h-[56px] px-8 text-lg font-semibold bg-white/80 hover:bg-white border-2 border-purple-200 hover:border-purple-300"
-              >
-                <BookOpen className="w-5 h-5 mr-2" />
-                Create Account
-              </Button>
-            </motion.div>
+              <BookOpen className="w-5 h-5 mr-2" />
+              Create Account
+            </Button>
           </Link>
         </div>
       </div>

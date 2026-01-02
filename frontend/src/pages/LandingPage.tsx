@@ -6,7 +6,6 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { demoScreenshot, wordWizIcon } from "@/assets";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
@@ -16,20 +15,15 @@ import FAQ from "@/components/FAQ";
 import React from "react";
 import {
   BookOpen,
-  Search,
   BarChart3,
-  PenTool,
-  DollarSign,
   Users,
   GraduationCap,
   User,
-  Speech,
   WholeWord,
   CircleDollarSign,
   Sparkles,
 } from "lucide-react";
 import AnimatedPracticeDemo from "@/components/AnimatedPracticeDemo";
-import FloatingWords from "@/components/FloatingWords";
 import { googleLogin } from "@/api";
 import { GoogleIcon } from "@/components/GoogleIcon";
 
@@ -92,38 +86,7 @@ const LandingPage = () => {
       <LandingPageNavbar />
 
       {/* Hero Section */}
-      <section className="relative px-4 sm:px-6 py-12 sm:py-16 md:py-20 bg-gradient-to-br from-pastel-purple via-pastel-pink/30 to-pastel-blue/20 text-foreground overflow-hidden">
-        {/* Animated gradient orbs for depth */}
-        <motion.div
-          className="absolute top-20 left-10 w-72 h-72 bg-purple-300/30 rounded-full blur-3xl"
-          animate={{
-            x: [0, 50, 0],
-            y: [0, 30, 0],
-            scale: [1, 1.1, 1],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-        <motion.div
-          className="absolute bottom-20 right-10 w-96 h-96 bg-pink-300/20 rounded-full blur-3xl"
-          animate={{
-            x: [0, -30, 0],
-            y: [0, -50, 0],
-            scale: [1, 1.2, 1],
-          }}
-          transition={{
-            duration: 25,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-
-        {/* Floating words background */}
-        <FloatingWords />
-
+      <section className="relative px-4 sm:px-6 py-16 sm:py-20 md:py-24 bg-background text-foreground">
         {/* Content */}
         <div className="relative z-10 max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row items-center gap-8 md:gap-12 lg:gap-16">
@@ -136,49 +99,11 @@ const LandingPage = () => {
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.6 }}
             >
-              {/* Logo Icon */}
-              <motion.div
-                className="flex justify-center lg:justify-start"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-              >
-                <div className="relative">
-                  <motion.img
-                    src={wordWizIcon}
-                    alt="Word Wiz AI"
-                    className="h-16 w-16 md:h-20 md:w-20"
-                    animate={{
-                      rotate: [0, -5, 5, -5, 0],
-                    }}
-                    transition={{
-                      duration: 5,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                  />
-                  <motion.div
-                    className="absolute -top-2 -right-2"
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      rotate: [0, 180, 360],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                  >
-                    <Sparkles className="w-6 h-6 text-yellow-400" />
-                  </motion.div>
-                </div>
-              </motion.div>
-
               <div className="space-y-4">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-primary">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight">
                   Your AI Reading Tutor
                   <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600">
+                  <span className="text-primary">
                     100% Free Forever
                   </span>
                 </h1>
@@ -190,67 +115,48 @@ const LandingPage = () => {
 
               {/* Trust badges */}
               <div className="flex flex-wrap gap-3 justify-center lg:justify-start text-sm text-muted-foreground">
-                <div className="flex items-center gap-1 px-3 py-1.5 bg-white/60 rounded-full">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-md border">
                   <CircleDollarSign className="w-4 h-4 text-green-600" />
                   <span className="font-medium">No Ads</span>
                 </div>
-                <div className="flex items-center gap-1 px-3 py-1.5 bg-white/60 rounded-full">
-                  <Sparkles className="w-4 h-4 text-purple-600" />
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-md border">
+                  <Sparkles className="w-4 h-4 text-primary" />
                   <span className="font-medium">AI-Powered</span>
                 </div>
-                <div className="flex items-center gap-1 px-3 py-1.5 bg-white/60 rounded-full">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-md border">
                   <BookOpen className="w-4 h-4 text-blue-600" />
                   <span className="font-medium">Instant Feedback</span>
                 </div>
               </div>
 
               {/* CTAs */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center">
+              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start items-center">
                 {/* Primary CTA - Google Sign In */}
-                <motion.div
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                  className="w-full sm:w-auto"
+                <Button
+                  size="lg"
+                  className="w-full sm:w-auto min-h-[56px] px-8 text-base font-semibold"
+                  onClick={() => googleLogin()}
                 >
-                  <Button
-                    size="lg"
-                    className="w-full sm:w-auto min-h-[56px] px-8 text-lg font-semibold shadow-xl hover:shadow-2xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0 transition-all duration-300"
-                    onClick={() => googleLogin()}
-                  >
-                    <GoogleIcon className="w-6 h-6 mr-2" />
-                    Sign in with Google
-                  </Button>
-                </motion.div>
+                  <GoogleIcon className="w-5 h-5 mr-2" />
+                  Sign in with Google
+                </Button>
 
                 {/* Secondary CTA */}
                 <Link to="/signup" className="w-full sm:w-auto">
-                  <motion.div
-                    whileHover={{ scale: 1.02, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="w-full sm:w-auto min-h-[56px] px-8 text-base font-semibold"
                   >
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="w-full sm:w-auto min-h-[56px] px-8 text-lg font-semibold bg-white/80 hover:bg-white border-2 border-purple-200 hover:border-purple-300 transition-all duration-300"
-                    >
-                      <BookOpen className="w-5 h-5 mr-2" />
-                      Create Account
-                    </Button>
-                  </motion.div>
+                    Create Account
+                  </Button>
                 </Link>
               </div>
 
               {/* Social proof */}
-              <motion.p
-                className="text-sm text-muted-foreground italic"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.8 }}
-              >
+              <p className="text-sm text-muted-foreground">
                 Join thousands of families improving reading skills with AI
-              </motion.p>
+              </p>
             </motion.div>
 
             {/* Right side - Animated Demo */}
@@ -266,14 +172,11 @@ const LandingPage = () => {
             </motion.div>
           </div>
         </div>
-
-        {/* Bottom gradient fade */}
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
       </section>
 
       {/* What Makes Word Wiz Unique */}
       <motion.section
-        className="px-6 py-20 bg-gradient-to-br from-background to-purple-50/50"
+        className="px-6 py-20 bg-muted/30"
         variants={fadeUpVariant}
         initial="hidden"
         whileInView="visible"
@@ -318,11 +221,11 @@ const LandingPage = () => {
             ].map((feature, i) => (
               <motion.div
                 key={i}
-                className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl text-center h-full hover:shadow-2xl transition-shadow rounded-3xl p-6"
+                className="bg-card border text-card-foreground shadow-sm text-center h-full hover:shadow-md transition-shadow rounded-lg p-6"
                 variants={childVariant}
               >
                 <div
-                  className={`w-12 h-12 bg-gradient-to-r ${feature.iconBg} rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg`}
+                  className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center mx-auto mb-4"
                 >
                   {feature.icon}
                 </div>
@@ -374,11 +277,11 @@ const LandingPage = () => {
             ].map((target, i) => (
               <motion.div
                 key={i}
-                className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl text-center h-full hover:shadow-2xl transition-shadow rounded-3xl p-6"
+                className="bg-card border text-card-foreground shadow-sm text-center h-full hover:shadow-md transition-shadow rounded-lg p-6"
                 variants={childVariant}
               >
                 <div
-                  className={`w-12 h-12 bg-gradient-to-r ${target.iconBg} rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg`}
+                  className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center mx-auto mb-4"
                 >
                   {target.icon}
                 </div>
@@ -393,7 +296,7 @@ const LandingPage = () => {
       {/* How It Works */}
       <motion.section
         id="how-it-works-section"
-        className="px-6 py-20 bg-gradient-to-br from-background to-purple-50/50"
+        className="px-6 py-20 bg-background"
         variants={fadeUpVariant}
         initial="hidden"
         whileInView="visible"
@@ -416,26 +319,23 @@ const LandingPage = () => {
                 step: "1",
                 title: "Read Aloud",
                 text: "Your child reads practice sentences aloud while Word Wiz AI listens using advanced speech recognition technology.",
-                gradient: "from-blue-400 to-purple-500",
               },
               {
                 step: "2",
                 title: "AI Pronunciation Analysis",
                 text: "Our AI analyzes every phoneme (individual sound) to identify which letter sounds and word patterns need more practice.",
-                gradient: "from-purple-400 to-pink-500",
               },
               {
                 step: "3",
                 title: "Personalized Phonics Feedback",
                 text: "Get instant feedback with pronunciation tips and customized practice sentences targeting specific phonics skills. Guidance is provided through text-to-speech audio.",
-                gradient: "from-green-400 to-blue-500",
               },
             ].map((step, i) => (
               <motion.div key={i} variants={childVariant} className="h-full">
-                <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl hover:shadow-2xl transition-shadow rounded-3xl h-full p-6">
+                <Card className="bg-card border shadow-sm hover:shadow-md transition-shadow h-full">
                   <CardHeader>
                     <div
-                      className={`bg-gradient-to-br ${step.gradient} text-white w-12 h-12 flex items-center justify-center rounded-full mb-4 shadow-lg font-bold text-lg`}
+                      className="bg-primary text-primary-foreground w-12 h-12 flex items-center justify-center rounded-lg mb-4 font-bold text-lg"
                     >
                       {step.step}
                     </div>

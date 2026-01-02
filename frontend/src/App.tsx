@@ -65,6 +65,12 @@ const ChildPronounceWordsWrong = lazy(
 const DecodableBooksVsLeveledReaders = lazy(
   () => import("./pages/articles/DecodableBooksVsLeveledReaders.tsx")
 );
+const CantBlendSounds = lazy(
+  () => import("./pages/articles/CantBlendSounds.tsx")
+);
+const GuessesWords = lazy(
+  () => import("./pages/articles/GuessesWords.tsx")
+);
 
 // Lazy load guide pages
 const ChoosingReadingApp = lazy(
@@ -78,6 +84,45 @@ const IsTeacherTeachingPhonics = lazy(
 );
 const PhonemeAwarenessGuide = lazy(
   () => import("./pages/guides/PhonemeAwarenessGuide.tsx")
+);
+const TeachCVCWords = lazy(
+  () => import("./pages/guides/TeachCVCWords.tsx")
+);
+const TeachConsonantBlends = lazy(
+  () => import("./pages/guides/TeachConsonantBlends.tsx")
+);
+const DailyPhonicsRoutine = lazy(
+  () => import("./pages/guides/DailyPhonicsRoutine.tsx")
+);
+const ShortVowelSounds = lazy(
+  () => import("./pages/guides/ShortVowelSounds.tsx")
+);
+const DecodableSentences = lazy(
+  () => import("./pages/guides/DecodableSentences.tsx")
+);
+const FiveMinuteActivities = lazy(
+  () => import("./pages/guides/FiveMinuteActivities.tsx")
+);
+const RControlledVowels = lazy(
+  () => import("./pages/guides/RControlledVowels.tsx")
+);
+const PhonicsWithoutWorksheets = lazy(
+  () => import("./pages/guides/PhonicsWithoutWorksheets.tsx")
+);
+const ChildReadsSlowly = lazy(
+  () => import("./pages/articles/ChildReadsSlowly.tsx")
+);
+const SkipsWords = lazy(
+  () => import("./pages/articles/SkipsWords.tsx")
+);
+const TutorVsApp = lazy(
+  () => import("./pages/comparisons/TutorVsApp.tsx")
+);
+const AIvsTraditional = lazy(
+  () => import("./pages/comparisons/AIvsTraditional.tsx")
+);
+const FreeVsPaid = lazy(
+  () => import("./pages/comparisons/FreeVsPaid.tsx")
 );
 
 // Loading fallback component
@@ -138,6 +183,18 @@ function App() {
                     path="/comparisons/ixl-vs-duolingo-abc-vs-word-wiz-ai"
                     element={<IXLDuolingoABCComparison />}
                   />
+                  <Route
+                    path="/comparisons/reading-tutor-vs-reading-app"
+                    element={<TutorVsApp />}
+                  />
+                  <Route
+                    path="/comparisons/ai-reading-app-vs-traditional-phonics-program"
+                    element={<AIvsTraditional />}
+                  />
+                  <Route
+                    path="/comparisons/free-phonics-apps-vs-paid-reading-programs"
+                    element={<FreeVsPaid />}
+                  />
 
                   {/* Article Pages */}
                   <Route
@@ -151,6 +208,22 @@ function App() {
                   <Route
                     path="/articles/decodable-books-vs-leveled-readers"
                     element={<DecodableBooksVsLeveledReaders />}
+                  />
+                  <Route
+                    path="/articles/child-cant-blend-sounds-into-words"
+                    element={<CantBlendSounds />}
+                  />
+                  <Route
+                    path="/articles/kindergartener-guesses-words-instead-sounding-out"
+                    element={<GuessesWords />}
+                  />
+                  <Route
+                    path="/articles/child-reads-slowly-struggles-with-fluency"
+                    element={<ChildReadsSlowly />}
+                  />
+                  <Route
+                    path="/articles/first-grader-skips-words-when-reading-aloud"
+                    element={<SkipsWords />}
                   />
 
                   {/* Guide Pages */}
@@ -169,6 +242,38 @@ function App() {
                   <Route
                     path="/guides/phoneme-awareness-complete-guide"
                     element={<PhonemeAwarenessGuide />}
+                  />
+                  <Route
+                    path="/guides/how-to-teach-cvc-words-to-struggling-readers"
+                    element={<TeachCVCWords />}
+                  />
+                  <Route
+                    path="/guides/teaching-consonant-blends-kindergarten-at-home"
+                    element={<TeachConsonantBlends />}
+                  />
+                  <Route
+                    path="/guides/daily-phonics-practice-routine-kindergarten-at-home"
+                    element={<DailyPhonicsRoutine />}
+                  />
+                  <Route
+                    path="/guides/short-vowel-sounds-exercises-beginning-readers"
+                    element={<ShortVowelSounds />}
+                  />
+                  <Route
+                    path="/guides/decodable-sentences-for-beginning-readers"
+                    element={<DecodableSentences />}
+                  />
+                  <Route
+                    path="/guides/five-minute-reading-practice-activities-kids"
+                    element={<FiveMinuteActivities />}
+                  />
+                  <Route
+                    path="/guides/r-controlled-vowels-teaching-strategies-parents"
+                    element={<RControlledVowels />}
+                  />
+                  <Route
+                    path="/guides/phonics-practice-without-worksheets-kindergarten"
+                    element={<PhonicsWithoutWorksheets />}
                   />
 
                   <Route path="/toast-test" element={<ToastTestPage />} />

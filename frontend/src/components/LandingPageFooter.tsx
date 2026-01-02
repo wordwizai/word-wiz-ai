@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 const LandingPageFooter = () => {
   return (
     <footer className="bg-primary text-primary-foreground py-12 px-6 mt-12">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-8 mb-8">
           {/* Brand */}
           <div className="text-center md:text-left">
             <h3 className="text-xl font-bold mb-2">Word Wiz AI</h3>
@@ -63,9 +63,27 @@ const LandingPageFooter = () => {
           {/* Comparisons */}
           <div>
             <h4 className="font-semibold mb-3 text-sm uppercase">
-              Comparisons
+              App Comparisons
             </h4>
             <div className="flex flex-col gap-2 text-sm">
+              <Link
+                to="/comparisons/reading-tutor-vs-reading-app"
+                className="hover:underline"
+              >
+                Tutor vs Reading App
+              </Link>
+              <Link
+                to="/comparisons/ai-reading-app-vs-traditional-phonics-program"
+                className="hover:underline"
+              >
+                AI vs Traditional Phonics
+              </Link>
+              <Link
+                to="/comparisons/free-phonics-apps-vs-paid-reading-programs"
+                className="hover:underline"
+              >
+                Free vs Paid Programs
+              </Link>
               <Link
                 to="/comparisons/abcmouse-vs-hooked-on-phonics-vs-word-wiz-ai"
                 className="hover:underline"
@@ -91,18 +109,6 @@ const LandingPageFooter = () => {
                 Lexia vs Raz-Kids
               </Link>
               <Link
-                to="/comparisons/teach-your-monster-vs-abcya-vs-word-wiz-ai"
-                className="hover:underline"
-              >
-                Teach Monster vs ABCya
-              </Link>
-              <Link
-                to="/comparisons/ixl-vs-duolingo-abc-vs-word-wiz-ai"
-                className="hover:underline"
-              >
-                IXL vs Duolingo ABC
-              </Link>
-              <Link
                 to="/comparisons/best-free-reading-apps"
                 className="hover:underline"
               >
@@ -114,7 +120,7 @@ const LandingPageFooter = () => {
           {/* Guides */}
           <div>
             <h4 className="font-semibold mb-3 text-sm uppercase">
-              Guides
+              Phonics Guides
             </h4>
             <div className="flex flex-col gap-2 text-sm">
               <Link
@@ -122,6 +128,63 @@ const LandingPageFooter = () => {
                 className="hover:underline"
               >
                 Teaching Phonics at Home
+              </Link>
+              <Link
+                to="/guides/how-to-teach-cvc-words-to-struggling-readers"
+                className="hover:underline"
+              >
+                How to Teach CVC Words
+              </Link>
+              <Link
+                to="/guides/teaching-consonant-blends-kindergarten-at-home"
+                className="hover:underline"
+              >
+                Teaching Consonant Blends
+              </Link>
+              <Link
+                to="/guides/short-vowel-sounds-exercises-beginning-readers"
+                className="hover:underline"
+              >
+                Short Vowel Sounds
+              </Link>
+              <Link
+                to="/guides/r-controlled-vowels-teaching-strategies-parents"
+                className="hover:underline"
+              >
+                R-Controlled Vowels
+              </Link>
+              <Link
+                to="/guides/daily-phonics-practice-routine-kindergarten-at-home"
+                className="hover:underline"
+              >
+                Daily Phonics Routine
+              </Link>
+              <Link
+                to="/guides/decodable-sentences-for-beginning-readers"
+                className="hover:underline"
+              >
+                Decodable Sentences
+              </Link>
+              <Link
+                to="/guides/phonics-practice-without-worksheets-kindergarten"
+                className="hover:underline"
+              >
+                Phonics Without Worksheets
+              </Link>
+            </div>
+          </div>
+
+          {/* Practice Activities */}
+          <div>
+            <h4 className="font-semibold mb-3 text-sm uppercase">
+              Practice Activities
+            </h4>
+            <div className="flex flex-col gap-2 text-sm">
+              <Link
+                to="/guides/five-minute-reading-practice-activities-kids"
+                className="hover:underline"
+              >
+                5 Minute Reading Activities
               </Link>
               <Link
                 to="/guides/is-teacher-teaching-enough-phonics"
@@ -144,12 +207,36 @@ const LandingPageFooter = () => {
             </div>
           </div>
 
-          {/* Articles */}
+          {/* Reading Problems */}
           <div>
             <h4 className="font-semibold mb-3 text-sm uppercase">
-              Articles
+              Reading Problems
             </h4>
             <div className="flex flex-col gap-2 text-sm">
+              <Link
+                to="/articles/child-cant-blend-sounds-into-words"
+                className="hover:underline"
+              >
+                Can't Blend Sounds
+              </Link>
+              <Link
+                to="/articles/kindergartener-guesses-words-instead-sounding-out"
+                className="hover:underline"
+              >
+                Guesses Words
+              </Link>
+              <Link
+                to="/articles/child-reads-slowly-struggles-with-fluency"
+                className="hover:underline"
+              >
+                Reads Slowly
+              </Link>
+              <Link
+                to="/articles/first-grader-skips-words-when-reading-aloud"
+                className="hover:underline"
+              >
+                Skips Words
+              </Link>
               <Link
                 to="/articles/why-child-hates-reading"
                 className="hover:underline"

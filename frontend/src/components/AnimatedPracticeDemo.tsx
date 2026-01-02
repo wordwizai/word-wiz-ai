@@ -1,31 +1,34 @@
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { WordBadge } from "./WordBadge";
 import { Mic, Volume2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+
+// Demo sentences with PER scores
+const DEMO_SENTENCES = [
+  {
+    words: ["The", "cat", "sat"],
+    perScores: [0.0, 0.1, 0.0], // Perfect, nearly perfect, perfect
+  },
+  {
+    words: ["I", "see", "the", "blue", "sky"],
+    perScores: [0.0, 0.3, 0.0, 0.2, 0.0],
+  },
+  {
+    words: ["Fish", "swim", "in", "the", "pond"],
+    perScores: [0.0, 0.0, 0.0, 0.15, 0.0],
+  },
+];
 
 // Simulated practice session showing how the app works
 const AnimatedPracticeDemo = () => {
   const prefersReducedMotion = useReducedMotion();
-  const demoSentences = [
-    {
-      words: ["The", "cat", "sat"],
-      perScores: [0.0, 0.1, 0.0], // Perfect, nearly perfect, perfect
-    },
-    {
-      words: ["I", "see", "the", "blue", "sky"],
-      perScores: [0.0, 0.3, 0.0, 0.2, 0.0],
-    },
-    {
-      words: ["Fish", "swim", "in", "the", "pond"],
-      perScores: [0.0, 0.0, 0.0, 0.15, 0.0],
-    },
-  ];
 
   const [currentSentence, setCurrentSentence] = useState(0);
   const [animationPhase, setAnimationPhase] = useState<
     "waiting" | "recording" | "analyzing" | "showing"
   >("waiting");
   const [showHighlighting, setShowHighlighting] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // Skip animations if user prefers reduced motion
@@ -43,12 +46,11 @@ const AnimatedPracticeDemo = () => {
     ];
 
     let currentStep = 0;
-    let timeoutId: NodeJS.Timeout;
 
     const runTimeline = () => {
       if (currentStep >= timeline.length) {
         // Move to next sentence
-        setCurrentSentence((prev) => (prev + 1) % demoSentences.length);
+        setCurrentSentence((prev) => (prev + 1) % DEMO_SENTENCES.length);
         setShowHighlighting(false);
         currentStep = 0;
       }
@@ -62,7 +64,7 @@ const AnimatedPracticeDemo = () => {
         setShowHighlighting(false);
       }
 
-      timeoutId = setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         currentStep++;
         runTimeline();
       }, step.duration);
@@ -70,10 +72,14 @@ const AnimatedPracticeDemo = () => {
 
     runTimeline();
 
-    return () => clearTimeout(timeoutId);
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, [currentSentence, prefersReducedMotion]);
 
-  const sentence = demoSentences[currentSentence];
+  const sentence = DEMO_SENTENCES[currentSentence];
 
   return (
     <div className="relative w-full h-full flex items-center justify-center p-4 md:p-8">

@@ -12,47 +12,47 @@ interface FloatingWord {
   color: string;
 }
 
+const WORDS = [
+  "cat",
+  "dog",
+  "run",
+  "jump",
+  "play",
+  "read",
+  "fun",
+  "book",
+  "learn",
+  "grow",
+];
+
+const COLORS = [
+  "text-purple-300/20",
+  "text-pink-300/20",
+  "text-blue-300/20",
+  "text-green-300/20",
+  "text-yellow-300/20",
+];
+
 const FloatingWords = () => {
   const prefersReducedMotion = useReducedMotion();
-  const words = [
-    "cat",
-    "dog",
-    "run",
-    "jump",
-    "play",
-    "read",
-    "fun",
-    "book",
-    "learn",
-    "grow",
-  ];
-
-  const colors = [
-    "text-purple-300/20",
-    "text-pink-300/20",
-    "text-blue-300/20",
-    "text-green-300/20",
-    "text-yellow-300/20",
-  ];
-
   const [floatingWords, setFloatingWords] = useState<FloatingWord[]>([]);
 
   useEffect(() => {
-    const generateWords = () => {
+    const generateWords = (): FloatingWord[] => {
       return Array.from({ length: 12 }, (_, i) => ({
         id: `word-${i}`,
-        word: words[Math.floor(Math.random() * words.length)],
+        word: WORDS[Math.floor(Math.random() * WORDS.length)],
         x: Math.random() * 100,
         y: Math.random() * 100,
         duration: 15 + Math.random() * 10,
         delay: Math.random() * 2,
         size: 1.5 + Math.random() * 2,
-        color: colors[Math.floor(Math.random() * colors.length)],
+        color: COLORS[Math.floor(Math.random() * COLORS.length)],
       }));
     };
 
     setFloatingWords(generateWords());
-  }, []);
+  }, []); // Empty array is intentional - we only want to generate words once on mount
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">

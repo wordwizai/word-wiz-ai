@@ -1,5 +1,4 @@
-import { Helmet } from "react-helmet-async";
-import ArticlePageTemplate, { ArticleSection } from "../../components/ArticlePageTemplate";
+import ArticlePageTemplate, { type ArticleSection } from "../../components/ArticlePageTemplate";
 
 const AIvsTraditional = () => {
   const content: ArticleSection[] = [

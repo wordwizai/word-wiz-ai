@@ -1,5 +1,4 @@
-import { Helmet } from "react-helmet-async";
-import ArticlePageTemplate, { ArticleSection } from "../../components/ArticlePageTemplate";
+import ArticlePageTemplate, { type ArticleSection } from "../../components/ArticlePageTemplate";
 
 const TutorVsApp = () => {
   const content: ArticleSection[] = [
@@ -475,51 +474,73 @@ const TutorVsApp = () => {
   const relatedArticles = [
     {
       title: "Child Can't Blend Sounds Into Words (Here's Why + How to Fix)",
-      url: "/articles/child-cant-blend-sounds-into-words"
+      href: "/articles/child-cant-blend-sounds-into-words",
+      category: "Reading Problems",
+      readTime: 11
     },
     {
       title: "Child Reads Slowly and Struggles with Fluency",
-      url: "/articles/child-reads-slowly-struggles-with-fluency"
+      href: "/articles/child-reads-slowly-struggles-with-fluency",
+      category: "Reading Problems",
+      readTime: 11
     },
     {
       title: "Daily Phonics Practice Routine for Kindergarten at Home",
-      url: "/guides/daily-phonics-practice-routine-kindergarten-at-home"
+      href: "/guides/daily-phonics-practice-routine-kindergarten-at-home",
+      category: "Phonics Guides",
+      readTime: 11
     }
   ];
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: "Reading Tutor vs Reading App: Which Is Better for Your Child?",
+    description: "Detailed comparison of reading tutors, traditional reading apps, and AI-powered reading apps across cost, effectiveness, and use cases.",
+    author: {
+      "@type": "Organization",
+      name: "Word Wiz AI"
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Word Wiz AI",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://wordwizai.com/wordwizIcon.svg"
+      }
+    },
+    datePublished: "2025-01-02",
+    dateModified: "2025-01-02"
+  };
+
   return (
-    <>
-      <Helmet>
-        <title>Reading Tutor vs Reading App: Which Is Better for Your Child?</title>
-        <meta 
-          name="description" 
-          content="Compare reading tutors ($40-80/hr), traditional apps, and AI tools like Word Wiz AI. Includes pricing, effectiveness, and which option works best for different situations." 
-        />
-        <link rel="canonical" href="https://wordwizai.com/comparisons/reading-tutor-vs-reading-app" />
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Article",
-            "headline": "Reading Tutor vs Reading App: Which Is Better for Your Child?",
-            "description": "Detailed comparison of reading tutors, traditional reading apps, and AI-powered reading apps across cost, effectiveness, and use cases.",
-            "author": {
-              "@type": "Organization",
-              "name": "Word Wiz AI"
-            },
-            "datePublished": "2025-01-02",
-            "dateModified": "2025-01-02"
-          })}
-        </script>
-      </Helmet>
-      <ArticlePageTemplate
-        title="Reading Tutor vs Reading App: Which Is Better for Your Child?"
-        subtitle="Compare private tutors, traditional apps, and AI tools across cost, convenience, and effectiveness to find the best fit for your child"
-        content={content}
-        lastUpdated="January 2, 2025"
-        readTime="14 min"
-        relatedArticles={relatedArticles}
-      />
-    </>
+    <ArticlePageTemplate
+      metaTitle="Reading Tutor vs Reading App: Which Is Better for Your Child?"
+      metaDescription="Compare reading tutors ($40-80/hr), traditional apps, and AI tools like Word Wiz AI. Includes pricing, effectiveness, and which option works best for different situations."
+      canonicalUrl="https://wordwizai.com/comparisons/reading-tutor-vs-reading-app"
+      heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=630&fit=crop"
+      heroImageAlt="Parent comparing options for child's reading help - tutor vs app"
+      headline="Reading Tutor vs Reading App: Which Is Better for Your Child?"
+      subheadline="Compare private tutors, traditional apps, and AI tools across cost, convenience, and effectiveness to find the best fit for your child"
+      author={{
+        name: "Word Wiz AI Editorial Team",
+        bio: "Educational technology experts helping parents make informed decisions about reading interventions.",
+      }}
+      publishDate="2025-01-02"
+      readTime={14}
+      category="App Comparisons"
+      content={content}
+      relatedArticles={relatedArticles}
+      structuredData={structuredData}
+      breadcrumbs={[
+        { label: "Home", href: "/" },
+        { label: "Comparisons", href: "/comparisons/reading-tutor-vs-reading-app" },
+        {
+          label: "Tutor vs App",
+          href: "/comparisons/reading-tutor-vs-reading-app",
+        },
+      ]}
+    />
   );
 };
 

@@ -1,5 +1,4 @@
-import { Helmet } from "react-helmet-async";
-import ArticlePageTemplate, { ArticleSection } from "../../components/ArticlePageTemplate";
+import ArticlePageTemplate, { type ArticleSection } from "../../components/ArticlePageTemplate";
 
 const FreeVsPaid = () => {
   const content: ArticleSection[] = [
@@ -473,51 +472,73 @@ const FreeVsPaid = () => {
   const relatedArticles = [
     {
       title: "Reading Tutor vs Reading App: Which Is Better?",
-      url: "/comparisons/reading-tutor-vs-reading-app"
+      href: "/comparisons/reading-tutor-vs-reading-app",
+      category: "App Comparisons",
+      readTime: 14
     },
     {
       title: "AI Reading App vs Traditional Phonics Program",
-      url: "/comparisons/ai-reading-app-vs-traditional-phonics-program"
+      href: "/comparisons/ai-reading-app-vs-traditional-phonics-program",
+      category: "App Comparisons",
+      readTime: 16
     },
     {
       title: "Child Can't Blend Sounds Into Words",
-      url: "/articles/child-cant-blend-sounds-into-words"
+      href: "/articles/child-cant-blend-sounds-into-words",
+      category: "Reading Problems",
+      readTime: 11
     }
   ];
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: "Free Phonics Apps vs Paid Reading Programs: Which Is Better?",
+    description: "Comprehensive comparison of free and paid reading programs, including cost-benefit analysis and recommendations for different family situations.",
+    author: {
+      "@type": "Organization",
+      name: "Word Wiz AI"
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Word Wiz AI",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://wordwizai.com/wordwizIcon.svg"
+      }
+    },
+    datePublished: "2025-01-02",
+    dateModified: "2025-01-02"
+  };
+
   return (
-    <>
-      <Helmet>
-        <title>Free Phonics Apps vs Paid Reading Programs: Which Is Better?</title>
-        <meta 
-          name="description" 
-          content="Compare free phonics apps (Khan Academy, Starfall, Word Wiz AI) with paid programs (ABCmouse, Reading Eggs). When is free enough? When is paid worth it?" 
-        />
-        <link rel="canonical" href="https://wordwizai.com/comparisons/free-phonics-apps-vs-paid-reading-programs" />
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Article",
-            "headline": "Free Phonics Apps vs Paid Reading Programs: Which Is Better?",
-            "description": "Comprehensive comparison of free and paid reading programs, including cost-benefit analysis and recommendations for different family situations.",
-            "author": {
-              "@type": "Organization",
-              "name": "Word Wiz AI"
-            },
-            "datePublished": "2025-01-02",
-            "dateModified": "2025-01-02"
-          })}
-        </script>
-      </Helmet>
-      <ArticlePageTemplate
-        title="Free Phonics Apps vs Paid Reading Programs: Which Is Better?"
-        subtitle="Compare top free options with paid programs, including cost-benefit analysis and when each makes sense for your family"
-        content={content}
-        lastUpdated="January 2, 2025"
-        readTime="13 min"
-        relatedArticles={relatedArticles}
-      />
-    </>
+    <ArticlePageTemplate
+      metaTitle="Free Phonics Apps vs Paid Reading Programs: Which Is Better?"
+      metaDescription="Compare free phonics apps (Khan Academy, Starfall, Word Wiz AI) with paid programs (ABCmouse, Reading Eggs). When is free enough? When is paid worth it?"
+      canonicalUrl="https://wordwizai.com/comparisons/free-phonics-apps-vs-paid-reading-programs"
+      heroImage="https://images.unsplash.com/photo-1554224311-2aa614489514?w=1200&h=630&fit=crop"
+      heroImageAlt="Comparison of free and paid phonics programs for children"
+      headline="Free Phonics Apps vs Paid Reading Programs: Which Is Better?"
+      subheadline="Compare top free options with paid programs, including cost-benefit analysis and when each makes sense for your family"
+      author={{
+        name: "Word Wiz AI Editorial Team",
+        bio: "Education experts helping families make smart, budget-conscious choices for reading instruction.",
+      }}
+      publishDate="2025-01-02"
+      readTime={13}
+      category="App Comparisons"
+      content={content}
+      relatedArticles={relatedArticles}
+      structuredData={structuredData}
+      breadcrumbs={[
+        { label: "Home", href: "/" },
+        { label: "Comparisons", href: "/comparisons/free-phonics-apps-vs-paid-reading-programs" },
+        {
+          label: "Free vs Paid",
+          href: "/comparisons/free-phonics-apps-vs-paid-reading-programs",
+        },
+      ]}
+    />
   );
 };
 

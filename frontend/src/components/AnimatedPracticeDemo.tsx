@@ -3,19 +3,31 @@ import { WordBadge } from "./WordBadge";
 import { Mic, Volume2 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 
-// Demo sentences with PER scores
+// Demo sentences with PER scores and feedback messages
 const DEMO_SENTENCES = [
   {
     words: ["The", "cat", "sat"],
     perScores: [0.0, 0.1, 0.0], // Perfect, nearly perfect, perfect
+    feedback: "Great job!",
+    feedbackColor: "bg-green-100 text-green-600",
   },
   {
     words: ["I", "see", "the", "blue", "sky"],
-    perScores: [0.0, 0.3, 0.0, 0.2, 0.0],
+    perScores: [0.0, 0.8, 0.0, 0.2, 0.0], // Error in "see"
+    feedback: "Try the 'ee' sound in 'see'",
+    feedbackColor: "bg-orange-100 text-orange-600",
   },
   {
     words: ["Fish", "swim", "in", "the", "pond"],
     perScores: [0.0, 0.0, 0.0, 0.15, 0.0],
+    feedback: "Perfect pronunciation!",
+    feedbackColor: "bg-green-100 text-green-600",
+  },
+  {
+    words: ["The", "sheep", "eat", "grass"],
+    perScores: [0.0, 0.7, 0.0, 0.0], // Error in "sheep"
+    feedback: "Work on the 'sh' sound in 'sheep'",
+    feedbackColor: "bg-orange-100 text-orange-600",
   },
 ];
 
@@ -130,10 +142,10 @@ const AnimatedPracticeDemo = () => {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-600 rounded-full"
+                className={`flex items-center gap-2 px-4 py-2 rounded-full ${sentence.feedbackColor}`}
               >
                 <Volume2 className="w-5 h-5" />
-                <span className="font-medium">Great job!</span>
+                <span className="font-medium">{sentence.feedback}</span>
               </motion.div>
             )}
             {animationPhase === "waiting" && (

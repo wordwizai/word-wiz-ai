@@ -92,6 +92,34 @@ const LandingPage = () => {
 
       {/* Hero Section */}
       <section className="relative px-4 sm:px-6 py-12 sm:py-16 md:py-20 bg-gradient-to-br from-pastel-purple via-pastel-pink/30 to-pastel-blue/20 text-foreground overflow-hidden">
+        {/* Animated gradient orbs for depth */}
+        <motion.div
+          className="absolute top-20 left-10 w-72 h-72 bg-purple-300/30 rounded-full blur-3xl"
+          animate={{
+            x: [0, 50, 0],
+            y: [0, 30, 0],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <motion.div
+          className="absolute bottom-20 right-10 w-96 h-96 bg-pink-300/20 rounded-full blur-3xl"
+          animate={{
+            x: [0, -30, 0],
+            y: [0, -50, 0],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+
         {/* Floating words background */}
         <FloatingWords />
 
@@ -179,14 +207,14 @@ const LandingPage = () => {
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center">
                 {/* Primary CTA - Google Sign In */}
                 <motion.div
-                  whileHover={{ scale: 1.02 }}
+                  whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
-                  transition={{ type: "spring", stiffness: 400 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
                   className="w-full sm:w-auto"
                 >
                   <Button
                     size="lg"
-                    className="w-full sm:w-auto min-h-[56px] px-8 text-lg font-semibold shadow-xl hover:shadow-2xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0"
+                    className="w-full sm:w-auto min-h-[56px] px-8 text-lg font-semibold shadow-xl hover:shadow-2xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0 transition-all duration-300"
                     onClick={() => googleLogin()}
                   >
                     <svg
@@ -206,14 +234,14 @@ const LandingPage = () => {
                 {/* Secondary CTA */}
                 <Link to="/signup" className="w-full sm:w-auto">
                   <motion.div
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: 1.02, y: -2 }}
                     whileTap={{ scale: 0.98 }}
-                    transition={{ type: "spring", stiffness: 400 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
                   >
                     <Button
                       variant="outline"
                       size="lg"
-                      className="w-full sm:w-auto min-h-[56px] px-8 text-lg font-semibold bg-white/80 hover:bg-white border-2 border-purple-200 hover:border-purple-300"
+                      className="w-full sm:w-auto min-h-[56px] px-8 text-lg font-semibold bg-white/80 hover:bg-white border-2 border-purple-200 hover:border-purple-300 transition-all duration-300"
                     >
                       <BookOpen className="w-5 h-5 mr-2" />
                       Create Account

@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 interface FloatingWord {
@@ -13,6 +13,7 @@ interface FloatingWord {
 }
 
 const FloatingWords = () => {
+  const prefersReducedMotion = useReducedMotion();
   const words = [
     "cat",
     "dog",
@@ -55,7 +56,7 @@ const FloatingWords = () => {
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {floatingWords.map((fw) => (
+      {!prefersReducedMotion && floatingWords.map((fw) => (
         <motion.div
           key={fw.id}
           className={`absolute font-bold ${fw.color}`}

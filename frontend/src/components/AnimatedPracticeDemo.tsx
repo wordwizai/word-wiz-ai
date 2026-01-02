@@ -1,10 +1,11 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { WordBadge } from "./WordBadge";
 import { Mic, Volume2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 // Simulated practice session showing how the app works
 const AnimatedPracticeDemo = () => {
+  const prefersReducedMotion = useReducedMotion();
   const demoSentences = [
     {
       words: ["The", "cat", "sat"],
@@ -27,6 +28,13 @@ const AnimatedPracticeDemo = () => {
   const [showHighlighting, setShowHighlighting] = useState(false);
 
   useEffect(() => {
+    // Skip animations if user prefers reduced motion
+    if (prefersReducedMotion) {
+      setAnimationPhase("showing");
+      setShowHighlighting(true);
+      return;
+    }
+
     const timeline = [
       { phase: "waiting" as const, duration: 1500 },
       { phase: "recording" as const, duration: 2000 },
@@ -63,7 +71,7 @@ const AnimatedPracticeDemo = () => {
     runTimeline();
 
     return () => clearTimeout(timeoutId);
-  }, [currentSentence]);
+  }, [currentSentence, prefersReducedMotion]);
 
   const sentence = demoSentences[currentSentence];
 

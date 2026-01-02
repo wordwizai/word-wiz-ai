@@ -729,7 +729,7 @@ const WhyChildHatesReading = () => {
       subheadline="The 5 real reasons kids resist reading, and exactly what to do about each one"
       author={{
         name: "Word Wiz AI Team",
-        bio: "Educational technology experts specializing in early literacy and reading instruction based on the Science of Reading.",
+        bio: "Passionate about early literacy and reading instruction based on the Science of Reading.",
       }}
       publishDate="2024-12-29"
       readTime={14}

@@ -796,7 +796,7 @@ const PhonemeAwarenessGuide = () => {
       subheadline="The often-overlooked superpower that predicts reading success, and how to build it at home"
       author={{
         name: "Word Wiz AI Team",
-        bio: "Educational technology experts specializing in phoneme awareness, phonics instruction, and early literacy.",
+        bio: "Passionate about phoneme awareness, phonics instruction, and early literacy.",
       }}
       publishDate="2024-12-29"
       readTime={13}

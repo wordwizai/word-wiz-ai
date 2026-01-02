@@ -6,7 +6,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { demoScreenshot } from "@/assets";
+import { demoScreenshot, wordWizIcon } from "@/assets";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
@@ -26,7 +26,11 @@ import {
   Speech,
   WholeWord,
   CircleDollarSign,
+  Sparkles,
 } from "lucide-react";
+import AnimatedPracticeDemo from "@/components/AnimatedPracticeDemo";
+import FloatingWords from "@/components/FloatingWords";
+import { googleLogin } from "@/api";
 
 const fadeUpVariant = {
   hidden: { opacity: 0, y: 30 },
@@ -87,67 +91,165 @@ const LandingPage = () => {
       <LandingPageNavbar />
 
       {/* Hero Section */}
-      <motion.section
-        className="px-4 sm:px-6 py-12 sm:py-20 md:py-28 bg-pastel-purple text-foreground"
-        variants={fadeUpVariant}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.3 }}
-        transition={{ duration: 0.6 }}
-      >
-        <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-8 md:gap-12">
-          <div className="flex-1 space-y-4 sm:space-y-6 text-center md:text-left">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-extrabold leading-tight text-primary">
-              Your Personalized Reading Companion
-            </h1>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-full sm:max-w-xl mx-auto md:mx-0">
-              Word Wiz AI helps children ages 5-8 learn to read through
-              AI-powered pronunciation feedback and personalized phonics
-              practice. 100% free, no ads, no subscriptions.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start">
-              <Link to="/signup" className="w-full sm:w-auto">
+      <section className="relative px-4 sm:px-6 py-12 sm:py-16 md:py-20 bg-gradient-to-br from-pastel-purple via-pastel-pink/30 to-pastel-blue/20 text-foreground overflow-hidden">
+        {/* Floating words background */}
+        <FloatingWords />
+
+        {/* Content */}
+        <div className="relative z-10 max-w-7xl mx-auto">
+          <div className="flex flex-col lg:flex-row items-center gap-8 md:gap-12 lg:gap-16">
+            {/* Left side - Text and CTAs */}
+            <motion.div
+              className="flex-1 space-y-6 md:space-y-8 text-center lg:text-left max-w-2xl"
+              variants={fadeUpVariant}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.6 }}
+            >
+              {/* Logo Icon */}
+              <motion.div
+                className="flex justify-center lg:justify-start"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                <div className="relative">
+                  <motion.img
+                    src={wordWizIcon}
+                    alt="Word Wiz AI"
+                    className="h-16 w-16 md:h-20 md:w-20"
+                    animate={{
+                      rotate: [0, -5, 5, -5, 0],
+                    }}
+                    transition={{
+                      duration: 5,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  />
+                  <motion.div
+                    className="absolute -top-2 -right-2"
+                    animate={{
+                      scale: [1, 1.2, 1],
+                      rotate: [0, 180, 360],
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  >
+                    <Sparkles className="w-6 h-6 text-yellow-400" />
+                  </motion.div>
+                </div>
+              </motion.div>
+
+              <div className="space-y-4">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-primary">
+                  Your AI Reading Tutor
+                  <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600">
+                    100% Free Forever
+                  </span>
+                </h1>
+                <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0">
+                  Help children ages 5-8 learn to read through AI-powered
+                  pronunciation feedback and personalized phonics practice.
+                </p>
+              </div>
+
+              {/* Trust badges */}
+              <div className="flex flex-wrap gap-3 justify-center lg:justify-start text-sm text-muted-foreground">
+                <div className="flex items-center gap-1 px-3 py-1.5 bg-white/60 rounded-full">
+                  <CircleDollarSign className="w-4 h-4 text-green-600" />
+                  <span className="font-medium">No Ads</span>
+                </div>
+                <div className="flex items-center gap-1 px-3 py-1.5 bg-white/60 rounded-full">
+                  <Sparkles className="w-4 h-4 text-purple-600" />
+                  <span className="font-medium">AI-Powered</span>
+                </div>
+                <div className="flex items-center gap-1 px-3 py-1.5 bg-white/60 rounded-full">
+                  <BookOpen className="w-4 h-4 text-blue-600" />
+                  <span className="font-medium">Instant Feedback</span>
+                </div>
+              </div>
+
+              {/* CTAs */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center">
+                {/* Primary CTA - Google Sign In */}
                 <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 300 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                  className="w-full sm:w-auto"
                 >
                   <Button
                     size="lg"
-                    className="w-full sm:w-auto min-h-[48px] flex items-center gap-2"
+                    className="w-full sm:w-auto min-h-[56px] px-8 text-lg font-semibold shadow-xl hover:shadow-2xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0"
+                    onClick={() => googleLogin()}
                   >
-                    <BookOpen className="w-5 h-5" />
-                    Create an Account
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      className="w-6 h-6 mr-2"
+                    >
+                      <path
+                        d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                    Sign in with Google
                   </Button>
                 </motion.div>
-              </Link>
-              <a href="#how-it-works-section" className="w-full sm:w-auto">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="w-full sm:w-auto min-h-[48px] flex items-center gap-2"
+
+                {/* Secondary CTA */}
+                <Link to="/signup" className="w-full sm:w-auto">
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ type: "spring", stiffness: 400 }}
                   >
-                    <Search className="w-5 h-5" />
-                    How It Works
-                  </Button>
-                </motion.div>
-              </a>
-            </div>
-          </div>
-          <div className="flex-1 max-w-full">
-            <div className="border border-border rounded-2xl aspect-[4/3] flex items-center justify-center max-w-full bg-background">
-              <img
-                src={demoScreenshot}
-                alt="Word Wiz AI reading practice interface showing real-time phoneme-level pronunciation feedback for children learning to read"
-                className="w-full h-full object-cover rounded-2xl p-2 bg-background m-2"
-              />
-            </div>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="w-full sm:w-auto min-h-[56px] px-8 text-lg font-semibold bg-white/80 hover:bg-white border-2 border-purple-200 hover:border-purple-300"
+                    >
+                      <BookOpen className="w-5 h-5 mr-2" />
+                      Create Account
+                    </Button>
+                  </motion.div>
+                </Link>
+              </div>
+
+              {/* Social proof */}
+              <motion.p
+                className="text-sm text-muted-foreground italic"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+              >
+                Join thousands of families improving reading skills with AI
+              </motion.p>
+            </motion.div>
+
+            {/* Right side - Animated Demo */}
+            <motion.div
+              className="flex-1 w-full max-w-2xl"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              <div className="aspect-[4/3] w-full">
+                <AnimatedPracticeDemo />
+              </div>
+            </motion.div>
           </div>
         </div>
-      </motion.section>
+
+        {/* Bottom gradient fade */}
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
+      </section>
 
       {/* What Makes Word Wiz Unique */}
       <motion.section

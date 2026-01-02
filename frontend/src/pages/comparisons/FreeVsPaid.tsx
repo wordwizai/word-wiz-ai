@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import ArticlePageTemplate, { ArticleSection } from "../../components/templates/ArticlePageTemplate";
+import ArticlePageTemplate, { ArticleSection } from "../../components/ArticlePageTemplate";
 
 const FreeVsPaid = () => {
   const content: ArticleSection[] = [

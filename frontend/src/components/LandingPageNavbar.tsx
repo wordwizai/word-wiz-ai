@@ -33,14 +33,11 @@ const LandingPageNavbar = () => {
             Log In
           </Button>
         </Link>
-        <Button
-          size="default"
-          onClick={() => googleLogin()}
-        >
-          <GoogleIcon className="w-4 h-4 mr-2 hidden sm:block" />
-          <span className="hidden sm:inline">Sign in with Google</span>
-          <span className="sm:hidden">Sign In</span>
-        </Button>
+        <Link to="/signup">
+          <Button size="default">
+            <span>Sign Up</span>
+          </Button>
+        </Link>
       </div>
     </nav>
   );

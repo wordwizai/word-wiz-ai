@@ -104,9 +104,7 @@ const LandingPage = () => {
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight">
                   Your AI Reading Tutor
                   <br />
-                  <span className="text-primary">
-                    100% Free Forever
-                  </span>
+                  <span className="text-primary">100% Free Forever</span>
                 </h1>
                 <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0">
                   Help children ages 5-8 learn to read through AI-powered
@@ -143,7 +141,7 @@ const LandingPage = () => {
 
               {/* Social proof */}
               <p className="text-sm text-muted-foreground">
-                Join thousands of families improving reading skills with AI
+                Join us in our mission of improving reading skills with AI
               </p>
             </motion.div>
 
@@ -212,9 +210,7 @@ const LandingPage = () => {
                 className="bg-card border text-card-foreground shadow-sm text-center h-full hover:shadow-md transition-shadow rounded-lg p-6"
                 variants={childVariant}
               >
-                <div
-                  className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center mx-auto mb-4"
-                >
+                <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center mx-auto mb-4">
                   {feature.icon}
                 </div>
                 <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
@@ -268,9 +264,7 @@ const LandingPage = () => {
                 className="bg-card border text-card-foreground shadow-sm text-center h-full hover:shadow-md transition-shadow rounded-lg p-6"
                 variants={childVariant}
               >
-                <div
-                  className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center mx-auto mb-4"
-                >
+                <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center mx-auto mb-4">
                   {target.icon}
                 </div>
                 <h3 className="text-xl font-semibold mb-2">{target.title}</h3>
@@ -322,9 +316,7 @@ const LandingPage = () => {
               <motion.div key={i} variants={childVariant} className="h-full">
                 <Card className="bg-card border shadow-sm hover:shadow-md transition-shadow h-full">
                   <CardHeader>
-                    <div
-                      className="bg-primary text-primary-foreground w-12 h-12 flex items-center justify-center rounded-lg mb-4 font-bold text-lg"
-                    >
+                    <div className="bg-primary text-primary-foreground w-12 h-12 flex items-center justify-center rounded-lg mb-4 font-bold text-lg">
                       {step.step}
                     </div>
                     <CardTitle className="text-xl font-semibold">

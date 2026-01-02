@@ -27,9 +27,9 @@ const LandingPageCTA = ({ fadeUpVariant }: LandingPageCTAProps) => {
           Start Reading Practice Today
         </h2>
         <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-          Join thousands of families using Word Wiz AI for personalized phonics
-          practice with AI-powered pronunciation feedback. No credit card
-          required, no ads, no subscriptions.
+          Help your child learn to read faster using Word Wiz AI for
+          personalized phonics practice with AI-powered pronunciation feedback.
+          No credit card required, no ads, no subscriptions.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Button

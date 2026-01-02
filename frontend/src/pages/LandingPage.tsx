@@ -175,8 +175,8 @@ const LandingPage = () => {
               What Makes Word Wiz Unique?
             </h2>
             <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
-              Powered by GPT-4 and advanced speech recognition technology.
-              Trusted by parents and teachers nationwide.
+              Powered by GPT-4 and advanced speech recognition technology, and
+              backed by real AI research.
             </p>
           </div>
           <motion.div

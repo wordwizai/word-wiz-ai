@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import ArticlePageTemplate, { ArticleSection } from "../../components/ArticlePageTemplate";
+import ArticlePageTemplate, { type ArticleSection } from "../../components/ArticlePageTemplate";
 
 const ChildReadsSlowly = () => {
   const content: ArticleSection[] = [
@@ -558,17 +558,44 @@ const ChildReadsSlowly = () => {
   const relatedArticles = [
     {
       title: "Child Can't Blend Sounds Into Words (Here's Why + How to Fix)",
-      url: "/articles/child-cant-blend-sounds-into-words"
+      href: "/articles/child-cant-blend-sounds-into-words",
+      category: "Reading Problems",
+      readTime: 11
     },
     {
       title: "Daily Phonics Practice Routine for Kindergarten at Home",
-      url: "/guides/daily-phonics-practice-routine-kindergarten-at-home"
+      href: "/guides/daily-phonics-practice-routine-kindergarten-at-home",
+      category: "Reading Guides",
+      readTime: 11
     },
     {
       title: "5 Minute Reading Practice Activities for Kids",
-      url: "/guides/five-minute-reading-practice-activities-kids"
+      href: "/guides/five-minute-reading-practice-activities-kids",
+      category: "Reading Guides",
+      readTime: 8
     }
   ];
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: "Child Reads Slowly and Struggles with Fluency",
+    description: "Your child reads accurately but painfully slow? Learn the 5 root causes of slow reading and 6 proven solutions to build reading fluency in 8-12 weeks.",
+    author: {
+      "@type": "Organization",
+      name: "Word Wiz AI"
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Word Wiz AI",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://wordwizai.com/wordwizIcon.svg"
+      }
+    },
+    datePublished: "2025-01-02",
+    dateModified: "2025-01-02"
+  };
 
   return (
     <>
@@ -595,12 +622,31 @@ const ChildReadsSlowly = () => {
         </script>
       </Helmet>
       <ArticlePageTemplate
-        title="Child Reads Slowly and Struggles with Fluency"
-        subtitle="Understanding why reading is slow and 6 proven strategies to build fluency in 8-12 weeks with consistent practice"
+        metaTitle="Child Reads Slowly and Struggles with Fluency (Solutions That Work)"
+        metaDescription="Your child reads accurately but painfully slow? Learn the 5 root causes of slow reading and 6 proven solutions to build reading fluency in 8-12 weeks."
+        canonicalUrl="https://wordwizai.com/articles/child-reads-slowly-struggles-with-fluency"
+        heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=630&fit=crop"
+        heroImageAlt="Child reading slowly while parent helps"
+        headline="Child Reads Slowly and Struggles with Fluency"
+        subheadline="Understanding why reading is slow and 6 proven strategies to build fluency in 8-12 weeks with consistent practice"
+        author={{
+          name: "Word Wiz AI Editorial Team",
+          bio: "Reading specialists helping parents build reading fluency through evidence-based strategies.",
+        }}
+        publishDate="2025-01-02"
+        readTime={15}
+        category="Reading Problems"
         content={content}
-        lastUpdated="January 2, 2025"
-        readTime="15 min"
         relatedArticles={relatedArticles}
+        structuredData={structuredData}
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Articles", href: "/articles/child-reads-slowly-struggles-with-fluency" },
+          {
+            label: "Reads Slowly",
+            href: "/articles/child-reads-slowly-struggles-with-fluency",
+          },
+        ]}
       />
     </>
   );

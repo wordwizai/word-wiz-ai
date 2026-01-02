@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import ArticlePageTemplate, { ArticleSection } from "../../components/ArticlePageTemplate";
+import ArticlePageTemplate, { type ArticleSection } from "../../components/ArticlePageTemplate";
 
 const RControlledVowels = () => {
   const content: ArticleSection[] = [
@@ -426,17 +426,44 @@ const RControlledVowels = () => {
   const relatedArticles = [
     {
       title: "How to Teach CVC Words to Struggling Readers",
-      url: "/guides/how-to-teach-cvc-words-to-struggling-readers"
+      href: "/guides/how-to-teach-cvc-words-to-struggling-readers",
+      category: "Reading Guides",
+      readTime: 10
     },
     {
       title: "Teaching Consonant Blends to Kindergarten at Home",
-      url: "/guides/teaching-consonant-blends-kindergarten-at-home"
+      href: "/guides/teaching-consonant-blends-kindergarten-at-home",
+      category: "Reading Guides",
+      readTime: 9
     },
     {
       title: "Short Vowel Sounds Exercises for Beginning Readers",
-      url: "/guides/short-vowel-sounds-exercises-beginning-readers"
+      href: "/guides/short-vowel-sounds-exercises-beginning-readers",
+      category: "Reading Guides",
+      readTime: 8
     }
   ];
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: "R-Controlled Vowels Teaching Strategies for Parents (AR, ER, IR, OR, UR)",
+    description: "Master r-controlled vowels (bossy R) with parent-friendly teaching strategies. Includes word lists, activities, and progression from simple to complex patterns.",
+    author: {
+      "@type": "Organization",
+      name: "Word Wiz AI"
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Word Wiz AI",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://wordwizai.com/wordwizIcon.svg"
+      }
+    },
+    datePublished: "2025-01-02",
+    dateModified: "2025-01-02"
+  };
 
   return (
     <>
@@ -489,12 +516,31 @@ const RControlledVowels = () => {
         </script>
       </Helmet>
       <ArticlePageTemplate
-        title="R-Controlled Vowels Teaching Strategies for Parents (AR, ER, IR, OR, UR)"
-        subtitle="Master 'Bossy R' patterns with proven strategies, word lists, and activities for AR, ER, IR, OR, and UR combinations"
+        metaTitle="R-Controlled Vowels Teaching Strategies for Parents (AR, ER, IR, OR, UR)"
+        metaDescription="Master r-controlled vowels (bossy R) with parent-friendly teaching strategies. Includes word lists, activities, and progression from simple to complex patterns."
+        canonicalUrl="https://wordwizai.com/guides/r-controlled-vowels-teaching-strategies-parents"
+        heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=630&fit=crop"
+        heroImageAlt="Parent teaching child r-controlled vowels with word cards"
+        headline="R-Controlled Vowels Teaching Strategies for Parents (AR, ER, IR, OR, UR)"
+        subheadline="Master 'Bossy R' patterns with proven strategies, word lists, and activities for AR, ER, IR, OR, and UR combinations"
+        author={{
+          name: "Word Wiz AI Editorial Team",
+          bio: "Educational technology experts helping parents teach foundational reading skills.",
+        }}
+        publishDate="2025-01-02"
+        readTime={12}
+        category="Reading Guides"
         content={content}
-        lastUpdated="January 2, 2025"
-        readTime="12 min"
         relatedArticles={relatedArticles}
+        structuredData={structuredData}
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Guides", href: "/guides/r-controlled-vowels-teaching-strategies-parents" },
+          {
+            label: "R-Controlled Vowels",
+            href: "/guides/r-controlled-vowels-teaching-strategies-parents",
+          },
+        ]}
       />
     </>
   );

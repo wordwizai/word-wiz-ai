@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import ArticlePageTemplate, { ArticleSection } from "../../components/ArticlePageTemplate";
+import ArticlePageTemplate, { type ArticleSection } from "../../components/ArticlePageTemplate";
 
 const SkipsWords = () => {
   const content: ArticleSection[] = [
@@ -502,17 +502,44 @@ const SkipsWords = () => {
   const relatedArticles = [
     {
       title: "Kindergartener Guesses Words Instead of Sounding Out",
-      url: "/articles/kindergartener-guesses-words-instead-sounding-out"
+      href: "/articles/kindergartener-guesses-words-instead-sounding-out",
+      category: "Reading Problems",
+      readTime: 12
     },
     {
       title: "Child Can't Blend Sounds Into Words",
-      url: "/articles/child-cant-blend-sounds-into-words"
+      href: "/articles/child-cant-blend-sounds-into-words",
+      category: "Reading Problems",
+      readTime: 11
     },
     {
       title: "Child Reads Slowly and Struggles with Fluency",
-      url: "/articles/child-reads-slowly-struggles-with-fluency"
+      href: "/articles/child-reads-slowly-struggles-with-fluency",
+      category: "Reading Problems",
+      readTime: 15
     }
   ];
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: "First Grader Skips Words When Reading Aloud",
+    description: "Your first grader skips words when reading? Learn the 6 root causes (text too hard, tracking issues, rushing, guessing, etc.) and proven fixes for each.",
+    author: {
+      "@type": "Organization",
+      name: "Word Wiz AI"
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Word Wiz AI",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://wordwizai.com/wordwizIcon.svg"
+      }
+    },
+    datePublished: "2025-01-02",
+    dateModified: "2025-01-02"
+  };
 
   return (
     <>
@@ -539,12 +566,31 @@ const SkipsWords = () => {
         </script>
       </Helmet>
       <ArticlePageTemplate
-        title="First Grader Skips Words When Reading Aloud"
-        subtitle="Identify why your child skips words (6 root causes) and implement the specific fix that works for your situation"
+        metaTitle="First Grader Skips Words When Reading Aloud (6 Causes + Fixes)"
+        metaDescription="Your first grader skips words when reading? Learn the 6 root causes (text too hard, tracking issues, rushing, guessing, etc.) and proven fixes for each."
+        canonicalUrl="https://wordwizai.com/articles/first-grader-skips-words-when-reading-aloud"
+        heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=630&fit=crop"
+        heroImageAlt="First grader reading with parent, skipping words"
+        headline="First Grader Skips Words When Reading Aloud"
+        subheadline="Identify why your child skips words (6 root causes) and implement the specific fix that works for your situation"
+        author={{
+          name: "Word Wiz AI Editorial Team",
+          bio: "Reading specialists helping parents address common reading challenges.",
+        }}
+        publishDate="2025-01-02"
+        readTime={13}
+        category="Reading Problems"
         content={content}
-        lastUpdated="January 2, 2025"
-        readTime="13 min"
         relatedArticles={relatedArticles}
+        structuredData={structuredData}
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Articles", href: "/articles/first-grader-skips-words-when-reading-aloud" },
+          {
+            label: "Skips Words",
+            href: "/articles/first-grader-skips-words-when-reading-aloud",
+          },
+        ]}
       />
     </>
   );

@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import ArticlePageTemplate, { ArticleSection } from "../../components/ArticlePageTemplate";
+import ArticlePageTemplate, { type ArticleSection } from "../../components/ArticlePageTemplate";
 
 const PhonicsWithoutWorksheets = () => {
   const content: ArticleSection[] = [
@@ -488,17 +488,44 @@ const PhonicsWithoutWorksheets = () => {
   const relatedArticles = [
     {
       title: "Daily Phonics Practice Routine for Kindergarten at Home",
-      url: "/guides/daily-phonics-practice-routine-kindergarten-at-home"
+      href: "/guides/daily-phonics-practice-routine-kindergarten-at-home",
+      category: "Reading Guides",
+      readTime: 11
     },
     {
       title: "5 Minute Reading Practice Activities for Kids",
-      url: "/guides/five-minute-reading-practice-activities-kids"
+      href: "/guides/five-minute-reading-practice-activities-kids",
+      category: "Reading Guides",
+      readTime: 8
     },
     {
       title: "How to Teach CVC Words to Struggling Readers",
-      url: "/guides/how-to-teach-cvc-words-to-struggling-readers"
+      href: "/guides/how-to-teach-cvc-words-to-struggling-readers",
+      category: "Reading Guides",
+      readTime: 10
     }
   ];
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: "Phonics Practice Without Worksheets for Kindergarten",
+    description: "Ditch the worksheets! Learn 25+ hands-on, movement-based, and game-based phonics activities that work better than workbooks for kindergarteners.",
+    author: {
+      "@type": "Organization",
+      name: "Word Wiz AI"
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Word Wiz AI",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://wordwizai.com/wordwizIcon.svg"
+      }
+    },
+    datePublished: "2025-01-02",
+    dateModified: "2025-01-02"
+  };
 
   return (
     <>
@@ -525,12 +552,31 @@ const PhonicsWithoutWorksheets = () => {
         </script>
       </Helmet>
       <ArticlePageTemplate
-        title="Phonics Practice Without Worksheets for Kindergarten"
-        subtitle="25+ hands-on, movement-based, and game-based phonics activities that work better than workbooks for young learners"
+        metaTitle="Phonics Practice Without Worksheets for Kindergarten (25+ Activities)"
+        metaDescription="Ditch the worksheets! Learn 25+ hands-on, movement-based, and game-based phonics activities that work better than workbooks for kindergarteners."
+        canonicalUrl="https://wordwizai.com/guides/phonics-practice-without-worksheets-kindergarten"
+        heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=630&fit=crop"
+        heroImageAlt="Child engaged in hands-on phonics activity without worksheets"
+        headline="Phonics Practice Without Worksheets for Kindergarten"
+        subheadline="25+ hands-on, movement-based, and game-based phonics activities that work better than workbooks for young learners"
+        author={{
+          name: "Word Wiz AI Editorial Team",
+          bio: "Educational technology experts helping parents teach reading through engaging, developmentally-appropriate methods.",
+        }}
+        publishDate="2025-01-02"
+        readTime={14}
+        category="Reading Guides"
         content={content}
-        lastUpdated="January 2, 2025"
-        readTime="14 min"
         relatedArticles={relatedArticles}
+        structuredData={structuredData}
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Guides", href: "/guides/phonics-practice-without-worksheets-kindergarten" },
+          {
+            label: "Phonics Without Worksheets",
+            href: "/guides/phonics-practice-without-worksheets-kindergarten",
+          },
+        ]}
       />
     </>
   );

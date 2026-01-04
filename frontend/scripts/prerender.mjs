@@ -53,10 +53,71 @@ const routes = [
 
 const distPath = join(__dirname, "..", "dist");
 
+// Process and save HTML for a route
+function processAndSaveHTML(html, route) {
+  // Determine output path
+  const outputPath =
+    route === "/"
+      ? join(distPath, "index.html")
+      : join(distPath, route, "index.html");
+
+  // Create directory if it doesn't exist
+  const outputDir = dirname(outputPath);
+  if (!existsSync(outputDir)) {
+    mkdirSync(outputDir, { recursive: true });
+  }
+
+  // Process HTML for nested routes
+  let processedHtml = html;
+
+  if (route !== "/") {
+    const depth = route.split("/").filter((p) => p).length;
+    const prefix = "../".repeat(depth);
+
+    processedHtml = html
+      .replace(/href="\/assets\//g, `href="${prefix}assets/`)
+      .replace(/src="\/assets\//g, `src="${prefix}assets/`)
+      .replace(/href="\//g, `href="${prefix}`)
+      .replace('id="root"', 'id="root" data-server-rendered="true"');
+  } else {
+    processedHtml = html.replace(
+      'id="root"',
+      'id="root" data-server-rendered="true"'
+    );
+  }
+
+  // Write the prerendered HTML
+  writeFileSync(outputPath, processedHtml, "utf-8");
+  return outputPath;
+}
+
+async function prerenderRoute(page, route, baseUrl) {
+  try {
+    const url = `${baseUrl}${route}`;
+    await page.goto(url, {
+      waitUntil: "domcontentloaded", // Faster than networkidle0
+      timeout: 20000,
+    });
+
+    // Wait for React to render
+    await page.waitForSelector("#root > *", { timeout: 10000 });
+
+    // Get the rendered HTML immediately (no extra delay)
+    const html = await page.content();
+    
+    const outputPath = processAndSaveHTML(html, route);
+    console.log(`  ✓ ${route}`);
+    return { success: true, route };
+  } catch (error) {
+    console.error(`  ❌ ${route}: ${error.message}`);
+    return { success: false, route, error: error.message };
+  }
+}
+
 async function prerenderRoutes() {
+  const startTime = Date.now();
   console.log("🚀 Starting prerender process...\n");
 
-  // Use puppeteer with a local preview server for better compatibility
   const puppeteer = (await import("puppeteer")).default;
 
   const browser = await puppeteer.launch({
@@ -65,6 +126,7 @@ async function prerenderRoutes() {
       "--no-sandbox",
       "--disable-setuid-sandbox",
       "--disable-dev-shm-usage",
+      "--disable-gpu",
     ],
   });
 
@@ -83,85 +145,66 @@ async function prerenderRoutes() {
     const baseUrl = `http://localhost:4173`;
     console.log(`✓ Preview server running at ${baseUrl}\n`);
 
-    for (const route of routes) {
-      console.log(`📄 Prerendering: ${route}`);
+    // Create a single page and reuse it for all routes
+    const page = await browser.newPage();
 
-      const page = await browser.newPage();
-
-      // Set a user agent to avoid bot detection
-      await page.setUserAgent(
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-      );
-
-      // Navigate to the route
-      const url = `${baseUrl}${route}`;
-      await page.goto(url, {
-        waitUntil: "networkidle0",
-        timeout: 30000,
-      });
-
-      // Wait for React to render
-      await page.waitForSelector("#root > *", { timeout: 10000 });
-
-      // Give React time to fully render
-      await page.evaluate(
-        () => new Promise((resolve) => setTimeout(resolve, 1000))
-      );
-
-      // Get the rendered HTML
-      const html = await page.content();
-
-      // Determine output path
-      const outputPath =
-        route === "/"
-          ? join(distPath, "index.html")
-          : join(distPath, route, "index.html");
-
-      // Create directory if it doesn't exist
-      const outputDir = dirname(outputPath);
-      if (!existsSync(outputDir)) {
-        mkdirSync(outputDir, { recursive: true });
-      }
-
-      // Process HTML for nested routes
-      let processedHtml = html;
-
-      if (route !== "/") {
-        const depth = route.split("/").filter((p) => p).length;
-        const prefix = "../".repeat(depth);
-
-        processedHtml = html
-          .replace(/href="\/assets\//g, `href="${prefix}assets/`)
-          .replace(/src="\/assets\//g, `src="${prefix}assets/`)
-          .replace(/href="\//g, `href="${prefix}`)
-          .replace('id="root"', 'id="root" data-server-rendered="true"');
+    // Block external analytics/tracking scripts
+    await page.setRequestInterception(true);
+    page.on('request', (request) => {
+      const url = request.url();
+      if (url.includes('/_vercel/') || 
+          url.includes('/insights/') ||
+          url.includes('vercel-insights.com') ||
+          url.includes('google-analytics.com') ||
+          url.includes('googletagmanager.com')) {
+        request.abort();
       } else {
-        processedHtml = html.replace(
-          'id="root"',
-          'id="root" data-server-rendered="true"'
-        );
+        request.continue();
       }
+    });
 
-      // Write the prerendered HTML
-      writeFileSync(outputPath, processedHtml, "utf-8");
-      console.log(`  ✓ Saved to: ${outputPath.replace(distPath, "dist")}\n`);
+    await page.setUserAgent(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    );
 
+    // Process routes sequentially (but efficiently with reused page)
+    console.log(`📄 Prerendering ${routes.length} routes...\n`);
+    const results = [];
+    
+    for (const route of routes) {
+      const result = await prerenderRoute(page, route, baseUrl);
+      results.push(result);
+    }
+
+    // Close page before closing server
+    try {
       await page.close();
+    } catch (e) {
+      // Page might already be closed, ignore
     }
 
     // Close preview server
     await previewServer.httpServer.close();
-    console.log("✓ Preview server closed\n");
+    
+    const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+    const successful = results.filter(r => r.success).length;
+    const failed = results.filter(r => !r.success).length;
+    
+    console.log(`\n✅ Prerender complete in ${duration}s!`);
+    console.log(`📊 ${successful} successful, ${failed} failed out of ${routes.length} routes\n`);
+    
+    if (failed > 0) {
+      console.log("Failed routes:");
+      results.filter(r => !r.success).forEach(r => {
+        console.log(`   - ${r.route}`);
+      });
+    }
   } catch (error) {
     console.error("❌ Prerender error:", error);
     process.exit(1);
   } finally {
     await browser.close();
   }
-
-  console.log("✅ Prerender complete!\n");
-  console.log(`📊 Prerendered ${routes.length} routes:`);
-  routes.forEach((route) => console.log(`   - ${route}`));
 }
 
 prerenderRoutes();

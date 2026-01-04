@@ -14,6 +14,7 @@ import { Link } from "react-router-dom";
 import { Check, X, Star, ArrowRight, Info } from "lucide-react";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import LandingPageFooter from "@/components/LandingPageFooter";
+import { trackSignupClick } from "@/utils/analytics";
 
 interface ComparisonProduct {
   name: string;
@@ -467,7 +468,10 @@ const ComparisonPage: React.FC<ComparisonPageProps> = ({
                     </ul>
                   </div>
                   <Button className="w-full" size="lg" asChild>
-                    <Link to="/signup">
+                    <Link 
+                      to="/signup"
+                      onClick={() => trackSignupClick('comparison_product_card', 'link', h1Title)}
+                    >
                       Sign Up Free
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Link>
@@ -559,7 +563,10 @@ const ComparisonPage: React.FC<ComparisonPageProps> = ({
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" asChild>
-                  <Link to="/signup">
+                  <Link 
+                    to="/signup"
+                    onClick={() => trackSignupClick('comparison_final_cta', 'link', h1Title)}
+                  >
                     Get Started Free
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Link>

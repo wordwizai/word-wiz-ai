@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import LandingPageFooter from "@/components/LandingPageFooter";
+import { trackSignupClick } from "@/utils/analytics";
 
 // ===== TYPES & INTERFACES =====
 
@@ -303,7 +304,7 @@ const CalloutBoxComponent: React.FC<{ callout: CalloutBox }> = ({
   );
 };
 
-const InlineCTAComponent: React.FC<{ cta: InlineCTA }> = ({ cta }) => (
+const InlineCTAComponent: React.FC<{ cta: InlineCTA; context?: string }> = ({ cta, context }) => (
   <Card className="my-8 bg-primary/5 border-primary/20">
     <CardContent className="p-6">
       <div className="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -312,7 +313,14 @@ const InlineCTAComponent: React.FC<{ cta: InlineCTA }> = ({ cta }) => (
           <p className="text-sm text-muted-foreground">{cta.description}</p>
         </div>
         <Button asChild size="lg" className="flex-shrink-0">
-          <Link to={cta.buttonHref}>
+          <Link 
+            to={cta.buttonHref}
+            onClick={() => {
+              if (cta.buttonHref.includes('/signup')) {
+                trackSignupClick('inline_cta', 'link', context);
+              }
+            }}
+          >
             {cta.buttonText}
             <ArrowRight className="ml-2 w-4 h-4" />
           </Link>
@@ -484,7 +492,7 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
             <HeadingTag id={section.id} className={headingClasses}>
               {section.content as string}
             </HeadingTag>
-            {ctaAfterSection && <InlineCTAComponent cta={ctaAfterSection} />}
+            {ctaAfterSection && <InlineCTAComponent cta={ctaAfterSection} context={headline} />}
           </React.Fragment>
         );
 
@@ -494,7 +502,7 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
             <p className="text-base md:text-lg leading-relaxed text-foreground/90 mb-4">
               {parseMarkdownBold(section.content as string)}
             </p>
-            {ctaAfterSection && <InlineCTAComponent cta={ctaAfterSection} />}
+            {ctaAfterSection && <InlineCTAComponent cta={ctaAfterSection} context={headline} />}
           </React.Fragment>
         );
 
@@ -512,7 +520,7 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
                 </li>
               ))}
             </ul>
-            {ctaAfterSection && <InlineCTAComponent cta={ctaAfterSection} />}
+            {ctaAfterSection && <InlineCTAComponent cta={ctaAfterSection} context={headline} />}
           </React.Fragment>
         );
 
@@ -533,7 +541,7 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
                 </figcaption>
               )}
             </figure>
-            {ctaAfterSection && <InlineCTAComponent cta={ctaAfterSection} />}
+            {ctaAfterSection && <InlineCTAComponent cta={ctaAfterSection} context={headline} />}
           </React.Fragment>
         );
 
@@ -541,7 +549,7 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
         return (
           <React.Fragment key={idx}>
             <CalloutBoxComponent callout={section.content as CalloutBox} />
-            {ctaAfterSection && <InlineCTAComponent cta={ctaAfterSection} />}
+            {ctaAfterSection && <InlineCTAComponent cta={ctaAfterSection} context={headline} />}
           </React.Fragment>
         );
 
@@ -609,7 +617,10 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
                       practice
                     </p>
                     <Button size="lg" variant="secondary" asChild>
-                      <Link to="/signup">
+                      <Link 
+                        to="/signup"
+                        onClick={() => trackSignupClick('article_final_cta', 'link', headline)}
+                      >
                         Get Started Free
                         <ArrowRight className="ml-2 w-4 h-4" />
                       </Link>

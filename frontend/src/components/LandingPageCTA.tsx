@@ -4,6 +4,7 @@ import { BookOpen } from "lucide-react";
 import { googleLogin } from "@/api";
 import { Button } from "./ui/button";
 import { GoogleIcon } from "./GoogleIcon";
+import { trackSignupClick } from "@/utils/analytics";
 
 interface LandingPageCTAProps {
   fadeUpVariant: {
@@ -35,7 +36,10 @@ const LandingPageCTA = ({ fadeUpVariant }: LandingPageCTAProps) => {
           <Button
             size="lg"
             className="min-h-[56px] px-8 text-base font-semibold"
-            onClick={() => googleLogin()}
+            onClick={() => {
+              trackSignupClick('landing_cta', 'google');
+              googleLogin();
+            }}
           >
             <GoogleIcon className="w-5 h-5 mr-2" />
             Sign in with Google
@@ -45,6 +49,7 @@ const LandingPageCTA = ({ fadeUpVariant }: LandingPageCTAProps) => {
               variant="outline"
               size="lg"
               className="min-h-[56px] px-8 text-base font-semibold"
+              onClick={() => trackSignupClick('landing_cta', 'link')}
             >
               <BookOpen className="w-5 h-5 mr-2" />
               Create Account

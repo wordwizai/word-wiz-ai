@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { wordWizIcon } from "@/assets";
-import { googleLogin } from "@/api";
-import { GoogleIcon } from "./GoogleIcon";
+import { trackSignupClick } from "@/utils/analytics";
 
 const LandingPageNavbar = () => {
   return (
@@ -34,7 +33,10 @@ const LandingPageNavbar = () => {
           </Button>
         </Link>
         <Link to="/signup">
-          <Button size="default">
+          <Button 
+            size="default"
+            onClick={() => trackSignupClick('navbar', 'link')}
+          >
             <span>Sign Up</span>
           </Button>
         </Link>

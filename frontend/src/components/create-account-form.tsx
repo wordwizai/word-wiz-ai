@@ -15,6 +15,7 @@ import React from "react";
 import { AlertCircleIcon } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { googleLogin } from "@/api";
+import { trackSignupClick } from "@/utils/analytics";
 
 export function CreateAccountForm({
   className,
@@ -35,6 +36,7 @@ export function CreateAccountForm({
     setLoading(true);
     setError(null);
     try {
+      trackSignupClick('signup_form', 'email');
       await register(username, email, password, fullName);
       await loginWithEmailAndPassword(username, password);
       window.location.href = "/dashboard";
@@ -71,6 +73,7 @@ export function CreateAccountForm({
                   type="button"
                   onClick={() => {
                     setLoading(true);
+                    trackSignupClick('signup_form', 'google');
                     googleLogin();
                   }}
                 >

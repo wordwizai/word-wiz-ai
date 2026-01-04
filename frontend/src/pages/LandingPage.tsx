@@ -27,6 +27,7 @@ import AnimatedPracticeDemo from "@/components/AnimatedPracticeDemo";
 import TrustBadgeCarousel from "@/components/TrustBadgeCarousel";
 import { googleLogin } from "@/api";
 import { GoogleIcon } from "@/components/GoogleIcon";
+import { trackSignupClick } from "@/utils/analytics";
 
 const fadeUpVariant = {
   hidden: { opacity: 0, y: 30 },
@@ -121,7 +122,10 @@ const LandingPage = () => {
                 <Button
                   size="lg"
                   className="w-full sm:w-auto min-h-[56px] px-8 text-base font-semibold"
-                  onClick={() => googleLogin()}
+                  onClick={() => {
+                    trackSignupClick('hero', 'google');
+                    googleLogin();
+                  }}
                 >
                   <GoogleIcon className="w-5 h-5 mr-2" />
                   Sign in with Google
@@ -133,6 +137,7 @@ const LandingPage = () => {
                     variant="outline"
                     size="lg"
                     className="w-full sm:w-auto min-h-[56px] px-8 text-base font-semibold"
+                    onClick={() => trackSignupClick('hero', 'link')}
                   >
                     Create Account
                   </Button>

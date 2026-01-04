@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { trackSignupClick } from "@/utils/analytics";
 
 const LandingPageFooter = () => {
   return (
@@ -18,7 +19,11 @@ const LandingPageFooter = () => {
               <Link to="/about" className="hover:underline">
                 About
               </Link>
-              <Link to="/signup" className="hover:underline">
+              <Link 
+                to="/signup" 
+                className="hover:underline"
+                onClick={() => trackSignupClick('footer', 'link')}
+              >
                 Sign Up
               </Link>
               <Link to="/login" className="hover:underline">

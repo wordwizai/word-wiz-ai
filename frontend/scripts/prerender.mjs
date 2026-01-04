@@ -6,16 +6,49 @@ import { createServer } from "vite";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Routes to prerender
+// Routes to prerender - All static SEO pages
 const routes = [
+  // Core pages
   "/",
   "/about",
   "/contact",
+  "/privacy",
+  
+  // Comparison pages (11)
   "/comparisons/abcmouse-vs-hooked-on-phonics-vs-word-wiz-ai",
   "/comparisons/reading-eggs-vs-starfall-vs-word-wiz-ai",
   "/comparisons/homer-vs-khan-academy-kids-vs-word-wiz-ai",
   "/comparisons/hooked-on-phonics-vs-word-wiz-ai",
   "/comparisons/best-free-reading-apps",
+  "/comparisons/lexia-vs-raz-kids-vs-word-wiz-ai",
+  "/comparisons/teach-your-monster-vs-abcya-vs-word-wiz-ai",
+  "/comparisons/ixl-vs-duolingo-abc-vs-word-wiz-ai",
+  "/comparisons/reading-tutor-vs-reading-app",
+  "/comparisons/ai-reading-app-vs-traditional-phonics-program",
+  "/comparisons/free-phonics-apps-vs-paid-reading-programs",
+  
+  // Article pages (7)
+  "/articles/why-child-hates-reading",
+  "/articles/child-pronounces-words-wrong",
+  "/articles/decodable-books-vs-leveled-readers",
+  "/articles/child-cant-blend-sounds-into-words",
+  "/articles/kindergartener-guesses-words-instead-sounding-out",
+  "/articles/child-reads-slowly-struggles-with-fluency",
+  "/articles/first-grader-skips-words-when-reading-aloud",
+  
+  // Guide pages (12)
+  "/guides/how-to-choose-reading-app",
+  "/guides/how-to-teach-phonics-at-home",
+  "/guides/is-teacher-teaching-enough-phonics",
+  "/guides/phoneme-awareness-complete-guide",
+  "/guides/how-to-teach-cvc-words-to-struggling-readers",
+  "/guides/teaching-consonant-blends-kindergarten-at-home",
+  "/guides/daily-phonics-practice-routine-kindergarten-at-home",
+  "/guides/short-vowel-sounds-exercises-beginning-readers",
+  "/guides/decodable-sentences-for-beginning-readers",
+  "/guides/five-minute-reading-practice-activities-kids",
+  "/guides/r-controlled-vowels-teaching-strategies-parents",
+  "/guides/phonics-practice-without-worksheets-kindergarten",
 ];
 
 const distPath = join(__dirname, "..", "dist");

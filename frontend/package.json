@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/prerender.mjs",
     "build:only": "vite build",
     "build:prerender": "vite build && node scripts/prerender.mjs",
     "lint": "eslint .",
@@ -56,6 +56,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.2.0",
+    "puppeteer": "^24.34.0",
     "terser": "^5.44.1",
     "tw-animate-css": "^1.3.4",
     "typescript": "~5.8.3",

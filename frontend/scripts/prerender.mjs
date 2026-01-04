@@ -13,7 +13,7 @@ const routes = [
   "/about",
   "/contact",
   "/privacy",
-  
+
   // Comparison pages (11)
   "/comparisons/abcmouse-vs-hooked-on-phonics-vs-word-wiz-ai",
   "/comparisons/reading-eggs-vs-starfall-vs-word-wiz-ai",
@@ -26,7 +26,7 @@ const routes = [
   "/comparisons/reading-tutor-vs-reading-app",
   "/comparisons/ai-reading-app-vs-traditional-phonics-program",
   "/comparisons/free-phonics-apps-vs-paid-reading-programs",
-  
+
   // Article pages (7)
   "/articles/why-child-hates-reading",
   "/articles/child-pronounces-words-wrong",
@@ -35,7 +35,7 @@ const routes = [
   "/articles/kindergartener-guesses-words-instead-sounding-out",
   "/articles/child-reads-slowly-struggles-with-fluency",
   "/articles/first-grader-skips-words-when-reading-aloud",
-  
+
   // Guide pages (12)
   "/guides/how-to-choose-reading-app",
   "/guides/how-to-teach-phonics-at-home",
@@ -104,7 +104,7 @@ async function prerenderRoute(page, route, baseUrl) {
 
     // Get the rendered HTML immediately (no extra delay)
     const html = await page.content();
-    
+
     const outputPath = processAndSaveHTML(html, route);
     console.log(`  ✓ ${route}`);
     return { success: true, route };
@@ -150,13 +150,15 @@ async function prerenderRoutes() {
 
     // Block external analytics/tracking scripts
     await page.setRequestInterception(true);
-    page.on('request', (request) => {
+    page.on("request", (request) => {
       const url = request.url();
-      if (url.includes('/_vercel/') || 
-          url.includes('/insights/') ||
-          url.includes('vercel-insights.com') ||
-          url.includes('google-analytics.com') ||
-          url.includes('googletagmanager.com')) {
+      if (
+        url.includes("/_vercel/") ||
+        url.includes("/insights/") ||
+        url.includes("vercel-insights.com") ||
+        url.includes("google-analytics.com") ||
+        url.includes("googletagmanager.com")
+      ) {
         request.abort();
       } else {
         request.continue();
@@ -170,7 +172,7 @@ async function prerenderRoutes() {
     // Process routes sequentially (but efficiently with reused page)
     console.log(`📄 Prerendering ${routes.length} routes...\n`);
     const results = [];
-    
+
     for (const route of routes) {
       const result = await prerenderRoute(page, route, baseUrl);
       results.push(result);
@@ -185,19 +187,23 @@ async function prerenderRoutes() {
 
     // Close preview server
     await previewServer.httpServer.close();
-    
+
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
-    const successful = results.filter(r => r.success).length;
-    const failed = results.filter(r => !r.success).length;
-    
+    const successful = results.filter((r) => r.success).length;
+    const failed = results.filter((r) => !r.success).length;
+
     console.log(`\n✅ Prerender complete in ${duration}s!`);
-    console.log(`📊 ${successful} successful, ${failed} failed out of ${routes.length} routes\n`);
-    
+    console.log(
+      `📊 ${successful} successful, ${failed} failed out of ${routes.length} routes\n`
+    );
+
     if (failed > 0) {
       console.log("Failed routes:");
-      results.filter(r => !r.success).forEach(r => {
-        console.log(`   - ${r.route}`);
-      });
+      results
+        .filter((r) => !r.success)
+        .forEach((r) => {
+          console.log(`   - ${r.route}`);
+        });
     }
   } catch (error) {
     console.error("❌ Prerender error:", error);

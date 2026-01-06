@@ -68,9 +68,7 @@ const DecodableBooksVsLeveledReaders = lazy(
 const CantBlendSounds = lazy(
   () => import("./pages/articles/CantBlendSounds.tsx")
 );
-const GuessesWords = lazy(
-  () => import("./pages/articles/GuessesWords.tsx")
-);
+const GuessesWords = lazy(() => import("./pages/articles/GuessesWords.tsx"));
 
 // Lazy load guide pages
 const ChoosingReadingApp = lazy(
@@ -85,9 +83,7 @@ const IsTeacherTeachingPhonics = lazy(
 const PhonemeAwarenessGuide = lazy(
   () => import("./pages/guides/PhonemeAwarenessGuide.tsx")
 );
-const TeachCVCWords = lazy(
-  () => import("./pages/guides/TeachCVCWords.tsx")
-);
+const TeachCVCWords = lazy(() => import("./pages/guides/TeachCVCWords.tsx"));
 const TeachConsonantBlends = lazy(
   () => import("./pages/guides/TeachConsonantBlends.tsx")
 );
@@ -112,18 +108,12 @@ const PhonicsWithoutWorksheets = lazy(
 const ChildReadsSlowly = lazy(
   () => import("./pages/articles/ChildReadsSlowly.tsx")
 );
-const SkipsWords = lazy(
-  () => import("./pages/articles/SkipsWords.tsx")
-);
-const TutorVsApp = lazy(
-  () => import("./pages/comparisons/TutorVsApp.tsx")
-);
+const SkipsWords = lazy(() => import("./pages/articles/SkipsWords.tsx"));
+const TutorVsApp = lazy(() => import("./pages/comparisons/TutorVsApp.tsx"));
 const AIvsTraditional = lazy(
   () => import("./pages/comparisons/AIvsTraditional.tsx")
 );
-const FreeVsPaid = lazy(
-  () => import("./pages/comparisons/FreeVsPaid.tsx")
-);
+const FreeVsPaid = lazy(() => import("./pages/comparisons/FreeVsPaid.tsx"));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -135,7 +125,8 @@ const PageLoader = () => (
 function App() {
   return (
     <div className="font-body">
-      <Analytics />
+      {/* Only load Vercel Analytics in production */}
+      {import.meta.env.PROD && <Analytics />}
       <Toaster />
       <BrowserRouter>
         <AuthProvider>

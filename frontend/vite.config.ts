@@ -27,6 +27,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    include: ["react-helmet-async"],
+  },
   base: "/",
   build: {
     target: "esnext",
@@ -37,6 +40,15 @@ export default defineConfig({
         chunkFileNames: "assets/js/[name]-[hash].js",
         entryFileNames: "assets/js/[name]-[hash].js",
         assetFileNames: "assets/[ext]/[name]-[hash].[ext]",
+        manualChunks: {
+          // Bundle react-helmet-async with vendor to ensure proper loading order
+          vendor: [
+            "react",
+            "react-dom",
+            "react-router-dom",
+            "react-helmet-async",
+          ],
+        },
       },
     },
     chunkSizeWarningLimit: 1000,

@@ -4,7 +4,13 @@
   },
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "rewrites": [{ "source": "/(.*)", "destination": "/" }],
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/seo/:path*/", "destination": "/seo/:path*/index.html" },
+    { "source": "/seo/:path*", "destination": "/seo/:path*/index.html" },
+    { "source": "/(.*)", "destination": "/" }
+  ],
   "headers": [
     {
       "source": "/assets/(.*)",

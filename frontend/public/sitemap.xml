@@ -1,220 +1,207 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- Main Pages -->
   <url>
     <loc>https://wordwizai.com/</loc>
-    <lastmod>2025-12-28</lastmod>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
+    <priority>1</priority>
   </url>
   <url>
     <loc>https://wordwizai.com/about</loc>
-    <lastmod>2025-12-28</lastmod>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://wordwizai.com/contact</loc>
-    <lastmod>2025-12-28</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://wordwizai.com/signup</loc>
-    <lastmod>2025-12-28</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://wordwizai.com/login</loc>
-    <lastmod>2025-12-28</lastmod>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
-
-  <!-- Comparison Pages -->
   <url>
-    <loc>https://wordwizai.com/comparisons/abcmouse-vs-hooked-on-phonics-vs-word-wiz-ai</loc>
-    <lastmod>2025-12-28</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://wordwizai.com/privacy</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://wordwizai.com/comparisons/reading-eggs-vs-starfall-vs-word-wiz-ai</loc>
-    <lastmod>2025-12-28</lastmod>
+    <loc>https://wordwizai.com/comparisons/wordly-vs-word-wiz-ai</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wordwizai.com/comparisons/homer-vs-khan-academy-kids-vs-word-wiz-ai</loc>
-    <lastmod>2025-12-28</lastmod>
+    <loc>https://wordwizai.com/comparisons/reading-eggs-vs-word-wiz-ai</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://wordwizai.com/comparisons/starfall-vs-word-wiz-ai</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://wordwizai.com/comparisons/abcmouse-vs-word-wiz-ai</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://wordwizai.com/comparisons/raz-kids-vs-word-wiz-ai</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://wordwizai.com/comparisons/hooked-on-phonics-vs-word-wiz-ai</loc>
-    <lastmod>2025-12-28</lastmod>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wordwizai.com/comparisons/best-free-reading-apps</loc>
-    <lastmod>2025-12-28</lastmod>
+    <loc>https://wordwizai.com/comparisons/epic-vs-word-wiz-ai</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wordwizai.com/comparisons/lexia-vs-raz-kids-vs-word-wiz-ai</loc>
-    <lastmod>2025-12-28</lastmod>
+    <loc>https://wordwizai.com/comparisons/lexia-core5-vs-word-wiz-ai</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wordwizai.com/comparisons/teach-your-monster-vs-abcya-vs-word-wiz-ai</loc>
-    <lastmod>2025-12-28</lastmod>
+    <loc>https://wordwizai.com/comparisons/iready-vs-word-wiz-ai</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wordwizai.com/comparisons/ixl-vs-duolingo-abc-vs-word-wiz-ai</loc>
-    <lastmod>2025-12-28</lastmod>
+    <loc>https://wordwizai.com/comparisons/teach-your-monster-to-read-vs-word-wiz-ai</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <!-- Article Pages -->
-  <url>
-    <loc>https://wordwizai.com/articles/why-child-hates-reading</loc>
-    <lastmod>2025-12-28</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wordwizai.com/articles/child-pronounces-words-wrong</loc>
-    <lastmod>2025-12-28</lastmod>
+    <loc>https://wordwizai.com/comparisons/fundations-vs-word-wiz-ai</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wordwizai.com/articles/decodable-books-vs-leveled-readers</loc>
-    <lastmod>2025-12-28</lastmod>
+    <loc>https://wordwizai.com/articles/best-phonics-apps-kids-2025</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wordwizai.com/articles/child-cant-blend-sounds-into-words</loc>
-    <lastmod>2025-01-02</lastmod>
+    <loc>https://wordwizai.com/articles/dyslexia-reading-apps</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wordwizai.com/articles/kindergartener-guesses-words-instead-sounding-out</loc>
-    <lastmod>2025-01-02</lastmod>
+    <loc>https://wordwizai.com/articles/how-ai-personalizes-reading-instruction</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <!-- Guide Pages -->
-  <url>
-    <loc>https://wordwizai.com/guides/how-to-choose-reading-app</loc>
-    <lastmod>2025-12-28</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wordwizai.com/guides/how-to-teach-phonics-at-home</loc>
-    <lastmod>2025-12-28</lastmod>
+    <loc>https://wordwizai.com/articles/phonemic-awareness-activities-for-struggling-readers</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wordwizai.com/guides/is-teacher-teaching-enough-phonics</loc>
-    <lastmod>2025-12-28</lastmod>
+    <loc>https://wordwizai.com/articles/science-of-reading-explained</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wordwizai.com/guides/phoneme-awareness-complete-guide</loc>
-    <lastmod>2025-12-28</lastmod>
+    <loc>https://wordwizai.com/articles/structured-literacy-vs-balanced-literacy</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wordwizai.com/guides/how-to-teach-cvc-words-to-struggling-readers</loc>
-    <lastmod>2025-01-02</lastmod>
+    <loc>https://wordwizai.com/articles/teaching-reading-at-home-parent-guide</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wordwizai.com/guides/teaching-consonant-blends-kindergarten-at-home</loc>
-    <lastmod>2025-01-02</lastmod>
+    <loc>https://wordwizai.com/guides/cvc-words-complete-guide</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wordwizai.com/guides/daily-phonics-practice-routine-kindergarten-at-home</loc>
-    <lastmod>2025-01-02</lastmod>
+    <loc>https://wordwizai.com/guides/decodable-books-guide</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wordwizai.com/guides/short-vowel-sounds-exercises-beginning-readers</loc>
-    <lastmod>2025-01-02</lastmod>
+    <loc>https://wordwizai.com/guides/decodable-texts-educators-guide</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://wordwizai.com/guides/decodable-sentences-for-beginning-readers</loc>
-    <lastmod>2025-01-02</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://wordwizai.com/guides/five-minute-reading-practice-activities-kids</loc>
-    <lastmod>2025-01-02</lastmod>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wordwizai.com/guides/r-controlled-vowels-teaching-strategies-parents</loc>
-    <lastmod>2025-01-02</lastmod>
+    <loc>https://wordwizai.com/guides/high-frequency-words-complete-guide</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wordwizai.com/guides/phonics-practice-without-worksheets-kindergarten</loc>
-    <lastmod>2025-01-02</lastmod>
+    <loc>https://wordwizai.com/guides/how-to-help-child-learn-read</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wordwizai.com/articles/child-reads-slowly-struggles-with-fluency</loc>
-    <lastmod>2025-01-02</lastmod>
+    <loc>https://wordwizai.com/guides/orton-gillingham-approach-complete-guide</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wordwizai.com/articles/first-grader-skips-words-when-reading-aloud</loc>
-    <lastmod>2025-01-02</lastmod>
+    <loc>https://wordwizai.com/guides/phoneme-awareness-complete-guide</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wordwizai.com/comparisons/reading-tutor-vs-reading-app</loc>
-    <lastmod>2025-01-02</lastmod>
+    <loc>https://wordwizai.com/guides/phoneme-segmentation-guide</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wordwizai.com/comparisons/ai-reading-app-vs-traditional-phonics-program</loc>
-    <lastmod>2025-01-02</lastmod>
+    <loc>https://wordwizai.com/guides/phonics-rules-patterns-complete-guide</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://wordwizai.com/comparisons/free-phonics-apps-vs-paid-reading-programs</loc>
-    <lastmod>2025-01-02</lastmod>
+    <loc>https://wordwizai.com/guides/reading-fluency-complete-guide</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://wordwizai.com/guides/sight-words-guide</loc>
+    <lastmod>2026-01-04T22:25:43.272Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
   </url>
 </urlset>

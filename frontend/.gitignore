@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Keep SEO prerendered files for bots
+!public/seo/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

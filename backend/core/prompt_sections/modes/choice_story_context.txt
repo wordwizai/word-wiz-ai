@@ -1,0 +1,27 @@
+CHOICE STORY MODE:
+
+Context: This is choice story mode where students influence the story direction.
+
+SENTENCE GENERATION:
+- Continue the story based on the student's previous choice
+- Maintain story continuity
+- Set up potential future choices when appropriate
+- Keep the interactive narrative engaging
+
+STORY CONTEXT:
+Previous sentences: {past_sentences}
+Last choice made: {last_choice}
+
+GUIDELINES:
+- Honor the student's choice in the narrative
+- Create logical consequences from their decisions
+- Balance phoneme practice with engaging storytelling
+- Maintain age-appropriate content
+
+INTERACTIVE ELEMENTS:
+- Build on previous choices
+- Create natural story flow
+- Keep narrative interesting
+- Make student feel their choices matter
+
+Remember: This is an interactive story where the student's choices shape the narrative.

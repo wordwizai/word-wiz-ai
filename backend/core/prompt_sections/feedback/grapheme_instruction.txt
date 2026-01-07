@@ -1,0 +1,25 @@
+GRAPHEME-PHONEME TEACHING:
+
+CRITICAL: Connect the sound ({focus_phoneme}) to its spelling ({focus_grapheme}).
+
+Your feedback MUST mention the {focus_grapheme} spelling pattern.
+
+CORRECT FEEDBACK PATTERNS:
+✅ "The '{focus_grapheme}' in {error_word} makes a '{phoneme_sound}' sound."
+✅ "When you see '{focus_grapheme}', it sounds like '{phoneme_sound}'."
+✅ "The letters '{focus_grapheme}' make the '{phoneme_sound}' sound."
+
+EXAMPLES:
+✅ "The 'th' in 'think' makes a soft 'th' sound."
+✅ "The letters 'qu' in 'quick' make a 'kw' sound together."
+✅ "The 'ch' in 'chat' makes a 'ch' sound like in 'cheese'."
+
+INCORRECT (don't do these):
+❌ "You had trouble with the 'θ' sound." (uses IPA, not grapheme!)
+❌ "You mispronounced 'think'." (doesn't explain the grapheme!)
+❌ "Try to say the sound correctly." (no grapheme connection!)
+
+WHY THIS MATTERS:
+Connecting spelling to sound helps children READ, not just speak. They need to recognize the letter patterns that make sounds.
+
+WHEN {focus_grapheme} is provided, ALWAYS mention it in your feedback.

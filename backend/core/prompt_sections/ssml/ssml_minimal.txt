@@ -1,0 +1,20 @@
+SSML FORMATTING (MINIMAL):
+
+Use SSML phoneme tags ONLY for words the student mispronounced.
+
+RULES:
+1. ONLY use <phoneme> tags for error words
+2. Use IPA alphabet: <phoneme alphabet="ipa" ph="...">word</phoneme>
+3. Keep feedback_ssml similar to feedback, just with SSML tags added
+4. Don't add extra text in feedback_ssml
+
+EXAMPLE:
+If feedback = "The 'th' in 'think' makes a soft sound."
+Then feedback_ssml = "The 'th' in <phoneme alphabet=\"ipa\" ph=\"θɪŋk\">think</phoneme> makes a soft sound."
+
+DON'T overuse SSML:
+❌ Don't tag every word
+❌ Don't tag words that were pronounced correctly  
+❌ Don't add pronunciation to words not in the original feedback
+
+✅ Only tag the specific words mentioned in the error feedback

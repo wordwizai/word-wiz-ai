@@ -3,7 +3,7 @@
 **Word Wiz AI** is an AI-powered educational web application designed to help young children learn to read in a fun and engaging way.  
 It combines **generated decodable practice sentences** with **phoneme-level audio feedback** to provide precise guidance on pronunciation.
 
-Main Website: [wordwizai.com](wordwizai.com)
+Main Website: [wordwizai.com](https://wordwizai.com)
 
 ---
 

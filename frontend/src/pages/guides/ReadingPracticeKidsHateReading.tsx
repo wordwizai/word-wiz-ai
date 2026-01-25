@@ -7,7 +7,7 @@ const ReadingPracticeKidsHateReading = () => {
     {
       type: "paragraph",
       content:
-        "Your child groans when you suggest reading time. They hide books, make excuses, or have meltdowns at the mere mention of practice. Reading has become a battleground, and you're exhausted from the fights. If your child hates reading, you're not alone—reading resistance affects 20-30% of children and can stem from many causes: texts that are too hard, boring topics, past failures, pressure, or underlying reading difficulties. The critical mistake most parents make is forcing more practice, which deepens the negative association. Instead, you need strategies that rebuild your child's relationship with reading while still developing skills. With the approaches in this guide, most children shift from hating reading to tolerating it (or even enjoying it) within 6-8 weeks.",
+        "Your child groans when you suggest reading time. They hide books, make excuses, or have meltdowns at the mere mention of practice. Reading has become a battleground, and you're exhausted from the fights. If your child hates reading, you're not alone. This affects roughly 20-30% of children and stems from many causes: texts that are too difficult, boring topics, past failures, excessive pressure, or underlying reading difficulties. Most parents make a critical mistake by forcing more practice, which only deepens the negative association. What you need are strategies that rebuild your child's relationship with reading while still developing skills. With the right approaches, most children shift from hating reading to tolerating or even enjoying it within 6-8 weeks.",
     },
     {
       type: "heading",
@@ -348,7 +348,7 @@ const ReadingPracticeKidsHateReading = () => {
         type: "success",
         title: "Word Wiz AI for Reading-Resistant Kids",
         content:
-          "Word Wiz AI removes parent-child conflict by providing neutral, encouraging feedback. The AI adapts to your child's level, ensuring success experiences that rebuild confidence. Gamification and instant feedback make practice engaging for kids who hate traditional reading. Try it free at wordwizai.com.",
+          "Word Wiz AI removes parent-child conflict by providing neutral, encouraging feedback. The AI adapts to your child's level, ensuring success experiences that rebuild confidence. Gamification and instant feedback make practice engaging for kids who hate traditional reading. The platform is completely free. Visit wordwizai.com to get started.",
       },
     },
     {
@@ -359,20 +359,19 @@ const ReadingPracticeKidsHateReading = () => {
     },
     {
       type: "paragraph",
-      content:
-        "You're making progress when your child:",
+      content: "You're making progress when your child:",
     },
     {
       type: "list",
       content: [
-        "✅ Complains less about reading time (even if they don't love it)",
-        "✅ Occasionally asks to continue reading past the timer",
-        "✅ Chooses books independently at the library or bookstore",
-        "✅ Mentions something they read ('This book is actually funny')",
-        "✅ Reads without being reminded on some days",
-        "✅ Finishes books (rather than abandoning every one after 2 pages)",
-        "✅ Shows pride when completing a book or reaching a reading goal",
-        "✅ Asks for more time on reading apps or games",
+        "Complains less about reading time (even if they don't love it)",
+        "Occasionally asks to continue reading past the timer",
+        "Chooses books independently at the library or bookstore",
+        "Mentions something they read ('This book is actually funny')",
+        "Reads without being reminded on some days",
+        "Finishes books (rather than abandoning every one after 2 pages)",
+        "Shows pride when completing a book or reaching a reading goal",
+        "Asks for more time on reading apps or games",
       ],
     },
     {
@@ -402,7 +401,7 @@ const ReadingPracticeKidsHateReading = () => {
       metaTitle="Reading Practice for Kids Who Hate Reading: 10 Proven Strategies"
       metaDescription="Does your child hate reading? Learn why kids resist reading and 10 proven strategies to rebuild motivation and skills without power struggles."
       canonicalUrl="https://wordwizai.com/guides/reading-practice-kids-hate-reading"
-      heroImage="/images/hero/reading-help.jpg"
+      heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
       headline="Reading Practice for Kids Who Hate Reading"
       subheadline="Proven strategies to rebuild your child's relationship with reading—without battles, tears, or force"
       author="Word Wiz AI Team"

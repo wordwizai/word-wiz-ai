@@ -7,7 +7,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "Your kindergartener is falling behind in reading. While classmates are sounding out CVC words and reading simple books, your child still struggles with letter sounds or can't blend sounds together. You need targeted intervention—fast—but in-person tutoring is expensive ($50-100/hour) and hard to schedule. Phonics apps offer an affordable, accessible alternative, but the market is crowded with mediocre options. The best phonics app for kindergarten struggling readers must offer systematic phonics instruction, multisensory learning, pronunciation feedback, and adaptive difficulty. This comprehensive review of the top 5 apps will help you choose the right tool for your child's specific needs and learning style.",
+        "Your kindergartener is falling behind in reading. While classmates are sounding out CVC words and reading simple books, your child still struggles with letter sounds or can't blend sounds together. You need targeted help, and in-person tutoring at $50-100 per hour isn't always practical or affordable. Phonics apps can provide systematic instruction at a fraction of the cost, but you'll find dozens of options that vary wildly in quality. The best apps for struggling kindergarteners deliver systematic phonics instruction, engage multiple senses, provide pronunciation feedback, and adjust to your child's pace. This review examines five top apps to help you choose the right one.",
     },
     {
       type: "heading",
@@ -94,7 +94,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "**Price:** $19.99/month or $149/year. Free trial available. **Age Range:** 5-10 years. **Key Features:** AI-powered phoneme-level pronunciation analysis, systematic phonics sequence, adaptive difficulty, real-time corrective feedback, progress tracking for parents.",
+        "**Price:** Free. **Age Range:** 5-10 years. **Key Features:** AI-powered phoneme-level pronunciation analysis, systematic phonics sequence, adaptive difficulty, real-time corrective feedback, progress tracking for parents.",
     },
     {
       type: "heading",
@@ -378,7 +378,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "**Winner: ABCmouse.** Entire kindergarten curriculum for ~$60/year. Starfall free version is also excellent value. Hooked on Phonics and Reading Eggs ~$60/year for reading only. Word Wiz AI $149/year but includes unique AI technology.",
+        "**Winner: Word Wiz AI.** Completely free with AI-powered pronunciation feedback. Starfall free version also offers good value. ABCmouse provides entire kindergarten curriculum for ~$60/year. Hooked on Phonics and Reading Eggs ~$60/year for reading only.",
     },
     {
       type: "heading",
@@ -399,7 +399,8 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "heading",
       level: 3,
-      content: "Your child has pronunciation difficulties (mispronounces sounds, words sound unclear)",
+      content:
+        "Your child has pronunciation difficulties (mispronounces sounds, words sound unclear)",
     },
     {
       type: "paragraph",
@@ -419,7 +420,8 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "heading",
       level: 3,
-      content: "Your child needs structured, explicit teaching from the ground up",
+      content:
+        "Your child needs structured, explicit teaching from the ground up",
     },
     {
       type: "paragraph",
@@ -553,7 +555,7 @@ const BestPhonicsAppKindergarten = () => {
       metaTitle="Best Phonics App for Kindergarten Struggling Readers (2025)"
       metaDescription="Comprehensive review of top 5 phonics apps for kindergarten struggling readers: Word Wiz AI, Hooked on Phonics, Reading Eggs, ABCmouse, and Starfall. Find the best fit for your child."
       canonicalUrl="https://wordwizai.com/comparisons/best-phonics-app-kindergarten-struggling-readers"
-      heroImage="/images/hero/app-comparison.jpg"
+      heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
       headline="Best Phonics App for Kindergarten Struggling Readers"
       subheadline="In-depth comparison of Word Wiz AI, Hooked on Phonics, Reading Eggs, ABCmouse, and Starfall—which is right for your child?"
       author="Word Wiz AI Team"
@@ -564,7 +566,10 @@ const BestPhonicsAppKindergarten = () => {
       relatedArticles={relatedArticles}
       breadcrumbs={[
         { label: "Home", href: "/" },
-        { label: "Comparisons", href: "/comparisons/ai-reading-tutors-vs-traditional-apps" },
+        {
+          label: "Comparisons",
+          href: "/comparisons/ai-reading-tutors-vs-traditional-apps",
+        },
         { label: "Best Phonics App for Kindergarten" },
       ]}
       structuredData={{

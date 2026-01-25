@@ -316,8 +316,7 @@ const VowelDigraphsActivities = () => {
     },
     {
       type: "paragraph",
-      content:
-        "Consistency is key. Here's a proven 15-minute daily routine:",
+      content: "Consistency is key. Here's a proven 15-minute daily routine:",
     },
     {
       type: "list",
@@ -351,7 +350,7 @@ const VowelDigraphsActivities = () => {
         type: "success",
         title: "Word Wiz AI for Vowel Digraph Practice",
         content:
-          "Word Wiz AI's AI-powered pronunciation analysis catches subtle vowel digraph errors that parents and traditional apps miss. First graders receive instant, encouraging feedback that helps them master these complex patterns faster. Try it free at wordwizai.com.",
+          "Word Wiz AI's AI-powered pronunciation analysis catches subtle vowel digraph errors that parents and traditional apps miss. First graders receive instant, encouraging feedback at no cost, helping them master these complex patterns faster. Visit wordwizai.com to get started.",
       },
     },
     {
@@ -362,19 +361,18 @@ const VowelDigraphsActivities = () => {
     },
     {
       type: "paragraph",
-      content:
-        "Your first grader has mastered vowel digraphs when they can:",
+      content: "Your first grader has mastered vowel digraphs when they can:",
     },
     {
       type: "list",
       content: [
-        "✅ Read 30+ words with various vowel digraphs (OO, OI/OY, OU/OW, AU/AW, EW) with 90% accuracy",
-        "✅ Distinguish between similar digraphs (OI vs OY, AU vs AW) in reading and spelling",
-        "✅ Read decodable sentences containing vowel digraphs fluently",
-        "✅ Recognize that digraphs represent single sounds, not two separate vowels",
-        "✅ Spell common vowel digraph words correctly",
-        "✅ Identify vowel digraphs in connected text independently",
-        "✅ Decode unfamiliar words containing vowel digraphs with 70%+ accuracy",
+        "Read 30+ words with various vowel digraphs (OO, OI/OY, OU/OW, AU/AW, EW) with 90% accuracy",
+        "Distinguish between similar digraphs (OI vs OY, AU vs AW) in reading and spelling",
+        "Read decodable sentences containing vowel digraphs fluently",
+        "Recognize that digraphs represent single sounds, not two separate vowels",
+        "Spell common vowel digraph words correctly",
+        "Identify vowel digraphs in connected text independently",
+        "Decode unfamiliar words containing vowel digraphs with 70%+ accuracy",
       ],
     },
     {
@@ -404,7 +402,7 @@ const VowelDigraphsActivities = () => {
       metaTitle="Vowel Digraphs Activities for First Graders: Complete Guide"
       metaDescription="Master vowel digraphs (oo, oi, oy, ou, ow, au, aw, ew) with hands-on activities, games, and practice schedules for first-grade reading success."
       canonicalUrl="https://wordwizai.com/guides/vowel-digraphs-activities-first-graders"
-      heroImage="/images/hero/phonics-guide.jpg"
+      heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
       headline="Vowel Digraphs Activities for First Graders"
       subheadline="Hands-on activities and games to master two-vowel patterns that make one sound—essential for first-grade reading fluency"
       author="Word Wiz AI Team"

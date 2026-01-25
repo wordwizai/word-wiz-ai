@@ -390,7 +390,8 @@ const WorksheetsVsInteractive = () => {
     {
       type: "heading",
       level: 3,
-      content: "Strategy 4: Start with Interactive, Add Worksheets as Skills Grow",
+      content:
+        "Strategy 4: Start with Interactive, Add Worksheets as Skills Grow",
     },
     {
       type: "paragraph",
@@ -437,7 +438,7 @@ const WorksheetsVsInteractive = () => {
         type: "success",
         title: "Word Wiz AI: The Best of Interactive Practice",
         content:
-          "Word Wiz AI combines the engagement of interactive apps with phoneme-level pronunciation feedback that catches errors worksheets miss. The AI provides immediate, specific feedback that accelerates skill development. Use alongside worksheets for comprehensive phonics practice. Try it free at wordwizai.com.",
+          "Word Wiz AI combines the engagement of interactive apps with phoneme-level pronunciation feedback that catches errors worksheets miss. The AI provides immediate, specific feedback that accelerates skill development. Use alongside worksheets for comprehensive phonics practice at no cost. Visit wordwizai.com to get started.",
       },
     },
     {
@@ -448,8 +449,7 @@ const WorksheetsVsInteractive = () => {
     },
     {
       type: "paragraph",
-      content:
-        "For most families, the answer is both, strategically combined:",
+      content: "For most families, the answer is both, strategically combined:",
     },
     {
       type: "list",
@@ -487,7 +487,7 @@ const WorksheetsVsInteractive = () => {
       metaTitle="Phonics Worksheets vs Interactive Reading Practice: Which Works?"
       metaDescription="Comprehensive comparison of phonics worksheets vs interactive reading apps: pros, cons, research, and when to use each for optimal reading development."
       canonicalUrl="https://wordwizai.com/comparisons/worksheets-vs-interactive-reading-practice"
-      heroImage="/images/hero/comparison.jpg"
+      heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
       headline="Phonics Worksheets vs Interactive Reading Practice"
       subheadline="Evidence-based comparison of worksheets and interactive apps—which builds reading skills more effectively?"
       author="Word Wiz AI Team"
@@ -498,7 +498,10 @@ const WorksheetsVsInteractive = () => {
       relatedArticles={relatedArticles}
       breadcrumbs={[
         { label: "Home", href: "/" },
-        { label: "Comparisons", href: "/comparisons/ai-reading-tutors-vs-traditional-apps" },
+        {
+          label: "Comparisons",
+          href: "/comparisons/ai-reading-tutors-vs-traditional-apps",
+        },
         { label: "Worksheets vs Interactive" },
       ]}
       structuredData={{

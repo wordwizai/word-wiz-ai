@@ -7,7 +7,7 @@ const LongVowelSoundsPractice = () => {
     {
       type: "paragraph",
       content:
-        "Your first grader has mastered letter sounds and can read simple CVC words like 'cat' and 'dog.' Now it's time for a major leap: long vowel sounds. Unlike short vowels that make quick, clipped sounds, long vowels 'say their names'—A says /ay/ like in 'cake,' E says /ee/ like in 'feet,' I says /eye/ like in 'bike,' O says /oh/ like in 'boat,' and U says /yoo/ or /oo/ like in 'cube' or 'flute.' Understanding long vowels unlocks thousands of common words and transforms your child from a beginning reader to someone who can tackle real books. With the right practice sequence and activities in this guide, most first graders master long vowel sounds in 6-8 weeks of consistent daily practice.",
+        "Your first grader has mastered letter sounds and can read simple CVC words like 'cat' and 'dog.' The next major step is long vowel sounds. Unlike short vowels with their quick, clipped sounds, long vowels 'say their names.' A says /ay/ as in 'cake,' E says /ee/ as in 'feet,' I says /eye/ as in 'bike,' O says /oh/ as in 'boat,' and U says /yoo/ or /oo/ as in 'cube' or 'flute.' Learning long vowels opens up thousands of common words and helps your child move from beginning reader to someone who can handle real books. With daily practice using the activities in this guide, most first graders master long vowel sounds within 6-8 weeks.",
     },
     {
       type: "heading",
@@ -73,11 +73,11 @@ const LongVowelSoundsPractice = () => {
     {
       type: "list",
       content: [
-        "✅ Read 50+ CVC words with short vowels (cat, bed, sit, hot, cup) automatically",
-        "✅ Identify and produce all five short vowel sounds",
-        "✅ Blend three sounds together smoothly (c-a-t → cat)",
-        "✅ Distinguish between similar short vowel sounds (pit/pet, hot/hat)",
-        "✅ Read simple decodable sentences with short vowel words",
+        "Read 50+ CVC words with short vowels (cat, bed, sit, hot, cup) automatically",
+        "Identify and produce all five short vowel sounds",
+        "Blend three sounds together smoothly (c-a-t → cat)",
+        "Distinguish between similar short vowel sounds (pit/pet, hot/hat)",
+        "Read simple decodable sentences with short vowel words",
       ],
     },
     {
@@ -404,7 +404,7 @@ const LongVowelSoundsPractice = () => {
         type: "success",
         title: "Word Wiz AI for Long Vowel Practice",
         content:
-          "Word Wiz AI's phoneme-level pronunciation analysis provides instant feedback on long vowel pronunciation that traditional apps and even parents can't offer. First graders master long vowel sounds faster with AI-powered practice. Try it free at wordwizai.com.",
+          "Word Wiz AI's phoneme-level pronunciation analysis provides instant feedback on long vowel pronunciation that traditional apps and even parents can't offer. The platform is completely free and helps first graders master long vowel sounds faster with AI-powered practice. Visit wordwizai.com to get started.",
       },
     },
     {
@@ -477,13 +477,13 @@ const LongVowelSoundsPractice = () => {
     {
       type: "list",
       content: [
-        "✅ Identify and produce all five long vowel sounds accurately",
-        "✅ Read 50+ long vowel words with multiple spelling patterns (silent e, vowel teams)",
-        "✅ Distinguish between short and long vowel words in minimal pairs (cap/cape, bit/bite)",
-        "✅ Read decodable sentences containing long vowel words fluently",
-        "✅ Spell common long vowel words using the appropriate pattern",
-        "✅ Recognize long vowel words in connected text (books, signs)",
-        "✅ Explain the basic long vowel rules (silent e, vowel teams)",
+        "Identify and produce all five long vowel sounds accurately",
+        "Read 50+ long vowel words with multiple spelling patterns (silent e, vowel teams)",
+        "Distinguish between short and long vowel words in minimal pairs (cap/cape, bit/bite)",
+        "Read decodable sentences containing long vowel words fluently",
+        "Spell common long vowel words using the appropriate pattern",
+        "Recognize long vowel words in connected text (books, signs)",
+        "Explain the basic long vowel rules (silent e, vowel teams)",
       ],
     },
     {
@@ -513,7 +513,7 @@ const LongVowelSoundsPractice = () => {
       metaTitle="Long Vowel Sounds Practice for First Grade: Complete Guide"
       metaDescription="Master long vowel sounds in first grade with proven activities, word lists, and practice schedules. Includes long A, E, I, O, U exercises for reading success."
       canonicalUrl="https://wordwizai.com/guides/long-vowel-sounds-practice-first-grade"
-      heroImage="/images/hero/phonics-guide.jpg"
+      heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
       headline="Long Vowel Sounds Practice for First Grade"
       subheadline="Comprehensive guide to teaching and practicing long vowels—when vowels 'say their names' in words like cake, feet, and bike"
       author="Word Wiz AI Team"

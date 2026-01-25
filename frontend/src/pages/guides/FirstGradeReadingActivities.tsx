@@ -7,7 +7,7 @@ const FirstGradeReadingActivities = () => {
     {
       type: "paragraph",
       content:
-        "Your first grader comes home from school with a reading log to complete, but you're not sure how to make home practice effective without turning it into nightly battles. First grade is the pivotal year when children transition from 'learning to read' to 'reading to learn.' The right home practice accelerates this transition, while the wrong approach creates frustration and reading resistance. Effective first-grade reading practice at home requires balancing three essential components: decoding practice (phonics and fluency), comprehension development (understanding what's read), and motivation (maintaining engagement). With the structured activities and weekly schedules in this guide, most first graders show measurable reading growth within 6-8 weeks of consistent home practice.",
+        "Your first grader comes home from school with a reading log to complete, but you're not sure how to make home practice effective without nightly battles. First grade is when children transition from 'learning to read' to 'reading to learn.' The right home practice accelerates this transition, while the wrong approach creates frustration and resistance. Effective practice requires balancing three components: decoding practice (phonics and fluency), comprehension development (understanding what's read), and motivation (maintaining engagement). With the structured activities and schedules in this guide, most first graders show measurable growth within 6-8 weeks of consistent practice.",
     },
     {
       type: "heading",
@@ -422,7 +422,7 @@ const FirstGradeReadingActivities = () => {
         type: "success",
         title: "Word Wiz AI for First Grade Practice",
         content:
-          "Word Wiz AI's phoneme-level pronunciation feedback helps first graders develop accurate decoding skills. The AI provides encouraging feedback that builds confidence while catching errors parents miss. The adaptive difficulty ensures your child always works at the right level. Try it free at wordwizai.com.",
+          "Word Wiz AI's phoneme-level pronunciation feedback helps first graders develop accurate decoding skills. The AI provides encouraging feedback that builds confidence while catching errors parents miss. The adaptive difficulty ensures your child always works at the right level, all completely free. Visit wordwizai.com to get started.",
       },
     },
     {
@@ -459,20 +459,19 @@ const FirstGradeReadingActivities = () => {
     },
     {
       type: "paragraph",
-      content:
-        "Your first grader is making good progress when they:",
+      content: "Your first grader is making good progress when they:",
     },
     {
       type: "list",
       content: [
-        "✅ Decode CVC words and common phonics patterns independently (mid-year: short vowels + blends; end-of-year: long vowels + digraphs)",
-        "✅ Recognize 25-50 sight words automatically (mid-year) or 50-100 (end-of-year)",
-        "✅ Read at least 20-30 words per minute in grade-level text (mid-year) or 40-60 (end-of-year)",
-        "✅ Self-correct obvious errors when reading makes no sense",
-        "✅ Answer basic comprehension questions about what they read",
-        "✅ Retell stories in sequence with key details",
-        "✅ Show willingness to read independently for 5-10 minutes",
-        "✅ Decode unfamiliar words using phonics strategies (not just guessing)",
+        "Decode CVC words and common phonics patterns independently (mid-year: short vowels + blends; end-of-year: long vowels + digraphs)",
+        "Recognize 25-50 sight words automatically (mid-year) or 50-100 (end-of-year)",
+        "Read at least 20-30 words per minute in grade-level text (mid-year) or 40-60 (end-of-year)",
+        "Self-correct obvious errors when reading makes no sense",
+        "Answer basic comprehension questions about what they read",
+        "Retell stories in sequence with key details",
+        "Show willingness to read independently for 5-10 minutes",
+        "Decode unfamiliar words using phonics strategies (not just guessing)",
       ],
     },
     {
@@ -502,7 +501,7 @@ const FirstGradeReadingActivities = () => {
       metaTitle="First Grade Reading Practice Activities at Home (15 Activities)"
       metaDescription="15 proven first-grade reading activities for home practice: phonics, fluency, comprehension. Includes weekly schedules and parent strategies."
       canonicalUrl="https://wordwizai.com/guides/first-grade-reading-practice-activities-home"
-      heroImage="/images/hero/first-grade-reading.jpg"
+      heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
       headline="First Grade Reading Practice Activities at Home"
       subheadline="15 effective activities and weekly practice schedules to build first-grade reading skills at home"
       author="Word Wiz AI Team"

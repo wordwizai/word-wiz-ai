@@ -7,7 +7,7 @@ const ChildMemorizesBooksInsteadReading = () => {
     {
       type: "paragraph",
       content:
-        "You sit with your child and their favorite book, beaming with pride as they 'read' every page perfectly. Then you grab a different book with the same words, and suddenly they can't read a single sentence. Or you cover the pictures, and the reading stops entirely. The truth hits: your child isn't reading—they've memorized the book. This is one of the most common and frustrating challenges parents face when teaching young children to read. While memorization shows strong memory skills, it's not reading, and it can actually delay real reading development if not addressed. The good news: with the right strategies in this guide, most children transition from memorization to actual decoding in 4-8 weeks.",
+        "You sit with your child and their favorite book, beaming with pride as they 'read' every page perfectly. Then you grab a different book with the same words, and suddenly they can't read a single sentence. Or you cover the pictures, and the reading stops entirely. That's when it hits: your child isn't reading at all. They've memorized the book. This is surprisingly common and frustrating for parents. While memorization shows strong memory skills, it's not actual reading and can delay development if left unchecked. The good news is that with the right approach, most children transition from memorization to real decoding within 4-8 weeks.",
     },
     {
       type: "heading",
@@ -386,7 +386,7 @@ const ChildMemorizesBooksInsteadReading = () => {
         type: "success",
         title: "Word Wiz AI for Breaking Memorization Habits",
         content:
-          "Word Wiz AI's phoneme-level feedback catches memorization and guessing that parents miss. The AI provides unlimited new sentences your child can't memorize, forcing real decoding practice. Try it free at wordwizai.com.",
+          "Word Wiz AI's phoneme-level feedback catches memorization and guessing that parents miss. The AI provides unlimited new sentences your child can't memorize, forcing real decoding practice. The platform is completely free. Visit wordwizai.com to get started.",
       },
     },
     {
@@ -418,24 +418,24 @@ const ChildMemorizesBooksInsteadReading = () => {
     {
       type: "heading",
       level: 2,
-      content: "Success Checklist: Has Your Child Transitioned to Real Reading?",
+      content:
+        "Success Checklist: Has Your Child Transitioned to Real Reading?",
       id: "success-checklist",
     },
     {
       type: "paragraph",
-      content:
-        "Your child is reading (not memorizing) when they can:",
+      content: "Your child is reading (not memorizing) when they can:",
     },
     {
       type: "list",
       content: [
-        "✅ Read new texts they've never seen before with 70%+ accuracy",
-        "✅ Decode CVC words and simple phonics patterns independently",
-        "✅ Read with pictures covered at roughly the same accuracy as with pictures visible",
-        "✅ Sound out unfamiliar words rather than guessing wildly",
-        "✅ Read sentences out of order (not just starting from the beginning)",
-        "✅ Successfully read nonsense words that follow phonics rules",
-        "✅ Track words with their finger while looking at the text",
+        "Read new texts they've never seen before with 70%+ accuracy",
+        "Decode CVC words and simple phonics patterns independently",
+        "Read with pictures covered at roughly the same accuracy as with pictures visible",
+        "Sound out unfamiliar words rather than guessing wildly",
+        "Read sentences out of order (not just starting from the beginning)",
+        "Successfully read nonsense words that follow phonics rules",
+        "Track words with their finger while looking at the text",
       ],
     },
     {
@@ -465,7 +465,7 @@ const ChildMemorizesBooksInsteadReading = () => {
       metaTitle="Child Memorizes Books Instead of Reading: How to Fix It"
       metaDescription="Is your child memorizing books instead of actually reading? Learn how to identify memorization vs reading and fix it with proven strategies in 4-8 weeks."
       canonicalUrl="https://wordwizai.com/articles/child-memorizes-books-instead-reading"
-      heroImage="/images/hero/reading-help.jpg"
+      heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
       headline="Child Memorizes Books Instead of Reading"
       subheadline="How to identify memorization vs real reading and transition your child to true decoding skills"
       author="Word Wiz AI Team"
@@ -476,7 +476,10 @@ const ChildMemorizesBooksInsteadReading = () => {
       relatedArticles={relatedArticles}
       breadcrumbs={[
         { label: "Home", href: "/" },
-        { label: "Articles", href: "/articles/hooked-on-phonics-vs-word-wiz-ai" },
+        {
+          label: "Articles",
+          href: "/articles/hooked-on-phonics-vs-word-wiz-ai",
+        },
         { label: "Child Memorizes Books" },
       ]}
       structuredData={{

@@ -7,7 +7,7 @@ const SilentEWordsPractice = () => {
     {
       type: "paragraph",
       content:
-        "Your child has mastered short vowels and can read CVC words like 'cat,' 'dog,' and 'sun' with confidence. Now it's time for the next major phonics milestone: silent e words. Words like 'cake,' 'bike,' and 'home' follow the magic e pattern where adding a silent e to the end transforms the short vowel into a long vowel. This pattern appears in thousands of common English words and is essential for reading fluency. The challenge is that silent e is invisible when reading aloud—your child must recognize the pattern, remember the rule, and apply it automatically. With structured practice using the exercises in this guide, most children can master silent e words in 4-6 weeks.",
+        "Your child has mastered short vowels and can read CVC words like 'cat,' 'dog,' and 'sun' with confidence. The next step is silent e words. Words like 'cake,' 'bike,' and 'home' follow the magic e pattern where adding a silent e to the end changes the short vowel into a long vowel. This pattern appears in thousands of English words and unlocks a new level of reading fluency. The challenge is that silent e is invisible when reading aloud. Your child must recognize the pattern, remember the rule, and apply it automatically. With consistent practice using these exercises, most children master silent e words within 4-6 weeks.",
     },
     {
       type: "heading",
@@ -293,7 +293,7 @@ const SilentEWordsPractice = () => {
         type: "success",
         title: "Word Wiz AI for Silent E Practice",
         content:
-          "Word Wiz AI's phoneme-level analysis catches subtle errors in long vowel pronunciation that parents and traditional apps miss. Children receive instant, encouraging feedback that helps them master the silent e pattern faster. Try it free at wordwizai.com.",
+          "Word Wiz AI's phoneme-level analysis catches subtle errors in long vowel pronunciation that parents and traditional apps miss. Children receive instant, encouraging feedback completely free. Visit wordwizai.com to get started.",
       },
     },
     {
@@ -304,18 +304,17 @@ const SilentEWordsPractice = () => {
     },
     {
       type: "paragraph",
-      content:
-        "Your child has mastered silent e words when they can:",
+      content: "Your child has mastered silent e words when they can:",
     },
     {
       type: "list",
       content: [
-        "✅ Read 20 mixed silent e words (a_e, i_e, o_e, u_e) with 90% accuracy",
-        "✅ Distinguish between short and long vowel words (can/kane, kit/kite, hop/hope)",
-        "✅ Read sentences containing silent e words fluently",
-        "✅ Spell 15 common silent e words correctly",
-        "✅ Identify silent e words in connected text (books, signs)",
-        "✅ Explain the silent e rule in their own words",
+        "Read 20 mixed silent e words (a_e, i_e, o_e, u_e) with 90% accuracy",
+        "Distinguish between short and long vowel words (can/kane, kit/kite, hop/hope)",
+        "Read sentences containing silent e words fluently",
+        "Spell 15 common silent e words correctly",
+        "Identify silent e words in connected text (books, signs)",
+        "Explain the silent e rule in their own words",
       ],
     },
     {
@@ -345,7 +344,7 @@ const SilentEWordsPractice = () => {
       metaTitle="Silent E Words Practice for Kids: Complete Magic E Guide"
       metaDescription="Master silent e words (magic e) with proven practice activities for kids. Includes word lists, exercises, and a 4-6 week practice plan for reading success."
       canonicalUrl="https://wordwizai.com/guides/silent-e-words-practice-for-kids"
-      heroImage="/images/hero/phonics-guide.jpg"
+      heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
       headline="Silent E Words Practice for Kids"
       subheadline="Master the magic e pattern with structured exercises that transform short vowels into long vowels"
       author="Word Wiz AI Team"

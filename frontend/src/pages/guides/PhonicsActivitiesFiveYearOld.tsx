@@ -402,7 +402,7 @@ const PhonicsActivitiesFiveYearOld = () => {
         type: "success",
         title: "Word Wiz AI for 5-Year-Olds",
         content:
-          "Word Wiz AI's pronunciation feedback helps 5-year-olds learn correct sound production from the start. The AI provides encouraging, specific feedback that builds confidence while teaching proper phoneme production. Use 10-15 minutes daily alongside hands-on activities. Try it free at wordwizai.com.",
+          "Word Wiz AI's pronunciation feedback helps 5-year-olds learn correct sound production from the start. The AI provides encouraging, specific feedback that builds confidence while teaching proper phoneme production. Use 10-15 minutes daily alongside hands-on activities, completely free. Visit wordwizai.com to get started.",
       },
     },
     {
@@ -440,20 +440,19 @@ const PhonicsActivitiesFiveYearOld = () => {
     },
     {
       type: "paragraph",
-      content:
-        "Your 5-year-old is making good progress when they can:",
+      content: "Your 5-year-old is making good progress when they can:",
     },
     {
       type: "list",
       content: [
-        "✅ Recognize and name 20+ letters",
-        "✅ Produce sounds for 15+ letters",
-        "✅ Identify beginning sounds in simple words (What sound does 'cat' start with?)",
-        "✅ Rhyme simple words (cat/bat, run/fun)",
-        "✅ Blend 2-3 sounds together orally (/c/ /a/ /t/ → cat)",
-        "✅ Show interest in books and letters",
-        "✅ Attempt to read or 'pretend read' books",
-        "✅ Enjoy letter-based games and activities",
+        "Recognize and name 20+ letters",
+        "Produce sounds for 15+ letters",
+        "Identify beginning sounds in simple words (What sound does 'cat' start with?)",
+        "Rhyme simple words (cat/bat, run/fun)",
+        "Blend 2-3 sounds together orally (/c/ /a/ /t/ → cat)",
+        "Show interest in books and letters",
+        "Attempt to read or 'pretend read' books",
+        "Enjoy letter-based games and activities",
       ],
     },
     {
@@ -483,7 +482,7 @@ const PhonicsActivitiesFiveYearOld = () => {
       metaTitle="Phonics Activities for 5 Year Old Struggling Reader (Play-Based)"
       metaDescription="Age-appropriate, play-based phonics activities for 5-year-old struggling readers. No worksheets—multisensory games, movement, and fun that build reading skills."
       canonicalUrl="https://wordwizai.com/guides/phonics-activities-five-year-old-struggling-reader"
-      heroImage="/images/hero/young-reader.jpg"
+      heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
       headline="Phonics Activities for 5 Year Old Struggling Reader"
       subheadline="Play-based, multisensory phonics activities for 5-year-olds who need extra support—no worksheets required"
       author="Word Wiz AI Team"

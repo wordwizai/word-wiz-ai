@@ -7,7 +7,7 @@ const ChildConfusesBDLetters = () => {
     {
       type: "paragraph",
       content:
-        "Your child writes 'dog' as 'bog' and 'bed' as 'ded.' They flip b and d constantly, making reading and spelling frustrating for everyone. Letter reversals, especially b and d confusion, are one of the most common concerns parents have about their child's reading development. The good news: b/d confusion is completely normal for children under age 7-8 and is easily corrected with targeted practice. This confusion doesn't automatically indicate dyslexia or a learning disability—it's a predictable developmental stage. With the multisensory strategies and practice activities in this guide, most children eliminate b/d confusion in 4-6 weeks of consistent practice.",
+        "Your child writes 'dog' as 'bog' and 'bed' as 'ded.' They constantly flip b and d, making reading and spelling frustrating for everyone. Letter reversals, especially b and d confusion, are one of the most common concerns parents have about reading development. Here's the reassuring news: b/d confusion is completely normal for children under age 7-8 and responds well to targeted practice. This confusion doesn't automatically signal dyslexia or a learning disability. It's a predictable developmental stage. With the right multisensory strategies and practice, most children eliminate b/d confusion within 4-6 weeks.",
     },
     {
       type: "heading",
@@ -329,8 +329,7 @@ const ChildConfusesBDLetters = () => {
     },
     {
       type: "paragraph",
-      content:
-        "Eliminate b/d confusion with this 10-minute daily routine:",
+      content: "Eliminate b/d confusion with this 10-minute daily routine:",
     },
     {
       type: "list",
@@ -368,7 +367,7 @@ const ChildConfusesBDLetters = () => {
         type: "success",
         title: "Word Wiz AI for Letter Confusion",
         content:
-          "Word Wiz AI's pronunciation analysis catches b/d confusion errors in real-time, providing immediate corrective feedback. The AI generates unlimited practice sentences with b and d words, making practice engaging and effective. Try it free at wordwizai.com.",
+          "Word Wiz AI's pronunciation analysis catches b/d confusion errors in real-time, providing immediate corrective feedback. The AI generates unlimited practice sentences with b and d words at no cost, making practice engaging and effective. Visit wordwizai.com to get started.",
       },
     },
     {
@@ -425,19 +424,18 @@ const ChildConfusesBDLetters = () => {
     },
     {
       type: "paragraph",
-      content:
-        "Your child has overcome b/d confusion when they can:",
+      content: "Your child has overcome b/d confusion when they can:",
     },
     {
       type: "list",
       content: [
-        "✅ Read 20 words containing b and d with 90%+ accuracy",
-        "✅ Write b and d correctly in isolation and in words",
-        "✅ Self-correct when they make a b/d error without prompting",
-        "✅ Quickly identify whether a given letter is b or d (under 2 seconds)",
-        "✅ Read sentences with multiple b and d words without hesitation",
-        "✅ Spell words with b and d correctly 80%+ of the time",
-        "✅ No longer need mnemonic strategies (bed trick, fist trick) for most words",
+        "Read 20 words containing b and d with 90%+ accuracy",
+        "Write b and d correctly in isolation and in words",
+        "Self-correct when they make a b/d error without prompting",
+        "Quickly identify whether a given letter is b or d (under 2 seconds)",
+        "Read sentences with multiple b and d words without hesitation",
+        "Spell words with b and d correctly 80%+ of the time",
+        "No longer need mnemonic strategies (bed trick, fist trick) for most words",
       ],
     },
     {
@@ -467,7 +465,7 @@ const ChildConfusesBDLetters = () => {
       metaTitle="Child Confuses B and D Letters: Causes and Solutions"
       metaDescription="Is your child confusing b and d letters? Learn why letter reversals happen, when to worry, and proven multisensory strategies to fix it in 4-6 weeks."
       canonicalUrl="https://wordwizai.com/articles/child-confuses-b-d-letters"
-      heroImage="/images/hero/reading-help.jpg"
+      heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
       headline="Child Confuses B and D Letters"
       subheadline="Why letter reversals happen, when they're normal vs concerning, and proven strategies to eliminate confusion"
       author="Word Wiz AI Team"
@@ -478,7 +476,10 @@ const ChildConfusesBDLetters = () => {
       relatedArticles={relatedArticles}
       breadcrumbs={[
         { label: "Home", href: "/" },
-        { label: "Articles", href: "/articles/hooked-on-phonics-vs-word-wiz-ai" },
+        {
+          label: "Articles",
+          href: "/articles/hooked-on-phonics-vs-word-wiz-ai",
+        },
         { label: "B and D Letter Confusion" },
       ]}
       structuredData={{

@@ -324,7 +324,8 @@ const FiveMinuteActivities = () => {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline: "15 Quick 5-Minute Reading Practice Activities for Kids That Work",
+    headline:
+      "15 Quick 5-Minute Reading Practice Activities for Kids That Work",
     description:
       "Short, effective 5-minute reading activities busy parents can actually do. Perfect for daily practice without overwhelming schedules or kids who resist reading.",
     author: {

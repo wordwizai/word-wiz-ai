@@ -125,6 +125,38 @@ const FreeVsPaid = lazy(
   () => import("./pages/comparisons/FreeVsPaid.tsx")
 );
 
+// New SEO pages - 10 long-tail keywords
+const SilentEWordsPractice = lazy(
+  () => import("./pages/guides/SilentEWordsPractice.tsx")
+);
+const LongVowelSoundsPractice = lazy(
+  () => import("./pages/guides/LongVowelSoundsPractice.tsx")
+);
+const VowelDigraphsActivities = lazy(
+  () => import("./pages/guides/VowelDigraphsActivities.tsx")
+);
+const ChildMemorizesBooksInsteadReading = lazy(
+  () => import("./pages/articles/ChildMemorizesBooksInsteadReading.tsx")
+);
+const ChildConfusesBDLetters = lazy(
+  () => import("./pages/articles/ChildConfusesBDLetters.tsx")
+);
+const ReadingPracticeKidsHateReading = lazy(
+  () => import("./pages/guides/ReadingPracticeKidsHateReading.tsx")
+);
+const BestPhonicsAppKindergarten = lazy(
+  () => import("./pages/comparisons/BestPhonicsAppKindergarten.tsx")
+);
+const PhonicsActivitiesFiveYearOld = lazy(
+  () => import("./pages/guides/PhonicsActivitiesFiveYearOld.tsx")
+);
+const FirstGradeReadingActivities = lazy(
+  () => import("./pages/guides/FirstGradeReadingActivities.tsx")
+);
+const WorksheetsVsInteractive = lazy(
+  () => import("./pages/comparisons/WorksheetsVsInteractive.tsx")
+);
+
 // Loading fallback component
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -195,6 +227,14 @@ function App() {
                     path="/comparisons/free-phonics-apps-vs-paid-reading-programs"
                     element={<FreeVsPaid />}
                   />
+                  <Route
+                    path="/comparisons/best-phonics-app-kindergarten-struggling-readers"
+                    element={<BestPhonicsAppKindergarten />}
+                  />
+                  <Route
+                    path="/comparisons/phonics-worksheets-vs-interactive-reading"
+                    element={<WorksheetsVsInteractive />}
+                  />
 
                   {/* Article Pages */}
                   <Route
@@ -224,6 +264,14 @@ function App() {
                   <Route
                     path="/articles/first-grader-skips-words-when-reading-aloud"
                     element={<SkipsWords />}
+                  />
+                  <Route
+                    path="/articles/child-memorizes-books-instead-reading"
+                    element={<ChildMemorizesBooksInsteadReading />}
+                  />
+                  <Route
+                    path="/articles/child-confuses-b-d-letters"
+                    element={<ChildConfusesBDLetters />}
                   />
 
                   {/* Guide Pages */}
@@ -274,6 +322,30 @@ function App() {
                   <Route
                     path="/guides/phonics-practice-without-worksheets-kindergarten"
                     element={<PhonicsWithoutWorksheets />}
+                  />
+                  <Route
+                    path="/guides/silent-e-words-practice-for-kids"
+                    element={<SilentEWordsPractice />}
+                  />
+                  <Route
+                    path="/guides/long-vowel-sounds-practice-first-grade"
+                    element={<LongVowelSoundsPractice />}
+                  />
+                  <Route
+                    path="/guides/vowel-digraphs-activities-first-graders"
+                    element={<VowelDigraphsActivities />}
+                  />
+                  <Route
+                    path="/guides/reading-practice-kids-hate-reading"
+                    element={<ReadingPracticeKidsHateReading />}
+                  />
+                  <Route
+                    path="/guides/phonics-activities-5-year-old-struggling-reader"
+                    element={<PhonicsActivitiesFiveYearOld />}
+                  />
+                  <Route
+                    path="/guides/first-grade-reading-practice-activities-home"
+                    element={<FirstGradeReadingActivities />}
                   />
 
                   <Route path="/toast-test" element={<ToastTestPage />} />

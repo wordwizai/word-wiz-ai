@@ -19,10 +19,10 @@ const LandingPageFooter = () => {
               <Link to="/about" className="hover:underline">
                 About
               </Link>
-              <Link 
-                to="/signup" 
+              <Link
+                to="/signup"
                 className="hover:underline"
-                onClick={() => trackSignupClick('footer', 'link')}
+                onClick={() => trackSignupClick("footer", "link")}
               >
                 Sign Up
               </Link>
@@ -119,6 +119,18 @@ const LandingPageFooter = () => {
               >
                 Best Free Apps
               </Link>
+              <Link
+                to="/comparisons/best-phonics-app-kindergarten-struggling-readers"
+                className="hover:underline"
+              >
+                Best Kindergarten Phonics Apps
+              </Link>
+              <Link
+                to="/comparisons/phonics-worksheets-vs-interactive-reading"
+                className="hover:underline"
+              >
+                Worksheets vs Interactive
+              </Link>
             </div>
           </div>
 
@@ -175,6 +187,42 @@ const LandingPageFooter = () => {
                 className="hover:underline"
               >
                 Phonics Without Worksheets
+              </Link>
+              <Link
+                to="/guides/silent-e-words-practice-for-kids"
+                className="hover:underline"
+              >
+                Silent E Words Practice
+              </Link>
+              <Link
+                to="/guides/long-vowel-sounds-practice-first-grade"
+                className="hover:underline"
+              >
+                Long Vowel Sounds
+              </Link>
+              <Link
+                to="/guides/vowel-digraphs-activities-first-graders"
+                className="hover:underline"
+              >
+                Vowel Digraphs
+              </Link>
+              <Link
+                to="/guides/phonics-activities-5-year-old-struggling-reader"
+                className="hover:underline"
+              >
+                Phonics for 5-Year-Olds
+              </Link>
+              <Link
+                to="/guides/first-grade-reading-practice-activities-home"
+                className="hover:underline"
+              >
+                First Grade Activities
+              </Link>
+              <Link
+                to="/guides/reading-practice-kids-hate-reading"
+                className="hover:underline"
+              >
+                Kids Who Hate Reading
               </Link>
             </div>
           </div>
@@ -260,15 +308,25 @@ const LandingPageFooter = () => {
               >
                 Decodable vs Leveled Books
               </Link>
+              <Link
+                to="/articles/child-memorizes-books-instead-reading"
+                className="hover:underline"
+              >
+                Memorizes vs Reads
+              </Link>
+              <Link
+                to="/articles/child-confuses-b-d-letters"
+                className="hover:underline"
+              >
+                Confuses B and D
+              </Link>
             </div>
           </div>
         </div>
 
         {/* Copyright */}
         <div className="border-t border-primary-foreground/20 pt-6 text-center text-sm">
-          <p>
-            {new Date().getFullYear()} Word Wiz AI
-          </p>
+          <p>{new Date().getFullYear()} Word Wiz AI</p>
         </div>
       </div>
     </footer>

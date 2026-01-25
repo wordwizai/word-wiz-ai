@@ -449,14 +449,20 @@ const ChildMemorizesBooksInsteadReading = () => {
     {
       title: "Why Does My Child Guess Words When Reading?",
       href: "/articles/why-does-child-guess-words-reading",
+      category: "Reading Challenges",
+      readTime: 9,
     },
     {
       title: "Child Can't Blend Sounds Together",
       href: "/articles/child-cant-blend-sounds-together",
+      category: "Reading Challenges",
+      readTime: 11,
     },
     {
       title: "Reading Practice for Kids Who Hate Reading",
       href: "/guides/reading-practice-kids-hate-reading",
+      category: "Reading Help",
+      readTime: 13,
     },
   ];
 
@@ -466,11 +472,15 @@ const ChildMemorizesBooksInsteadReading = () => {
       metaDescription="Is your child memorizing books instead of actually reading? Learn how to identify memorization vs reading and fix it with proven strategies in 4-8 weeks."
       canonicalUrl="https://wordwizai.com/articles/child-memorizes-books-instead-reading"
       heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
+      heroImageAlt="Child reading and demonstrating memorization vs decoding"
       headline="Child Memorizes Books Instead of Reading"
       subheadline="How to identify memorization vs real reading and transition your child to true decoding skills"
-      author="Word Wiz AI Team"
+      author={{
+        name: "Word Wiz AI Team",
+        bio: "Passionate about phonics instruction and early literacy development.",
+      }}
       publishDate="2025-01-24"
-      readTime="12 min"
+      readTime={12}
       category="Reading Challenges"
       content={content}
       relatedArticles={relatedArticles}
@@ -478,9 +488,9 @@ const ChildMemorizesBooksInsteadReading = () => {
         { label: "Home", href: "/" },
         {
           label: "Articles",
-          href: "/articles/hooked-on-phonics-vs-word-wiz-ai",
+          href: "/articles/why-child-hates-reading",
         },
-        { label: "Child Memorizes Books" },
+        { label: "Child Memorizes Books", href: "/articles/child-memorizes-books-instead-reading" },
       ]}
       structuredData={{
         "@context": "https://schema.org",

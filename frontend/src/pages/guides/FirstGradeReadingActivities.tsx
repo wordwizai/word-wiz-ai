@@ -485,14 +485,20 @@ const FirstGradeReadingActivities = () => {
     {
       title: "Daily Phonics Routine for Struggling Readers",
       href: "/guides/daily-phonics-routine-struggling-readers",
+      category: "Phonics Practice",
+      readTime: 10,
     },
     {
       title: "5-Minute Reading Practice Activities for Busy Families",
       href: "/guides/five-minute-reading-practice-activities",
+      category: "Quick Activities",
+      readTime: 8,
     },
     {
       title: "How to Practice Decodable Sentences at Home",
-      href: "/guides/decodable-sentences-practice",
+      href: "/guides/decodable-sentences-for-beginning-readers",
+      category: "Fluency",
+      readTime: 9,
     },
   ];
 
@@ -502,18 +508,25 @@ const FirstGradeReadingActivities = () => {
       metaDescription="15 proven first-grade reading activities for home practice: phonics, fluency, comprehension. Includes weekly schedules and parent strategies."
       canonicalUrl="https://wordwizai.com/guides/first-grade-reading-practice-activities-home"
       heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
+      heroImageAlt="Parent and child doing reading activities at home"
       headline="First Grade Reading Practice Activities at Home"
       subheadline="15 effective activities and weekly practice schedules to build first-grade reading skills at home"
-      author="Word Wiz AI Team"
+      author={{
+        name: "Word Wiz AI Team",
+        bio: "Passionate about phonics instruction and early literacy development.",
+      }}
       publishDate="2025-01-24"
-      readTime="14 min"
+      readTime={14}
       category="Home Practice"
       content={content}
       relatedArticles={relatedArticles}
       breadcrumbs={[
         { label: "Home", href: "/" },
         { label: "Guides", href: "/guides/how-to-choose-reading-app" },
-        { label: "First Grade Reading Activities" },
+        {
+          label: "First Grade Reading Activities",
+          href: "/guides/first-grade-reading-practice-activities-home",
+        },
       ]}
       structuredData={{
         "@context": "https://schema.org",

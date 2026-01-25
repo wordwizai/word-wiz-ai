@@ -449,14 +449,20 @@ const ChildConfusesBDLetters = () => {
     {
       title: "Child Pronounces Words Wrong When Reading",
       href: "/articles/child-pronounces-words-wrong-reading",
+      category: "Reading Challenges",
+      readTime: 11,
     },
     {
       title: "How to Teach Phonics at Home to Your Child",
       href: "/guides/how-to-teach-phonics-at-home",
+      category: "Parent Guide",
+      readTime: 12,
     },
     {
       title: "Short Vowel Sounds Exercises for Beginning Readers",
       href: "/guides/short-vowel-sounds-exercises-beginning-readers",
+      category: "Phonics Practice",
+      readTime: 10,
     },
   ];
 
@@ -466,11 +472,15 @@ const ChildConfusesBDLetters = () => {
       metaDescription="Is your child confusing b and d letters? Learn why letter reversals happen, when to worry, and proven multisensory strategies to fix it in 4-6 weeks."
       canonicalUrl="https://wordwizai.com/articles/child-confuses-b-d-letters"
       heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
+      heroImageAlt="Child tracing b and d letters to reduce confusion"
       headline="Child Confuses B and D Letters"
       subheadline="Why letter reversals happen, when they're normal vs concerning, and proven strategies to eliminate confusion"
-      author="Word Wiz AI Team"
+      author={{
+        name: "Word Wiz AI Team",
+        bio: "Passionate about phonics instruction and early literacy development.",
+      }}
       publishDate="2025-01-24"
-      readTime="11 min"
+      readTime={11}
       category="Reading Challenges"
       content={content}
       relatedArticles={relatedArticles}
@@ -478,9 +488,9 @@ const ChildConfusesBDLetters = () => {
         { label: "Home", href: "/" },
         {
           label: "Articles",
-          href: "/articles/hooked-on-phonics-vs-word-wiz-ai",
+          href: "/articles/why-child-hates-reading",
         },
-        { label: "B and D Letter Confusion" },
+        { label: "B and D Letter Confusion", href: "/articles/child-confuses-b-d-letters" },
       ]}
       structuredData={{
         "@context": "https://schema.org",

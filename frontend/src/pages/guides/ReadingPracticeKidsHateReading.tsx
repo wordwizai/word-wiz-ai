@@ -385,14 +385,20 @@ const ReadingPracticeKidsHateReading = () => {
     {
       title: "Why Does My Child Hate Reading? Expert Insights",
       href: "/articles/why-does-child-hate-reading",
+      category: "Reading Help",
+      readTime: 7,
     },
     {
       title: "5-Minute Reading Practice Activities",
       href: "/guides/five-minute-reading-practice-activities",
+      category: "Reading Practice",
+      readTime: 5,
     },
     {
       title: "How to Choose the Best Reading App for Your Child",
       href: "/guides/how-to-choose-reading-app",
+      category: "Reading Apps",
+      readTime: 8,
     },
   ];
 
@@ -402,18 +408,25 @@ const ReadingPracticeKidsHateReading = () => {
       metaDescription="Does your child hate reading? Learn why kids resist reading and 10 proven strategies to rebuild motivation and skills without power struggles."
       canonicalUrl="https://wordwizai.com/guides/reading-practice-kids-hate-reading"
       heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
+      heroImageAlt="Reading Practice for Kids Who Hate Reading"
       headline="Reading Practice for Kids Who Hate Reading"
       subheadline="Proven strategies to rebuild your child's relationship with reading—without battles, tears, or force"
-      author="Word Wiz AI Team"
+      author={{
+        name: "Word Wiz AI Team",
+        bio: "Passionate about phonics instruction and early literacy development.",
+      }}
       publishDate="2025-01-24"
-      readTime="13 min"
+      readTime={13}
       category="Reading Motivation"
       content={content}
       relatedArticles={relatedArticles}
       breadcrumbs={[
         { label: "Home", href: "/" },
         { label: "Guides", href: "/guides/how-to-choose-reading-app" },
-        { label: "Reading for Kids Who Hate It" },
+        {
+          label: "Reading for Kids Who Hate It",
+          href: "/guides/reading-practice-kids-hate-reading",
+        },
       ]}
       structuredData={{
         "@context": "https://schema.org",

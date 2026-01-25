@@ -328,14 +328,20 @@ const SilentEWordsPractice = () => {
     {
       title: "Short Vowel Sounds Exercises for Beginning Readers",
       href: "/guides/short-vowel-sounds-exercises-beginning-readers",
+      category: "Phonics Practice",
+      readTime: 12,
     },
     {
       title: "Long Vowel Sounds Practice for First Grade",
       href: "/guides/long-vowel-sounds-practice-first-grade",
+      category: "Phonics Practice",
+      readTime: 13,
     },
     {
       title: "How to Teach CVC Words to Struggling Readers",
       href: "/guides/how-to-teach-cvc-words-to-struggling-readers",
+      category: "Phonics Practice",
+      readTime: 11,
     },
   ];
 
@@ -345,18 +351,25 @@ const SilentEWordsPractice = () => {
       metaDescription="Master silent e words (magic e) with proven practice activities for kids. Includes word lists, exercises, and a 4-6 week practice plan for reading success."
       canonicalUrl="https://wordwizai.com/guides/silent-e-words-practice-for-kids"
       heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
+      heroImageAlt="Child practicing silent e words with cards"
       headline="Silent E Words Practice for Kids"
       subheadline="Master the magic e pattern with structured exercises that transform short vowels into long vowels"
-      author="Word Wiz AI Team"
+      author={{
+        name: "Word Wiz AI Team",
+        bio: "Passionate about phonics instruction and early literacy development.",
+      }}
       publishDate="2025-01-24"
-      readTime="12 min"
+      readTime={12}
       category="Phonics Practice"
       content={content}
       relatedArticles={relatedArticles}
       breadcrumbs={[
         { label: "Home", href: "/" },
         { label: "Guides", href: "/guides/how-to-choose-reading-app" },
-        { label: "Silent E Words Practice" },
+        {
+          label: "Silent E Words Practice",
+          href: "/guides/silent-e-words-practice-for-kids",
+        },
       ]}
       structuredData={{
         "@context": "https://schema.org",

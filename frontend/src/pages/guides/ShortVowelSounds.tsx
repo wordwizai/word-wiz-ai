@@ -263,8 +263,7 @@ const ShortVowelSounds = () => {
     },
     {
       type: "paragraph",
-      content:
-        "Your child has mastered short vowels when they can:",
+      content: "Your child has mastered short vowels when they can:",
     },
     {
       type: "list",

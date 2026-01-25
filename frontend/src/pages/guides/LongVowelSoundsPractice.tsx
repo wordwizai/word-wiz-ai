@@ -497,14 +497,20 @@ const LongVowelSoundsPractice = () => {
     {
       title: "Short Vowel Sounds Exercises for Beginning Readers",
       href: "/guides/short-vowel-sounds-exercises-beginning-readers",
+      category: "Phonics Practice",
+      readTime: 12,
     },
     {
       title: "Silent E Words Practice for Kids",
       href: "/guides/silent-e-words-practice-for-kids",
+      category: "Phonics Practice",
+      readTime: 12,
     },
     {
       title: "Vowel Digraphs Activities for First Graders",
       href: "/guides/vowel-digraphs-activities-first-graders",
+      category: "Phonics Practice",
+      readTime: 13,
     },
   ];
 
@@ -514,18 +520,25 @@ const LongVowelSoundsPractice = () => {
       metaDescription="Master long vowel sounds in first grade with proven activities, word lists, and practice schedules. Includes long A, E, I, O, U exercises for reading success."
       canonicalUrl="https://wordwizai.com/guides/long-vowel-sounds-practice-first-grade"
       heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
+      heroImageAlt="Child practicing long vowel sounds with flashcards"
       headline="Long Vowel Sounds Practice for First Grade"
       subheadline="Comprehensive guide to teaching and practicing long vowels—when vowels 'say their names' in words like cake, feet, and bike"
-      author="Word Wiz AI Team"
+      author={{
+        name: "Word Wiz AI Team",
+        bio: "Passionate about phonics instruction and early literacy development.",
+      }}
       publishDate="2025-01-24"
-      readTime="13 min"
+      readTime={13}
       category="Phonics Practice"
       content={content}
       relatedArticles={relatedArticles}
       breadcrumbs={[
         { label: "Home", href: "/" },
         { label: "Guides", href: "/guides/how-to-choose-reading-app" },
-        { label: "Long Vowel Sounds Practice" },
+        {
+          label: "Long Vowel Sounds Practice",
+          href: "/guides/long-vowel-sounds-practice-first-grade",
+        },
       ]}
       structuredData={{
         "@context": "https://schema.org",

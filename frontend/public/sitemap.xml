@@ -217,4 +217,65 @@
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+  <!-- New SEO Pages -->
+  <url>
+    <loc>https://wordwizai.com/guides/silent-e-words-practice-for-kids</loc>
+    <lastmod>2026-01-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://wordwizai.com/guides/long-vowel-sounds-practice-first-grade</loc>
+    <lastmod>2026-01-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://wordwizai.com/guides/vowel-digraphs-activities-first-graders</loc>
+    <lastmod>2026-01-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://wordwizai.com/articles/child-memorizes-books-instead-reading</loc>
+    <lastmod>2026-01-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://wordwizai.com/articles/child-confuses-b-d-letters</loc>
+    <lastmod>2026-01-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://wordwizai.com/guides/reading-practice-kids-hate-reading</loc>
+    <lastmod>2026-01-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://wordwizai.com/comparisons/best-phonics-app-kindergarten-struggling-readers</loc>
+    <lastmod>2026-01-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://wordwizai.com/guides/phonics-activities-5-year-old-struggling-reader</loc>
+    <lastmod>2026-01-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://wordwizai.com/guides/first-grade-reading-practice-activities-home</loc>
+    <lastmod>2026-01-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://wordwizai.com/comparisons/phonics-worksheets-vs-interactive-reading</loc>
+    <lastmod>2026-01-25</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
 </urlset>

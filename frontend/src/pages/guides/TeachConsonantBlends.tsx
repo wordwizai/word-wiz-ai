@@ -36,8 +36,7 @@ const TeachConsonantBlends = () => {
     },
     {
       type: "paragraph",
-      content:
-        "Blends are categorized by where they appear in words:",
+      content: "Blends are categorized by where they appear in words:",
     },
     {
       type: "list",
@@ -188,8 +187,7 @@ const TeachConsonantBlends = () => {
     },
     {
       type: "paragraph",
-      content:
-        "Make blend practice fun with these parent-tested activities:",
+      content: "Make blend practice fun with these parent-tested activities:",
     },
     {
       type: "heading",

@@ -539,14 +539,20 @@ const BestPhonicsAppKindergarten = () => {
     {
       title: "Hooked on Phonics vs Word Wiz AI: In-Depth Comparison",
       href: "/articles/hooked-on-phonics-vs-word-wiz-ai",
+      category: "App Comparisons",
+      readTime: 12,
     },
     {
       title: "Free Phonics Programs vs Paid: What's the Difference?",
       href: "/comparisons/free-phonics-programs-vs-paid",
+      category: "App Comparisons",
+      readTime: 10,
     },
     {
       title: "AI Reading Tutors vs Traditional Reading Apps",
       href: "/comparisons/ai-reading-tutors-vs-traditional-apps",
+      category: "App Comparisons",
+      readTime: 11,
     },
   ];
 
@@ -556,11 +562,15 @@ const BestPhonicsAppKindergarten = () => {
       metaDescription="Comprehensive review of top 5 phonics apps for kindergarten struggling readers: Word Wiz AI, Hooked on Phonics, Reading Eggs, ABCmouse, and Starfall. Find the best fit for your child."
       canonicalUrl="https://wordwizai.com/comparisons/best-phonics-app-kindergarten-struggling-readers"
       heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
+      heroImageAlt="Kindergartener using a phonics app on a tablet"
       headline="Best Phonics App for Kindergarten Struggling Readers"
       subheadline="In-depth comparison of Word Wiz AI, Hooked on Phonics, Reading Eggs, ABCmouse, and Starfall—which is right for your child?"
-      author="Word Wiz AI Team"
+      author={{
+        name: "Word Wiz AI Team",
+        bio: "Passionate about phonics instruction and early literacy development.",
+      }}
       publishDate="2025-01-24"
-      readTime="14 min"
+      readTime={14}
       category="App Comparisons"
       content={content}
       relatedArticles={relatedArticles}
@@ -570,7 +580,7 @@ const BestPhonicsAppKindergarten = () => {
           label: "Comparisons",
           href: "/comparisons/ai-reading-tutors-vs-traditional-apps",
         },
-        { label: "Best Phonics App for Kindergarten" },
+        { label: "Best Phonics App for Kindergarten", href: "/comparisons/best-phonics-app-kindergarten-struggling-readers" },
       ]}
       structuredData={{
         "@context": "https://schema.org",

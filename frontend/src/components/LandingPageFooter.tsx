@@ -126,7 +126,7 @@ const LandingPageFooter = () => {
                 Best Kindergarten Phonics Apps
               </Link>
               <Link
-                to="/comparisons/worksheets-vs-interactive-reading-practice"
+                to="/comparisons/phonics-worksheets-vs-interactive-reading"
                 className="hover:underline"
               >
                 Worksheets vs Interactive
@@ -207,7 +207,7 @@ const LandingPageFooter = () => {
                 Vowel Digraphs
               </Link>
               <Link
-                to="/guides/phonics-activities-five-year-old-struggling-reader"
+                to="/guides/phonics-activities-5-year-old-struggling-reader"
                 className="hover:underline"
               >
                 Phonics for 5-Year-Olds

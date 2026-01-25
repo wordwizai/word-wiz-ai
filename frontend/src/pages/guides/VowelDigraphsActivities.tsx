@@ -386,14 +386,20 @@ const VowelDigraphsActivities = () => {
     {
       title: "Long Vowel Sounds Practice for First Grade",
       href: "/guides/long-vowel-sounds-practice-first-grade",
+      category: "Phonics Practice",
+      readTime: 13,
     },
     {
       title: "R-Controlled Vowels Explained",
-      href: "/guides/r-controlled-vowels-explained",
+      href: "/guides/r-controlled-vowels-teaching-strategies-parents",
+      category: "Phonics Practice",
+      readTime: 12,
     },
     {
       title: "First Grade Reading Practice Activities at Home",
       href: "/guides/first-grade-reading-practice-activities-home",
+      category: "Home Practice",
+      readTime: 14,
     },
   ];
 
@@ -403,18 +409,25 @@ const VowelDigraphsActivities = () => {
       metaDescription="Master vowel digraphs (oo, oi, oy, ou, ow, au, aw, ew) with hands-on activities, games, and practice schedules for first-grade reading success."
       canonicalUrl="https://wordwizai.com/guides/vowel-digraphs-activities-first-graders"
       heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
+      heroImageAlt="Vowel Digraphs Activities for First Graders"
       headline="Vowel Digraphs Activities for First Graders"
       subheadline="Hands-on activities and games to master two-vowel patterns that make one sound—essential for first-grade reading fluency"
-      author="Word Wiz AI Team"
+      author={{
+        name: "Word Wiz AI Team",
+        bio: "Passionate about phonics instruction and early literacy development.",
+      }}
       publishDate="2025-01-24"
-      readTime="13 min"
+      readTime={13}
       category="Phonics Practice"
       content={content}
       relatedArticles={relatedArticles}
       breadcrumbs={[
         { label: "Home", href: "/" },
         { label: "Guides", href: "/guides/how-to-choose-reading-app" },
-        { label: "Vowel Digraphs Activities" },
+        {
+          label: "Vowel Digraphs Activities",
+          href: "/guides/vowel-digraphs-activities-first-graders",
+        },
       ]}
       structuredData={{
         "@context": "https://schema.org",

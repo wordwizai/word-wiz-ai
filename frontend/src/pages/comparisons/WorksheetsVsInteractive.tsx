@@ -471,14 +471,20 @@ const WorksheetsVsInteractive = () => {
     {
       title: "Phonics Without Worksheets: Play-Based Alternatives",
       href: "/guides/phonics-without-worksheets",
+      category: "Play-Based",
+      readTime: 8,
     },
     {
       title: "Best Phonics App for Kindergarten Struggling Readers",
       href: "/comparisons/best-phonics-app-kindergarten-struggling-readers",
+      category: "App Comparison",
+      readTime: 10,
     },
     {
       title: "AI Reading Tutors vs Traditional Reading Apps",
       href: "/comparisons/ai-reading-tutors-vs-traditional-apps",
+      category: "App Comparison",
+      readTime: 9,
     },
   ];
 
@@ -486,13 +492,17 @@ const WorksheetsVsInteractive = () => {
     <ArticlePageTemplate
       metaTitle="Phonics Worksheets vs Interactive Reading Practice: Which Works?"
       metaDescription="Comprehensive comparison of phonics worksheets vs interactive reading apps: pros, cons, research, and when to use each for optimal reading development."
-      canonicalUrl="https://wordwizai.com/comparisons/worksheets-vs-interactive-reading-practice"
+      canonicalUrl="https://wordwizai.com/comparisons/phonics-worksheets-vs-interactive-reading"
       heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
+      heroImageAlt="Worksheet and tablet showing phonics practice side-by-side"
       headline="Phonics Worksheets vs Interactive Reading Practice"
       subheadline="Evidence-based comparison of worksheets and interactive apps—which builds reading skills more effectively?"
-      author="Word Wiz AI Team"
+      author={{
+        name: "Word Wiz AI Team",
+        bio: "Passionate about phonics instruction and early literacy development.",
+      }}
       publishDate="2025-01-24"
-      readTime="13 min"
+      readTime={13}
       category="Learning Methods"
       content={content}
       relatedArticles={relatedArticles}
@@ -502,7 +512,7 @@ const WorksheetsVsInteractive = () => {
           label: "Comparisons",
           href: "/comparisons/ai-reading-tutors-vs-traditional-apps",
         },
-        { label: "Worksheets vs Interactive" },
+        { label: "Worksheets vs Interactive", href: "/comparisons/phonics-worksheets-vs-interactive-reading" },
       ]}
       structuredData={{
         "@context": "https://schema.org",

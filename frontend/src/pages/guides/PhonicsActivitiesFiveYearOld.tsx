@@ -465,15 +465,21 @@ const PhonicsActivitiesFiveYearOld = () => {
   const relatedArticles = [
     {
       title: "Teaching Consonant Blends to Kindergarten Readers",
-      href: "/guides/teaching-consonant-blends-kindergarten",
+      href: "/guides/teaching-consonant-blends-kindergarten-at-home",
+      category: "Phonics Practice",
+      readTime: 11,
     },
     {
       title: "How to Teach CVC Words to Struggling Readers",
       href: "/guides/how-to-teach-cvc-words-to-struggling-readers",
+      category: "Phonics Practice",
+      readTime: 11,
     },
     {
       title: "Phonics Without Worksheets: Play-Based Learning",
-      href: "/guides/phonics-without-worksheets",
+      href: "/guides/phonics-practice-without-worksheets-kindergarten",
+      category: "Play-Based",
+      readTime: 10,
     },
   ];
 
@@ -481,20 +487,27 @@ const PhonicsActivitiesFiveYearOld = () => {
     <ArticlePageTemplate
       metaTitle="Phonics Activities for 5 Year Old Struggling Reader (Play-Based)"
       metaDescription="Age-appropriate, play-based phonics activities for 5-year-old struggling readers. No worksheets—multisensory games, movement, and fun that build reading skills."
-      canonicalUrl="https://wordwizai.com/guides/phonics-activities-five-year-old-struggling-reader"
+      canonicalUrl="https://wordwizai.com/guides/phonics-activities-5-year-old-struggling-reader"
       heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
+      heroImageAlt="Play-based phonics activities for five-year-olds"
       headline="Phonics Activities for 5 Year Old Struggling Reader"
       subheadline="Play-based, multisensory phonics activities for 5-year-olds who need extra support—no worksheets required"
-      author="Word Wiz AI Team"
+      author={{
+        name: "Word Wiz AI Team",
+        bio: "Passionate about phonics instruction and early literacy development.",
+      }}
       publishDate="2025-01-24"
-      readTime="13 min"
+      readTime={13}
       category="Early Reading"
       content={content}
       relatedArticles={relatedArticles}
       breadcrumbs={[
         { label: "Home", href: "/" },
         { label: "Guides", href: "/guides/how-to-choose-reading-app" },
-        { label: "Phonics for 5-Year-Olds" },
+        {
+          label: "Phonics for 5-Year-Olds",
+          href: "/guides/phonics-activities-5-year-old-struggling-reader",
+        },
       ]}
       structuredData={{
         "@context": "https://schema.org",

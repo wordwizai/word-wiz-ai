@@ -37,8 +37,12 @@ COPY . .
 # Expose HTTPS port for direct WebSocket access
 EXPOSE 8443
 
+# SSL cert paths are configurable via environment variables
+ENV SSL_KEYFILE="/etc/letsencrypt/live/api.wordwizai.com/privkey.pem"
+ENV SSL_CERTFILE="/etc/letsencrypt/live/api.wordwizai.com/fullchain.pem"
+
 # Run Uvicorn with SSL on port 8443
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8443", \
-     "--timeout-keep-alive", "86400", \
-     "--ssl-keyfile", "/etc/letsencrypt/live/api.wordwizai.com/privkey.pem", \
-     "--ssl-certfile", "/etc/letsencrypt/live/api.wordwizai.com/fullchain.pem"]
+CMD uvicorn main:app --host 0.0.0.0 --port 8443 \
+    --timeout-keep-alive 86400 \
+    --ssl-keyfile "$SSL_KEYFILE" \
+    --ssl-certfile "$SSL_CERTFILE"

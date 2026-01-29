@@ -9,24 +9,7 @@
 
 **Goal**: Eliminate active security vulnerabilities and harden production configuration.
 
-### 1.1 Secret Rotation & Git History Cleanup
-
-- [ ] Rotate all exposed API keys immediately:
-  - OpenAI API key
-  - ElevenLabs API key
-  - Google Cloud AI API key
-  - Google OAuth client secret
-  - Play.ht API key
-  - Deepgram API key
-  - HuggingFace token (frontend)
-  - Application SECRET_KEY
-- [ ] Rotate the AWS RDS database password
-- [ ] Remove `.env` files from git history using `git filter-repo` or BFG Repo-Cleaner
-- [ ] Update `.gitignore` to use `.env*` wildcard pattern (currently only `.env` is ignored, missing `.env.local`, `.env.production`, etc.)
-- [ ] Create `.env.example` files for both backend and frontend with placeholder values
-- [ ] Remove hardcoded email from `backend/docker-compose.yml` certbot command; use an environment variable
-
-### 1.2 Production Configuration Fixes
+### 1.1 Production Configuration Fixes
 
 - [ ] **Disable debug mode** in `backend/main.py:12` — change `FastAPI(debug=True)` to read from environment variable: `debug=os.getenv("DEBUG", "false").lower() == "true"`
 - [ ] **Tighten CORS** in `backend/main.py:14-23` — restrict `allow_methods` from `["*"]` to `["GET", "POST", "PUT", "OPTIONS"]` and `allow_headers` from `["*"]` to `["Content-Type", "Authorization"]`
@@ -37,8 +20,6 @@
 
 ### QA Checks
 
-- [ ] Verify no `.env` files are tracked by git (`git ls-files | grep .env` returns nothing)
-- [ ] Confirm all rotated API keys work in dev and production
 - [ ] Test that `debug=False` hides stack traces from API error responses
 - [ ] Verify CORS restrictions don't break frontend requests (test from `wordwizai.com` and `localhost:5173`)
 - [ ] Confirm JWT tokens expire at the new shorter window

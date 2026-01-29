@@ -16,7 +16,8 @@ from openai import OpenAI
 from .audio_validation import log_audio_characteristics, validate_audio_output
 from .phoneme_extractor import PhonemeExtractor
 from .phoneme_extractor_onnx import PhonemeExtractorONNX
-from .process_audio import analyze_results, process_audio_array
+from .audio_analysis import analyze_results
+from .process_audio import process_audio_array
 from .text_to_audio import ElevenLabsAPIClient, GoogleTTSAPIClient
 from .word_extractor import WordExtractor, WordExtractorOnline
 

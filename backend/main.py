@@ -6,7 +6,7 @@ import os
 from routers import ai, auth, google_auth, session, user, activities, feedback, health, classes
 from starlette.middleware.sessions import SessionMiddleware
 
-app = FastAPI(debug=True)
+app = FastAPI(debug=os.getenv("DEBUG", "false").lower() == "true")
 
 # Create the database tables
 Base.metadata.create_all(bind=engine)
@@ -21,8 +21,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 app.add_middleware(SessionMiddleware, secret_key=google_auth.GOOGLE_CLIENT_SECRET or "")

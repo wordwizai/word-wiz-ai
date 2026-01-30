@@ -8,6 +8,8 @@ from elevenlabs.client import ElevenLabs
 from google.cloud import texttospeech as texttospeech
 from google.oauth2 import service_account
 
+from .text_utils import contains_ssml_tags
+
 
 class ElevenLabsAPIClient:
     def __init__(self):
@@ -15,7 +17,7 @@ class ElevenLabsAPIClient:
         self.client = ElevenLabs(api_key=os.getenv("ELEVENLABS_API_KEY"))
 
     def getAudio(self, text, is_ssml=False):
-        if is_ssml or self._contains_ssml_tags(text):
+        if is_ssml or contains_ssml_tags(text):
             # Wrap in SSML root element if not already wrapped
             if not text.strip().startswith("<speak>"):
                 text = f"<speak>{text}</speak>"
@@ -30,14 +32,6 @@ class ElevenLabsAPIClient:
         )
         return audio
 
-    def _contains_ssml_tags(self, text):
-        """Check if text contains SSML tags"""
-        import re
-
-        # Look for common SSML tags
-        ssml_pattern = r"<(phoneme|emphasis|break|say-as|prosody|voice|speak)\b[^>]*>"
-        return bool(re.search(ssml_pattern, text, re.IGNORECASE))
-
 
 class GoogleTTSAPIClient:
     def __init__(self):
@@ -49,7 +43,7 @@ class GoogleTTSAPIClient:
 
     def getAudio(self, text, is_ssml=False):
         # Check if text contains SSML tags or if explicitly marked as SSML
-        if is_ssml or self._contains_ssml_tags(text):
+        if is_ssml or contains_ssml_tags(text):
             # Wrap in SSML root element if not already wrapped
             if not text.strip().startswith("<speak>"):
                 text = f"<speak>{text}</speak>"
@@ -74,17 +68,3 @@ class GoogleTTSAPIClient:
         )
 
         return [response.audio_content]
-
-    def _contains_ssml_tags(self, text):
-        """Check if text contains SSML tags"""
-        import re
-
-        # Look for common SSML tags
-        ssml_pattern = r"<(phoneme|emphasis|break|say-as|prosody|voice|speak)\b[^>]*>"
-        return bool(re.search(ssml_pattern, text, re.IGNORECASE))
-
-
-# if __name__ == "__main__":
-#     client = ElevenLabsAPIClient()
-#     audio = client.getAudio(text="Hello, World!", playAudio=True)
-#     print(audio)

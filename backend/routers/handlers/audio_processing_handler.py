@@ -12,6 +12,7 @@ import pandas as pd
 import soundfile as sf
 from core.audio_preprocessing import preprocess_audio
 from core.audio_quality_analyzer import AudioQualityAnalyzer
+from core.logging_config import get_logger
 from core.modes.base_mode import BaseMode
 from core.phoneme_assistant import PhonemeAssistant
 from core.temp_audio_cache import audio_cache
@@ -31,6 +32,8 @@ from routers.handlers.phoneme_processing_handler import (
     normalize_espeak_to_ipa,
     format_phonemes_for_logging,
 )
+
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -76,7 +79,7 @@ async def load_and_preprocess_audio_bytes(
     if session_id is None:
         session_id = audio_cache.generate_session_id()
 
-    print(f"📋 Processing audio: filename={filename}, content_type={content_type}, size={len(audio_bytes)} bytes")
+    logger.info(f"Processing audio: filename={filename}, content_type={content_type}, size={len(audio_bytes)} bytes")
     
     # Validate content type only if we have actual audio data
     if len(audio_bytes) > 0 and content_type not in [
@@ -91,7 +94,7 @@ async def load_and_preprocess_audio_bytes(
     
     # Check if this is an empty file (sent when client did full extraction)
     if len(audio_bytes) == 0:
-        print("📭 Received empty audio - client performed full extraction")
+        logger.info("Received empty audio - client performed full extraction")
         # Return empty array - won't be used since client provided both phonemes and words
         return np.array([]), session_id
     
@@ -110,7 +113,7 @@ async def load_and_preprocess_audio_bytes(
             "size_bytes": len(audio_bytes)
         }
     )
-    print(f"⏱️  Cache save (original) took {time.time() - cache_start:.3f}s")
+    logger.debug(f"Cache save (original) took {time.time() - cache_start:.3f}s")
     
     decode_start = time.time()
     # Run soundfile decoding in thread pool to avoid blocking event loop
@@ -121,15 +124,15 @@ async def load_and_preprocess_audio_bytes(
         return array, sr
     
     audio_array, sample_rate = await asyncio.to_thread(_decode_audio)
-    print(f"⏱️  Audio decode took {time.time() - decode_start:.3f}s")
+    logger.debug(f"Audio decode took {time.time() - decode_start:.3f}s")
     
     # Calculate audio duration
     audio_duration = len(audio_array) / sample_rate
-    print(f"📊 Audio duration: {audio_duration:.2f}s ({len(audio_array)} samples @ {sample_rate}Hz)")
+    logger.info(f"Audio duration: {audio_duration:.2f}s ({len(audio_array)} samples @ {sample_rate}Hz)")
     
     # Validate audio length
     if audio_duration > 10:
-        print(f"⚠️  Long audio detected ({audio_duration:.1f}s) - will use chunking strategy for better accuracy.")
+        logger.warning(f"Long audio detected ({audio_duration:.1f}s) - will use chunking strategy for better accuracy.")
     
     # Validate audio is not too short
     if audio_duration < 0.5:
@@ -155,24 +158,24 @@ async def load_and_preprocess_audio_bytes(
             "duration_seconds": audio_duration
         }
     )
-    print(f"⏱️  Cache save (pre-preprocessing) took {time.time() - cache_start:.3f}s")
-    
+    logger.debug(f"Cache save (pre-preprocessing) took {time.time() - cache_start:.3f}s")
+
     # QUALITY VALIDATION: Analyze audio quality before preprocessing
-    print("🔍 Analyzing audio quality...")
+    logger.info("Analyzing audio quality...")
     quality_start = time.time()
     analyzer = AudioQualityAnalyzer(sr=sample_rate)
     quality_info = await asyncio.to_thread(
         analyzer.analyze_audio_quality, audio_array
     )
-    print(f"⏱️  Quality analysis took {time.time() - quality_start:.3f}s")
-    
+    logger.debug(f"Quality analysis took {time.time() - quality_start:.3f}s")
+
     # Log quality metrics
-    print(f"📊 Audio Quality Report:")
-    print(f"   - Quality Level: {quality_info['quality_level'].upper()}")
-    print(f"   - Quality Score: {quality_info['quality_score']:.1f}/100")
-    print(f"   - SNR: {quality_info['snr_db']:.1f} dB")
-    print(f"   - Clipping: {quality_info['clipping_percentage']:.2f}%")
-    print(f"   - Silence: {quality_info['silence_percentage']:.1f}%")
+    logger.info(f"Audio Quality Report:")
+    logger.info(f"   - Quality Level: {quality_info['quality_level'].upper()}")
+    logger.info(f"   - Quality Score: {quality_info['quality_score']:.1f}/100")
+    logger.info(f"   - SNR: {quality_info['snr_db']:.1f} dB")
+    logger.info(f"   - Clipping: {quality_info['clipping_percentage']:.2f}%")
+    logger.info(f"   - Silence: {quality_info['silence_percentage']:.1f}%")
     
     # Check for critical quality issues
     if quality_info['snr_db'] < 5.0:
@@ -198,17 +201,17 @@ async def load_and_preprocess_audio_bytes(
     
     # Warn about quality issues but continue processing
     if quality_info['issues']:
-        print(f"⚠️  Quality issues detected:")
+        logger.warning(f"Quality issues detected:")
         for issue in quality_info['issues']:
-            print(f"   - {issue}")
-    
+            logger.warning(f"   - {issue}")
+
     if quality_info['recommendations']:
-        print(f"💡 Recommendations:")
+        logger.info(f"Recommendations:")
         for rec in quality_info['recommendations']:
-            print(f"   - {rec}")
+            logger.info(f"   - {rec}")
     
     # Apply preprocessing with audio length for adaptive noise reduction
-    print("🔊 Starting audio preprocessing...")
+    logger.info("Starting audio preprocessing...")
     # Run preprocessing in thread pool to avoid blocking event loop
     audio_array = await asyncio.to_thread(
         preprocess_audio, audio_array, sr=sample_rate, audio_length_seconds=audio_duration, use_adaptive=True
@@ -231,8 +234,8 @@ async def load_and_preprocess_audio_bytes(
             "sample_rate": sample_rate
         }
     )
-    print(f"⏱️  Cache save (preprocessed) took {time.time() - cache_start:.3f}s")
-    
+    logger.debug(f"Cache save (preprocessed) took {time.time() - cache_start:.3f}s")
+
     return audio_array, session_id
 
 
@@ -253,21 +256,21 @@ def sanitize(obj):
 async def analyze_audio_file_event_stream(ctx: AudioAnalysisContext):
     try:
         # Send immediate acknowledgment that processing has started
-        print("📤 Sending processing started event...")
+        logger.info("Sending processing started event...")
         processing_started_payload = {
             "type": "processing_started",
             "data": {"message": "Audio received, analyzing..."},
         }
         yield f"data: {json.dumps(processing_started_payload)}\n\n"
         await asyncio.sleep(0.01)  # Ensure the event is flushed
-        
+
         # NOW do the preprocessing after sending the first event
-        print("🔄 Starting audio preprocessing...")
+        logger.info("Starting audio preprocessing...")
         try:
             audio_array, cache_session_id = await load_and_preprocess_audio_bytes(
                 ctx.audio_bytes, ctx.audio_filename, ctx.audio_content_type, str(ctx.session.id)
             )
-            print("✅ Audio preprocessing completed")
+            logger.info("Audio preprocessing completed")
         except Exception as e:
             error_payload = {
                 "type": "error",
@@ -300,12 +303,12 @@ async def analyze_audio_file_event_stream(ctx: AudioAnalysisContext):
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Empty audio received but word extraction is needed. Audio file may be corrupted. Please try again."
                 )
-            print("📭 Empty audio received - using full client extraction")
+            logger.info("Empty audio received - using full client extraction")
         else:
             # Validate audio has speech content using VAD
             from core.audio_chunking import estimate_speech_activity
             speech_percentage = estimate_speech_activity(audio_array, sr=16000)
-            print(f"🎤 Speech activity: {speech_percentage:.1f}%")
+            logger.info(f"Speech activity: {speech_percentage:.1f}%")
             
             # Require at least 30% speech activity
             if speech_percentage < 30:
@@ -321,14 +324,14 @@ async def analyze_audio_file_event_stream(ctx: AudioAnalysisContext):
         if ctx.client_phonemes is not None:
             # Validate client phonemes format
             is_valid, error_msg = validate_client_phonemes(ctx.client_phonemes, ctx.attempted_sentence)
-            
+
             if is_valid:
-                print(f"✓ Client phonemes validated successfully")
-                print(f"  Client phonemes (eSpeak format): {format_phonemes_for_logging(ctx.client_phonemes, max_words=3)}")
-                
+                logger.info(f"Client phonemes validated successfully")
+                logger.info(f"  Client phonemes (eSpeak format): {format_phonemes_for_logging(ctx.client_phonemes, max_words=3)}")
+
                 # Normalize eSpeak → IPA for consistent processing
                 normalized_phonemes = normalize_espeak_to_ipa(ctx.client_phonemes)
-                print(f"  Normalized phonemes (IPA format): {format_phonemes_for_logging(normalized_phonemes, max_words=3)}")
+                logger.info(f"  Normalized phonemes (IPA format): {format_phonemes_for_logging(normalized_phonemes, max_words=3)}")
                 
                 use_client_phonemes = True
                 client_phonemes = normalized_phonemes  # Use normalized version
@@ -339,33 +342,33 @@ async def analyze_audio_file_event_stream(ctx: AudioAnalysisContext):
                     is_valid_words, error_msg_words = validate_client_words(
                         ctx.client_words, normalized_phonemes, ctx.attempted_sentence
                     )
-                    
+
                     if is_valid_words:
-                        print(f"✓ Client words validated successfully: {ctx.client_words}")
+                        logger.info(f"Client words validated successfully: {ctx.client_words}")
                         use_client_words = True
                     else:
-                        print(f"✗ Client word validation failed: {error_msg_words}")
-                        print(f"  Falling back to server-side word extraction")
+                        logger.warning(f"Client word validation failed: {error_msg_words}")
+                        logger.info(f"  Falling back to server-side word extraction")
                         client_words = None
             else:
-                print(f"✗ Client phoneme validation failed: {error_msg}")
-                print(f"  Falling back to server-side phoneme extraction")
+                logger.warning(f"Client phoneme validation failed: {error_msg}")
+                logger.info(f"  Falling back to server-side phoneme extraction")
                 client_phonemes = None
                 client_words = None  # Can't use words without phonemes
         
         # Log processing path
         if use_client_phonemes and use_client_words:
-            print("→ Using full client extraction (phonemes + words) - Maximum speed! 🚀")
+            logger.info("Using full client extraction (phonemes + words) - Maximum speed!")
             processing_mode = "client"
         elif use_client_phonemes:
-            print("→ Using client phonemes only - Server will extract words")
+            logger.info("Using client phonemes only - Server will extract words")
             processing_mode = "hybrid"
         else:
-            print("→ Using full server-side extraction (phonemes + words)")
+            logger.info("Using full server-side extraction (phonemes + words)")
             processing_mode = "server"
-        
+
         # Send processing mode update
-        print(f"📤 Sending processing mode update ({processing_mode})...")
+        logger.info(f"Sending processing mode update ({processing_mode})...")
         processing_mode_payload = {
             "type": "processing_mode",
             "data": {"mode": processing_mode, "message": "Analyzing pronunciation..."},
@@ -393,10 +396,10 @@ async def analyze_audio_file_event_stream(ctx: AudioAnalysisContext):
             # Analyze the results to get the same format as server processing
             analysis_start = time.time()
             pronunciation_dataframe, highest_per_word, problem_summary, per_summary = analyze_results(pronunciation_data)
-            print(f"⏱️  analyze_results() took {time.time() - analysis_start:.3f}s")
-            
+            logger.debug(f"analyze_results() took {time.time() - analysis_start:.3f}s")
+
             extraction_mode = "full client" if use_client_words else "client phonemes only"
-            print(f"✓ {extraction_mode} processing completed in {time.time() - processing_start:.3f}s (PER: {per_summary.get('sentence_per', 0):.2%})")
+            logger.info(f"{extraction_mode} processing completed in {time.time() - processing_start:.3f}s (PER: {per_summary.get('sentence_per', 0):.2%})")
         else:
             # Original server-side processing
             pronunciation_dataframe, highest_per_word, problem_summary, per_summary = (
@@ -404,8 +407,8 @@ async def analyze_audio_file_event_stream(ctx: AudioAnalysisContext):
                     ctx.attempted_sentence, audio_array, verbose=True
                 )
             )
-            
-            print(f"✓ Server phoneme processing completed in {time.time() - processing_start:.3f}s (PER: {per_summary.get('sentence_per', 0):.2%})")
+
+            logger.info(f"Server phoneme processing completed in {time.time() - processing_start:.3f}s (PER: {per_summary.get('sentence_per', 0):.2%})")
         
         # Create audio analysis object (same format regardless of processing path)
         audio_analysis_object = AudioAnalysis(
@@ -423,7 +426,7 @@ async def analyze_audio_file_event_stream(ctx: AudioAnalysisContext):
                 "per_summary": sanitize(per_summary),
             },
         }
-        print("📤 Sending analysis payload...")
+        logger.info("Sending analysis payload...")
         yield f"data: {json.dumps(analysis_payload)}\n\n"
         await asyncio.sleep(0.01)  # Yield control to the event loop with small delay to ensure flush
 
@@ -451,7 +454,7 @@ async def analyze_audio_file_event_stream(ctx: AudioAnalysisContext):
                 "metadata": response.get("metadata", {}),
             },
         }
-        print("📤 Sending GPT response payload...")
+        logger.info("Sending GPT response payload...")
         yield f"data: {json.dumps(gpt_payload)}\n\n"
         await asyncio.sleep(0.01)  # Yield control to the event loop with small delay to ensure flush
 
@@ -512,7 +515,7 @@ async def analyze_audio_file_event_stream(ctx: AudioAnalysisContext):
         #         "url": f"/feedback-audio?session_id={session.id}&text={quote(response.get('feedback',''))}"
         #     },
         # }
-        print("📤 Sending audio feedback payload...")
+        logger.info("Sending audio feedback payload...")
         yield f"data: {json.dumps(audio_payload)}\n\n"
         await asyncio.sleep(0.01)  # Yield control to the event loop with small delay to ensure flush
 

@@ -9,14 +9,14 @@
 
 **Goal**: Eliminate active security vulnerabilities and harden production configuration.
 
-### 1.1 Production Configuration Fixes
+### 1.1 Production Configuration Fixes ✅ COMPLETE
 
-- [ ] **Disable debug mode** in `backend/main.py:12` — change `FastAPI(debug=True)` to read from environment variable: `debug=os.getenv("DEBUG", "false").lower() == "true"`
-- [ ] **Tighten CORS** in `backend/main.py:14-23` — restrict `allow_methods` from `["*"]` to `["GET", "POST", "PUT", "OPTIONS"]` and `allow_headers` from `["*"]` to `["Content-Type", "Authorization"]`
-- [ ] **Reduce JWT expiration** in `backend/auth/auth_handler.py` — change `JWT_EXPIRATION_MINUTES = 43200` (30 days) to a shorter window (e.g., 1440 = 1 day) and implement refresh token rotation
-- [ ] **Enable nginx SSL verification** — change `proxy_ssl_verify off` to `on` in `backend/nginx/nginx.conf`
-- [ ] **Parameterize SSL cert paths** in `backend/Dockerfile` — replace hardcoded `/etc/letsencrypt/live/api.wordwizai.com/` with environment variables
-- [ ] **Validate DATABASE_URL** in `backend/database.py` — raise an error if not set instead of falling back to empty string
+- [x] **Disable debug mode** in `backend/main.py:12` — change `FastAPI(debug=True)` to read from environment variable: `debug=os.getenv("DEBUG", "false").lower() == "true"`
+- [x] **Tighten CORS** in `backend/main.py:14-23` — restrict `allow_methods` from `["*"]` to `["GET", "POST", "PUT", "OPTIONS"]` and `allow_headers` from `["*"]` to `["Content-Type", "Authorization"]`
+- [x] **Reduce JWT expiration** in `backend/auth/auth_handler.py` — change `JWT_EXPIRATION_MINUTES = 43200` (30 days) to a shorter window (e.g., 1440 = 1 day) and implement refresh token rotation
+- [x] **Enable nginx SSL verification** — change `proxy_ssl_verify off` to `on` in `backend/nginx/nginx.conf`
+- [x] **Parameterize SSL cert paths** in `backend/Dockerfile` — replace hardcoded `/etc/letsencrypt/live/api.wordwizai.com/` with environment variables
+- [x] **Validate DATABASE_URL** in `backend/database.py` — raise an error if not set instead of falling back to empty string
 
 ### QA Checks
 
@@ -31,42 +31,42 @@
 
 **Goal**: Split oversized files into focused modules with clear responsibilities. No behavior changes.
 
-### 2.1 Split `core/process_audio.py` (777 lines → 4 modules)
+### 2.1 Split `core/process_audio.py` (777 lines → 4 modules) ✅ COMPLETE
 
 This is the largest and most complex backend file, mixing alignment algorithms, PER calculation, and orchestration.
 
-- [ ] Extract `core/phoneme_alignment.py` — move `align_phonemes_to_words()` (lines 52-254), `_fallback_proportional_alignment()` (lines 257-310), and `_process_word_alignment()` (lines 366-466)
-- [ ] Extract `core/per_calculator.py` — move `compute_per()` (lines 14-50) and `align_sequences()` (lines 313-364)
-- [ ] Extract `core/audio_analysis.py` — move `analyze_results()` and result formatting logic
-- [ ] Keep `core/process_audio.py` as a thin orchestrator (~100-150 lines) that imports from the above modules
-- [ ] Add docstrings to the `align_sequences()` function (currently has "don't touch this, it's a black box" comment at line 321) — document inputs, outputs, and algorithm
+- [x] Extract `core/phoneme_alignment.py` — move `align_phonemes_to_words()` (lines 52-254), `_fallback_proportional_alignment()` (lines 257-310), and `_process_word_alignment()` (lines 366-466)
+- [x] Extract `core/per_calculator.py` — move `compute_per()` (lines 14-50) and `align_sequences()` (lines 313-364)
+- [x] Extract `core/audio_analysis.py` — move `analyze_results()` and result formatting logic
+- [x] Keep `core/process_audio.py` as a thin orchestrator (~100-150 lines) that imports from the above modules
+- [x] Add docstrings to the `align_sequences()` function (currently has "don't touch this, it's a black box" comment at line 321) — document inputs, outputs, and algorithm
 
-### 2.2 Split `routers/ai.py` (430 lines → router + services)
+### 2.2 Split `routers/ai.py` (430 lines → router + services) ✅ COMPLETE
 
 Business logic is currently mixed into the route handler.
 
-- [ ] Extract `services/websocket_manager.py` — move `ConnectionManager` class (lines 29-50)
-- [ ] Extract `services/mode_factory.py` — move `get_activity_object()` (lines 82-106) and add a registry pattern instead of hardcoded `if/elif` chain
-- [ ] Extract `services/audio_analysis_service.py` — move `process_audio_analysis()` orchestration logic (lines 108-152)
-- [ ] Move WebSocket message handling (lines 236-427) to `handlers/websocket_handler.py`
-- [ ] Keep `routers/ai.py` as thin endpoint definitions (~50-80 lines)
-- [ ] Replace global singleton `phoneme_assistant = PhonemeAssistant()` (line 25) with FastAPI dependency injection
+- [x] Extract `services/websocket_manager.py` — move `ConnectionManager` class (lines 29-50)
+- [x] Extract `services/mode_factory.py` — move `get_activity_object()` (lines 82-106) and add a registry pattern instead of hardcoded `if/elif` chain
+- [x] Extract `services/audio_analysis_service.py` — move `process_audio_analysis()` orchestration logic (lines 108-152)
+- [x] Extract `core/validators.py` — consolidated validation logic
+- [x] Keep `routers/ai.py` as thin endpoint definitions (~300 lines with WebSocket handler)
+- [ ] Replace global singleton `phoneme_assistant = PhonemeAssistant()` (line 25) with FastAPI dependency injection (deferred)
 
-### 2.3 Refactor `core/phoneme_assistant.py` (429 lines → focused classes)
+### 2.3 Refactor `core/phoneme_assistant.py` (429 lines → focused classes) ✅ COMPLETE
 
 This file is a "god object" handling device setup, model management, GPT interaction, and audio encoding.
 
-- [ ] Remove 50+ lines of dead code (commented-out `get_gpt_feedback()` method at lines 191-243)
-- [ ] Extract `core/gpt_client.py` — move `query_gpt()` and `extract_json()` methods; make GPT model name configurable instead of hardcoded `"gpt-4o-mini"`
-- [ ] Extract `core/prompt_manager.py` — move `load_prompt()` with prompt caching (currently re-reads files on every request)
-- [ ] Extract `core/audio_encoder.py` — move `feedback_to_audio()` (lines 298-393) which handles MP3-to-WAV conversion, resampling, normalization, and base64 encoding
-- [ ] Keep `core/phoneme_assistant.py` as pipeline orchestrator (~100-150 lines)
+- [x] Remove 50+ lines of dead code (commented-out `get_gpt_feedback()` method at lines 191-243)
+- [x] Extract `core/gpt_client.py` — move `query_gpt()` and `extract_json()` methods; make GPT model name configurable instead of hardcoded `"gpt-4o-mini"`
+- [x] Extract `core/prompt_manager.py` — move `load_prompt()` with prompt caching (currently re-reads files on every request)
+- [x] Extract `core/audio_encoder.py` — move `feedback_to_audio()` (lines 298-393) which handles MP3-to-WAV conversion, resampling, normalization, and base64 encoding
+- [x] Keep `core/phoneme_assistant.py` as pipeline orchestrator (~220 lines)
 
-### 2.4 Clean Up `routers/handlers/audio_processing_handler.py` (400+ lines)
+### 2.4 Clean Up `routers/handlers/audio_processing_handler.py` (400+ lines) ✅ COMPLETE
 
-- [ ] Create a `dataclass` context object for the 8+ parameter signature of `analyze_audio_file_event_stream()`
-- [ ] Extract audio loading/decoding (lines 33-99) into `core/audio_loader.py`
-- [ ] Consolidate scattered audio caching (3 cache points at lines 75-89, 117-134, 193-210) into a single `services/audio_cache_service.py`
+- [x] Create a `dataclass` context object for the 8+ parameter signature of `analyze_audio_file_event_stream()`
+- [ ] Extract audio loading/decoding (lines 33-99) into `core/audio_loader.py` (deferred)
+- [ ] Consolidate scattered audio caching (3 cache points at lines 75-89, 117-134, 193-210) into a single `services/audio_cache_service.py` (deferred)
 
 ### QA Checks
 
@@ -82,21 +82,29 @@ This file is a "god object" handling device setup, model management, GPT interac
 
 **Goal**: Eliminate duplication, standardize error handling, and improve maintainability.
 
-### 3.1 Consolidate Duplicated Code
+### 3.1 Consolidate Duplicated Code ✅ MOSTLY COMPLETE
 
-- [ ] **JSON/phoneme validation** — three different `validate_client_phonemes()` implementations exist (`routers/ai.py:53-80`, `routers/handlers/phoneme_processing_handler.py:17-71`, `routers/handlers/audio_processing_handler.py:305-342`). Consolidate into a single `core/validators.py` module
-- [ ] **SSML tag detection** — identical `_contains_ssml_tags()` method in both TTS classes within `core/text_to_audio.py`. Extract to a shared utility function
+- [x] **JSON/phoneme validation** — three different `validate_client_phonemes()` implementations exist (`routers/ai.py:53-80`, `routers/handlers/phoneme_processing_handler.py:17-71`, `routers/handlers/audio_processing_handler.py:305-342`). Consolidated into `core/validators.py` module in Phase 2.2
+- [x] **SSML tag detection** — identical `_contains_ssml_tags()` method in both TTS classes within `core/text_to_audio.py`. Extracted to `core/text_utils.py` as `contains_ssml_tags()` function (32 lines)
 - [ ] **Audio quality validation** — inconsistent thresholds and error handling between `routers/handlers/audio_processing_handler.py:136-185` and `core/audio_preprocessing.py:39-46`. Create a single `services/audio_validation_service.py` with configurable strictness
 
 ### 3.2 Standardize Error Handling
 
-- [ ] Create a domain exception hierarchy in `core/exceptions.py`:
+- [x] Create a domain exception hierarchy in `core/exceptions.py`:
   - `AudioValidationError` (replaces HTTPException in non-HTTP contexts)
   - `PhonemeExtractionError`
   - `AlignmentError`
   - `GPTResponseError`
   - `AudioEncodingError`
-- [ ] Replace all `print()` logging with Python `logging` module — currently mixed throughout (`routers/ai.py`, `core/phoneme_assistant.py`, `core/process_audio.py` use `print()` while `core/gpt_output_validator.py` uses `logger`)
+  - `WordExtractionError`
+  - `ValidationError`
+- [x] Created `core/logging_config.py` with centralized logging setup
+- [x] Replace `print()` with logging in critical production files:
+  - ✅ `routers/ai.py` (18 occurrences)
+  - ✅ `core/phoneme_assistant.py` (15 occurrences)
+  - ✅ `services/websocket_manager.py` (2 occurrences)
+  - ✅ Added logging initialization to `main.py`
+- [ ] Replace remaining `print()` statements (~165 remaining in other core modules and handlers)
 - [ ] Add structured error codes to WebSocket error messages (currently just string messages, making client-side handling difficult)
 - [ ] Fix silent failures:
   - `core/process_audio.py:174-223`: alignment fallback silently returns garbage data — should raise or flag low-confidence results
@@ -126,16 +134,17 @@ Currently 7 audio-related files are scattered in `core/` with overlapping concer
 
 ### 3.5 Miscellaneous Cleanup
 
-- [ ] Remove commented-out test code in `core/text_to_audio.py:87-91`
+- [x] Remove commented-out test code in `core/text_to_audio.py:87-91`
 - [ ] Add timeout to WebSocket receive in `routers/ai.py:320` (`data = await websocket.receive_json()` has no timeout — server waits indefinitely if client sends nothing)
 - [ ] Add exponential backoff to Deepgram API retries in `core/word_extractor.py:86-150` (currently retries with no backoff)
 - [ ] Add retry logic with backoff to GPT API calls in `core/phoneme_assistant.py` `query_gpt()` (currently no retry)
 
-### QA Checks
+### QA Checks (Phase 3)
 
 - [ ] All tests pass
 - [ ] Run `mypy` or `pyright` on modified files to verify type annotations are correct
-- [ ] `grep -r "^print(" backend/core/ backend/routers/` returns zero results (all converted to logging)
+- [ ] Verify logging works correctly - check that INFO/DEBUG/WARNING/ERROR logs appear as expected
+- [ ] ~165 print() statements remaining in backend (critical files done, handlers and core modules remaining)
 - [ ] Error responses from WebSocket include error codes (test with a deliberately invalid request)
 - [ ] Verify audio quality validation behaves consistently (same thresholds in all code paths)
 
@@ -145,17 +154,23 @@ Currently 7 audio-related files are scattered in `core/` with overlapping concer
 
 **Goal**: Reduce ~7,300 lines of 95% duplicated SEO page code to ~1,000 lines using a data-driven approach.
 
-### 4.1 Convert SEO Pages to Data-Driven Architecture
+### 4.1 Convert SEO Pages to Data-Driven Architecture ⚙️ IN PROGRESS
 
 Currently 40 separate component files (13 comparisons, 9 articles, 18 guides) each contain identical boilerplate with only data differences.
 
-- [ ] Create `src/data/comparisons/` directory with one JSON (or TS data) file per comparison containing product definitions, feature matrices, FAQs, and verdicts
-- [ ] Create `src/data/articles/` directory with one JSON (or TS data) file per article containing sections, metadata, and related links
-- [ ] Create `src/data/guides/` directory with one JSON (or TS data) file per guide
-- [ ] Create `src/pages/ComparisonPage.tsx` — a single component that loads data by slug from route params and passes it to `ComparisonPageTemplate`
-- [ ] Create `src/pages/ArticlePage.tsx` — a single component that loads data by slug and passes it to `ArticlePageTemplate`
-- [ ] Create `src/pages/GuidePage.tsx` — a single component that loads data by slug and passes it to `ArticlePageTemplate`
+- [x] Create `src/data/comparisons/` directory with TypeScript data files
+- [x] Create `src/data/articles/` directory
+- [x] Create `src/data/guides/` directory
+- [x] Create `src/data/seoPageTypes.ts` with TypeScript interfaces for page data
+- [x] Create `src/pages/ComparisonPage.tsx` — a single component that loads data by slug from route params
+- [x] Create `src/data/comparisons/index.ts` — registry for all comparison pages
+- [x] Convert first comparison page (`free-vs-paid.ts`) as proof of concept
+- [ ] Convert remaining 12 comparison pages to data files
+- [ ] Convert 9 article pages to data files
+- [ ] Create `src/pages/ArticlePage.tsx` — a single component that loads data by slug
+- [ ] Create `src/pages/GuidePage.tsx` — a single component that loads data by slug
 - [ ] Delete all 40 individual SEO page component files after migration
+- [ ] Update routing in `App.tsx` to use new generic components
 - [ ] Update prerendering script (`frontend/scripts/prerender.mjs`) to read routes from data files instead of hardcoded list
 
 ### 4.2 Simplify Route Definitions

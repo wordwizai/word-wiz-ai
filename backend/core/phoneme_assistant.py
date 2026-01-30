@@ -13,6 +13,7 @@ from .audio_analysis import analyze_results
 from .audio_encoder import feedback_to_audio_base64
 from .gpt_client import GPTClient
 from .grapheme_to_phoneme import grapheme_to_phoneme
+from .logging_config import get_logger
 from .optimization_config import config
 from .phoneme_extractor import PhonemeExtractor
 from .phoneme_extractor_onnx import PhonemeExtractorONNX
@@ -21,9 +22,7 @@ from .prompt_manager import PromptManager
 from .text_to_audio import GoogleTTSAPIClient
 from .word_extractor import WordExtractorOnline
 
-# Configure logging
-import logging
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class PhonemeAssistant:
@@ -50,16 +49,16 @@ class PhonemeAssistant:
         # Check if GPU is available and set the device
         if torch.cuda.is_available():
             self.device = torch.device("cuda")
-            print("Using GPU for processing.")
+            logger.info("Using GPU for processing")
         else:
             self.device = torch.device("cpu")
-            print("Using CPU for processing.")
+            logger.info("Using CPU for processing")
 
         # Use all available CPU cores for better performance
         num_cores = os.cpu_count() or 4
         torch.set_num_threads(num_cores)
         torch.set_num_interop_threads(num_cores)
-        print(f"Using {num_cores} CPU threads for PyTorch inference")
+        logger.info(f"Using {num_cores} CPU threads for PyTorch inference")
 
         # Determine optimization settings
         if use_optimized_model is None:
@@ -69,20 +68,20 @@ class PhonemeAssistant:
         use_onnx = os.getenv("USE_ONNX_BACKEND", "true").lower() == "true"
 
         if use_onnx:
-            print("Initializing ONNX-based PhonemeExtractor for faster inference...")
+            logger.info("Initializing ONNX-based PhonemeExtractor for faster inference")
             try:
                 self.phoneme_extractor = PhonemeExtractorONNX()
-                print("✅ ONNX Runtime backend loaded successfully")
+                logger.info("ONNX Runtime backend loaded successfully")
             except Exception as e:
-                print(f"⚠️  ONNX loading failed ({e}), falling back to PyTorch")
+                logger.warning(f"ONNX loading failed ({e}), falling back to PyTorch")
                 self.phoneme_extractor = PhonemeExtractor()
         elif use_optimized_model:
-            print("Initializing optimized PyTorch PhonemeExtractor...")
+            logger.info("Initializing optimized PyTorch PhonemeExtractor")
             if config.get('enable_performance_logging', False):
-                print(config.summary())
+                logger.debug(config.summary())
             self.phoneme_extractor = PhonemeExtractor()
         else:
-            print("Using standard PhonemeExtractor...")
+            logger.info("Using standard PhonemeExtractor")
             self.phoneme_extractor = PhonemeExtractor(
                 use_quantization=False,
                 use_fast_model=False

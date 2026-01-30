@@ -14,12 +14,15 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from sqlalchemy.orm import Session
 
 from auth.auth_handler import get_current_active_user
+from core.logging_config import get_logger
 from core.phoneme_assistant import PhonemeAssistant
 from core.validators import validate_client_phonemes, validate_client_words
 from database import get_db
 from models import User
 from services import ConnectionManager, get_activity_object, process_audio_analysis
 from routers.handlers.audio_processing_handler import analyze_audio_file_event_stream, AudioAnalysisContext
+
+logger = get_logger(__name__)
 
 router = APIRouter()
 phoneme_assistant = PhonemeAssistant()
@@ -35,7 +38,7 @@ async def analyze_audio(
     current_user: User = Depends(get_current_active_user),
 ):
     """Analyze audio using server-side phoneme extraction."""
-    print("Received request to /analyze-audio")
+    logger.info("Received request to /analyze-audio")
 
     session = db.query(User).filter(User.id == current_user.id).first()
     if not session:
@@ -71,7 +74,7 @@ async def analyze_audio_with_phonemes(
     Analyze audio with client-provided phonemes and optionally words.
     Falls back to server-side extraction if client data is invalid.
     """
-    print("Received request to /analyze-audio-with-phonemes")
+    logger.info("Received request to /analyze-audio-with-phonemes")
 
     # Validate client phonemes (returns None if invalid)
     phonemes_data = validate_client_phonemes(client_phonemes)
@@ -130,7 +133,7 @@ async def websocket_audio_analysis(websocket: WebSocket):
     db = next(get_db())
 
     if not token:
-        print("❌ No token provided")
+        logger.warning("WebSocket connection rejected: No token provided")
         return
 
     try:
@@ -146,7 +149,7 @@ async def websocket_audio_analysis(websocket: WebSocket):
         user_identifier: str = payload.get("sub")
 
         if user_identifier is None:
-            print("❌ No user identifier in token")
+            logger.warning("WebSocket connection rejected: No user identifier in token")
             return
 
         # Get user from database
@@ -155,19 +158,19 @@ async def websocket_audio_analysis(websocket: WebSocket):
         ).first()
 
         if current_user is None:
-            print(f"❌ User not found: {user_identifier}")
+            logger.warning(f"WebSocket connection rejected: User not found: {user_identifier}")
             return
 
     except JWTError as e:
-        print(f"❌ JWT Error: {e}")
+        logger.error(f"WebSocket authentication failed: JWT Error: {e}")
         return
     except Exception as e:
-        print(f"❌ Authentication exception: {e}")
+        logger.error(f"WebSocket authentication failed: {e}", exc_info=True)
         return
 
     # Accept the WebSocket connection (only after successful authentication)
     await websocket.accept()
-    print(f"✅ WebSocket accepted for user {current_user.username} (ID: {current_user.id})")
+    logger.info(f"WebSocket accepted for user {current_user.username} (ID: {current_user.id})")
 
     # Add to connection manager
     manager.active_connections[current_user.id] = websocket
@@ -175,11 +178,11 @@ async def websocket_audio_analysis(websocket: WebSocket):
     try:
         while True:
             # Wait for messages from client
-            print(f"⏳ [{time.time()}] Waiting for WebSocket message...")
+            logger.debug(f"Waiting for WebSocket message... [timestamp: {time.time()}]")
             receive_start = time.time()
             data = await websocket.receive_json()
             receive_time = time.time() - receive_start
-            print(f"📨 [{time.time()}] Message received in {receive_time:.3f}s, size: {len(str(data))} bytes")
+            logger.debug(f"WebSocket message received in {receive_time:.3f}s, size: {len(str(data))} bytes [timestamp: {time.time()}]")
 
             if data.get("type") == "ping":
                 # Heartbeat
@@ -193,7 +196,7 @@ async def websocket_audio_analysis(websocket: WebSocket):
                 })
                 continue
 
-            print(f"🎯 [{time.time()}] Processing analyze_audio request")
+            logger.info(f"Processing analyze_audio request [timestamp: {time.time()}]")
             # Extract request data
             audio_base64 = data.get("audio_base64")
             attempted_sentence = data.get("attempted_sentence")
@@ -212,19 +215,19 @@ async def websocket_audio_analysis(websocket: WebSocket):
 
             # Send immediate acknowledgment BEFORE decoding audio
             ack_start = time.time()
-            print(f"📤 [{time.time()}] Sending immediate processing_started acknowledgment...")
+            logger.debug(f"Sending immediate processing_started acknowledgment [timestamp: {time.time()}]")
             await websocket.send_json({
                 "type": "processing_started",
                 "data": {"message": "Audio received, processing..."}
             })
-            print(f"✅ [{time.time()}] Acknowledgment sent in {time.time() - ack_start:.3f}s")
+            logger.debug(f"Acknowledgment sent in {time.time() - ack_start:.3f}s [timestamp: {time.time()}]")
             await asyncio.sleep(0)
 
             # Decode audio
             try:
                 decode_start = time.time()
                 audio_bytes = base64.b64decode(audio_base64)
-                print(f"⏱️  Base64 decode took {time.time() - decode_start:.3f}s")
+                logger.debug(f"Base64 decode took {time.time() - decode_start:.3f}s")
             except Exception as e:
                 await websocket.send_json({
                     "type": "error",
@@ -238,7 +241,7 @@ async def websocket_audio_analysis(websocket: WebSocket):
                 session_start = time.time()
                 session = get_session(db, session_id)
                 activity_object = get_activity_object(session)
-                print(f"⏱️  Session/activity lookup took {time.time() - session_start:.3f}s")
+                logger.debug(f"Session/activity lookup took {time.time() - session_start:.3f}s")
             except Exception as e:
                 await websocket.send_json({
                     "type": "error",
@@ -247,7 +250,7 @@ async def websocket_audio_analysis(websocket: WebSocket):
                 continue
 
             # Process audio through the event stream generator
-            print("🔄 Starting event stream generator...")
+            logger.info("Starting audio analysis event stream")
             generator_start = time.time()
             try:
                 ctx = AudioAnalysisContext(
@@ -266,7 +269,7 @@ async def websocket_audio_analysis(websocket: WebSocket):
                 async for event in analyze_audio_file_event_stream(ctx):
                     if 'first_event' not in locals():
                         first_event = True
-                        print(f"⏱️  Time to first event from generator: {time.time() - generator_start:.3f}s")
+                        logger.debug(f"Time to first event from generator: {time.time() - generator_start:.3f}s")
 
                     # Parse SSE format and send as JSON
                     if event.startswith("data: "):
@@ -281,9 +284,10 @@ async def websocket_audio_analysis(websocket: WebSocket):
                 })
 
     except WebSocketDisconnect:
+        logger.info(f"WebSocket disconnected for user {current_user.id}")
         manager.disconnect(current_user.id)
     except Exception as e:
-        print(f"WebSocket error: {e}")
+        logger.error(f"WebSocket error for user {current_user.id}: {e}", exc_info=True)
         manager.disconnect(current_user.id)
     finally:
         db.close()

@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from models import User
 from core.phoneme_assistant import PhonemeAssistant
 from core.modes.base_mode import BaseMode
-from routers.handlers.audio_processing_handler import analyze_audio_file_event_stream
+from routers.handlers.audio_processing_handler import analyze_audio_file_event_stream, AudioAnalysisContext
 
 
 async def process_audio_analysis(
@@ -52,21 +52,24 @@ async def process_audio_analysis(
     audio_filename = audio_file.filename
     audio_content_type = audio_file.content_type
 
+    # Create analysis context
+    ctx = AudioAnalysisContext(
+        phoneme_assistant=phoneme_assistant,
+        activity_object=activity_object,
+        audio_bytes=audio_bytes,
+        audio_filename=audio_filename,
+        audio_content_type=audio_content_type,
+        attempted_sentence=attempted_sentence,
+        db=db,
+        current_user=current_user,
+        session=session,
+        client_phonemes=client_phonemes,
+        client_words=client_words,
+    )
+
     # Return StreamingResponse immediately - preprocessing will happen inside the stream
     return StreamingResponse(
-        analyze_audio_file_event_stream(
-            phoneme_assistant=phoneme_assistant,
-            activity_object=activity_object,
-            audio_bytes=audio_bytes,
-            audio_filename=audio_filename,
-            audio_content_type=audio_content_type,
-            attempted_sentence=attempted_sentence,
-            current_user=current_user,
-            session=session,
-            db=db,
-            client_phonemes=client_phonemes,
-            client_words=client_words,
-        ),
+        analyze_audio_file_event_stream(ctx),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",

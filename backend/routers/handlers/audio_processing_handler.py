@@ -3,6 +3,8 @@ import io
 import json
 import math
 import time
+from dataclasses import dataclass
+from typing import Optional
 from urllib.parse import quote
 
 import numpy as np
@@ -13,7 +15,8 @@ from core.audio_quality_analyzer import AudioQualityAnalyzer
 from core.modes.base_mode import BaseMode
 from core.phoneme_assistant import PhonemeAssistant
 from core.temp_audio_cache import audio_cache
-from core.process_audio import process_audio_with_client_phonemes, analyze_results
+from core.process_audio import process_audio_with_client_phonemes
+from core.audio_analysis import analyze_results
 from core.grapheme_to_phoneme import grapheme_to_phoneme as g2p
 from crud.feedback_entry import create_feedback_entry, get_feedback_entries_by_session
 from crud.session import get_session
@@ -28,6 +31,27 @@ from routers.handlers.phoneme_processing_handler import (
     normalize_espeak_to_ipa,
     format_phonemes_for_logging,
 )
+
+
+@dataclass
+class AudioAnalysisContext:
+    """
+    Context object for audio analysis event stream.
+
+    Encapsulates all parameters needed for audio analysis processing
+    to avoid long parameter lists.
+    """
+    phoneme_assistant: PhonemeAssistant
+    activity_object: BaseMode
+    audio_bytes: bytes
+    audio_filename: str
+    audio_content_type: str
+    attempted_sentence: str
+    db: Session
+    current_user: User
+    session: UserSession
+    client_phonemes: Optional[list[list[str]]] = None
+    client_words: Optional[list[str]] = None
 
 
 async def load_and_preprocess_audio_bytes(
@@ -226,19 +250,7 @@ def sanitize(obj):
     return obj
 
 
-async def analyze_audio_file_event_stream(
-    phoneme_assistant: PhonemeAssistant,
-    activity_object: BaseMode,
-    audio_bytes: bytes,
-    audio_filename: str,
-    audio_content_type: str,
-    attempted_sentence: str,
-    db: Session,
-    current_user: User,
-    session: UserSession,
-    client_phonemes: list[list[str]] | None = None,
-    client_words: list[str] | None = None,
-):
+async def analyze_audio_file_event_stream(ctx: AudioAnalysisContext):
     try:
         # Send immediate acknowledgment that processing has started
         print("📤 Sending processing started event...")
@@ -253,7 +265,7 @@ async def analyze_audio_file_event_stream(
         print("🔄 Starting audio preprocessing...")
         try:
             audio_array, cache_session_id = await load_and_preprocess_audio_bytes(
-                audio_bytes, audio_filename, audio_content_type, str(session.id)
+                ctx.audio_bytes, ctx.audio_filename, ctx.audio_content_type, str(ctx.session.id)
             )
             print("✅ Audio preprocessing completed")
         except Exception as e:
@@ -271,18 +283,18 @@ async def analyze_audio_file_event_stream(
             # Empty audio is only valid if we have BOTH client phonemes and words
             # If we have neither, it's an error
             # If we have only words, we need audio for server-side phoneme extraction
-            if client_phonemes is None and client_words is None:
+            if ctx.client_phonemes is None and ctx.client_words is None:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Empty audio received with no client extraction data. Please try again."
                 )
-            elif client_phonemes is None:
+            elif ctx.client_phonemes is None:
                 # Have words but not phonemes - need audio for phoneme extraction
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Empty audio received but phoneme extraction is needed. Audio file may be corrupted. Please try again."
                 )
-            elif client_words is None:
+            elif ctx.client_words is None:
                 # Have phonemes but not words - need audio for word extraction
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -306,30 +318,30 @@ async def analyze_audio_file_event_stream(
         use_client_phonemes = False
         use_client_words = False
         
-        if client_phonemes is not None:
+        if ctx.client_phonemes is not None:
             # Validate client phonemes format
-            is_valid, error_msg = validate_client_phonemes(client_phonemes, attempted_sentence)
+            is_valid, error_msg = validate_client_phonemes(ctx.client_phonemes, ctx.attempted_sentence)
             
             if is_valid:
                 print(f"✓ Client phonemes validated successfully")
-                print(f"  Client phonemes (eSpeak format): {format_phonemes_for_logging(client_phonemes, max_words=3)}")
+                print(f"  Client phonemes (eSpeak format): {format_phonemes_for_logging(ctx.client_phonemes, max_words=3)}")
                 
                 # Normalize eSpeak → IPA for consistent processing
-                normalized_phonemes = normalize_espeak_to_ipa(client_phonemes)
+                normalized_phonemes = normalize_espeak_to_ipa(ctx.client_phonemes)
                 print(f"  Normalized phonemes (IPA format): {format_phonemes_for_logging(normalized_phonemes, max_words=3)}")
                 
                 use_client_phonemes = True
                 client_phonemes = normalized_phonemes  # Use normalized version
                 
                 # If client words also provided, validate them
-                if client_words is not None:
+                if ctx.client_words is not None:
                     from routers.handlers.phoneme_processing_handler import validate_client_words
                     is_valid_words, error_msg_words = validate_client_words(
-                        client_words, client_phonemes, attempted_sentence
+                        ctx.client_words, normalized_phonemes, ctx.attempted_sentence
                     )
                     
                     if is_valid_words:
-                        print(f"✓ Client words validated successfully: {client_words}")
+                        print(f"✓ Client words validated successfully: {ctx.client_words}")
                         use_client_words = True
                     else:
                         print(f"✗ Client word validation failed: {error_msg_words}")
@@ -367,14 +379,14 @@ async def analyze_audio_file_event_stream(
         
         if use_client_phonemes and client_phonemes is not None:
             # Get ground truth phonemes for the sentence
-            ground_truth_phonemes = g2p(attempted_sentence)
-            
+            ground_truth_phonemes = g2p(ctx.attempted_sentence)
+
             # Process audio with client phonemes (and optionally client words)
             pronunciation_data = await process_audio_with_client_phonemes(
                 client_phonemes=client_phonemes,
                 ground_truth_phonemes=ground_truth_phonemes,
                 audio_array=audio_array,
-                word_extraction_model=phoneme_assistant.word_extractor,
+                word_extraction_model=ctx.phoneme_assistant.word_extractor,
                 client_words=client_words if use_client_words else None,
             )
             
@@ -388,8 +400,8 @@ async def analyze_audio_file_event_stream(
         else:
             # Original server-side processing
             pronunciation_dataframe, highest_per_word, problem_summary, per_summary = (
-                await phoneme_assistant.process_audio(
-                    attempted_sentence, audio_array, verbose=True
+                await ctx.phoneme_assistant.process_audio(
+                    ctx.attempted_sentence, audio_array, verbose=True
                 )
             )
             
@@ -418,11 +430,11 @@ async def analyze_audio_file_event_stream(
         # STEP 2: GET GPT RESPONSE
 
         # based on the mode
-        response = await activity_object.get_feedback_and_next_sentence(
-            attempted_sentence=attempted_sentence,
+        response = await ctx.activity_object.get_feedback_and_next_sentence(
+            attempted_sentence=ctx.attempted_sentence,
             analysis=audio_analysis_object,
-            phoneme_assistant=phoneme_assistant,
-            session=session,
+            phoneme_assistant=ctx.phoneme_assistant,
+            session=ctx.session,
         )
         # response = phoneme_assistant.get_gpt_response(
         #     attempted_sentence=attempted_sentence,
@@ -452,12 +464,12 @@ async def analyze_audio_file_event_stream(
             "metadata": response.get("metadata", {}),
         }
         feedback_entry = FeedbackEntryCreate(
-            session_id=session.id,
-            sentence=attempted_sentence,
+            session_id=ctx.session.id,
+            sentence=ctx.attempted_sentence,
             phoneme_analysis=analysis_payload.get("data", {}),
             gpt_response=gpt_response_for_db,
         )
-        create_feedback_entry(db, feedback_entry)
+        create_feedback_entry(ctx.db, feedback_entry)
 
         # STEP 4: FEEDBACK AUDIO
         loop = asyncio.get_event_loop()
@@ -466,8 +478,8 @@ async def analyze_audio_file_event_stream(
         feedback_ssml = response.get("feedback_ssml")
         
         response_audio_file = await loop.run_in_executor(
-            None, 
-            phoneme_assistant.feedback_to_audio, 
+            None,
+            ctx.phoneme_assistant.feedback_to_audio,
             feedback_text,
             feedback_ssml
         )
@@ -478,7 +490,7 @@ async def analyze_audio_file_event_stream(
         feedback_audio_bytes = base64.b64decode(response_audio_file["data"])
         audio_cache.save_feedback_audio(
             feedback_audio_bytes,
-            str(session.id),  # Convert session ID to string
+            str(ctx.session.id),  # Convert session ID to string
             feedback_text,
             metadata={
                 "stage": "tts_feedback",

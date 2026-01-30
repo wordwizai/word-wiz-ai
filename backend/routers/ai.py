@@ -19,7 +19,7 @@ from core.validators import validate_client_phonemes, validate_client_words
 from database import get_db
 from models import User
 from services import ConnectionManager, get_activity_object, process_audio_analysis
-from routers.handlers.audio_processing_handler import analyze_audio_file_event_stream
+from routers.handlers.audio_processing_handler import analyze_audio_file_event_stream, AudioAnalysisContext
 
 router = APIRouter()
 phoneme_assistant = PhonemeAssistant()
@@ -250,19 +250,20 @@ async def websocket_audio_analysis(websocket: WebSocket):
             print("🔄 Starting event stream generator...")
             generator_start = time.time()
             try:
-                async for event in analyze_audio_file_event_stream(
+                ctx = AudioAnalysisContext(
                     phoneme_assistant=phoneme_assistant,
                     activity_object=activity_object,
                     audio_bytes=audio_bytes,
                     audio_filename=filename,
                     audio_content_type=content_type,
                     attempted_sentence=attempted_sentence,
+                    db=db,
                     current_user=current_user,
                     session=session,
-                    db=db,
                     client_phonemes=client_phonemes,
                     client_words=client_words,
-                ):
+                )
+                async for event in analyze_audio_file_event_stream(ctx):
                     if 'first_event' not in locals():
                         first_event = True
                         print(f"⏱️  Time to first event from generator: {time.time() - generator_start:.3f}s")

@@ -1,0 +1,35 @@
+GRAPHEME PATTERN FOCUS:
+
+PRIMARY GOAL: Include many words with the '{focus_grapheme}' spelling pattern.
+
+GRAPHEME: {focus_grapheme}
+SOUND: {focus_phoneme}
+
+Find natural words containing '{focus_grapheme}':
+- Beginning: {focus_grapheme} at start of word
+- Middle: {focus_grapheme} in middle of word
+- End: {focus_grapheme} at end of word
+
+USE VARIETY:
+Include '{focus_grapheme}' in different word positions for better practice.
+
+EXAMPLE (focus_grapheme='qu'):
+"Quincy quickly asked a question about the quiet queen's quilt."
+- 'qu' appears 6 times in different words
+- Natural, coherent sentence
+- Student practices 'qu' pattern repeatedly
+
+EXAMPLE (focus_grapheme='ch'):
+"Charlie chose cheese and cherries for his lunch in the church."
+- 'ch' appears 6 times (Charlie, chose, cheese, cherries, lunch, church)
+- Clear, simple sentence
+- Multiple 'ch' positions (start, middle, end)
+
+EXAMPLE (focus_grapheme='th'):
+"I think the path through the thick forest is worth exploring with my three brothers."
+- 'th' appears 6 times
+- Moderate complexity
+- Varies position and word type
+
+KEEP IT NATURAL:
+The sentence should make sense and be age-appropriate, not just a list of words.

@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(findstr:*)",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []

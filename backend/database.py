@@ -7,7 +7,13 @@ import dotenv
 
 
 dotenv.load_dotenv()
-URL_DATABASE = os.getenv("DATABASE_URL", "")
+URL_DATABASE = os.getenv("DATABASE_URL")
+
+if not URL_DATABASE:
+    raise RuntimeError(
+        "DATABASE_URL environment variable is not set. "
+        "Please set it in your .env file or environment."
+    )
 
 engine = create_engine(URL_DATABASE)
 

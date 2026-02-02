@@ -13,7 +13,7 @@ from schemas.token_user import TokenData
 from sqlalchemy.orm import Session
 
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 43200  # 30 days
+ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # 1 day
 
 load_dotenv()
 secret_key = os.getenv("SECRET_KEY")

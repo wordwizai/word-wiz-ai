@@ -35,6 +35,7 @@ pydub
 google-genai
 google-cloud-texttospeech
 google-cloud-speech
+azure-cognitiveservices-speech
 typing_extensions
 psutil
 questionary

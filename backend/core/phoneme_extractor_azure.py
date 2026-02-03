@@ -57,6 +57,59 @@ class AzurePronunciationExtractor:
         result = self.extract_phonemes(audio, sampling_rate, reference_text)
         return result['phonemes']
     
+    def extract_words(self, audio, sampling_rate=16000):
+        """
+        Extract words from audio (interface compatible with word extractors)
+        
+        Args:
+            audio: Audio data as numpy array
+            sampling_rate: Sample rate of the audio
+            
+        Returns:
+            List of recognized words
+        """
+        result = self.extract_phonemes(audio, sampling_rate, reference_text=None)
+        
+        # Extract just the words from the recognized text
+        recognized_text = result.get('recognized_text', '')
+        words = recognized_text.lower().strip().split()
+        
+        return words
+    
+    def extract_words_and_phonemes(self, audio, sampling_rate=16000, reference_text=None):
+        """
+        Extract both words and phonemes in a single call (Azure-optimized)
+        
+        This method leverages Azure's built-in word recognition and phoneme alignment,
+        avoiding the need for separate word extraction and phoneme-to-word alignment.
+        
+        Args:
+            audio: Audio data as numpy array
+            sampling_rate: Sample rate of the audio
+            reference_text: Optional reference text for pronunciation assessment
+            
+        Returns:
+            Dict containing:
+                - words: List of recognized words
+                - phonemes: List of lists of phonemes (aligned to words)
+                - words_details: Detailed word-level information (if reference_text provided)
+                - azure_scores: Overall pronunciation scores (if reference_text provided)
+        """
+        result = self.extract_phonemes(audio, sampling_rate, reference_text)
+        
+        # Extract words from recognized text
+        recognized_text = result.get('recognized_text', '')
+        words = recognized_text.lower().strip().split()
+        
+        return {
+            'words': words,
+            'phonemes': result['phonemes'],
+            'recognized_text': recognized_text,
+            'words_details': result.get('words', []),
+            'azure_scores': result.get('azure_scores', {}),
+            'backend': 'azure'
+        }
+    
     def extract_phonemes(
         self,
         audio_data: np.ndarray,

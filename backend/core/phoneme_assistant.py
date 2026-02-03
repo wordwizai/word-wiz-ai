@@ -313,6 +313,7 @@ class PhonemeAssistant:
             sampling_rate=16000,
             phoneme_extraction_model=self.phoneme_extractor,
             word_extraction_model=self.word_extractor,
+            reference_text=attempted_sentence,  # Pass reference text for Azure optimization
         )
 
         if status_callback:

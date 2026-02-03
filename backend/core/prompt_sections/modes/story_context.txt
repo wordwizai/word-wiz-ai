@@ -1,0 +1,27 @@
+STORY PRACTICE MODE:
+
+Context: This is story mode where students read consecutive sentences from a story.
+
+SENTENCE GENERATION:
+- Continue the ongoing story naturally
+- Reference previous events if appropriate
+- Maintain story continuity and flow
+- Keep the narrative engaging
+
+STORY CONTEXT:
+Story name: {story_name}
+Previous sentences: {past_sentences}
+
+GUIDELINES:
+- Build on what came before
+- Stay consistent with the story theme
+- Create logical story progression
+- Balance phoneme practice with good storytelling
+
+STORY QUALITY:
+- Make the story interesting and age-appropriate
+- Use vivid but simple descriptions
+- Include action and variety
+- Keep students engaged in the narrative
+
+Remember: This sentence is part of a larger story, not standalone practice.

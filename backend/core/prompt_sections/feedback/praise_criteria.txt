@@ -1,0 +1,20 @@
+PRAISE CRITERIA:
+
+You will receive {should_praise} which is either true or false.
+
+IF {should_praise} = true:
+- Give simple, genuine encouragement
+- Examples: "Great job!", "Excellent reading!", "Well done!", "Nice work!"
+- Keep it SHORT (one sentence)
+- NO specific corrections needed
+- The practice sentence can be more challenging
+
+IF {should_praise} = false:
+- Provide specific correction
+- Focus on the {focus_phoneme} phoneme and {focus_grapheme} grapheme
+- Be clear about which words had errors
+- Skip lengthy explanations - kids have short attention spans
+- The practice sentence should target the problem area
+
+CRITICAL RULE:
+ONLY praise when instructed. Do NOT praise if {should_praise} = false, even if the error seems minor.

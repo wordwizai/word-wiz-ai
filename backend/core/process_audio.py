@@ -658,14 +658,13 @@ async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=
     # Validate predicted_words is a list of strings
     if not isinstance(predicted_words, list):
         raise ValueError(f"predicted_words is not a list: {type(predicted_words)}")
-    
+
     # Filter out any non-string items and ensure we have valid words
     predicted_words = [str(word) for word in predicted_words if word]
     if not predicted_words:
         raise ValueError("No valid words extracted from audio")
 
     # regroup the phonemes to reflect the words that were spoken
-    import time
     alignment_start = time.time()
     flattened_phoneme_predictions = [item for sublist in phoneme_predictions for item in sublist]
     predicted_words_phonemes = g2p(" ".join(predicted_words)) # take the words our model thinks we said and get the phonemes for them

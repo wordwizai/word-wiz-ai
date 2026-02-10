@@ -4,12 +4,16 @@ from .word_extractor import WordExtractor
 import numpy as np
 import IPython.display as ipd
 import re
+import time
+import logging
 from .evaluation import accuracy_metrics as am
 from .grapheme_to_phoneme import grapheme_to_phoneme as g2p
 from .evaluation.accuracy_metrics import compute_phoneme_error_rate
 from .speech_problem_classifier import SpeechProblemClassifier
 from .audio_preprocessing import preprocess_audio
 import asyncio
+
+logger = logging.getLogger(__name__)
 
 def compute_per(gt_phonemes, pred_phonemes):
     """
@@ -465,7 +469,7 @@ def _process_word_alignment(
     
     return results
 
-async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=16000, phoneme_extraction_model=None, word_extraction_model=None, use_chunking=True) -> list[dict]:
+async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=16000, phoneme_extraction_model=None, word_extraction_model=None, use_chunking=True, reference_text=None) -> list[dict]:
     """
     Use the phoneme extractor to transcribe an audio array.
     
@@ -476,11 +480,13 @@ async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=
         phoneme_extraction_model: Phoneme extraction model (optional)
         word_extraction_model: Word extraction model (optional)
         use_chunking: Whether to chunk long audio (default True)
+        reference_text: Reference text for pronunciation assessment (optional, used by Azure)
         
     Returns:
         List of dictionaries containing pronunciation analysis results
     """
     from .audio_chunking import should_use_chunking, chunk_audio_at_silence, merge_chunk_results
+    from .phoneme_extractor_azure import AzurePronunciationExtractor
     
     if phoneme_extraction_model is None:
         phoneme_extraction_model = PhonemeExtractor()
@@ -496,6 +502,63 @@ async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=
     
     # preprocess the audio
     audio_array = preprocess_audio(audio=audio_array, sr=sampling_rate, audio_length_seconds=audio_duration)
+    
+    # Check if we're using Azure extractor - it has optimized combined extraction
+    is_azure = isinstance(phoneme_extraction_model, AzurePronunciationExtractor)
+    
+    if is_azure and reference_text and hasattr(phoneme_extraction_model, 'extract_words_and_phonemes'):
+        # Azure-optimized path: single API call for both words and phonemes
+        print(f"🚀 Using Azure optimized extraction with reference text")
+        print(f"📝 Audio is {audio_duration:.1f}s")
+        
+        try:
+            # Single call to Azure gets both words and phonemes, already aligned!
+            azure_result = await asyncio.to_thread(
+                phoneme_extraction_model.extract_words_and_phonemes,
+                audio=audio_array,
+                sampling_rate=sampling_rate,
+                reference_text=reference_text
+            )
+            
+            predicted_words = azure_result['words']
+            phoneme_predictions = azure_result['phonemes']
+            
+            print(f"✅ Azure extraction complete")
+            print(f"   Recognized: {azure_result.get('recognized_text', '')}")
+            print(f"   Words: {predicted_words}")
+            print(f"   Phonemes already aligned to words (no realignment needed)")
+            
+            # Skip the complex alignment steps - Azure already aligned phonemes to words!
+            # Just validate we have data
+            if not predicted_words or not phoneme_predictions:
+                raise ValueError("Azure returned empty results")
+            
+            # Use helper function to process word alignment
+            word_alignment_start = time.time()
+            ground_truth_words = [word for word, _ in ground_truth_phonemes]
+            results = _process_word_alignment(
+                ground_truth_words=ground_truth_words,
+                ground_truth_phonemes=ground_truth_phonemes,
+                predicted_words=predicted_words,
+                phoneme_predictions=phoneme_predictions
+            )
+            print(f"⏱️  Word alignment processing took {time.time() - word_alignment_start:.3f}s")
+            
+            # Enhance results with Azure pronunciation scores if available
+            if azure_result.get('words_details'):
+                for i, result in enumerate(results):
+                    if i < len(azure_result['words_details']):
+                        azure_word = azure_result['words_details'][i]
+                        result['azure_accuracy'] = azure_word.get('accuracy_score', 0)
+                        result['azure_error_type'] = azure_word.get('error_type', 'None')
+            
+            return results
+            
+        except Exception as e:
+            logger.warning(f"Azure optimized extraction failed: {e}, falling back to standard path")
+            # Fall through to standard processing
+    
+    # Standard processing path (for ONNX, PyTorch, or Azure without reference text)
     
     # Check if audio should be chunked
     if use_chunking and should_use_chunking(audio_array, sampling_rate, threshold_seconds=8):
@@ -595,14 +658,13 @@ async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=
     # Validate predicted_words is a list of strings
     if not isinstance(predicted_words, list):
         raise ValueError(f"predicted_words is not a list: {type(predicted_words)}")
-    
+
     # Filter out any non-string items and ensure we have valid words
     predicted_words = [str(word) for word in predicted_words if word]
     if not predicted_words:
         raise ValueError("No valid words extracted from audio")
 
     # regroup the phonemes to reflect the words that were spoken
-    import time
     alignment_start = time.time()
     flattened_phoneme_predictions = [item for sublist in phoneme_predictions for item in sublist]
     predicted_words_phonemes = g2p(" ".join(predicted_words)) # take the words our model thinks we said and get the phonemes for them

@@ -16,6 +16,7 @@ from openai import OpenAI
 from .audio_validation import log_audio_characteristics, validate_audio_output
 from .phoneme_extractor import PhonemeExtractor
 from .phoneme_extractor_onnx import PhonemeExtractorONNX
+from .phoneme_extractor_azure import AzurePronunciationExtractor
 from .process_audio import analyze_results, process_audio_array
 from .text_to_audio import ElevenLabsAPIClient, GoogleTTSAPIClient
 from .word_extractor import WordExtractor, WordExtractorOnline
@@ -48,29 +49,65 @@ class PhonemeAssistant:
         if use_optimized_model is None:
             use_optimized_model = config.get('use_optimized_model', True)
 
-        # Check if we should use ONNX Runtime (faster)
-        use_onnx = os.getenv("USE_ONNX_BACKEND", "true").lower() == "true"
+        # Determine backend: auto (default: Azure), azure, onnx, pytorch
+        backend_type = os.getenv("PHONEME_BACKEND", "auto").lower()
         
-        # Load optimized models for better performance
-        if use_onnx:
-            print("Initializing ONNX-based PhonemeExtractor for faster inference...")
-            try:
-                self.phoneme_extractor = PhonemeExtractorONNX()
-                print("✅ ONNX Runtime backend loaded successfully")
-            except Exception as e:
-                print(f"⚠️  ONNX loading failed ({e}), falling back to PyTorch")
+        # Initialize phoneme extractor based on backend selection
+        self.backend_type = backend_type
+        self.phoneme_extractor = None
+        
+        if backend_type == "azure" or backend_type == "auto":
+            # Try Azure first (cost-effective, better accuracy)
+            azure_key = os.getenv("AZURE_SPEECH_KEY")
+            azure_region = os.getenv("AZURE_SPEECH_REGION", "eastus")
+            
+            if azure_key:
+                try:
+                    print(f"Initializing Azure Pronunciation Assessment (region: {azure_region})...")
+                    self.phoneme_extractor = AzurePronunciationExtractor(azure_key, azure_region)
+                    self.backend_type = "azure"
+                    print("✅ Azure Pronunciation Assessment loaded successfully")
+                except Exception as e:
+                    logger.warning(f"Azure initialization failed: {e}")
+                    if backend_type == "azure":
+                        raise  # If explicitly requested Azure, don't fallback
+                    print("⚠️  Azure loading failed, falling back to ONNX...")
+            else:
+                if backend_type == "azure":
+                    raise ValueError("AZURE_SPEECH_KEY not set in environment")
+                print("⚠️  AZURE_SPEECH_KEY not set, falling back to ONNX...")
+        
+        # Fallback to ONNX or PyTorch if Azure not available/requested
+        if self.phoneme_extractor is None:
+            use_onnx = os.getenv("USE_ONNX_BACKEND", "true").lower() == "true"
+            
+            if backend_type == "onnx" or (use_onnx and backend_type == "auto"):
+                print("Initializing ONNX-based PhonemeExtractor for faster inference...")
+                try:
+                    self.phoneme_extractor = PhonemeExtractorONNX()
+                    self.backend_type = "onnx"
+                    print("✅ ONNX Runtime backend loaded successfully")
+                except Exception as e:
+                    if backend_type == "onnx":
+                        raise  # If explicitly requested ONNX, don't fallback
+                    print(f"⚠️  ONNX loading failed ({e}), falling back to PyTorch")
+                    self.phoneme_extractor = PhonemeExtractor()
+                    self.backend_type = "pytorch"
+            elif use_optimized_model:
+                print("Initializing optimized PyTorch PhonemeExtractor...")
+                if config.get('enable_performance_logging', False):
+                    print(config.summary())
                 self.phoneme_extractor = PhonemeExtractor()
-        elif use_optimized_model:
-            print("Initializing optimized PyTorch PhonemeExtractor...")
-            if config.get('enable_performance_logging', False):
-                print(config.summary())
-            self.phoneme_extractor = PhonemeExtractor()
-        else:
-            print("Using standard PhonemeExtractor...")
-            self.phoneme_extractor = PhonemeExtractor(
-                use_quantization=False,
-                use_fast_model=False
-            )
+                self.backend_type = "pytorch"
+            else:
+                print("Using standard PhonemeExtractor...")
+                self.phoneme_extractor = PhonemeExtractor(
+                    use_quantization=False,
+                    use_fast_model=False
+                )
+                self.backend_type = "pytorch"
+        
+        logger.info(f"Phoneme backend initialized: {self.backend_type}")
             
         self.word_extractor = WordExtractorOnline()
         self.tts = GoogleTTSAPIClient()
@@ -276,6 +313,7 @@ class PhonemeAssistant:
             sampling_rate=16000,
             phoneme_extraction_model=self.phoneme_extractor,
             word_extraction_model=self.word_extractor,
+            reference_text=attempted_sentence,  # Pass reference text for Azure optimization
         )
 
         if status_callback:

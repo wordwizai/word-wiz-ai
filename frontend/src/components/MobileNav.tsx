@@ -2,18 +2,14 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
 import {
   BadgeCheck,
+  BarChart3,
   Bell,
-  CircleQuestionMark,
   House,
   LogOut,
-  Moon,
-  Route,
   Settings,
-  Sun,
   Target,
 } from "lucide-react";
 import { useContext } from "react";
-import { motion } from "framer-motion";
 import { AuthContext } from "@/contexts/AuthContext";
 import type { AuthContextType } from "@/contexts/AuthContext";
 import { nameToInitials } from "@/lib/utils";
@@ -33,7 +29,6 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { useTheme } from "@/contexts/ThemeContext";
 
 interface MobileNavProps {
   className?: string;
@@ -41,113 +36,124 @@ interface MobileNavProps {
 
 const MobileNav = ({ className }: MobileNavProps) => {
   const { user, logout } = useContext<AuthContextType>(AuthContext);
+  const location = useLocation();
+
+  const isActive = (path: string) =>
+    location.pathname === path || location.pathname.startsWith(path + "/");
+
+  const navLinkClass = (path: string) =>
+    `p-2.5 rounded-xl transition-colors ${
+      isActive(path)
+        ? "bg-primary/10 text-primary"
+        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+    }`;
 
   return (
     <TooltipProvider>
       <aside className={`${className}`}>
-        <div className="mx-3 sm:mx-5 mb-1 p-2 flex flex-row items-center justify-around bg-primary-foreground rounded-lg shadow-md shadow-primary/50 dark:shadow-none">
+        <div className="mx-3 sm:mx-5 mb-2 px-2 py-1.5 flex flex-row items-center justify-around bg-card border-t border-border rounded-t-2xl shadow-lg">
           {/* Home */}
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
-              <Link to="/dashboard" className="p-2 rounded-lg hover:bg-primary/10 transition-colors">
+              <Link to="/dashboard" className={navLinkClass("/dashboard")}>
                 <span className="sr-only">Dashboard</span>
-                <House className="size-6 stroke-primary" />
+                <House className="size-6" />
               </Link>
             </TooltipTrigger>
             <TooltipContent side="top">Dashboard</TooltipContent>
           </Tooltip>
+
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
-              <Link to="/practice" className="p-2 rounded-lg hover:bg-primary/10 transition-colors">
+              <Link to="/practice" className={navLinkClass("/practice")}>
                 <span className="sr-only">Practice</span>
-                <Target className="size-6 stroke-primary" />
+                <Target className="size-6" />
               </Link>
             </TooltipTrigger>
             <TooltipContent side="top">Practice</TooltipContent>
           </Tooltip>
+
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
-              <Link to="progress" className="p-2 rounded-lg hover:bg-primary/10 transition-colors">
+              <Link to="/progress" className={navLinkClass("/progress")}>
                 <span className="sr-only">Progress</span>
-                <Route className="size-6 stroke-primary" />
+                <BarChart3 className="size-6" />
               </Link>
             </TooltipTrigger>
             <TooltipContent side="top">Progress</TooltipContent>
           </Tooltip>
+
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
-              <Link to="/settings" className="p-2 rounded-lg hover:bg-primary/10 transition-colors">
+              <Link to="/settings" className={navLinkClass("/settings")}>
                 <span className="sr-only">Settings</span>
-                <Settings className="size-6 stroke-primary" />
+                <Settings className="size-6" />
               </Link>
             </TooltipTrigger>
             <TooltipContent side="top">Settings</TooltipContent>
           </Tooltip>
+
           {/* Avatar Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="iconLg"
-                className="w-12 h-12 rounded-2xl hover:bg-purple-100/50 hover:shadow-md transition-all duration-200 group p-2"
+              <Button
+                variant="ghost"
+                className="w-10 h-10 rounded-xl hover:bg-muted transition-colors p-0"
               >
                 <span className="sr-only">Account</span>
-                <Avatar className="w-8 h-8 mx-auto rounded-xl group-hover:scale-110 transition-transform duration-200">
+                <Avatar className="w-8 h-8 rounded-xl">
                   <AvatarImage src="" alt={user?.username} />
-                  <AvatarFallback className="bg-gradient-to-br from-purple-400 to-pink-500 text-white font-semibold">
+                  <AvatarFallback className="bg-primary/10 text-primary font-bold rounded-xl text-xs">
                     {nameToInitials(user?.full_name ?? "")}
                   </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-              className="w-64 rounded-2xl border-2 border-purple-200 bg-white/95 shadow-xl"
+              className="w-64 rounded-xl border-2 border-border bg-card shadow-lg"
               side="top"
               align="end"
-              sideOffset={4}
+              sideOffset={8}
             >
               <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-3 px-3 py-3 text-left">
                   <Avatar className="h-10 w-10 rounded-xl">
-                    <AvatarImage
-                      src={""}
-                      alt={user?.full_name ?? "Not logged in"}
-                    />
-                    <AvatarFallback className="rounded-xl bg-gradient-to-br from-purple-400 to-pink-500 text-white font-semibold">
+                    <AvatarImage src="" alt={user?.full_name ?? "Not logged in"} />
+                    <AvatarFallback className="rounded-xl bg-primary/10 text-primary font-bold">
                       {nameToInitials(user?.full_name ?? "")}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold text-gray-800">
+                    <span className="truncate font-semibold text-foreground">
                       {user?.full_name ?? "Not logged in"}
                     </span>
-                    <span className="truncate text-xs text-gray-600">
-                      {user?.email ?? "Not logged in"}
+                    <span className="truncate text-xs text-muted-foreground">
+                      {user?.email ?? ""}
                     </span>
                   </div>
                 </div>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-purple-200/50" />
+              <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem asChild className="hover:bg-purple-50 rounded-lg mx-2">
+                <DropdownMenuItem asChild className="rounded-lg mx-2 hover:bg-secondary">
                   <Link to="/settings#account" className="flex items-center gap-3">
-                    <BadgeCheck size={18} className="text-purple-600" />
-                    <span className="text-gray-700">Account</span>
+                    <BadgeCheck size={18} className="text-primary" />
+                    <span>Account</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild className="hover:bg-purple-50 rounded-lg mx-2">
+                <DropdownMenuItem asChild className="rounded-lg mx-2 hover:bg-secondary">
                   <Link to="/settings#notifications" className="flex items-center gap-3">
-                    <Bell size={18} className="text-purple-600" />
-                    <span className="text-gray-700">Notifications</span>
+                    <Bell size={18} className="text-primary" />
+                    <span>Notifications</span>
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
-              <DropdownMenuSeparator className="bg-purple-200/50" />
-              <DropdownMenuItem 
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
                 onClick={logout}
-                className="hover:bg-red-50 rounded-lg mx-2"
+                className="rounded-lg mx-2 hover:bg-destructive/10"
               >
-                <LogOut size={18} className="text-red-600" />
+                <LogOut size={18} className="text-destructive" />
                 <span>Log out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>

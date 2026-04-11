@@ -87,7 +87,7 @@ class PhonemeAssistant:
 
         # load in our prompt
 
-    def load_prompt(self, prompt_path: str) -> str:
+    def load_prompt(self, prompt_path: str, include_ssml: bool = True) -> str:
         # Always resolve prompt_path relative to backend root
         backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         resolved_prompt_path = (
@@ -101,21 +101,23 @@ class PhonemeAssistant:
             ]
             text = "".join(content)
 
-        # Automatically append SSML instruction to all prompts
-        ssml_instruction_rel = "core/gpt_prompts/ssml_instruction.txt"
-        ssml_instruction_path = os.path.join(backend_root, ssml_instruction_rel)
-        try:
-            with open(ssml_instruction_path, encoding="utf-8") as ssml_file:
-                ssml_lines = ssml_file.readlines()
-                ssml_content = [
-                    line for line in ssml_lines if not line.strip().startswith("//")
-                ]
-                ssml_text = "".join(ssml_content)
-                text += "\n\n" + ssml_text
-        except FileNotFoundError:
-            # If SSML instruction file is missing, continue without it
-            pass
-        
+        # Automatically append SSML instruction unless caller opts out.
+        # Sentence-only prompts (next_sentence_*) set include_ssml=False because
+        # the GPT output is read by the user, not spoken by TTS.
+        if include_ssml:
+            ssml_instruction_rel = "core/gpt_prompts/ssml_instruction.txt"
+            ssml_instruction_path = os.path.join(backend_root, ssml_instruction_rel)
+            try:
+                with open(ssml_instruction_path, encoding="utf-8") as ssml_file:
+                    ssml_lines = ssml_file.readlines()
+                    ssml_content = [
+                        line for line in ssml_lines if not line.strip().startswith("//")
+                    ]
+                    ssml_text = "".join(ssml_content)
+                    text += "\n\n" + ssml_text
+            except FileNotFoundError:
+                pass
+
         return text
 
     def extract_json(self, response_text):

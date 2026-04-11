@@ -20,7 +20,10 @@ import { showErrorToast, showNetworkError } from "@/utils/errorHandling";
 
 export interface UseAudioTransportOptions {
   onAnalysis?: (data: any) => void;
-  onGptResponse?: (data: any) => void;
+  /** Called immediately with locally-generated feedback text (before TTS is ready). */
+  onFeedback?: (data: { text: string; ssml?: string }) => void;
+  /** Called when GPT returns the next practice sentence (arrives in parallel with audio). */
+  onNextSentence?: (data: { sentence: any }) => void;
   onAudioFeedback?: (audioUrl: string) => void;
   onError?: (error: string) => void;
   onProcessingStart?: () => void;
@@ -57,8 +60,12 @@ export function useAudioTransport(options: UseAudioTransportOptions) {
         opts.onAnalysis?.(event.data);
         break;
 
-      case "gpt_response":
-        opts.onGptResponse?.(event.data);
+      case "feedback":
+        opts.onFeedback?.(event.data);
+        break;
+
+      case "next_sentence":
+        opts.onNextSentence?.(event.data);
         break;
 
       case "audio_feedback_file":

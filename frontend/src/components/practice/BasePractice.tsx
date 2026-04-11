@@ -57,9 +57,14 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
       setShowHighlightedWords(true);
       setAnalysisData(data);
     },
-    onGptResponse: (data) => {
+    onFeedback: (data) => {
+      // Arrives immediately after analysis (locally generated, no GPT).
+      setFeedback(data.text);
+    },
+    onNextSentence: (data) => {
+      // Arrives after GPT call (in parallel with TTS audio).
+      // This is the sentence the user reads next — NOT played via TTS.
       setNextSentence(data.sentence);
-      setFeedback(data.feedback);
       setTimeout(() => {
         setShowNextButton(true);
       }, 1000);

@@ -44,37 +44,44 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ className }: SidebarProps) => {
-  // get the user
   const { user, logout } = useContext<AuthContextType>(AuthContext);
   const { theme, setTheme } = useTheme();
   const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(true);
 
-  // Helper to check if route is active
-  const isActive = (path: string) => {
-    return (
-      location.pathname === path || location.pathname.startsWith(path + "/")
-    );
-  };
+  const isActive = (path: string) =>
+    location.pathname === path || location.pathname.startsWith(path + "/");
+
+  const navItemClass = (path: string, expanded: boolean) =>
+    `${expanded ? "w-full justify-start" : "w-12 h-12"} rounded-lg transition-colors ${
+      isActive(path)
+        ? "bg-primary/10 text-primary font-medium"
+        : "text-foreground hover:bg-muted"
+    }`;
+
+  const iconClass = (path: string, expanded: boolean) =>
+    `w-5 h-5 ${expanded ? "mr-3" : ""} ${
+      isActive(path) ? "text-primary" : "text-muted-foreground"
+    }`;
 
   return (
     <TooltipProvider>
       <aside
         className={`${
           isExpanded ? "w-64" : "w-20"
-        } flex flex-col bg-sidebar p-4 space-y-6 border-r-2 border-border transition-all duration-300 ${className}`}
+        } flex flex-col bg-sidebar p-3 space-y-4 border-r border-border transition-all duration-300 ${className}`}
       >
         {/* Logo/Brand and Toggle */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between px-1 py-1">
           {isExpanded && (
             <Link
               to="/dashboard"
               className="flex items-center gap-3 flex-1 min-w-0"
             >
-              <div className="w-12 h-12 flex-shrink-0 bg-gradient-to-br from-primary/60 to-purple-300 rounded-2xl flex items-center justify-center shadow-md hover:shadow-lg transition-shadow">
-                <img src={wordWizIcon} alt="Word Wiz" className="w-10 h-10" />
+              <div className="w-9 h-9 flex-shrink-0 bg-primary/10 rounded-lg flex items-center justify-center">
+                <img src={wordWizIcon} alt="Word Wiz" className="w-7 h-7" />
               </div>
-              <span className="text-lg font-bold text-foreground">
+              <span className="text-base font-semibold text-foreground">
                 Word Wiz <span className="text-primary">AI</span>
               </span>
             </Link>
@@ -83,176 +90,56 @@ const Sidebar = ({ className }: SidebarProps) => {
             variant="ghost"
             size="icon"
             onClick={() => setIsExpanded(!isExpanded)}
-            className={`w-12 h-12 flex-shrink-0 rounded-xl hover:bg-primary/10 transition-colors ${
+            className={`w-9 h-9 flex-shrink-0 rounded-lg hover:bg-muted transition-colors ${
               !isExpanded ? "mx-auto" : ""
             }`}
           >
             {isExpanded ? (
-              <PanelLeftClose className="w-5 h-5 text-foreground" />
+              <PanelLeftClose className="w-4 h-4 text-muted-foreground" />
             ) : (
-              <PanelLeft className="w-5 h-5 text-foreground" />
+              <PanelLeft className="w-4 h-4 text-muted-foreground" />
             )}
           </Button>
         </div>
 
         {/* Navigation Items */}
         <div
-          className={`flex flex-col space-y-1 ${
+          className={`flex flex-col space-y-0.5 ${
             isExpanded ? "items-stretch" : "items-center"
           }`}
         >
-          <Tooltip delayDuration={300}>
-            <TooltipTrigger asChild>
-              <Link to="/dashboard">
-                <Button
-                  variant="ghost"
-                  className={`${
-                    isExpanded ? "w-full justify-start" : "w-12 h-12"
-                  } rounded-xl hover:bg-purple-100/50 transition-colors ${
-                    isActive("/dashboard")
-                      ? "bg-purple-100/70 border-2 border-purple-300"
-                      : ""
-                  }`}
-                >
-                  <House
-                    className={`w-5 h-5 text-purple-600 ${
-                      isExpanded ? "mr-3" : ""
-                    }`}
-                  />
-                  {isExpanded && (
-                    <span className="font-medium text-foreground">
-                      Dashboard
-                    </span>
-                  )}
-                  {!isExpanded && <span className="sr-only">Dashboard</span>}
-                </Button>
-              </Link>
-            </TooltipTrigger>
-            {!isExpanded && (
-              <TooltipContent
-                side="right"
-                className="bg-card border-2 border-border text-foreground"
-              >
-                <p>Dashboard</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-
-          <Tooltip delayDuration={300}>
-            <TooltipTrigger asChild>
-              <Link to="/practice">
-                <Button
-                  variant="ghost"
-                  className={`${
-                    isExpanded ? "w-full justify-start" : "w-12 h-12"
-                  } rounded-xl hover:bg-blue-100/50 transition-colors ${
-                    isActive("/practice")
-                      ? "bg-blue-100/70 border-2 border-blue-300"
-                      : ""
-                  }`}
-                >
-                  <Target
-                    className={`w-5 h-5 text-blue-600 ${
-                      isExpanded ? "mr-3" : ""
-                    }`}
-                  />
-                  {isExpanded && (
-                    <span className="font-medium text-foreground">
-                      Practice
-                    </span>
-                  )}
-                  {!isExpanded && <span className="sr-only">Practice</span>}
-                </Button>
-              </Link>
-            </TooltipTrigger>
-            {!isExpanded && (
-              <TooltipContent
-                side="right"
-                className="bg-card border-2 border-border text-foreground"
-              >
-                <p>Practice</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-
-          <Tooltip delayDuration={300}>
-            <TooltipTrigger asChild>
-              <Link to="/progress">
-                <Button
-                  variant="ghost"
-                  className={`${
-                    isExpanded ? "w-full justify-start" : "w-12 h-12"
-                  } rounded-xl hover:bg-green-100/50 transition-colors ${
-                    isActive("/progress")
-                      ? "bg-green-100/70 border-2 border-green-300"
-                      : ""
-                  }`}
-                >
-                  <BarChart3
-                    className={`w-5 h-5 text-green-600 ${
-                      isExpanded ? "mr-3" : ""
-                    }`}
-                  />
-                  {isExpanded && (
-                    <span className="font-medium text-foreground">
-                      Progress
-                    </span>
-                  )}
-                  {!isExpanded && <span className="sr-only">Progress</span>}
-                </Button>
-              </Link>
-            </TooltipTrigger>
-            {!isExpanded && (
-              <TooltipContent
-                side="right"
-                className="bg-card border-2 border-border text-foreground"
-              >
-                <p>Progress</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
-
-          <Tooltip delayDuration={300}>
-            <TooltipTrigger asChild>
-              <Link to="/classes">
-                <Button
-                  variant="ghost"
-                  className={`${
-                    isExpanded ? "w-full justify-start" : "w-12 h-12"
-                  } rounded-xl hover:bg-orange-100/50 transition-colors ${
-                    isActive("/classes")
-                      ? "bg-orange-100/70 border-2 border-orange-300"
-                      : ""
-                  }`}
-                >
-                  <Users
-                    className={`w-5 h-5 text-orange-600 ${
-                      isExpanded ? "mr-3" : ""
-                    }`}
-                  />
-                  {isExpanded && (
-                    <span className="font-medium text-foreground">
-                      Classes
-                    </span>
-                  )}
-                  {!isExpanded && <span className="sr-only">Classes</span>}
-                </Button>
-              </Link>
-            </TooltipTrigger>
-            {!isExpanded && (
-              <TooltipContent
-                side="right"
-                className="bg-card border-2 border-border text-foreground"
-              >
-                <p>Classes</p>
-              </TooltipContent>
-            )}
-          </Tooltip>
+          {[
+            { path: "/dashboard", icon: House, label: "Dashboard" },
+            { path: "/practice", icon: Target, label: "Practice" },
+            { path: "/progress", icon: BarChart3, label: "Progress" },
+            { path: "/classes", icon: Users, label: "Classes" },
+          ].map(({ path, icon: Icon, label }) => (
+            <Tooltip key={path} delayDuration={300}>
+              <TooltipTrigger asChild>
+                <Link to={path}>
+                  <Button
+                    variant="ghost"
+                    className={navItemClass(path, isExpanded)}
+                  >
+                    <Icon className={iconClass(path, isExpanded)} />
+                    {isExpanded && <span>{label}</span>}
+                    {!isExpanded && <span className="sr-only">{label}</span>}
+                  </Button>
+                </Link>
+              </TooltipTrigger>
+              {!isExpanded && (
+                <TooltipContent side="right" className="bg-popover border border-border text-foreground">
+                  <p>{label}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          ))}
         </div>
 
         {/* Bottom Buttons */}
-        <div className="mt-auto space-y-1">
-          <Separator className="mb-3" />
+        <div className="mt-auto space-y-0.5">
+          <Separator className="mb-2" />
+
           {/* Theme Toggle */}
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
@@ -262,56 +149,34 @@ const Sidebar = ({ className }: SidebarProps) => {
                     variant="ghost"
                     className={`${
                       isExpanded ? "w-full justify-start" : "w-12 h-12"
-                    } rounded-xl hover:bg-amber-100/50 transition-colors relative`}
+                    } rounded-lg hover:bg-muted transition-colors relative text-foreground`}
                   >
                     <Sun
-                      className={`w-5 h-5 scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90 text-amber-600 ${
+                      className={`w-5 h-5 scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90 text-muted-foreground ${
                         isExpanded ? "mr-3" : ""
                       }`}
                     />
                     <Moon
-                      className={`w-5 h-5 absolute scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0 text-amber-600 ${
+                      className={`w-5 h-5 absolute scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0 text-muted-foreground ${
                         isExpanded ? "left-3" : "left-1/2 -translate-x-1/2"
                       }`}
                     />
-                    {isExpanded && (
-                      <span className="font-medium text-foreground">Theme</span>
-                    )}
-                    {!isExpanded && (
-                      <span className="sr-only">Toggle theme</span>
-                    )}
+                    {isExpanded && <span className="font-medium">Theme</span>}
+                    {!isExpanded && <span className="sr-only">Toggle theme</span>}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="w-32 rounded-xl border-2 border-border bg-card shadow-lg"
+                  className="w-32 rounded-lg border border-border bg-popover shadow-md"
                 >
-                  <DropdownMenuItem
-                    onClick={() => setTheme("light")}
-                    className="rounded-lg mx-2 hover:bg-secondary"
-                  >
-                    Light
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setTheme("dark")}
-                    className="rounded-lg mx-2 hover:bg-secondary"
-                  >
-                    Dark
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setTheme("system")}
-                    className="rounded-lg mx-2 hover:bg-secondary"
-                  >
-                    System
-                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme("light")} className="rounded-md cursor-pointer">Light</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme("dark")} className="rounded-md cursor-pointer">Dark</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme("system")} className="rounded-md cursor-pointer">System</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </TooltipTrigger>
             {!isExpanded && (
-              <TooltipContent
-                side="right"
-                className="bg-card border-2 border-border text-foreground"
-              >
+              <TooltipContent side="right" className="bg-popover border border-border text-foreground">
                 <p>Theme</p>
               </TooltipContent>
             )}
@@ -323,33 +188,16 @@ const Sidebar = ({ className }: SidebarProps) => {
               <Link to="/settings">
                 <Button
                   variant="ghost"
-                  className={`${
-                    isExpanded ? "w-full justify-start" : "w-12 h-12"
-                  } rounded-xl hover:bg-purple-100/50 transition-colors ${
-                    isActive("/settings")
-                      ? "bg-purple-100/70 border-2 border-purple-300"
-                      : ""
-                  }`}
+                  className={navItemClass("/settings", isExpanded)}
                 >
-                  <Settings
-                    className={`w-5 h-5 text-purple-600 ${
-                      isExpanded ? "mr-3" : ""
-                    }`}
-                  />
-                  {isExpanded && (
-                    <span className="font-medium text-foreground">
-                      Settings
-                    </span>
-                  )}
+                  <Settings className={iconClass("/settings", isExpanded)} />
+                  {isExpanded && <span>Settings</span>}
                   {!isExpanded && <span className="sr-only">Settings</span>}
                 </Button>
               </Link>
             </TooltipTrigger>
             {!isExpanded && (
-              <TooltipContent
-                side="right"
-                className="bg-card border-2 border-border text-foreground"
-              >
+              <TooltipContent side="right" className="bg-popover border border-border text-foreground">
                 <p>Settings</p>
               </TooltipContent>
             )}
@@ -361,24 +209,17 @@ const Sidebar = ({ className }: SidebarProps) => {
                 variant="ghost"
                 className={`${
                   isExpanded ? "w-full justify-start" : "w-12 h-12"
-                } rounded-xl hover:bg-purple-100/50 transition-colors`}
+                } rounded-lg hover:bg-muted transition-colors text-foreground`}
               >
                 <CircleQuestionMark
-                  className={`w-5 h-5 text-purple-600 ${
-                    isExpanded ? "mr-3" : ""
-                  }`}
+                  className={`w-5 h-5 text-muted-foreground ${isExpanded ? "mr-3" : ""}`}
                 />
-                {isExpanded && (
-                  <span className="font-medium text-foreground">Help</span>
-                )}
+                {isExpanded && <span className="font-medium">Help</span>}
                 {!isExpanded && <span className="sr-only">Help</span>}
               </Button>
             </TooltipTrigger>
             {!isExpanded && (
-              <TooltipContent
-                side="right"
-                className="bg-card border-2 border-border text-foreground"
-              >
+              <TooltipContent side="right" className="bg-popover border border-border text-foreground">
                 <p>Help</p>
               </TooltipContent>
             )}
@@ -391,19 +232,19 @@ const Sidebar = ({ className }: SidebarProps) => {
                 variant="ghost"
                 className={`${
                   isExpanded ? "w-full justify-start" : "w-12 h-12"
-                } rounded-xl hover:bg-purple-100/50 transition-colors ${
+                } rounded-lg hover:bg-muted transition-colors ${
                   isExpanded ? "p-2" : "p-0"
                 }`}
               >
-                <Avatar className="w-10 h-10 border-2 border-primary rounded-xl">
+                <Avatar className="w-8 h-8 rounded-lg border border-border">
                   <AvatarImage src="" alt={user?.username} />
-                  <AvatarFallback className="bg-primary/10 text-primary font-bold rounded-xl">
+                  <AvatarFallback className="bg-primary/10 text-primary font-semibold rounded-lg text-xs">
                     {nameToInitials(user?.full_name ?? "")}
                   </AvatarFallback>
                 </Avatar>
                 {isExpanded && (
-                  <div className="ml-3 text-left overflow-hidden flex-1">
-                    <div className="text-sm font-semibold text-foreground truncate">
+                  <div className="ml-2 text-left overflow-hidden flex-1">
+                    <div className="text-sm font-medium text-foreground truncate">
                       {user?.full_name ?? "Guest"}
                     </div>
                     <div className="text-xs text-muted-foreground truncate">
@@ -415,23 +256,20 @@ const Sidebar = ({ className }: SidebarProps) => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-              className="w-64 rounded-xl border-2 border-border bg-card shadow-lg"
+              className="w-64 rounded-xl border border-border bg-popover shadow-md"
               side="right"
               align="end"
               sideOffset={4}
             >
               <DropdownMenuLabel className="p-0 font-normal">
-                <div className="flex items-center gap-3 px-3 py-3 text-left">
-                  <Avatar className="h-10 w-10 border-2 border-primary rounded-xl">
-                    <AvatarImage
-                      src={""}
-                      alt={user?.full_name ?? "Not logged in"}
-                    />
-                    <AvatarFallback className="bg-primary/10 text-primary font-bold rounded-xl">
+                <div className="flex items-center gap-3 px-3 py-3">
+                  <Avatar className="h-9 w-9 rounded-lg border border-border">
+                    <AvatarImage src="" alt={user?.full_name ?? "Not logged in"} />
+                    <AvatarFallback className="bg-primary/10 text-primary font-semibold rounded-lg text-xs">
                       {nameToInitials(user?.full_name ?? "")}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
+                  <div className="grid flex-1 text-sm leading-tight">
                     <span className="truncate font-semibold text-foreground">
                       {user?.full_name ?? "Not logged in"}
                     </span>
@@ -443,27 +281,15 @@ const Sidebar = ({ className }: SidebarProps) => {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem
-                  asChild
-                  className="rounded-lg mx-2 hover:bg-secondary"
-                >
-                  <Link
-                    to="/settings#account"
-                    className="flex items-center gap-3"
-                  >
-                    <BadgeCheck size={18} className="text-primary" />
+                <DropdownMenuItem asChild className="rounded-md cursor-pointer">
+                  <Link to="/settings#account" className="flex items-center gap-3">
+                    <BadgeCheck size={16} className="text-muted-foreground" />
                     <span>Account</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  asChild
-                  className="rounded-lg mx-2 hover:bg-secondary"
-                >
-                  <Link
-                    to="/settings#notifications"
-                    className="flex items-center gap-3"
-                  >
-                    <Bell size={18} className="text-primary" />
+                <DropdownMenuItem asChild className="rounded-md cursor-pointer">
+                  <Link to="/settings#notifications" className="flex items-center gap-3">
+                    <Bell size={16} className="text-muted-foreground" />
                     <span>Notifications</span>
                   </Link>
                 </DropdownMenuItem>
@@ -471,9 +297,9 @@ const Sidebar = ({ className }: SidebarProps) => {
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={logout}
-                className="rounded-lg mx-2 hover:bg-destructive/10"
+                className="rounded-md cursor-pointer text-destructive focus:text-destructive"
               >
-                <LogOut size={18} className="text-destructive" />
+                <LogOut size={16} />
                 <span>Log out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>

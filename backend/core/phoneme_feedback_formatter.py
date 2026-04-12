@@ -20,7 +20,9 @@ class FeedbackResult:
     ssml: str   # SSML-enhanced feedback for Google Cloud TTS
 
 
-# Maps IPA phoneme symbols to human-readable letter combinations for plain text
+# ── Display names ──────────────────────────────────────────────────────────────
+
+# Maps IPA phoneme → human-readable letter combination for plain text
 _IPA_TO_DISPLAY: dict[str, str] = {
     "θ":  "th",
     "ð":  "th",
@@ -50,19 +52,20 @@ _IPA_TO_DISPLAY: dict[str, str] = {
     "eɪ": "long a",
     "ɔɪ": "oy",
     "oʊ": "long o",
-    # Simple consonants — use as-is
     "p": "p", "b": "b", "t": "t", "d": "d",
     "k": "k", "ɡ": "g", "g": "g", "f": "f", "v": "v",
     "s": "s", "z": "z", "h": "h", "m": "m",
     "n": "n", "l": "l", "w": "w",
 }
 
-# Maps IPA phoneme → (ph_attribute, demo_syllable) for Google Cloud TTS <phoneme> tags.
-# The demo syllable is wrapped in <phoneme ph="..."> so TTS produces the target sound.
-# Google's supported IPA consonants: p b t d k ɡ m n ŋ f v s z θ ð ʃ ʒ h l ɹ ʧ ʤ j w
-# Google's supported IPA vowels: æ ɑː ə ɚ ɛ ɪ iː ɔː ʊ uː ʌ aɪ aʊ eɪ ɔɪ oʊ
+
+# ── Google Cloud TTS phoneme tags ──────────────────────────────────────────────
+
+# Maps IPA phoneme → (ph attribute, demo syllable) for <phoneme> tags.
+# Google Cloud TTS supported IPA:
+#   Consonants: p b t d k ɡ m n ŋ f v s z θ ð ʃ ʒ h l ɹ ʧ ʤ j w
+#   Vowels:     æ ɑː ə ɚ ɛ ɪ iː ɔː ʊ uː ʌ aɪ aʊ eɪ ɔɪ oʊ
 _IPA_DEMO: dict[str, tuple[str, str]] = {
-    # Consonants
     "p":  ("p",   "p"),
     "b":  ("b",   "b"),
     "t":  ("t",   "t"),
@@ -91,7 +94,6 @@ _IPA_DEMO: dict[str, tuple[str, str]] = {
     "tʃ": ("ʧ",   "ch"),
     "ʤ":  ("ʤ",   "j"),
     "dʒ": ("ʤ",   "j"),
-    # Vowels
     "æ":  ("æ",   "ah"),
     "ɑː": ("ɑː",  "ah"),
     "ə":  ("ə",   "uh"),
@@ -110,8 +112,45 @@ _IPA_DEMO: dict[str, tuple[str, str]] = {
     "oʊ": ("oʊ",  "oh"),
 }
 
+
+# ── Grapheme tips ──────────────────────────────────────────────────────────────
+
+# Tips keyed by grapheme cluster (what the student SAW in the word).
+# These are preferred over phoneme tips when we can identify the grapheme.
+GRAPHEME_TIPS: dict[str, str] = {
+    "th":  "When you see 'th', put your tongue lightly between your teeth and blow air out gently — like in 'think' or 'three'.",
+    "oo":  "When you see two O's together, they usually make an 'oo' sound — like in 'food' or 'moon'.",
+    "ch":  "When you see 'ch', press your tongue to the roof of your mouth and release with a puff of air — like in 'chair' or 'chin'.",
+    "sh":  "When you see 'sh', round your lips slightly and push air through — like telling someone to be quiet, as in 'ship' or 'fish'.",
+    "ph":  "When you see 'ph', it makes an 'f' sound — like in 'phone' or 'photo'.",
+    "ck":  "When you see 'ck' at the end of a word, it makes a 'k' sound — like in 'back' or 'duck'.",
+    "ng":  "When you see 'ng', it makes a nasal sound from the back of your throat — like in 'sing' or 'ring'.",
+    "wh":  "When you see 'wh', it usually makes a 'w' sound — like in 'where' or 'when'.",
+    "ea":  "When you see 'ea', it often makes a long 'ee' sound — like in 'read' or 'beach'.",
+    "ai":  "When you see 'ai', it usually makes a long 'a' sound — like in 'rain' or 'sail'.",
+    "ay":  "When you see 'ay', it makes a long 'a' sound — like in 'day' or 'play'.",
+    "igh": "When you see 'igh', it makes a long 'i' sound — like in 'night' or 'light'.",
+    "ow":  "When you see 'ow', it can make an 'oh' sound like in 'snow', or an 'ow' sound like in 'cow'.",
+    "ou":  "When you see 'ou', it often makes an 'ow' sound — like in 'out' or 'house'.",
+    "oi":  "When you see 'oi', it makes an 'oy' sound — like in 'coin' or 'join'.",
+    "oy":  "When you see 'oy', it makes an 'oy' sound — like in 'boy' or 'toy'.",
+    "ew":  "When you see 'ew', it usually makes a long 'oo' sound — like in 'new' or 'flew'.",
+    "ue":  "When you see 'ue', it often makes a long 'oo' or 'yoo' sound — like in 'blue' or 'cue'.",
+    "ie":  "When you see 'ie', it often makes a long 'ee' sound — like in 'piece' or 'field'.",
+    "gh":  "When you see 'gh' after a vowel, it's usually silent — like in 'night' or 'through'. Sometimes it makes an 'f' sound, like in 'enough'.",
+    "kn":  "When you see 'kn' at the start of a word, the 'k' is silent — like in 'knee' or 'know'.",
+    "wr":  "When you see 'wr' at the start of a word, the 'w' is silent — like in 'write' or 'wrong'.",
+    "dge": "When you see 'dge', it makes a 'j' sound — like in 'bridge' or 'judge'.",
+    "tch": "When you see 'tch', it makes a 'ch' sound — like in 'catch' or 'witch'.",
+    "ge":  "When you see 'ge' at the end of a word, it often makes a 'j' sound — like in 'age' or 'large'.",
+    "ce":  "When you see 'ce', it usually makes an 's' sound — like in 'face' or 'mice'.",
+    "ci":  "When you see 'ci', it often makes a 'sh' sound — like in 'special' or 'ancient'.",
+}
+
+
+# ── Phoneme tips (fallback when grapheme can't be identified) ──────────────────
+
 PRONUNCIATION_TIPS: dict[str, str] = {
-    "uː": "When you see two O's next to each other, they usually make an 'oo' sound, like in food or moon.",
     "θ":  "For the 'th' sound, put your tongue lightly between your teeth and blow air out gently.",
     "ð":  "For the voiced 'th' sound, put your tongue between your teeth and use your voice — like in 'the' or 'this'.",
     "ʃ":  "For the 'sh' sound, round your lips slightly and push air through — like telling someone to be quiet.",
@@ -122,11 +161,12 @@ PRONUNCIATION_TIPS: dict[str, str] = {
     "ɛ":  "This is a short 'eh' sound — like in 'bed' or 'said'.",
     "ɪ":  "This is a short 'ih' sound — like in 'bit' or 'him', not the long 'ee'.",
     "iː": "This is the long 'ee' sound — like in 'feet' or 'sleep'.",
+    "uː": "This is the long 'oo' sound — like in 'food' or 'moon'.",
     "ʊ":  "This is a short 'oo' sound — like in 'book' or 'put', not the long 'oo'.",
     "ʌ":  "This is a short 'uh' sound — like in 'cup' or 'fun'.",
-    "aɪ": "This diphthong starts with 'ah' and glides to 'ee' — like in 'bite' or 'fly'.",
-    "eɪ": "This diphthong starts with 'eh' and glides to 'ee' — like in 'date' or 'say'.",
-    "oʊ": "This diphthong starts with 'oh' and glides closed — like in 'go' or 'home'.",
+    "aɪ": "This sound starts with 'ah' and glides to 'ee' — like in 'bite' or 'fly'.",
+    "eɪ": "This sound starts with 'eh' and glides to 'ee' — like in 'date' or 'say'.",
+    "oʊ": "This sound starts with 'oh' and glides closed — like in 'go' or 'home'.",
     "ʧ":  "The 'ch' sound — press your tongue to the roof of your mouth and release with a puff of air.",
     "tʃ": "The 'ch' sound — press your tongue to the roof of your mouth and release with a puff of air.",
     "ʤ":  "The 'j' sound — same as 'ch' but use your voice.",
@@ -134,19 +174,84 @@ PRONUNCIATION_TIPS: dict[str, str] = {
     "ʒ":  "This sound is like 'sh' but voiced — like the middle of 'measure' or 'vision'.",
     "v":  "The 'v' sound — bite your lower lip lightly and use your voice, like 'f' but voiced.",
     "z":  "The 'z' sound — same as 's' but use your voice.",
+    "f":  "The 'f' sound — bite your lower lip lightly and blow air out.",
 }
 
 
+# ── Grapheme detection ─────────────────────────────────────────────────────────
+
+# Maps IPA phoneme → candidate grapheme clusters to search for in the word,
+# ordered from longest/most specific to shortest (avoids "sh" matching before "tch").
+_PHONEME_TO_GRAPHEMES: dict[str, list[str]] = {
+    "θ":  ["tch", "th"],          # voiceless th: think, three, month
+    "ð":  ["th"],                  # voiced th: the, this, breathe
+    "ʃ":  ["tch", "sh", "ci", "ti"],
+    "ʧ":  ["tch", "ch"],
+    "tʃ": ["tch", "ch"],
+    "ʤ":  ["dge", "ge", "j"],
+    "dʒ": ["dge", "ge", "j"],
+    "ŋ":  ["ng"],
+    "ʒ":  ["ge", "ci"],
+    "f":  ["ph", "gh", "f"],       # phone, rough, fun
+    "k":  ["ck", "k", "c"],
+    "j":  ["y"],                   # yes, year
+    "w":  ["wh", "w"],             # where, water
+    "ɹ":  ["wr", "r"],             # write, run
+    "r":  ["wr", "r"],
+    "n":  ["kn", "n"],             # knee, no
+    "uː": ["oo", "ew", "ue"],      # food, flew, blue
+    "ʊ":  ["oo", "u"],             # book, put
+    "iː": ["ee", "ea", "ie"],      # feet, beach, field
+    "eɪ": ["ai", "ay", "ea"],      # rain, day, break
+    "aɪ": ["igh", "ie", "y"],      # night, pie, fly
+    "oʊ": ["ow", "oa"],            # snow, boat
+    "aʊ": ["ou", "ow"],            # out, cow
+    "ɔɪ": ["oi", "oy"],            # coin, boy
+}
+
+
+def _find_grapheme_in_word(phoneme: str, word: str) -> Optional[str]:
+    """
+    Scan word (case-insensitive) for the most specific grapheme cluster
+    that commonly produces the given phoneme.
+
+    Returns the matched grapheme string, or None if no candidate is found.
+    """
+    candidates = _PHONEME_TO_GRAPHEMES.get(phoneme)
+    if not candidates:
+        return None
+    word_lower = word.lower()
+    for grapheme in candidates:
+        if grapheme in word_lower:
+            return grapheme
+    return None
+
+
+def _tip_for_phoneme(phoneme: str, error_words: list[str]) -> str:
+    """
+    Return the best available tip for a phoneme, preferring grapheme-centric tips.
+
+    Strategy:
+    1. Check each error word for a known grapheme cluster → use GRAPHEME_TIPS.
+    2. If no grapheme found in any word, fall back to PRONUNCIATION_TIPS.
+    """
+    for word in error_words:
+        grapheme = _find_grapheme_in_word(phoneme, word)
+        if grapheme and grapheme in GRAPHEME_TIPS:
+            return GRAPHEME_TIPS[grapheme]
+
+    # Fallback: phoneme-based tip
+    return PRONUNCIATION_TIPS.get(phoneme, "")
+
+
+# ── Formatting helpers ─────────────────────────────────────────────────────────
+
 def _display_name(phoneme: str) -> str:
-    """Return a human-readable letter name for an IPA phoneme."""
     return _IPA_TO_DISPLAY.get(phoneme, phoneme)
 
 
 def _phoneme_tag(phoneme: str) -> str:
-    """
-    Return a Google Cloud TTS <phoneme> tag that plays the target sound in isolation.
-    Falls back to a quoted display name if the phoneme isn't in the demo table.
-    """
+    """Return a Google Cloud TTS <phoneme> tag that plays the target sound."""
     if phoneme in _IPA_DEMO:
         ph_attr, demo_text = _IPA_DEMO[phoneme]
         return f'<phoneme alphabet="ipa" ph="{ph_attr}">{demo_text}</phoneme>'
@@ -154,7 +259,6 @@ def _phoneme_tag(phoneme: str) -> str:
 
 
 def _oxford_list(words: list[str]) -> str:
-    """Format a word list with Oxford comma: 'a', 'a and b', 'a, b, and c'."""
     if len(words) == 1:
         return words[0]
     if len(words) == 2:
@@ -162,8 +266,11 @@ def _oxford_list(words: list[str]) -> str:
     return ", ".join(words[:-1]) + f", and {words[-1]}"
 
 
-def _words_for_phoneme(phoneme: str, phoneme_to_error_words: dict, max_words: int = 4) -> list[str]:
-    """Return up to max_words unique words that had errors with this phoneme."""
+def _words_for_phoneme(
+    phoneme: str,
+    phoneme_to_error_words: dict,
+    max_words: int = 4,
+) -> list[str]:
     seen: set[str] = set()
     words: list[str] = []
     for entry in phoneme_to_error_words.get(phoneme, []):
@@ -180,15 +287,11 @@ def _ordered_phonemes(
     phoneme_to_error_words: dict[str, list[dict]],
     problem_summary: dict,
 ) -> list[str]:
-    """
-    Return phonemes with errors in pedagogical order:
-    recommended_focus_phoneme first, then others sorted by error count descending.
-    """
+    """Return phonemes with errors: recommended_focus first, others by error count."""
     recommended = problem_summary.get("recommended_focus_phoneme")
     focus: Optional[str] = None
     if recommended and isinstance(recommended, (list, tuple)) and len(recommended) >= 1:
         focus = str(recommended[0])
-    # Fallback: highest error count
     if not focus:
         error_counts = problem_summary.get("phoneme_error_counts", {})
         if error_counts:
@@ -201,13 +304,14 @@ def _ordered_phonemes(
         [p for p in phoneme_to_error_words if p != focus],
         key=lambda p: (-error_counts.get(p, 0), -len(phoneme_to_error_words.get(p, []))),
     )
-
     result: list[str] = []
     if focus and focus in phoneme_to_error_words:
         result.append(focus)
     result.extend(others)
     return result
 
+
+# ── Public API ─────────────────────────────────────────────────────────────────
 
 def build_phoneme_to_error_words(pronunciation_data: list[dict]) -> dict[str, list[dict]]:
     """
@@ -222,21 +326,17 @@ def build_phoneme_to_error_words(pronunciation_data: list[dict]) -> dict[str, li
         if word_data.get("per", 0) <= 0:
             continue
 
-        # ground_truth_word can be None for insertion-type alignment entries
         word = (word_data.get("ground_truth_word") or "").strip()
 
         for phoneme in word_data.get("missed", []):
             phoneme_to_error_words.setdefault(phoneme, []).append(
                 {"word": word, "error_type": "missed"}
             )
-
         for phoneme in word_data.get("added", []):
             phoneme_to_error_words.setdefault(phoneme, []).append(
                 {"word": word, "error_type": "added"}
             )
-
         for sub in word_data.get("substituted", []):
-            # substituted entries are (expected_phoneme, actual_phoneme) pairs
             expected = sub[0] if isinstance(sub, (list, tuple)) and len(sub) > 0 else sub
             phoneme_to_error_words.setdefault(expected, []).append(
                 {"word": word, "error_type": "substituted"}
@@ -255,15 +355,17 @@ def generate_feedback(
 
     Pure function — no network calls. Returns instantly.
 
-    Feedback covers all problem phonemes (recommended focus first, then others
-    by error count). A pronunciation tip is appended for the focus phoneme only.
+    Tips are grapheme-centric when possible: the formatter scans each error word
+    for a known grapheme cluster that produces the target phoneme (e.g., "th" in
+    "think" for /θ/), then uses a tip that references the letters the student saw.
+    Falls back to a phoneme-level tip when no matching grapheme is found.
 
     Args:
-        problem_summary: From analyze_results() — contains recommended_focus_phoneme,
-                         phoneme_error_counts, etc. phoneme_to_error_words is built
-                         here if not already present.
+        problem_summary: From analyze_results(). May contain phoneme_to_error_words;
+                         if absent it is built from pronunciation_data.
         per_summary:     From analyze_results() — contains sentence_per.
-        pronunciation_data: Raw pronunciation records (pronunciation_dataframe.to_dict('records')).
+        pronunciation_data: Raw pronunciation records
+                            (pronunciation_dataframe.to_dict('records')).
 
     Returns:
         FeedbackResult with .text (plain) and .ssml (Google Cloud TTS SSML).
@@ -294,7 +396,7 @@ def generate_feedback(
         display = _display_name(phoneme)
         word_list = _oxford_list(words)
 
-        # ── Plain text ──────────────────────────────────────────────────────
+        # Plain text
         if i == 0:
             text_parts.append(
                 f"You had trouble with the '{display}' sound — "
@@ -305,29 +407,32 @@ def generate_feedback(
                 f"You also had trouble with the '{display}' sound in {word_list}."
             )
 
-        # ── SSML ─────────────────────────────────────────────────────────────
+        # SSML
         tag = _phoneme_tag(phoneme)
         if i == 0:
             ssml_parts.append(
-                f"You had trouble with the {tag} sound — "
-                f"you missed it in <break time=\"200ms\"/> {word_list}."
+                f'You had trouble with the {tag} sound — '
+                f'you missed it in <break time="200ms"/> {word_list}.'
             )
         else:
             ssml_parts.append(
-                f"You also had trouble with the {tag} sound in "
-                f"<break time=\"200ms\"/> {word_list}."
+                f'You also had trouble with the {tag} sound in '
+                f'<break time="200ms"/> {word_list}.'
             )
 
     if not text_parts:
         return FeedbackResult(text="Keep practicing!", ssml="Keep practicing!")
 
-    # Append pronunciation tip for the focus phoneme (first in ordered list)
-    tip = PRONUNCIATION_TIPS.get(ordered[0], "")
+    # Append tip for focus phoneme only — grapheme-centric if we can identify
+    # the grapheme cluster from the error words, phoneme-level tip otherwise.
+    focus_phoneme = ordered[0]
+    focus_words = _words_for_phoneme(focus_phoneme, phoneme_to_error_words, max_words=4)
+    tip = _tip_for_phoneme(focus_phoneme, focus_words)
     if tip:
         text_parts.append(tip)
         ssml_parts.append(tip)
 
-    text = " ".join(text_parts)
-    ssml = " ".join(ssml_parts)
-
-    return FeedbackResult(text=text, ssml=ssml)
+    return FeedbackResult(
+        text=" ".join(text_parts),
+        ssml=" ".join(ssml_parts),
+    )

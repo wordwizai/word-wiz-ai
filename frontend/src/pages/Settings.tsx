@@ -31,6 +31,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Settings2,
+  User,
+  Bell,
+  Palette,
+  Zap,
+  CheckCircle2,
+  Sparkles,
+} from "lucide-react";
 type Settings = {
   preferred_language?: string;
   theme?: "dark" | "light" | "system" | null;
@@ -90,9 +99,35 @@ const Settings = () => {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-6">Settings</h1>
+    <div className="flex-1 overflow-auto bg-background">
+      {/* Hero Header */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-accent/5 to-primary/5 border-b border-border px-6 py-6">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-accent/10 rounded-full blur-3xl" />
+          <Sparkles className="absolute top-4 right-16 w-6 h-6 text-primary/10 rotate-45" />
+        </div>
+        <div className="relative z-10 flex items-center gap-4 max-w-4xl mx-auto">
+          <div className="hidden sm:flex shrink-0">
+            <div className="relative w-14 h-14">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl rotate-6" />
+              <div className="absolute inset-0 bg-gradient-to-tl from-accent/20 to-primary/20 rounded-2xl -rotate-6" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Settings2 className="w-7 h-7 text-primary" />
+              </div>
+            </div>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">Configuration</p>
+            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary via-primary/80 to-accent bg-clip-text text-transparent">
+              Settings
+            </h1>
+            <p className="text-sm text-muted-foreground mt-0.5">Manage your account, preferences, and app behaviour</p>
+          </div>
+        </div>
+      </div>
 
+      <div className="container mx-auto py-6 px-4 max-w-4xl">
       <Tabs
         value={tab}
         onValueChange={(value) => {
@@ -101,16 +136,31 @@ const Settings = () => {
         }}
         className="w-full"
       >
-        <TabsList className="grid grid-cols-5 mb-8">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="account">Account</TabsTrigger>
-          <TabsTrigger value="appearance">Appearance</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
+        <TabsList className="flex flex-wrap h-auto gap-1 mb-6 bg-muted/60 p-1 rounded-xl">
+          <TabsTrigger value="profile" className="flex items-center gap-1.5 rounded-lg flex-1 min-w-fit data-[state=active]:shadow-sm">
+            <User className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Profile</span>
+          </TabsTrigger>
+          <TabsTrigger value="account" className="flex items-center gap-1.5 rounded-lg flex-1 min-w-fit data-[state=active]:shadow-sm">
+            <Settings2 className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Account</span>
+          </TabsTrigger>
+          <TabsTrigger value="appearance" className="flex items-center gap-1.5 rounded-lg flex-1 min-w-fit data-[state=active]:shadow-sm">
+            <Palette className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Appearance</span>
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="flex items-center gap-1.5 rounded-lg flex-1 min-w-fit data-[state=active]:shadow-sm">
+            <Bell className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Notifications</span>
+          </TabsTrigger>
+          <TabsTrigger value="performance" className="flex items-center gap-1.5 rounded-lg flex-1 min-w-fit data-[state=active]:shadow-sm">
+            <Zap className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Performance</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile">
-          <Card>
+          <Card className="rounded-2xl border-2 border-border shadow-sm">
             <CardHeader>
               <CardTitle>Profile Settings</CardTitle>
               <CardDescription>
@@ -144,7 +194,7 @@ const Settings = () => {
         </TabsContent>
 
         <TabsContent value="account">
-          <Card>
+          <Card className="rounded-2xl border-2 border-border shadow-sm">
             <CardHeader>
               <CardTitle>Account Settings</CardTitle>
               <CardDescription>
@@ -202,7 +252,7 @@ const Settings = () => {
         </TabsContent>
 
         <TabsContent value="appearance">
-          <Card>
+          <Card className="rounded-2xl border-2 border-border shadow-sm">
             <CardHeader>
               <CardTitle>Appearance Settings</CardTitle>
               <CardDescription>
@@ -238,7 +288,7 @@ const Settings = () => {
         </TabsContent>
 
         <TabsContent value="notifications">
-          <Card>
+          <Card className="rounded-2xl border-2 border-border shadow-sm">
             <CardHeader>
               <CardTitle>Notification Settings</CardTitle>
               <CardDescription>
@@ -282,7 +332,7 @@ const Settings = () => {
         </TabsContent>
 
         <TabsContent value="performance">
-          <Card>
+          <Card className="rounded-2xl border-2 border-border shadow-sm">
             <CardHeader>
               <CardTitle>Performance Settings</CardTitle>
               <CardDescription>
@@ -335,11 +385,12 @@ const Settings = () => {
 
               <Separator />
 
-              <div className="rounded-lg bg-muted p-4">
-                <h4 className="text-sm font-medium mb-2">
-                  💡 Performance Tips
-                </h4>
-                <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+              <div className="rounded-xl bg-muted/60 border border-border p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Zap className="w-4 h-4 text-primary" />
+                  <h4 className="text-sm font-semibold text-foreground">Performance Tips</h4>
+                </div>
+                <ul className="text-sm text-muted-foreground space-y-1.5 list-disc list-inside">
                   <li>Model downloads once and caches for future sessions</li>
                   <li>Automatically disabled on low-memory devices</li>
                   <li>Falls back to server processing if any issues occur</li>
@@ -351,9 +402,23 @@ const Settings = () => {
         </TabsContent>
       </Tabs>
 
-      <div className="mt-6 flex justify-between items-center">
-        <p className="text-green-600">{savedStatus}</p>
-        <Button onClick={handleSave}>Save Changes</Button>
+      <div className="mt-6 flex justify-between items-center gap-4 pt-4 border-t border-border">
+        <div className="flex items-center gap-2 min-h-[20px]">
+          {savedStatus && (
+            <div className={`flex items-center gap-1.5 text-sm font-medium ${
+              savedStatus.includes("Failed")
+                ? "text-destructive"
+                : "text-emerald-600 dark:text-emerald-400"
+            }`}>
+              {!savedStatus.includes("Failed") && <CheckCircle2 className="w-4 h-4" />}
+              {savedStatus}
+            </div>
+          )}
+        </div>
+        <Button onClick={handleSave} className="rounded-xl px-6 font-semibold">
+          Save changes
+        </Button>
+      </div>
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ import {
   Flame,
   Star,
   TrendingUp,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
@@ -77,14 +78,37 @@ const ProgressDashboard = () => {
 
   return (
     <main className="flex-1 p-4 sm:p-6 bg-background space-y-6 overflow-auto flex flex-col min-h-0">
-      <div className="text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-3">
-          <BarChart3 className="w-8 h-8 text-primary" />
+      {/* Hero Header */}
+      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-green-500/10 via-primary/5 to-teal-500/10 border border-green-500/20 p-6">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-10 -right-10 w-40 h-40 bg-green-500/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-teal-500/10 rounded-full blur-3xl" />
+          <BarChart3 className="absolute top-4 right-16 w-8 h-8 text-green-500/10 rotate-12" />
+          <TrendingUp className="absolute bottom-6 right-8 w-6 h-6 text-primary/10 -rotate-12" />
+          <Sparkles className="absolute top-8 left-1/3 w-5 h-5 text-accent/10 rotate-45" />
         </div>
-        <h1 className="text-3xl font-bold text-foreground">Your Progress</h1>
-        <p className="text-muted-foreground mt-2">
-          Track your reading journey!
-        </p>
+        <div className="relative z-10 flex items-center gap-5">
+          <div className="hidden sm:flex shrink-0">
+            <div className="relative w-16 h-16">
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500/20 to-teal-500/20 rounded-2xl rotate-6" />
+              <div className="absolute inset-0 bg-gradient-to-tl from-teal-500/20 to-green-500/20 rounded-2xl -rotate-6" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <BarChart3 className="w-8 h-8 text-green-600" />
+              </div>
+            </div>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">
+              Statistics
+            </p>
+            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-green-600 via-primary to-teal-600 bg-clip-text text-transparent">
+              Your Progress
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Track your reading journey and celebrate your growth!
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Progress Stats */}

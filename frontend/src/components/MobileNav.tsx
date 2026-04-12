@@ -34,6 +34,13 @@ interface MobileNavProps {
   className?: string;
 }
 
+const navItems = [
+  { path: "/dashboard", icon: House, label: "Dashboard" },
+  { path: "/practice", icon: Target, label: "Practice" },
+  { path: "/progress", icon: BarChart3, label: "Progress" },
+  { path: "/settings", icon: Settings, label: "Settings" },
+];
+
 const MobileNav = ({ className }: MobileNavProps) => {
   const { user, logout } = useContext<AuthContextType>(AuthContext);
   const location = useLocation();
@@ -41,84 +48,81 @@ const MobileNav = ({ className }: MobileNavProps) => {
   const isActive = (path: string) =>
     location.pathname === path || location.pathname.startsWith(path + "/");
 
-  const navLinkClass = (path: string) =>
-    `p-2.5 rounded-xl transition-colors ${
-      isActive(path)
-        ? "bg-primary/10 text-primary"
-        : "text-muted-foreground hover:bg-muted hover:text-foreground"
-    }`;
-
   return (
     <TooltipProvider>
-      <aside className={`${className}`}>
-        <div className="mx-3 sm:mx-5 mb-2 px-2 py-1.5 flex flex-row items-center justify-around bg-card border-t border-border rounded-t-2xl shadow-lg">
-          {/* Home */}
-          <Tooltip delayDuration={300}>
-            <TooltipTrigger asChild>
-              <Link to="/dashboard" className={navLinkClass("/dashboard")}>
-                <span className="sr-only">Dashboard</span>
-                <House className="size-6" />
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="top">Dashboard</TooltipContent>
-          </Tooltip>
+      <aside
+        className={`${className} fixed inset-x-0 bottom-0 flex justify-center z-50`}
+        style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
+      >
+        {/* Liquid glass pill */}
+        <div className="glass-nav flex items-center gap-0.5 px-2 py-1.5 rounded-full">
+          {navItems.map(({ path, icon: Icon, label }) => {
+            const active = isActive(path);
+            return (
+              <Tooltip key={path} delayDuration={300}>
+                <TooltipTrigger asChild>
+                  <Link
+                    to={path}
+                    className="relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 active:scale-90"
+                    aria-label={label}
+                  >
+                    {active && (
+                      <span className="glass-nav-item-active absolute inset-0 rounded-full transition-all duration-200" />
+                    )}
+                    <Icon
+                      className={`relative z-10 transition-all duration-200 ${
+                        active
+                          ? "glass-nav-icon-active"
+                          : "glass-nav-icon-inactive"
+                      }`}
+                      style={{
+                        width: "1.2rem",
+                        height: "1.2rem",
+                        strokeWidth: active ? 2.2 : 1.8,
+                      }}
+                    />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="top">{label}</TooltipContent>
+              </Tooltip>
+            );
+          })}
 
-          <Tooltip delayDuration={300}>
-            <TooltipTrigger asChild>
-              <Link to="/practice" className={navLinkClass("/practice")}>
-                <span className="sr-only">Practice</span>
-                <Target className="size-6" />
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="top">Practice</TooltipContent>
-          </Tooltip>
-
-          <Tooltip delayDuration={300}>
-            <TooltipTrigger asChild>
-              <Link to="/progress" className={navLinkClass("/progress")}>
-                <span className="sr-only">Progress</span>
-                <BarChart3 className="size-6" />
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="top">Progress</TooltipContent>
-          </Tooltip>
-
-          <Tooltip delayDuration={300}>
-            <TooltipTrigger asChild>
-              <Link to="/settings" className={navLinkClass("/settings")}>
-                <span className="sr-only">Settings</span>
-                <Settings className="size-6" />
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="top">Settings</TooltipContent>
-          </Tooltip>
+          {/* Divider */}
+          <div
+            className="glass-nav-divider mx-1 self-stretch"
+            style={{ width: "1px" }}
+          />
 
           {/* Avatar Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="w-10 h-10 rounded-xl hover:bg-muted transition-colors p-0"
+                className="w-11 h-11 rounded-full p-0 transition-all duration-200 active:scale-90 hover:bg-transparent focus-visible:ring-0"
               >
                 <span className="sr-only">Account</span>
-                <Avatar className="w-8 h-8 rounded-xl">
+                <Avatar className="w-8 h-8 rounded-full ring-2 ring-primary/20">
                   <AvatarImage src="" alt={user?.username} />
-                  <AvatarFallback className="bg-primary/10 text-primary font-bold rounded-xl text-xs">
+                  <AvatarFallback className="rounded-full bg-primary/10 text-primary font-bold text-xs">
                     {nameToInitials(user?.full_name ?? "")}
                   </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-              className="w-64 rounded-xl border-2 border-border bg-card shadow-lg"
+              className="w-64 rounded-2xl border-2 border-border bg-card shadow-lg"
               side="top"
               align="end"
-              sideOffset={8}
+              sideOffset={10}
             >
               <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-3 px-3 py-3 text-left">
                   <Avatar className="h-10 w-10 rounded-xl">
-                    <AvatarImage src="" alt={user?.full_name ?? "Not logged in"} />
+                    <AvatarImage
+                      src=""
+                      alt={user?.full_name ?? "Not logged in"}
+                    />
                     <AvatarFallback className="rounded-xl bg-primary/10 text-primary font-bold">
                       {nameToInitials(user?.full_name ?? "")}
                     </AvatarFallback>
@@ -135,14 +139,26 @@ const MobileNav = ({ className }: MobileNavProps) => {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem asChild className="rounded-lg mx-2 hover:bg-secondary">
-                  <Link to="/settings#account" className="flex items-center gap-3">
+                <DropdownMenuItem
+                  asChild
+                  className="rounded-lg mx-2 hover:bg-secondary"
+                >
+                  <Link
+                    to="/settings#account"
+                    className="flex items-center gap-3"
+                  >
                     <BadgeCheck size={18} className="text-primary" />
                     <span>Account</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild className="rounded-lg mx-2 hover:bg-secondary">
-                  <Link to="/settings#notifications" className="flex items-center gap-3">
+                <DropdownMenuItem
+                  asChild
+                  className="rounded-lg mx-2 hover:bg-secondary"
+                >
+                  <Link
+                    to="/settings#notifications"
+                    className="flex items-center gap-3"
+                  >
                     <Bell size={18} className="text-primary" />
                     <span>Notifications</span>
                   </Link>

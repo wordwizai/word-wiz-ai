@@ -13,7 +13,7 @@ export const FeedbackAnimatedText = ({
         feedback.split(" ").map((word, idx) => (
           <motion.span
             key={word + idx}
-            className="inline-block mx-1 text-lg font-medium text-gray-500"
+            className="inline-block mx-1 text-lg font-medium text-muted-foreground"
             initial={{ opacity: 0, y: 12 }}
             animate={{
               opacity: 1,

@@ -8,10 +8,13 @@ from urllib.parse import quote
 import numpy as np
 import pandas as pd
 import soundfile as sf
+import base64 as _base64
+
 from core.audio_preprocessing import preprocess_audio
 from core.audio_quality_analyzer import AudioQualityAnalyzer
 from core.modes.base_mode import BaseMode
 from core.phoneme_assistant import PhonemeAssistant
+from core.phoneme_feedback_formatter import generate_feedback as generate_phoneme_feedback
 from core.temp_audio_cache import audio_cache
 from core.process_audio import process_audio_with_client_phonemes, analyze_results
 from core.grapheme_to_phoneme import grapheme_to_phoneme as g2p
@@ -415,94 +418,127 @@ async def analyze_audio_file_event_stream(
         yield f"data: {json.dumps(analysis_payload)}\n\n"
         await asyncio.sleep(0.01)  # Yield control to the event loop with small delay to ensure flush
 
-        # STEP 2: GET GPT RESPONSE
+        # STEP 2: GENERATE LOCAL FEEDBACK (instant — no network call)
+        #
+        # Feedback text is derived directly from the analysis data using
+        # phoneme_feedback_formatter, so we can stream it to the client immediately
+        # and then fire TTS + GPT in parallel.
 
-        # based on the mode
-        response = await activity_object.get_feedback_and_next_sentence(
-            attempted_sentence=attempted_sentence,
-            analysis=audio_analysis_object,
-            phoneme_assistant=phoneme_assistant,
-            session=session,
+        feedback_result = generate_phoneme_feedback(
+            problem_summary=problem_summary,
+            per_summary=per_summary,
+            pronunciation_data=pronunciation_dataframe.to_dict("records"),
         )
-        # response = phoneme_assistant.get_gpt_response(
-        #     attempted_sentence=attempted_sentence,
-        #     pronunciation_data=pronunciation_dataframe.to_dict(),
-        #     highest_per_word_data=highest_per_word,
-        #     problem_summary=problem_summary,
-        #     per_summary=per_summary,
-        # )
-        gpt_payload = {
-            "type": "gpt_response",
+
+        feedback_payload = {
+            "type": "feedback",
             "data": {
-                "sentence": response.get("sentence", ""),
-                "feedback": response.get("feedback", ""),
-                "metadata": response.get("metadata", {}),
+                "text": feedback_result.text,
+                "ssml": feedback_result.ssml,
             },
         }
-        print("📤 Sending GPT response payload...")
-        yield f"data: {json.dumps(gpt_payload)}\n\n"
-        await asyncio.sleep(0.01)  # Yield control to the event loop with small delay to ensure flush
+        print("📤 Sending feedback payload (local, no GPT)...")
+        yield f"data: {json.dumps(feedback_payload)}\n\n"
+        await asyncio.sleep(0.01)
 
-        # STEP 3: LOG THE ENTRY INTO THE DB
-        # Store the full response including SSML for logging, but only send plain feedback to frontend
-        gpt_response_for_db = {
-            "sentence": response.get("sentence", ""),
-            "feedback": response.get("feedback", ""),
-            "feedback_ssml": response.get("feedback_ssml", ""),
-            "metadata": response.get("metadata", {}),
-        }
-        feedback_entry = FeedbackEntryCreate(
-            session_id=session.id,
-            sentence=attempted_sentence,
-            phoneme_analysis=analysis_payload.get("data", {}),
-            gpt_response=gpt_response_for_db,
-        )
-        create_feedback_entry(db, feedback_entry)
+        # STEP 3: FIRE TTS AND GPT IN PARALLEL
+        #
+        # TTS runs in the thread pool (feedback_to_audio is synchronous).
+        # GPT runs as an asyncio Task.
+        # asyncio.wait() lets us stream each result the moment it finishes,
+        # rather than waiting for both before yielding either.
 
-        # STEP 4: FEEDBACK AUDIO
         loop = asyncio.get_event_loop()
-        # Ensure feedback is never None - use empty string as fallback
-        feedback_text = response.get("feedback") or ""
-        feedback_ssml = response.get("feedback_ssml")
-        
-        response_audio_file = await loop.run_in_executor(
-            None, 
-            phoneme_assistant.feedback_to_audio, 
-            feedback_text,
-            feedback_ssml
+
+        tts_future = loop.run_in_executor(
+            None,
+            phoneme_assistant.feedback_to_audio,
+            feedback_result.text,
+            feedback_result.ssml,
         )
-        
-        # CACHE POINT 4: Save feedback audio
-        # Extract audio bytes from base64 for caching
-        import base64
-        feedback_audio_bytes = base64.b64decode(response_audio_file["data"])
-        audio_cache.save_feedback_audio(
-            feedback_audio_bytes,
-            str(session.id),  # Convert session ID to string
-            feedback_text,
-            metadata={
-                "stage": "tts_feedback",
-                "feedback_text": feedback_text,
-                "has_ssml": feedback_ssml is not None,
-                "mimetype": response_audio_file["mimetype"]
-            }
+
+        gpt_task = asyncio.ensure_future(
+            activity_object.get_next_sentence(
+                attempted_sentence=attempted_sentence,
+                analysis=audio_analysis_object,
+                phoneme_assistant=phoneme_assistant,
+                session=session,
+            )
         )
-        
-        audio_payload = {
-            "type": "audio_feedback_file",
-            "data": response_audio_file["data"],
-            "filename": response_audio_file["filename"],
-            "mimetype": response_audio_file["mimetype"],
-        }
-        # audio_payload = {
-        #     "type": "audio_feedback_url",
-        #     "data": {
-        #         "url": f"/feedback-audio?session_id={session.id}&text={quote(response.get('feedback',''))}"
-        #     },
-        # }
-        print("📤 Sending audio feedback payload...")
-        yield f"data: {json.dumps(audio_payload)}\n\n"
-        await asyncio.sleep(0.01)  # Yield control to the event loop with small delay to ensure flush
+
+        sentence_result = None
+        audio_file_result = None
+        pending = {tts_future, gpt_task}
+
+        while pending:
+            done, pending = await asyncio.wait(
+                pending, return_when=asyncio.FIRST_COMPLETED
+            )
+            for task in done:
+                try:
+                    result = task.result()
+                except Exception as task_err:
+                    # Cancel any still-running task and bubble up
+                    for t in pending:
+                        t.cancel()
+                    raise task_err
+
+                if task is gpt_task:
+                    sentence_result = result
+
+                    next_sentence_payload = {
+                        "type": "next_sentence",
+                        "data": {
+                            "sentence": sentence_result.get("sentence", ""),
+                        },
+                    }
+                    print("📤 Sending next_sentence payload (GPT)...")
+                    yield f"data: {json.dumps(sanitize(next_sentence_payload))}\n\n"
+                    await asyncio.sleep(0.01)
+
+                    # STEP 4: LOG TO DB as soon as we have the sentence.
+                    # Local feedback is already known, so we have everything we need.
+                    gpt_response_for_db = {
+                        "sentence": sentence_result.get("sentence", ""),
+                        "feedback": feedback_result.text,
+                        "feedback_ssml": feedback_result.ssml,
+                        "metadata": sentence_result.get("metadata", {}),
+                    }
+                    feedback_entry = FeedbackEntryCreate(
+                        session_id=session.id,
+                        sentence=attempted_sentence,
+                        phoneme_analysis=analysis_payload.get("data", {}),
+                        gpt_response=gpt_response_for_db,
+                    )
+                    create_feedback_entry(db, feedback_entry)
+
+                else:
+                    # TTS future completed
+                    audio_file_result = result
+
+                    # CACHE POINT 4: Save feedback audio
+                    feedback_audio_bytes = _base64.b64decode(audio_file_result["data"])
+                    audio_cache.save_feedback_audio(
+                        feedback_audio_bytes,
+                        str(session.id),
+                        feedback_result.text,
+                        metadata={
+                            "stage": "tts_feedback",
+                            "feedback_text": feedback_result.text,
+                            "has_ssml": bool(feedback_result.ssml),
+                            "mimetype": audio_file_result["mimetype"],
+                        },
+                    )
+
+                    audio_payload = {
+                        "type": "audio_feedback_file",
+                        "data": audio_file_result["data"],
+                        "filename": audio_file_result["filename"],
+                        "mimetype": audio_file_result["mimetype"],
+                    }
+                    print("📤 Sending audio_feedback_file payload (TTS)...")
+                    yield f"data: {json.dumps(audio_payload)}\n\n"
+                    await asyncio.sleep(0.01)
 
     except Exception as e:
         error_payload = {

@@ -10,8 +10,10 @@ import { API_URL, WS_URL } from "@/api";
 export interface AudioAnalysisEvent {
   type:
     | "processing_started"
+    | "processing_mode"
     | "analysis"
-    | "gpt_response"
+    | "feedback"          // local feedback text + ssml (arrives before TTS)
+    | "next_sentence"     // GPT-generated sentence (arrives in parallel with audio)
     | "audio_feedback_file"
     | "error"
     | "pong";

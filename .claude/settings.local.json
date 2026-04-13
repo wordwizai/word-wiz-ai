@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(npm run:*)"
     ],
     "deny": [],
     "ask": []

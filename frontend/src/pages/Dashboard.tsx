@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import ActivitiesList from "@/components/ActivitiesList";
@@ -13,9 +13,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { getSessions, getUserStatistics, type UserStatistics } from "@/api";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import DynamicIcon from "@/components/DynamicIcon";
@@ -271,7 +269,7 @@ const Dashboard = () => {
         <div className="relative flex-1 flex flex-col">
           <ActivitiesList
             numberOfActivities={3}
-            className="w-full md:h-full flex-1"
+            className="w-full flex-1"
             shuffleDaily={true}
           />
           <div className="flex justify-center mt-4">
@@ -288,26 +286,22 @@ const Dashboard = () => {
         </div>
 
         {/* Recent Sessions panel */}
-        <Card className="flex flex-col md:overflow-hidden md:min-h-0 rounded-2xl bg-card border-2 border-border shadow-sm md:w-80">
-          <CardHeader className="p-4 pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-primary/10 rounded-lg">
-                  <Clock className="w-4 h-4 text-primary" />
-                </div>
-                <h3 className="text-base font-semibold text-foreground">
-                  Recent Sessions
-                </h3>
-              </div>
-              {pastSessions.length > 0 && (
-                <span className="text-xs text-muted-foreground bg-muted rounded-full px-2 py-0.5">
-                  {pastSessions.length}
-                </span>
-              )}
+        <div className="flex flex-col md:w-80">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-primary/10 rounded-xl">
+              <Clock className="w-5 h-5 text-primary" />
             </div>
-          </CardHeader>
-          <Separator />
-          <CardContent className="p-4 pt-3 md:flex-1 flex flex-col overflow-hidden min-h-0">
+            <h2 className="text-xl md:text-2xl font-bold text-foreground">
+              Recent Sessions
+            </h2>
+            {pastSessions.length > 0 && (
+              <span className="text-xs text-muted-foreground bg-muted rounded-full px-2 py-0.5 ml-auto">
+                {pastSessions.length}
+              </span>
+            )}
+          </div>
+          <Card className="flex flex-col flex-1 rounded-2xl bg-card border-2 border-border shadow-sm overflow-hidden">
+          <CardContent className="px-3 pb-3 pt-2 flex-1 flex flex-col overflow-hidden min-h-0">
             {sessionsLoading ? (
               <div className="flex flex-col gap-3">
                 {Array.from({ length: 4 }).map((_, i) => (
@@ -321,8 +315,8 @@ const Dashboard = () => {
                 ))}
               </div>
             ) : pastSessions.length > 0 ? (
-              <ScrollArea className="rounded-xl h-full min-h-0">
-                <div className="flex flex-col gap-2 pr-3">
+              <div className="flex-1 overflow-y-auto min-h-0">
+                <div className="flex flex-col gap-2 pr-1">
                   {pastSessions.map((session) => {
                     const colorIndex =
                       Math.abs(session.activity.id) % activityColors.length;
@@ -355,7 +349,7 @@ const Dashboard = () => {
                     );
                   })}
                 </div>
-              </ScrollArea>
+              </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-36 text-center gap-2">
                 <div className="w-12 h-12 bg-muted rounded-2xl flex items-center justify-center">
@@ -376,7 +370,8 @@ const Dashboard = () => {
               </div>
             )}
           </CardContent>
-        </Card>
+          </Card>
+        </div>
       </div>
     </main>
   );

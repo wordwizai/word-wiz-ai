@@ -1,12 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
+import { Separator } from "./ui/separator";
 import {
   BadgeCheck,
   Bell,
   CircleQuestionMark,
   House,
   LogOut,
-  Route,
   Settings,
   Target,
   BarChart3,
@@ -97,7 +97,7 @@ const Sidebar = ({ className }: SidebarProps) => {
 
         {/* Navigation Items */}
         <div
-          className={`flex flex-col space-y-4 ${
+          className={`flex flex-col space-y-1 ${
             isExpanded ? "items-stretch" : "items-center"
           }`}
         >
@@ -251,7 +251,8 @@ const Sidebar = ({ className }: SidebarProps) => {
         </div>
 
         {/* Bottom Buttons */}
-        <div className="mt-auto">
+        <div className="mt-auto space-y-1">
+          <Separator className="mb-3" />
           {/* Theme Toggle */}
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>

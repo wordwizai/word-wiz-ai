@@ -203,6 +203,79 @@
   --pastel-teal-foreground: #cffafe;
 }
 
+/* Liquid glass nav — light and dark */
+.glass-nav {
+  background: oklch(1 0 0 / 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid oklch(1 0 0 / 0.65);
+  box-shadow:
+    0 8px 32px oklch(0 0 0 / 0.10),
+    0 2px 8px oklch(0 0 0 / 0.06),
+    inset 0 1px 0 oklch(1 0 0 / 0.75);
+}
+
+.dark .glass-nav {
+  background: oklch(0.12 0.02 240 / 0.75);
+  border: 1px solid oklch(1 0 0 / 0.08);
+  box-shadow:
+    0 8px 32px oklch(0 0 0 / 0.45),
+    0 2px 8px oklch(0 0 0 / 0.25),
+    inset 0 1px 0 oklch(1 0 0 / 0.06);
+}
+
+.glass-nav-item-active {
+  background: oklch(0.58 0.16 280 / 0.12);
+  box-shadow:
+    0 0 0 1px oklch(0.58 0.16 280 / 0.18),
+    0 2px 10px oklch(0.58 0.16 280 / 0.18);
+}
+
+.dark .glass-nav-item-active {
+  background: oklch(0.65 0.18 280 / 0.20);
+  box-shadow:
+    0 0 0 1px oklch(0.65 0.18 280 / 0.30),
+    0 2px 12px oklch(0.65 0.18 280 / 0.25);
+}
+
+.glass-nav-icon-active {
+  color: oklch(0.52 0.18 280);
+  filter: drop-shadow(0 1px 4px oklch(0.58 0.16 280 / 0.4));
+}
+
+.dark .glass-nav-icon-active {
+  color: oklch(0.72 0.16 280);
+  filter: drop-shadow(0 1px 6px oklch(0.65 0.18 280 / 0.5));
+}
+
+.glass-nav-icon-inactive {
+  color: oklch(0.5 0.02 240);
+}
+
+.dark .glass-nav-icon-inactive {
+  color: oklch(0.65 0.02 240);
+}
+
+.glass-nav-divider {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    oklch(0 0 0 / 0.12) 30%,
+    oklch(0 0 0 / 0.12) 70%,
+    transparent
+  );
+}
+
+.dark .glass-nav-divider {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    oklch(1 0 0 / 0.10) 30%,
+    oklch(1 0 0 / 0.10) 70%,
+    transparent
+  );
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

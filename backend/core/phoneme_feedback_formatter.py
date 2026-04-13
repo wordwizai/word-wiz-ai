@@ -147,6 +147,11 @@ GRAPHEME_TIPS: dict[str, str] = {
     "ci":  "When you see 'ci', it often makes a 'sh' sound — like in 'special' or 'ancient'.",
 }
 
+PHONEME_TO_GRAPHEME: dict[str, str] = {
+    "θ": "th", "ð": "th", "ʃ": "sh", "ʧ": "ch", "ŋ": "ng",
+    "uː": "oo", "eɪ": "ay", "aɪ": "igh", "ɔɪ": "oi",
+}
+
 
 # ── Phoneme tips (fallback when grapheme can't be identified) ──────────────────
 
@@ -426,8 +431,16 @@ def generate_feedback(
     # Append tip for focus phoneme only — grapheme-centric if we can identify
     # the grapheme cluster from the error words, phoneme-level tip otherwise.
     focus_phoneme = ordered[0]
-    focus_words = _words_for_phoneme(focus_phoneme, phoneme_to_error_words, max_words=4)
-    tip = _tip_for_phoneme(focus_phoneme, focus_words)
+    grapheme = None
+    if pronunciation_data:
+        for entry in pronunciation_data:
+            g = entry.get("grapheme") or entry.get("letters") or entry.get("graphemes")
+            if g:
+                grapheme = g.lower()
+                break
+    if not grapheme:
+        grapheme = PHONEME_TO_GRAPHEME.get(focus_phoneme)
+    tip = (GRAPHEME_TIPS.get(grapheme) if grapheme else None) or PRONUNCIATION_TIPS.get(focus_phoneme)
     if tip:
         text_parts.append(tip)
         ssml_parts.append(tip)

@@ -93,16 +93,16 @@ class SpeechProblemClassifier:
         for result in results:
             if result["type"] in ("match", "substitution"):
                 # Count missed, added, and substituted phonemes
-                phoneme_errors.update(result.get("missed", []))
-                phoneme_errors.update(result.get("added", []))
-                phoneme_errors.update([sub[0] for sub in result.get("substituted", [])])  # Incorrect phonemes
+                phoneme_errors.update(result.get("missed") or [])
+                phoneme_errors.update(result.get("added") or [])
+                phoneme_errors.update([sub[0] for sub in (result.get("substituted") or [])])  # Incorrect phonemes
 
                 # Classify errors by phoneme group
-                for phoneme in result.get("missed", []):
+                for phoneme in (result.get("missed") or []):
                     SpeechProblemClassifier._update_group_errors(phoneme_group_errors, phoneme)
-                for phoneme in result.get("added", []):
+                for phoneme in (result.get("added") or []):
                     SpeechProblemClassifier._update_group_errors(phoneme_group_errors, phoneme)
-                for sub in result.get("substituted", []):
+                for sub in (result.get("substituted") or []):
                     SpeechProblemClassifier._update_group_errors(phoneme_group_errors, sub[0])  # Incorrect phoneme
 
             elif result["type"] == "deletion":

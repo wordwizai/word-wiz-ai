@@ -37,16 +37,23 @@ _IPA_TO_DISPLAY: dict[str, str] = {
     "ɹ":  "r",
     "r":  "r",
     "æ":  "short a",
+    "a":  "short a",   # bare 'a' from wav2vec2-TIMIT — same sound as /æ/
+    "ɑ":  "ah",
     "ɑː": "ah",
     "ə":  "uh",
     "ɚ":  "er",
     "ɛ":  "eh",
+    "e":  "eh",        # TIMIT bare 'e'
     "ɪ":  "short i",
+    "i":  "short i",   # TIMIT bare 'i'
     "iː": "long ee",
+    "ɔ":  "aw",
     "ɔː": "aw",
     "ʊ":  "short oo",
+    "u":  "long oo",   # TIMIT bare 'u'
     "uː": "long oo",
     "ʌ":  "short u",
+    "o":  "long o",    # TIMIT bare 'o'
     "aɪ": "long i",
     "aʊ": "ow",
     "eɪ": "long a",
@@ -62,54 +69,74 @@ _IPA_TO_DISPLAY: dict[str, str] = {
 # ── Google Cloud TTS phoneme tags ──────────────────────────────────────────────
 
 # Maps IPA phoneme → (ph attribute, demo syllable) for <phoneme> tags.
+#
 # Google Cloud TTS supported IPA:
 #   Consonants: p b t d k ɡ m n ŋ f v s z θ ð ʃ ʒ h l ɹ ʧ ʤ j w
 #   Vowels:     æ ɑː ə ɚ ɛ ɪ iː ɔː ʊ uː ʌ aɪ aʊ eɪ ɔɪ oʊ
+#
+# IMPORTANT: Bare consonant IPA (e.g. ph="θ") is nearly inaudible — TTS cannot
+# produce a consonant without vowel context.  Every consonant entry below is
+# backed with a schwa (ə) so Google TTS renders a clear, audible demo syllable.
+# Vowels and diphthongs are pure sounds and need no backing.
+# Special case: /ŋ/ cannot open a syllable in English, so use final position "ɪŋ".
 _IPA_DEMO: dict[str, tuple[str, str]] = {
-    "p":  ("p",   "p"),
-    "b":  ("b",   "b"),
-    "t":  ("t",   "t"),
-    "d":  ("d",   "d"),
-    "k":  ("k",   "k"),
-    "ɡ":  ("ɡ",   "g"),
-    "g":  ("ɡ",   "g"),
-    "m":  ("m",   "m"),
-    "n":  ("n",   "n"),
-    "ŋ":  ("ŋ",   "ng"),
-    "f":  ("f",   "fff"),
-    "v":  ("v",   "v"),
-    "s":  ("s",   "sss"),
-    "z":  ("z",   "z"),
-    "θ":  ("θ",   "th"),
-    "ð":  ("ð",   "th"),
-    "ʃ":  ("ʃ",   "sh"),
-    "ʒ":  ("ʒ",   "zh"),
-    "h":  ("h",   "h"),
-    "l":  ("l",   "l"),
-    "ɹ":  ("ɹ",   "r"),
-    "r":  ("ɹ",   "r"),
-    "j":  ("j",   "y"),
-    "w":  ("w",   "w"),
-    "ʧ":  ("ʧ",   "ch"),
-    "tʃ": ("ʧ",   "ch"),
-    "ʤ":  ("ʤ",   "j"),
-    "dʒ": ("ʤ",   "j"),
-    "æ":  ("æ",   "ah"),
-    "ɑː": ("ɑː",  "ah"),
-    "ə":  ("ə",   "uh"),
-    "ɚ":  ("ɚ",   "er"),
-    "ɛ":  ("ɛ",   "eh"),
-    "ɪ":  ("ɪ",   "ih"),
-    "iː": ("iː",  "ee"),
-    "ɔː": ("ɔː",  "aw"),
-    "ʊ":  ("ʊ",   "oo"),
-    "uː": ("uː",  "oo"),
-    "ʌ":  ("ʌ",   "uh"),
-    "aɪ": ("aɪ",  "eye"),
-    "aʊ": ("aʊ",  "ow"),
-    "eɪ": ("eɪ",  "ay"),
-    "ɔɪ": ("ɔɪ",  "oy"),
-    "oʊ": ("oʊ",  "oh"),
+    # Stops — must have vowel context or they are completely silent
+    "p":  ("pə",   "puh"),
+    "b":  ("bə",   "buh"),
+    "t":  ("tə",   "tuh"),
+    "d":  ("də",   "duh"),
+    "k":  ("kə",   "kuh"),
+    "ɡ":  ("ɡə",   "guh"),
+    "g":  ("ɡə",   "guh"),
+    # Nasals
+    "m":  ("mə",   "muh"),
+    "n":  ("nə",   "nuh"),
+    "ŋ":  ("ɪŋ",   "ing"),   # /ŋ/ never opens a syllable in English
+    # Fricatives — schwa backing makes the burst clearly audible
+    "f":  ("fə",   "fuh"),
+    "v":  ("və",   "vuh"),
+    "s":  ("sə",   "suh"),
+    "z":  ("zə",   "zuh"),
+    "θ":  ("θə",   "thuh"),
+    "ð":  ("ðə",   "thuh"),
+    "ʃ":  ("ʃə",   "shuh"),
+    "ʒ":  ("ʒə",   "zhuh"),
+    "h":  ("hə",   "huh"),
+    # Liquids / glides
+    "l":  ("lə",   "luh"),
+    "ɹ":  ("ɹə",   "ruh"),
+    "r":  ("ɹə",   "ruh"),
+    "j":  ("jə",   "yuh"),
+    "w":  ("wə",   "wuh"),
+    # Affricates
+    "ʧ":  ("ʧə",   "chuh"),
+    "tʃ": ("ʧə",   "chuh"),
+    "ʤ":  ("ʤə",   "juh"),
+    "dʒ": ("ʤə",   "juh"),
+    # Vowels and diphthongs — pure sounds, no backing needed
+    # Also include bare TIMIT vowel symbols the model may output
+    "æ":  ("æ",    "ah"),
+    "a":  ("æ",    "ah"),   # TIMIT bare 'a' → same sound
+    "ɑ":  ("ɑː",   "ah"),
+    "ɑː": ("ɑː",   "ah"),
+    "e":  ("ɛ",    "eh"),   # TIMIT bare 'e'
+    "i":  ("ɪ",    "ih"),   # TIMIT bare 'i'
+    "o":  ("oʊ",   "oh"),   # TIMIT bare 'o'
+    "u":  ("uː",   "oo"),   # TIMIT bare 'u'
+    "ə":  ("ə",    "uh"),
+    "ɚ":  ("ɚ",    "er"),
+    "ɛ":  ("ɛ",    "eh"),
+    "ɪ":  ("ɪ",    "ih"),
+    "iː": ("iː",   "ee"),
+    "ɔː": ("ɔː",   "aw"),
+    "ʊ":  ("ʊ",    "oo"),
+    "uː": ("uː",   "oo"),
+    "ʌ":  ("ʌ",    "uh"),
+    "aɪ": ("aɪ",   "eye"),
+    "aʊ": ("aʊ",   "ow"),
+    "eɪ": ("eɪ",   "ay"),
+    "ɔɪ": ("ɔɪ",   "oy"),
+    "oʊ": ("oʊ",   "oh"),
 }
 
 
@@ -205,11 +232,16 @@ _PHONEME_TO_GRAPHEMES: dict[str, list[str]] = {
     "r":  ["wr", "r"],
     "n":  ["kn", "n"],             # knee, no
     "uː": ["oo", "ew", "ue"],      # food, flew, blue
+    "u":  ["oo", "ew", "ue"],      # TIMIT bare 'u'
     "ʊ":  ["oo", "u"],             # book, put
     "iː": ["ee", "ea", "ie"],      # feet, beach, field
+    "i":  ["ee", "ea", "ie", "y"], # TIMIT bare 'i'
     "eɪ": ["ai", "ay", "ea"],      # rain, day, break
+    "e":  ["ea", "ai", "ay"],      # TIMIT bare 'e'
     "aɪ": ["igh", "ie", "y"],      # night, pie, fly
+    "a":  ["ai", "ay", "a"],       # TIMIT bare 'a' — short-a spelling
     "oʊ": ["ow", "oa"],            # snow, boat
+    "o":  ["ow", "oa", "o"],       # TIMIT bare 'o'
     "aʊ": ["ou", "ow"],            # out, cow
     "ɔɪ": ["oi", "oy"],            # coin, boy
 }
@@ -288,6 +320,54 @@ def _words_for_phoneme(
     return words
 
 
+def _focus_from_high_per_words(
+    pronunciation_data: list[dict],
+    phoneme_to_error_words: dict[str, list[dict]],
+) -> Optional[str]:
+    """
+    Pick the best focus phoneme by walking words from worst PER to least-bad.
+
+    Iterates high-PER words (PER ≥ 0.4) from worst to best and returns the
+    most-errored phoneme found in the first word that has phoneme errors.
+    This ensures the single worst word always wins rather than a common phoneme
+    that happens to appear in multiple mildly-wrong words (e.g. schwa in 'the').
+    """
+    HIGH_PER_THRESHOLD = 0.4
+
+    # Sort clearly mispronounced words worst-first.
+    # Use total_errors (absolute count) as the primary key so a short word like
+    # "the" (2 phonemes → 100% PER from 1 mistake) doesn't beat a longer word
+    # with more actual errors (e.g. "dog"→"doge" = 2-3 errors).
+    # PER is the tiebreaker for words with the same error count.
+    high_per_words = sorted(
+        [w for w in pronunciation_data if (w.get("per") or 0) >= HIGH_PER_THRESHOLD],
+        key=lambda w: ((w.get("total_errors") or 0), (w.get("per") or 0)),
+        reverse=True,
+    )
+    if not high_per_words:
+        return None
+
+    # Walk worst → less-bad; return as soon as we find a word with phoneme errors
+    for word_entry in high_per_words:
+        word_name = (word_entry.get("ground_truth_word") or "").strip().lower()
+        if not word_name:
+            continue
+
+        candidates: dict[str, int] = {}
+        for phoneme, entries in phoneme_to_error_words.items():
+            count = sum(
+                1 for e in entries
+                if (e.get("word") or "").strip().lower() == word_name
+            )
+            if count:
+                candidates[phoneme] = count
+
+        if candidates:
+            return max(candidates, key=lambda p: candidates[p])
+
+    return None
+
+
 def _ordered_phonemes(
     phoneme_to_error_words: dict[str, list[dict]],
     problem_summary: dict,
@@ -328,20 +408,20 @@ def build_phoneme_to_error_words(pronunciation_data: list[dict]) -> dict[str, li
     phoneme_to_error_words: dict[str, list[dict]] = {}
 
     for word_data in pronunciation_data:
-        if word_data.get("per", 0) <= 0:
+        if (word_data.get("per") or 0) <= 0:
             continue
 
         word = (word_data.get("ground_truth_word") or "").strip()
 
-        for phoneme in word_data.get("missed", []):
+        for phoneme in (word_data.get("missed") or []):
             phoneme_to_error_words.setdefault(phoneme, []).append(
                 {"word": word, "error_type": "missed"}
             )
-        for phoneme in word_data.get("added", []):
+        for phoneme in (word_data.get("added") or []):
             phoneme_to_error_words.setdefault(phoneme, []).append(
                 {"word": word, "error_type": "added"}
             )
-        for sub in word_data.get("substituted", []):
+        for sub in (word_data.get("substituted") or []):
             expected = sub[0] if isinstance(sub, (list, tuple)) and len(sub) > 0 else sub
             phoneme_to_error_words.setdefault(expected, []).append(
                 {"word": word, "error_type": "substituted"}
@@ -385,67 +465,75 @@ def generate_feedback(
     if not phoneme_to_error_words and sentence_per <= 0.2:
         return FeedbackResult(text="Great job!", ssml="Great job!")
 
-    ordered = _ordered_phonemes(phoneme_to_error_words, problem_summary)
+    # Priority: phonemes from clearly mispronounced words (PER ≥ 0.4) first.
+    # This prevents a high-frequency consonant like 't' from dominating just
+    # because it appears many times across the sentence with tiny errors.
+    focus_phoneme = _focus_from_high_per_words(pronunciation_data, phoneme_to_error_words)
 
-    if not ordered:
+    if not focus_phoneme:
+        # No word was clearly wrong (nothing cleared the 0.4 PER threshold).
+        # If the overall sentence is also low-error, all mistakes are minor —
+        # praise the child rather than nitpicking a barely-wrong word.
+        if sentence_per <= 0.2:
+            return FeedbackResult(text="Great job!", ssml="Great job!")
+
+        ordered = _ordered_phonemes(phoneme_to_error_words, problem_summary)
+        if not ordered:
+            return FeedbackResult(text="Keep practicing!", ssml="Keep practicing!")
+        focus_phoneme = ordered[0]
+    words = _words_for_phoneme(focus_phoneme, phoneme_to_error_words, max_words=3)
+    if not words:
         return FeedbackResult(text="Keep practicing!", ssml="Keep practicing!")
 
-    text_parts: list[str] = []
-    ssml_parts: list[str] = []
+    focus_word = words[0]
+    display = _display_name(focus_phoneme)
+    tag = _phoneme_tag(focus_phoneme)
 
-    for i, phoneme in enumerate(ordered):
-        words = _words_for_phoneme(phoneme, phoneme_to_error_words, max_words=4)
-        if not words:
-            continue
-
-        display = _display_name(phoneme)
-        word_list = _oxford_list(words)
-
-        # Plain text
-        if i == 0:
-            text_parts.append(
-                f"You had trouble with the '{display}' sound — "
-                f"you missed it in {word_list}."
-            )
-        else:
-            text_parts.append(
-                f"You also had trouble with the '{display}' sound in {word_list}."
-            )
-
-        # SSML
-        tag = _phoneme_tag(phoneme)
-        if i == 0:
-            ssml_parts.append(
-                f'You had trouble with the {tag} sound — '
-                f'you missed it in <break time="200ms"/> {word_list}.'
-            )
-        else:
-            ssml_parts.append(
-                f'You also had trouble with the {tag} sound in '
-                f'<break time="200ms"/> {word_list}.'
-            )
-
-    if not text_parts:
-        return FeedbackResult(text="Keep practicing!", ssml="Keep practicing!")
-
-    # Append tip for focus phoneme only — grapheme-centric if we can identify
-    # the grapheme cluster from the error words, phoneme-level tip otherwise.
-    focus_phoneme = ordered[0]
-    grapheme = None
-    if pronunciation_data:
-        for entry in pronunciation_data:
-            g = entry.get("grapheme") or entry.get("letters") or entry.get("graphemes")
-            if g:
-                grapheme = g.lower()
-                break
+    # Find the grapheme cluster the child saw in the specific mispronounced word.
+    grapheme = _find_grapheme_in_word(focus_phoneme, focus_word)
     if not grapheme:
         grapheme = PHONEME_TO_GRAPHEME.get(focus_phoneme)
-    tip = (GRAPHEME_TIPS.get(grapheme) if grapheme else None) or PRONUNCIATION_TIPS.get(focus_phoneme)
-    if tip:
-        text_parts.append(tip)
-        ssml_parts.append(tip)
 
-    return FeedbackResult(
-        text=" ".join(text_parts),
-        ssml=" ".join(ssml_parts),
-    )
+    tip = (GRAPHEME_TIPS.get(grapheme) if grapheme else None) or PRONUNCIATION_TIPS.get(focus_phoneme)
+
+    # Build full-word IPA from expected_phonemes in pronunciation_data so we can
+    # wrap the focus word in a <phoneme> tag — this gives Google TTS the correct
+    # pronunciation of the whole word, not just the isolated sound.
+    word_ipa: Optional[str] = None
+    for entry in pronunciation_data:
+        w = (entry.get("ground_truth_word") or "").strip().lower()
+        if w == focus_word.lower():
+            phonemes = entry.get("expected_phonemes")
+            if isinstance(phonemes, list) and phonemes:
+                word_ipa = "".join(phonemes)
+            break
+
+    def _word_ssml(word: str, ipa: Optional[str]) -> str:
+        if ipa:
+            return f'<phoneme alphabet="ipa" ph="{ipa}">{word}</phoneme>'
+        return word
+
+    # Build a word-specific intro: lead with the word they saw, then name the
+    # letters (grapheme) using <say-as spell-out> so TTS spells them out clearly,
+    # then demo the isolated sound via the schwa-backed phoneme tag.
+    if grapheme and grapheme in focus_word.lower():
+        grapheme_ssml = f'<say-as interpret-as="spell-out">{grapheme}</say-as>'
+        intro_text = (
+            f"In the word '{focus_word}', the letters '{grapheme}' make the '{display}' sound."
+        )
+        intro_ssml = (
+            f'In the word {_word_ssml(focus_word, word_ipa)}, '
+            f'the letters {grapheme_ssml} make the '
+            f'<break time="400ms"/>{tag}<break time="300ms"/> sound.'
+        )
+    else:
+        intro_text = f"Watch the '{display}' sound in '{focus_word}'."
+        intro_ssml = (
+            f'Watch the <break time="400ms"/>{tag}<break time="300ms"/> '
+            f'sound in {_word_ssml(focus_word, word_ipa)}.'
+        )
+
+    text = f"{intro_text} {tip}" if tip else intro_text
+    ssml = f"{intro_ssml} {tip}" if tip else intro_ssml
+
+    return FeedbackResult(text=text, ssml=ssml)

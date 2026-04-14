@@ -414,6 +414,8 @@ def _process_word_alignment(
                 "ground_truth_word": gt_word,
                 "phonemes": pred_phonemes,
                 "ground_truth_phonemes": gt_phonemes,
+                "expected_phonemes": list(gt_phonemes),
+                "actual_phonemes": list(pred_phonemes) if pred_phonemes else [],
                 "per": round(per, 4),
                 "missed": missed,
                 "added": added,
@@ -431,34 +433,39 @@ def _process_word_alignment(
             results.append({
                 "type": op,
                 "predicted_word": pred_word,
-                "ground_truth_word": None,
+                "ground_truth_word": "",
                 "phonemes": pred_phonemes,
-                "ground_truth_phonemes": None,
-                "per": None,
-                "missed": None,
-                "added": None,
-                "substituted": None,
+                "ground_truth_phonemes": [],
+                "expected_phonemes": [],
+                "actual_phonemes": pred_phonemes or [],
+                "per": 0.0,   # insertion is not a mispronunciation of an expected word
+                "missed": [],
+                "added": list(pred_phonemes) if pred_phonemes else [],
+                "substituted": [],
                 "total_phonemes": 0,
                 "total_errors": 0,
                 "error": "Extra word predicted."
             })
             pred_idx += 1
-        
+
         elif op == 'deletion':
-            # A ground truth word is missing in prediction
+            # A ground truth word is missing in prediction — every phoneme was missed
             gt_word = ground_truth_words[gt_idx]
+            gt_phonemes_del = list(ground_truth_phonemes[gt_idx][1]) if gt_idx < len(ground_truth_phonemes) else []
             results.append({
                 "type": op,
-                "predicted_word": None,
+                "predicted_word": "",
                 "ground_truth_word": gt_word,
-                "phonemes": None,
-                "ground_truth_phonemes": None,
-                "per": None,
-                "missed": None,
-                "added": None,
-                "substituted": None,
-                "total_phonemes": 0,
-                "total_errors": 0,
+                "phonemes": [],
+                "ground_truth_phonemes": gt_phonemes_del,
+                "expected_phonemes": gt_phonemes_del,
+                "actual_phonemes": [],
+                "per": 1.0,
+                "missed": gt_phonemes_del,   # every phoneme in the word was missed
+                "added": [],
+                "substituted": [],
+                "total_phonemes": len(gt_phonemes_del),
+                "total_errors": len(gt_phonemes_del),
                 "error": "Word missing in prediction."
             })
             gt_idx += 1

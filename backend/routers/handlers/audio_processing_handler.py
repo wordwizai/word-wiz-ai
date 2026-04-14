@@ -543,7 +543,7 @@ async def analyze_audio_file_event_stream(
     except Exception as e:
         error_payload = {
             "type": "error",
-            "data": {"error": f"AI processing failed: {str(e)}"},
+            "data": {"message": f"AI processing failed: {str(e)}"},
         }
         yield f"data: {json.dumps(error_payload)}\n\n"
         return

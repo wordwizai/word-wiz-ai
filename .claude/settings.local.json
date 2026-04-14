@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "WebFetch(domain:docs.cloud.google.com)"
     ],
     "deny": [],
     "ask": []

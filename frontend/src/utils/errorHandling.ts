@@ -57,8 +57,10 @@ const ERROR_MESSAGES: Record<ErrorCategory, ErrorMessage> = {
 /**
  * Categorize error based on error message or type
  */
-export function categorizeError(error: string | Error): ErrorCategory {
-  const message = typeof error === "string" ? error : error.message;
+export function categorizeError(error: string | Error | undefined | null): ErrorCategory {
+  if (!error) return ErrorCategory.UNKNOWN;
+  const message = typeof error === "string" ? error : (error.message ?? "");
+  if (!message) return ErrorCategory.UNKNOWN;
   const lowerMessage = message.toLowerCase();
 
   if (lowerMessage.includes("not authenticated") || lowerMessage.includes("authentication")) {

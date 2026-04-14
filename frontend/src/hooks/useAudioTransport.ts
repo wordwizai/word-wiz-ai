@@ -76,12 +76,17 @@ export function useAudioTransport(options: UseAudioTransportOptions) {
         }
         break;
 
-      case "error":
+      case "error": {
         setIsProcessing(false);
         opts.onProcessingEnd?.();
-        showErrorToast(event.data);
-        opts.onError?.(event.data);
+        const errorMsg =
+          typeof event.data === "string"
+            ? event.data
+            : event.data?.message || event.data?.error || "An error occurred";
+        showErrorToast(errorMsg);
+        opts.onError?.(errorMsg);
         break;
+      }
 
       case "pong":
         // Heartbeat response, ignore

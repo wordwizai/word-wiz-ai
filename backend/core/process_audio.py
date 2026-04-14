@@ -9,6 +9,10 @@ from .grapheme_to_phoneme import grapheme_to_phoneme as g2p
 from .evaluation.accuracy_metrics import compute_phoneme_error_rate
 from .speech_problem_classifier import SpeechProblemClassifier
 from .audio_preprocessing import preprocess_audio
+from .grapheme_segmenter import (
+    segment_word_to_graphemes,
+    map_phoneme_errors_to_graphemes
+)
 import asyncio
 
 def compute_per(gt_phonemes, pred_phonemes):
@@ -407,6 +411,20 @@ def _process_word_alignment(
                 elif pop == 'substitution':
                     substituted.append((gph, pph))
             
+            # NEW: Segment word into graphemes
+            graphemes = segment_word_to_graphemes(gt_word, gt_phonemes)
+            
+            # NEW: Map errors to graphemes
+            grapheme_errors = map_phoneme_errors_to_graphemes(
+                word=gt_word,
+                graphemes=graphemes,
+                expected_phonemes=gt_phonemes,
+                detected_phonemes=pred_phonemes,
+                missed_phonemes=missed,
+                added_phonemes=added,
+                substituted_phonemes=substituted
+            )
+            
             per = (len(missed) + len(added) + len(substituted)) / max(len(gt_phonemes), 1)
             results.append({
                 "type": op,
@@ -420,6 +438,9 @@ def _process_word_alignment(
                 "substituted": substituted,
                 "total_phonemes": len(gt_phonemes),
                 "total_errors": len(missed) + len(added) + len(substituted),
+                # NEW FIELDS:
+                "graphemes": graphemes,
+                "grapheme_errors": grapheme_errors,
             })
             gt_idx += 1
             pred_idx += 1

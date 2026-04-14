@@ -47,30 +47,45 @@ export const RecordAndNextButtons = ({
       );
     }
 
-    // Idle state: show microphone icon
+    // Idle state: show microphone icon with inviting ring
     return (
-      <Button
-        className="w-24 h-24 shadow-inner transition-all duration-300 rounded-full hover:bg-fuchsia-200 hover:scale-105 hover:shadow-lg"
-        variant="secondary"
-        onClick={onStartRecording}
-      >
-        <Mic className="size-10 text-purple-700" />
-      </Button>
+      <div className="relative flex items-center justify-center">
+        {/* Animated outer ring */}
+        <span className="absolute w-32 h-32 rounded-full bg-primary/10 animate-ping" style={{ animationDuration: "2s" }} />
+        <Button
+          className="relative w-24 h-24 shadow-inner transition-all duration-300 rounded-full bg-gradient-to-br from-primary/10 to-purple-100 hover:from-primary/20 hover:to-fuchsia-200 hover:scale-105 hover:shadow-lg border-2 border-primary/20"
+          variant="secondary"
+          onClick={onStartRecording}
+        >
+          <Mic className="size-10 text-purple-700" />
+        </Button>
+      </div>
     );
   };
 
+  const getLabel = () => {
+    if (isProcessing) return "Analyzing...";
+    if (isRecording) return "Tap to stop";
+    return "Tap to record";
+  };
+
   return (
-    <div className="flex justify-center items-center gap-4">
-      {renderRecordButton()}
-      {showNextButton && (
-        <Button
-          variant="outline"
-          onClick={onNext}
-          className="w-24 h-24 shadow-inner rounded-full hover:scale-105 transition-all duration-300"
-        >
-          <SkipForward className="size-10" />
-        </Button>
-      )}
+    <div className="flex flex-col items-center gap-3">
+      <div className="flex justify-center items-center gap-4">
+        {renderRecordButton()}
+        {showNextButton && (
+          <Button
+            variant="outline"
+            onClick={onNext}
+            className="w-24 h-24 shadow-inner rounded-full hover:scale-105 transition-all duration-300"
+          >
+            <SkipForward className="size-10" />
+          </Button>
+        )}
+      </div>
+      <span className="text-xs font-medium text-muted-foreground tracking-wide">
+        {getLabel()}
+      </span>
     </div>
   );
 };

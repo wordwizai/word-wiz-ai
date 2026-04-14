@@ -32,41 +32,58 @@ const GenericPractice = ({
     <>
       <LocalProcessingAlert />
       <div className={config.styling?.containerStyle}>
+        {/* Top bar */}
         <div className="w-full flex flex-row justify-between items-center">
-        <Link to="/dashboard">
-          <Button variant="ghost" className="text-muted-foreground group">
-            <Home className="size-5" />
-            <span className="opacity-0 translate-x-[-16px] transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0 hidden md:inline-block">
-              Home
-            </span>
-          </Button>
-        </Link>
-        <h1
-          className={`scroll-m-20 text-3xl font-semibold tracking-tight first:mt-0 ${config.styling?.headerStyle}`}
-        >
-          {config.title}
-        </h1>
-        <div className="w-16 hidden md:inline-block" />
-      </div>
-      <div className="w-full flex flex-col items-center justify-center gap-6 flex-1">
-        <SentenceDisplay
-          wordArray={props.wordArray}
-          showHighlightedWords={props.showHighlightedWords}
-          analysisData={props.analysisData}
-        />
-        <RecordAndNextButtons
-          isRecording={props.isRecording}
-          isProcessing={props.isProcessing}
-          onStartRecording={props.onStartRecording}
-          onStopRecording={props.onStopRecording}
-          showNextButton={
-            config.features.hasNextButton ? props.showNextButton : false
-          }
-          onNext={props.displayNextSentence}
-        />
-      </div>
-      <FeedbackDisplay feedback={props.feedback} />
-      {customContent}
+          <Link to="/dashboard">
+            <Button variant="ghost" className="text-muted-foreground group">
+              <Home className="size-5" />
+              <span className="opacity-0 translate-x-[-16px] transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0 hidden md:inline-block">
+                Home
+              </span>
+            </Button>
+          </Link>
+          <h1
+            className={`scroll-m-20 text-2xl font-semibold tracking-tight first:mt-0 ${config.styling?.headerStyle}`}
+          >
+            {config.title}
+          </h1>
+          <div className="w-16 hidden md:inline-block" />
+        </div>
+
+        {/* Practice stage card */}
+        <div className="w-full flex flex-col items-center justify-center flex-1">
+          <div className="w-full max-w-3xl rounded-3xl bg-card border-2 border-border/60 shadow-lg p-8 md:p-12 flex flex-col items-center gap-8">
+            {/* Instruction label */}
+            <p className="text-sm font-medium text-muted-foreground uppercase tracking-widest">
+              Read the sentence aloud
+            </p>
+
+            {/* Sentence display */}
+            <SentenceDisplay
+              wordArray={props.wordArray}
+              showHighlightedWords={props.showHighlightedWords}
+              analysisData={props.analysisData}
+            />
+
+            {/* Divider */}
+            <div className="w-16 h-px bg-border" />
+
+            {/* Record button */}
+            <RecordAndNextButtons
+              isRecording={props.isRecording}
+              isProcessing={props.isProcessing}
+              onStartRecording={props.onStartRecording}
+              onStopRecording={props.onStopRecording}
+              showNextButton={
+                config.features.hasNextButton ? props.showNextButton : false
+              }
+              onNext={props.displayNextSentence}
+            />
+          </div>
+        </div>
+
+        <FeedbackDisplay feedback={props.feedback} />
+        {customContent}
       </div>
     </>
   );

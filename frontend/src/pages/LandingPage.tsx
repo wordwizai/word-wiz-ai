@@ -167,7 +167,7 @@ const LandingPage = () => {
 
       {/* What Makes Word Wiz Unique */}
       <motion.section
-        className="px-6 py-20 bg-muted/30"
+        className="px-6 py-20 bg-gradient-to-b from-primary/5 to-background"
         variants={fadeUpVariant}
         initial="hidden"
         whileInView="visible"
@@ -176,7 +176,7 @@ const LandingPage = () => {
       >
         <div className="max-w-6xl mx-auto text-center space-y-10">
           <div className="space-y-4">
-            <h2 className="text-3xl md:text-4xl font-bold">
+            <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary via-primary/80 to-purple-600 bg-clip-text text-transparent">
               What Makes Word Wiz Unique?
             </h2>
             <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
@@ -205,17 +205,17 @@ const LandingPage = () => {
               },
               {
                 icon: <CircleDollarSign className="w-6 h-6 text-green-600" />,
-                iconBg: "from-green-200 to-blue-200",
+                iconBg: "from-green-200 to-emerald-200",
                 title: "100% Free Forever",
                 text: "No ads, no subscriptions, no hidden fees. Our mission is helping every child learn to read better.",
               },
             ].map((feature, i) => (
               <motion.div
                 key={i}
-                className="bg-card border text-card-foreground shadow-sm text-center h-full hover:shadow-md transition-shadow rounded-lg p-6"
+                className="bg-card border-2 border-border/50 text-card-foreground shadow-sm text-center h-full hover:shadow-lg hover:-translate-y-1 hover:border-primary/20 transition-all duration-200 rounded-2xl p-6"
                 variants={childVariant}
               >
-                <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center mx-auto mb-4">
+                <div className={`w-14 h-14 bg-gradient-to-br ${feature.iconBg} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm`}>
                   {feature.icon}
                 </div>
                 <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
@@ -228,7 +228,7 @@ const LandingPage = () => {
 
       {/* Who It's For Section */}
       <motion.section
-        className="px-6 py-20 bg-muted/50"
+        className="px-6 py-20 bg-background"
         variants={fadeUpVariant}
         initial="hidden"
         whileInView="visible"
@@ -236,7 +236,7 @@ const LandingPage = () => {
         transition={{ duration: 0.6 }}
       >
         <div className="max-w-6xl mx-auto text-center space-y-10">
-          <h2 className="text-3xl md:text-4xl font-bold">Who It's For</h2>
+          <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary via-primary/80 to-purple-600 bg-clip-text text-transparent">Who It's For</h2>
           <motion.div
             className="grid grid-cols-1 md:grid-cols-3 gap-6"
             variants={staggerContainer}
@@ -266,10 +266,10 @@ const LandingPage = () => {
             ].map((target, i) => (
               <motion.div
                 key={i}
-                className="bg-card border text-card-foreground shadow-sm text-center h-full hover:shadow-md transition-shadow rounded-lg p-6"
+                className="bg-card border-2 border-border/50 text-card-foreground shadow-sm text-center h-full hover:shadow-lg hover:-translate-y-1 hover:border-primary/20 transition-all duration-200 rounded-2xl p-6"
                 variants={childVariant}
               >
-                <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center mx-auto mb-4">
+                <div className={`w-14 h-14 bg-gradient-to-br ${target.iconBg} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm`}>
                   {target.icon}
                 </div>
                 <h3 className="text-xl font-semibold mb-2">{target.title}</h3>
@@ -283,7 +283,7 @@ const LandingPage = () => {
       {/* How It Works */}
       <motion.section
         id="how-it-works-section"
-        className="px-6 py-20 bg-background"
+        className="px-6 py-20 bg-gradient-to-b from-background to-primary/5"
         variants={fadeUpVariant}
         initial="hidden"
         whileInView="visible"
@@ -291,7 +291,7 @@ const LandingPage = () => {
         transition={{ duration: 0.6 }}
       >
         <div className="max-w-6xl mx-auto space-y-10">
-          <h2 className="text-3xl md:text-4xl font-bold text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-center bg-gradient-to-r from-primary via-primary/80 to-purple-600 bg-clip-text text-transparent">
             How It Works
           </h2>
           <motion.div
@@ -304,24 +304,27 @@ const LandingPage = () => {
             {[
               {
                 step: "1",
+                stepGradient: "from-primary to-purple-500",
                 title: "Read Aloud",
                 text: "Your child reads practice sentences aloud while Word Wiz AI listens using advanced speech recognition technology.",
               },
               {
                 step: "2",
+                stepGradient: "from-purple-500 to-pink-500",
                 title: "AI Pronunciation Analysis",
                 text: "Our AI analyzes every phoneme (individual sound) to identify which letter sounds and word patterns need more practice.",
               },
               {
                 step: "3",
+                stepGradient: "from-pink-500 to-rose-400",
                 title: "Personalized Phonics Feedback",
                 text: "Get instant feedback with pronunciation tips and customized practice sentences targeting specific phonics skills. Guidance is provided through text-to-speech audio.",
               },
             ].map((step, i) => (
               <motion.div key={i} variants={childVariant} className="h-full">
-                <Card className="bg-card border shadow-sm hover:shadow-md transition-shadow h-full">
+                <Card className="bg-card border-2 border-border/50 shadow-sm hover:shadow-lg hover:-translate-y-1 hover:border-primary/20 transition-all duration-200 h-full rounded-2xl">
                   <CardHeader>
-                    <div className="bg-primary text-primary-foreground w-12 h-12 flex items-center justify-center rounded-lg mb-4 font-bold text-lg">
+                    <div className={`bg-gradient-to-br ${step.stepGradient} text-white w-12 h-12 flex items-center justify-center rounded-2xl mb-4 font-bold text-lg shadow-md`}>
                       {step.step}
                     </div>
                     <CardTitle className="text-xl font-semibold">

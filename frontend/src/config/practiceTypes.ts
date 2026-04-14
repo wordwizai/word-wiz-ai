@@ -24,7 +24,7 @@ export const practiceTypeConfigs: Record<string, PracticeTypeConfig> = {
     },
     styling: {
       headerStyle: "text-center flex-1",
-      containerStyle: "min-h-screen px-4 py-4 flex flex-col items-center gap-6",
+      containerStyle: "min-h-screen px-4 py-4 flex flex-col items-center gap-6 bg-gradient-to-b from-primary/5 via-background to-background",
     },
   },
   story: {
@@ -36,7 +36,7 @@ export const practiceTypeConfigs: Record<string, PracticeTypeConfig> = {
     },
     styling: {
       headerStyle: "text-center flex-1",
-      containerStyle: "min-h-screen px-4 py-4 flex flex-col items-center gap-6",
+      containerStyle: "min-h-screen px-4 py-4 flex flex-col items-center gap-6 bg-gradient-to-b from-primary/5 via-background to-background",
     },
   },
   "choice-story": {
@@ -48,7 +48,7 @@ export const practiceTypeConfigs: Record<string, PracticeTypeConfig> = {
     },
     styling: {
       headerStyle: "",
-      containerStyle: "min-h-screen px-4 py-4 flex flex-col items-center gap-6",
+      containerStyle: "min-h-screen px-4 py-4 flex flex-col items-center gap-6 bg-gradient-to-b from-primary/5 via-background to-background",
     },
   },
 };

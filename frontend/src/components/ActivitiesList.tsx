@@ -30,6 +30,8 @@ interface ActivitiesListProps {
   inputActivities?: Activity[];
   className?: string; // additional class names for styling
   shuffleDaily?: boolean; // if true, shuffle activities based on date seed
+  /** Optional element rendered to the far right of the section header */
+  headerAction?: React.ReactNode;
 }
 
 // Seeded random number generator using mulberry32 algorithm
@@ -60,6 +62,7 @@ const ActivitiesList = ({
   inputActivities,
   className = "",
   shuffleDaily = false,
+  headerAction,
 }: ActivitiesListProps) => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const { token } = useContext(AuthContext);
@@ -189,12 +192,13 @@ const ActivitiesList = ({
     <div className={"space-y-4 flex flex-col " + className}>
       {/* Header section */}
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-primary/10 rounded-xl">
+        <div className="p-2 bg-primary/10 rounded-xl shrink-0">
           <BookOpen className="w-5 h-5 text-primary" />
         </div>
         <h2 className="text-xl md:text-2xl font-bold text-foreground">
           Choose Your Practice
         </h2>
+        {headerAction && <div className="ml-auto">{headerAction}</div>}
       </div>
 
       {/* Activities grid */}

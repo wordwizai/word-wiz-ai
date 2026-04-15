@@ -56,7 +56,7 @@ const Achievements = () => {
   return (
     <main className="flex-1 p-4 sm:p-6 bg-background space-y-6 overflow-y-auto flex flex-col min-h-0 h-full">
       {/* Hero */}
-      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-amber-500/10 via-primary/5 to-purple-500/10 border border-amber-500/20 p-6">
+      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-amber-500/10 via-primary/5 to-purple-500/10 border border-amber-500/20 p-6 min-h-[120px]">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl" />
           <Trophy className="absolute top-4 right-16 w-8 h-8 text-amber-500/15 rotate-12" />
@@ -89,30 +89,32 @@ const Achievements = () => {
 
       {/* XP + Freezes row */}
       {gamification && (
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="flex-1 bg-card rounded-2xl border border-border p-4 space-y-3">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary/80 to-purple-500 flex items-center justify-center text-white text-xs font-black">
+        <div className="bg-card rounded-2xl border border-border p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+            {/* Level badge + XP bar */}
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="w-8 h-8 shrink-0 rounded-full bg-gradient-to-br from-primary/80 to-purple-500 flex items-center justify-center text-white text-sm font-black shadow-sm">
                 {gamification.level}
               </div>
-              <span className="text-sm font-bold text-foreground">
-                {gamification.level_name}
-              </span>
-              <span className="ml-auto text-xs text-muted-foreground">
-                {gamification.total_xp} XP total
-              </span>
+              <div className="flex-1 min-w-0">
+                <XPProgressBar data={gamification} />
+              </div>
             </div>
-            <XPProgressBar data={gamification} />
-          </div>
-          <div className="sm:w-72">
-            <StreakFreezeWidget
-              freezesAvailable={gamification.streak_freezes_available}
-              onUsed={(n) =>
-                setGamification((g) =>
-                  g ? { ...g, streak_freezes_available: n } : g
-                )
-              }
-            />
+
+            {/* Divider */}
+            <div className="hidden sm:block h-10 w-px bg-border" />
+
+            {/* Streak freeze widget */}
+            <div className="sm:w-64 shrink-0">
+              <StreakFreezeWidget
+                freezesAvailable={gamification.streak_freezes_available}
+                onUsed={(n) =>
+                  setGamification((g) =>
+                    g ? { ...g, streak_freezes_available: n } : g
+                  )
+                }
+              />
+            </div>
           </div>
         </div>
       )}

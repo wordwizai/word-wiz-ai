@@ -49,11 +49,11 @@ export default function AchievementUnlockedToast({
   return (
     <div
       className={cn(
-        "fixed inset-0 z-[9999] flex items-center justify-center pointer-events-none transition-all duration-300",
-        visible ? "opacity-100" : "opacity-0"
+        "fixed inset-0 z-[9999] flex items-center justify-center transition-all duration-300",
+        visible ? "opacity-100" : "opacity-0 pointer-events-none"
       )}
     >
-      {/* Backdrop */}
+      {/* Backdrop — blocks clicks while the modal is visible */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
 
       {/* Card */}

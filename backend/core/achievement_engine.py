@@ -183,15 +183,17 @@ def process_sentence_result(
     if perfect_sentence:
         xp_earned += _award_xp(db, user_id, 15, XPReason.PERFECT_SENTENCE)
 
-    # Daily practice bonus (once per calendar day)
-    if _is_first_sentence_today(db, user_id, session_id):
+    # Daily bonuses — only once per calendar day (first sentence of the day)
+    first_today = _is_first_sentence_today(db, user_id, session_id)
+    current_streak = _get_current_streak(db, user_id)
+
+    if first_today:
         xp_earned += _award_xp(db, user_id, 10, XPReason.DAILY_PRACTICE)
 
-    # Streak bonus (day N → +5*N XP, capped at day 30 to avoid exploit)
-    current_streak = _get_current_streak(db, user_id)
-    if current_streak > 1:
-        streak_bonus = min(5 * current_streak, 150)
-        xp_earned += _award_xp(db, user_id, streak_bonus, XPReason.STREAK_BONUS)
+        # Streak bonus (day N → +5*N XP, capped at 150 to avoid exploit)
+        if current_streak > 1:
+            streak_bonus = min(5 * current_streak, 150)
+            xp_earned += _award_xp(db, user_id, streak_bonus, XPReason.STREAK_BONUS)
 
     # -----------------------------------------------------------------------
     # 3. Refresh aggregate stats needed for badge evaluation

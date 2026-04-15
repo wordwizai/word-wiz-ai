@@ -37,7 +37,7 @@ export default function LevelUpScreen({
     <div
       className={cn(
         "fixed inset-0 z-[9998] flex items-center justify-center transition-all duration-300",
-        visible ? "opacity-100" : "opacity-0"
+        visible ? "opacity-100" : "opacity-0 pointer-events-none"
       )}
     >
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
@@ -62,10 +62,15 @@ export default function LevelUpScreen({
           <X className="w-4 h-4" />
         </Button>
 
-        {/* Level badge */}
+        {/* Level badge — pulse glow on entry, then settles */}
         <div className="relative">
-          <div className="absolute inset-0 rounded-full bg-white/30 blur-2xl animate-ping" />
-          <div className="relative w-24 h-24 rounded-full bg-white/20 border-4 border-white/50 flex items-center justify-center">
+          <div className="absolute inset-0 rounded-full bg-white/30 blur-2xl animate-pulse" />
+          <div
+            className={cn(
+              "relative w-24 h-24 rounded-full bg-white/20 border-4 border-white/50 flex items-center justify-center transition-transform duration-700",
+              visible ? "scale-100" : "scale-50"
+            )}
+          >
             <span className="text-4xl font-black">{level}</span>
           </div>
         </div>

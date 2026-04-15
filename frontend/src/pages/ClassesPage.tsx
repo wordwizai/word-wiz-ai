@@ -143,19 +143,28 @@ const ClassesPage = () => {
   return (
     <main className="flex-1 p-4 sm:p-6 bg-background space-y-6 overflow-y-auto flex flex-col min-h-0 h-full">
       {/* Header */}
-      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 via-accent/5 to-primary/5 border border-primary/20 p-6">
-        <div className="relative z-10 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl md:text-4xl font-bold text-foreground mb-2">
+      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/15 p-6 min-h-[96px]">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl" />
+          <Users className="absolute top-4 right-16 w-8 h-8 text-primary/10 rotate-6" />
+        </div>
+        <div className="relative z-10 flex items-center gap-4">
+          <div className="hidden sm:flex shrink-0 w-14 h-14 bg-gradient-to-br from-primary/20 to-purple-200/60 rounded-2xl items-center justify-center shadow-sm">
+            <Users className="w-7 h-7 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest mb-1">
               Classes
+            </p>
+            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary via-primary/80 to-purple-600 bg-clip-text text-transparent">
+              {viewMode === "student" ? "Your Learning Journey" : "Your Classes"}
             </h1>
-            <p className="text-sm md:text-base text-muted-foreground/80">
+            <p className="text-sm text-muted-foreground mt-1">
               {viewMode === "student"
-                ? "Your learning journey"
+                ? "Track your progress and join classes"
                 : "Manage your classes and view student progress"}
             </p>
           </div>
-          <Users className="w-12 h-12 md:w-16 md:h-16 text-primary/20" />
         </div>
       </div>
 

@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import ActivitiesList from "@/components/ActivitiesList";
@@ -9,7 +10,6 @@ import {
   BookOpen,
   Trophy,
   ArrowRight,
-  Medal,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -123,6 +123,7 @@ const Dashboard = () => {
 
   const [pastSessions, setPastSessions] = useState<Session[]>([]);
   const [sessionsLoading, setSessionsLoading] = useState(true);
+  const [sessionsOpen, setSessionsOpen] = useState(false);
   const [statistics, setStatistics] = useState<UserStatistics | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
   const [gamification, setGamification] = useState<UserGamification | null>(
@@ -255,203 +256,162 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Gamification Row: XP bar + level + badges + streak freeze */}
-      {gamification && (
-        <div className="flex flex-col sm:flex-row gap-3">
-          {/* XP + Level card */}
-          <Card className="flex-1 bg-gradient-to-br from-primary/5 to-purple-500/5 border-primary/20 rounded-2xl">
-            <CardContent className="p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/80 to-purple-500 flex items-center justify-center text-white text-sm font-black shadow-sm">
-                    {gamification.level}
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground font-medium">
-                      Current Level
-                    </p>
-                    <p className="text-sm font-bold text-foreground">
-                      {gamification.level_name}
-                    </p>
-                  </div>
-                </div>
+      {/* Gamification Row */}
+      {!gamification ? (
+        <Skeleton className="h-[68px] w-full rounded-2xl" />
+      ) : (
+        <Card className="rounded-2xl bg-gradient-to-br from-amber-500/10 via-primary/5 to-orange-500/5 border-amber-500/20">
+          <CardContent className="py-3 px-4">
+            <div className="flex items-center gap-3 sm:gap-4">
+              {/* Level badge */}
+              <div className="w-8 h-8 shrink-0 rounded-full bg-gradient-to-br from-primary/80 to-purple-500 flex items-center justify-center text-white text-sm font-black shadow-sm">
+                {gamification.level}
+              </div>
+
+              {/* XP bar — takes up remaining space */}
+              <div className="flex-1 min-w-0">
+                <XPProgressBar data={gamification} />
+              </div>
+
+              {/* Divider */}
+              <div className="hidden sm:block h-8 w-px bg-border shrink-0" />
+
+              {/* Streak freezes + achievements link */}
+              <div className="flex items-center gap-3 shrink-0">
+                <StreakFreezeWidget
+                  compact
+                  freezesAvailable={gamification.streak_freezes_available}
+                  onUsed={(n) =>
+                    setGamification((g) =>
+                      g ? { ...g, streak_freezes_available: n } : g
+                    )
+                  }
+                />
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-xs text-primary gap-1 h-7 px-2"
+                  className="text-xs text-primary gap-1.5 h-7 px-2 shrink-0"
                   onClick={() => router("/achievements")}
                 >
-                  <Medal className="w-3 h-3" />
-                  {gamification.lifetime_badges_count} badges
+                  <Trophy className="w-3 h-3" />
+                  {gamification.lifetime_badges_count > 0
+                    ? `${gamification.lifetime_badges_count} badge${gamification.lifetime_badges_count !== 1 ? "s" : ""}`
+                    : "Achievements"}
+                  <ArrowRight className="w-3 h-3" />
                 </Button>
               </div>
-              <XPProgressBar data={gamification} />
-            </CardContent>
-          </Card>
-
-          {/* Streak freeze */}
-          <div className="sm:w-64 flex flex-col justify-center">
-            <StreakFreezeWidget
-              freezesAvailable={gamification.streak_freezes_available}
-              onUsed={(n) =>
-                setGamification((g) =>
-                  g ? { ...g, streak_freezes_available: n } : g
-                )
-              }
-            />
-          </div>
-
-          {/* Recent badges */}
-          {gamification.recent_badges.length > 0 && (
-            <Card className="sm:w-64 bg-card border-border rounded-2xl">
-              <CardContent className="p-4">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                  Recent Badges
-                </p>
-                <div className="flex gap-2 flex-wrap">
-                  {gamification.recent_badges.slice(0, 4).map((ua) => (
-                    <div
-                      key={ua.id}
-                      className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center"
-                      title={ua.definition.name}
-                    >
-                      <DynamicIcon
-                        name={ua.definition.icon_name}
-                        className="w-4 h-4 text-primary"
-                        fallback="Star"
-                      />
-                    </div>
-                  ))}
-                </div>
-                <Button
-                  variant="link"
-                  size="sm"
-                  className="text-xs p-0 h-auto mt-2 text-primary"
-                  onClick={() => router("/achievements")}
-                >
-                  View all achievements →
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
-      <div className="flex space-x-0 sm:space-x-4 space-y-4 flex-1 w-full min-w-0 min-h-0 flex-col md:flex-row md:space-y-0">
-        {/* Activities with enhanced styling */}
-        <div className="relative flex-1 flex flex-col">
-          <ActivitiesList
-            numberOfActivities={3}
-            className="w-full flex-1"
-            shuffleDaily={true}
-          />
-          <div className="flex justify-center mt-4">
+      {/* Activities — full width, clock button injected into header */}
+      <div className="flex-1 flex flex-col min-h-0">
+        <ActivitiesList
+          numberOfActivities={3}
+          className="w-full flex-1"
+          shuffleDaily={true}
+          headerAction={
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
-              className="text-foreground border-primary/30 hover:border-primary/60 hover:bg-primary/5 transition-colors px-6 py-2 min-h-[44px] gap-2"
-              onClick={() => router("/practice")}
+              className="gap-1.5 text-muted-foreground hover:text-foreground h-8 px-2"
+              onClick={() => setSessionsOpen(true)}
             >
-              View All Activities
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Recent Sessions panel */}
-        <div className="flex flex-col md:w-80">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-primary/10 rounded-xl">
-              <Clock className="w-5 h-5 text-primary" />
-            </div>
-            <h2 className="text-xl md:text-2xl font-bold text-foreground">
-              Recent Sessions
-            </h2>
-            {pastSessions.length > 0 && (
-              <span className="text-xs text-muted-foreground bg-muted rounded-full px-2 py-0.5 ml-auto">
-                {pastSessions.length}
+              <Clock className="w-4 h-4" />
+              <span className="text-xs">
+                {sessionsLoading ? "History" : `History${pastSessions.length > 0 ? ` (${pastSessions.length})` : ""}`}
               </span>
-            )}
-          </div>
-          <Card className="flex flex-col flex-1 rounded-2xl bg-card border-2 border-border shadow-sm overflow-hidden">
-            <CardContent className="px-3 pb-3 pt-2 flex-1 flex flex-col overflow-hidden min-h-0">
-              {sessionsLoading ? (
-                <div className="flex flex-col gap-3">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-3 p-3 rounded-xl bg-muted/40"
-                    >
-                      <Skeleton className="w-7 h-7 rounded-lg shrink-0" />
-                      <div className="flex-1 space-y-1.5">
-                        <Skeleton className="h-3.5 w-3/4 rounded" />
-                        <Skeleton className="h-3 w-1/2 rounded" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : pastSessions.length > 0 ? (
-                <div className="flex-1 overflow-y-auto min-h-0">
-                  <div className="flex flex-col gap-2 pr-1">
-                    {pastSessions.map((session) => {
-                      const colorIndex =
-                        Math.abs(session.activity.id) % activityColors.length;
-                      const cardColor = activityColors[colorIndex];
-
-                      return (
-                        <button
-                          key={session.id}
-                          className="group w-full text-left rounded-xl border-2 border-white/60 hover:border-white cursor-pointer p-3 transition-all duration-200 hover:shadow-sm"
-                          onClick={() => router(`/practice/${session.id}`)}
-                          style={{
-                            backgroundColor: `var(--${cardColor})`,
-                          }}
-                        >
-                          <div className="flex items-center gap-2">
-                            <DynamicIcon
-                              name={session.activity.emoji_icon}
-                              className="w-4 h-4 shrink-0 text-foreground/70"
-                              fallback="Star"
-                            />
-                            <span className="text-sm font-semibold text-foreground line-clamp-1 flex-1">
-                              {session.activity.title}
-                            </span>
-                          </div>
-                          <div className="text-xs text-foreground/60 mt-1 pl-6">
-                            {formatActivityType(session.activity.activity_type)}{" "}
-                            ·{" "}
-                            {new Date(session.created_at).toLocaleDateString()}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center h-36 text-center gap-2">
-                  <div className="w-12 h-12 bg-muted rounded-2xl flex items-center justify-center">
-                    <Clock className="w-6 h-6 text-muted-foreground" />
-                  </div>
-                  <p className="text-sm font-semibold text-foreground">
-                    No sessions yet
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Start practicing to see your history here
-                  </p>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="mt-1 text-xs h-8 px-3"
-                    onClick={() => router("/practice")}
-                  >
-                    Start practicing
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+            </Button>
+          }
+        />
+        <div className="flex justify-center mt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-foreground border-primary/30 hover:border-primary/60 hover:bg-primary/5 transition-colors px-6 py-2 min-h-[44px] gap-2"
+            onClick={() => router("/practice")}
+          >
+            View All Activities
+            <ArrowRight className="w-4 h-4" />
+          </Button>
         </div>
       </div>
+
+      {/* Recent Sessions modal */}
+      <Dialog open={sessionsOpen} onOpenChange={setSessionsOpen}>
+        <DialogContent className="max-w-sm p-0 gap-0 flex flex-col max-h-[80vh]">
+          <DialogHeader className="px-4 pt-4 pb-3 border-b shrink-0">
+            <DialogTitle className="flex items-center gap-2 text-base font-semibold pr-6">
+              <Clock className="w-4 h-4 text-primary" />
+              Recent Sessions
+              {pastSessions.length > 0 && (
+                <span className="text-xs text-muted-foreground bg-muted rounded-full px-2 py-0.5 font-normal">
+                  {pastSessions.length}
+                </span>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-y-auto p-3 space-y-2">
+            {sessionsLoading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-muted/40">
+                  <Skeleton className="w-7 h-7 rounded-lg shrink-0" />
+                  <div className="flex-1 space-y-1.5">
+                    <Skeleton className="h-3.5 w-3/4 rounded" />
+                    <Skeleton className="h-3 w-1/2 rounded" />
+                  </div>
+                </div>
+              ))
+            ) : pastSessions.length > 0 ? (
+              pastSessions.map((session) => {
+                const colorIndex = Math.abs(session.activity.id) % activityColors.length;
+                const cardColor = activityColors[colorIndex];
+                return (
+                  <button
+                    key={session.id}
+                    className="w-full text-left rounded-xl border-2 border-white/60 hover:border-white cursor-pointer p-3 transition-all duration-200 hover:shadow-sm"
+                    onClick={() => { setSessionsOpen(false); router(`/practice/${session.id}`); }}
+                    style={{ backgroundColor: `var(--${cardColor})` }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <DynamicIcon
+                        name={session.activity.emoji_icon}
+                        className="w-4 h-4 shrink-0 text-foreground/70"
+                        fallback="Star"
+                      />
+                      <span className="text-sm font-semibold text-foreground line-clamp-1 flex-1">
+                        {session.activity.title}
+                      </span>
+                    </div>
+                    <div className="text-xs text-foreground/60 mt-1 pl-6">
+                      {formatActivityType(session.activity.activity_type)} ·{" "}
+                      {new Date(session.created_at).toLocaleDateString()}
+                    </div>
+                  </button>
+                );
+              })
+            ) : (
+              <div className="flex flex-col items-center justify-center py-10 text-center gap-2">
+                <div className="w-12 h-12 bg-muted rounded-2xl flex items-center justify-center">
+                  <Clock className="w-6 h-6 text-muted-foreground" />
+                </div>
+                <p className="text-sm font-semibold text-foreground">No sessions yet</p>
+                <p className="text-xs text-muted-foreground">Start practicing to see your history here</p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="mt-1 text-xs h-8 px-3"
+                  onClick={() => { setSessionsOpen(false); router("/practice"); }}
+                >
+                  Start practicing
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 };

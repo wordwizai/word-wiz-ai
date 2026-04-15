@@ -15,6 +15,7 @@ import {
   PanelLeftClose,
   PanelLeft,
   Users,
+  Trophy,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
@@ -38,6 +39,7 @@ import type { AuthContextType } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { nameToInitials } from "@/lib/utils";
 import { wordWizIcon } from "@/assets";
+import XPProgressBar from "@/components/gamification/XPProgressBar";
 
 interface SidebarProps {
   className?: string;
@@ -214,6 +216,43 @@ const Sidebar = ({ className }: SidebarProps) => {
 
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>
+              <Link to="/achievements">
+                <Button
+                  variant="ghost"
+                  className={`${
+                    isExpanded ? "w-full justify-start" : "w-12 h-12"
+                  } rounded-xl hover:bg-amber-100/50 transition-colors ${
+                    isActive("/achievements")
+                      ? "bg-amber-100/70 border-2 border-amber-300"
+                      : ""
+                  }`}
+                >
+                  <Trophy
+                    className={`w-5 h-5 text-amber-600 ${
+                      isExpanded ? "mr-3" : ""
+                    }`}
+                  />
+                  {isExpanded && (
+                    <span className="font-medium text-foreground">
+                      Achievements
+                    </span>
+                  )}
+                  {!isExpanded && <span className="sr-only">Achievements</span>}
+                </Button>
+              </Link>
+            </TooltipTrigger>
+            {!isExpanded && (
+              <TooltipContent
+                side="right"
+                className="bg-card border-2 border-border text-foreground"
+              >
+                <p>Achievements</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+
+          <Tooltip delayDuration={300}>
+            <TooltipTrigger asChild>
               <Link to="/classes">
                 <Button
                   variant="ghost"
@@ -231,9 +270,7 @@ const Sidebar = ({ className }: SidebarProps) => {
                     }`}
                   />
                   {isExpanded && (
-                    <span className="font-medium text-foreground">
-                      Classes
-                    </span>
+                    <span className="font-medium text-foreground">Classes</span>
                   )}
                   {!isExpanded && <span className="sr-only">Classes</span>}
                 </Button>
@@ -383,6 +420,17 @@ const Sidebar = ({ className }: SidebarProps) => {
               </TooltipContent>
             )}
           </Tooltip>
+
+          {/* XP Progress Bar */}
+          {isExpanded ? (
+            <div className="px-1 py-2">
+              <XPProgressBar collapsed={false} />
+            </div>
+          ) : (
+            <div className="flex justify-center py-1">
+              <XPProgressBar collapsed={true} />
+            </div>
+          )}
 
           {/* Avatar Dropdown */}
           <DropdownMenu>

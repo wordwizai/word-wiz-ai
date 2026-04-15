@@ -18,3 +18,6 @@ class User(Base):
     sessions = relationship("Session", back_populates="user")
     classes = relationship("Class", back_populates="teacher")
     class_memberships = relationship("ClassMembership", back_populates="student")
+    gamification = relationship("UserGamification", back_populates="user", uselist=False)
+    achievements = relationship("UserAchievement", back_populates="user")
+    xp_transactions = relationship("XPTransaction", back_populates="user")

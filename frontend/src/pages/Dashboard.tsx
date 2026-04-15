@@ -9,14 +9,23 @@ import {
   BookOpen,
   Trophy,
   ArrowRight,
+  Medal,
   type LucideIcon,
 } from "lucide-react";
-import { getSessions, getUserStatistics, type UserStatistics } from "@/api";
+import {
+  getSessions,
+  getUserStatistics,
+  getMyGamification,
+  type UserStatistics,
+  type UserGamification,
+} from "@/api";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import DynamicIcon from "@/components/DynamicIcon";
 import { useCountUp } from "@/hooks/useCountUp";
+import XPProgressBar from "@/components/gamification/XPProgressBar";
+import StreakFreezeWidget from "@/components/gamification/StreakFreezeWidget";
 
 interface Session {
   id: string;
@@ -116,6 +125,9 @@ const Dashboard = () => {
   const [sessionsLoading, setSessionsLoading] = useState(true);
   const [statistics, setStatistics] = useState<UserStatistics | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
+  const [gamification, setGamification] = useState<UserGamification | null>(
+    null
+  );
   const router = useNavigate();
 
   useEffect(() => {
@@ -153,9 +165,15 @@ const Dashboard = () => {
     fetchStatistics();
   }, [token]);
 
+  // Fetch gamification data
+  useEffect(() => {
+    if (!token) return;
+    getMyGamification(token).then(setGamification).catch(console.error);
+  }, [token]);
+
   const formatActivityType = (type: string | undefined) => {
     if (!type) return "Unknown";
-    
+
     switch (type.toLowerCase()) {
       case "unlimited":
         return "Unlimited";
@@ -237,6 +255,88 @@ const Dashboard = () => {
         />
       </div>
 
+      {/* Gamification Row: XP bar + level + badges + streak freeze */}
+      {gamification && (
+        <div className="flex flex-col sm:flex-row gap-3">
+          {/* XP + Level card */}
+          <Card className="flex-1 bg-gradient-to-br from-primary/5 to-purple-500/5 border-primary/20 rounded-2xl">
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/80 to-purple-500 flex items-center justify-center text-white text-sm font-black shadow-sm">
+                    {gamification.level}
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground font-medium">
+                      Current Level
+                    </p>
+                    <p className="text-sm font-bold text-foreground">
+                      {gamification.level_name}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs text-primary gap-1 h-7 px-2"
+                  onClick={() => router("/achievements")}
+                >
+                  <Medal className="w-3 h-3" />
+                  {gamification.lifetime_badges_count} badges
+                </Button>
+              </div>
+              <XPProgressBar data={gamification} />
+            </CardContent>
+          </Card>
+
+          {/* Streak freeze */}
+          <div className="sm:w-64 flex flex-col justify-center">
+            <StreakFreezeWidget
+              freezesAvailable={gamification.streak_freezes_available}
+              onUsed={(n) =>
+                setGamification((g) =>
+                  g ? { ...g, streak_freezes_available: n } : g
+                )
+              }
+            />
+          </div>
+
+          {/* Recent badges */}
+          {gamification.recent_badges.length > 0 && (
+            <Card className="sm:w-64 bg-card border-border rounded-2xl">
+              <CardContent className="p-4">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                  Recent Badges
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  {gamification.recent_badges.slice(0, 4).map((ua) => (
+                    <div
+                      key={ua.id}
+                      className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center"
+                      title={ua.definition.name}
+                    >
+                      <DynamicIcon
+                        name={ua.definition.icon_name}
+                        className="w-4 h-4 text-primary"
+                        fallback="Star"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="text-xs p-0 h-auto mt-2 text-primary"
+                  onClick={() => router("/achievements")}
+                >
+                  View all achievements →
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
       <div className="flex space-x-0 sm:space-x-4 space-y-4 flex-1 w-full min-w-0 min-h-0 flex-col md:flex-row md:space-y-0">
         {/* Activities with enhanced styling */}
         <div className="relative flex-1 flex flex-col">
@@ -274,75 +374,81 @@ const Dashboard = () => {
             )}
           </div>
           <Card className="flex flex-col flex-1 rounded-2xl bg-card border-2 border-border shadow-sm overflow-hidden">
-          <CardContent className="px-3 pb-3 pt-2 flex-1 flex flex-col overflow-hidden min-h-0">
-            {sessionsLoading ? (
-              <div className="flex flex-col gap-3">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-muted/40">
-                    <Skeleton className="w-7 h-7 rounded-lg shrink-0" />
-                    <div className="flex-1 space-y-1.5">
-                      <Skeleton className="h-3.5 w-3/4 rounded" />
-                      <Skeleton className="h-3 w-1/2 rounded" />
+            <CardContent className="px-3 pb-3 pt-2 flex-1 flex flex-col overflow-hidden min-h-0">
+              {sessionsLoading ? (
+                <div className="flex flex-col gap-3">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-3 p-3 rounded-xl bg-muted/40"
+                    >
+                      <Skeleton className="w-7 h-7 rounded-lg shrink-0" />
+                      <div className="flex-1 space-y-1.5">
+                        <Skeleton className="h-3.5 w-3/4 rounded" />
+                        <Skeleton className="h-3 w-1/2 rounded" />
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : pastSessions.length > 0 ? (
-              <div className="flex-1 overflow-y-auto min-h-0">
-                <div className="flex flex-col gap-2 pr-1">
-                  {pastSessions.map((session) => {
-                    const colorIndex =
-                      Math.abs(session.activity.id) % activityColors.length;
-                    const cardColor = activityColors[colorIndex];
+                  ))}
+                </div>
+              ) : pastSessions.length > 0 ? (
+                <div className="flex-1 overflow-y-auto min-h-0">
+                  <div className="flex flex-col gap-2 pr-1">
+                    {pastSessions.map((session) => {
+                      const colorIndex =
+                        Math.abs(session.activity.id) % activityColors.length;
+                      const cardColor = activityColors[colorIndex];
 
-                    return (
-                      <button
-                        key={session.id}
-                        className="group w-full text-left rounded-xl border-2 border-white/60 hover:border-white cursor-pointer p-3 transition-all duration-200 hover:shadow-sm"
-                        onClick={() => router(`/practice/${session.id}`)}
-                        style={{
-                          backgroundColor: `var(--${cardColor})`,
-                        }}
-                      >
-                        <div className="flex items-center gap-2">
-                          <DynamicIcon
-                            name={session.activity.emoji_icon}
-                            className="w-4 h-4 shrink-0 text-foreground/70"
-                            fallback="Star"
-                          />
-                          <span className="text-sm font-semibold text-foreground line-clamp-1 flex-1">
-                            {session.activity.title}
-                          </span>
-                        </div>
-                        <div className="text-xs text-foreground/60 mt-1 pl-6">
-                          {formatActivityType(session.activity.activity_type)} ·{" "}
-                          {new Date(session.created_at).toLocaleDateString()}
-                        </div>
-                      </button>
-                    );
-                  })}
+                      return (
+                        <button
+                          key={session.id}
+                          className="group w-full text-left rounded-xl border-2 border-white/60 hover:border-white cursor-pointer p-3 transition-all duration-200 hover:shadow-sm"
+                          onClick={() => router(`/practice/${session.id}`)}
+                          style={{
+                            backgroundColor: `var(--${cardColor})`,
+                          }}
+                        >
+                          <div className="flex items-center gap-2">
+                            <DynamicIcon
+                              name={session.activity.emoji_icon}
+                              className="w-4 h-4 shrink-0 text-foreground/70"
+                              fallback="Star"
+                            />
+                            <span className="text-sm font-semibold text-foreground line-clamp-1 flex-1">
+                              {session.activity.title}
+                            </span>
+                          </div>
+                          <div className="text-xs text-foreground/60 mt-1 pl-6">
+                            {formatActivityType(session.activity.activity_type)}{" "}
+                            ·{" "}
+                            {new Date(session.created_at).toLocaleDateString()}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-36 text-center gap-2">
-                <div className="w-12 h-12 bg-muted rounded-2xl flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-muted-foreground" />
+              ) : (
+                <div className="flex flex-col items-center justify-center h-36 text-center gap-2">
+                  <div className="w-12 h-12 bg-muted rounded-2xl flex items-center justify-center">
+                    <Clock className="w-6 h-6 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm font-semibold text-foreground">
+                    No sessions yet
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Start practicing to see your history here
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="mt-1 text-xs h-8 px-3"
+                    onClick={() => router("/practice")}
+                  >
+                    Start practicing
+                  </Button>
                 </div>
-                <p className="text-sm font-semibold text-foreground">No sessions yet</p>
-                <p className="text-xs text-muted-foreground">
-                  Start practicing to see your history here
-                </p>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="mt-1 text-xs h-8 px-3"
-                  onClick={() => router("/practice")}
-                >
-                  Start practicing
-                </Button>
-              </div>
-            )}
-          </CardContent>
+              )}
+            </CardContent>
           </Card>
         </div>
       </div>

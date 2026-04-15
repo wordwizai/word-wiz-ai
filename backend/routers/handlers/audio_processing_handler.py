@@ -10,6 +10,7 @@ import pandas as pd
 import soundfile as sf
 import base64 as _base64
 
+from core.achievement_engine import process_sentence_result
 from core.audio_preprocessing import preprocess_audio
 from core.audio_quality_analyzer import AudioQualityAnalyzer
 from core.modes.base_mode import BaseMode
@@ -511,6 +512,24 @@ async def analyze_audio_file_event_stream(
                         gpt_response=gpt_response_for_db,
                     )
                     create_feedback_entry(db, feedback_entry)
+
+                    # Award XP + check badges
+                    try:
+                        gamification_update = process_sentence_result(
+                            db=db,
+                            user_id=current_user.id,
+                            session_id=session.id,
+                            phoneme_analysis=analysis_payload.get("data", {}),
+                            activity_type=session.activity.activity_type if session.activity else None,
+                        )
+                        gamification_payload = {
+                            "type": "gamification_update",
+                            "data": gamification_update.model_dump(),
+                        }
+                        yield f"data: {json.dumps(sanitize(gamification_payload))}\n\n"
+                        await asyncio.sleep(0.01)
+                    except Exception as gam_err:
+                        print(f"⚠️  Gamification update failed (non-fatal): {gam_err}")
 
                 else:
                     # TTS future completed

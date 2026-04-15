@@ -21,6 +21,7 @@ const ClassesPage = lazy(() => import("./pages/ClassesPage.tsx"));
 const OAuthRedirect = lazy(() => import("./components/OAuthRedirect.tsx"));
 const PracticeRouter = lazy(() => import("./pages/PracticeRouter.tsx"));
 const PracticeDashboard = lazy(() => import("./pages/PracticeDashboard.tsx"));
+const Achievements = lazy(() => import("./pages/Achievements.tsx"));
 const UnderConstructionPage = lazy(
   () => import("./pages/UnderConstructionPage.tsx")
 );
@@ -68,9 +69,7 @@ const DecodableBooksVsLeveledReaders = lazy(
 const CantBlendSounds = lazy(
   () => import("./pages/articles/CantBlendSounds.tsx")
 );
-const GuessesWords = lazy(
-  () => import("./pages/articles/GuessesWords.tsx")
-);
+const GuessesWords = lazy(() => import("./pages/articles/GuessesWords.tsx"));
 
 // Lazy load guide pages
 const ChoosingReadingApp = lazy(
@@ -85,9 +84,7 @@ const IsTeacherTeachingPhonics = lazy(
 const PhonemeAwarenessGuide = lazy(
   () => import("./pages/guides/PhonemeAwarenessGuide.tsx")
 );
-const TeachCVCWords = lazy(
-  () => import("./pages/guides/TeachCVCWords.tsx")
-);
+const TeachCVCWords = lazy(() => import("./pages/guides/TeachCVCWords.tsx"));
 const TeachConsonantBlends = lazy(
   () => import("./pages/guides/TeachConsonantBlends.tsx")
 );
@@ -112,18 +109,12 @@ const PhonicsWithoutWorksheets = lazy(
 const ChildReadsSlowly = lazy(
   () => import("./pages/articles/ChildReadsSlowly.tsx")
 );
-const SkipsWords = lazy(
-  () => import("./pages/articles/SkipsWords.tsx")
-);
-const TutorVsApp = lazy(
-  () => import("./pages/comparisons/TutorVsApp.tsx")
-);
+const SkipsWords = lazy(() => import("./pages/articles/SkipsWords.tsx"));
+const TutorVsApp = lazy(() => import("./pages/comparisons/TutorVsApp.tsx"));
 const AIvsTraditional = lazy(
   () => import("./pages/comparisons/AIvsTraditional.tsx")
 );
-const FreeVsPaid = lazy(
-  () => import("./pages/comparisons/FreeVsPaid.tsx")
-);
+const FreeVsPaid = lazy(() => import("./pages/comparisons/FreeVsPaid.tsx"));
 
 // New SEO pages - 10 long-tail keywords
 const SilentEWordsPractice = lazy(
@@ -372,6 +363,7 @@ function App() {
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/practice" element={<PracticeDashboard />} />
                     <Route path="/classes" element={<ClassesPage />} />
+                    <Route path="/achievements" element={<Achievements />} />
                   </Route>
                   <Route path="*" element={<UnderConstructionPage />} />
                 </Routes>

@@ -4,6 +4,9 @@ import { useHybridAudioAnalysis } from "@/hooks/useHybridAudioAnalysis";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getCurrentSessionState, type Session } from "@/api";
 import { showErrorToast, showAudioPlaybackError } from "@/utils/errorHandling";
+import { useGamificationEvents } from "@/hooks/useGamificationEvents";
+import AchievementUnlockedToast from "@/components/gamification/AchievementUnlockedToast";
+import LevelUpScreen from "@/components/gamification/LevelUpScreen";
 
 interface BasePracticeProps {
   session: Session;
@@ -38,6 +41,15 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
   const [showNextButton, setShowNextButton] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const { token } = useContext(AuthContext);
+
+  // Gamification event queue
+  const {
+    pendingBadge,
+    pendingLevelUp,
+    dismissBadge,
+    dismissLevelUp,
+    handleUpdate,
+  } = useGamificationEvents();
 
   // Initialize hybrid audio analysis
   const {
@@ -113,6 +125,7 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
       showErrorToast(err);
       setIsProcessing(false);
     },
+    onGamificationUpdate: handleUpdate,
     sessionId: session.id,
   });
 
@@ -133,15 +146,21 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
         if (fetchedSentence.type === "full-feedback-state") {
           setCurrentSentence(fetchedSentence.data.gpt_response.sentence);
         } else if (session.activity.activity_settings?.first_sentence) {
-          setCurrentSentence(session.activity.activity_settings?.first_sentence);
+          setCurrentSentence(
+            session.activity.activity_settings?.first_sentence
+          );
         } else {
           setCurrentSentence("The quick brown fox jumped over the lazy dog");
         }
       } catch (error) {
         console.error("Failed to fetch session state:", error);
-        showErrorToast("Failed to load practice session. Please try refreshing.");
+        showErrorToast(
+          "Failed to load practice session. Please try refreshing."
+        );
         if (session.activity.activity_settings?.first_sentence) {
-          setCurrentSentence(session.activity.activity_settings?.first_sentence);
+          setCurrentSentence(
+            session.activity.activity_settings?.first_sentence
+          );
         }
       }
     };
@@ -169,22 +188,40 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
   const wordArray =
     typeof currentSentence === "string" ? currentSentence.split(" ") : [];
 
-  return renderContent({
-    currentSentence,
-    wordArray,
-    analysisData,
-    feedback,
-    showHighlightedWords,
-    isRecording,
-    isProcessing,
-    isModelLoading,
-    modelLoadProgress,
-    onStartRecording: startRecording,
-    onStopRecording: stopRecording,
-    displayNextSentence,
-    nextSentence,
-    showNextButton,
-  });
+  return (
+    <>
+      {pendingLevelUp && (
+        <LevelUpScreen
+          level={pendingLevelUp.level}
+          levelName={pendingLevelUp.levelName}
+          onClose={dismissLevelUp}
+        />
+      )}
+      {pendingBadge && !pendingLevelUp && (
+        <AchievementUnlockedToast
+          badge={pendingBadge}
+          xpEarned={pendingBadge.xpEarned}
+          onClose={dismissBadge}
+        />
+      )}
+      {renderContent({
+        currentSentence,
+        wordArray,
+        analysisData,
+        feedback,
+        showHighlightedWords,
+        isRecording,
+        isProcessing,
+        isModelLoading,
+        modelLoadProgress,
+        onStartRecording: startRecording,
+        onStopRecording: stopRecording,
+        displayNextSentence,
+        nextSentence,
+        showNextButton,
+      })}
+    </>
+  );
 };
 
 export default BasePractice;

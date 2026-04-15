@@ -9,12 +9,22 @@ import {
   Star,
   TrendingUp,
   Sparkles,
+  Trophy,
   type LucideIcon,
 } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
-import { getUserStatistics, type UserStatistics } from "@/api";
+import {
+  getUserStatistics,
+  getMyBadges,
+  type UserStatistics,
+  type BadgeWithStatus,
+} from "@/api";
 import { useCountUp } from "@/hooks/useCountUp";
+import { Button } from "@/components/ui/button";
+import BadgeGrid from "@/components/gamification/BadgeGrid";
+import XPProgressBar from "@/components/gamification/XPProgressBar";
+import { useNavigate } from "react-router-dom";
 
 interface AnimatedProgressStatProps {
   icon: LucideIcon;
@@ -54,14 +64,15 @@ const AnimatedProgressStat = ({
 
 const ProgressDashboard = () => {
   const { token } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [statistics, setStatistics] = useState<UserStatistics | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
+  const [badges, setBadges] = useState<BadgeWithStatus[]>([]);
 
   // Fetch user statistics
   useEffect(() => {
     const fetchStatistics = async () => {
       if (!token) return;
-
       try {
         setStatsLoading(true);
         const stats = await getUserStatistics(token);
@@ -72,8 +83,13 @@ const ProgressDashboard = () => {
         setStatsLoading(false);
       }
     };
-
     fetchStatistics();
+  }, [token]);
+
+  // Fetch badges
+  useEffect(() => {
+    if (!token) return;
+    getMyBadges(token).then(setBadges).catch(console.error);
   }, [token]);
 
   return (
@@ -165,6 +181,42 @@ const ProgressDashboard = () => {
         <PhonemeErrorsPieChart errorType="substitution" className="flex-1" />
         <PhonemeErrorsPieChart errorType="insertion" className="flex-1" />
         <PhonemeErrorsPieChart errorType="deletion" className="flex-1" />
+      </div>
+
+      {/* My Achievements Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-amber-500/10 rounded-xl">
+              <Trophy className="w-5 h-5 text-amber-500" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-foreground">
+                My Achievements
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                {badges.filter((b) => b.earned).length} of {badges.length}{" "}
+                earned
+              </p>
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs gap-1 h-8"
+            onClick={() => navigate("/achievements")}
+          >
+            View all
+          </Button>
+        </div>
+
+        {/* XP bar inline */}
+        <div className="max-w-sm">
+          <XPProgressBar />
+        </div>
+
+        {/* Show up to 12 most recent/earned badges */}
+        <BadgeGrid badges={badges.slice(0, 12)} />
       </div>
     </main>
   );

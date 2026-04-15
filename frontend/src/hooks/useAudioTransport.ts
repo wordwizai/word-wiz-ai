@@ -17,6 +17,7 @@ import type {
   AudioAnalysisEvent,
 } from "@/services/audioTransport";
 import { showErrorToast, showNetworkError } from "@/utils/errorHandling";
+import { type GamificationUpdate } from "@/api";
 
 export interface UseAudioTransportOptions {
   onAnalysis?: (data: any) => void;
@@ -28,6 +29,7 @@ export interface UseAudioTransportOptions {
   onError?: (error: string) => void;
   onProcessingStart?: () => void;
   onProcessingEnd?: () => void;
+  onGamificationUpdate?: (data: GamificationUpdate) => void;
   sessionId: number;
   useWebSocket?: boolean; // If true, use WebSocket; otherwise SSE
 }
@@ -74,6 +76,10 @@ export function useAudioTransport(options: UseAudioTransportOptions) {
           const audioUrl = URL.createObjectURL(blob);
           opts.onAudioFeedback?.(audioUrl);
         }
+        break;
+
+      case "gamification_update":
+        opts.onGamificationUpdate?.(event.data);
         break;
 
       case "error": {

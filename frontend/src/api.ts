@@ -479,6 +479,93 @@ const deleteClass = async (token: string, classId: number): Promise<void> => {
   }
 };
 
+// ---------------------------------------------------------------------------
+// Gamification
+// ---------------------------------------------------------------------------
+
+export type AchievementRarity = "common" | "rare" | "epic" | "legendary";
+
+export interface NewlyEarnedBadge {
+  key: string;
+  name: string;
+  description: string;
+  icon_name: string;
+  xp_reward: number;
+  rarity: AchievementRarity;
+}
+
+export interface UserGamification {
+  total_xp: number;
+  level: number;
+  level_name: string;
+  xp_into_level: number;
+  xp_needed_for_next: number;
+  streak_freezes_available: number;
+  lifetime_badges_count: number;
+  recent_badges: {
+    id: number;
+    achievement_id: number;
+    earned_at: string;
+    xp_at_earn_time: number;
+    definition: {
+      id: number;
+      key: string;
+      name: string;
+      description: string;
+      icon_name: string;
+      xp_reward: number;
+      rarity: AchievementRarity;
+    };
+  }[];
+}
+
+export interface BadgeWithStatus {
+  id: number;
+  key: string;
+  name: string;
+  description: string;
+  icon_name: string;
+  xp_reward: number;
+  rarity: AchievementRarity;
+  earned: boolean;
+  earned_at: string | null;
+}
+
+export interface GamificationUpdate {
+  xp_earned: number;
+  total_xp: number;
+  level: number;
+  level_name: string;
+  xp_into_level: number;
+  xp_needed_for_next: number;
+  leveled_up: boolean;
+  streak_freezes_available: number;
+  newly_earned_badges: NewlyEarnedBadge[];
+}
+
+const getMyGamification = async (token: string): Promise<UserGamification> => {
+  const response = await axios.get(`${API_URL}/gamification/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+const getMyBadges = async (token: string): Promise<BadgeWithStatus[]> => {
+  const response = await axios.get(`${API_URL}/gamification/me/badges`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+const useStreakFreeze = async (token: string) => {
+  const response = await axios.post(
+    `${API_URL}/gamification/streak-freeze`,
+    {},
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return response.data;
+};
+
 export {
   loginUser,
   registerUser,
@@ -504,6 +591,9 @@ export {
   leaveClass,
   deleteClass,
   getStudentInsights,
+  getMyGamification,
+  getMyBadges,
+  useStreakFreeze,
 };
 export type {
   Session,

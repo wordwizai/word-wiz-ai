@@ -3,13 +3,23 @@ from database import Base, engine
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
-from routers import ai, auth, google_auth, session, user, activities, feedback, health, classes
+from routers import ai, auth, google_auth, session, user, activities, feedback, health, classes, gamification
 from starlette.middleware.sessions import SessionMiddleware
 
 app = FastAPI(debug=True)
 
 # Create the database tables
 Base.metadata.create_all(bind=engine)
+
+# Seed achievement definitions on startup
+from database import SessionLocal as _SessionLocal
+from core.achievement_engine import seed_achievements as _seed_achievements
+
+_db = _SessionLocal()
+try:
+    _seed_achievements(_db)
+finally:
+    _db.close()
 
 origins = [
     "http://localhost:5173",
@@ -36,6 +46,7 @@ app.include_router(session.router, prefix="/session")
 app.include_router(activities.router, prefix="/activities")
 app.include_router(feedback.router, prefix="/feedback")
 app.include_router(classes.router, prefix="/classes")
+app.include_router(gamification.router, prefix="/gamification")
 app.include_router(health.router)  # Health check endpoints
 
 if __name__ == "__main__":

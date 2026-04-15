@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Frontend (Vite)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "--port", "5173", "--strictPort"],
+      "cwd": "frontend",
+      "port": 5173
+    },
+    {
+      "name": "Backend (FastAPI)",
+      "runtimeExecutable": "venv/Scripts/python.exe",
+      "runtimeArgs": ["main.py"],
+      "cwd": "backend",
+      "port": 8000
+    }
+  ]
+}

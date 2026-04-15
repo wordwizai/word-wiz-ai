@@ -149,7 +149,7 @@ class PhonemeExtractorONNX:
             raise ValueError(f"❌ Audio appears to be silent (RMS: {audio_rms:.6f})")
         
         if self._performance_logging:
-            print(f"📊 Audio validation: duration={audio_duration:.2f}s, RMS={audio_rms:.4f}, samples={len(audio)}")
+            print(f"[INFO] Audio validation: duration={audio_duration:.2f}s, RMS={audio_rms:.4f}, samples={len(audio)}")
         
         # Optimize audio preprocessing if enabled
         if use_optimized_preprocessing:

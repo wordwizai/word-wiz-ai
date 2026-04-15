@@ -58,9 +58,9 @@ class PhonemeAssistant:
             print("Initializing ONNX-based PhonemeExtractor for faster inference...")
             try:
                 self.phoneme_extractor = PhonemeExtractorONNX()
-                print("✅ ONNX Runtime backend loaded successfully")
+                print("[OK] ONNX Runtime backend loaded successfully")
             except Exception as e:
-                print(f"⚠️  ONNX loading failed ({e}), falling back to PyTorch")
+                print(f"[WARN] ONNX loading failed ({e}), falling back to PyTorch")
                 self.phoneme_extractor = PhonemeExtractor()
         elif use_optimized_model:
             print("Initializing optimized PyTorch PhonemeExtractor...")

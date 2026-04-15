@@ -276,6 +276,65 @@
   );
 }
 
+/* Glass navbar — full-width sticky bar */
+.glass-navbar {
+  background: oklch(0.94 0.04 280 / 0.72);
+  backdrop-filter: blur(24px) saturate(220%);
+  -webkit-backdrop-filter: blur(24px) saturate(220%);
+  border-bottom: 1px solid oklch(0.58 0.16 280 / 0.20);
+  box-shadow:
+    0 4px 30px oklch(0.58 0.16 280 / 0.12),
+    inset 0 -1px 0 oklch(0.58 0.16 280 / 0.10),
+    inset 0 1px 0 oklch(1 0 0 / 0.85);
+}
+
+.dark .glass-navbar {
+  background: oklch(0.14 0.04 280 / 0.88);
+  border-bottom: 1px solid oklch(0.65 0.18 280 / 0.20);
+  box-shadow:
+    0 4px 30px oklch(0 0 0 / 0.50),
+    inset 0 -1px 0 oklch(0.65 0.18 280 / 0.12),
+    inset 0 1px 0 oklch(1 0 0 / 0.06);
+}
+
+/* Glass sidebar — vertical panel */
+.glass-sidebar {
+  background: oklch(0.99 0 0 / 0.80);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-right: 1px solid oklch(1 0 0 / 0.60);
+  box-shadow:
+    2px 0 24px oklch(0 0 0 / 0.05),
+    inset -1px 0 0 oklch(1 0 0 / 0.65);
+}
+
+.dark .glass-sidebar {
+  background: oklch(0.11 0.02 240 / 0.85);
+  border-right: 1px solid oklch(1 0 0 / 0.07);
+  box-shadow:
+    2px 0 24px oklch(0 0 0 / 0.40),
+    inset -1px 0 0 oklch(1 0 0 / 0.05);
+}
+
+/* Glass card — for panels and content cards */
+.glass-card {
+  background: oklch(1 0 0 / 0.68);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid oklch(1 0 0 / 0.58);
+  box-shadow:
+    0 4px 20px oklch(0 0 0 / 0.07),
+    inset 0 1px 0 oklch(1 0 0 / 0.75);
+}
+
+.dark .glass-card {
+  background: oklch(0.15 0.02 240 / 0.72);
+  border: 1px solid oklch(1 0 0 / 0.08);
+  box-shadow:
+    0 4px 20px oklch(0 0 0 / 0.45),
+    inset 0 1px 0 oklch(1 0 0 / 0.05);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

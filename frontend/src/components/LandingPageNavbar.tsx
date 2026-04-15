@@ -5,7 +5,7 @@ import { trackSignupClick } from "@/utils/analytics";
 
 const LandingPageNavbar = () => {
   return (
-    <nav className="w-full px-4 sm:px-6 py-4 sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border flex flex-row items-center justify-between gap-3 sm:gap-0">
+    <nav className="w-full px-4 sm:px-6 py-4 sticky top-0 z-50 glass-navbar flex flex-row items-center justify-between gap-3 sm:gap-0">
       <Link className="flex items-center gap-2" to="/">
         <img src={wordWizIcon} alt="Word Wiz Icon" className="h-8 w-8" />
         <span className="text-lg sm:text-xl font-semibold">Word Wiz AI</span>

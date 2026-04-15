@@ -62,7 +62,7 @@ const Sidebar = ({ className }: SidebarProps) => {
       <aside
         className={`${
           isExpanded ? "w-64" : "w-20"
-        } flex flex-col bg-sidebar p-4 space-y-6 border-r-2 border-border transition-all duration-300 ${className}`}
+        } flex flex-col glass-sidebar p-4 space-y-6 transition-all duration-300 ${className}`}
       >
         {/* Logo/Brand and Toggle */}
         <div className="flex items-center justify-between mb-4">

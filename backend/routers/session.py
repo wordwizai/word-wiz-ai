@@ -6,7 +6,7 @@ from models import Activity
 from models import Session as UserSession
 from models import User
 from schemas.session import SessionCreate, SessionCreateRequest, SessionOut
-from sqlalchemy.orm import Session as DBSession
+from sqlalchemy.orm import Session as DBSession, selectinload
 
 router = APIRouter()
 
@@ -40,8 +40,9 @@ def get_active_sessions(
 ):
     sessions = (
         db.query(UserSession)
+        .options(selectinload(UserSession.activity))
         .filter(UserSession.user_id == current_user.id)
-        .filter(UserSession.is_completed == 0)  # Assuming is_completed is a boolean
+        .filter(UserSession.is_completed == 0)
         .order_by(UserSession.created_at.desc())
         .all()
     )
@@ -55,6 +56,7 @@ def get_all_sessions(
 ):
     sessions = (
         db.query(UserSession)
+        .options(selectinload(UserSession.activity))
         .filter(UserSession.user_id == current_user.id)
         .order_by(UserSession.created_at.desc())
         .all()

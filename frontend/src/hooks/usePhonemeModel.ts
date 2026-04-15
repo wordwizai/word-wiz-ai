@@ -1,5 +1,6 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect } from "react";
 import phonemeExtractor from "@/services/phonemeExtractor";
+import { useModelLoader } from "./useModelLoader";
 
 export interface UsePhonemeModelReturn {
   isSupported: boolean;
@@ -16,23 +17,23 @@ export interface UsePhonemeModelReturn {
   unloadModel: () => void;
 }
 
-/**
- * React hook for managing the client-side phoneme extraction model.
- * Handles model loading, extraction, and error states.
- */
 export function usePhonemeModel(): UsePhonemeModelReturn {
   const [isSupported, setIsSupported] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isReady, setIsReady] = useState(false);
-  const [loadProgress, setLoadProgress] = useState(0);
-  const [error, setError] = useState<string | null>(null);
-  const [shouldFallbackToServer, setShouldFallbackToServer] = useState(false);
 
-  // Track if component is mounted to prevent state updates after unmount
-  const isMountedRef = useRef(true);
+  const {
+    isLoading,
+    isReady,
+    loadProgress,
+    error,
+    shouldFallbackToServer,
+    isMountedRef,
+    setError,
+    setShouldFallbackToServer,
+    loadModel,
+    unloadModel,
+  } = useModelLoader(phonemeExtractor, isSupported, "Browser or device not supported");
 
   useEffect(() => {
-    // Check browser support on mount
     const checkSupport = async () => {
       const browserSupported = phonemeExtractor.checkBrowserSupport();
       const resourcesOk = await phonemeExtractor.checkDeviceResources();
@@ -49,80 +50,14 @@ export function usePhonemeModel(): UsePhonemeModelReturn {
           );
           setShouldFallbackToServer(true);
         }
-
-        // Check if model is already loaded
-        if (phonemeExtractor.isModelLoaded()) {
-          setIsReady(true);
-          setLoadProgress(100);
-        }
       }
     };
 
     checkSupport();
-
-    // Cleanup on unmount
-    return () => {
-      isMountedRef.current = false;
-    };
   }, []);
 
-  /**
-   * Load the phoneme extraction model.
-   */
-  const loadModel = useCallback(async () => {
-    if (!isSupported) {
-      setError("Browser or device not supported");
-      setShouldFallbackToServer(true);
-      return;
-    }
-
-    if (isReady || isLoading) {
-      console.log("Model already loaded or loading");
-      return;
-    }
-
-    console.log("🚀 Starting model load...");
-    setIsLoading(true);
-    setError(null);
-    setLoadProgress(0);
-
-    try {
-      await phonemeExtractor.loadModel((progress) => {
-        if (isMountedRef.current) {
-          setLoadProgress(progress);
-        }
-      });
-
-      console.log("✅ Model load completed, updating state...");
-
-      if (isMountedRef.current) {
-        setIsReady(true);
-        setIsLoading(false);
-        setLoadProgress(100);
-        setShouldFallbackToServer(false);
-        console.log("✅ State updated: isReady=true");
-      }
-    } catch (err) {
-      console.error("Failed to load model:", err);
-
-      if (isMountedRef.current) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to load model";
-        setError(errorMessage);
-        setIsLoading(false);
-        setIsReady(false);
-        setShouldFallbackToServer(true);
-      }
-    }
-  }, [isSupported, isReady, isLoading]);
-
-  /**
-   * Extract phonemes from audio blob.
-   * Returns null if extraction fails (caller should fallback to server).
-   */
   const extractPhonemes = useCallback(
     async (audio: Blob): Promise<string[][] | null> => {
-      // Check if model is actually loaded (not relying on React state to avoid timing issues)
       if (!phonemeExtractor.isModelLoaded()) {
         console.warn("Model not loaded, cannot extract phonemes");
         setShouldFallbackToServer(true);
@@ -132,7 +67,6 @@ export function usePhonemeModel(): UsePhonemeModelReturn {
       try {
         const phonemes = await phonemeExtractor.extractPhonemes(audio);
 
-        // Reset fallback flag on successful extraction
         if (isMountedRef.current) {
           setShouldFallbackToServer(false);
         }
@@ -154,16 +88,10 @@ export function usePhonemeModel(): UsePhonemeModelReturn {
     [isReady]
   );
 
-  /**
-   * Extract both phonemes AND words from audio blob.
-   * Uses the same model output for both - no additional overhead.
-   * Returns null if extraction fails (caller should fallback to server).
-   */
   const extractPhonemesAndWords = useCallback(
     async (
       audio: Blob
     ): Promise<{ phonemes: string[][]; words: string[] } | null> => {
-      // Check if model is actually loaded
       if (!phonemeExtractor.isModelLoaded()) {
         console.warn("Model not loaded, cannot extract phonemes and words");
         setShouldFallbackToServer(true);
@@ -173,7 +101,6 @@ export function usePhonemeModel(): UsePhonemeModelReturn {
       try {
         const result = await phonemeExtractor.extractPhonemesAndWords(audio);
 
-        // Reset fallback flag on successful extraction
         if (isMountedRef.current) {
           setShouldFallbackToServer(false);
         }
@@ -196,19 +123,6 @@ export function usePhonemeModel(): UsePhonemeModelReturn {
     },
     [isReady]
   );
-
-  /**
-   * Unload the model and free memory.
-   */
-  const unloadModel = useCallback(() => {
-    phonemeExtractor.unloadModel();
-
-    if (isMountedRef.current) {
-      setIsReady(false);
-      setLoadProgress(0);
-      setError(null);
-    }
-  }, []);
 
   return {
     isSupported,

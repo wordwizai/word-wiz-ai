@@ -1,42 +1,12 @@
 import {
   pipeline,
   AutomaticSpeechRecognitionPipeline,
-  env,
 } from "@huggingface/transformers";
 import {
   checkDeviceCapabilities,
   type DeviceCapabilities,
 } from "../utils/deviceCapabilities";
-
-// Configure HuggingFace authentication token globally
-const hfToken = import.meta.env.VITE_HUGGINGFACE_TOKEN;
-if (hfToken) {
-  // Set custom headers for authentication
-  (env as any).customHeaders = {
-    Authorization: `Bearer ${hfToken}`,
-  };
-  console.log("🔑 HuggingFace token configured");
-} else {
-  console.warn("⚠️ No HuggingFace token found - may encounter 401 errors");
-}
-
-// Performance optimizations for Transformers.js
-// Enable multi-threading for faster inference (requires crossOriginIsolated headers)
-if (env.backends?.onnx?.wasm) {
-  const numThreads = navigator.hardwareConcurrency || 4;
-  env.backends.onnx.wasm.numThreads = numThreads;
-  console.log(
-    `🚀 WASM configured for ${numThreads} threads (will fall back to single-thread if crossOriginIsolated not enabled)`
-  );
-}
-
-// Try to use WebGPU for even faster inference if available
-// WebGPU is 10-100x faster than WASM but only available in Chrome/Edge
-if ("gpu" in navigator) {
-  console.log("🎮 WebGPU detected - will attempt to use GPU acceleration");
-} else {
-  console.log("💻 WebGPU not available, using CPU (WASM)");
-}
+import "./transformersInit";
 
 /**
  * Singleton client-side phoneme extractor.

@@ -1,9 +1,8 @@
 from models import FeedbackEntry  # Adjust import if needed
-from schemas.feedback_entry import FeedbackEntryCreate, FeedbackEntryOut
+from schemas.feedback_entry import FeedbackEntryCreate
 from sqlalchemy.orm import Session
 from models.session import Session as SessionModel
 from datetime import date, timedelta
-from sqlalchemy import func, distinct
 
 
 def create_feedback_entry(db: Session, feedback: FeedbackEntryCreate) -> FeedbackEntry:
@@ -96,16 +95,15 @@ def get_user_statistics(db: Session, user_id: int) -> dict:
     # Calculate streaks
     current_streak, longest_streak = calculate_streaks(session_dates)
     
-    # 3. Calculate total words read from feedback entries
-    feedback_entries = get_feedback_entries_by_user(
-        db, user_id=user_id, skip=0, limit=10000  # High limit to get all
+    # 3. Calculate total words read — only fetch sentence column to avoid loading
+    # the large phoneme_analysis JSON for every entry
+    sentences = (
+        db.query(FeedbackEntry.sentence)
+        .join(SessionModel, FeedbackEntry.session_id == SessionModel.id)
+        .filter(SessionModel.user_id == user_id)
+        .all()
     )
-    
-    words_read = 0
-    for entry in feedback_entries:
-        if entry.sentence:
-            # Simple word count: split by whitespace
-            words_read += len(entry.sentence.split())
+    words_read = sum(len(row.sentence.split()) for row in sentences if row.sentence)
     
     return {
         "total_sessions": total_sessions,
@@ -224,14 +222,20 @@ def get_student_insights(
     phoneme_error_aggregator = Counter()
     phoneme_error_types = defaultdict(lambda: {"substitution": 0, "deletion": 0, "insertion": 0})
     
+    # Fetch all feedback entries for all sessions in a single query
+    session_ids = [s.id for s in recent_sessions_query]
+    all_feedback_entries = (
+        db.query(FeedbackEntry)
+        .filter(FeedbackEntry.session_id.in_(session_ids))
+        .all()
+    )
+    feedback_by_session: dict[int, list] = {s.id: [] for s in recent_sessions_query}
+    for entry in all_feedback_entries:
+        feedback_by_session[entry.session_id].append(entry)
+
     for session in recent_sessions_query:
-        # Get all feedback entries for this session
-        feedback_entries = (
-            db.query(FeedbackEntry)
-            .filter(FeedbackEntry.session_id == session.id)
-            .all()
-        )
-        
+        feedback_entries = feedback_by_session.get(session.id, [])
+
         if not feedback_entries:
             continue
         

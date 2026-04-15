@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Form, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import Dict, List
 
-from auth.auth_handler import get_current_user
+from auth.auth_handler import get_current_active_user
 from database import get_db
 from crud.feedback_entry import get_feedback_entries_by_user, get_user_statistics
 from schemas.feedback_entry import FeedbackEntryOut, UserStatistics
@@ -16,7 +16,7 @@ def read_feedback_entries_for_user(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
 ):
     return get_feedback_entries_by_user(
         db, user_id=current_user.id, skip=skip, limit=limit
@@ -28,7 +28,7 @@ def get_sentence_pers_for_user(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
 ):
     feedback_entries = get_feedback_entries_by_user(
         db, user_id=current_user.id, skip=skip, limit=limit
@@ -38,11 +38,10 @@ def get_sentence_pers_for_user(
         # Assume phoneme_analysis is a dict with a "per" key for sentence PER
         per_entry = None
         if isinstance(entry.phoneme_analysis, dict):
+            per_summary = entry.phoneme_analysis.get("per_summary", {})
             per_entry = {
                 "date": entry.created_at,
-                "per": entry.phoneme_analysis.get("per_summary", "").get(
-                    "sentence_per", 0
-                ),
+                "per": per_summary.get("sentence_per", 0) if isinstance(per_summary, dict) else 0,
             }
         if per_entry is not None:
             pers.append(per_entry)
@@ -58,7 +57,7 @@ def get_mistake_type_phonemes_for_user(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
 ):
     if (
         mistake_type != "insertion"
@@ -129,7 +128,7 @@ def get_mistake_type_phonemes_for_user(
 @router.get("/statistics", response_model=UserStatistics)
 def get_user_statistics_endpoint(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_active_user),
 ):
     """
     Get comprehensive user statistics for dashboard.
@@ -146,7 +145,5 @@ def get_user_statistics_endpoint(
         stats = get_user_statistics(db, user_id=current_user.id)
         return UserStatistics(**stats)
     except Exception as e:
-        # Log error in production
         print(f"Error fetching user statistics: {e}")
-        # Return zeros instead of failing
-        return UserStatistics()
+        raise HTTPException(status_code=500, detail="Failed to fetch statistics")

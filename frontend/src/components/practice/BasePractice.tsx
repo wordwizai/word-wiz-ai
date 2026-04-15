@@ -125,16 +125,24 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
 
   useEffect(() => {
     const getCurrentSentence = async () => {
-      const fetchedSentence = await getCurrentSessionState(
-        token ?? "",
-        session.id
-      );
-      if (fetchedSentence.type === "full-feedback-state") {
-        setCurrentSentence(fetchedSentence.data.gpt_response.sentence);
-      } else if (session.activity.activity_settings?.first_sentence) {
-        setCurrentSentence(session.activity.activity_settings?.first_sentence);
-      } else {
-        setCurrentSentence("The quick brown fox jumped over the lazy dog");
+      try {
+        const fetchedSentence = await getCurrentSessionState(
+          token ?? "",
+          session.id
+        );
+        if (fetchedSentence.type === "full-feedback-state") {
+          setCurrentSentence(fetchedSentence.data.gpt_response.sentence);
+        } else if (session.activity.activity_settings?.first_sentence) {
+          setCurrentSentence(session.activity.activity_settings?.first_sentence);
+        } else {
+          setCurrentSentence("The quick brown fox jumped over the lazy dog");
+        }
+      } catch (error) {
+        console.error("Failed to fetch session state:", error);
+        showErrorToast("Failed to load practice session. Please try refreshing.");
+        if (session.activity.activity_settings?.first_sentence) {
+          setCurrentSentence(session.activity.activity_settings?.first_sentence);
+        }
       }
     };
     getCurrentSentence();

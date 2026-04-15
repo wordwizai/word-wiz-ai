@@ -1,26 +1,12 @@
 import {
   pipeline,
   AutomaticSpeechRecognitionPipeline,
-  env,
 } from "@huggingface/transformers";
 import {
   checkDeviceCapabilities,
   type DeviceCapabilities,
 } from "../utils/deviceCapabilities";
-
-// Configure HuggingFace authentication token globally
-const hfToken = import.meta.env.VITE_HUGGINGFACE_TOKEN;
-if (hfToken) {
-  // Set custom headers for authentication
-  (env as any).customHeaders = {
-    Authorization: `Bearer ${hfToken}`,
-  };
-  console.log("🔑 HuggingFace token configured for word model");
-} else {
-  console.warn(
-    "⚠️ No HuggingFace token found for word model - may encounter 401 errors"
-  );
-}
+import "./transformersInit";
 
 /**
  * Singleton client-side word extractor.

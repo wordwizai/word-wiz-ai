@@ -5,7 +5,6 @@ import logging
 import os
 import re
 
-import pandas as pd
 import soundfile as sf
 import torch
 from core.grapheme_to_phoneme import grapheme_to_phoneme
@@ -17,11 +16,14 @@ from .audio_validation import log_audio_characteristics, validate_audio_output
 from .phoneme_extractor import PhonemeExtractor
 from .phoneme_extractor_onnx import PhonemeExtractorONNX
 from .process_audio import analyze_results, process_audio_array
-from .text_to_audio import ElevenLabsAPIClient, GoogleTTSAPIClient
-from .word_extractor import WordExtractor, WordExtractorOnline
+from .text_to_audio import GoogleTTSAPIClient
+from .word_extractor import WordExtractorOnline
 
 # Configure logging
 logger = logging.getLogger(__name__)
+
+# Module-level cache so prompt files are only read from disk once per process
+_prompt_cache: dict[tuple, str] = {}
 
 
 class PhonemeAssistant:
@@ -88,6 +90,10 @@ class PhonemeAssistant:
         # load in our prompt
 
     def load_prompt(self, prompt_path: str, include_ssml: bool = True) -> str:
+        cache_key = (prompt_path, include_ssml)
+        if cache_key in _prompt_cache:
+            return _prompt_cache[cache_key]
+
         # Always resolve prompt_path relative to backend root
         backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         resolved_prompt_path = (
@@ -118,6 +124,7 @@ class PhonemeAssistant:
             except FileNotFoundError:
                 pass
 
+        _prompt_cache[cache_key] = text
         return text
 
     def extract_json(self, response_text):

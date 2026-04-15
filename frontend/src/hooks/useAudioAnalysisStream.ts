@@ -157,17 +157,8 @@ export const useAudioAnalysisStream = (
 };
 
 // Helper to decode base64 to blob
-function b64toBlob(b64Data: string, contentType = "", sliceSize = 512): Blob {
+function b64toBlob(b64Data: string, contentType = ""): Blob {
   const byteCharacters = atob(b64Data);
-  const byteArrays = [];
-
-  for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-    const slice = byteCharacters.slice(offset, offset + sliceSize);
-    const byteNumbers = new Array(slice.length)
-      .fill(0)
-      .map((_, i) => slice.charCodeAt(i));
-    byteArrays.push(new Uint8Array(byteNumbers));
-  }
-
-  return new Blob(byteArrays, { type: contentType });
+  const byteArray = Uint8Array.from(byteCharacters, (c) => c.charCodeAt(0));
+  return new Blob([byteArray], { type: contentType });
 }

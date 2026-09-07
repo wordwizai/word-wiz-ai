@@ -3,6 +3,14 @@ import ArticlePageTemplate, { type ArticleSection } from "../../components/Artic
 const FreeVsPaid = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "Are free phonics apps good enough, or is paid worth it?",
+        content: "Free apps work well when a child is on track or ahead, a parent can fill gaps, and the child self-directs. Paid programs, at $10-20 a month, add a complete scope and sequence, unlimited content, no ads, detailed progress tracking, and family plans. That is still 15-30 times cheaper than a private tutor at $200-400 a month, so paid is worth it when a child is genuinely behind.",
+      },
+    },
+    {
       type: "paragraph",
       content: "Every parent asks: Do I really need to pay for a phonics app, or are the free options good enough? With dozens of free reading apps available and quality paid programs costing $10-20/month, this is a critical budget decision. This comprehensive comparison will help you determine whether free apps can meet your child's needs or if paid programs offer essential advantages worth the investment."
     },

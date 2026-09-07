@@ -5,6 +5,14 @@ import ArticlePageTemplate, {
 const PhonemeAwarenessGuide = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "What is phoneme awareness and how do you build it?",
+        content: "Phoneme awareness is the ability to hear and manipulate individual sounds in spoken words, recognizing that cat is three sounds. It is purely oral and needs no letters or materials. It develops predictably: rhyming around ages three to four, beginning sounds and syllables at four to five, blending and segmenting at five to six, and sound manipulation by seven. Five to ten minutes daily builds it.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "Phoneme awareness is the superpower skill that predicts reading success better than almost any other factor, yet it remains often overlooked or fundamentally misunderstood by parents and even some educators. Research consistently shows that phoneme awareness in kindergarten is one of the strongest predictors of reading achievement in elementary school, more predictive than vocabulary size, letter knowledge, or even general intelligence. Despite this clear research evidence, many children do not receive adequate phoneme awareness instruction, leaving them to struggle unnecessarily with reading later. This comprehensive guide explains exactly what phoneme awareness is, why it matters so profoundly for reading development, how it develops across childhood, and most importantly, exactly how to develop it at home through simple, engaging activities that take just minutes per day. Whether your child is struggling with reading or you simply want to give them the strongest possible foundation, understanding and developing phoneme awareness is one of the most valuable investments you can make in their literacy future.",
@@ -727,7 +735,7 @@ const PhonemeAwarenessGuide = () => {
 
   const inlineCTAs = [
     {
-      afterSection: 15,
+      afterSection: 16,
       title: "Check Phoneme Pronunciation",
       description:
         "Word Wiz AI assesses if your child produces individual phonemes correctly, critical for phoneme awareness",
@@ -735,7 +743,7 @@ const PhonemeAwarenessGuide = () => {
       buttonHref: "/signup",
     },
     {
-      afterSection: 30,
+      afterSection: 31,
       title: "Practice with Feedback",
       description:
         "Use Word Wiz AI to ensure proper pronunciation while building phoneme awareness",

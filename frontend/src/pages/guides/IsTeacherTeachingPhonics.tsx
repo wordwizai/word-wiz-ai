@@ -5,6 +5,14 @@ import ArticlePageTemplate, {
 const IsTeacherTeachingPhonics = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "How can you tell if your child's teacher is teaching enough phonics?",
+        content: "Five red flags signal thin phonics instruction: teaching children to guess from pictures or context, leveled readers used before decoding is solid, memorizing 100+ sight words before decoding is taught, no visible phonics scope and sequence, and balanced literacy without explicit phonics. Ask the teacher what order sounds are introduced and request work samples before raising concerns.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "You have a nagging feeling your child's reading instruction is not quite right. Maybe they are guessing at words based on pictures, relying heavily on context clues rather than actually reading, or struggling with basic decoding despite being in school all year. Your concern is valid, important, and deserves investigation. You have the right and responsibility to ask questions about the quality of phonics instruction your child is receiving. This guide will empower you to evaluate your child's reading instruction objectively, identify red flags that indicate inadequate phonics teaching, and take appropriate action to ensure your child receives the systematic, explicit phonics instruction that research shows is essential for reading success. You will learn exactly what to look for, what questions to ask, and how to have productive conversations with teachers and administrators about your child's reading education.",
@@ -644,7 +652,7 @@ const IsTeacherTeachingPhonics = () => {
 
   const inlineCTAs = [
     {
-      afterSection: 12,
+      afterSection: 13,
       title: "Assess Your Child's Pronunciation",
       description:
         "Word Wiz AI provides objective pronunciation assessment, helping you understand exactly what skills need work",
@@ -652,7 +660,7 @@ const IsTeacherTeachingPhonics = () => {
       buttonHref: "/signup",
     },
     {
-      afterSection: 25,
+      afterSection: 26,
       title: "Supplement with Daily Practice",
       description:
         "While advocating at school, use Word Wiz AI for consistent home phonics support",

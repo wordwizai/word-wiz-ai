@@ -5,6 +5,14 @@ import ArticlePageTemplate, {
 const GuessesWords = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "How do you stop a kindergartener from guessing at words?",
+        content: "Remove the cues the guessing depends on. Cover pictures, use word lists with no context, and switch to decodable texts so the only available strategy is sounding out. Practice 10-15 minutes daily. Occasional guessing usually resolves in 2-4 weeks, frequent guessing in 6-8 weeks, and complete reliance on pictures and context in 10-12 weeks of systematic phonics.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "You show your kindergartener the word 'egg' next to a picture of an elephant, and they confidently say 'elephant!' Or they see the word 'house' and guess 'home' because it starts with H. Your child is not reading—they are guessing, using pictures and first letters as clues while completely skipping the actual decoding process. This guessing habit, often encouraged by well-meaning teachers using outdated reading instruction methods, is one of the most damaging patterns a beginning reader can develop. If left uncorrected, guessing becomes an ingrained strategy that prevents children from becoming truly proficient readers. The good news is that with the right approach at home, you can break this guessing habit and teach your child to actually decode words—and you can do it even if their school is teaching them to guess.",

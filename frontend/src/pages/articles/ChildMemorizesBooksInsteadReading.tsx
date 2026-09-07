@@ -5,6 +5,14 @@ import ArticlePageTemplate, {
 const ChildMemorizesBooksInsteadReading = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "What if my child memorizes books instead of reading them?",
+        content: "Test it first: give the child a book they have never seen, cover the pictures, or ask them to read the words out of order. A memorizer stalls; a reader decodes. The fix is systematic phonics with decodable rather than predictable texts, 15-20 minutes daily, plus constantly varied materials. Preschoolers usually transition in 4-6 weeks; second graders who have memorized for years need three to six months.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "You sit with your child and their favorite book, beaming with pride as they 'read' every page perfectly. Then you grab a different book with the same words, and suddenly they can't read a single sentence. Or you cover the pictures, and the reading stops entirely. That's when it hits: your child isn't reading at all. They've memorized the book. This is surprisingly common and frustrating for parents. While memorization shows strong memory skills, it's not actual reading and can delay development if left unchecked. The good news is that with the right approach, most children transition from memorization to real decoding within 4-8 weeks.",

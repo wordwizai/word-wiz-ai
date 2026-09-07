@@ -3,6 +3,14 @@ import ArticlePageTemplate, { type ArticleSection } from "../../components/Artic
 const TutorVsApp = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "Reading tutor or reading app: which is better?",
+        content: "Cost decides this for most families. A private reading tutor runs $40-80 an hour, or $320-960 a month at two to three sessions a week, versus $0-15 a month for an app. Tutors are worth it for suspected dyslexia, no progress after six months of app use, or a child needing human accountability. Otherwise a daily app plus weekly tutoring beats either alone.",
+      },
+    },
+    {
       type: "paragraph",
       content: "Your child struggles with reading. You want to help, but you're not sure what path to take. Should you invest hundreds of dollars per month in a private reading tutor? Download a reading app? Or try one of the newer AI-powered reading tools? Each option has advantages and drawbacks, and the \"best\" choice depends on your child's specific needs, your budget, and your situation."
     },

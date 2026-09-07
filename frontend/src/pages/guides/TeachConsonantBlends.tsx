@@ -5,6 +5,14 @@ import ArticlePageTemplate, {
 const TeachConsonantBlends = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "How do you teach consonant blends at home?",
+        content: "Teach blends in a fixed sequence: isolate blend sounds first, then L-blends, R-blends, and S-blends, roughly one group per week. Ten to fifteen minutes daily is enough; most kindergarteners and first graders master blends in 4-8 weeks. The most common error is inserting a vowel between the consonants, saying buh-lack for black, which slower stretched blending corrects.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "Your kindergartener can read simple three-letter words like 'cat' and 'dog,' but they freeze up completely when they see 'stop' or 'frog.' This is the consonant blends challenge, and it trips up countless young readers who have mastered basic CVC words but struggle to take the next step. Consonant blends—also called clusters—are when two or three consonants appear side-by-side at the beginning or end of a word, with each letter keeping its individual sound. Teaching these patterns at home requires a systematic approach that builds on your child's existing phonics foundation without overwhelming them. This guide provides a clear, parent-friendly roadmap to teaching consonant blends to kindergarteners and first graders, with practical activities that take just 10-15 minutes per day.",

@@ -5,6 +5,14 @@ import ArticlePageTemplate, {
 const WhyChildHatesReading = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "Why does my child hate reading?",
+        content: "Reading hatred is usually a symptom, not a personality trait. Five causes account for most of it: reading is genuinely hard for the child, the material is boring, past experiences created negative associations, confidence has collapsed after repeated failure, or an undiagnosed issue such as vision, hearing, or dyslexia is in the way. Diagnose which applies before choosing a fix.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "If your child groans, makes excuses, or outright refuses when it is time to read, you are not alone in this struggle. Many parents across the country face this frustrating challenge on a daily basis, watching their children resist what should be an enjoyable activity. The good news is that reading reluctance is almost always fixable once you identify and address the root cause. Reading should be a source of joy and discovery, not a battleground between parent and child. When children hate reading, there is always a reason behind it, and understanding that reason is the key to turning their attitude around. This comprehensive guide will help you identify why your child resists reading and provide concrete, actionable solutions to transform them from a reluctant reader into an engaged one.",
@@ -661,7 +669,7 @@ const WhyChildHatesReading = () => {
 
   const inlineCTAs = [
     {
-      afterSection: 15,
+      afterSection: 16,
       title: "Build Reading Confidence with Word Wiz AI",
       description:
         "Private pronunciation practice with instant AI feedback, no judgment, just improvement",
@@ -669,7 +677,7 @@ const WhyChildHatesReading = () => {
       buttonHref: "/signup",
     },
     {
-      afterSection: 30,
+      afterSection: 31,
       title: "Practice Makes Progress",
       description:
         "Use Word Wiz AI's speech recognition to practice reading aloud in a safe, encouraging environment",

@@ -5,6 +5,14 @@ import ArticlePageTemplate, {
 const ChildConfusesBDLetters = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "Why does my child confuse b and d, and how do I fix it?",
+        content: "Reversing b and d is rarely a sign of dyslexia on its own, and below age eight, home intervention is usually sufficient. Fix it with one consistent visual anchor, the bed trick or the fist trick but not both, reinforced by tactile practice such as sand-tray writing and sorting games. A 10-minute daily routine typically eliminates the confusion in 4-6 weeks.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "Your child writes 'dog' as 'bog' and 'bed' as 'ded.' They constantly flip b and d, making reading and spelling frustrating for everyone. Letter reversals, especially b and d confusion, are one of the most common concerns parents have about reading development. Here's the reassuring news: b/d confusion is completely normal for children under age 7-8 and responds well to targeted practice. This confusion doesn't automatically signal dyslexia or a learning disability. It's a predictable developmental stage. With the right multisensory strategies and practice, most children eliminate b/d confusion within 4-6 weeks.",

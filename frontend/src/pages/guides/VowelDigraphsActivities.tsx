@@ -5,6 +5,14 @@ import ArticlePageTemplate, {
 const VowelDigraphsActivities = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "How do you teach vowel digraphs to first graders?",
+        content: "Introduce vowel digraphs in order of predictability: OI and OY first, then EW and AU/AW, then OO with its two sounds, and finally OU and OW. Spend one to two weeks on each, testing 15 mixed words weekly and advancing at 90 percent accuracy. Fifteen minutes daily for 6-8 weeks covers the major digraphs for most first graders.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "Your first grader can read simple words with silent e and even some vowel teams, but now you're encountering words like 'book,' 'coin,' and 'cloud' that don't follow the familiar patterns. These words contain vowel digraphs—two vowels that work together to make one sound. Unlike vowel teams where the first vowel usually 'says its name' (like 'ai' in 'rain'), vowel digraphs create entirely new sounds that must be learned as separate patterns. Understanding vowel digraphs unlocks hundreds of common words and is essential for first-grade reading fluency. With the hands-on activities and systematic practice in this guide, most first graders master the major vowel digraphs in 6-8 weeks.",

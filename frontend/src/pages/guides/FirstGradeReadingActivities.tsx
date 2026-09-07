@@ -5,6 +5,14 @@ import ArticlePageTemplate, {
 const FirstGradeReadingActivities = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "What reading activities should first graders do at home?",
+        content: "First graders need a weekly mix of decoding, fluency, and comprehension practice rather than a single activity. The highest-yield options are paired reading, timed repeated reading of the same passage across three or four days, phonics sorting, and story retelling. Keep texts at an independent level the child reads with 95 percent accuracy. The year-end fluency target is 40-60 words per minute.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "Your first grader comes home from school with a reading log to complete, but you're not sure how to make home practice effective without nightly battles. First grade is when children transition from 'learning to read' to 'reading to learn.' The right home practice accelerates this transition, while the wrong approach creates frustration and resistance. Effective practice requires balancing three components: decoding practice (phonics and fluency), comprehension development (understanding what's read), and motivation (maintaining engagement). With the structured activities and schedules in this guide, most first graders show measurable growth within 6-8 weeks of consistent practice.",

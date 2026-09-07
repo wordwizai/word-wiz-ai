@@ -5,6 +5,14 @@ import ArticlePageTemplate, {
 const BestPhonicsAppKindergarten = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "What is the best phonics app for a kindergarten struggling reader?",
+        content: "The best choice depends on the specific gap. Hooked on Phonics ($9.99/month) is the strongest structured curriculum; Reading Eggs ($12.99/month) wins on engagement; ABCmouse covers a whole kindergarten curriculum; Starfall is the best free option; and Word Wiz AI focuses narrowly on phoneme-level pronunciation feedback. Apps alone can suffice for a child six to twelve months behind, practicing 15-20 minutes daily.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "Your kindergartener is falling behind in reading. While classmates are sounding out CVC words and reading simple books, your child still struggles with letter sounds or can't blend sounds together. You need targeted help, and in-person tutoring at $50-100 per hour isn't always practical or affordable. Phonics apps can provide systematic instruction at a fraction of the cost, but you'll find dozens of options that vary wildly in quality. The best apps for struggling kindergarteners deliver systematic phonics instruction, engage multiple senses, provide pronunciation feedback, and adjust to your child's pace. This review examines five top apps to help you choose the right one.",

@@ -5,6 +5,14 @@ import ArticlePageTemplate, {
 const DailyPhonicsRoutine = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "What does a daily phonics routine for kindergarten look like?",
+        content: "A working kindergarten phonics routine takes 15 minutes: three minutes of letter-sound review, three of blending, four of word reading, three of sentence or story reading, and two of progress tracking. Daily practice outperforms one long weekly session because 15 minutes a day is 105 minutes a week spread across seven repetitions. Expect visible gains in 8-12 weeks.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "You know your child needs daily phonics practice, but between work, dinner, homework, and bedtime chaos, finding the time feels impossible. You have tried practicing here and there, but inconsistency means your child is not making real progress. The truth is that 15 minutes of daily, structured phonics practice beats an hour-long session once a week every single time. This guide provides a proven 15-minute daily phonics routine specifically designed for busy parents of kindergarteners. This routine is simple enough to stick with, structured enough to produce results, and flexible enough to adapt as your child's skills grow. If you can commit to just 15 minutes per day—the same amount of time it takes to watch a short YouTube video—you can transform your child's reading ability in just 8-12 weeks.",

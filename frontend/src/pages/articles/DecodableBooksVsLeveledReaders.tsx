@@ -5,6 +5,14 @@ import ArticlePageTemplate, {
 const DecodableBooksVsLeveledReaders = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "Decodable books or leveled readers: which should my child read?",
+        content: "Decodable books first, leveled readers later. Decodable texts use only patterns the child has been taught, so the only way through is sounding out. Leveled readers mix in untaught words and picture cues that reward guessing. Apply the 90 percent test: a book is decodable only if 90 percent of its words fit patterns your child knows. Add leveled readers once they clear 80 percent.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "The reading wars debate simplified: Should your child read decodable books or leveled readers? This question confuses many parents who want to make the best choices for their children's literacy development, but understanding the difference is crucial for reading success. The answer is not as simple as choosing one over the other. Both types of books serve important purposes in a child's reading journey, but they work in fundamentally different ways and are best used at different stages or for different purposes. By the end of this article, you will understand exactly when to use each type of book, how to evaluate whether a book is truly decodable, and how to create a balanced reading diet that supports your child's development as a confident, skilled reader. This knowledge will empower you to make informed decisions that align with the Science of Reading research while meeting your child's individual needs.",
@@ -539,7 +547,7 @@ const DecodableBooksVsLeveledReaders = () => {
 
   const inlineCTAs = [
     {
-      afterSection: 12,
+      afterSection: 13,
       title: "Practice Decodable Reading with Feedback",
       description:
         "Word Wiz AI provides pronunciation feedback on decodable sentences, ensuring proper habits from the start",
@@ -547,7 +555,7 @@ const DecodableBooksVsLeveledReaders = () => {
       buttonHref: "/signup",
     },
     {
-      afterSection: 25,
+      afterSection: 26,
       title: "Build Strong Reading Skills",
       description:
         "Use Word Wiz AI alongside any books for consistent pronunciation practice and feedback",

@@ -5,6 +5,14 @@ import ArticlePageTemplate, {
 const TeachingPhonicsAtHome = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "How do you teach phonics at home?",
+        content: "Teaching phonics at home takes about 15 minutes a day and no teaching degree: three minutes of warm-up review, five of new letter-sound or pattern instruction, five applying it to real words and decodable text, and two on a game. Follow a fixed progression, weight instruction roughly 80 percent phonics to 20 percent sight words, and require 90 percent accuracy before advancing.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "Watching your child struggle with reading is heartbreaking for any parent. The good news is that phonics instruction is systematic, structured, and highly teachable, even by parents with absolutely no formal teaching experience or education background. You do not need a teaching degree or special training to help your child become a confident, skilled reader. This comprehensive guide provides everything you need to successfully teach phonics at home, including specific activities, a suggested daily routine, common mistakes to avoid, and troubleshooting strategies for when things are not going as planned. Whether you are supplementing classroom instruction, homeschooling, or trying to fill gaps from inadequate school phonics programs, this guide will give you the knowledge and confidence to make a real difference in your child's reading development. Thousands of parents have successfully taught their children to read using systematic phonics instruction at home, and you can too.",
@@ -585,7 +593,7 @@ const TeachingPhonicsAtHome = () => {
 
   const inlineCTAs = [
     {
-      afterSection: 15,
+      afterSection: 16,
       title: "Practice Pronunciation with Word Wiz AI",
       description:
         "Free speech recognition provides instant feedback on pronunciation, catching errors you might miss",
@@ -593,7 +601,7 @@ const TeachingPhonicsAtHome = () => {
       buttonHref: "/signup",
     },
     {
-      afterSection: 35,
+      afterSection: 36,
       title: "Make Phonics Practice Easier",
       description:
         "Word Wiz AI listens to your child read and provides specific, encouraging feedback automatically",

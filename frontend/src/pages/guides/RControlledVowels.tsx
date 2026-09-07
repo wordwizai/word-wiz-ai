@@ -6,6 +6,14 @@ import ArticlePageTemplate, {
 const RControlledVowels = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "How do you teach r-controlled vowels?",
+        content: "Start with AR and OR because their sounds are distinct, spending three to five days on each, then teach ER, IR, and UR together since all three make the same schwa-r sound. Children are usually ready in late kindergarten or early first grade, after three to six months of phonics. Expect mastery in 4-8 weeks with 10-15 minutes of daily practice.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         'Your child has mastered short vowels and blends, but now stumbles over words like "car," "bird," and "her." Welcome to r-controlled vowels—where the letter R "bosses" the vowel and changes its sound completely. This guide will show you exactly how to teach these tricky patterns so your child can decode hundreds of new words with confidence.',

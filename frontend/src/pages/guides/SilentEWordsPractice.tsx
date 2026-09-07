@@ -5,6 +5,14 @@ import ArticlePageTemplate, {
 const SilentEWordsPractice = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "How do you teach silent e (magic e) words?",
+        content: "Teach silent e one pattern at a time in order of frequency: a_e, i_e, o_e, u_e, then the rare e_e, spending one to two weeks on each. Use word transformation drills that turn cap into cape so the vowel change is explicit. With 15 minutes of practice 5-6 days a week, most children master silent e in 4-6 weeks.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "Your child has mastered short vowels and can read CVC words like 'cat,' 'dog,' and 'sun' with confidence. The next step is silent e words. Words like 'cake,' 'bike,' and 'home' follow the magic e pattern where adding a silent e to the end changes the short vowel into a long vowel. This pattern appears in thousands of English words and unlocks a new level of reading fluency. The challenge is that silent e is invisible when reading aloud. Your child must recognize the pattern, remember the rule, and apply it automatically. With consistent practice using these exercises, most children master silent e words within 4-6 weeks.",

@@ -6,6 +6,14 @@ import ArticlePageTemplate, {
 const PhonicsWithoutWorksheets = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "How do you practice phonics without worksheets?",
+        content: "Replace worksheets with five categories of active practice: movement games like sound hopscotch, manipulatives such as letter tiles and play-dough, card and board games, app-based practice, and daily-life reading of signs and labels. Kindergarteners hold focus for only 5-15 minutes on seated tasks, so a 20-30 minute worksheet becomes a battle. Aim for 15-20 minutes of hands-on practice daily.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "Your kindergartener groans at the sight of another phonics worksheet. Their hand cramps after two minutes of writing. Or maybe they just can't sit still long enough to finish even one page. Here's the good news: worksheets aren't necessary for phonics mastery. In fact, for many young learners, hands-on, movement-based, and game-based phonics practice works better—and it's way more fun.",

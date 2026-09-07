@@ -5,6 +5,14 @@ import ArticlePageTemplate, {
 const PhonicsActivitiesFiveYearOld = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "What phonics activities work for a 5-year-old struggling reader?",
+        content: "Five-year-olds learn phonics best through short multisensory play rather than worksheets: sound treasure hunts, play-dough letters, sorting games, and building CVC words with toys. Work in phases, spending two to four weeks on foundational phonological awareness, four to six weeks on letter sounds at two or three new sounds a week, then four to six weeks on blending. Expect progress in 8-12 weeks.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "Your 5-year-old is struggling with reading while peers are sounding out words and recognizing letters with ease. You want to help, but you're worried about pushing too hard or using inappropriate methods. Five is a unique age—some children are reading fluently while others haven't quite developed the prerequisite skills yet. Both are normal. What struggling 5-year-olds need is playful, age-appropriate phonics practice that builds foundational skills without the pressure and worksheets typically used with older children. The activities in this guide are specifically designed for 5-year-olds who need extra support: multisensory, game-based, and developmentally appropriate. With 15-20 minutes of daily play-based practice, most 5-year-olds develop the phonics skills they need within 8-12 weeks.",

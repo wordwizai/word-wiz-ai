@@ -4,6 +4,14 @@ import ArticlePageTemplate, { type ArticleSection } from "../../components/Artic
 const ChildReadsSlowly = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "Why does my child read so slowly, and how do I fix it?",
+        content: "Slow reading with good accuracy is a fluency problem, not a decoding problem: the child can sound words out but has not made it automatic. Compare against benchmarks of 60 words per minute by the end of first grade, 90 by second, and 110 by third. Repeated reading of the same passage at a level where 95-98 percent of words are known, 20-30 minutes daily, produces gains in 8-12 weeks.",
+      },
+    },
+    {
       type: "paragraph",
       content: "You sit with your child as they struggle through a simple paragraph, taking five full minutes to decode what should take 30 seconds. They can read the words—technically—but it's painfully slow. By the time they finish a sentence, they've forgotten what it said. The frustration is visible on their face, and you're wondering: why is my child reading so slowly, and how do I help?"
     },

@@ -604,7 +604,535 @@ export const phonicsPatterns: PhonicsPattern[] = [
     relatedSlugs: ["et-family", "end-family", "sh-digraph"],
   },
 
-  // ===END-BATCH-1===
+  {
+    slug: "est-family",
+    pattern: "est",
+    displayName: "-est Word Family",
+    category: "word-family",
+    gradeLevel: "Grade 1",
+    words: [
+      "best", "rest", "test", "nest", "pest", "vest", "west",
+      "zest", "chest", "crest",
+    ],
+    sampleSentences: [
+      "The best nest is in the west.",
+      "Rest your vest on the chest.",
+      "Take a test, then a rest.",
+      "The pest sat on the crest.",
+    ],
+    teachingNotes: [
+      "The -est family stacks a three-consonant ending ('st' after the vowel is already two, and many -est words also add a beginning blend like 'chest' or 'crest'), so it is best introduced after -et and -ed feel automatic. 'Best,' 'rest,' 'test,' and 'nest' are common, useful words that show up constantly in school vocabulary, which makes this family worth prioritizing even though it is mechanically a bit harder than simpler short-e families.",
+      "Because 'chest' and 'crest' begin with a consonant digraph or blend on top of the -est ending, read those two last. If your child reads 'best' and 'nest' confidently but stalls on 'chest,' the breakdown is happening at the beginning of the word, not the familiar -est ending — go back and isolate the 'ch' sound before reattaching the rest.",
+    ],
+    commonErrors: [
+      "Dropping the final t and reading 'best' as 'bes'",
+      "Struggling with the beginning digraph in 'chest'",
+      "Confusing short e with short i, drifting 'nest' toward 'nist'",
+    ],
+    relatedSlugs: ["ed-family", "end-family", "ent-family"],
+  },
+  {
+    slug: "end-family",
+    pattern: "end",
+    displayName: "-end Word Family",
+    category: "word-family",
+    gradeLevel: "Grade 1",
+    words: [
+      "end", "bend", "lend", "mend", "send", "tend", "blend",
+      "spend", "trend",
+    ],
+    sampleSentences: [
+      "Send the bend to the end.",
+      "Mend and tend the blend.",
+      "I will lend and spend at the end.",
+      "The trend will bend and end.",
+    ],
+    teachingNotes: [
+      "The -end family mirrors -and in structure — both end in the two-consonant blend 'nd' — so teaching them close together lets your child notice that the ending blend behaves the same way regardless of the vowel in front of it. That kind of cross-family comparison is exactly how strong readers eventually generalize spelling patterns instead of relearning them from scratch every time the vowel changes.",
+      "Practice the 'nd' ending in isolation, holding the /n/ briefly before releasing into /d/, and then attach a beginning sound. 'Blend' and 'spend' add a beginning consonant blend on top of the ending blend, so those two are naturally more demanding and worth saving for last within this family.",
+    ],
+    commonErrors: [
+      "Dropping the final d sound and reading 'end' as 'en'",
+      "Struggling with the double blend in 'blend' or 'spend'",
+      "Confusing -end with -and when reading quickly",
+    ],
+    relatedSlugs: ["and-family", "est-family", "ent-family"],
+  },
+  {
+    slug: "ent-family",
+    pattern: "ent",
+    displayName: "-ent Word Family",
+    category: "word-family",
+    gradeLevel: "Grade 1",
+    words: [
+      "went", "bent", "dent", "rent", "sent", "tent", "cent",
+      "spent", "scent",
+    ],
+    sampleSentences: [
+      "We went to rent a tent.",
+      "The cent was bent and sent.",
+      "I spent a dent on the tent.",
+      "Follow the scent to the tent.",
+    ],
+    teachingNotes: [
+      "The -ent family is anchored by 'went,' one of the most common irregular-feeling but actually fully decodable words a beginning reader meets — many kids memorize it as a sight word before realizing it follows the same -ent pattern as 'bent,' 'dent,' and 'tent.' Pointing out that 'went' decodes just like its family members can be a genuinely satisfying realization for a child who thought it was an exception.",
+      "'Spent' and 'scent' both add a beginning blend, and 'scent' in particular has a silent-feeling first letter that trips kids up (the 's' is fully pronounced, but the word does not look the way it sounds at first glance). Treat 'scent' as a slightly advanced bonus word rather than a core practice word if your child is still building basic fluency.",
+    ],
+    commonErrors: [
+      "Treating 'went' as an unrelated sight word instead of part of the family",
+      "Dropping the final t sound",
+      "Struggling with the beginning blend in 'spent'",
+    ],
+    relatedSlugs: ["end-family", "est-family", "eck-family"],
+  },
+  {
+    slug: "eck-family",
+    pattern: "eck",
+    displayName: "-eck Word Family",
+    category: "word-family",
+    gradeLevel: "Grade 1",
+    words: ["neck", "peck", "deck", "check", "wreck", "speck"],
+    sampleSentences: [
+      "Peck the neck on the deck.",
+      "Check the deck for a wreck.",
+      "A speck is on the neck.",
+      "The bird will peck and check.",
+    ],
+    teachingNotes: [
+      "The -eck family uses the same 'ck' spelling logic your child already met in -ack: after a short vowel at the end of a word, English spells the /k/ sound with 'ck' rather than a plain 'k.' Reminding your child of this rule ('short vowel, then ck') helps them apply it confidently to new -eck words instead of treating each one as unfamiliar.",
+      "'Wreck' is worth calling out specifically because the 'w' is silent before 'r' — this is the same silent-w pattern found in words like 'write' and 'wrong,' and -eck is often a child's first encounter with it. Simply tell your child the 'w' is silent here rather than expecting them to sound it out; some spelling patterns are best taught directly rather than discovered.",
+    ],
+    commonErrors: [
+      "Trying to sound out 'c' and 'k' separately",
+      "Attempting to pronounce the silent w in 'wreck'",
+      "Confusing -eck with -ick when reading quickly",
+    ],
+    relatedSlugs: ["ack-family", "ock-family", "ent-family"],
+  },
+  {
+    slug: "elt-family",
+    pattern: "elt",
+    displayName: "-elt Word Family",
+    category: "word-family",
+    gradeLevel: "Grade 1",
+    words: ["belt", "felt", "melt", "welt", "smelt", "dwelt"],
+    sampleSentences: [
+      "The belt will melt if it felt hot.",
+      "Smelt the metal by the belt.",
+      "We dwelt on the felt belt.",
+      "Did the ice melt or felt cold?",
+    ],
+    teachingNotes: [
+      "The -elt family is small, but 'belt,' 'felt,' and 'melt' are common enough in everyday language that it is still worth a focused practice session. Like other short-e families ending in a consonant blend, the key skill is blending the /l/ and /t/ sounds together smoothly rather than pausing between them.",
+      "This family is a natural pairing with -ell, since both share the double-l-adjacent short-e sound, and comparing 'bell' to 'belt' side by side highlights how a single added final consonant changes both the spelling and the ending sound. Use this comparison to reinforce that reading is about tracking every letter in sequence, not just the first and last.",
+    ],
+    commonErrors: [
+      "Rushing through and dropping the final t sound",
+      "Confusing -elt with -ell",
+      "Pausing awkwardly between the l and t instead of blending",
+    ],
+    relatedSlugs: ["ell-family", "eck-family", "end-family"],
+  },
+
+  // ============================================================
+  // WORD FAMILIES — short I
+  // ============================================================
+  {
+    slug: "ig-family",
+    pattern: "ig",
+    displayName: "-ig Word Family",
+    category: "word-family",
+    gradeLevel: "Kindergarten",
+    words: [
+      "big", "dig", "fig", "jig", "pig", "rig", "wig", "twig",
+      "sprig",
+    ],
+    sampleSentences: [
+      "The big pig can dig.",
+      "Dig for a fig by the rig.",
+      "The pig has a wig.",
+      "Snap the twig off the sprig.",
+    ],
+    teachingNotes: [
+      "The -ig family is often a child's first real exposure to short i, and it is worth spending a moment contrasting the short i sound /ɪ/ with the short e sound /ɛ/ your child likely just learned, since these two vowels are commonly confused by beginning readers — have them say 'pig' and 'peg' back to back and notice how the mouth position changes slightly for each.",
+      "'Big' and 'pig' are the easiest, most familiar entry points, both concrete and highly motivating for young children. 'Twig' and 'sprig' introduce beginning blends and are good stretch words once the plain three- and four-letter -ig words are solid.",
+    ],
+    commonErrors: [
+      "Confusing short i and short e, reading 'pig' as 'peg'",
+      "Dropping the beginning consonant in blend words like 'twig'",
+      "Guessing based on picture context instead of decoding the letters",
+    ],
+    relatedSlugs: ["in-family", "ip-family", "it-family"],
+  },
+  {
+    slug: "in-family",
+    pattern: "in",
+    displayName: "-in Word Family",
+    category: "word-family",
+    gradeLevel: "Kindergarten",
+    words: [
+      "in", "bin", "fin", "pin", "tin", "win", "chin", "grin",
+      "shin", "skin", "spin", "twin",
+    ],
+    sampleSentences: [
+      "Win the pin in the bin.",
+      "The twin has a grin on his chin.",
+      "Spin the tin can on your shin.",
+      "The fish has a fin and skin.",
+    ],
+    teachingNotes: [
+      "Like -et and -en before it, 'in' itself is a very common preposition that children often recognize instantly as a whole word, which makes it a useful anchor for the rest of the -in family — if they can already read 'in,' point out that 'bin,' 'fin,' 'pin,' and 'win' just add one sound to the front of a word they already know.",
+      "This family includes a nice mix of digraph words ('chin,' 'shin') and blend words ('grin,' 'skin,' 'spin,' 'twin'), so it is a good comprehensive review once your child has covered both digraphs and blends separately. If digraphs have not been introduced yet, hold off on 'chin' and 'shin' and focus on the plain -in words first.",
+    ],
+    commonErrors: [
+      "Confusing short i and short e in this family",
+      "Sounding out 'ch' or 'sh' as separate letters in 'chin' or 'shin'",
+      "Dropping a consonant in blends like 'spin' or 'twin'",
+    ],
+    relatedSlugs: ["ig-family", "ip-family", "ink-family"],
+  },
+  {
+    slug: "ip-family",
+    pattern: "ip",
+    displayName: "-ip Word Family",
+    category: "word-family",
+    gradeLevel: "Kindergarten",
+    words: [
+      "dip", "hip", "lip", "nip", "rip", "sip", "tip", "zip",
+      "chip", "ship", "skip", "trip", "whip",
+    ],
+    sampleSentences: [
+      "Sip and dip the chip.",
+      "Skip to the ship with a trip.",
+      "Zip your lip and flip the tip.",
+      "The whip can rip and nip.",
+    ],
+    teachingNotes: [
+      "The -ip family has one of the largest and most varied word lists among the short-i families, giving a lot of runway for practice: plain words ('dip,' 'hip,' 'lip'), digraph words ('chip,' 'ship,' 'whip'), and blend words ('skip,' 'trip') are all represented. This variety makes -ip an excellent family for a mixed-review session once your child has separately learned digraphs and blends.",
+      "'Zip,' 'skip,' and 'trip' tend to be favorites because they connect to real actions a child can act out, which helps cement the word-to-meaning connection alongside the word-to-sound connection. Consider having your child physically skip across the room after reading the word 'skip' — movement paired with reading is a simple, effective way to reinforce new vocabulary.",
+    ],
+    commonErrors: [
+      "Confusing 'ship' and 'chip' due to similar shapes",
+      "Dropping a consonant in blends like 'skip' or 'trip'",
+      "Reading 'whip' with the w sound omitted",
+    ],
+    relatedSlugs: ["ig-family", "in-family", "it-family"],
+  },
+  {
+    slug: "it-family",
+    pattern: "it",
+    displayName: "-it Word Family",
+    category: "word-family",
+    gradeLevel: "Kindergarten",
+    words: [
+      "bit", "fit", "hit", "kit", "pit", "sit", "wit", "quit",
+      "spit", "slit",
+    ],
+    sampleSentences: [
+      "Sit in the pit and hit the ball.",
+      "Fit the kit in the bit.",
+      "Do not quit or spit.",
+      "The slit is a bit small.",
+    ],
+    teachingNotes: [
+      "The -it family is another workhorse short-i family full of common, everyday words — 'sit,' 'hit,' 'fit,' 'bit' — that appear constantly in early readers and classroom instructions. Because these words are so frequent, this is a good family to practice for automatic, instant recognition rather than slow, effortful sounding-out, since your child will need instant recall of these words very soon in their reading development.",
+      "'Quit' is worth a specific mention: the 'qu' combination always makes a /kw/ sound together, never just /k/, so remind your child that q is essentially never seen without u right after it in English. This is a good early introduction to the qu spelling convention that will reappear in many future words.",
+    ],
+    commonErrors: [
+      "Reading 'qu' as just a /k/ sound instead of /kw/",
+      "Confusing short i with short e in this family",
+      "Dropping the beginning consonant in 'spit' or 'slit'",
+    ],
+    relatedSlugs: ["ig-family", "in-family", "ip-family"],
+  },
+  {
+    slug: "id-family",
+    pattern: "id",
+    displayName: "-id Word Family",
+    category: "word-family",
+    gradeLevel: "Kindergarten",
+    words: ["bid", "did", "hid", "kid", "lid", "rid", "grid", "skid"],
+    sampleSentences: [
+      "The kid did hid the lid.",
+      "Bid to get rid of the grid.",
+      "Did the kid skid on the lid?",
+      "Rid the kid of the grid.",
+    ],
+    teachingNotes: [
+      "The -id family centers on 'did' and 'kid,' two extremely common words that show up in almost every early reader and everyday conversation with young children. 'Did' in particular is worth extra attention because it is often confused visually with 'bid' due to the similar shapes of the letters b and d — a very common reversal error at this age that usually resolves with more reading mileage rather than needing special intervention.",
+      "If your child regularly swaps b and d (reading 'bid' as 'did' or vice versa), a simple trick many teachers use is having the child make a fist with both hands, thumbs up, then point index fingers out: the left hand forms a lowercase b, the right hand forms a lowercase d, matching the order of the letters in the alphabet and in the word 'bed.'",
+    ],
+    commonErrors: [
+      "Confusing b and d, reading 'bid' as 'did' or vice versa",
+      "Confusing short i with short e in this family",
+      "Dropping a consonant in blend words like 'grid' or 'skid'",
+    ],
+    relatedSlugs: ["ig-family", "it-family", "ick-family"],
+  },
+  {
+    slug: "ick-family",
+    pattern: "ick",
+    displayName: "-ick Word Family",
+    category: "word-family",
+    gradeLevel: "Kindergarten–Grade 1",
+    words: [
+      "kick", "lick", "pick", "sick", "tick", "wick", "brick",
+      "chick", "click", "quick", "stick", "thick", "trick",
+    ],
+    sampleSentences: [
+      "Pick a brick and kick it quick.",
+      "The chick can lick the stick.",
+      "Click the tick, not the trick.",
+      "The thick wick is sick.",
+    ],
+    teachingNotes: [
+      "The -ick family, like -ack and -eck before it, uses the 'ck' short-vowel spelling rule for the /k/ sound, so by this point your child should be recognizing that pattern across families without needing it re-taught from scratch. This is a good moment to check for that transfer: if your child hesitates on 'ck' here after having learned it in -ack, a quick reminder ('remember, ck after a short vowel') is usually all it takes.",
+      "This family also contains 'chick,' 'click,' 'quick,' 'thick,' and 'trick' — a rich mix of digraphs and blends layered onto the same ending, making -ick an excellent comprehensive review word list once digraphs and blends have both been introduced separately.",
+    ],
+    commonErrors: [
+      "Trying to sound out 'c' and 'k' separately",
+      "Confusing -ick with -ack or -eck when reading quickly",
+      "Dropping consonants in blend words like 'stick' or 'trick'",
+    ],
+    relatedSlugs: ["ack-family", "eck-family", "id-family"],
+  },
+  {
+    slug: "ill-family",
+    pattern: "ill",
+    displayName: "-ill Word Family",
+    category: "word-family",
+    gradeLevel: "Kindergarten–Grade 1",
+    words: [
+      "bill", "fill", "hill", "mill", "pill", "will", "chill",
+      "drill", "grill", "skill", "spill", "still", "thrill",
+    ],
+    sampleSentences: [
+      "Bill will fill the hill.",
+      "Spill the pill on the grill.",
+      "Chill by the mill, then drill.",
+      "The thrill was still a skill.",
+    ],
+    teachingNotes: [
+      "The -ill family uses the same double-consonant spelling convention your child saw in -ell: two L's make just one /l/ sound. 'Will,' 'hill,' and 'fill' are common, familiar words that give an easy start before moving into digraph and blend words like 'chill,' 'drill,' 'grill,' 'skill,' 'spill,' 'still,' and 'thrill.'",
+      "'Still' and 'thrill' are among the more demanding words in this list — 'still' has a beginning blend plus the double-l ending, and 'thrill' stacks a digraph, a blend, and the ending together. Treat these as milestone words rather than starting points, and celebrate them once your child reads them smoothly.",
+    ],
+    commonErrors: [
+      "Trying to pronounce double letters as two separate sounds",
+      "Dropping consonants in more complex blend words like 'thrill'",
+      "Confusing -ill with -ell",
+    ],
+    relatedSlugs: ["ell-family", "ick-family", "ing-family"],
+  },
+  {
+    slug: "ing-family",
+    pattern: "ing",
+    displayName: "-ing Word Family",
+    category: "word-family",
+    gradeLevel: "Grade 1",
+    words: [
+      "king", "ring", "sing", "wing", "bring", "cling", "sting",
+      "swing", "thing",
+    ],
+    sampleSentences: [
+      "The king can sing and swing.",
+      "Bring the ring to the wing.",
+      "Cling to the thing that stings.",
+      "Sing a song on the swing.",
+    ],
+    teachingNotes: [
+      "The -ing family is one of the most important nasal rime families to teach as a single chunk, since '-ing' also happens to be the most common word ending in the entire English language once children start reading verbs like 'running' and 'jumping.' Teaching your child to instantly recognize '-ing' as one unit here pays enormous dividends across nearly every book they will read from this point forward.",
+      "Several -ing words carry beginning blends ('bring,' 'cling,' 'sting,' 'swing'), so use 'king,' 'ring,' 'sing,' and 'wing' as the entry point before tackling those. As with -ang and -ank, resist letting your child sound out the 'n' and 'g' separately — model the whole '-ing' chunk as one smooth sound.",
+    ],
+    commonErrors: [
+      "Splitting '-ing' into separate n and g sounds",
+      "Confusing -ing with -ang or -ong when reading quickly",
+      "Dropping a consonant in beginning blends like 'sting' or 'swing'",
+    ],
+    relatedSlugs: ["ill-family", "ink-family", "ang-family"],
+  },
+  {
+    slug: "ink-family",
+    pattern: "ink",
+    displayName: "-ink Word Family",
+    category: "word-family",
+    gradeLevel: "Grade 1",
+    words: [
+      "ink", "link", "pink", "rink", "sink", "wink", "blink",
+      "drink", "think", "stink",
+    ],
+    sampleSentences: [
+      "Think pink by the sink.",
+      "Wink and blink at the rink.",
+      "Link the ink to the drink.",
+      "Do not stink at the rink.",
+    ],
+    teachingNotes: [
+      "The -ink family pairs naturally with -ank as another nasalized ending, and comparing the two side by side ('bank' versus 'blink') helps children hear how the vowel changes the whole word even though the 'nk' ending chunk stays constant. 'Think' and 'drink' both start with digraphs or blends, so those are good words to practice once the simpler 'ink,' 'pink,' 'sink,' and 'wink' feel automatic.",
+      "As with all the nasal endings, treat '-ink' as one connected unit rather than three separate letter sounds. If your child is stalling out between the vowel and the ending, have them practice saying just '-ink' by itself several times in a row before reattaching a beginning sound.",
+    ],
+    commonErrors: [
+      "Splitting '-ink' into separate n and k sounds",
+      "Confusing -ink with -ank when reading quickly",
+      "Sounding out 'th' separately in 'think'",
+    ],
+    relatedSlugs: ["ing-family", "ank-family", "ist-family"],
+  },
+  {
+    slug: "ist-family",
+    pattern: "ist",
+    displayName: "-ist Word Family",
+    category: "word-family",
+    gradeLevel: "Grade 1",
+    words: ["fist", "list", "mist", "wrist", "twist"],
+    sampleSentences: [
+      "Make a list and a fist.",
+      "The mist is on my wrist.",
+      "Twist the list in the mist.",
+      "My fist can twist a bit.",
+    ],
+    teachingNotes: [
+      "The -ist family is small but useful, and it stacks the two-consonant 'st' ending on top of short i, the same ending pattern your child already met in -ast and -est with different vowels. Comparing 'fast,' 'fist,' and (informally) the sound pattern across these families reinforces that endings behave consistently no matter which vowel comes before them.",
+      "'Wrist' is worth flagging specifically: like 'wreck,' it has a silent w before the r, so tell your child directly rather than expecting them to sound it out. This is good repeated exposure to the silent-w-before-r pattern that will help later with words like 'wrap' and 'wrong.'",
+    ],
+    commonErrors: [
+      "Attempting to pronounce the silent w in 'wrist'",
+      "Dropping the final t sound",
+      "Confusing -ist with -est when reading quickly",
+    ],
+    relatedSlugs: ["ink-family", "ift-family", "est-family"],
+  },
+  {
+    slug: "ift-family",
+    pattern: "ift",
+    displayName: "-ift Word Family",
+    category: "word-family",
+    gradeLevel: "Grade 1",
+    words: ["gift", "lift", "rift", "sift", "drift", "shift", "swift"],
+    sampleSentences: [
+      "Lift the gift and sift it.",
+      "The swift drift will shift.",
+      "Sift the rift, then lift.",
+      "A swift gift can shift.",
+    ],
+    teachingNotes: [
+      "The -ift family combines a beginning consonant (or blend, in words like 'drift,' 'shift,' 'swift') with the two-consonant 'ft' ending, giving children practice blending sounds on both sides of the vowel in a single word. 'Gift' and 'lift' are the most familiar starting points and are common enough in everyday language to feel immediately useful.",
+      "'Shift' and 'swift' both begin with a digraph or blend, so save those until the plainer -ift words are solid. As always with consonant-heavy endings, model saying '-ift' smoothly as a connected unit before attaching different beginning sounds.",
+    ],
+    commonErrors: [
+      "Dropping the final t sound in the ft ending",
+      "Struggling with the beginning blend in 'drift' or 'swift'",
+      "Confusing -ift with -ist",
+    ],
+    relatedSlugs: ["ist-family", "ilt-family", "ick-family"],
+  },
+  {
+    slug: "ilt-family",
+    pattern: "ilt",
+    displayName: "-ilt Word Family",
+    category: "word-family",
+    gradeLevel: "Grade 1",
+    words: ["tilt", "wilt", "quilt", "guilt", "stilt"],
+    sampleSentences: [
+      "The quilt will tilt and wilt.",
+      "Do not feel guilt on the stilt.",
+      "Tilt the stilt a bit.",
+      "The wilt is on the quilt.",
+    ],
+    teachingNotes: [
+      "The -ilt family is small, and two of its five words — 'guilt' and 'quilt' — involve the tricky 'gu' and 'qu' spellings where the u is part of the consonant sound rather than a vowel to blend separately. Point this out directly: in 'quilt,' 'qu' makes one /kw/ sound before you get to the short-i vowel, and in 'guilt,' the u is silent and just tells you the g is hard rather than soft.",
+      "Because this family is short and includes some irregular spellings, treat it as a quick, targeted lesson rather than a major unit, and focus most of your child's independent practice time on 'tilt' and 'wilt,' which are fully regular and predictable.",
+    ],
+    commonErrors: [
+      "Misreading the 'qu' in 'quilt' as just a k sound",
+      "Trying to sound out the silent u in 'guilt'",
+      "Dropping the final t sound",
+    ],
+    relatedSlugs: ["ift-family", "ill-family", "imp-family"],
+  },
+  {
+    slug: "imp-family",
+    pattern: "imp",
+    displayName: "-imp Word Family",
+    category: "word-family",
+    gradeLevel: "Grade 1",
+    words: ["limp", "blimp", "shrimp", "skimp", "wimp"],
+    sampleSentences: [
+      "The limp blimp will not skimp.",
+      "A shrimp is not a wimp.",
+      "Skimp on the limp blimp.",
+      "The wimp saw a shrimp.",
+    ],
+    teachingNotes: [
+      "The -imp family is small and mostly made up of blend words, so it works best as a stretch challenge once your child is already comfortable with -amp and -ump — comparing all three side by side ('camp,' 'limp,' 'jump') shows how the same 'mp' ending pattern holds steady across every short vowel.",
+      "'Shrimp' is a fun standout word for kids because it names a real animal and stacks an unusually long three-consonant beginning blend ('shr') in front of the ending — reading it successfully is a genuine milestone worth pointing out and celebrating.",
+    ],
+    commonErrors: [
+      "Pausing awkwardly between the m and p instead of blending smoothly",
+      "Dropping consonants in the beginning blend of 'shrimp' or 'blimp'",
+      "Confusing -imp with -ump",
+    ],
+    relatedSlugs: ["ilt-family", "ump-family", "amp-family"],
+  },
+
+  // ============================================================
+  // WORD FAMILIES — short O (part 1)
+  // ============================================================
+  {
+    slug: "op-family",
+    pattern: "op",
+    displayName: "-op Word Family",
+    category: "word-family",
+    gradeLevel: "Kindergarten",
+    words: [
+      "hop", "mop", "pop", "top", "cop", "stop", "chop", "crop",
+      "drop", "shop", "plop",
+    ],
+    sampleSentences: [
+      "Hop to the shop and stop.",
+      "Mop the top, then drop the mop.",
+      "Chop the crop with a plop.",
+      "Pop by the shop with the cop.",
+    ],
+    teachingNotes: [
+      "The -op family is usually where short o is introduced, and it is worth taking a moment to contrast the short o sound /ɒ/ with the short a sound /æ/ your child already knows, since these two vowels are sometimes confused by beginning readers who have not yet built a strong ear for the difference. Have your child say 'hop' and 'hap'-sounding words back to back and notice how the mouth rounds more for the o sound.",
+      "'Stop' and 'shop' are two of the most useful early sight-adjacent words in this family, appearing on street signs and in everyday errands, which gives you natural opportunities to point out and practice them outside of formal lesson time. 'Chop,' 'crop,' 'drop,' and 'plop' add beginning blends and are good next steps once the plainer -op words are solid.",
+    ],
+    commonErrors: [
+      "Confusing short o and short a sounds",
+      "Dropping a consonant in blends like 'stop' or 'drop'",
+      "Guessing 'stop' for every word that starts with 's' in this family",
+    ],
+    relatedSlugs: ["ot-family", "ock-family", "og-family"],
+  },
+  {
+    slug: "ot-family",
+    pattern: "ot",
+    displayName: "-ot Word Family",
+    category: "word-family",
+    gradeLevel: "Kindergarten",
+    words: [
+      "dot", "got", "hot", "jot", "lot", "not", "pot", "rot",
+      "tot", "shot", "spot", "trot", "knot",
+    ],
+    sampleSentences: [
+      "The hot pot has a spot.",
+      "Got a lot? Jot it down.",
+      "The tot will trot, not rot.",
+      "Shot a dot, tied a knot.",
+    ],
+    teachingNotes: [
+      "The -ot family includes 'not' and 'got,' two extremely common words your child will see on nearly every page of an early reader, so build in extra repetition here even after the family feels 'done.' 'Hot' and 'pot' are similarly frequent and concrete, giving an easy, motivating starting point.",
+      "'Knot' is worth calling out directly: the k is silent before n at the beginning of a word, a spelling pattern that also shows up in 'know' and 'knee.' Rather than having your child try to sound out the k, simply tell them it is silent here — this is one of a small handful of silent-letter rules worth teaching explicitly rather than discovering through trial and error.",
+    ],
+    commonErrors: [
+      "Attempting to pronounce the silent k in 'knot'",
+      "Confusing short o and short u sounds",
+      "Dropping a consonant in blends like 'spot' or 'trot'",
+    ],
+    relatedSlugs: ["op-family", "og-family", "ock-family"],
+  },
+
+  // ===END-BATCH-2===
 ];
 
 export function getPatternBySlug(slug: string): PhonicsPattern | undefined {

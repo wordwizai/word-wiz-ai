@@ -5,6 +5,14 @@ import ArticlePageTemplate, {
 const ShortVowelSounds = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "How do you teach short vowel sounds to a kindergartener?",
+        content: "Work through six exercises in order: sound isolation, sound matching, word families, minimal pairs, CVC word reading, and short-vowel sentences. Introduce one vowel at a time, spending one to two weeks on each rather than teaching all five at once. Most kindergarteners master all five short vowel sounds in 6-8 weeks of daily practice.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "Your kindergartener can name all the letters and knows most consonant sounds, but when it comes to the vowels—A, E, I, O, U—everything falls apart. They confuse 'cat' and 'cot,' read 'pin' as 'pen,' or freeze completely when they hit a vowel in the middle of a word. This is the short vowel challenge, and it is one of the most critical hurdles in early reading. Short vowels are harder to hear, harder to distinguish, and harder to remember than consonants, yet they appear in nearly every single word your child will ever read. The good news is that with targeted, systematic practice using the right exercises, most kindergarteners can master all five short vowel sounds in 6-8 weeks. This guide provides proven short vowel exercises that move children from confusion to confidence, using a clear progression from sound recognition to reading fluency.",

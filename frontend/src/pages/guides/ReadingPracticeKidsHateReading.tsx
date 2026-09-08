@@ -5,6 +5,14 @@ import ArticlePageTemplate, {
 const ReadingPracticeKidsHateReading = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "How do you get a child who hates reading to practice?",
+        content: "Lower the difficulty and shorten the session before anything else. Give books the child reads at 95-100 percent accuracy, set a five-minute timer, and stop when it rings even mid-sentence. Do not correct errors during reading. Reading resistance affects roughly 20-30 percent of children, and most shift from hating reading to tolerating it within 6-8 weeks of low-pressure practice.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "Your child groans when you suggest reading time. They hide books, make excuses, or have meltdowns at the mere mention of practice. Reading has become a battleground, and you're exhausted from the fights. If your child hates reading, you're not alone. This affects roughly 20-30% of children and stems from many causes: texts that are too difficult, boring topics, past failures, excessive pressure, or underlying reading difficulties. Most parents make a critical mistake by forcing more practice, which only deepens the negative association. What you need are strategies that rebuild your child's relationship with reading while still developing skills. With the right approaches, most children shift from hating reading to tolerating or even enjoying it within 6-8 weeks.",

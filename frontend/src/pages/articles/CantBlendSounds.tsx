@@ -5,6 +5,14 @@ import ArticlePageTemplate, {
 const CantBlendSounds = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "What do you do when a child knows letter sounds but can't blend them?",
+        content: "Blending is a separate skill from letter-sound knowledge and must be taught on its own, starting orally without print. Begin with two-sound words, move to three-sound words built from continuous sounds before stop sounds like /p/ and /t/, then add speed and decodable sentences. Practice 10-15 minutes daily; most children blend reliably within 6-12 weeks.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "Your child knows their letter sounds perfectly. They can tell you that 'c' says /k/, 'a' says /æ/, and 't' says /t/. But when you ask them to read the word 'cat,' they just cannot do it. They say the sounds separately—'/k/... /a/... /t/'—but they cannot put them together into a word. This is called a **blending deficit**, and it is one of the most frustrating challenges parents face when teaching their children to read. The good news is that blending sounds is a skill that can be taught and improved with the right approach. This article will help you understand why your child struggles with blending, how to diagnose the specific issue, and most importantly, exactly what to do to help them overcome this critical reading hurdle.",

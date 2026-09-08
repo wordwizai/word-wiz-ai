@@ -5,6 +5,14 @@ import ArticlePageTemplate, {
 const DecodableSentences = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "What are decodable sentences and how should they be used?",
+        content: "Decodable sentences contain only the phonics patterns a child has already been taught, so words must be sounded out rather than guessed from pictures or context. Use them at the level where the child decodes 90 percent of words accurately, at a volume of 10-20 sentences a day, five to seven days a week, spending two to four weeks per level before advancing.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "Your child can sound out individual words, but when you hand them a book, they guess, skip words, or freeze completely. The problem is not your child's decoding ability—it is the text itself. Most beginning reader books are filled with words that do not follow the phonics rules your child has learned, forcing them to memorize or guess instead of decode. The solution is decodable sentences: carefully controlled texts where every single word can be sounded out using the phonics patterns your child knows. This guide provides 100+ free decodable sentences organized by skill level, explains the science behind why they work, and shows you exactly how to use them to accelerate your child's reading progress. Whether your child is just starting with simple CVC words or ready for blends and digraphs, these sentences give them the practice they need to build true reading fluency.",

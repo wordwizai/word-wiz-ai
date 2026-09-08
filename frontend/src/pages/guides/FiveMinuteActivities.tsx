@@ -5,6 +5,14 @@ import ArticlePageTemplate, {
 const FiveMinuteActivities = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "Can five minutes of reading practice a day actually help?",
+        content: "Yes. Five minutes of focused daily practice produces 35 minutes a week spread across seven sessions, which builds skill faster than a single 30-minute weekly session because the child revisits patterns before forgetting them. Short sessions also end before resistance sets in. Use a timer, pick one focused activity such as a letter-sound speed drill or word-family ladder, and stop when it rings.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "You know your child needs daily reading practice, but the thought of another 30-minute reading session makes you both exhausted before you even start. Between work, homework, dinner, and bedtime battles, finding time for reading feels impossible. Here is the good news: effective reading practice does not require long sessions. Five minutes—yes, just five—is enough to make real progress when the activity is focused and purposeful. This guide provides 15 quick, effective 5-minute reading practice activities that busy parents can actually do every single day. These activities require minimal prep, no expensive materials, and work for kids from pre-K through second grade. Whether your child loves reading or resists it, these short bursts of practice build skills without burning out either of you. Pick a different activity each day to keep practice fresh, or repeat favorites. The key is consistency: 5 minutes daily beats 30 minutes weekly every time.",

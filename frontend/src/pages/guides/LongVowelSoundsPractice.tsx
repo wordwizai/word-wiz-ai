@@ -5,6 +5,14 @@ import ArticlePageTemplate, {
 const LongVowelSoundsPractice = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "How do you teach long vowel sounds in first grade?",
+        content: "Teach one long vowel spelling pattern at a time, allowing one to two weeks per pattern rather than introducing silent e and all the vowel teams together. The critical skill is distinguishing long from short vowels, built through sorting and word-family work. With 15-20 minutes of daily practice, most first graders master all five long vowel sounds in 6-8 weeks.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "Your first grader has mastered letter sounds and can read simple CVC words like 'cat' and 'dog.' The next major step is long vowel sounds. Unlike short vowels with their quick, clipped sounds, long vowels 'say their names.' A says /ay/ as in 'cake,' E says /ee/ as in 'feet,' I says /eye/ as in 'bike,' O says /oh/ as in 'boat,' and U says /yoo/ or /oo/ as in 'cube' or 'flute.' Learning long vowels opens up thousands of common words and helps your child move from beginning reader to someone who can handle real books. With daily practice using the activities in this guide, most first graders master long vowel sounds within 6-8 weeks.",

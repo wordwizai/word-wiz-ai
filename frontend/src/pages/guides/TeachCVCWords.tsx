@@ -5,6 +5,14 @@ import ArticlePageTemplate, {
 const TeachCVCWords = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "How do you teach CVC words to a struggling reader?",
+        content: "Teach CVC words in five stages: automatic letter sounds, oral blending, reading single words, mixed practice, then timed fluency work. Ten to fifteen minutes of daily practice is enough. Most struggling readers master CVC words in 4-6 weeks, and nearly all within 4-8 weeks. Readiness for blends means reading 20-30 CVC words a minute at 90 percent accuracy.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "You watch your child struggle to read simple three-letter words like 'cat' or 'dog,' and you know they need help, but you are not sure where to start or how to make it click. CVC words—Consonant-Vowel-Consonant patterns like 'bat,' 'pen,' and 'hot'—are the absolute foundation of early reading, yet many struggling readers get stuck on these seemingly simple words for months. The good news is that with the right approach, most children can master CVC words in just 4-6 weeks of consistent practice at home. This comprehensive guide will walk you through exactly how to teach CVC words to struggling readers, using proven methods that build both decoding skills and confidence. Whether your child is in kindergarten just starting out or in first or second grade still struggling with basics, these strategies will meet them where they are and move them forward systematically.",

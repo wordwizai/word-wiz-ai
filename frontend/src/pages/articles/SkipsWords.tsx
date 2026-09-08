@@ -3,6 +3,14 @@ import ArticlePageTemplate, { type ArticleSection } from "../../components/Artic
 const SkipsWords = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "Why does my first grader skip words when reading aloud?",
+        content: "Word skipping has six root causes: text that is too hard, weak visual tracking, rushing, guessing from pictures, boredom, and no comprehension self-monitoring. Diagnose before fixing. Count errors and skips on one page, and if there are more than five, the text is too hard. Drop to books where the child knows 95-98 percent of words. Most children improve markedly within two to three months.",
+      },
+    },
+    {
       type: "paragraph",
       content: "You're listening to your first grader read aloud: \"The cat sat... the mat.\" Wait—didn't she skip \"on\"? You check the page. Sure enough, the sentence says \"The cat sat on the mat,\" but your child read it without the word \"on.\" This isn't a one-time mistake. Your child consistently skips small words (and sometimes big ones) when reading aloud. Why is this happening, and what can you do about it?"
     },

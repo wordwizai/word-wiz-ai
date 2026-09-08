@@ -3,6 +3,14 @@ import ArticlePageTemplate, { type ArticleSection } from "../../components/Artic
 const AIvsTraditional = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "Is an AI reading app better than a traditional phonics program?",
+        content: "Neither replaces the other. Traditional phonics programs supply a proven scope and sequence plus physical, screen-free materials for $100-300 upfront or $10-20 monthly. AI reading apps add what a parent cannot reliably do, detecting pronunciation errors at the phoneme level with roughly 95 percent accuracy, for free to $15 a month, but require full screen time. Most families do best combining both.",
+      },
+    },
+    {
       type: "paragraph",
       content: "Reading instruction is undergoing a revolution. For decades, parents relied on workbooks, flashcards, and phonics programs with DVD lessons. Now, AI-powered apps can listen to your child read, identify pronunciation errors at the phoneme level, and provide instant feedback with superhuman accuracy. But does newer mean better? This comprehensive comparison will help you decide whether to stick with time-tested traditional phonics programs or embrace AI-powered reading tools."
     },

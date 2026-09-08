@@ -5,6 +5,14 @@ import ArticlePageTemplate, {
 const WorksheetsVsInteractive = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "Are phonics worksheets or interactive apps more effective?",
+        content: "Interactive practice is more effective for phonics instruction because it gives immediate feedback and adapts difficulty; worksheets are better for handwriting and letter formation, which apps cannot teach. The practical answer is both: apps as primary instruction three to five days a week at 15-20 minutes, plus two or three worksheets weekly at 10-15 minutes. Commit for 8-12 weeks before judging results.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "Your child groans when you pull out phonics worksheets, but you're not sure if interactive digital practice is truly better or just more entertaining. The debate between phonics worksheets and interactive reading practice is a practical one for parents: worksheets are cheap, easy to find, and don't require technology, while interactive apps offer engagement, immediate feedback, and gamification. But which approach actually builds reading skills more effectively? The research reveals a nuanced answer: both have value, but for different purposes and different children. This comprehensive comparison examines the pros and cons of each approach, when to use worksheets vs interactive practice, and how to strategically combine them for optimal reading development.",

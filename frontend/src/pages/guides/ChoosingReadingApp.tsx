@@ -6,6 +6,14 @@ import ArticlePageTemplate, {
 const ChoosingReadingApp = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "How do you choose the right reading app for your child?",
+        content: "Work through five steps: identify the child's specific skill gap, set a budget, verify the app teaches systematic phonics in a defined sequence, evaluate whether it offers real speech feedback rather than just recording, and trial it long enough to judge engagement. Reading apps range from free to about $20 a month, so match the app to the gap before comparing prices.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "With hundreds of reading apps available and aggressive marketing campaigns promoting each one as 'the best,' choosing the right one for your child can feel overwhelming and confusing. The stakes feel high because you want to make the right choice for your child's education, and many of these apps require significant financial investment or time commitment. Some apps cost hundreds of dollars per year, while others are free but may not be effective. How do you know which app will actually help your child learn to read versus just keeping them entertained? This comprehensive guide will help you cut through the marketing noise and select an app that actually helps your child become a better, more confident reader. By the end of this guide, you will have a clear decision-making framework based on research and practical considerations rather than advertising claims.",
@@ -736,7 +744,7 @@ const ChoosingReadingApp = () => {
 
   const inlineCTAs = [
     {
-      afterSection: 10,
+      afterSection: 11,
       title: "Try Speech Recognition for Free",
       description:
         "Word Wiz AI offers phoneme-level pronunciation feedback at no cost, a feature most apps charge $10-20/month for",
@@ -744,7 +752,7 @@ const ChoosingReadingApp = () => {
       buttonHref: "/signup",
     },
     {
-      afterSection: 35,
+      afterSection: 36,
       title: "The Smart Choice: Start Free",
       description:
         "Word Wiz AI gives you premium speech recognition technology without the premium price",

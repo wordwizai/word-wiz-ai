@@ -5,6 +5,14 @@ import ArticlePageTemplate, {
 const ChildPronounceWordsWrong = () => {
   const content: ArticleSection[] = [
     {
+      type: "callout",
+      content: {
+        type: "info",
+        title: "Why does my child read words but pronounce them wrong?",
+        content: "Children develop pronunciation errors when they learn to decode without anyone checking how the words sound, usually from self-teaching or reading independently with no adult listening. The patterns are predictable: th produced as f or d, silent letters sounded out, vowel teams like ea, oa, and ai given the wrong sound, and consonant clusters simplified. Practice one target sound five minutes a day.",
+      },
+    },
+    {
       type: "paragraph",
       content:
         "Your child can read the words on the page, but they are not saying them correctly. Maybe they pronounce 'three' as 'free,' or 'ship' as 'sip.' This is surprisingly common among early readers and, thankfully, fixable with the right approach. When children learn to read, they are mastering two separate skills: decoding the written symbols into words, and pronouncing those words correctly. Sometimes these skills develop at different rates, leading to situations where a child can identify and understand a word on the page but struggles to say it properly out loud. The good news is that pronunciation errors are highly responsive to targeted practice and feedback, especially when that feedback is consistent and specific.",
@@ -543,7 +551,7 @@ const ChildPronounceWordsWrong = () => {
 
   const inlineCTAs = [
     {
-      afterSection: 13,
+      afterSection: 14,
       title: "Get Pronunciation Feedback with Word Wiz AI",
       description:
         "Free speech recognition identifies specific pronunciation errors and provides encouraging, actionable feedback",
@@ -551,7 +559,7 @@ const ChildPronounceWordsWrong = () => {
       buttonHref: "/signup",
     },
     {
-      afterSection: 22,
+      afterSection: 23,
       title: "Start Practicing Today",
       description:
         "Word Wiz AI makes pronunciation practice easy, consistent, and judgment-free",

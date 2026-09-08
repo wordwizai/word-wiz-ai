@@ -309,7 +309,7 @@ const FiveMinuteActivities = () => {
     },
     {
       title: "Decodable Sentences for Beginning Readers Practice",
-      href: "/guides/decodable-sentences-beginning-readers-practice",
+      href: "/guides/decodable-sentences-for-beginning-readers",
       category: "Guides",
       readTime: 10,
     },
@@ -348,7 +348,7 @@ const FiveMinuteActivities = () => {
     <ArticlePageTemplate
       metaTitle="15 Quick 5-Minute Reading Practice Activities for Kids That Work"
       metaDescription="Short, effective 5-minute reading activities busy parents can actually do. Perfect for daily practice without overwhelming schedules or kids who resist reading."
-      canonicalUrl="https://wordwizai.com/guides/5-minute-reading-practice-activities-for-kids"
+      canonicalUrl="https://wordwizai.com/guides/five-minute-reading-practice-activities-kids"
       heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=630&fit=crop"
       heroImageAlt="Parent and child doing quick 5-minute reading practice activity together"
       headline="15 Quick 5-Minute Reading Practice Activities"
@@ -368,7 +368,7 @@ const FiveMinuteActivities = () => {
         { label: "Guides", href: "/guides/how-to-teach-phonics-at-home" },
         {
           label: "5 Minute Activities",
-          href: "/guides/5-minute-reading-practice-activities-for-kids",
+          href: "/guides/five-minute-reading-practice-activities-kids",
         },
       ]}
     />

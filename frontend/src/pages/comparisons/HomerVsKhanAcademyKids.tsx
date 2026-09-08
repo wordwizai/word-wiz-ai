@@ -410,9 +410,9 @@ const HomerKhanAcademyKidsComparison = () => {
       wordWizDetails={wordWizDetails}
       metaTitle="HOMER vs Khan Academy Kids vs Word Wiz AI (2025): Free vs Paid"
       metaDescription="Compare HOMER's personalization, Khan Academy Kids' free platform, and Word Wiz AI's speech recognition. See which learning app is best for your child."
-      canonicalUrl="https://wordwizai.com/comparisons/homer-vs-khan-academy-kids"
+      canonicalUrl="https://wordwizai.com/comparisons/homer-vs-khan-academy-kids-vs-word-wiz-ai"
       h1Title="HOMER vs Khan Academy Kids vs Word Wiz AI: Personalized Learning Compared (2025)"
-      introText="Evaluating HOMER's interest-based personalization, Khan Academy Kids' free comprehensive curriculum, or Word Wiz AI's speech recognition technology? This comparison helps you choose the right learning app for your child's needs."
+      introText="Khan Academy Kids is free with no paid tier, HOMER costs $12.99/month or $79.99/year for interest-based personalization, and Word Wiz AI is free and the only one that listens to a child read aloud. Khan Academy Kids paired with Word Wiz AI covers both breadth and pronunciation at no cost."
       verdict={verdict}
       faqs={faqs}
       structuredData={structuredData}

@@ -13,6 +13,7 @@ import {
   DollarSign,
 } from "lucide-react";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
+import SeoHead from "@/components/SeoHead";
 import LandingPageFooter from "@/components/LandingPageFooter";
 import LandingPageCTA from "@/components/LandingPageCTA";
 
@@ -66,6 +67,12 @@ const About = () => {
 
   return (
     <main className="scroll-smooth bg-background text-foreground">
+      <SeoHead
+        title="About Word Wiz AI | Free Phoneme-Level Reading Tutor"
+        description="Why Word Wiz AI exists, how phoneme-level pronunciation feedback works, and who built it. A free reading tutor for kids ages 5-8, with no ads and no subscription."
+        canonicalPath="/about"
+      />
+
       {/* Navbar */}
       <LandingPageNavbar />
 

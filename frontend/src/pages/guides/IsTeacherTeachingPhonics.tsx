@@ -663,7 +663,7 @@ const IsTeacherTeachingPhonics = () => {
 
   const breadcrumbs = [
     { label: "Home", href: "/" },
-    { label: "Guides", href: "/guides" },
+    { label: "Guides", href: "/guides/how-to-teach-phonics-at-home" },
     {
       label: "Is Teacher Teaching Phonics",
       href: "/guides/is-teacher-teaching-enough-phonics",

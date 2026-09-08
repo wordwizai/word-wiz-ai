@@ -680,7 +680,7 @@ const WhyChildHatesReading = () => {
 
   const breadcrumbs = [
     { label: "Home", href: "/" },
-    { label: "Articles", href: "/articles" },
+    { label: "Articles", href: "/articles/why-child-hates-reading" },
     {
       label: "Why Your Child Hates Reading",
       href: "/articles/why-child-hates-reading",

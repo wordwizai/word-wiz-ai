@@ -1,4 +1,3 @@
-import { Helmet } from "react-helmet-async";
 import ArticlePageTemplate, {
   type ArticleSection,
 } from "../../components/ArticlePageTemplate";
@@ -487,86 +486,74 @@ const RControlledVowels = () => {
     },
   ];
 
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline:
-      "R-Controlled Vowels Teaching Strategies for Parents (AR, ER, IR, OR, UR)",
-    description:
-      "Master r-controlled vowels (bossy R) with parent-friendly teaching strategies. Includes word lists, activities, and progression from simple to complex patterns.",
-    author: {
-      "@type": "Organization",
-      name: "Word Wiz AI",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "Word Wiz AI",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://wordwizai.com/wordwizIcon.svg",
+  // Emitted as a JSON-LD array so the page is eligible for both Article and
+  // HowTo rich results.
+  const structuredData = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline:
+        "R-Controlled Vowels Teaching Strategies for Parents (AR, ER, IR, OR, UR)",
+      description:
+        "Master r-controlled vowels (bossy R) with parent-friendly teaching strategies. Includes word lists, activities, and progression from simple to complex patterns.",
+      author: {
+        "@type": "Organization",
+        name: "Word Wiz AI",
       },
+      publisher: {
+        "@type": "Organization",
+        name: "Word Wiz AI",
+        logo: {
+          "@type": "ImageObject",
+          url: "https://wordwizai.com/wordwizIcon.svg",
+        },
+      },
+      datePublished: "2025-01-02",
+      dateModified: "2025-01-02",
     },
-    datePublished: "2025-01-02",
-    dateModified: "2025-01-02",
-  };
+    {
+      "@context": "https://schema.org",
+      "@type": "HowTo",
+      name: "R-Controlled Vowels Teaching Strategies for Parents",
+      description:
+        "Learn how to teach r-controlled vowels (AR, ER, IR, OR, UR) to your child with proven strategies and activities.",
+      step: [
+        {
+          "@type": "HowToStep",
+          name: "Introduce AR and OR First",
+          text: "Start with AR and OR patterns because they have distinct sounds. Teach one at a time over 3-5 days.",
+        },
+        {
+          "@type": "HowToStep",
+          name: "Introduce ER, IR, UR as Triplets",
+          text: "Teach these three together, explaining they sound identical but have different spellings.",
+        },
+        {
+          "@type": "HowToStep",
+          name: "Practice Word Sorting",
+          text: "Sort words into five columns (AR, ER, IR, OR, UR) to build pattern recognition.",
+        },
+        {
+          "@type": "HowToStep",
+          name: "Read R-Controlled Sentences",
+          text: "Progress from word lists to sentences to decodable stories featuring r-controlled vowels.",
+        },
+        {
+          "@type": "HowToStep",
+          name: "Use Multisensory Activities",
+          text: "Implement word families, sound sorting games, Bossy R Bingo, and treasure hunts.",
+        },
+        {
+          "@type": "HowToStep",
+          name: "Track Progress",
+          text: "Monitor mastery across reading, pronunciation, and spelling of all five patterns.",
+        },
+      ],
+    },
+  ];
 
   return (
     <>
-      <Helmet>
-        <title>
-          R-Controlled Vowels Teaching Strategies for Parents (AR, ER, IR, OR,
-          UR)
-        </title>
-        <meta
-          name="description"
-          content="Master r-controlled vowels (bossy R) with parent-friendly teaching strategies. Includes word lists, activities, and progression from simple to complex patterns."
-        />
-        <link
-          rel="canonical"
-          href="https://wordwizai.com/guides/r-controlled-vowels-teaching-strategies-parents"
-        />
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "HowTo",
-            name: "R-Controlled Vowels Teaching Strategies for Parents",
-            description:
-              "Learn how to teach r-controlled vowels (AR, ER, IR, OR, UR) to your child with proven strategies and activities.",
-            step: [
-              {
-                "@type": "HowToStep",
-                name: "Introduce AR and OR First",
-                text: "Start with AR and OR patterns because they have distinct sounds. Teach one at a time over 3-5 days.",
-              },
-              {
-                "@type": "HowToStep",
-                name: "Introduce ER, IR, UR as Triplets",
-                text: "Teach these three together, explaining they sound identical but have different spellings.",
-              },
-              {
-                "@type": "HowToStep",
-                name: "Practice Word Sorting",
-                text: "Sort words into five columns (AR, ER, IR, OR, UR) to build pattern recognition.",
-              },
-              {
-                "@type": "HowToStep",
-                name: "Read R-Controlled Sentences",
-                text: "Progress from word lists to sentences to decodable stories featuring r-controlled vowels.",
-              },
-              {
-                "@type": "HowToStep",
-                name: "Use Multisensory Activities",
-                text: "Implement word families, sound sorting games, Bossy R Bingo, and treasure hunts.",
-              },
-              {
-                "@type": "HowToStep",
-                name: "Track Progress",
-                text: "Monitor mastery across reading, pronunciation, and spelling of all five patterns.",
-              },
-            ],
-          })}
-        </script>
-      </Helmet>
       <ArticlePageTemplate
         metaTitle="R-Controlled Vowels Teaching Strategies for Parents (AR, ER, IR, OR, UR)"
         metaDescription="Master r-controlled vowels (bossy R) with parent-friendly teaching strategies. Includes word lists, activities, and progression from simple to complex patterns."

@@ -430,7 +430,7 @@ const LexiaRazKidsComparison = () => {
       metaDescription="Compare Lexia Core5, Raz-Kids, and Word Wiz AI for schools. See pricing, features, pros/cons, and which is best for your students. Free speech recognition option included."
       canonicalUrl="https://wordwizai.com/comparisons/lexia-vs-raz-kids-vs-word-wiz-ai"
       h1Title="Lexia vs Raz-Kids vs Word Wiz AI: Comprehensive Comparison for Schools"
-      introText="Choosing the right reading program for your classroom? Compare Lexia Core5's comprehensive intervention, Raz-Kids' leveled library, and Word Wiz AI's unique speech recognition technology. See pricing, features, and which fits your needs."
+      introText="For classrooms, Lexia Core5 runs $50-80 per student per year for assessment-driven intervention, Raz-Kids costs $120 per classroom of 36 for a leveled reading library, and Word Wiz AI is free and adds the pronunciation feedback neither provides. Many schools pair one paid tool with Word Wiz AI rather than choosing between them."
       verdict={verdict}
       faqs={faqs}
       structuredData={structuredData}

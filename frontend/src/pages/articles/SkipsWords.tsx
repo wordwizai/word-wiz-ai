@@ -1,4 +1,3 @@
-import { Helmet } from "react-helmet-async";
 import ArticlePageTemplate, { type ArticleSection } from "../../components/ArticlePageTemplate";
 
 const SkipsWords = () => {
@@ -543,28 +542,6 @@ const SkipsWords = () => {
 
   return (
     <>
-      <Helmet>
-        <title>First Grader Skips Words When Reading Aloud (6 Causes + Fixes)</title>
-        <meta 
-          name="description" 
-          content="Your first grader skips words when reading? Learn the 6 root causes (text too hard, tracking issues, rushing, guessing, etc.) and proven fixes for each." 
-        />
-        <link rel="canonical" href="https://wordwizai.com/articles/first-grader-skips-words-when-reading-aloud" />
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Article",
-            "headline": "First Grader Skips Words When Reading Aloud",
-            "description": "Comprehensive guide to understanding and fixing word skipping in first graders, including 6 root causes and specific interventions for each.",
-            "author": {
-              "@type": "Organization",
-              "name": "Word Wiz AI"
-            },
-            "datePublished": "2025-01-02",
-            "dateModified": "2025-01-02"
-          })}
-        </script>
-      </Helmet>
       <ArticlePageTemplate
         metaTitle="First Grader Skips Words When Reading Aloud (6 Causes + Fixes)"
         metaDescription="Your first grader skips words when reading? Learn the 6 root causes (text too hard, tracking issues, rushing, guessing, etc.) and proven fixes for each."

@@ -1,134 +1,382 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
-import { createServer } from "vite";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Routes to prerender
-const routes = [
-  "/",
-  "/about",
-  "/contact",
-  "/comparisons/abcmouse-vs-hooked-on-phonics-vs-word-wiz-ai",
-  "/comparisons/reading-eggs-vs-starfall-vs-word-wiz-ai",
-  "/comparisons/homer-vs-khan-academy-kids-vs-word-wiz-ai",
-  "/comparisons/hooked-on-phonics-vs-word-wiz-ai",
-  "/comparisons/best-free-reading-apps",
+const projectRoot = join(__dirname, "..");
+const distPath = join(projectRoot, "dist");
+const appTsxPath = join(projectRoot, "src", "App.tsx");
+
+const SITE_ORIGIN = "https://wordwizai.com";
+
+/**
+ * Routes that must never be prerendered: the authenticated app surface,
+ * auth flows, and dev-only pages. These need JS anyway and have no SEO value.
+ *
+ * Matched on whole path segments, so "/practice-words/short-a" is NOT
+ * excluded by the "/practice" entry.
+ */
+const EXCLUDED_ROUTES = [
+  "/dashboard",
+  "/practice",
+  "/settings",
+  "/classes",
+  "/progress",
+  "/login",
+  "/signup",
+  "/oauth-callback",
+  "/toast-test",
 ];
 
-const distPath = join(__dirname, "..", "dist");
+/**
+ * Discover every prerenderable route straight from App.tsx.
+ *
+ * This is deliberately derived rather than hand-listed: the previous version
+ * of this script hardcoded 8 of 40 routes and silently went stale every time
+ * a new SEO page was added. Any new content route now prerenders for free.
+ */
+function discoverRoutes() {
+  const source = readFileSync(appTsxPath, "utf-8");
+  const found = new Set();
 
-async function prerenderRoutes() {
-  console.log("🚀 Starting prerender process...\n");
+  for (const match of source.matchAll(/path="([^"]+)"/g)) {
+    found.add(match[1]);
+  }
 
-  // Use puppeteer with a local preview server for better compatibility
-  const puppeteer = (await import("puppeteer")).default;
+  const routes = [...found]
+    // Drops the "*" catch-all.
+    .filter((route) => route.startsWith("/"))
+    // Drops parameterized routes like "/practice/:sessionId".
+    .filter((route) => !route.includes(":"))
+    .filter(
+      (route) =>
+        !EXCLUDED_ROUTES.some(
+          (excluded) => route === excluded || route.startsWith(`${excluded}/`)
+        )
+    )
+    .sort();
+
+  if (routes.length === 0) {
+    throw new Error(
+      `No prerenderable routes found in ${appTsxPath}. Has the Route syntax changed?`
+    );
+  }
+
+  return routes;
+}
+
+// HTML comments can legitimately mention tag names (index.html documents why
+// no <title> or canonical belongs there), so strip them before counting tags.
+const stripComments = (html) => html.replace(/<!--[\s\S]*?-->/g, "");
+
+const firstMatch = (html, pattern) => {
+  const match = html.match(pattern);
+  return match ? match[1].trim().replace(/\s+/g, " ") : null;
+};
+
+const titleOf = (html) => firstMatch(html, /<title[^>]*>([\s\S]*?)<\/title>/i);
+
+const titleCountOf = (html) => (html.match(/<title[^>]*>/gi) || []).length;
+
+const canonicalsOf = (html) =>
+  [...html.matchAll(/<link[^>]*rel="canonical"[^>]*>/gi)].map((m) =>
+    firstMatch(m[0], /href="([^"]*)"/i)
+  );
+
+const descriptionsOf = (html) =>
+  [...html.matchAll(/<meta[^>]*name="description"[^>]*>/gi)].map((m) =>
+    firstMatch(m[0], /content="([^"]*)"/i)
+  );
+
+/**
+ * The build gate. Every problem found here is one that would otherwise ship
+ * silently and cost organic traffic for months, so these are errors, not warnings.
+ */
+function validate(pages) {
+  const homepage = pages.find((page) => page.route === "/");
+  const problems = [];
+
+  for (const { route, html: rawHtml } of pages) {
+    const html = stripComments(rawHtml);
+    const title = titleOf(html);
+    const canonicals = canonicalsOf(html);
+    const descriptions = descriptionsOf(html);
+    const expectedCanonical = route === "/" ? `${SITE_ORIGIN}/` : `${SITE_ORIGIN}${route}`;
+
+    if (!title) {
+      problems.push(`${route} — no <title> in prerendered output`);
+    } else if (titleCountOf(html) > 1) {
+      problems.push(
+        `${route} — ${titleCountOf(
+          html
+        )} <title> tags. Remove the hardcoded one from index.html or the duplicate Helmet block from the page.`
+      );
+    }
+
+    if (canonicals.length === 0) {
+      problems.push(`${route} — no <link rel="canonical">`);
+    } else if (canonicals.length > 1) {
+      problems.push(
+        `${route} — ${canonicals.length} canonical tags (${canonicals.join(
+          ", "
+        )}). Search engines will ignore all of them. Remove the hardcoded one from index.html.`
+      );
+    } else if (canonicals[0].replace(/\/$/, "") !== expectedCanonical.replace(/\/$/, "")) {
+      problems.push(
+        `${route} — canonical points at ${canonicals[0]}, expected ${expectedCanonical}`
+      );
+    }
+
+    if (descriptions.length > 1) {
+      problems.push(`${route} — ${descriptions.length} meta descriptions, expected 1`);
+    }
+
+    if (
+      route !== "/" &&
+      homepage &&
+      title &&
+      title === titleOf(stripComments(homepage.html))
+    ) {
+      problems.push(
+        `${route} — title is identical to the homepage ("${title}"). This page has no Helmet block.`
+      );
+    }
+
+    if (!/<div id="root"[^>]*>\s*<[a-z]/i.test(html)) {
+      problems.push(`${route} — #root is empty; the app did not render before capture`);
+    }
+  }
+
+  return problems;
+}
+
+const SECTIONS = [
+  ["/guides/", "Guides"],
+  ["/comparisons/", "Comparisons"],
+  ["/articles/", "Articles"],
+];
+
+const sectionFor = (route) =>
+  SECTIONS.find(([prefix]) => route.startsWith(prefix))?.[1] ?? "Site";
+
+// llms.txt is plain markdown, so HTML entities from the serialized DOM
+// ("Phonics &amp; Pronunciation") need decoding back to their characters.
+const decodeEntities = (text) =>
+  text
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&nbsp;/g, " ");
+
+/**
+ * Emit /llms.txt and /llms-full.txt.
+ *
+ * Both are generated from the pages just prerendered, so they cannot drift out
+ * of sync with the site the way a hand-maintained file would. Answer engines
+ * (ChatGPT, Claude, Perplexity) don't execute JavaScript, so these plus the
+ * prerendered HTML are what make the content legible to them at all.
+ */
+function writeLlmsFiles(pages, distPath) {
+  const entries = pages.map(({ route, html, text }) => {
+    const clean = stripComments(html);
+    return {
+      route,
+      section: sectionFor(route),
+      title: decodeEntities(titleOf(clean) ?? route),
+      description: decodeEntities(descriptionsOf(clean)[0] ?? ""),
+      url: route === "/" ? `${SITE_ORIGIN}/` : `${SITE_ORIGIN}${route}`,
+      text,
+    };
+  });
+
+  const index = [
+    "# Word Wiz AI",
+    "",
+    "> A free, browser-based AI reading tutor for children ages 5-8. A child reads a",
+    "> sentence aloud; Word Wiz AI transcribes it at the phoneme level, compares it to",
+    "> the expected pronunciation, and gives targeted feedback on the specific sounds",
+    "> they missed. No subscription, no ads. Built around phonics rather than",
+    "> whole-word memorization.",
+    "",
+    "The pages below are written for parents and teachers of beginning and struggling",
+    "readers. Guides are instructional, comparisons evaluate other reading apps, and",
+    "articles diagnose specific reading problems.",
+    "",
+  ];
+
+  for (const [, section] of [...SECTIONS, ["", "Site"]]) {
+    const inSection = entries.filter((entry) => entry.section === section);
+    if (inSection.length === 0) continue;
+
+    index.push(`## ${section}`, "");
+    for (const entry of inSection.sort((a, b) => a.title.localeCompare(b.title))) {
+      index.push(
+        entry.description
+          ? `- [${entry.title}](${entry.url}): ${entry.description}`
+          : `- [${entry.title}](${entry.url})`
+      );
+    }
+    index.push("");
+  }
+
+  writeFileSync(join(distPath, "llms.txt"), index.join("\n"), "utf-8");
+
+  const full = [
+    "# Word Wiz AI — full content",
+    "",
+    `Generated ${new Date().toISOString().slice(0, 10)} from ${entries.length} pages.`,
+    "",
+  ];
+
+  for (const entry of entries) {
+    full.push(
+      "",
+      "---",
+      "",
+      `# ${entry.title}`,
+      `URL: ${entry.url}`,
+      "",
+      entry.text ?? "",
+      ""
+    );
+  }
+
+  writeFileSync(join(distPath, "llms-full.txt"), full.join("\n"), "utf-8");
+
+  return {
+    indexBytes: index.join("\n").length,
+    fullBytes: full.join("\n").length,
+  };
+}
+
+async function prerender() {
+  console.log("Starting prerender...\n");
+
+  if (!existsSync(join(distPath, "index.html"))) {
+    console.error(`No build found at ${distPath}. Run "vite build" first.`);
+    process.exit(1);
+  }
+
+  let puppeteer;
+  try {
+    puppeteer = (await import("puppeteer")).default;
+  } catch {
+    console.error(
+      'puppeteer is not installed. Run "npm install --save-dev puppeteer" in frontend/.'
+    );
+    process.exit(1);
+  }
+
+  const routes = discoverRoutes();
+  console.log(`Discovered ${routes.length} routes from src/App.tsx\n`);
 
   const browser = await puppeteer.launch({
     headless: "new",
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage",
-    ],
+    args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
   });
 
+  const { preview } = await import("vite");
+  const previewServer = await preview({
+    preview: { port: 4173, strictPort: true },
+    logLevel: "silent",
+  });
+  const baseUrl = "http://localhost:4173";
+
+  // Captured in memory and written only after every route succeeds. Writing
+  // during the loop would mutate dist/index.html mid-run, which is what the
+  // preview server hands to every not-yet-prerendered route.
+  const pages = [];
+
   try {
-    // Start Vite preview server
-    console.log("📦 Starting preview server...");
-    const { preview } = await import("vite");
-    const previewServer = await preview({
-      preview: {
-        port: 4173,
-        strictPort: true,
-      },
-      logLevel: "silent",
-    });
-
-    const baseUrl = `http://localhost:4173`;
-    console.log(`✓ Preview server running at ${baseUrl}\n`);
-
     for (const route of routes) {
-      console.log(`📄 Prerendering: ${route}`);
+      process.stdout.write(`  ${route} ... `);
 
       const page = await browser.newPage();
-
-      // Set a user agent to avoid bot detection
       await page.setUserAgent(
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
       );
 
-      // Navigate to the route
-      const url = `${baseUrl}${route}`;
-      await page.goto(url, {
-        waitUntil: "networkidle0",
-        timeout: 30000,
+      try {
+        await page.goto(`${baseUrl}${route}`, {
+          waitUntil: "networkidle2",
+          timeout: 45000,
+        });
+      } catch {
+        // A hanging third-party request shouldn't fail the route; the render
+        // check below is what actually decides whether the capture is usable.
+        process.stdout.write("(load timeout) ");
+      }
+
+      await page.waitForSelector("#root > *", { timeout: 15000 });
+
+      // react-helmet-async injects into <head> after the first paint, so wait
+      // for the canonical tag rather than racing it with a fixed delay.
+      await page
+        .waitForFunction(
+          () => document.querySelector('link[rel="canonical"]') !== null,
+          { timeout: 10000 }
+        )
+        .catch(() => process.stdout.write("(no canonical) "));
+
+      await new Promise((resolve) => setTimeout(resolve, 400));
+
+      const html = (await page.content()).replace(
+        '<div id="root"',
+        '<div id="root" data-prerendered="true"'
+      );
+
+      // Readable text, used to build llms-full.txt.
+      const text = await page.evaluate(() => {
+        const scope =
+          document.querySelector("article") ||
+          document.querySelector("main") ||
+          document.body;
+        return scope.innerText.replace(/\n{3,}/g, "\n\n").trim();
       });
 
-      // Wait for React to render
-      await page.waitForSelector("#root > *", { timeout: 10000 });
-
-      // Give React time to fully render
-      await page.evaluate(
-        () => new Promise((resolve) => setTimeout(resolve, 1000))
-      );
-
-      // Get the rendered HTML
-      const html = await page.content();
-
-      // Determine output path
-      const outputPath =
-        route === "/"
-          ? join(distPath, "index.html")
-          : join(distPath, route, "index.html");
-
-      // Create directory if it doesn't exist
-      const outputDir = dirname(outputPath);
-      if (!existsSync(outputDir)) {
-        mkdirSync(outputDir, { recursive: true });
-      }
-
-      // Process HTML for nested routes
-      let processedHtml = html;
-
-      if (route !== "/") {
-        const depth = route.split("/").filter((p) => p).length;
-        const prefix = "../".repeat(depth);
-
-        processedHtml = html
-          .replace(/href="\/assets\//g, `href="${prefix}assets/`)
-          .replace(/src="\/assets\//g, `src="${prefix}assets/`)
-          .replace(/href="\//g, `href="${prefix}`)
-          .replace('id="root"', 'id="root" data-server-rendered="true"');
-      } else {
-        processedHtml = html.replace(
-          'id="root"',
-          'id="root" data-server-rendered="true"'
-        );
-      }
-
-      // Write the prerendered HTML
-      writeFileSync(outputPath, processedHtml, "utf-8");
-      console.log(`  ✓ Saved to: ${outputPath.replace(distPath, "dist")}\n`);
-
+      pages.push({ route, html, text });
       await page.close();
+      console.log("ok");
     }
-
-    // Close preview server
-    await previewServer.httpServer.close();
-    console.log("✓ Preview server closed\n");
-  } catch (error) {
-    console.error("❌ Prerender error:", error);
-    process.exit(1);
   } finally {
     await browser.close();
+    await previewServer.close?.();
   }
 
-  console.log("✅ Prerender complete!\n");
-  console.log(`📊 Prerendered ${routes.length} routes:`);
-  routes.forEach((route) => console.log(`   - ${route}`));
+  console.log("\nValidating output...");
+  const problems = validate(pages);
+
+  if (problems.length > 0) {
+    console.error(`\nPrerender validation failed (${problems.length} problems):\n`);
+    for (const problem of problems) console.error(`  - ${problem}`);
+    console.error("\nNothing was written. Fix the above and rebuild.\n");
+    process.exit(1);
+  }
+
+  for (const { route, html } of pages) {
+    const outputPath =
+      route === "/"
+        ? join(distPath, "index.html")
+        : join(distPath, route, "index.html");
+
+    mkdirSync(dirname(outputPath), { recursive: true });
+    writeFileSync(outputPath, html, "utf-8");
+  }
+
+  const llms = writeLlmsFiles(pages, distPath);
+
+  console.log(`Validation passed. Wrote ${pages.length} prerendered pages.`);
+  console.log(
+    `Wrote llms.txt (${(llms.indexBytes / 1024).toFixed(1)}kb) and ` +
+      `llms-full.txt (${(llms.fullBytes / 1024).toFixed(0)}kb).\n`
+  );
 }
 
-prerenderRoutes();
+prerender().catch((error) => {
+  console.error("Prerender failed:", error);
+  process.exit(1);
+});

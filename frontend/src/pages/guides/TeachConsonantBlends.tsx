@@ -387,7 +387,7 @@ const TeachConsonantBlends = () => {
     },
     {
       title: "Short Vowel Sounds Exercises for Kindergarten",
-      href: "/guides/short-vowel-sounds-exercises-kindergarten",
+      href: "/guides/short-vowel-sounds-exercises-beginning-readers",
       category: "Guides",
       readTime: 10,
     },

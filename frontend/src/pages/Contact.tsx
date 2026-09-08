@@ -14,6 +14,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
+import SeoHead from "@/components/SeoHead";
 import LandingPageFooter from "@/components/LandingPageFooter";
 import LandingPageCTA from "@/components/LandingPageCTA";
 import React from "react";
@@ -93,6 +94,12 @@ const Contact = () => {
 
   return (
     <main className="scroll-smooth bg-background text-foreground">
+      <SeoHead
+        title="Contact Word Wiz AI | Questions, Feedback & School Enquiries"
+        description="Get in touch with Word Wiz AI about the free reading tutor, classroom use, feedback, or partnership questions."
+        canonicalPath="/contact"
+      />
+
       {/* Navbar */}
       <LandingPageNavbar />
 

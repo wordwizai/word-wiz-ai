@@ -746,7 +746,7 @@ const PhonemeAwarenessGuide = () => {
 
   const breadcrumbs = [
     { label: "Home", href: "/" },
-    { label: "Guides", href: "/guides" },
+    { label: "Guides", href: "/guides/how-to-teach-phonics-at-home" },
     {
       label: "Phoneme Awareness Guide",
       href: "/guides/phoneme-awareness-complete-guide",

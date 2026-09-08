@@ -470,7 +470,7 @@ const WorksheetsVsInteractive = () => {
   const relatedArticles = [
     {
       title: "Phonics Without Worksheets: Play-Based Alternatives",
-      href: "/guides/phonics-without-worksheets",
+      href: "/guides/phonics-practice-without-worksheets-kindergarten",
       category: "Play-Based",
       readTime: 8,
     },
@@ -482,7 +482,7 @@ const WorksheetsVsInteractive = () => {
     },
     {
       title: "AI Reading Tutors vs Traditional Reading Apps",
-      href: "/comparisons/ai-reading-tutors-vs-traditional-apps",
+      href: "/comparisons/ai-reading-app-vs-traditional-phonics-program",
       category: "App Comparison",
       readTime: 9,
     },
@@ -510,7 +510,7 @@ const WorksheetsVsInteractive = () => {
         { label: "Home", href: "/" },
         {
           label: "Comparisons",
-          href: "/comparisons/ai-reading-tutors-vs-traditional-apps",
+          href: "/comparisons/ai-reading-app-vs-traditional-phonics-program",
         },
         { label: "Worksheets vs Interactive", href: "/comparisons/phonics-worksheets-vs-interactive-reading" },
       ]}

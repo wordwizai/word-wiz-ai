@@ -755,7 +755,7 @@ const ChoosingReadingApp = () => {
 
   const breadcrumbs = [
     { label: "Home", href: "/" },
-    { label: "Guides", href: "/guides" },
+    { label: "Guides", href: "/guides/how-to-teach-phonics-at-home" },
     {
       label: "How to Choose Reading App",
       href: "/guides/how-to-choose-reading-app",

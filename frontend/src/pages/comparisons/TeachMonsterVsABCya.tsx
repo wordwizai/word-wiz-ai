@@ -330,7 +330,7 @@ const TeachMonsterABCyaComparison = () => {
       metaDescription="Compare Teach Your Monster, ABCya, and Word Wiz AI. All offer free phonics practice, but only Word Wiz AI provides speech recognition. See which is right for your child."
       canonicalUrl="https://wordwizai.com/comparisons/teach-your-monster-vs-abcya-vs-word-wiz-ai"
       h1Title="Teach Your Monster vs ABCya vs Word Wiz AI: Which Free Reading Game is Best?"
-      introText="Looking for free reading games for your child? Compare Teach Your Monster's adventure phonics, ABCya's game variety, and Word Wiz AI's unique speech recognition. See which fits your child's needs and learning style."
+      introText="Teach Your Monster is free in the browser and $4.99 on mobile, ABCya is free with ads or $99/year ad-free, and Word Wiz AI is free with no ads and the only one giving spoken pronunciation feedback. Teach Your Monster plus Word Wiz AI is the strongest free combination: engaging phonics games plus accuracy checking."
       verdict={verdict}
       faqs={faqs}
       structuredData={structuredData}

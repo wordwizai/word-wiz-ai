@@ -538,19 +538,19 @@ const BestPhonicsAppKindergarten = () => {
   const relatedArticles = [
     {
       title: "Hooked on Phonics vs Word Wiz AI: In-Depth Comparison",
-      href: "/articles/hooked-on-phonics-vs-word-wiz-ai",
+      href: "/comparisons/hooked-on-phonics-vs-word-wiz-ai",
       category: "App Comparisons",
       readTime: 12,
     },
     {
       title: "Free Phonics Programs vs Paid: What's the Difference?",
-      href: "/comparisons/free-phonics-programs-vs-paid",
+      href: "/comparisons/free-phonics-apps-vs-paid-reading-programs",
       category: "App Comparisons",
       readTime: 10,
     },
     {
       title: "AI Reading Tutors vs Traditional Reading Apps",
-      href: "/comparisons/ai-reading-tutors-vs-traditional-apps",
+      href: "/comparisons/ai-reading-app-vs-traditional-phonics-program",
       category: "App Comparisons",
       readTime: 11,
     },
@@ -578,7 +578,7 @@ const BestPhonicsAppKindergarten = () => {
         { label: "Home", href: "/" },
         {
           label: "Comparisons",
-          href: "/comparisons/ai-reading-tutors-vs-traditional-apps",
+          href: "/comparisons/ai-reading-app-vs-traditional-phonics-program",
         },
         { label: "Best Phonics App for Kindergarten", href: "/comparisons/best-phonics-app-kindergarten-struggling-readers" },
       ]}

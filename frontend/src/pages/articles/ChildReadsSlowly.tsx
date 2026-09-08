@@ -1,4 +1,3 @@
-import { Helmet } from "react-helmet-async";
 import ArticlePageTemplate, { type ArticleSection } from "../../components/ArticlePageTemplate";
 
 const ChildReadsSlowly = () => {
@@ -599,28 +598,6 @@ const ChildReadsSlowly = () => {
 
   return (
     <>
-      <Helmet>
-        <title>Child Reads Slowly and Struggles with Fluency (Solutions That Work)</title>
-        <meta 
-          name="description" 
-          content="Your child reads accurately but painfully slow? Learn the 5 root causes of slow reading and 6 proven solutions to build reading fluency in 8-12 weeks." 
-        />
-        <link rel="canonical" href="https://wordwizai.com/articles/child-reads-slowly-struggles-with-fluency" />
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Article",
-            "headline": "Child Reads Slowly and Struggles with Fluency",
-            "description": "Understand why children read slowly and learn proven strategies to build reading fluency including repeated reading, reader's theater, and timed practice.",
-            "author": {
-              "@type": "Organization",
-              "name": "Word Wiz AI"
-            },
-            "datePublished": "2025-01-02",
-            "dateModified": "2025-01-02"
-          })}
-        </script>
-      </Helmet>
       <ArticlePageTemplate
         metaTitle="Child Reads Slowly and Struggles with Fluency (Solutions That Work)"
         metaDescription="Your child reads accurately but painfully slow? Learn the 5 root causes of slow reading and 6 proven solutions to build reading fluency in 8-12 weeks."

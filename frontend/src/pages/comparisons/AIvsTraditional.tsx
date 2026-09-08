@@ -585,51 +585,77 @@ const AIvsTraditional = () => {
   const relatedArticles = [
     {
       title: "Reading Tutor vs Reading App: Which Is Better?",
-      url: "/comparisons/reading-tutor-vs-reading-app"
+      href: "/comparisons/reading-tutor-vs-reading-app",
+      category: "Comparisons",
+      readTime: 14,
     },
     {
       title: "How to Teach CVC Words to Struggling Readers",
-      url: "/guides/how-to-teach-cvc-words-to-struggling-readers"
+      href: "/guides/how-to-teach-cvc-words-to-struggling-readers",
+      category: "Phonics Guides",
+      readTime: 12,
     },
     {
       title: "Daily Phonics Practice Routine for Kindergarten",
-      url: "/guides/daily-phonics-practice-routine-kindergarten-at-home"
-    }
+      href: "/guides/daily-phonics-practice-routine-kindergarten-at-home",
+      category: "Phonics Guides",
+      readTime: 10,
+    },
   ];
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: "AI Reading App vs Traditional Phonics Program: 2025 Comparison",
+    description:
+      "Comprehensive comparison of AI-powered reading apps and traditional phonics programs across 15 factors including cost, effectiveness, and engagement.",
+    author: {
+      "@type": "Organization",
+      name: "Word Wiz AI",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Word Wiz AI",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://wordwizai.com/wordwizIcon.svg",
+      },
+    },
+    datePublished: "2025-01-02",
+    dateModified: "2025-01-02",
+  };
+
   return (
-    <>
-      <Helmet>
-        <title>AI Reading App vs Traditional Phonics Program: 2025 Comparison</title>
-        <meta 
-          name="description" 
-          content="Compare modern AI reading tools like Word Wiz AI with traditional phonics programs like Hooked on Phonics. Which approach works better for your child?" 
-        />
-        <link rel="canonical" href="https://wordwizai.com/comparisons/ai-reading-app-vs-traditional-phonics-program" />
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Article",
-            "headline": "AI Reading App vs Traditional Phonics Program: 2025 Comparison",
-            "description": "Comprehensive comparison of AI-powered reading apps and traditional phonics programs across 15 factors including cost, effectiveness, and engagement.",
-            "author": {
-              "@type": "Organization",
-              "name": "Word Wiz AI"
-            },
-            "datePublished": "2025-01-02",
-            "dateModified": "2025-01-02"
-          })}
-        </script>
-      </Helmet>
-      <ArticlePageTemplate
-        title="AI Reading App vs Traditional Phonics Program: 2025 Comparison"
-        subtitle="Compare modern AI tools with time-tested traditional programs across cost, effectiveness, and 13 other critical factors"
-        content={content}
-        lastUpdated="January 2, 2025"
-        readTime="16 min"
-        relatedArticles={relatedArticles}
-      />
-    </>
+    <ArticlePageTemplate
+      metaTitle="AI Reading App vs Traditional Phonics Program: 2025 Comparison"
+      metaDescription="Compare modern AI reading tools like Word Wiz AI with traditional phonics programs like Hooked on Phonics. Which approach works better for your child?"
+      canonicalUrl="https://wordwizai.com/comparisons/ai-reading-app-vs-traditional-phonics-program"
+      heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=630&fit=crop"
+      heroImageAlt="Parent and child comparing reading practice methods at home"
+      headline="AI Reading App vs Traditional Phonics Program: 2025 Comparison"
+      subheadline="Compare modern AI tools with time-tested traditional programs across cost, effectiveness, and 13 other critical factors"
+      author={{
+        name: "Word Wiz AI Editorial Team",
+        bio: "Expert educators specializing in early literacy and phonics instruction.",
+      }}
+      publishDate="2025-01-02"
+      readTime={16}
+      category="Comparisons"
+      content={content}
+      relatedArticles={relatedArticles}
+      structuredData={structuredData}
+      breadcrumbs={[
+        { label: "Home", href: "/" },
+        {
+          label: "Comparisons",
+          href: "/comparisons/ai-reading-app-vs-traditional-phonics-program",
+        },
+        {
+          label: "AI vs Traditional Phonics",
+          href: "/comparisons/ai-reading-app-vs-traditional-phonics-program",
+        },
+      ]}
+    />
   );
 };
 

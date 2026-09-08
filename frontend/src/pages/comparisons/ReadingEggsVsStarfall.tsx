@@ -403,9 +403,9 @@ const ReadingEggsStarfallComparison = () => {
       wordWizDetails={wordWizDetails}
       metaTitle="Reading Eggs vs Starfall vs Word Wiz AI (2025): Which is Best?"
       metaDescription="Compare Reading Eggs, Starfall, and Word Wiz AI. See features, pricing, speech recognition, and which online reading program offers the best value for your child."
-      canonicalUrl="https://wordwizai.com/comparisons/reading-eggs-vs-starfall"
+      canonicalUrl="https://wordwizai.com/comparisons/reading-eggs-vs-starfall-vs-word-wiz-ai"
       h1Title="Reading Eggs vs Starfall vs Word Wiz AI: Complete Comparison (2025)"
-      introText="Comparing Reading Eggs' structured curriculum, Starfall's free nonprofit platform, or Word Wiz AI's speech recognition? This detailed analysis covers everything you need to choose the right online reading program for your family."
+      introText="Reading Eggs costs $12.99/month or $79.99/year for a structured curriculum, Starfall is free with limits or $60/year in full, and Word Wiz AI is free and the only one that listens to a child read and flags mispronounced sounds. Use Reading Eggs for sequence, Starfall for accessibility, and Word Wiz AI for pronunciation."
       verdict={verdict}
       faqs={faqs}
       structuredData={structuredData}

@@ -426,9 +426,9 @@ const ABCmouseHookedOnPhonicsComparison = () => {
       wordWizDetails={wordWizDetails}
       metaTitle="ABCmouse vs Hooked on Phonics vs Word Wiz AI (2025): Which is Best?"
       metaDescription="Detailed comparison of ABCmouse, Hooked on Phonics, and Word Wiz AI. Compare features, pricing, speech recognition, and effectiveness. See which reading program is right for your child."
-      canonicalUrl="https://wordwizai.com/comparisons/abcmouse-vs-hooked-on-phonics"
+      canonicalUrl="https://wordwizai.com/comparisons/abcmouse-vs-hooked-on-phonics-vs-word-wiz-ai"
       h1Title="ABCmouse vs Hooked on Phonics vs Word Wiz AI: Complete Comparison (2025)"
-      introText="Choosing between ABCmouse's comprehensive curriculum, Hooked on Phonics' traditional approach, or Word Wiz AI's cutting-edge speech recognition? This detailed comparison covers features, pricing, effectiveness, and helps you decide which reading program is best for your child."
+      introText="ABCmouse costs $14.99/month for the broadest curriculum, Hooked on Phonics runs $19.99/month plus materials for traditional systematic phonics, and Word Wiz AI is free and is the only one of the three that listens to a child read aloud and corrects pronunciation. Choose ABCmouse for breadth, Hooked on Phonics for structure, and Word Wiz AI for pronunciation accuracy."
       verdict={verdict}
       faqs={faqs}
       structuredData={structuredData}

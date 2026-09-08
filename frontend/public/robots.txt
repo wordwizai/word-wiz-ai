@@ -1,9 +1,21 @@
 # https://www.robotstxt.org/robotstxt.html
+
 User-agent: *
 Allow: /
+
+# Authenticated app surface. No search value, and these routes require JS
+# and a session anyway.
+#
+# NOTE: Disallow paths are PREFIX matches. A bare "Disallow: /practice" also
+# blocks "/practice-words/...", so the exact-match "$" and the trailing-slash
+# form are both needed to keep future content prefixes crawlable.
+Disallow: /practice$
+Disallow: /practice/
 Disallow: /dashboard
-Disallow: /practice
+Disallow: /progress
 Disallow: /settings
 Disallow: /classes
+Disallow: /oauth-callback
+Disallow: /toast-test
 
 Sitemap: https://wordwizai.com/sitemap.xml

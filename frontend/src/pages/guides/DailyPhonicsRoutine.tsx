@@ -333,7 +333,7 @@ const DailyPhonicsRoutine = () => {
     },
     {
       title: "5 Minute Reading Practice Activities for Kids",
-      href: "/guides/5-minute-reading-practice-activities-for-kids",
+      href: "/guides/five-minute-reading-practice-activities-kids",
       category: "Guides",
       readTime: 10,
     },

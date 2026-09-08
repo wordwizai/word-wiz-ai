@@ -558,7 +558,7 @@ const DecodableBooksVsLeveledReaders = () => {
 
   const breadcrumbs = [
     { label: "Home", href: "/" },
-    { label: "Articles", href: "/articles" },
+    { label: "Articles", href: "/articles/why-child-hates-reading" },
     {
       label: "Decodable Books vs Leveled Readers",
       href: "/articles/decodable-books-vs-leveled-readers",

@@ -448,13 +448,13 @@ const ChildMemorizesBooksInsteadReading = () => {
   const relatedArticles = [
     {
       title: "Why Does My Child Guess Words When Reading?",
-      href: "/articles/why-does-child-guess-words-reading",
+      href: "/articles/kindergartener-guesses-words-instead-sounding-out",
       category: "Reading Challenges",
       readTime: 9,
     },
     {
       title: "Child Can't Blend Sounds Together",
-      href: "/articles/child-cant-blend-sounds-together",
+      href: "/articles/child-cant-blend-sounds-into-words",
       category: "Reading Challenges",
       readTime: 11,
     },

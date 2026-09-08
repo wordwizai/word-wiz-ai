@@ -4,6 +4,7 @@ import { wordWizIcon } from "@/assets";
 import React from "react";
 import { Shield } from "lucide-react";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
+import SeoHead from "@/components/SeoHead";
 import LandingPageFooter from "@/components/LandingPageFooter";
 import LandingPageCTA from "@/components/LandingPageCTA";
 
@@ -36,6 +37,12 @@ const Privacy = () => {
 
   return (
     <main className="scroll-smooth bg-background text-foreground">
+      <SeoHead
+        title="Privacy Policy | Word Wiz AI"
+        description="How Word Wiz AI handles children's audio, account data, and analytics. What we collect, what we never store, and how to request deletion."
+        canonicalPath="/privacy"
+      />
+
       {/* Navbar */}
       <LandingPageNavbar />
 

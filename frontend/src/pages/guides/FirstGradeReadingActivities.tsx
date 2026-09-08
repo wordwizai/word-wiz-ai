@@ -484,13 +484,13 @@ const FirstGradeReadingActivities = () => {
   const relatedArticles = [
     {
       title: "Daily Phonics Routine for Struggling Readers",
-      href: "/guides/daily-phonics-routine-struggling-readers",
+      href: "/guides/daily-phonics-practice-routine-kindergarten-at-home",
       category: "Phonics Practice",
       readTime: 10,
     },
     {
       title: "5-Minute Reading Practice Activities for Busy Families",
-      href: "/guides/five-minute-reading-practice-activities",
+      href: "/guides/five-minute-reading-practice-activities-kids",
       category: "Quick Activities",
       readTime: 8,
     },

@@ -562,7 +562,7 @@ const ChildPronounceWordsWrong = () => {
 
   const breadcrumbs = [
     { label: "Home", href: "/" },
-    { label: "Articles", href: "/articles" },
+    { label: "Articles", href: "/articles/why-child-hates-reading" },
     {
       label: "Child Pronounces Words Wrong",
       href: "/articles/child-pronounces-words-wrong",

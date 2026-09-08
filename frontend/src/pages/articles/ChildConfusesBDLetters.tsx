@@ -448,7 +448,7 @@ const ChildConfusesBDLetters = () => {
   const relatedArticles = [
     {
       title: "Child Pronounces Words Wrong When Reading",
-      href: "/articles/child-pronounces-words-wrong-reading",
+      href: "/articles/child-pronounces-words-wrong",
       category: "Reading Challenges",
       readTime: 11,
     },

@@ -384,13 +384,13 @@ const ReadingPracticeKidsHateReading = () => {
   const relatedArticles = [
     {
       title: "Why Does My Child Hate Reading? Expert Insights",
-      href: "/articles/why-does-child-hate-reading",
+      href: "/articles/why-child-hates-reading",
       category: "Reading Help",
       readTime: 7,
     },
     {
       title: "5-Minute Reading Practice Activities",
-      href: "/guides/five-minute-reading-practice-activities",
+      href: "/guides/five-minute-reading-practice-activities-kids",
       category: "Reading Practice",
       readTime: 5,
     },

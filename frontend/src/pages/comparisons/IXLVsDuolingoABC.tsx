@@ -377,7 +377,7 @@ const IXLDuolingoABCComparison = () => {
       metaDescription="Compare IXL Language Arts, Duolingo ABC, and Word Wiz AI for teaching reading. See pricing, features, and which is right for your child. Free speech recognition option included."
       canonicalUrl="https://wordwizai.com/comparisons/ixl-vs-duolingo-abc-vs-word-wiz-ai"
       h1Title="IXL Language Arts vs Duolingo ABC vs Word Wiz AI: Comprehensive Comparison"
-      introText="Comparing literacy programs for your child? See how IXL's comprehensive curriculum, Duolingo ABC's free gamified learning, and Word Wiz AI's unique speech recognition technology stack up. Find the right fit for your family's needs and budget."
+      introText="Duolingo ABC is completely free with no ads for ages 3-7, IXL costs $19.95/month or $79/year for comprehensive coverage, and Word Wiz AI is free and the only one giving pronunciation feedback. The strongest free pairing is Duolingo ABC for early reading plus Word Wiz AI for pronunciation practice."
       verdict={verdict}
       faqs={faqs}
       structuredData={structuredData}

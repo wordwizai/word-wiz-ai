@@ -1,4 +1,3 @@
-import { Helmet } from "react-helmet-async";
 import ArticlePageTemplate, {
   type ArticleSection,
 } from "../../components/ArticlePageTemplate";
@@ -587,34 +586,6 @@ const PhonicsWithoutWorksheets = () => {
 
   return (
     <>
-      <Helmet>
-        <title>
-          Phonics Practice Without Worksheets for Kindergarten (25+ Activities)
-        </title>
-        <meta
-          name="description"
-          content="Ditch the worksheets! Learn 25+ hands-on, movement-based, and game-based phonics activities that work better than workbooks for kindergarteners."
-        />
-        <link
-          rel="canonical"
-          href="https://wordwizai.com/guides/phonics-practice-without-worksheets-kindergarten"
-        />
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Article",
-            headline: "Phonics Practice Without Worksheets for Kindergarten",
-            description:
-              "Discover 25+ effective alternatives to phonics worksheets including movement activities, games, manipulatives, and real-world integration strategies.",
-            author: {
-              "@type": "Organization",
-              name: "Word Wiz AI",
-            },
-            datePublished: "2025-01-02",
-            dateModified: "2025-01-02",
-          })}
-        </script>
-      </Helmet>
       <ArticlePageTemplate
         metaTitle="Phonics Practice Without Worksheets for Kindergarten (25+ Activities)"
         metaDescription="Ditch the worksheets! Learn 25+ hands-on, movement-based, and game-based phonics activities that work better than workbooks for kindergarteners."

@@ -413,7 +413,7 @@ const ShortVowelSounds = () => {
     <ArticlePageTemplate
       metaTitle="Short Vowel Sounds Exercises for Kindergarten (A, E, I, O, U)"
       metaDescription="Master short vowel sounds with proven exercises for kindergarten. Includes word lists, practice activities, and a clear progression from sound recognition to reading."
-      canonicalUrl="https://wordwizai.com/guides/short-vowel-sounds-exercises-kindergarten"
+      canonicalUrl="https://wordwizai.com/guides/short-vowel-sounds-exercises-beginning-readers"
       heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=630&fit=crop"
       heroImageAlt="Kindergarten child learning short vowel sounds with colorful letter cards"
       headline="Short Vowel Sounds Exercises for Kindergarten"
@@ -433,7 +433,7 @@ const ShortVowelSounds = () => {
         { label: "Guides", href: "/guides/how-to-teach-phonics-at-home" },
         {
           label: "Short Vowel Sounds",
-          href: "/guides/short-vowel-sounds-exercises-kindergarten",
+          href: "/guides/short-vowel-sounds-exercises-beginning-readers",
         },
       ]}
     />

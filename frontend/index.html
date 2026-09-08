@@ -13,55 +13,23 @@
     <link rel="dns-prefetch" href="https://www.google-analytics.com" />
     <link rel="dns-prefetch" href="https://cdn.vercel-insights.com" />
 
-    <!-- Primary Meta Tags -->
-    <title>
-      Word Wiz AI - Free AI Reading Tutor for Kids | Learn Phonics &
-      Pronunciation
-    </title>
-    <meta
-      name="title"
-      content="Word Wiz AI - Free AI Reading Tutor for Kids | Learn Phonics & Pronunciation"
-    />
-    <meta
-      name="description"
-      content="Help your child learn to read with Word Wiz AI, a 100% free AI-powered reading tutor. Get personalized phonics practice with pronunciation feedback using advanced speech recognition. Perfect for kids ages 5-8."
-    />
-    <meta
-      name="keywords"
-      content="reading app, phonics app, learn to read, pronunciation feedback, AI tutor, free reading app, kids education, phoneme awareness, speech recognition, early literacy"
-    />
+    <!--
+      SEO NOTE — do not add page-specific tags to this file.
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://wordwizai.com/" />
-    <meta
-      property="og:title"
-      content="Word Wiz AI - Free AI Reading Tutor for Kids"
-    />
-    <meta
-      property="og:description"
-      content="Personalized phonics practice with AI-powered pronunciation feedback. 100% free, no ads. Help kids learn to read with advanced speech recognition technology."
-    />
-    <meta property="og:image" content="https://wordwizai.com/og-image.png" />
+      index.html is served for every route, so any <title>, description,
+      canonical, Open Graph or Twitter tag placed here appears on all 44 pages.
+      A hardcoded canonical pointing at "/" is exactly what previously made
+      every article, guide and comparison page look like a duplicate of the
+      homepage to search engines.
 
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://wordwizai.com/" />
-    <meta
-      name="twitter:title"
-      content="Word Wiz AI - Free AI Reading Tutor for Kids"
-    />
-    <meta
-      name="twitter:description"
-      content="Help kids learn to read with AI-powered phonics practice. 100% free, no subscriptions."
-    />
-    <meta
-      name="twitter:image"
-      content="https://wordwizai.com/twitter-card.png"
-    />
+      Per-page tags come from react-helmet-async, via SeoHead (static pages) or
+      ArticlePageTemplate / ComparisonPageTemplate (content pages), and are
+      baked into each route's static HTML by scripts/prerender.mjs.
 
-    <!-- Additional SEO -->
-    <link rel="canonical" href="https://wordwizai.com/" />
+      The <title> below is only a fallback for routes that render no Helmet
+      block (the authenticated app surface, which is noindex anyway).
+    -->
+    <title>Word Wiz AI - Free AI Reading Tutor for Kids</title>
     <meta name="robots" content="index, follow" />
     <meta name="language" content="English" />
     <meta name="author" content="Word Wiz AI" />

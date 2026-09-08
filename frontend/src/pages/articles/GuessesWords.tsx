@@ -365,7 +365,7 @@ const GuessesWords = () => {
     },
     {
       title: "Decodable Sentences for Beginning Readers Practice",
-      href: "/guides/decodable-sentences-beginning-readers-practice",
+      href: "/guides/decodable-sentences-for-beginning-readers",
       category: "Guides",
       readTime: 10,
     },

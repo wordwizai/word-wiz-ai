@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
+import SeoHead from "@/components/SeoHead";
 import LandingPageFooter from "@/components/LandingPageFooter";
 import LandingPageCTA from "@/components/LandingPageCTA";
 import FAQ from "@/components/FAQ";
@@ -84,6 +85,33 @@ const LandingPage = () => {
 
   return (
     <main className="scroll-smooth bg-background text-foreground">
+      <SeoHead
+        title="Word Wiz AI - Free AI Reading Tutor for Kids | Learn Phonics & Pronunciation"
+        description="Help your child learn to read with Word Wiz AI, a 100% free AI-powered reading tutor. Get personalized phonics practice with pronunciation feedback using advanced speech recognition. Perfect for kids ages 5-8."
+        canonicalPath="/"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "SoftwareApplication",
+          name: "Word Wiz AI",
+          applicationCategory: "EducationalApplication",
+          operatingSystem: "Any (web browser)",
+          description:
+            "A free AI-powered reading tutor that listens to children read aloud and gives phoneme-level pronunciation feedback.",
+          url: "https://wordwizai.com/",
+          offers: {
+            "@type": "Offer",
+            price: "0",
+            priceCurrency: "USD",
+          },
+          audience: {
+            "@type": "EducationalAudience",
+            educationalRole: "student",
+            suggestedMinAge: 5,
+            suggestedMaxAge: 8,
+          },
+        }}
+      />
+
       {/* Navbar */}
       <LandingPageNavbar />
 

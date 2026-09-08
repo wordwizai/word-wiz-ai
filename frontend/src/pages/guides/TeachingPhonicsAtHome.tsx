@@ -604,7 +604,7 @@ const TeachingPhonicsAtHome = () => {
 
   const breadcrumbs = [
     { label: "Home", href: "/" },
-    { label: "Guides", href: "/guides" },
+    { label: "Guides", href: "/guides/how-to-teach-phonics-at-home" },
     {
       label: "Teaching Phonics at Home",
       href: "/guides/how-to-teach-phonics-at-home",

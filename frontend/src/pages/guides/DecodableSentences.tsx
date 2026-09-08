@@ -408,7 +408,7 @@ const DecodableSentences = () => {
     },
     {
       title: "Short Vowel Sounds Exercises for Kindergarten",
-      href: "/guides/short-vowel-sounds-exercises-kindergarten",
+      href: "/guides/short-vowel-sounds-exercises-beginning-readers",
       category: "Guides",
       readTime: 12,
     },
@@ -452,7 +452,7 @@ const DecodableSentences = () => {
     <ArticlePageTemplate
       metaTitle="Decodable Sentences for Beginning Readers: 100+ Examples"
       metaDescription="Free decodable sentences for beginning readers organized by skill level. Understand what makes sentences decodable and how to use them effectively for practice."
-      canonicalUrl="https://wordwizai.com/guides/decodable-sentences-beginning-readers-practice"
+      canonicalUrl="https://wordwizai.com/guides/decodable-sentences-for-beginning-readers"
       heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=630&fit=crop"
       heroImageAlt="Child practicing reading with decodable sentences"
       headline="Decodable Sentences for Beginning Readers"
@@ -472,7 +472,7 @@ const DecodableSentences = () => {
         { label: "Guides", href: "/guides/how-to-teach-phonics-at-home" },
         {
           label: "Decodable Sentences",
-          href: "/guides/decodable-sentences-beginning-readers-practice",
+          href: "/guides/decodable-sentences-for-beginning-readers",
         },
       ]}
     />

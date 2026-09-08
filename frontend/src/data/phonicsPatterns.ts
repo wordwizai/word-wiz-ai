@@ -1638,7 +1638,559 @@ export const phonicsPatterns: PhonicsPattern[] = [
     relatedSlugs: ["ug-family", "un-family", "ub-family"],
   },
 
-  // ===END-BATCH-3===
+  // ============================================================
+  // DIGRAPHS
+  // ============================================================
+  {
+    slug: "sh-digraph",
+    pattern: "sh",
+    displayName: "SH Digraph",
+    category: "digraph",
+    gradeLevel: "Kindergarten–Grade 1",
+    words: [
+      "ship", "shop", "shed", "shell", "shine", "share", "fish",
+      "wish", "dish", "cash", "wash", "brush", "crash", "flash",
+    ],
+    sampleSentences: [
+      "The ship will shop for a shell.",
+      "Wish for fish in the dish.",
+      "Wash the cash and brush.",
+      "Share the shine, then crash.",
+    ],
+    teachingNotes: [
+      "The digraph 'sh' is usually the very first two-letter-one-sound combination a child learns, and it is worth being explicit about what makes it different from a blend: in a blend like 'st,' you can still hear both the /s/ and the /t/, but in 'sh,' the s and h disappear completely into one brand-new sound that neither letter makes on its own. Say 'sh' by itself, finger to lips, and have your child feel that it is a single continuous sound rather than two clicks.",
+      "'Sh' shows up at the beginning ('ship,' 'shop'), the end ('fish,' 'wish'), and occasionally in the middle of words, so give your child practice spotting it in all three positions rather than only at the start of a word. A quick sorting game — cards with 'sh' at the beginning versus the end — helps children notice the digraph regardless of where it lands.",
+    ],
+    commonErrors: [
+      "Trying to sound out 's' and 'h' as two separate sounds",
+      "Confusing 'sh' with 'ch' since both are common early digraphs",
+      "Missing 'sh' when it appears at the end of a word instead of the beginning",
+    ],
+    relatedSlugs: ["ch-digraph", "ash-family", "ish-family"],
+  },
+  {
+    slug: "ch-digraph",
+    pattern: "ch",
+    displayName: "CH Digraph",
+    category: "digraph",
+    gradeLevel: "Kindergarten–Grade 1",
+    words: [
+      "chip", "chin", "chat", "chop", "cheese", "chair", "teach",
+      "beach", "peach", "lunch", "bench", "much", "such", "church",
+    ],
+    sampleSentences: [
+      "Chip and chat by the chair.",
+      "Teach me to reach the peach.",
+      "Much cheese is on the bench.",
+      "Church bells ring at lunch.",
+    ],
+    teachingNotes: [
+      "Like 'sh,' the digraph 'ch' makes one completely new sound when the two letters combine, and it is a good idea to directly compare 'sh' and 'ch' side by side once your child knows both, since they are visually similar and easy to mix up under time pressure. Have your child say 'ship' and 'chip' back to back and notice how the ch sound has a slight puff or click at the start that sh does not.",
+      "'Ch' also appears at the end of words ('much,' 'such,' 'lunch,' 'bench'), not just the beginning, so make sure practice includes both positions. A small number of 'ch' words, mostly borrowed from other languages, are pronounced like 'sh' (as in 'chef') or like 'k' (as in 'school'), but these are rare enough at this stage to set aside until your child is a more advanced reader.",
+    ],
+    commonErrors: [
+      "Confusing 'ch' with 'sh' when reading quickly",
+      "Trying to sound out 'c' and 'h' as two separate sounds",
+      "Missing 'ch' at the end of a word like 'lunch' or 'bench'",
+    ],
+    relatedSlugs: ["sh-digraph", "unch-family", "atch-family"],
+  },
+  {
+    slug: "th-digraph",
+    pattern: "th",
+    displayName: "TH Digraph",
+    category: "digraph",
+    gradeLevel: "Kindergarten–Grade 1",
+    words: [
+      "this", "that", "then", "thin", "bath", "math", "with",
+      "teeth", "three", "thumb", "think", "cloth", "moth", "path",
+    ],
+    sampleSentences: [
+      "This bath is with three.",
+      "Think about the thin moth.",
+      "That math path has a thumb.",
+      "Brush your teeth, then bathe.",
+    ],
+    teachingNotes: [
+      "The digraph 'th' is unusual because it actually represents two different sounds in English, and children need to hear both: a 'voiced' th where the vocal cords buzz (as in 'this,' 'that,' 'then') and an 'unvoiced' th with no buzz (as in 'thin,' 'bath,' 'three'). You do not need to teach the technical labels — just have your child put a hand on their throat while saying 'this' and then 'thin' and notice the difference in vibration.",
+      "Because 'th' words are so frequent — 'this,' 'that,' 'then,' and 'with' are among the most common words in English — accuracy here matters more than almost any other digraph. If your child substitutes an 'f' or 'd' sound for 'th' (a common developmental pattern, saying 'dis' for 'this' or 'baf' for 'bath'), that is often just a normal articulation stage that resolves with age, but mention it to a speech-language professional if it persists much past age seven.",
+    ],
+    commonErrors: [
+      "Substituting an f or d sound for th",
+      "Not distinguishing between the voiced and unvoiced versions of th",
+      "Trying to sound out 't' and 'h' as two separate sounds",
+    ],
+    relatedSlugs: ["wh-digraph", "sh-digraph", "ent-family"],
+  },
+  {
+    slug: "wh-digraph",
+    pattern: "wh",
+    displayName: "WH Digraph",
+    category: "digraph",
+    gradeLevel: "Kindergarten–Grade 1",
+    words: [
+      "what", "when", "where", "why", "white", "wheel", "whale",
+      "whisk", "whisper", "which",
+    ],
+    sampleSentences: [
+      "What is white and where?",
+      "When will the whale whisper?",
+      "Why is the wheel here?",
+      "Whisk the batter, then ask which.",
+    ],
+    teachingNotes: [
+      "The digraph 'wh' makes a sound very close to a plain 'w' in most American English dialects — 'what' and a hypothetical 'wat' sound almost identical — so this is one digraph where the visual spelling matters more than a dramatically different sound. Still, teaching it as its own two-letter unit matters because so many question words start this way: 'what,' 'when,' 'where,' 'why,' and 'which' are the backbone of how children ask questions in both speech and early writing.",
+      "Because the 'wh' question words are used so often in classroom instructions ('When do we...', 'Where is the...'), fluent, instant recognition of this digraph pays off well beyond phonics practice — it directly supports following along with spoken and written directions at school.",
+    ],
+    commonErrors: [
+      "Confusing 'wh' words with plain 'w' words when reading quickly",
+      "Trying to sound out 'w' and 'h' as two separate sounds",
+      "Mixing up similar-looking question words like 'when' and 'where'",
+    ],
+    relatedSlugs: ["th-digraph", "ent-family", "ip-family"],
+  },
+  {
+    slug: "ph-digraph",
+    pattern: "ph",
+    displayName: "PH Digraph",
+    category: "digraph",
+    gradeLevel: "Grade 1–Grade 2",
+    words: [
+      "phone", "photo", "graph", "dolphin", "alphabet", "elephant",
+      "trophy", "nephew", "phonics",
+    ],
+    sampleSentences: [
+      "The phone has a photo.",
+      "Draw a graph of the dolphin.",
+      "Learn the alphabet with an elephant.",
+      "The trophy went to my nephew.",
+    ],
+    teachingNotes: [
+      "The digraph 'ph' makes an /f/ sound and almost always shows up in words that originally came into English from Greek — 'phone,' 'photo,' 'graph,' 'alphabet,' and even the word 'phonics' itself all trace back to Greek roots. This is a nice moment to plant an early seed about word origins: telling a child 'ph makes an f sound because these words came from Greek a long time ago' gives them a memorable hook rather than an arbitrary spelling rule to memorize.",
+      "'Ph' is less frequent than 'sh,' 'ch,' 'th,' or 'wh,' so it is typically introduced a bit later, often in first or second grade once a child has a solid handle on the more common digraphs. Because it always makes the same /f/ sound as the letter f, some children find it easier to grasp than digraphs that make an entirely new sound, once they know to expect it.",
+    ],
+    commonErrors: [
+      "Trying to sound out 'p' and 'h' as two separate sounds",
+      "Confusing ph words with plain f-spelled words in writing",
+      "Not recognizing ph in the middle of longer words like 'elephant' or 'alphabet'",
+    ],
+    relatedSlugs: ["th-digraph", "sh-digraph", "ock-family"],
+  },
+  {
+    slug: "ck-digraph",
+    pattern: "ck",
+    displayName: "CK Digraph",
+    category: "digraph",
+    gradeLevel: "Kindergarten–Grade 1",
+    words: [
+      "back", "sock", "duck", "pick", "rock", "neck", "kick",
+      "luck", "deck", "truck", "black", "clock", "stick", "trick",
+    ],
+    sampleSentences: [
+      "Kick the sock, pick the rock.",
+      "The duck has luck by the deck.",
+      "A black truck hit the stick.",
+      "Trick the clock, then kick back.",
+    ],
+    teachingNotes: [
+      "'Ck' is a spelling-only digraph: it makes exactly the same /k/ sound as a plain letter k, but English uses 'ck' instead of 'k' specifically right after a short vowel at the end of a one-syllable word. This rule is genuinely predictable and worth stating outright — 'short vowel, then ck' — rather than leaving your child to notice it purely through repeated exposure across all the individual word families.",
+      "By the time a child has worked through -ack, -eck, -ick, -ock, and -uck as separate word families, this entry is a good chance to step back and confirm the rule has generalized across all five vowels at once — mix words from every vowel together in a single practice list and see if your child reads them with equal ease, regardless of which vowel comes before the 'ck.'",
+    ],
+    commonErrors: [
+      "Trying to sound out 'c' and 'k' as two separate sounds",
+      "Using 'ck' after a long vowel or consonant, where it does not belong",
+      "Confusing which vowel comes before ck in similar-looking words",
+    ],
+    relatedSlugs: ["ack-family", "ock-family", "uck-family"],
+  },
+  {
+    slug: "ng-digraph",
+    pattern: "ng",
+    displayName: "NG Digraph",
+    category: "digraph",
+    gradeLevel: "Grade 1",
+    words: [
+      "king", "song", "ring", "hang", "sing", "long", "bang",
+      "wing", "gong", "rang", "strong", "swing",
+    ],
+    sampleSentences: [
+      "The king can sing a long song.",
+      "Ring the gong, hear it bang.",
+      "A strong wing can swing.",
+      "Hang the ring, then sing.",
+    ],
+    teachingNotes: [
+      "Like 'ck,' the digraph 'ng' is best understood after your child has already met it inside individual word families like -ang, -ing, -ong, and -ung — this entry is the chance to name the pattern explicitly and confirm it transfers across every vowel. 'Ng' makes a single nasal sound (air moving through the nose) that is genuinely different from either 'n' or 'g' said alone, which is why trying to sound it out letter by letter never quite works.",
+      "A simple physical check: have your child hold their nose lightly while saying a word like 'sing' — they should feel the sound change or get blocked, since 'ng' is a nasal sound made partly through the nose. This kind of concrete, physical demonstration often does more to cement the concept than verbal explanation alone.",
+    ],
+    commonErrors: [
+      "Splitting 'ng' into separate n and g sounds",
+      "Confusing -ang, -ing, -ong, and -ung endings when reading quickly",
+      "Dropping the nasal quality and reading it as a plain g sound",
+    ],
+    relatedSlugs: ["ing-family", "ang-family", "ong-family"],
+  },
+
+  // ============================================================
+  // BLENDS — L-blends
+  // ============================================================
+  {
+    slug: "bl-blend",
+    pattern: "bl",
+    displayName: "BL Blend",
+    category: "blend",
+    gradeLevel: "Grade 1",
+    words: [
+      "black", "blue", "blob", "block", "blend", "blank", "bloom",
+      "blast", "blink", "blade", "bless", "bloat",
+    ],
+    sampleSentences: [
+      "The black blob will bloom.",
+      "Blend the blue blank paper.",
+      "Blink at the blade, then bless.",
+      "A blast made the block bloat.",
+    ],
+    teachingNotes: [
+      "'Bl' is a true consonant blend, which means both the /b/ and the /l/ sounds are still audible when said together quickly — this is the key difference from a digraph like 'sh,' where the individual letter sounds disappear entirely. Have your child say /b/ and /l/ slowly and separately first, then speed them up until they naturally glide into 'bl,' rather than jumping straight to the fast version.",
+      "Color words ('black,' 'blue') and common classroom vocabulary ('block,' 'blend') make this blend easy to fold into everyday conversation well before a dedicated worksheet session — pointing at a blue block and sounding out both words together is genuine, low-pressure practice.",
+    ],
+    commonErrors: [
+      "Dropping the l and reading 'black' as 'back'",
+      "Inserting an extra vowel sound between b and l",
+      "Confusing 'bl' with 'br' words",
+    ],
+    relatedSlugs: ["cl-blend", "fl-blend", "gl-blend"],
+  },
+  {
+    slug: "cl-blend",
+    pattern: "cl",
+    displayName: "CL Blend",
+    category: "blend",
+    gradeLevel: "Grade 1",
+    words: [
+      "clap", "clip", "clock", "class", "clean", "cloud", "climb",
+      "close", "club", "clown", "clay", "cling",
+    ],
+    sampleSentences: [
+      "Clap and clip by the clock.",
+      "Clean the cloud-gray class.",
+      "The clown will climb and cling.",
+      "Close the club near the clay.",
+    ],
+    teachingNotes: [
+      "'Cl' blends the /k/ sound of c with /l/, and it is worth noting that this is the same /k/ sound spelled with a plain c, not the 'ck' spelling your child has seen in word families — c at the start of a blend never takes the extra k. As with all blends, both sounds stay audible: a child who reads 'clap' as 'cap' is skipping the l, which is the single most common blend error at this stage.",
+      "'Climb' is worth a special note: the b at the end is completely silent, a leftover from older English spelling that did not simplify over time. Simply tell your child directly that the b is silent here rather than expecting them to discover it — a small number of English words like this are genuinely irregular and are best taught as direct exceptions.",
+    ],
+    commonErrors: [
+      "Dropping the l and reading 'clap' as 'cap'",
+      "Trying to pronounce the silent b in 'climb'",
+      "Confusing 'cl' with 'cr' words",
+    ],
+    relatedSlugs: ["bl-blend", "fl-blend", "sl-blend"],
+  },
+  {
+    slug: "fl-blend",
+    pattern: "fl",
+    displayName: "FL Blend",
+    category: "blend",
+    gradeLevel: "Grade 1",
+    words: [
+      "flag", "flat", "flip", "flop", "fly", "flame", "float",
+      "flash", "fluff", "flute", "flew", "flock",
+    ],
+    sampleSentences: [
+      "The flag is flat, but it can fly.",
+      "Flip and flop by the flame.",
+      "Float the flute in a flash.",
+      "The flock flew with fluff.",
+    ],
+    teachingNotes: [
+      "'Fl' combines /f/ and /l/, two sounds that are both made with the tongue and lips in fairly relaxed positions, which usually makes this blend a little easier for children to produce smoothly than blends involving a hard stop consonant like /b/ or /k/. Even so, watch for children who drop the l and read 'flag' as 'fag' or 'flat' as 'fat' — the fix is the same as with every blend: slow down and practice both sounds together before speeding up.",
+      "This blend includes 'fly' and 'flew,' two forms of the same irregular verb, which is a nice opportunity to point out that spelling and sound stay consistent even when grammar gets more complicated — 'fly' and 'flew' both clearly start with the fl blend even though one is present tense and one is past.",
+    ],
+    commonErrors: [
+      "Dropping the l and reading 'flag' as 'fag' or 'flat' as 'fat'",
+      "Confusing 'fl' with 'fr' words",
+      "Rushing the blend and swallowing the vowel that follows",
+    ],
+    relatedSlugs: ["bl-blend", "cl-blend", "gl-blend"],
+  },
+  {
+    slug: "gl-blend",
+    pattern: "gl",
+    displayName: "GL Blend",
+    category: "blend",
+    gradeLevel: "Grade 1",
+    words: [
+      "glad", "glass", "glow", "glue", "globe", "gleam", "glide",
+      "glitter", "gloom", "glare",
+    ],
+    sampleSentences: [
+      "I am glad about the glass.",
+      "The globe will glow and gleam.",
+      "Glue the glitter, then glide.",
+      "A glare cuts through the gloom.",
+    ],
+    teachingNotes: [
+      "'Gl' blends /g/ and /l/, and because g can also sometimes make a soft /j/ sound in other words (as in 'giant'), it is worth confirming your child knows that g is always hard (as in 'go') at the start of a blend like this — soft g essentially never appears before a consonant. 'Glad' is a common, useful feeling word that makes an easy, motivating entry point into this blend.",
+      "Several -gl words describe light or shine ('glow,' 'gleam,' 'glitter,' 'glare'), which gives a nice opportunity for a themed practice session — talk about all the ways things can shine while practicing the words that describe it, tying vocabulary building directly to the phonics lesson.",
+    ],
+    commonErrors: [
+      "Dropping the l and reading 'glad' as 'gad'",
+      "Confusing 'gl' with 'gr' words",
+      "Applying a soft g sound instead of the correct hard g",
+    ],
+    relatedSlugs: ["bl-blend", "cl-blend", "gr-blend"],
+  },
+  {
+    slug: "pl-blend",
+    pattern: "pl",
+    displayName: "PL Blend",
+    category: "blend",
+    gradeLevel: "Grade 1",
+    words: [
+      "plan", "play", "plug", "plum", "plane", "plant", "plate",
+      "please", "plow", "plot", "plus", "plump",
+    ],
+    sampleSentences: [
+      "Plan to play with a plum.",
+      "Plant the plate, please.",
+      "The plane will plow and plot.",
+      "Plus, plug in the plump one.",
+    ],
+    teachingNotes: [
+      "'Pl' blends /p/ and /l/, and 'play' is one of the most emotionally motivating words in a young child's vocabulary — most kids will happily practice reading and writing a word connected so directly to something they love doing. Use that built-in motivation as a launching point before moving through the rest of the list.",
+      "'Please' is worth a small note since the 'ea' inside it makes a long e sound rather than following a pattern your child has learned yet — treat it as a sight word for now if vowel teams have not been covered, and revisit it once the 'ea' vowel team is formally introduced.",
+    ],
+    commonErrors: [
+      "Dropping the l and reading 'plan' as 'pan'",
+      "Confusing 'pl' with 'pr' words",
+      "Misreading the vowel team in 'please' before it has been taught",
+    ],
+    relatedSlugs: ["bl-blend", "cl-blend", "sl-blend"],
+  },
+  {
+    slug: "sl-blend",
+    pattern: "sl",
+    displayName: "SL Blend",
+    category: "blend",
+    gradeLevel: "Grade 1",
+    words: [
+      "sled", "slip", "slide", "sleep", "slow", "slot", "slam",
+      "sly", "slug", "sleeve", "slice", "slim",
+    ],
+    sampleSentences: [
+      "Slide down slow, then sleep.",
+      "Slip the slug in the slot.",
+      "Slam the sleeve, slice it thin.",
+      "A sly slug is slim.",
+    ],
+    teachingNotes: [
+      "'Sl' blends /s/ and /l/, both sounds that are relatively easy for young children to sustain and hear clearly, which usually makes this one of the more approachable s-blends to teach. 'Slide' and 'sled' both connect to playground and winter activities that most children have real experience with, giving an easy hook into the lesson.",
+      "As with every s-blend, if your child is dropping the second consonant (saying 'sip' for 'slip'), have them practice holding the /s/ sound a beat longer than usual before releasing into the rest of the word — exaggerating the first sound briefly often makes the second consonant easier to hear and include.",
+    ],
+    commonErrors: [
+      "Dropping the l and reading 'slip' as 'sip'",
+      "Confusing 'sl' with 'sw' or 'st' words",
+      "Rushing through and losing the second consonant sound",
+    ],
+    relatedSlugs: ["bl-blend", "sp-blend", "st-blend"],
+  },
+
+  // ============================================================
+  // BLENDS — R-blends
+  // ============================================================
+  {
+    slug: "br-blend",
+    pattern: "br",
+    displayName: "BR Blend",
+    category: "blend",
+    gradeLevel: "Grade 1",
+    words: [
+      "brag", "brush", "brown", "bread", "brick", "bring", "broom",
+      "brave", "break", "bridge", "branch", "bright",
+    ],
+    sampleSentences: [
+      "Brag about the brown brick.",
+      "Bring the broom, then brush.",
+      "Break the bread, be brave.",
+      "The bright bridge has a branch.",
+    ],
+    teachingNotes: [
+      "'Br' is an r-blend, a category that tends to be harder for children than l-blends because the American English r sound involves a distinctive tongue curl that many kids are still refining well into first grade. If your child is substituting a /w/ sound for r (a very common and normal developmental pattern, saying 'bwown' for 'brown'), that usually resolves naturally with age and does not need special phonics intervention.",
+      "'Bread' and 'break' both use the 'ea' vowel team with an unexpected short-e sound rather than the more common long-e sound, so treat those two as slight exceptions until vowel teams are covered in more depth. Focus most of your practice time on the fully regular words in this list: 'brag,' 'brick,' 'bring,' and 'brown.'",
+    ],
+    commonErrors: [
+      "Substituting a w sound for r, saying 'bwown' for 'brown'",
+      "Dropping the r and reading 'brag' as 'bag'",
+      "Confusing 'br' with 'bl' words",
+    ],
+    relatedSlugs: ["cr-blend", "dr-blend", "gr-blend"],
+  },
+  {
+    slug: "cr-blend",
+    pattern: "cr",
+    displayName: "CR Blend",
+    category: "blend",
+    gradeLevel: "Grade 1",
+    words: [
+      "crab", "crib", "crop", "cry", "crown", "cream", "crawl",
+      "crash", "crisp", "cradle", "crack", "creek",
+    ],
+    sampleSentences: [
+      "The crab will crawl and cry.",
+      "Crash the crop by the crib.",
+      "Cream is crisp near the creek.",
+      "A crown sits in the cradle.",
+    ],
+    teachingNotes: [
+      "'Cr' blends the hard /k/ sound of c with r, and like every r-blend it is common for young children to soften the r or replace it with a w-like glide while their speech sounds are still developing — this is typically a normal articulation stage rather than a reading problem. 'Crab' is an especially motivating word for this blend given how popular sea-creature vocabulary tends to be with young children.",
+      "'Crash' combines this blend with the digraph 'sh' at the end, so it is a good integrated practice word once both patterns have been taught separately. If your child struggles specifically with 'crash' but not with simpler cr-words, the breakdown is likely at the ending digraph rather than the beginning blend.",
+    ],
+    commonErrors: [
+      "Substituting a w sound for r",
+      "Dropping the r and reading 'crab' as 'cab'",
+      "Confusing 'cr' with 'cl' words",
+    ],
+    relatedSlugs: ["br-blend", "dr-blend", "tr-blend"],
+  },
+  {
+    slug: "dr-blend",
+    pattern: "dr",
+    displayName: "DR Blend",
+    category: "blend",
+    gradeLevel: "Grade 1",
+    words: [
+      "drum", "drop", "dress", "draw", "dream", "drive", "drink",
+      "drag", "dry", "drift", "drain", "drip",
+    ],
+    sampleSentences: [
+      "Drum and drop the dress.",
+      "Draw a dream, then drive.",
+      "Drink and drag it dry.",
+      "The drain will drift and drip.",
+    ],
+    teachingNotes: [
+      "'Dr' is unusual among the r-blends because in fast, natural speech it often sounds closer to a 'j' or 'jr' sound than a crisp /d/ plus /r/ — say 'drum' and 'jrum' side by side and notice how similar they can sound. This is completely normal English pronunciation, not a mistake, so do not correct a child who reads it this way as long as the meaning and spelling connection stay intact.",
+      "Because that natural sound shift can confuse the spelling-to-sound connection, it helps to point at the letters while sounding out dr-words slowly during practice, reminding your child that even though it can sound like 'jr' when spoken quickly, it is always spelled with d and r together.",
+    ],
+    commonErrors: [
+      "Confusing the natural dr-to-jr sound shift with a spelling error",
+      "Dropping the r and reading 'drum' as 'dum'",
+      "Confusing 'dr' with 'tr' words",
+    ],
+    relatedSlugs: ["cr-blend", "tr-blend", "fr-blend"],
+  },
+  {
+    slug: "fr-blend",
+    pattern: "fr",
+    displayName: "FR Blend",
+    category: "blend",
+    gradeLevel: "Grade 1",
+    words: [
+      "frog", "from", "fresh", "free", "fry", "front", "frown",
+      "friend", "fruit", "frost", "freeze", "fright",
+    ],
+    sampleSentences: [
+      "The frog is free and fresh.",
+      "My friend will fry the fruit.",
+      "Frost is in front, do not frown.",
+      "Freeze, then fright will pass.",
+    ],
+    teachingNotes: [
+      "'Fr' blends /f/ and r, and 'frog' tends to be one of the most eagerly practiced words in this list for the same reason -og and -ig family words are popular: animals capture attention. 'From' and 'friend' are both extremely high-frequency words that will appear constantly in your child's early reading, so give them extra repetition even though 'from' in particular has a slightly less obvious vowel sound than the spelling suggests.",
+      "'Friend' is a genuinely irregular word — the 'ie' does not follow the usual vowel-team rules your child will learn later — so it is best taught as a memorized sight word rather than something to sound out from first principles. Point that out directly so your child does not get frustrated trying to apply phonics rules that do not quite apply here.",
+    ],
+    commonErrors: [
+      "Dropping the r and reading 'frog' as 'fog'",
+      "Trying to sound out 'friend' with regular vowel-team rules",
+      "Confusing 'fr' with 'fl' words",
+    ],
+    relatedSlugs: ["br-blend", "gr-blend", "og-family"],
+  },
+  {
+    slug: "gr-blend",
+    pattern: "gr",
+    displayName: "GR Blend",
+    category: "blend",
+    gradeLevel: "Grade 1",
+    words: [
+      "grab", "grass", "green", "grow", "grin", "grape", "great",
+      "grip", "grand", "groan", "grill", "ground",
+    ],
+    sampleSentences: [
+      "Grab the green grass.",
+      "Grow a grape, then grin.",
+      "The grand grill is on the ground.",
+      "Grip it, do not groan.",
+    ],
+    teachingNotes: [
+      "'Gr' blends the hard /g/ sound with r, and 'green' and 'grass' are both concrete, everyday words that connect easily to time spent outside, which makes for natural, low-pressure practice opportunities beyond a worksheet. As with all r-blends, be patient with children who soften or substitute the r sound, since full mastery of r articulation is still developing for many kids at this age.",
+      "'Great' is worth a quick note since its vowel team 'ea' makes a long-a sound here rather than the more common long-e sound found in words like 'read' — an irregular pronunciation worth flagging directly rather than expecting your child to sound it out correctly on the first try.",
+    ],
+    commonErrors: [
+      "Dropping the r and reading 'grab' as 'gab'",
+      "Misreading the vowel team in 'great' as a long-e sound",
+      "Confusing 'gr' with 'gl' words",
+    ],
+    relatedSlugs: ["br-blend", "cr-blend", "fr-blend"],
+  },
+  {
+    slug: "pr-blend",
+    pattern: "pr",
+    displayName: "PR Blend",
+    category: "blend",
+    gradeLevel: "Grade 1",
+    words: [
+      "pretty", "press", "prize", "print", "proud", "prince",
+      "promise", "practice", "pray", "prep",
+    ],
+    sampleSentences: [
+      "Press print to see the prize.",
+      "The proud prince made a promise.",
+      "Practice makes you pretty good.",
+      "Pray and prep for the prize.",
+    ],
+    teachingNotes: [
+      "'Pr' blends /p/ and r, and it appears in several longer, multisyllable words your child may already recognize by sight from school routines — 'practice,' 'promise,' and 'proud' are common in classroom and storybook vocabulary well before formal decoding of every syllable is expected. Focus on the clean, single-syllable words first ('press,' 'print,' 'prize') to build the blend itself before tackling the longer words.",
+      "'Pretty' is a genuinely irregular word — the second syllable does not sound the way its spelling suggests — so treat it as a sight word exception rather than a decoding example, and reassure your child that it is fine to simply memorize a small number of words like this rather than sound out every single one.",
+    ],
+    commonErrors: [
+      "Dropping the r and reading 'press' as 'pess'",
+      "Trying to fully sound out the irregular word 'pretty'",
+      "Confusing 'pr' with 'pl' words",
+    ],
+    relatedSlugs: ["tr-blend", "gr-blend", "cr-blend"],
+  },
+  {
+    slug: "tr-blend",
+    pattern: "tr",
+    displayName: "TR Blend",
+    category: "blend",
+    gradeLevel: "Grade 1",
+    words: [
+      "trip", "tree", "truck", "train", "trap", "try", "track",
+      "trail", "treat", "trust", "trick", "trot",
+    ],
+    sampleSentences: [
+      "The truck will trip on the track.",
+      "Try to trap the trail.",
+      "A treat is on the tree.",
+      "Trust the trick, then trot.",
+    ],
+    teachingNotes: [
+      "'Tr' is another r-blend that, like 'dr,' often shifts toward a 'ch' or 'chr'-like sound in fast natural speech — say 'truck' and 'chruck' side by side and notice the similarity. This is completely normal spoken English, and pointing at the letters while sounding words out slowly helps your child keep the spelling-sound connection clear even as their natural speech shifts the sound slightly.",
+      "'Truck,' 'train,' and 'tree' are all common vehicle and nature words that tend to be highly motivating for young readers, making this one of the more reliably engaging blends to practice. Once your child can read the whole list fluently, try a simple sorting activity: things that move (truck, train, trip) versus things that grow (tree, trail).",
+    ],
+    commonErrors: [
+      "Confusing the natural tr-to-chr sound shift with a spelling error",
+      "Dropping the r and reading 'truck' as 'tuck'",
+      "Confusing 'tr' with 'dr' words",
+    ],
+    relatedSlugs: ["dr-blend", "cr-blend", "pr-blend"],
+  },
+
+  // ===END-BATCH-4===
 ];
 
 export function getPatternBySlug(slug: string): PhonicsPattern | undefined {

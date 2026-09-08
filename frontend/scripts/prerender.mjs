@@ -336,6 +336,85 @@ function writeLlmsFiles(pages, distPath) {
   };
 }
 
+const BASE_ARGS = [
+  "--no-sandbox",
+  "--disable-setuid-sandbox",
+  "--disable-dev-shm-usage",
+];
+
+/**
+ * Launch a browser suitable for the environment we're building in.
+ *
+ * Locally, puppeteer's own bundled Chrome works. Vercel's build container is
+ * minimal and ships none of Chrome's runtime shared libraries, so a plain
+ * downloaded Chromium dies there with:
+ *
+ *   chrome: error while loading shared libraries: libnspr4.so: cannot open
+ *   shared object file — Code: 127
+ *
+ * @sparticuz/chromium packages those libraries alongside the binary, which is
+ * why it is used on Vercel specifically rather than everywhere (it is
+ * Linux-only, so it cannot be the local path on macOS or Windows).
+ *
+ * Set PRERENDER_BROWSER=sparticuz to force that path on any other Linux CI,
+ * or PUPPETEER_EXECUTABLE_PATH to point at a Chrome you supply yourself.
+ */
+async function launchBrowser() {
+  const explicitPath = process.env.PUPPETEER_EXECUTABLE_PATH;
+  const useSparticuz =
+    process.env.PRERENDER_BROWSER === "sparticuz" ||
+    (Boolean(process.env.VERCEL) && !explicitPath);
+
+  if (explicitPath) {
+    console.log(`Browser: PUPPETEER_EXECUTABLE_PATH -> ${explicitPath}`);
+    const { default: puppeteerCore } = await import("puppeteer-core");
+    return puppeteerCore.launch({
+      executablePath: explicitPath,
+      headless: true,
+      args: BASE_ARGS,
+    });
+  }
+
+  if (useSparticuz) {
+    let chromium;
+    let puppeteerCore;
+    try {
+      ({ default: chromium } = await import("@sparticuz/chromium"));
+      ({ default: puppeteerCore } = await import("puppeteer-core"));
+    } catch (error) {
+      console.error(
+        "This build needs @sparticuz/chromium and puppeteer-core, which are\n" +
+          "not installed. Run in frontend/:\n" +
+          "  npm install --save-dev @sparticuz/chromium puppeteer-core\n" +
+          `(underlying error: ${error.message})`
+      );
+      process.exit(1);
+    }
+
+    const executablePath = await chromium.executablePath();
+    console.log(`Browser: @sparticuz/chromium -> ${executablePath}`);
+
+    return puppeteerCore.launch({
+      executablePath,
+      headless: true,
+      args: [...new Set([...chromium.args, ...BASE_ARGS])],
+    });
+  }
+
+  let puppeteer;
+  try {
+    ({ default: puppeteer } = await import("puppeteer"));
+  } catch {
+    console.error(
+      'puppeteer is not installed. Run "npm install --save-dev puppeteer" in frontend/.'
+    );
+    process.exit(1);
+  }
+
+  console.log("Browser: puppeteer bundled Chrome");
+  return puppeteer.launch({ headless: "new", args: BASE_ARGS });
+}
+
 async function prerender() {
   console.log("Starting prerender...\n");
 
@@ -344,23 +423,10 @@ async function prerender() {
     process.exit(1);
   }
 
-  let puppeteer;
-  try {
-    puppeteer = (await import("puppeteer")).default;
-  } catch {
-    console.error(
-      'puppeteer is not installed. Run "npm install --save-dev puppeteer" in frontend/.'
-    );
-    process.exit(1);
-  }
-
   const routes = discoverRoutes();
   console.log(`Discovered ${routes.length} routes from src/App.tsx\n`);
 
-  const browser = await puppeteer.launch({
-    headless: "new",
-    args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
-  });
+  const browser = await launchBrowser();
 
   const { preview } = await import("vite");
   const previewServer = await preview({

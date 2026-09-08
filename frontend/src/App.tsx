@@ -157,6 +157,14 @@ const WorksheetsVsInteractive = lazy(
   () => import("./pages/comparisons/WorksheetsVsInteractive.tsx")
 );
 
+// ── Programmatic phonics practice pages ──────────────────────────────
+// One page per pattern in src/data/phonicsPatterns.ts. The route is
+// dynamic here, but scripts/prerender.mjs expands one static URL per
+// pattern so each ships as real HTML with its own title and canonical.
+const PracticeWordsHub = lazy(() => import("./pages/PracticeWordsHub.tsx"));
+const PracticeWordsPage = lazy(() => import("./pages/PracticeWordsPage.tsx"));
+// ─────────────────────────────────────────────────────────────────────
+
 // Loading fallback component
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -235,6 +243,17 @@ function App() {
                     path="/comparisons/phonics-worksheets-vs-interactive-reading"
                     element={<WorksheetsVsInteractive />}
                   />
+
+                  {/* ── Phonics practice pages (generated from data) ── */}
+                  <Route
+                    path="/practice-words"
+                    element={<PracticeWordsHub />}
+                  />
+                  <Route
+                    path="/practice-words/:slug"
+                    element={<PracticeWordsPage />}
+                  />
+                  {/* ────────────────────────────────────────────────── */}
 
                   {/* Article Pages */}
                   <Route

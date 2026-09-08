@@ -9,6 +9,7 @@
     "build:only": "vite build",
     "build:prerender": "vite build && node scripts/prerender.mjs",
     "typecheck": "tsc -p tsconfig.app.json --noEmit",
+    "verify:live": "node scripts/verify-live.mjs",
     "lint": "eslint .",
     "preview": "vite preview --port 5173"
   },

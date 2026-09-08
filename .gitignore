@@ -40,3 +40,11 @@ backend/wav2vec2-timit-ipa-onnx/
 
 # Claude Code agent worktrees (local scratch, never committed)
 .claude/worktrees/
+
+# Google Search Console service-account credentials (frontend/scripts/gsc-report.mjs).
+# The key should normally live OUTSIDE the repo entirely — see growth/GSC_API_SETUP.md.
+# These patterns are a safety net in case one ends up under the repo anyway.
+gsc-service-account*.json
+*gsc*key*.json
+growth/*credentials*.json
+growth/*service-account*.json

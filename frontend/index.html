@@ -13,22 +13,8 @@
     <link rel="dns-prefetch" href="https://www.google-analytics.com" />
     <link rel="dns-prefetch" href="https://cdn.vercel-insights.com" />
 
-    <!--
-      SEO NOTE — do not add page-specific tags to this file.
-
-      index.html is served for every route, so any <title>, description,
-      canonical, Open Graph or Twitter tag placed here appears on all 44 pages.
-      A hardcoded canonical pointing at "/" is exactly what previously made
-      every article, guide and comparison page look like a duplicate of the
-      homepage to search engines.
-
-      Per-page tags come from react-helmet-async, via SeoHead (static pages) or
-      ArticlePageTemplate / ComparisonPageTemplate (content pages), and are
-      baked into each route's static HTML by scripts/prerender.mjs.
-
-      The <title> below is only a fallback for routes that render no Helmet
-      block (the authenticated app surface, which is noindex anyway).
-    -->
+    <!-- Per-page SEO tags come from SeoHead / the page templates. See docs/SEO.md. -->
+    <!-- The tags below are fallbacks only; do not add page-specific ones here. -->
     <title>Word Wiz AI - Free AI Reading Tutor for Kids</title>
     <meta name="robots" content="index, follow" />
     <meta name="language" content="English" />

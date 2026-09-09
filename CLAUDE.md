@@ -56,6 +56,75 @@ alembic upgrade head                              # Apply migrations
 alembic downgrade -1                              # Rollback one migration
 ```
 
+## Deployment (Backend → AWS EC2)
+
+The backend runs on an EC2 box behind nginx, as three Docker Compose services
+(`backend`, `nginx`, `certbot`). The frontend deploys separately via Vercel on
+push; only the backend needs manual steps.
+
+**Connection details are deliberately not in this file — this repo is public.**
+Set them locally (e.g. in your shell profile or an untracked `.env.deploy`):
+
+```bash
+export WWAI_HOST=<ec2-public-ip>       # the box behind api.wordwizai.com
+export WWAI_USER=ubuntu
+export WWAI_KEY=/path/to/your-ec2-key.pem   # chmod 600; never commit
+```
+
+### Deploy
+
+```bash
+ssh -i "$WWAI_KEY" "$WWAI_USER@$WWAI_HOST"
+cd ~/word-wiz-ai && git pull
+cd backend && docker compose up -d --build backend
+```
+
+`compose up --build` builds the new image while the old container keeps
+serving, then swaps. A failed build leaves the running container untouched,
+so a broken build degrades to "nothing changed" rather than an outage.
+
+### Verify after deploying
+
+Health routes live under `/health/` (the router carries its own prefix, so
+`main.py` includes it without one). `/` legitimately 404s — there is no root
+route; use `/docs` as the liveness signal.
+
+```bash
+curl -sk https://localhost:8443/docs -o /dev/null -w "%{http_code}\n"   # expect 200
+curl -sk https://localhost:8443/health/system-resources                 # cpu/mem/disk
+curl -sk https://localhost:8443/openapi.json | python3 -c \
+  "import sys,json;print(len(json.load(sys.stdin)['paths']),'routes')"  # expect >= 31
+docker compose logs backend --tail 50      # confirm the phoneme model loaded
+```
+
+In the startup log, confirm `[OK] ONNX Runtime backend loaded successfully`.
+If you instead see `[WARN] ONNX loading failed ... falling back to PyTorch`,
+**stop and fix it** — see the fast-model trap in Troubleshooting below.
+
+### Rollback
+
+```bash
+cd ~/word-wiz-ai && git checkout <previous-sha>
+cd backend && docker compose up -d --build backend
+```
+
+### Constraints to respect
+
+- **Memory is the binding limit.** The box has ~3.8 GB and idles near 83%
+  used, with the container holding ~2.3 GB. There is ~4 GB of swap, so builds
+  succeed but thrash. Do not enable anything that loads a second model
+  (notably `WWAI_ASR_FALLBACK`, which pulls a ~1.2 GB wav2vec2 on top of the
+  resident ONNX model) without first raising memory or preloading at startup.
+- **`restart: no`** — the container does not come back on its own. If it dies,
+  it stays dead until someone runs `compose up -d`.
+- **The server's `docker-compose.yml` has drifted from git.** The committed
+  file sets `deploy.resources.limits` (1.5 g / 1.3 cpu); the server has those
+  deleted, so production is effectively uncapped. Reconcile before trusting
+  the committed file as a description of production.
+- TLS certs come from a `letsencrypt` Docker volume mounted read-only into
+  both `backend` and `nginx`; the `certbot` service renews them. Uvicorn
+  terminates TLS itself on 8443, and nginx also proxies 443 → `backend:8443`.
+
 ## Audio Analysis Pipeline (9 Steps)
 
 1. User reads sentence → Audio recorded in browser (MediaRecorder API)
@@ -262,7 +331,17 @@ Test JSON format example:
 
 ## Troubleshooting
 
-- **Model loading fails**: Check RAM (4GB+ required), verify HuggingFace Hub access, try `USE_ONNX_BACKEND=false`
+- **Model loading fails**: Check RAM (4GB+ required), verify HuggingFace Hub access. **Do NOT reach for `USE_ONNX_BACKEND=false`** — see the next entry.
+- **⚠️ The PyTorch fallback silently loads a grapheme model.** `USE_FAST_MODELS`
+  defaults to `True`, so a bare `PhonemeExtractor()` loads
+  `facebook/wav2vec2-base-960h` — a **character** ASR model that emits English
+  letters, not IPA. Those letters are then scored against IPA ground truth, so
+  essentially everything reads as an error. Two paths reach it:
+  `USE_ONNX_BACKEND=false`, and the `except` in `phoneme_assistant.py` that
+  falls back to `PhonemeExtractor()` when ONNX loading throws. Either way you
+  get one `[WARN]` line and then silently garbage feedback until restart.
+  If you must use the PyTorch path, pass `use_fast_model=False` explicitly or
+  set `USE_FAST_MODELS=false`.
 - **WebSocket disconnects**: Check nginx config for WebSocket support (`proxy_buffering off`), verify CORS origins
 - **High PER despite good pronunciation**: Validate ground truth with `grapheme_to_phoneme()`, check audio quality (16kHz, low noise)
 - **GPT malformed JSON**: Check prompt includes output schema, use `extract_json()`, log full response

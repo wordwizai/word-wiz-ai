@@ -459,54 +459,89 @@ async function prerender() {
   const pages = [];
 
   try {
-    for (const route of routes) {
-      process.stdout.write(`  ${route} ... `);
-
+    /**
+     * Capture one route. Throws if the app never rendered.
+     *
+     * Lazy route chunks occasionally lose a race under load (parallel builds,
+     * a dev server competing for CPU), so a single attempt is not a reliable
+     * signal. The retry distinguishes a flaky render from a genuinely broken
+     * page: a page that fails every attempt really is broken and should fail
+     * the build.
+     */
+    const capture = async (route) => {
       const page = await browser.newPage();
       await page.setUserAgent(
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
       );
 
       try {
-        await page.goto(`${baseUrl}${route}`, {
-          waitUntil: "networkidle2",
-          timeout: 45000,
+        try {
+          await page.goto(`${baseUrl}${route}`, {
+            waitUntil: "networkidle2",
+            timeout: 45000,
+          });
+        } catch {
+          // A hanging third-party request shouldn't fail the route; the render
+          // check below is what actually decides whether the capture is usable.
+          process.stdout.write("(load timeout) ");
+        }
+
+        await page.waitForSelector("#root > *", { timeout: 20000 });
+
+        // react-helmet-async injects into <head> after the first paint, so wait
+        // for the canonical tag rather than racing it with a fixed delay.
+        await page
+          .waitForFunction(
+            () => document.querySelector('link[rel="canonical"]') !== null,
+            { timeout: 10000 }
+          )
+          .catch(() => process.stdout.write("(no canonical) "));
+
+        await new Promise((resolve) => setTimeout(resolve, 400));
+
+        const html = (await page.content()).replace(
+          '<div id="root"',
+          '<div id="root" data-prerendered="true"'
+        );
+
+        // Readable text, used to build llms-full.txt.
+        const text = await page.evaluate(() => {
+          const scope =
+            document.querySelector("article") ||
+            document.querySelector("main") ||
+            document.body;
+          return scope.innerText.replace(/\n{3,}/g, "\n\n").trim();
         });
-      } catch {
-        // A hanging third-party request shouldn't fail the route; the render
-        // check below is what actually decides whether the capture is usable.
-        process.stdout.write("(load timeout) ");
+
+        return { route, html, text };
+      } finally {
+        await page.close();
+      }
+    };
+
+    const ATTEMPTS = 3;
+
+    for (const route of routes) {
+      process.stdout.write(`  ${route} ... `);
+
+      let captured;
+      for (let attempt = 1; attempt <= ATTEMPTS; attempt++) {
+        try {
+          captured = await capture(route);
+          break;
+        } catch (error) {
+          if (attempt === ATTEMPTS) {
+            console.log("FAILED");
+            throw new Error(
+              `${route} did not render after ${ATTEMPTS} attempts: ${error.message.split("\n")[0]}`
+            );
+          }
+          process.stdout.write(`(retry ${attempt}) `);
+          await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+        }
       }
 
-      await page.waitForSelector("#root > *", { timeout: 15000 });
-
-      // react-helmet-async injects into <head> after the first paint, so wait
-      // for the canonical tag rather than racing it with a fixed delay.
-      await page
-        .waitForFunction(
-          () => document.querySelector('link[rel="canonical"]') !== null,
-          { timeout: 10000 }
-        )
-        .catch(() => process.stdout.write("(no canonical) "));
-
-      await new Promise((resolve) => setTimeout(resolve, 400));
-
-      const html = (await page.content()).replace(
-        '<div id="root"',
-        '<div id="root" data-prerendered="true"'
-      );
-
-      // Readable text, used to build llms-full.txt.
-      const text = await page.evaluate(() => {
-        const scope =
-          document.querySelector("article") ||
-          document.querySelector("main") ||
-          document.body;
-        return scope.innerText.replace(/\n{3,}/g, "\n\n").trim();
-      });
-
-      pages.push({ route, html, text });
-      await page.close();
+      pages.push(captured);
       console.log("ok");
     }
   } finally {

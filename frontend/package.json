@@ -12,7 +12,8 @@
     "verify:live": "node scripts/verify-live.mjs",
     "indexnow": "node scripts/indexnow.mjs",
     "lint": "eslint .",
-    "preview": "vite preview --port 5173"
+    "preview": "vite preview --port 5173",
+    "og:image": "node scripts/make-og-image.mjs"
   },
   "dependencies": {
     "@huggingface/transformers": "^3.7.6",

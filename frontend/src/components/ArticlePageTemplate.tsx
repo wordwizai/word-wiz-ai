@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import LandingPageFooter from "@/components/LandingPageFooter";
+import { DEFAULT_OG_IMAGE } from "@/components/SeoHead";
 import { trackSignupClick } from "@/utils/analytics";
 
 // ===== TYPES & INTERFACES =====
@@ -454,7 +455,7 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
   metaTitle,
   metaDescription,
   canonicalUrl,
-  ogImage,
+  ogImage = DEFAULT_OG_IMAGE,
   heroImage,
   heroImageAlt,
   headline,

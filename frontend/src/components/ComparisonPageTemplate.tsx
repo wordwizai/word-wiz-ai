@@ -14,6 +14,7 @@ import { Link } from "react-router-dom";
 import { Check, X, Star, ArrowRight, Info } from "lucide-react";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import LandingPageFooter from "@/components/LandingPageFooter";
+import { DEFAULT_OG_IMAGE } from "@/components/SeoHead";
 import { trackSignupClick } from "@/utils/analytics";
 
 interface ComparisonProduct {
@@ -119,9 +120,11 @@ const ComparisonPage: React.FC<ComparisonPageProps> = ({
         <meta property="og:title" content={metaTitle} />
         <meta property="og:description" content={metaDescription} />
         <meta property="og:type" content="article" />
+        <meta property="og:image" content={DEFAULT_OG_IMAGE} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={metaTitle} />
         <meta name="twitter:description" content={metaDescription} />
+        <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
         <script type="application/ld+json">
           {JSON.stringify(structuredData)}
         </script>

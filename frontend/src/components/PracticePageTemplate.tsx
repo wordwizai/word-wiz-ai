@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import LandingPageFooter from "@/components/LandingPageFooter";
+import { DEFAULT_OG_IMAGE } from "@/components/SeoHead";
 import { trackSignupClick } from "@/utils/analytics";
 import {
   categoryLabels,
@@ -111,9 +112,11 @@ const PracticePageTemplate = ({ pattern }: { pattern: PhonicsPattern }) => {
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:title" content={metaTitle} />
         <meta property="og:description" content={metaDescription} />
+        <meta property="og:image" content={DEFAULT_OG_IMAGE} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={metaTitle} />
         <meta name="twitter:description" content={metaDescription} />
+        <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
         <script type="application/ld+json">
           {JSON.stringify(structuredData)}
         </script>

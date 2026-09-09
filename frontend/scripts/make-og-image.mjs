@@ -3,14 +3,11 @@
  *
  * Regenerate with:  npm run og:image
  *
- * Built from the real design system rather than an invented one:
- *   - Poppins, the app's --font-heading / --font-body
- *   - Charis SIL, the app's --font-ipa, used for the phoneme chips
- *   - The oklch tokens from src/index.css, written as oklch() directly since
- *     this renders in Chrome
- *   - public/wordwizIcon.svg, read from disk so the logo can never drift
- *   - Card treatment from STYLE_GUIDELINES.md: rounded-3xl, white-to-purple
- *     gradient, 2px purple border, soft shadow
+ * Deliberately flat: one solid brand purple ground, no gradients, no
+ * decorative flourishes. The colour comes from the logo's own hexes, the
+ * type is the app's Poppins, and the phoneme chips use the app's Charis SIL.
+ * The only "designed" element is the analysis card, because that is the one
+ * thing about this product a generic screenshot would not convey.
  */
 
 import { readFileSync, writeFileSync } from "fs";
@@ -31,19 +28,13 @@ const html = `<!doctype html>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Charis+SIL:wght@400;700&display=swap">
 <style>
   :root {
-    /* Tokens copied from src/index.css (light mode). */
-    --background: oklch(0.98 0.01 280);
-    --foreground: oklch(0.2 0.02 280);
-    --primary: oklch(0.55 0.18 280);
-    --muted-foreground: oklch(0.45 0.02 280);
-    --pastel-purple: oklch(0.95 0.05 280);
-    --pastel-pink: oklch(0.95 0.05 340);
-
-    /* Literal hexes from wordwizIcon.svg, so the card matches the mark. */
-    --logo-purple-deep: #602195;
-    --logo-purple: #7A32B3;
-    --logo-gold: #F0B44A;
-    --logo-gold-light: #F8CA68;
+    /* Literal hexes from wordwizIcon.svg. */
+    --purple-deep: #602195;
+    --purple: #7A32B3;
+    --gold: #F0B44A;
+    --gold-light: #F8CA68;
+    --ink: #1c1020;
+    --slate: #5c5566;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -51,107 +42,85 @@ const html = `<!doctype html>
   body {
     width: 1200px; height: 630px;
     font-family: "Poppins", system-ui, sans-serif;
-    background:
-      radial-gradient(900px 520px at 88% 8%, var(--pastel-pink) 0%, transparent 62%),
-      linear-gradient(135deg, #ffffff 0%, var(--pastel-purple) 100%);
-    position: relative; overflow: hidden;
+    background: var(--purple-deep);
     display: flex; flex-direction: column;
+    position: relative;
   }
 
-  /* Gold sparkles echoing the four stars in the logo. */
-  .sparkle { position: absolute; color: var(--logo-gold-light); line-height: 1; }
-  .s1 { top: 58px;  right: 322px; font-size: 26px; opacity: .85; }
-  .s2 { top: 470px; right: 92px;  font-size: 34px; opacity: .55; }
-  .s3 { bottom: 84px; left: 560px; font-size: 20px; opacity: .5; }
+  /* A single flat gold rule, the one accent on the card. */
+  .rule { height: 8px; background: var(--gold); }
 
   .brand {
-    position: absolute; top: 48px; left: 72px;
+    position: absolute; top: 52px; left: 76px;
     display: flex; align-items: center; gap: 16px;
   }
-  .brand svg { width: 62px; height: 54px; display: block; }
+  .chip {
+    width: 68px; height: 68px; border-radius: 18px; background: #ffffff;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .chip svg { width: 46px; height: 40px; display: block; }
   .brand-name {
-    font-size: 30px; font-weight: 700; letter-spacing: -0.02em;
-    color: var(--logo-purple-deep);
+    font-size: 29px; font-weight: 600; letter-spacing: -0.01em; color: #ffffff;
   }
 
   .body {
-    flex: 1; padding: 132px 72px 0;
+    flex: 1; padding: 150px 76px 0;
     display: flex; flex-direction: column; justify-content: center;
   }
 
   h1 {
     font-weight: 700; font-size: 56px; line-height: 1.12;
-    letter-spacing: -0.03em; color: var(--foreground); max-width: 640px;
+    letter-spacing: -0.03em; color: #ffffff; max-width: 620px;
   }
-  /* The gradient-text treatment used on the app's own headings. */
-  h1 em {
-    font-style: normal;
-    background: linear-gradient(90deg, var(--primary) 0%, var(--logo-purple) 55%, oklch(0.62 0.19 340) 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  }
+  h1 em { font-style: normal; color: var(--gold-light); }
 
   .sub {
-    margin-top: 20px; font-size: 23px; font-weight: 400; line-height: 1.45;
-    color: var(--muted-foreground); max-width: 600px;
+    margin-top: 22px; font-size: 23px; font-weight: 400; line-height: 1.45;
+    color: #d6c6e8; max-width: 580px;
   }
 
-  /* Card treatment straight from STYLE_GUIDELINES.md. */
   .demo {
-    position: absolute; right: 72px; top: 50%; transform: translateY(-44%);
-    width: 348px; padding: 30px 32px;
-    border-radius: 30px;
-    background: linear-gradient(to bottom right, #ffffff, color-mix(in oklab, var(--pastel-purple) 60%, white));
-    border: 2px solid color-mix(in oklab, var(--primary) 18%, white);
-    box-shadow: 0 22px 45px -14px color-mix(in oklab, var(--primary) 32%, transparent);
+    position: absolute; right: 76px; top: 50%; transform: translateY(-44%);
+    width: 350px; padding: 30px 32px;
+    border-radius: 22px; background: #ffffff;
   }
   .demo-label {
     font-size: 12px; font-weight: 600; letter-spacing: 0.14em;
-    text-transform: uppercase; color: var(--primary); margin-bottom: 16px;
+    text-transform: uppercase; color: var(--purple); margin-bottom: 16px;
   }
   .demo-word {
-    font-size: 42px; font-weight: 600; color: var(--foreground);
+    font-size: 42px; font-weight: 600; color: var(--ink);
     margin-bottom: 18px; letter-spacing: -0.01em;
   }
   .phonemes { display: flex; gap: 9px; }
   .ph {
     font-family: "Charis SIL", Georgia, serif; font-size: 24px;
-    padding: 9px 15px; border-radius: 14px;
-    background: color-mix(in oklab, var(--pastel-purple) 80%, white);
-    color: var(--logo-purple-deep);
+    padding: 9px 15px; border-radius: 10px;
+    background: #f1edf6; color: var(--purple-deep);
   }
-  .ph.wrong {
-    background: color-mix(in oklab, var(--logo-gold) 26%, white);
-    border: 2px solid var(--logo-gold);
-    color: #8a5a08;
-  }
+  .ph.wrong { background: var(--gold); color: #4a3000; font-weight: 700; }
   .demo-note {
-    margin-top: 18px; font-size: 16px; color: var(--muted-foreground); line-height: 1.45;
+    margin-top: 18px; font-size: 16px; color: var(--slate); line-height: 1.45;
   }
-  .demo-note b { font-family: "Charis SIL", Georgia, serif; color: var(--logo-purple-deep); font-weight: 700; }
+  .demo-note b {
+    font-family: "Charis SIL", Georgia, serif;
+    color: var(--purple-deep); font-weight: 700;
+  }
 
-  .footer { padding: 0 72px 48px; display: flex; align-items: center; gap: 12px; }
-  .pill {
-    font-size: 17px; font-weight: 500; padding: 10px 20px; border-radius: 999px;
-    background: color-mix(in oklab, var(--primary) 12%, white);
-    color: var(--primary);
+  .footer {
+    padding: 0 76px 50px;
+    display: flex; align-items: baseline; gap: 14px;
+    font-size: 19px; color: #c3b0d8;
   }
-  .pill.gold {
-    background: color-mix(in oklab, var(--logo-gold) 24%, white);
-    color: #8a5a08;
-  }
-  .url {
-    margin-left: auto; font-size: 20px; font-weight: 600;
-    color: color-mix(in oklab, var(--primary) 70%, white);
-  }
+  .footer .dot { color: #8e6fb0; }
+  .url { margin-left: auto; font-weight: 600; color: #ffffff; }
 </style>
 </head>
 <body>
-  <span class="sparkle s1">✦</span>
-  <span class="sparkle s2">✦</span>
-  <span class="sparkle s3">✦</span>
+  <div class="rule"></div>
 
   <div class="brand">
-    ${logoSvg}
+    <span class="chip">${logoSvg}</span>
     <span class="brand-name">Word Wiz AI</span>
   </div>
 
@@ -173,9 +142,11 @@ const html = `<!doctype html>
   </div>
 
   <div class="footer">
-    <span class="pill">Free forever</span>
-    <span class="pill">No ads</span>
-    <span class="pill gold">Ages 5–8</span>
+    <span>Free forever</span>
+    <span class="dot">·</span>
+    <span>No ads</span>
+    <span class="dot">·</span>
+    <span>Ages 5–8</span>
     <span class="url">wordwizai.com</span>
   </div>
 </body>

@@ -1,0 +1,5 @@
+{
+  "words": ["my", "dog", "wordwiz", "naps"],
+  "phonemes_by_word": [["m", "a", "ɪ"], ["d", "ɔ", "g"], ["w", "ɝ", "d", "w", "ɪ", "z"], ["n", "æ", "p", "s"]],
+  "source": "hand-written; probes the eng_to_ipa out-of-vocabulary fallback"
+}

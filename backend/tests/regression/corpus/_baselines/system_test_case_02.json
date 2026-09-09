@@ -1,0 +1,569 @@
+{
+  "case_id": "system_test_case_02",
+  "client_path": {
+    "highest_per_word": "the",
+    "problem_types": [
+      "high_frequency_errors",
+      "most_common_phoneme",
+      "most_common_word",
+      "phoneme_articulatory_info",
+      "phoneme_difficulty_levels",
+      "phoneme_error_counts",
+      "phoneme_group_errors",
+      "recommended_focus_phoneme",
+      "word_error_counts"
+    ],
+    "sentence_per": 0.114286,
+    "total_errors": 4,
+    "total_phonemes": 35,
+    "words": [
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "ð",
+          "ə"
+        ],
+        "ground_truth_word": "the",
+        "missed": [
+          "ð"
+        ],
+        "per": 0.5,
+        "phonemes": [
+          "ə"
+        ],
+        "predicted_word": "the",
+        "substituted": [],
+        "total_errors": 1,
+        "total_phonemes": 2,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "k",
+          "w",
+          "ɪ",
+          "k"
+        ],
+        "ground_truth_word": "quick",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "k",
+          "w",
+          "ɪ",
+          "k"
+        ],
+        "predicted_word": "quick",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 4,
+        "type": "match"
+      },
+      {
+        "added": [
+          "d"
+        ],
+        "ground_truth_phonemes": [
+          "b",
+          "r",
+          "a",
+          "ʊ",
+          "n"
+        ],
+        "ground_truth_word": "brown",
+        "missed": [
+          "b"
+        ],
+        "per": 0.4,
+        "phonemes": [
+          "r",
+          "a",
+          "ʊ",
+          "n",
+          "d"
+        ],
+        "predicted_word": "brown",
+        "substituted": [],
+        "total_errors": 2,
+        "total_phonemes": 5,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "f",
+          "ɑ",
+          "k",
+          "s"
+        ],
+        "ground_truth_word": "fox",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "f",
+          "ɑ",
+          "k",
+          "s"
+        ],
+        "predicted_word": "fox",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 4,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "ʤ",
+          "ə",
+          "m",
+          "p",
+          "t"
+        ],
+        "ground_truth_word": "jumped",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "ʤ",
+          "ə",
+          "m",
+          "p",
+          "t"
+        ],
+        "predicted_word": "jumped",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 5,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "o",
+          "ʊ",
+          "v",
+          "ə",
+          "r"
+        ],
+        "ground_truth_word": "over",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "o",
+          "ʊ",
+          "v",
+          "ə",
+          "r"
+        ],
+        "predicted_word": "over",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 5,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "ð",
+          "ə"
+        ],
+        "ground_truth_word": "the",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "ð",
+          "ə"
+        ],
+        "predicted_word": "the",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 2,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "l",
+          "e",
+          "ɪ",
+          "z",
+          "i"
+        ],
+        "ground_truth_word": "lazy",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "l",
+          "e",
+          "ɪ",
+          "z",
+          "i"
+        ],
+        "predicted_word": "lazy",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 5,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "d",
+          "ɔ",
+          "g"
+        ],
+        "ground_truth_word": "dog",
+        "missed": [
+          "g"
+        ],
+        "per": 0.3333,
+        "phonemes": [
+          "d",
+          "ɔ"
+        ],
+        "predicted_word": "dog",
+        "substituted": [],
+        "total_errors": 1,
+        "total_phonemes": 3,
+        "type": "match"
+      }
+    ]
+  },
+  "fixture": {
+    "phonemes_by_word": [
+      [
+        "ə"
+      ],
+      [
+        "k",
+        "w",
+        "ɪ",
+        "k"
+      ],
+      [
+        "r",
+        "a",
+        "ʊ",
+        "n",
+        "d"
+      ],
+      [
+        "f",
+        "ɑ",
+        "k",
+        "s"
+      ],
+      [
+        "ʤ",
+        "ə",
+        "m",
+        "p",
+        "t"
+      ],
+      [
+        "o",
+        "ʊ",
+        "v",
+        "ə",
+        "r"
+      ],
+      [
+        "ð",
+        "ə"
+      ],
+      [
+        "l",
+        "e",
+        "ɪ",
+        "z",
+        "i"
+      ],
+      [
+        "d",
+        "ɔ"
+      ]
+    ],
+    "phonemes_flat": [
+      "ə",
+      "k",
+      "w",
+      "ɪ",
+      "k",
+      "r",
+      "a",
+      "ʊ",
+      "n",
+      "d",
+      "f",
+      "ɑ",
+      "k",
+      "s",
+      "ʤ",
+      "ə",
+      "m",
+      "p",
+      "t",
+      "o",
+      "ʊ",
+      "v",
+      "ə",
+      "r",
+      "ð",
+      "ə",
+      "l",
+      "e",
+      "ɪ",
+      "z",
+      "i",
+      "d",
+      "ɔ"
+    ],
+    "source": "tests/system/test_case_02/result.json",
+    "words": [
+      "the",
+      "quick",
+      "brown",
+      "fox",
+      "jumped",
+      "over",
+      "the",
+      "lazy",
+      "dog"
+    ]
+  },
+  "format_version": 1,
+  "path_comparison_structural_count": 0,
+  "path_divergence": 0.0,
+  "sentence": "the quick brown fox jumped over the lazy dog",
+  "server_path": {
+    "highest_per_word": "the",
+    "problem_types": [
+      "high_frequency_errors",
+      "most_common_phoneme",
+      "most_common_word",
+      "phoneme_articulatory_info",
+      "phoneme_difficulty_levels",
+      "phoneme_error_counts",
+      "phoneme_group_errors",
+      "recommended_focus_phoneme",
+      "word_error_counts"
+    ],
+    "sentence_per": 0.114286,
+    "total_errors": 4,
+    "total_phonemes": 35,
+    "words": [
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "ð",
+          "ə"
+        ],
+        "ground_truth_word": "the",
+        "missed": [
+          "ð"
+        ],
+        "per": 0.5,
+        "phonemes": [
+          "ə"
+        ],
+        "predicted_word": "the",
+        "substituted": [],
+        "total_errors": 1,
+        "total_phonemes": 2,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "k",
+          "w",
+          "ɪ",
+          "k"
+        ],
+        "ground_truth_word": "quick",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "k",
+          "w",
+          "ɪ",
+          "k"
+        ],
+        "predicted_word": "quick",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 4,
+        "type": "match"
+      },
+      {
+        "added": [
+          "d"
+        ],
+        "ground_truth_phonemes": [
+          "b",
+          "r",
+          "a",
+          "ʊ",
+          "n"
+        ],
+        "ground_truth_word": "brown",
+        "missed": [
+          "b"
+        ],
+        "per": 0.4,
+        "phonemes": [
+          "r",
+          "a",
+          "ʊ",
+          "n",
+          "d"
+        ],
+        "predicted_word": "brown",
+        "substituted": [],
+        "total_errors": 2,
+        "total_phonemes": 5,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "f",
+          "ɑ",
+          "k",
+          "s"
+        ],
+        "ground_truth_word": "fox",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "f",
+          "ɑ",
+          "k",
+          "s"
+        ],
+        "predicted_word": "fox",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 4,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "ʤ",
+          "ə",
+          "m",
+          "p",
+          "t"
+        ],
+        "ground_truth_word": "jumped",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "ʤ",
+          "ə",
+          "m",
+          "p",
+          "t"
+        ],
+        "predicted_word": "jumped",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 5,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "o",
+          "ʊ",
+          "v",
+          "ə",
+          "r"
+        ],
+        "ground_truth_word": "over",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "o",
+          "ʊ",
+          "v",
+          "ə",
+          "r"
+        ],
+        "predicted_word": "over",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 5,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "ð",
+          "ə"
+        ],
+        "ground_truth_word": "the",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "ð",
+          "ə"
+        ],
+        "predicted_word": "the",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 2,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "l",
+          "e",
+          "ɪ",
+          "z",
+          "i"
+        ],
+        "ground_truth_word": "lazy",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "l",
+          "e",
+          "ɪ",
+          "z",
+          "i"
+        ],
+        "predicted_word": "lazy",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 5,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "d",
+          "ɔ",
+          "g"
+        ],
+        "ground_truth_word": "dog",
+        "missed": [
+          "g"
+        ],
+        "per": 0.3333,
+        "phonemes": [
+          "d",
+          "ɔ"
+        ],
+        "predicted_word": "dog",
+        "substituted": [],
+        "total_errors": 1,
+        "total_phonemes": 3,
+        "type": "match"
+      }
+    ]
+  }
+}

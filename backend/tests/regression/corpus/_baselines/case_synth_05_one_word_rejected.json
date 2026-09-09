@@ -1,0 +1,29 @@
+{
+  "case_id": "case_synth_05_one_word_rejected",
+  "client_path": {
+    "error": "ValueError: The audio provided has no speech inside"
+  },
+  "fixture": {
+    "phonemes_by_word": [
+      [
+        "ð",
+        "ə"
+      ]
+    ],
+    "phonemes_flat": [
+      "ð",
+      "ə"
+    ],
+    "source": "hand-written; simulates a clip where almost nothing was transcribed (mumbled, clipped, or mostly silence)",
+    "words": [
+      "the"
+    ]
+  },
+  "format_version": 1,
+  "path_comparison_structural_count": 0,
+  "path_divergence": 0.0,
+  "sentence": "the cat sat on the mat",
+  "server_path": {
+    "error": "ValueError: The audio provided has no speech inside"
+  }
+}

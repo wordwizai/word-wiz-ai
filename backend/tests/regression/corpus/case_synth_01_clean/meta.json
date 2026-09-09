@@ -1,0 +1,4 @@
+{
+  "tags": ["synthetic", "clean"],
+  "notes": "Baseline floor: a perfect read. Expected sentence_per 0.0 on both paths. If this case ever moves, something is badly wrong."
+}

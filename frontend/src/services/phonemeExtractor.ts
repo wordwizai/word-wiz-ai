@@ -8,6 +8,214 @@ import {
 } from "../utils/deviceCapabilities";
 import "./transformersInit";
 
+/* ------------------------------------------------------------------------- *
+ * Canonical IPA inventory -- EXACT MIRROR of backend/core/phoneme_inventory.py
+ *
+ * These tables and the two functions below MUST stay byte-for-byte equivalent
+ * to the Python module. If client and server tokenize differently, the same
+ * audio scores differently depending on which path ran -- which is precisely
+ * the bug class this is eliminating. There is a parity test that feeds an
+ * identical corpus through both implementations and compares the output; if you
+ * change anything here, change phoneme_inventory.py in the same commit.
+ *
+ * Verified against the real sources (not guessed):
+ *  - model vocab: Bobcat9/wav2vec2-timit-ipa-onnx vocab.json, 44 entries. It
+ *    emits the LIGATURES ʧ (U+02A7) / ʤ (U+02A4), ASCII g (U+0067), r (not ɹ),
+ *    and has no combined diphthong tokens -- aɪ arrives as "a" + "ɪ".
+ *  - ground truth: eng_to_ipa's ARPAbet->IPA table, which uses the same
+ *    ligatures and writes diphthongs as two codepoints.
+ * ------------------------------------------------------------------------- */
+
+// ---- WWAI_IPA_MIRROR_BEGIN ----
+/** Multi-codepoint sequences that must survive as a SINGLE token. All length 2. */
+const IPA_MULTI_CHAR_TOKENS: ReadonlySet<string> = new Set([
+  "tʃ",
+  "dʒ",
+  "aɪ",
+  "eɪ",
+  "ɔɪ",
+  "aʊ",
+  "oʊ",
+]);
+
+/** Modifiers that belong to the PRECEDING phoneme (length, aspiration, ...). */
+const IPA_DIACRITICS: ReadonlySet<string> = new Set([
+  "ː",
+  "ˑ",
+  "ʰ",
+  "ʲ",
+  "ʷ",
+  "˞",
+  "̃", // combining tilde (nasalization)
+  "̥", // combining ring below (voiceless)
+  "̬", // combining caron below (voiced)
+  "̩", // combining vertical line below (syllabic)
+  "̯", // combining inverted breve below (non-syllabic)
+  "͡", // combining double inverted breve (tie bar)
+  "͜", // combining double breve below (tie bar below)
+]);
+
+/** Characters with no phonemic content -- dropped outright. */
+const IPA_IGNORED_CHARS: ReadonlySet<string> = new Set([
+  "ˈ",
+  "ˌ",
+  ".",
+  "|",
+  "‖",
+  "‿",
+  "'",
+  "’",
+  ",",
+  "*",
+  "-",
+  "–",
+  "—",
+  " ",
+  "\t",
+  "\n",
+  "\r",
+]);
+
+/** Pure notation rewrites: same sound, different spelling. */
+const IPA_ALIAS_MAP: ReadonlyMap<string, string[]> = new Map([
+  ["ʧ", ["tʃ"]],
+  ["ʤ", ["dʒ"]],
+  ["ʦ", ["t", "s"]],
+  ["ʣ", ["d", "z"]],
+  ["ɡ", ["g"]], // U+0261 -> U+0067
+  ["ɹ", ["r"]],
+  ["ɻ", ["r"]],
+  ["ʀ", ["r"]],
+  ["ʁ", ["r"]],
+  ["ɚ", ["ə", "r"]],
+  ["ɝ", ["ə", "r"]],
+  ["ɫ", ["l"]],
+  ["ʍ", ["w"]],
+]);
+
+/** Symbols outside the inventory, folded onto their nearest member. */
+const IPA_INVENTORY_FOLD_MAP: ReadonlyMap<string, string[]> = new Map([
+  ["ʌ", ["ə"]],
+  ["ɐ", ["ə"]],
+  ["ɜ", ["ə"]],
+  ["ɘ", ["ə"]],
+  ["ɒ", ["ɑ"]],
+  ["e", ["ɛ"]],
+  ["o", ["oʊ"]],
+  ["ɾ", ["t"]],
+  ["ɽ", ["r"]],
+  ["ʔ", ["t"]],
+  ["y", ["j"]],
+  ["ɨ", ["ɪ"]],
+  ["ʉ", ["u"]],
+  ["ɯ", ["u"]],
+  ["ø", ["ɛ"]],
+  ["œ", ["ɛ"]],
+  ["ɤ", ["ə"]],
+  ["ɲ", ["n"]],
+  ["ɳ", ["n"]],
+  ["ʎ", ["l"]],
+  ["ç", ["h"]],
+  ["ɣ", ["g"]],
+  ["β", ["v"]],
+  ["ɸ", ["f"]],
+  ["a", ["ɑ"]],
+]);
+
+/**
+ * Longest-match IPA tokenizer. Mirror of phoneme_inventory.py::tokenize_ipa.
+ * Replaces `word.split("")`, which shredded aɪ/eɪ/oʊ into two "phonemes" and
+ * inflated the PER denominator.
+ */
+export function tokenizeIpa(input: string): string[] {
+  if (!input) return [];
+  // Array.from -> iterate by code point, matching Python's per-character loop.
+  const chars = Array.from(input.normalize("NFC"));
+  const tokens: string[] = [];
+  let i = 0;
+  while (i < chars.length) {
+    const ch = chars[i];
+
+    if (IPA_IGNORED_CHARS.has(ch)) {
+      i += 1;
+      continue;
+    }
+
+    if (IPA_DIACRITICS.has(ch)) {
+      if (tokens.length > 0) {
+        tokens[tokens.length - 1] = tokens[tokens.length - 1] + ch;
+      }
+      i += 1;
+      continue;
+    }
+
+    if (i + 1 < chars.length) {
+      const pair = ch + chars[i + 1];
+      if (IPA_MULTI_CHAR_TOKENS.has(pair)) {
+        tokens.push(pair);
+        i += 2;
+        continue;
+      }
+    }
+
+    tokens.push(ch);
+    i += 1;
+  }
+  return tokens;
+}
+
+function stripIpaDiacritics(token: string): string {
+  return Array.from(token)
+    .filter((c) => !IPA_DIACRITICS.has(c))
+    .join("");
+}
+
+/**
+ * Map any phoneme sequence into the canonical inventory.
+ * Mirror of phoneme_inventory.py::normalize_phonemes (fold_inventory=True).
+ */
+export function normalizeIpaPhonemes(input: string | string[]): string[] {
+  if (input === null || input === undefined) return [];
+  const source = Array.isArray(input) ? input.join("") : input;
+  const tokens = tokenizeIpa(source);
+
+  const out: string[] = [];
+  for (const raw of tokens) {
+    const token = raw.normalize("NFC");
+    const base = stripIpaDiacritics(token);
+    if (!base) continue;
+
+    const replacement =
+      IPA_ALIAS_MAP.get(base) ?? IPA_INVENTORY_FOLD_MAP.get(base) ?? [base];
+    for (const piece of replacement) {
+      if (piece) out.push(piece);
+    }
+  }
+  return out;
+}
+
+// ---- WWAI_IPA_MIRROR_END ----
+
+/**
+ * WWAI_PHONEME_NORMALIZATION feature flag, default OFF.
+ * Exposed to the browser bundle as VITE_WWAI_PHONEME_NORMALIZATION (Vite only
+ * inlines env vars with the VITE_ prefix). A `window.WWAI_PHONEME_NORMALIZATION`
+ * override is honoured too so the flag can be flipped at runtime for debugging.
+ */
+function isPhonemeNormalizationEnabled(): boolean {
+  const truthy = new Set(["1", "true", "yes", "on", "y", "t"]);
+  try {
+    const runtime = (globalThis as any)?.WWAI_PHONEME_NORMALIZATION;
+    if (runtime !== undefined && runtime !== null) {
+      return truthy.has(String(runtime).trim().toLowerCase());
+    }
+  } catch {
+    /* ignore */
+  }
+  const fromEnv = import.meta.env?.VITE_WWAI_PHONEME_NORMALIZATION;
+  return truthy.has(String(fromEnv ?? "").trim().toLowerCase());
+}
+
 /**
  * Singleton client-side phoneme extractor.
  * Manages model lifecycle, caching, and extraction with resource detection.
@@ -464,12 +672,26 @@ class ClientPhonemeExtractor {
 
     console.log("Individual phoneme words:", phonemes);
 
-    // Step 4: Split each word into individual phoneme characters
-    // Each word like "ðə" needs to become ["ð", "ə"]
-    const words: string[][] = phonemes.map((word) => {
+    // Step 4: Split each word into individual phonemes.
+    //
+    // WWAI_PHONEME_NORMALIZATION (default OFF).
+    //  OFF -> legacy behaviour: word.split(""), which shreds the two-codepoint
+    //         diphthongs aɪ/eɪ/oʊ/aʊ/ɔɪ into two "phonemes" and inflates the
+    //         PER denominator, so one real error can read as two.
+    //  ON  -> longest-match tokenization + canonical normalization, byte-for-byte
+    //         identical to backend/core/phoneme_inventory.py so the client and
+    //         server paths score the same audio the same way.
+    let words: string[][];
+    if (isPhonemeNormalizationEnabled()) {
+      words = phonemes
+        .map((word) => normalizeIpaPhonemes(word))
+        // Drop words that normalize to nothing (stress marks only) so
+        // downstream alignment never sees a zero-length phoneme group.
+        .filter((w) => w.length > 0);
+    } else {
       // Split the word into individual characters (phonemes)
-      return word.split("");
-    });
+      words = phonemes.map((word) => word.split(""));
+    }
 
     console.log("Parsed into words:", words);
     return words;

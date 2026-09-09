@@ -6,6 +6,7 @@ import time
 from typing import Optional
 from .optimization_config import config
 from .audio_optimization import OptimizedAudioPreprocessor
+from .phoneme_inventory import normalization_enabled, normalize_phonemes
 
 
 def default_model_output_processing(transcription):
@@ -15,8 +16,22 @@ def default_model_output_processing(transcription):
     # split by words
     filtered_transcription = re.split(r" ", filtered_transcription)
 
-    filtered_transcription = [list(word.replace("ˈ","")) for word in filtered_transcription if word != ""]
-    return filtered_transcription
+    words = [word for word in filtered_transcription if word != ""]
+
+    # WWAI_PHONEME_NORMALIZATION (default OFF).
+    # OFF  -> legacy behaviour: list(str) tokenization, which splits the
+    #         two-codepoint diphthongs aɪ/eɪ/oʊ/aʊ/ɔɪ into two "phonemes" and
+    #         inflates the PER denominator.
+    # ON   -> longest-match tokenization + canonical normalization, identical to
+    #         the client-side implementation in
+    #         frontend/src/services/phonemeExtractor.ts::parsePhonemeOutput.
+    if normalization_enabled():
+        normalized = [normalize_phonemes(word) for word in words]
+        # A word that normalizes to nothing (stress marks only) is dropped so
+        # downstream alignment never sees a zero-length phoneme group.
+        return [w for w in normalized if w]
+
+    return [list(word.replace("ˈ", "")) for word in words]
 
 
 class PhonemeExtractorONNX:

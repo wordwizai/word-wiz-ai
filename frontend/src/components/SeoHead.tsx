@@ -10,6 +10,15 @@ interface SeoHeadProps {
   /** Route path, e.g. "/about". Combined with the site origin for canonical. */
   canonicalPath: string;
   ogType?: "website" | "article";
+  /**
+   * Absolute URL of a real social preview image (1200x630).
+   *
+   * Deliberately has no default. The catch-all SPA rewrite returns index.html
+   * with a 200 for any missing path, so pointing at an image that doesn't
+   * exist serves crawlers HTML labelled as a PNG — a broken preview that looks
+   * like a successful response. Omitting the tag is the honest state until a
+   * real image ships.
+   */
   ogImage?: string;
   /** JSON-LD object or array of objects. */
   structuredData?: unknown;
@@ -28,7 +37,7 @@ const SeoHead = ({
   description,
   canonicalPath,
   ogType = "website",
-  ogImage = `${SITE_ORIGIN}/og-image.png`,
+  ogImage,
   structuredData,
 }: SeoHeadProps) => {
   const canonicalUrl = `${SITE_ORIGIN}${canonicalPath === "/" ? "/" : canonicalPath}`;
@@ -43,13 +52,16 @@ const SeoHead = ({
       <meta property="og:url" content={canonicalUrl} />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
-      <meta property="og:image" content={ogImage} />
+      {ogImage ? <meta property="og:image" content={ogImage} /> : null}
 
-      <meta name="twitter:card" content="summary_large_image" />
+      <meta
+        name="twitter:card"
+        content={ogImage ? "summary_large_image" : "summary"}
+      />
       <meta name="twitter:url" content={canonicalUrl} />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={ogImage} />
+      {ogImage ? <meta name="twitter:image" content={ogImage} /> : null}
 
       {structuredData ? (
         <script type="application/ld+json">

@@ -770,6 +770,9 @@ async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=
     import time
     alignment_start = time.time()
     flattened_phoneme_predictions = [item for sublist in phoneme_predictions for item in sublist]
+    from .gt_alignment import is_gt_anchored_enabled, align_to_ground_truth
+    if is_gt_anchored_enabled():  # WWAI_GT_ANCHORED_ALIGNMENT, default OFF
+        return align_to_ground_truth(flattened_phoneme_predictions, ground_truth_phonemes, predicted_words)
     predicted_words_phonemes = g2p(" ".join(predicted_words)) # take the words our model thinks we said and get the phonemes for them
     alignment = align_phonemes_to_words(flattened_phoneme_predictions, predicted_words_phonemes)
     phoneme_predictions = [pred_phonemes for _, pred_phonemes,_ in alignment]

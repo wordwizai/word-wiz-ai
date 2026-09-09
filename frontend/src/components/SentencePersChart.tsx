@@ -2,15 +2,12 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
-  ResponsiveContainer,
   XAxis,
 } from "recharts";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
-  CardTitle,
 } from "./ui/card";
 import {
   ChartContainer,
@@ -21,7 +18,7 @@ import {
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getSentencePers } from "@/api";
-import { TrendingUp, Target } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 
 const SentencePersChart = ({
   className = "",

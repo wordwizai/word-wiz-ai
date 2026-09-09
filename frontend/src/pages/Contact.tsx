@@ -5,10 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Heart,
-  MapPin,
   Mail,
   Github,
-  Twitter,
   Instagram,
   Send,
   MessageCircle,

@@ -1,4 +1,3 @@
-import React from "react";
 import ArticlePageTemplate, {
   type ArticleSection,
 } from "@/components/ArticlePageTemplate";

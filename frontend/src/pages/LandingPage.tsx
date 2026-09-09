@@ -3,7 +3,6 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-  CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -15,14 +14,12 @@ import LandingPageCTA from "@/components/LandingPageCTA";
 import FAQ from "@/components/FAQ";
 import React from "react";
 import {
-  BookOpen,
   BarChart3,
   Users,
   GraduationCap,
   User,
   WholeWord,
   CircleDollarSign,
-  Sparkles,
 } from "lucide-react";
 import AnimatedPracticeDemo from "@/components/AnimatedPracticeDemo";
 import TrustBadgeCarousel from "@/components/TrustBadgeCarousel";

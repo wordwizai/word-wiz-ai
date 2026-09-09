@@ -3,11 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { wordWizIcon } from "@/assets";
 import React from "react";
 import {
-  Heart,
   Users,
   Target,
   Github,
-  Twitter,
   Mail,
   Instagram,
   DollarSign,

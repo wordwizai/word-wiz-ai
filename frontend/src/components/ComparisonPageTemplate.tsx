@@ -11,7 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
-import { Check, X, Star, ArrowRight, Info } from "lucide-react";
+import { Check, X, ArrowRight, Info } from "lucide-react";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import LandingPageFooter from "@/components/LandingPageFooter";
 import { DEFAULT_OG_IMAGE } from "@/components/SeoHead";

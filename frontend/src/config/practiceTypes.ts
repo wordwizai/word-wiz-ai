@@ -1,4 +1,3 @@
-import { type Session } from "@/api";
 
 export interface PracticeTypeConfig {
   title: string;

@@ -1,12 +1,10 @@
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
-import { wordWizIcon } from "@/assets";
 import React from "react";
 import { Shield } from "lucide-react";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import SeoHead from "@/components/SeoHead";
 import LandingPageFooter from "@/components/LandingPageFooter";
-import LandingPageCTA from "@/components/LandingPageCTA";
 
 const fadeUpVariant = {
   hidden: { opacity: 0, y: 30 },

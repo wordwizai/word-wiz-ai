@@ -12,7 +12,6 @@ import FeedbackDisplay from "@/components/practice/FeedbackDisplay";
 import { LocalProcessingAlert } from "@/components/LocalProcessingAlert";
 import {
   getPracticeConfig,
-  type PracticeTypeConfig,
 } from "@/config/practiceTypes";
 
 interface GenericPracticeProps {

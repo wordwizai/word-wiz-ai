@@ -46,7 +46,7 @@ interface SidebarProps {
 const Sidebar = ({ className }: SidebarProps) => {
   // get the user
   const { user, logout } = useContext<AuthContextType>(AuthContext);
-  const { theme, setTheme } = useTheme();
+  const { setTheme } = useTheme();
   const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(true);
 

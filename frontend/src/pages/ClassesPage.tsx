@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Plus, Users } from "lucide-react";
 import {
   getMyClasses,
@@ -109,8 +109,6 @@ const ClassesPage = () => {
     setSelectedStudent(null);
   };
 
-  // Check if user is a teacher
-  const isTeacher = myClasses.length > 0;
 
   // If viewing student details, show student detail view
   if (selectedStudent !== null && selectedClassId !== null) {

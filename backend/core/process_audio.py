@@ -471,17 +471,74 @@ def _process_word_alignment(
     # Align the words
     word_ops = align_sequences(ground_truth_words, predicted_words)
     print("Word operations:", word_ops)
-    
+
+    # --- Bounds safety -------------------------------------------------
+    # The four input lists are produced by *separate* upstream stages
+    # (ASR word list, g2p ground truth, phoneme model, client payload) and are
+    # NOT guaranteed to be the same length. Indexing them blind raises
+    # IndexError, which surfaces to a child as "AI processing failed: list
+    # index out of range". Every access below goes through these helpers so an
+    # out-of-range index degrades to an empty value plus a structured warning
+    # instead of crashing. When every index IS in range these helpers are
+    # transparent: they return the exact same object the bare index would.
+    bounds_warnings: list[dict] = []
+
+    def _warn_oob(field: str, index: int, length: int, op_name: str):
+        warning = {
+            "warning": "phoneme_index_out_of_range",
+            "field": field,
+            "index": index,
+            "length": length,
+            "word_op": op_name,
+        }
+        bounds_warnings.append(warning)
+        print(
+            f"[WWAI][bounds] {field}[{index}] out of range (len={length}) "
+            f"during word op '{op_name}' - degrading to empty value"
+        )
+
+    def _safe_seq(seq, index: int, op_name: str, field: str, default):
+        """Return seq[index] when in range, else `default` + a structured warning."""
+        length = len(seq) if seq is not None else 0
+        if seq is not None and 0 <= index < length:
+            return seq[index]
+        _warn_oob(field, index, length, op_name)
+        return default
+
+    def _safe_phonemes(seq, index: int, op_name: str, field: str):
+        """Like _safe_seq but also normalises a non-sequence entry to []."""
+        value = _safe_seq(seq, index, op_name, field, None)
+        if isinstance(value, (list, tuple)):
+            return value
+        if value is not None:
+            _warn_oob(field, index, len(seq) if seq is not None else 0, op_name)
+        return []
+
+    def _safe_gt_phonemes(index: int, op_name: str):
+        """Ground truth is a list of (word, [phonemes]) tuples - guard both levels."""
+        entry = _safe_seq(ground_truth_phonemes, index, op_name, "ground_truth_phonemes", None)
+        if isinstance(entry, (list, tuple)) and len(entry) >= 2 and isinstance(entry[1], (list, tuple)):
+            return entry[1]
+        if entry is not None:
+            _warn_oob(
+                "ground_truth_phonemes[i][1]",
+                index,
+                len(ground_truth_phonemes) if ground_truth_phonemes is not None else 0,
+                op_name,
+            )
+        return []
+    # -------------------------------------------------------------------
+
     results = []
     gt_idx, pred_idx = 0, 0  # indices for ground truth and predicted phonemes
-    
+
     for op, gt_word_op, pred_word_op in word_ops:
         if op in ('match', 'substitution'):
-            gt_word = ground_truth_words[gt_idx]
-            pred_word = predicted_words[pred_idx]
-            gt_phonemes = ground_truth_phonemes[gt_idx][1]
-            pred_phonemes = phoneme_predictions[pred_idx]
-            
+            gt_word = _safe_seq(ground_truth_words, gt_idx, op, "ground_truth_words", gt_word_op or "")
+            pred_word = _safe_seq(predicted_words, pred_idx, op, "predicted_words", pred_word_op or "")
+            gt_phonemes = _safe_gt_phonemes(gt_idx, op)
+            pred_phonemes = _safe_phonemes(phoneme_predictions, pred_idx, op, "phoneme_predictions")
+
             # Get phoneme-level alignment
             phoneme_ops = align_sequences(gt_phonemes, pred_phonemes)
             missed, added, substituted = [], [], []
@@ -514,8 +571,8 @@ def _process_word_alignment(
         
         elif op == 'insertion':
             # Extra word predicted (no matching ground truth)
-            pred_word = predicted_words[pred_idx]
-            pred_phonemes = phoneme_predictions[pred_idx]
+            pred_word = _safe_seq(predicted_words, pred_idx, op, "predicted_words", pred_word_op or "")
+            pred_phonemes = _safe_phonemes(phoneme_predictions, pred_idx, op, "phoneme_predictions")
             results.append({
                 "type": op,
                 "predicted_word": pred_word,
@@ -536,8 +593,8 @@ def _process_word_alignment(
 
         elif op == 'deletion':
             # A ground truth word is missing in prediction — every phoneme was missed
-            gt_word = ground_truth_words[gt_idx]
-            gt_phonemes_del = list(ground_truth_phonemes[gt_idx][1]) if gt_idx < len(ground_truth_phonemes) else []
+            gt_word = _safe_seq(ground_truth_words, gt_idx, op, "ground_truth_words", gt_word_op or "")
+            gt_phonemes_del = list(_safe_gt_phonemes(gt_idx, op)) if gt_idx < len(ground_truth_phonemes) else []
             results.append({
                 "type": op,
                 "predicted_word": "",
@@ -555,7 +612,18 @@ def _process_word_alignment(
                 "error": "Word missing in prediction."
             })
             gt_idx += 1
-    
+
+    if bounds_warnings:
+        print(
+            f"[WWAI][bounds] {len(bounds_warnings)} out-of-range access(es) were degraded "
+            f"instead of raising IndexError. "
+            f"lens: ground_truth_words={len(ground_truth_words) if ground_truth_words is not None else 0}, "
+            f"ground_truth_phonemes={len(ground_truth_phonemes) if ground_truth_phonemes is not None else 0}, "
+            f"predicted_words={len(predicted_words) if predicted_words is not None else 0}, "
+            f"phoneme_predictions={len(phoneme_predictions) if phoneme_predictions is not None else 0}. "
+            f"details={bounds_warnings}"
+        )
+
     return results
 
 async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=16000, phoneme_extraction_model=None, word_extraction_model=None, use_chunking=True) -> list[dict]:
@@ -793,7 +861,61 @@ async def process_audio_with_client_phonemes(
               f"doesn't match word count ({len(predicted_words)})")
         # In this case, we'll align based on ground truth words instead
         # This is a safety measure - ideally they should match
-    
+
+    # --- Optional: realign client phonemes to the predicted words ------------
+    # The client's phoneme groups come from wav2vec2-timit-ipa's `|` boundaries
+    # while `predicted_words` comes from a *separate* whisper-tiny run, so the
+    # two segmentations routinely disagree. The server path (process_audio_array)
+    # solves this by flattening the phoneme stream and re-segmenting it against
+    # g2p(predicted_words) with dynamic programming. This does the same thing so
+    # both paths produce phoneme groups that are index-aligned with
+    # `predicted_words` by construction.
+    #
+    # Behind WWAI_CLIENT_REALIGN (default OFF) because it changes PER scores.
+    import os
+    _realign_enabled = os.getenv("WWAI_CLIENT_REALIGN", "false").strip().lower() in (
+        "1", "true", "yes", "on"
+    )
+    if _realign_enabled:
+        flattened_client_phonemes = [
+            phoneme
+            for group in (phoneme_predictions or [])
+            for phoneme in (group or [])
+        ]
+        if not flattened_client_phonemes:
+            print("[WWAI][client-realign] No client phonemes to realign - keeping original grouping")
+        else:
+            predicted_words_phonemes = g2p(" ".join(predicted_words))
+            realignment = align_phonemes_to_words(
+                flattened_client_phonemes, predicted_words_phonemes
+            )
+            if not realignment:
+                print(
+                    "[WWAI][client-realign] align_phonemes_to_words returned no alignment "
+                    "- keeping original client grouping"
+                )
+            else:
+                realigned = [pred_phonemes for _, pred_phonemes, _ in realignment]
+                # g2p() can silently drop trailing words (zip truncation on OOV /
+                # punctuation), so force exact index alignment with predicted_words.
+                if len(realigned) < len(predicted_words):
+                    print(
+                        f"[WWAI][client-realign] alignment shorter than predicted_words "
+                        f"({len(realigned)} < {len(predicted_words)}) - padding with empty groups"
+                    )
+                    realigned = realigned + [[] for _ in range(len(predicted_words) - len(realigned))]
+                elif len(realigned) > len(predicted_words):
+                    print(
+                        f"[WWAI][client-realign] alignment longer than predicted_words "
+                        f"({len(realigned)} > {len(predicted_words)}) - truncating"
+                    )
+                    realigned = realigned[:len(predicted_words)]
+                print(
+                    f"[WWAI][client-realign] regrouped {len(flattened_client_phonemes)} phonemes "
+                    f"from {len(phoneme_predictions)} client groups into {len(realigned)} word groups"
+                )
+                phoneme_predictions = realigned
+
     # Use helper function to process word alignment
     ground_truth_words = [word for word, _ in ground_truth_phonemes]
     results = _process_word_alignment(

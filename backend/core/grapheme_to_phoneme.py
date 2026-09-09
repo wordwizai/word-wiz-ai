@@ -114,6 +114,40 @@ def _strict_enabled() -> bool:
     return _env_flag("WWAI_G2P_STRICT", False)
 
 
+_COUPLING_WARNED = False
+
+
+def _warn_if_tokenization_uncoupled() -> None:
+    """Warn once when the ground-truth and prediction tokenizers disagree.
+
+    Strict mode tokenizes the ground truth with ``phoneme_inventory.tokenize_ipa``,
+    which keeps diphthongs whole ('brown' -> b r aʊ n).  The acoustic model emits
+    them split (b r a ʊ n) unless WWAI_PHONEME_NORMALIZATION rejoins them.  Enable
+    exactly one of the two and every diphthong scores as an error on both sides:
+
+        legacy GT + raw pred        -> PER 0.00   (consistent)
+        strict GT + normalized pred -> PER 0.00   (consistent)
+        strict GT + raw pred        -> PER 0.50   (broken)
+        legacy GT + normalized pred -> PER 0.40   (broken)
+
+    They are a matched pair: flip both, or neither.
+    """
+    global _COUPLING_WARNED
+    if _COUPLING_WARNED:
+        return
+    strict = _strict_enabled()
+    normalized = _env_flag("WWAI_PHONEME_NORMALIZATION", False)
+    if strict != normalized:
+        _COUPLING_WARNED = True
+        logger.warning(
+            "TOKENIZATION MISMATCH: WWAI_G2P_STRICT=%s but "
+            "WWAI_PHONEME_NORMALIZATION=%s. Ground truth and predictions are "
+            "being tokenized differently, so diphthongs (aɪ eɪ oʊ aʊ ɔɪ) will "
+            "score as errors and PER will be inflated. Set both or neither.",
+            strict, normalized,
+        )
+
+
 def _log_oov_enabled() -> bool:
     """``WWAI_G2P_LOG_OOV`` -- ON by default (logging only, no value change)."""
     return _env_flag("WWAI_G2P_LOG_OOV", True)
@@ -316,6 +350,8 @@ def grapheme_to_phoneme(grapheme, strict: bool | None = None) -> list[tuple]:
     """
     if strict is None:
         strict = _strict_enabled()
+
+    _warn_if_tokenization_uncoupled()
 
     cached = _convert_cached(grapheme, bool(strict))
     # Fresh mutable copies every call -- callers must never see cached state.

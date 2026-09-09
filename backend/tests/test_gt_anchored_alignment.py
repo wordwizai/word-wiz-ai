@@ -517,7 +517,10 @@ class TestProcessAudioArrayHook(unittest.TestCase):
         self._saved_flag = os.environ.get(GT_ANCHORED_FLAG)
         self._saved_preprocess = pa.preprocess_audio
         self._saved_g2p = pa.g2p
-        pa.preprocess_audio = lambda audio=None, sr=None, audio_length_seconds=None: audio
+        # **kwargs so this stub survives signature changes in the real
+        # preprocess_audio (e.g. already_preprocessed, added by the
+        # single-preprocessing-pass work).
+        pa.preprocess_audio = lambda audio=None, sr=None, audio_length_seconds=None, **kwargs: audio
         pa.g2p = lambda text: [(w, self.LEXICON[w]) for w in text.split()]
 
     def tearDown(self):

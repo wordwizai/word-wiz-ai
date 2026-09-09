@@ -502,7 +502,11 @@ async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=
     audio_duration = len(audio_array) / sampling_rate
     
     # preprocess the audio
-    audio_array = preprocess_audio(audio=audio_array, sr=sampling_rate, audio_length_seconds=audio_duration)
+    # already_preprocessed=None -> auto-detect. If the request handler already ran
+    # the single preprocessing pass on this exact array, skip it here instead of
+    # applying a second round of noise reduction + normalization
+    # (WWAI_SINGLE_PREPROCESS; unset = every pass runs, as before).
+    audio_array = preprocess_audio(audio=audio_array, sr=sampling_rate, audio_length_seconds=audio_duration, already_preprocessed=None)
     
     # Check if audio should be chunked
     if use_chunking and should_use_chunking(audio_array, sampling_rate, threshold_seconds=8):
@@ -668,7 +672,8 @@ async def process_audio_with_client_phonemes(
     # If client provided both phonemes and words, we don't need the audio at all
     if client_words is None or len(client_words) == 0:
         # Preprocess the audio (needed for word extraction)
-        audio_array = preprocess_audio(audio=audio_array, sr=sampling_rate)
+        # already_preprocessed=None -> auto-detect; see note in process_audio_array.
+        audio_array = preprocess_audio(audio=audio_array, sr=sampling_rate, already_preprocessed=None)
     
     # Determine if we need to extract words
     if client_words is not None and len(client_words) > 0:

@@ -421,7 +421,7 @@ export const phonicsPatterns: PhonicsPattern[] = [
     gradeLevel: "Grade 1",
     words: [
       "cast", "fast", "last", "mast", "past", "vast", "blast",
-      "mast", "contrast",
+      "outlast", "contrast",
     ],
     sampleSentences: [
       "Run fast to the last mast.",
@@ -1666,7 +1666,7 @@ export const phonicsPatterns: PhonicsPattern[] = [
       "Confusing 'sh' with 'ch' since both are common early digraphs",
       "Missing 'sh' when it appears at the end of a word instead of the beginning",
     ],
-    relatedSlugs: ["ch-digraph", "ash-family", "ish-family"],
+    relatedSlugs: ["ch-digraph", "ash-family", "th-digraph"],
   },
   {
     slug: "ch-digraph",
@@ -2191,6 +2191,798 @@ export const phonicsPatterns: PhonicsPattern[] = [
   },
 
   // ===END-BATCH-4===
+
+  // ===BATCH-5: vowel teams===
+  {
+    slug: "ai-vowel-team",
+    pattern: "ai",
+    displayName: "AI Vowel Team",
+    category: "vowel-team",
+    gradeLevel: "Grade 1",
+    words: [
+      "rain", "main", "pain", "gain", "train", "brain", "chain",
+      "plain", "mail", "tail", "sail", "nail", "paint", "faint", "wait",
+    ],
+    sampleSentences: [
+      "The train has rain on the tail.",
+      "Wait for the mail in the pail.",
+      "Paint the plain chain.",
+      "My brain feels faint.",
+    ],
+    teachingNotes: [
+      "'Ai' is the clearest example of the rule most children learn as 'two vowels go walking, the first one does the talking' - the a says its own name and the i stays silent. It is one of the more reliable vowel teams in English, which is why it is usually taught first, and it gives a child an early win after the messiness of short vowels.",
+      "The important limitation to teach alongside it: 'ai' almost never appears at the end of a word. English uses 'ay' there instead, which is why it is 'rain' but 'play.' If your child writes 'plai,' they have understood the sound correctly and only missed the position rule, so praise the sound and correct the placement rather than treating it as a spelling failure.",
+    ],
+    commonErrors: [
+      "Sounding out both letters as 'ah-ee' instead of one long A",
+      "Writing 'ai' at the end of a word where 'ay' belongs",
+      "Confusing 'ai' with 'ea', since both can make a long vowel sound",
+    ],
+    relatedSlugs: ["ay-vowel-team", "ea-vowel-team", "ee-vowel-team"],
+  },
+  {
+    slug: "ay-vowel-team",
+    pattern: "ay",
+    displayName: "AY Vowel Team",
+    category: "vowel-team",
+    gradeLevel: "Grade 1",
+    words: [
+      "day", "may", "say", "way", "play", "stay", "gray",
+      "tray", "clay", "pray", "spray", "today", "away", "delay",
+    ],
+    sampleSentences: [
+      "We play in the gray clay today.",
+      "Stay away and say the way.",
+      "May I spray the tray?",
+      "The delay lasted all day.",
+    ],
+    teachingNotes: [
+      "'Ay' makes exactly the same long A sound as 'ai,' so the sound itself is not the lesson - the position is. 'Ay' lives at the end of a word or syllable, 'ai' lives in the middle. Teaching these two together as a pair, rather than weeks apart, is what makes the rule stick, because the whole point of each is where the other cannot go.",
+      "Because 'ay' words are so common in everyday speech ('day,' 'play,' 'say'), many children already recognise several by sight before they can decode them. Use that: ask which part of 'play' makes the /ay/ sound, and let them discover the team inside a word they already know rather than introducing it cold.",
+    ],
+    commonErrors: [
+      "Writing 'ai' at the end of a word instead of 'ay'",
+      "Reading the y as a separate consonant sound",
+      "Assuming every word ending in y uses the long A sound",
+    ],
+    relatedSlugs: ["ai-vowel-team", "oy-vowel-team", "ee-vowel-team"],
+  },
+  {
+    slug: "ee-vowel-team",
+    pattern: "ee",
+    displayName: "EE Vowel Team",
+    category: "vowel-team",
+    gradeLevel: "Grade 1",
+    words: [
+      "see", "bee", "tree", "free", "three", "green", "seen",
+      "keep", "sleep", "sheep", "deep", "feet", "meet", "street", "week",
+    ],
+    sampleSentences: [
+      "Three green sheep sleep in the tree.",
+      "I see a bee on my feet.",
+      "Keep the street free this week.",
+      "We meet in the deep green.",
+    ],
+    teachingNotes: [
+      "'Ee' is the most dependable vowel team in English. It says long E essentially every time, with no meaningful exceptions a young reader will encounter, which makes it an excellent confidence builder right after the short vowels. If a child is discouraged by how irregular English feels, this is a good pattern to spend a week on.",
+      "It also combines readily with digraphs and blends the child already knows - 'sheep' needs 'sh' plus 'ee' plus 'p,' 'street' needs 'str' plus 'ee' plus 't.' Once 'ee' is solid, use it as the vowel in blending practice so the child is only juggling one new element at a time.",
+    ],
+    commonErrors: [
+      "Reading 'ee' as two separate short E sounds",
+      "Confusing 'ee' with 'ea', which shares the sound but is far less predictable",
+      "Dropping one e when spelling, writing 'sen' for 'seen'",
+    ],
+    relatedSlugs: ["ea-vowel-team", "ie-vowel-team", "ai-vowel-team"],
+  },
+  {
+    slug: "ea-vowel-team",
+    pattern: "ea",
+    displayName: "EA Vowel Team",
+    category: "vowel-team",
+    gradeLevel: "Grade 1–2",
+    words: [
+      "eat", "sea", "tea", "read", "beach", "teach", "clean",
+      "dream", "cream", "bread", "head", "ready", "heavy", "great", "break",
+    ],
+    sampleSentences: [
+      "We eat bread by the sea.",
+      "Clean the beach, then read.",
+      "I dream of cream and tea.",
+      "Get ready for a great break.",
+    ],
+    teachingNotes: [
+      "'Ea' is where the 'two vowels go walking' rule starts to break down, and it is better to tell a child that directly than to let them discover it as a failure. It makes long E most of the time ('eat,' 'dream'), short E fairly often ('bread,' 'head'), and long A in a small stubborn group ('great,' 'break,' 'steak').",
+      "The practical strategy is flexing: try the long E first because it is most common, and if the word does not sound like a real word you know, try short E instead. Model this out loud - read 'bread' as /breed/, pause, say that is not a word, then switch. Watching an adult flex without embarrassment is what teaches a child that self-correction is normal reading rather than a mistake.",
+    ],
+    commonErrors: [
+      "Reading every 'ea' as long E and giving up when the word sounds wrong",
+      "Not knowing to try a second sound when the first attempt fails",
+      "Confusing 'ea' and 'ee' when spelling, since they can sound identical",
+    ],
+    relatedSlugs: ["ee-vowel-team", "ai-vowel-team", "oa-vowel-team"],
+  },
+  {
+    slug: "ie-vowel-team",
+    pattern: "ie",
+    displayName: "IE Vowel Team",
+    category: "vowel-team",
+    gradeLevel: "Grade 1–2",
+    words: [
+      "pie", "tie", "lie", "die", "cried", "tried", "dried",
+      "fried", "field", "chief", "brief", "thief", "piece", "believe",
+    ],
+    sampleSentences: [
+      "I tried the pie in the field.",
+      "The chief tied a brief knot.",
+      "He cried, then fried a piece.",
+      "Do not lie to the thief.",
+    ],
+    teachingNotes: [
+      "'Ie' has two jobs and they split fairly cleanly by position. At the end of a short word it says long I ('pie,' 'tie,' 'cried'). In the middle of a word it usually says long E ('field,' 'chief,' 'piece'). Teaching the two groups as separate word sets, rather than as one confusing team, keeps a child from feeling the pattern is arbitrary.",
+      "This is also the pattern behind the old 'i before e except after c' rhyme, which is worth mentioning but not leaning on - it has enough exceptions that it misleads as often as it helps. A child who has practiced the two positional groups will decode these words more reliably than one relying on the rhyme.",
+    ],
+    commonErrors: [
+      "Applying the long I sound to middle-of-word 'ie' words like 'field'",
+      "Reading 'ie' as two separate vowel sounds",
+      "Over-applying the 'i before e' rhyme to words where it does not hold",
+    ],
+    relatedSlugs: ["ee-vowel-team", "ea-vowel-team", "oe-vowel-team"],
+  },
+  {
+    slug: "oa-vowel-team",
+    pattern: "oa",
+    displayName: "OA Vowel Team",
+    category: "vowel-team",
+    gradeLevel: "Grade 1",
+    words: [
+      "boat", "coat", "goat", "float", "throat", "road", "load",
+      "toad", "soap", "soak", "coach", "roast", "toast", "coal", "foam",
+    ],
+    sampleSentences: [
+      "The goat rode a boat down the road.",
+      "Soak the coat in soap.",
+      "We roast toast for the coach.",
+      "A toad can float on foam.",
+    ],
+    teachingNotes: [
+      "'Oa' behaves almost as reliably as 'ee' - it says long O nearly every time a beginning reader will meet it. Like 'ai,' it sits in the middle of words and effectively never at the end, where English switches to 'ow' or 'oe' instead. That parallel is worth pointing out explicitly if your child already knows the ai/ay pair, because it is the same rule with different letters.",
+      "'Oa' words also happen to be unusually easy to picture - boat, goat, coat, toad, soap - which makes them good candidates for drawing or acting out. For a child who is decoding accurately but not yet reading for meaning, pairing each word with an image helps close that gap.",
+    ],
+    commonErrors: [
+      "Sounding out both letters as 'oh-ah'",
+      "Writing 'oa' at the end of a word where 'ow' or 'oe' belongs",
+      "Confusing 'oa' with 'ou', which looks similar but sounds nothing alike",
+    ],
+    relatedSlugs: ["oe-vowel-team", "ow-vowel-team", "ea-vowel-team"],
+  },
+  {
+    slug: "oe-vowel-team",
+    pattern: "oe",
+    displayName: "OE Vowel Team",
+    category: "vowel-team",
+    gradeLevel: "Grade 1–2",
+    words: [
+      "toe", "hoe", "doe", "foe", "woe", "roe", "goes",
+      "toes", "hoes", "does", "aloe", "tiptoe", "oboe",
+    ],
+    sampleSentences: [
+      "The doe has a sore toe.",
+      "He goes to hoe the row.",
+      "Ten toes tiptoe past.",
+      "Aloe helps a sore toe.",
+    ],
+    teachingNotes: [
+      "'Oe' is a small team - there are not many words - but it fills a specific gap: it is one of the ways English spells long O at the end of a word, where 'oa' cannot go. Because the set is short, it is realistic to simply learn the handful of words rather than drill a rule.",
+      "Watch for 'does,' which looks like it belongs here and does not - it is pronounced /duz/ and is a high-frequency sight word. Point that out as an exception the first time it appears rather than letting a child repeatedly try to decode it with the long O sound.",
+    ],
+    commonErrors: [
+      "Trying to decode 'does' with the long O sound",
+      "Confusing 'oe' with 'oa' when spelling end-of-word long O",
+      "Reading the e as a separate syllable",
+    ],
+    relatedSlugs: ["oa-vowel-team", "ow-vowel-team", "ue-vowel-team"],
+  },
+  {
+    slug: "ue-vowel-team",
+    pattern: "ue",
+    displayName: "UE Vowel Team",
+    category: "vowel-team",
+    gradeLevel: "Grade 1–2",
+    words: [
+      "blue", "clue", "glue", "true", "due", "sue", "cue",
+      "hue", "value", "rescue", "tissue", "statue", "argue", "continue",
+    ],
+    sampleSentences: [
+      "The blue glue is true.",
+      "I found a clue in the tissue.",
+      "The statue is due for rescue.",
+      "Do not argue about the value.",
+    ],
+    teachingNotes: [
+      "'Ue' makes two closely related sounds: a plain /oo/ in 'blue' and 'glue,' and a /yoo/ in 'cue,' 'hue,' and 'rescue.' Most children slide between the two without noticing, and for reading purposes that is fine - the distinction matters more for spelling and pronunciation precision than for decoding.",
+      "Like 'oe,' this team lives at the end of words and syllables. It also shows up as the final piece of many longer words a child meets in second grade and beyond ('value,' 'continue,' 'argue'), so it is worth practicing in multisyllabic words rather than only in short ones.",
+    ],
+    commonErrors: [
+      "Reading 'ue' as two separate vowel sounds",
+      "Confusing 'ue' with 'ui', which looks similar and often sounds the same",
+      "Missing 'ue' at the end of longer words like 'continue'",
+    ],
+    relatedSlugs: ["ui-vowel-team", "oo-vowel-team", "oe-vowel-team"],
+  },
+  {
+    slug: "ui-vowel-team",
+    pattern: "ui",
+    displayName: "UI Vowel Team",
+    category: "vowel-team",
+    gradeLevel: "Grade 2",
+    words: [
+      "fruit", "suit", "juice", "cruise", "bruise", "suitcase",
+      "recruit", "pursuit", "nuisance", "build", "built", "guilt", "guitar",
+    ],
+    sampleSentences: [
+      "The fruit juice is in the suitcase.",
+      "He built a suit for the cruise.",
+      "A bruise is a nuisance.",
+      "She built a guitar.",
+    ],
+    teachingNotes: [
+      "'Ui' is a small and genuinely tricky team. In its main group it says /oo/ - 'fruit,' 'juice,' 'suit' - which is the same sound as 'ue' and 'oo,' so it is really a spelling pattern to memorise rather than a decoding rule to apply.",
+      "There is a second group where the u is silent and the i says short i: 'build,' 'built,' 'guilt,' 'guitar.' These are common enough words that a child will hit them early, and the honest framing is that the u is doing a job left over from older spellings rather than making a sound. Treat this second group as sight words and the pattern gets much less frustrating.",
+    ],
+    commonErrors: [
+      "Trying to make the u audible in 'build' and 'guitar'",
+      "Confusing 'ui' with 'ue' when spelling the /oo/ sound",
+      "Sounding out both letters separately",
+    ],
+    relatedSlugs: ["ue-vowel-team", "oo-vowel-team", "oi-vowel-team"],
+  },
+  {
+    slug: "oo-vowel-team",
+    pattern: "oo",
+    displayName: "OO Vowel Team",
+    category: "vowel-team",
+    gradeLevel: "Grade 1",
+    words: [
+      "moon", "soon", "food", "room", "pool", "cool", "tool",
+      "zoo", "book", "look", "took", "cook", "good", "wood", "foot",
+    ],
+    sampleSentences: [
+      "Look at the good book in the room.",
+      "Soon we cook food by the pool.",
+      "The moon is cool at the zoo.",
+      "He took a tool made of wood.",
+    ],
+    teachingNotes: [
+      "'Oo' has two sounds and no rule tells you which is which: the long /oo/ in 'moon' and 'food,' and the short /oo/ in 'book' and 'good.' This is one of the first places a child meets genuine ambiguity in English, and how you frame it matters. Presented as a rule with exceptions it feels unfair; presented as a team with two jobs it feels manageable.",
+      "Teach flexing explicitly here. Try the 'moon' sound first, and if the result is not a real word, try the 'book' sound. Sorting activities work especially well for this pattern - two columns, moon and book at the top, and the child files each new word by ear. That is far more effective than trying to memorise which words belong to which group.",
+    ],
+    commonErrors: [
+      "Using the 'moon' sound for every 'oo' word and reading 'book' as /booke/",
+      "Not attempting the second sound when the first one produces a non-word",
+      "Confusing 'oo' with 'ou' when spelling",
+    ],
+    relatedSlugs: ["ue-vowel-team", "ui-vowel-team", "ou-vowel-team"],
+  },
+  {
+    slug: "ow-vowel-team",
+    pattern: "ow",
+    displayName: "OW Vowel Team",
+    category: "vowel-team",
+    gradeLevel: "Grade 1–2",
+    words: [
+      "cow", "how", "now", "wow", "down", "town", "brown",
+      "crown", "clown", "snow", "slow", "grow", "show", "know", "yellow",
+    ],
+    sampleSentences: [
+      "The brown cow is in town now.",
+      "Snow will grow slow.",
+      "Show me how the clown sat down.",
+      "I know the yellow crown.",
+    ],
+    teachingNotes: [
+      "'Ow' is the other two-sound team, and it splits between the /ow/ in 'cow' and the long O in 'snow.' Unlike 'oo,' there is a weak positional tendency worth knowing: 'ow' at the end of a word more often says long O ('snow,' 'grow,' 'yellow'), while 'ow' in the middle more often says /ow/ ('down,' 'brown'). It is a tendency, not a rule, but it gives a child a sensible first guess.",
+      "Rhyming pairs make the ambiguity concrete rather than confusing. Put 'cow' and 'snow' side by side, or 'now' and 'know,' and have your child read both aloud. Seeing that identical letters can behave differently, in a controlled pair rather than mid-sentence, takes the surprise out of it.",
+    ],
+    commonErrors: [
+      "Reading every 'ow' as the /ow/ in 'cow', so 'snow' becomes /snau/",
+      "Not flexing to the second sound when the word does not make sense",
+      "Confusing 'ow' with 'ou', which shares the /ow/ sound",
+    ],
+    relatedSlugs: ["ou-vowel-team", "oa-vowel-team", "oe-vowel-team"],
+  },
+  {
+    slug: "ou-vowel-team",
+    pattern: "ou",
+    displayName: "OU Vowel Team",
+    category: "vowel-team",
+    gradeLevel: "Grade 1–2",
+    words: [
+      "out", "loud", "cloud", "proud", "found", "round", "sound",
+      "ground", "mouth", "south", "house", "mouse", "count", "shout", "about",
+    ],
+    sampleSentences: [
+      "A loud mouse ran out of the house.",
+      "We found a round cloud.",
+      "Shout about the sound.",
+      "The proud crowd sat on the ground.",
+    ],
+    teachingNotes: [
+      "'Ou' most often makes the /ow/ sound - the noise you make when you stub a toe - which is a useful hook because children remember it physically. 'Out,' 'loud,' 'house,' and 'shout' all follow it, and that covers the large majority of 'ou' words a beginning reader meets.",
+      "It shares that sound with 'ow,' which creates a spelling problem rather than a reading one: a child who hears /ow/ has to choose between two spellings. The rough guide is that 'ou' sits inside a word and 'ow' finishes it, which handles 'house' versus 'cow' correctly most of the time. There are other 'ou' sounds in words like 'you,' 'soup,' and 'touch,' but those are better handled as sight words for now.",
+    ],
+    commonErrors: [
+      "Sounding out o and u separately",
+      "Choosing 'ow' when spelling a middle-of-word /ow/ sound",
+      "Being thrown by irregulars like 'you' and 'touch'",
+    ],
+    relatedSlugs: ["ow-vowel-team", "oo-vowel-team", "oi-vowel-team"],
+  },
+  {
+    slug: "oi-vowel-team",
+    pattern: "oi",
+    displayName: "OI Vowel Team",
+    category: "vowel-team",
+    gradeLevel: "Grade 1–2",
+    words: [
+      "oil", "boil", "coil", "soil", "spoil", "coin", "join",
+      "point", "joint", "noise", "voice", "choice", "moist", "avoid",
+    ],
+    sampleSentences: [
+      "The coin fell in the soil.",
+      "Boil the oil, then join in.",
+      "Point at the loud noise.",
+      "Avoid a moist joint.",
+    ],
+    teachingNotes: [
+      "'Oi' is a diphthong, which means the mouth actually moves during the sound - it starts near 'oh' and glides toward 'ee.' Having a child say it slowly and feel their lips change shape makes it stick better than treating it as a single fixed sound, because the movement is the sound.",
+      "Usefully, 'oi' is reliable: it makes this one sound essentially every time, with no second job to flex to. After the ambiguity of 'oo,' 'ow,' and 'ea,' this pattern and its partner 'oy' are a relief, and they are worth teaching right after those harder teams for exactly that reason.",
+    ],
+    commonErrors: [
+      "Reading 'oi' as a long O followed by a short i",
+      "Writing 'oi' at the end of a word where 'oy' belongs",
+      "Confusing 'oi' with 'ou'",
+    ],
+    relatedSlugs: ["oy-vowel-team", "ou-vowel-team", "ui-vowel-team"],
+  },
+  {
+    slug: "oy-vowel-team",
+    pattern: "oy",
+    displayName: "OY Vowel Team",
+    category: "vowel-team",
+    gradeLevel: "Grade 1–2",
+    words: [
+      "boy", "toy", "joy", "soy", "coy", "ploy", "enjoy",
+      "annoy", "employ", "destroy", "royal", "loyal", "voyage", "oyster",
+    ],
+    sampleSentences: [
+      "The boy found joy in a toy.",
+      "Do not annoy the loyal boy.",
+      "I enjoy the royal voyage.",
+      "Soy will not destroy it.",
+    ],
+    teachingNotes: [
+      "'Oy' is the end-of-word partner to 'oi,' exactly as 'ay' partners 'ai' and 'ow' partners 'ou.' Same sound, different position. By the time a child reaches this team they have usually met that pattern twice already, so naming it out loud - 'this is the same trick again' - turns a new item into a familiar structure.",
+      "Because 'boy,' 'toy,' and 'joy' are among the first words many children can read, this team is a good place to practice reading longer words. 'Enjoy,' 'annoy,' and 'destroy' are simply a familiar chunk with a syllable in front, which is a gentle introduction to multisyllabic decoding.",
+    ],
+    commonErrors: [
+      "Writing 'oi' at the end of a word instead of 'oy'",
+      "Reading the y as a consonant",
+      "Missing 'oy' inside longer words such as 'employ'",
+    ],
+    relatedSlugs: ["oi-vowel-team", "ay-vowel-team", "ou-vowel-team"],
+  },
+  {
+    slug: "au-vowel-team",
+    pattern: "au",
+    displayName: "AU Vowel Team",
+    category: "vowel-team",
+    gradeLevel: "Grade 2",
+    words: [
+      "haul", "maul", "author", "autumn", "auto", "August",
+      "sauce", "cause", "pause", "launch", "laundry", "haunt", "fault", "vault",
+    ],
+    sampleSentences: [
+      "The author will pause in August.",
+      "Haul the laundry to the vault.",
+      "The sauce was not my fault.",
+      "Autumn winds haunt the launch.",
+    ],
+    teachingNotes: [
+      "'Au' makes the /aw/ sound heard in 'haul' and 'sauce.' Depending on regional accent this may sound identical to the short o in 'hot' or noticeably different, and both are correct - if your family says 'caught' and 'cot' the same way, do not try to teach a distinction your child does not hear.",
+      "'Au' sits at the beginning or middle of words and hands off to 'aw' at the end, which is the same positional pairing seen in ai/ay and oi/oy. Since this is the fourth time that structure appears, most children can predict the rule before being told, and asking them to guess is a better use of the moment than explaining it.",
+    ],
+    commonErrors: [
+      "Sounding out a and u separately",
+      "Writing 'au' at the end of a word instead of 'aw'",
+      "Confusing 'au' with 'ou'",
+    ],
+    relatedSlugs: ["aw-vowel-team", "ou-vowel-team", "oi-vowel-team"],
+  },
+  {
+    slug: "aw-vowel-team",
+    pattern: "aw",
+    displayName: "AW Vowel Team",
+    category: "vowel-team",
+    gradeLevel: "Grade 1–2",
+    words: [
+      "saw", "paw", "jaw", "law", "raw", "claw", "draw",
+      "straw", "yawn", "lawn", "dawn", "crawl", "shawl", "hawk", "awful",
+    ],
+    sampleSentences: [
+      "I saw a hawk on the lawn.",
+      "The cat has a raw paw and a claw.",
+      "Draw a straw at dawn.",
+      "He let out an awful yawn.",
+    ],
+    teachingNotes: [
+      "'Aw' is the end-of-word partner to 'au' and makes the same /aw/ sound. It is the more common of the two in words young children actually use - 'saw,' 'paw,' 'draw' - so many children learn 'aw' first and meet 'au' later, which is a sensible order.",
+      "Note that 'aw' also appears before l and n inside words ('crawl,' 'lawn,' 'yawn'), so the end-of-word guideline is a tendency rather than an absolute. If your child is confidently decoding 'saw' but stumbling on 'crawl,' the issue is usually the blend at the front rather than the vowel team.",
+    ],
+    commonErrors: [
+      "Reading the w as a consonant sound",
+      "Writing 'au' at the end of a word instead of 'aw'",
+      "Struggling with 'aw' before l and n as in 'crawl' and 'lawn'",
+    ],
+    relatedSlugs: ["au-vowel-team", "ow-vowel-team", "ou-vowel-team"],
+  },
+  // ===END-BATCH-5===
+
+  // ===BATCH-6: s-blends and tw===
+  {
+    slug: "st-blend",
+    pattern: "st",
+    displayName: "ST Blend",
+    category: "blend",
+    gradeLevel: "Kindergarten–Grade 1",
+    words: [
+      "stop", "step", "stem", "stick", "still", "sting", "star",
+      "start", "stand", "storm", "stone", "fast", "last", "nest", "best",
+    ],
+    sampleSentences: [
+      "Stop and stand by the stone.",
+      "The best nest is on a stick.",
+      "Run fast past the last star.",
+      "A storm will start still.",
+    ],
+    teachingNotes: [
+      "'St' is one of the most useful blends to teach early because it appears at both ends of words. A child meets it at the start in 'stop' and 'star,' and at the end in 'fast,' 'nest,' and 'best.' Practising both positions in the same session prevents the common situation where a child decodes 'stop' fluently but stalls on 'best.'",
+      "Because both letters keep their sounds, the work is purely about saying them quickly enough that they feel like one motion. If your child inserts a vowel and says 'suh-top,' slow the word down, then speed it up gradually rather than correcting the vowel directly. The extra sound disappears on its own once the blend is fast enough.",
+    ],
+    commonErrors: [
+      "Adding a vowel between the sounds, saying 'suh-top' for 'stop'",
+      "Dropping the s and reading 'stop' as 'top'",
+      "Missing the blend when it lands at the end of a word like 'nest'",
+    ],
+    relatedSlugs: ["sp-blend", "sk-blend", "sn-blend"],
+  },
+  {
+    slug: "sp-blend",
+    pattern: "sp",
+    displayName: "SP Blend",
+    category: "blend",
+    gradeLevel: "Kindergarten–Grade 1",
+    words: [
+      "spin", "spot", "spun", "spell", "spend", "speak", "spoon",
+      "sport", "space", "spider", "wasp", "gasp", "crisp", "grasp",
+    ],
+    sampleSentences: [
+      "The spider spun in a spot.",
+      "Spend a spoon on space.",
+      "I gasp at the crisp wasp.",
+      "Speak and spell the sport.",
+    ],
+    teachingNotes: [
+      "'Sp' works exactly like 'st': two sounds, both audible, said quickly. It also appears at the end of words, though less often - 'wasp,' 'gasp,' 'crisp.' Children who have already mastered 'st' usually pick this up in a single session, so it is a good one to pair with 'st' rather than teach separately.",
+      "Watch for the p sound getting swallowed. In casual speech the p in 'sp' is unaspirated, meaning it comes out softer than the p in 'pig,' and some children hear it as a b. If your child writes 'sbin' for 'spin,' their ear is working correctly and the spelling convention is what needs teaching.",
+    ],
+    commonErrors: [
+      "Writing b for the p sound, as in 'sbin' for 'spin'",
+      "Inserting a vowel, saying 'suh-pin'",
+      "Missing 'sp' at the end of words like 'crisp'",
+    ],
+    relatedSlugs: ["st-blend", "sk-blend", "sm-blend"],
+  },
+  {
+    slug: "sk-blend",
+    pattern: "sk",
+    displayName: "SK Blend",
+    category: "blend",
+    gradeLevel: "Kindergarten–Grade 1",
+    words: [
+      "skip", "skin", "skid", "sky", "skate", "skunk", "skill",
+      "skirt", "ask", "desk", "mask", "task", "risk", "dusk", "whisk",
+    ],
+    sampleSentences: [
+      "Skip past the desk at dusk.",
+      "The skunk has thin skin.",
+      "Ask about the mask and the task.",
+      "I skate in the sky with skill.",
+    ],
+    teachingNotes: [
+      "'Sk' is worth teaching alongside the spelling 'sc,' which makes the identical sound in 'scat' and 'scar.' A child does not need a rule for choosing between them at this stage; they need to know that two spellings can produce the same blend, so neither one surprises them mid-word.",
+      "End-position 'sk' is very common and often harder than the start: 'ask,' 'desk,' 'mask,' 'task.' 'Ask' in particular is a word many children reverse to 'aks,' which is a normal developmental pattern rather than a reading problem. Point at the letters in order and blend slowly, without making it a correction.",
+    ],
+    commonErrors: [
+      "Reversing 'ask' to 'aks'",
+      "Not recognising that 'sc' can make the same sound",
+      "Dropping the k at the end of words like 'desk'",
+    ],
+    relatedSlugs: ["st-blend", "sp-blend", "sn-blend"],
+  },
+  {
+    slug: "sm-blend",
+    pattern: "sm",
+    displayName: "SM Blend",
+    category: "blend",
+    gradeLevel: "Kindergarten–Grade 1",
+    words: [
+      "smell", "small", "smart", "smash", "smile", "smoke",
+      "smock", "smooth", "smug", "smudge", "smoothie",
+    ],
+    sampleSentences: [
+      "The small smile is smart.",
+      "I smell smoke.",
+      "Smash the smock, then smile.",
+      "That stone is smooth.",
+    ],
+    teachingNotes: [
+      "'Sm' is a small set and only appears at the beginning of words, which makes it one of the easier blends to master. Both sounds are continuants, meaning you can hold each one out, so this is a good blend for a child who struggles to hear the two parts - stretch it into 'ssssmmm' and the seam is obvious.",
+      "Because there are only a handful of 'sm' words, most of them common, this is a pattern a child can genuinely finish rather than sample. Reading the whole list in one sitting and knowing you have covered it is motivating in a way that endless practice is not.",
+    ],
+    commonErrors: [
+      "Dropping the s and reading 'small' as 'mall'",
+      "Inserting a vowel between the sounds",
+      "Confusing 'sm' with 'sn' since both start the same way",
+    ],
+    relatedSlugs: ["sn-blend", "sp-blend", "sl-blend"],
+  },
+  {
+    slug: "sn-blend",
+    pattern: "sn",
+    displayName: "SN Blend",
+    category: "blend",
+    gradeLevel: "Kindergarten–Grade 1",
+    words: [
+      "snap", "snip", "snug", "snack", "sneak", "sniff", "snow",
+      "snail", "snake", "sneeze", "snore", "snout",
+    ],
+    sampleSentences: [
+      "The snake will sneak in the snow.",
+      "Snap a snack and sniff.",
+      "A snug snail can snore.",
+      "I sneeze at the snout.",
+    ],
+    teachingNotes: [
+      "'Sn' pairs naturally with 'sm' - same starting sound, different second letter, both nasal. Teaching them back to back and asking a child to sort words by ear into two piles builds the discrimination faster than teaching either one alone.",
+      "There is a nice hook available here: a striking number of 'sn' words involve the nose. Snout, sniff, sneeze, snore, snot. Children find this genuinely funny, and the association makes the blend memorable in a way that drilling does not.",
+    ],
+    commonErrors: [
+      "Confusing 'sn' with 'sm'",
+      "Dropping the s and reading 'snap' as 'nap'",
+      "Inserting a vowel, saying 'suh-nap'",
+    ],
+    relatedSlugs: ["sm-blend", "st-blend", "sk-blend"],
+  },
+  {
+    slug: "sw-blend",
+    pattern: "sw",
+    displayName: "SW Blend",
+    category: "blend",
+    gradeLevel: "Kindergarten–Grade 1",
+    words: [
+      "swim", "swam", "swing", "sweet", "sweep", "sweat", "swift",
+      "switch", "swan", "sword", "swirl", "sweater",
+    ],
+    sampleSentences: [
+      "The swan can swim and swing.",
+      "Sweep the sweet swirl.",
+      "I swam swift in a sweater.",
+      "Flip the switch.",
+    ],
+    teachingNotes: [
+      "'Sw' only appears at the start of words. The one thing to flag is 'sword,' where the w is silent - it is pronounced 'sord.' That is a genuine exception rather than a pattern, so name it as one odd word instead of letting a child conclude the blend is unreliable.",
+      "'Swim,' 'swing,' and 'sweet' are high-frequency and physically actable. For a child who loses focus during word lists, having them do the action while reading the word keeps attention on the page longer than a seated drill does.",
+    ],
+    commonErrors: [
+      "Trying to pronounce the w in 'sword'",
+      "Dropping the w and reading 'swim' as 'sim'",
+      "Confusing 'sw' with 'st' at a glance",
+    ],
+    relatedSlugs: ["st-blend", "sp-blend", "tw-blend"],
+  },
+  {
+    slug: "sc-blend",
+    pattern: "sc",
+    displayName: "SC Blend",
+    category: "blend",
+    gradeLevel: "Grade 1",
+    words: [
+      "scat", "scan", "scab", "scar", "scarf", "scale", "scoop",
+      "scoot", "score", "scout", "scare", "scream", "screen", "scratch",
+    ],
+    sampleSentences: [
+      "The scout has a scar and a scarf.",
+      "Scan the score, then scoop.",
+      "Do not scream at the screen.",
+      "A scab can scare you.",
+    ],
+    teachingNotes: [
+      "'Sc' makes the same sound as 'sk' when followed by a, o, or u. Before e, i, or y the c goes soft and the pair makes an /s/ sound instead, as in 'science' and 'scene' - but those words are rare enough at this level that the practical rule is simply 'sc sounds like sk.'",
+      "'Sc' also opens the three-letter blends 'scr' in 'scream,' 'screen,' and 'scratch.' Those are a genuine step up in difficulty, so introduce them only once two-letter 'sc' is automatic, and treat 'scr' as 's' plus the already-known 'cr' rather than as a brand-new unit.",
+    ],
+    commonErrors: [
+      "Not connecting 'sc' to the identical sound in 'sk'",
+      "Struggling with the three-letter jump to 'scr'",
+      "Dropping the s and reading 'scat' as 'cat'",
+    ],
+    relatedSlugs: ["sk-blend", "st-blend", "cr-blend"],
+  },
+  {
+    slug: "tw-blend",
+    pattern: "tw",
+    displayName: "TW Blend",
+    category: "blend",
+    gradeLevel: "Kindergarten–Grade 1",
+    words: [
+      "two", "twin", "twig", "twist", "twelve", "twenty",
+      "tweet", "twirl", "twice", "twinkle", "tweeze",
+    ],
+    sampleSentences: [
+      "The twin found a twig.",
+      "Twist twice and twirl.",
+      "I see twelve stars twinkle.",
+      "Birds tweet at twenty past.",
+    ],
+    teachingNotes: [
+      "'Tw' is a small set, and almost every word in it relates to the number two - twin, twice, twelve, twenty, twist. Pointing that out gives a child a reason the words look alike, which is more memorable than treating them as an arbitrary list.",
+      "The catch is 'two' itself, where the w is silent. It is one of the most common words in English and a child will meet it constantly, so teach it as a sight word early and treat the rest of the blend as the regular pattern.",
+    ],
+    commonErrors: [
+      "Trying to pronounce the w in 'two'",
+      "Dropping the w and reading 'twin' as 'tin'",
+      "Confusing 'tw' with 'th' at a glance",
+    ],
+    relatedSlugs: ["sw-blend", "st-blend", "tr-blend"],
+  },
+  // ===END-BATCH-6===
+
+  // ===BATCH-7: r-controlled vowels===
+  {
+    slug: "ar-r-controlled",
+    pattern: "ar",
+    displayName: "AR (Bossy R)",
+    category: "r-controlled",
+    gradeLevel: "Grade 1",
+    words: [
+      "car", "far", "jar", "bar", "star", "park", "dark",
+      "bark", "shark", "sharp", "farm", "arm", "hard", "card", "yard",
+    ],
+    sampleSentences: [
+      "The car is far from the farm.",
+      "A shark swims in the dark.",
+      "Park the cart in the yard.",
+      "That card is hard and sharp.",
+    ],
+    teachingNotes: [
+      "'Ar' is the most distinctive of the r-controlled vowels and the easiest place to start. The sound is unmistakable - it is the 'arrr' of a pirate - and unlike 'er,' 'ir,' and 'ur,' it does not share its sound with any other spelling. That makes it a clean first lesson before the harder three.",
+      "The core idea to teach is that the r takes over. A child who has learned that a says /a/ in 'cat' has to accept that in 'car' the a no longer says that at all, and the r is why. Calling it 'bossy R' is a cliché precisely because it works - it gives a five-year-old a reason the rule they just learned has stopped applying.",
+    ],
+    commonErrors: [
+      "Trying to use the short a sound, reading 'car' as /kaa-r/",
+      "Separating the vowel and r into two sounds",
+      "Confusing 'ar' with 'or' when spelling",
+    ],
+    relatedSlugs: ["or-r-controlled", "er-r-controlled", "ir-r-controlled"],
+  },
+  {
+    slug: "or-r-controlled",
+    pattern: "or",
+    displayName: "OR (Bossy R)",
+    category: "r-controlled",
+    gradeLevel: "Grade 1",
+    words: [
+      "for", "or", "corn", "born", "torn", "horn", "storm",
+      "short", "sport", "north", "fork", "pork", "sort", "port", "story",
+    ],
+    sampleSentences: [
+      "The horn is short and torn.",
+      "Corn grows north of the port.",
+      "Sort the fork for the storm.",
+      "Tell a short sport story.",
+    ],
+    teachingNotes: [
+      "'Or' is the second clean r-controlled sound and, like 'ar,' it is mostly unambiguous. Teaching 'ar' and 'or' together as the two distinct ones, before the three that sound alike, gives a child two solid wins and a clear sense that this family is learnable.",
+      "One wrinkle: after a w, 'or' often shifts to sound like 'er' - 'work,' 'word,' 'world,' 'worm.' Those are common words, so flag them as a small group where the w changes things, rather than leaving a child to wonder why 'word' does not rhyme with 'ford.'",
+    ],
+    commonErrors: [
+      "Reading 'work' and 'word' with the 'or' sound",
+      "Confusing 'or' with 'ar'",
+      "Separating the o and r into two sounds",
+    ],
+    relatedSlugs: ["ar-r-controlled", "er-r-controlled", "ur-r-controlled"],
+  },
+  {
+    slug: "er-r-controlled",
+    pattern: "er",
+    displayName: "ER (Bossy R)",
+    category: "r-controlled",
+    gradeLevel: "Grade 1–2",
+    words: [
+      "her", "herd", "germ", "term", "fern", "verb", "clerk",
+      "person", "winter", "summer", "sister", "brother", "water", "under", "letter",
+    ],
+    sampleSentences: [
+      "Her sister sat under the fern.",
+      "Winter water is colder.",
+      "The person sent a letter.",
+      "My brother knows the term.",
+    ],
+    teachingNotes: [
+      "'Er,' 'ir,' and 'ur' all make the same sound, which is the single most important thing to tell a child about them. Presented as three separate lessons they feel like three arbitrary rules; presented as triplets that sound identical but are spelled differently, they become one fact with three cases.",
+      "'Er' is by far the most common of the three, especially at the end of words, where it does grammatical work - it turns a verb into a doer ('teach' to 'teacher') and makes comparisons ('cold' to 'colder'). Pointing that out gives a child a way to predict the spelling rather than guess, which is where most of the difficulty in this family actually sits.",
+    ],
+    commonErrors: [
+      "Guessing between 'er', 'ir', and 'ur' when spelling",
+      "Missing unstressed 'er' at the end of longer words",
+      "Trying to sound out e and r separately",
+    ],
+    relatedSlugs: ["ir-r-controlled", "ur-r-controlled", "ar-r-controlled"],
+  },
+  {
+    slug: "ir-r-controlled",
+    pattern: "ir",
+    displayName: "IR (Bossy R)",
+    category: "r-controlled",
+    gradeLevel: "Grade 1–2",
+    words: [
+      "bird", "girl", "first", "third", "shirt", "skirt", "dirt",
+      "stir", "sir", "firm", "birth", "thirty", "circle", "circus",
+    ],
+    sampleSentences: [
+      "The first girl wore a shirt.",
+      "A bird sat in the dirt.",
+      "Stir the third circle.",
+      "Thirty went to the circus.",
+    ],
+    teachingNotes: [
+      "'Ir' sounds exactly like 'er' and 'ur,' so it cannot be told apart by ear. What makes it learnable is that the 'ir' group is relatively small and full of very common words - bird, girl, first, third, shirt. Learning those specific words as a set is more efficient than trying to derive which spelling a word uses.",
+      "A pattern worth noticing: the ordinal numbers 'third' and 'thirty' both use 'ir,' as does 'first.' Number words come up constantly, so anchoring the spelling to counting gives a child a reliable place to check their memory from.",
+    ],
+    commonErrors: [
+      "Substituting 'er' or 'ur' when spelling 'ir' words",
+      "Reading 'ir' with a short i sound",
+      "Confusing 'girl' and 'grill' by transposing letters",
+    ],
+    relatedSlugs: ["er-r-controlled", "ur-r-controlled", "or-r-controlled"],
+  },
+  {
+    slug: "ur-r-controlled",
+    pattern: "ur",
+    displayName: "UR (Bossy R)",
+    category: "r-controlled",
+    gradeLevel: "Grade 1–2",
+    words: [
+      "turn", "burn", "hurt", "curl", "curb", "surf", "fur",
+      "burst", "church", "purple", "purse", "nurse", "turtle", "Thursday",
+    ],
+    sampleSentences: [
+      "The turtle will turn and burn.",
+      "My purple purse is hurt.",
+      "The nurse can surf on Thursday.",
+      "Curl the fur by the curb.",
+    ],
+    teachingNotes: [
+      "'Ur' completes the triplet. All three spellings make one sound, and once a child accepts that, the reading side of this family is essentially solved - any of the three can be read the same way, so decoding never fails. The remaining difficulty is entirely in spelling.",
+      "For spelling, the practical approach is word families rather than rules. Group 'turn, burn, churn' and 'hurt, burst, curb' and practice them as sets, because no reliable rule distinguishes 'ur' from 'er' and 'ir.' Telling a child that plainly is kinder than implying there is a rule they have failed to learn.",
+    ],
+    commonErrors: [
+      "Substituting 'er' or 'ir' when spelling",
+      "Reading 'ur' with a short u sound",
+      "Missing that all three spellings sound identical",
+    ],
+    relatedSlugs: ["er-r-controlled", "ir-r-controlled", "ar-r-controlled"],
+  },
+  // ===END-BATCH-7===
 ];
 
 export function getPatternBySlug(slug: string): PhonicsPattern | undefined {

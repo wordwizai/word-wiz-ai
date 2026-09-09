@@ -63,6 +63,24 @@ function expandProgrammaticRoutes() {
       );
     }
 
+    // relatedSlugs render as internal links on every generated page, so a
+    // typo here ships a dead link. Cheaper to fail the build than to find it
+    // in a crawl report months later.
+    const known = new Set(slugs);
+    const broken = new Set();
+    for (const match of source.matchAll(/relatedSlugs:\s*\[([^\]]*)\]/g)) {
+      for (const ref of match[1].matchAll(/"([^"]+)"/g)) {
+        if (!known.has(ref[1])) broken.add(ref[1]);
+      }
+    }
+
+    if (broken.size > 0) {
+      throw new Error(
+        `${dataFile} has relatedSlugs pointing at patterns that don't exist: ` +
+          `${[...broken].join(", ")}`
+      );
+    }
+
     routes.push(...slugs.map((slug) => `${prefix}${slug}`));
   }
 

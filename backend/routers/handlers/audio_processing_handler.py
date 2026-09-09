@@ -11,7 +11,12 @@ import soundfile as sf
 import base64 as _base64
 
 from core.audio_preprocessing import preprocess_audio
-from core.audio_quality_analyzer import AudioQualityAnalyzer
+from core.audio_quality_analyzer import (
+    AudioQualityAnalyzer,
+    assess_processability,
+    build_quality_warning,
+    soft_quality_gates_enabled,
+)
 from core.modes.base_mode import BaseMode
 from core.phoneme_assistant import PhonemeAssistant
 from core.phoneme_feedback_formatter import generate_feedback as generate_phoneme_feedback
@@ -37,7 +42,8 @@ async def load_and_preprocess_audio_bytes(
     audio_bytes: bytes,
     filename: str,
     content_type: str,
-    session_id: str | None = None
+    session_id: str | None = None,
+    quality_out: dict | None = None,
 ) -> tuple[np.ndarray, str]:
     """
     Load and preprocess audio from bytes with caching at key stages.
@@ -47,6 +53,11 @@ async def load_and_preprocess_audio_bytes(
         filename (str): Original filename.
         content_type (str): MIME type of the audio.
         session_id (str, optional): Session ID for caching. If None, generates one.
+        quality_out (dict, optional): Out-parameter. When provided, it is
+            populated with the quality report under key "quality_info" and, if
+            soft quality gates are enabled and something is worth mentioning, a
+            child-friendly warning under key "quality_warning". Purely
+            additive - the return value is unchanged.
 
     Returns:
         tuple[np.ndarray, str]: The preprocessed audio array and cache session ID.
@@ -144,7 +155,7 @@ async def load_and_preprocess_audio_bytes(
         analyzer.analyze_audio_quality, audio_array
     )
     print(f"⏱️  Quality analysis took {time.time() - quality_start:.3f}s")
-    
+
     # Log quality metrics
     print(f"📊 Audio Quality Report:")
     print(f"   - Quality Level: {quality_info['quality_level'].upper()}")
@@ -152,29 +163,56 @@ async def load_and_preprocess_audio_bytes(
     print(f"   - SNR: {quality_info['snr_db']:.1f} dB")
     print(f"   - Clipping: {quality_info['clipping_percentage']:.2f}%")
     print(f"   - Silence: {quality_info['silence_percentage']:.1f}%")
-    
-    # Check for critical quality issues
-    if quality_info['snr_db'] < 5.0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Audio quality too low (SNR: {quality_info['snr_db']:.1f} dB). "
-                   "Please record in a quieter environment or use a better microphone."
-        )
-    
-    if quality_info['clipping_percentage'] > 10.0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Audio is severely clipped ({quality_info['clipping_percentage']:.1f}% of samples). "
-                   "Please reduce microphone gain or speak further from the microphone."
-        )
-    
-    if quality_info['silence_percentage'] > 85.0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Audio is mostly silence ({quality_info['silence_percentage']:.1f}%). "
-                   "Please ensure you are speaking into the microphone."
-        )
-    
+    print(f"   - Metrics mode: {quality_info.get('metrics_mode', 'legacy')}")
+
+    if quality_out is not None:
+        quality_out['quality_info'] = quality_info
+
+    if soft_quality_gates_enabled():
+        # SOFT GATES (WWAI_SOFT_QUALITY_GATES=1)
+        #
+        # Reject only audio we genuinely cannot process: nothing received, or
+        # true digital silence. A noisy, clipped or pause-heavy recording is
+        # still a child's honest attempt -- analyze it and pass a gentle hint
+        # back to the frontend instead of refusing it.
+        is_processable, reason = assess_processability(audio_array)
+        if not is_processable:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=reason,
+            )
+
+        quality_warning = build_quality_warning(quality_info)
+        if quality_warning is not None:
+            print("⚠️  Soft quality gate: proceeding with a quality warning attached")
+            for hint in quality_warning['hints']:
+                print(f"   - {hint}")
+            if quality_out is not None:
+                quality_out['quality_warning'] = quality_warning
+    else:
+        # HARD GATES (default). Unchanged behavior.
+        # Check for critical quality issues
+        if quality_info['snr_db'] < 5.0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Audio quality too low (SNR: {quality_info['snr_db']:.1f} dB). "
+                       "Please record in a quieter environment or use a better microphone."
+            )
+
+        if quality_info['clipping_percentage'] > 10.0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Audio is severely clipped ({quality_info['clipping_percentage']:.1f}% of samples). "
+                       "Please reduce microphone gain or speak further from the microphone."
+            )
+
+        if quality_info['silence_percentage'] > 85.0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Audio is mostly silence ({quality_info['silence_percentage']:.1f}%). "
+                       "Please ensure you are speaking into the microphone."
+            )
+
     # Warn about quality issues but continue processing
     if quality_info['issues']:
         print(f"⚠️  Quality issues detected:")
@@ -254,9 +292,11 @@ async def analyze_audio_file_event_stream(
         
         # NOW do the preprocessing after sending the first event
         print("🔄 Starting audio preprocessing...")
+        quality_out: dict = {}
         try:
             audio_array, cache_session_id = await load_and_preprocess_audio_bytes(
-                audio_bytes, audio_filename, audio_content_type, str(session.id)
+                audio_bytes, audio_filename, audio_content_type, str(session.id),
+                quality_out=quality_out,
             )
             print("✅ Audio preprocessing completed")
         except Exception as e:
@@ -297,13 +337,31 @@ async def analyze_audio_file_event_stream(
             from core.audio_chunking import estimate_speech_activity
             speech_percentage = estimate_speech_activity(audio_array, sr=16000)
             print(f"🎤 Speech activity: {speech_percentage:.1f}%")
-            
-            # Require at least 30% speech activity
-            if speech_percentage < 30:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Audio appears to be mostly silent ({speech_percentage:.1f}% speech activity). Please record clearer audio with speech."
-                )
+
+            if soft_quality_gates_enabled():
+                # estimate_speech_activity thresholds relative to the LOUDEST
+                # frame, so one emphatic word can push several quieter ones
+                # below the bar and drag the whole recording under 30%. Do not
+                # refuse the recording over it -- warn and analyze.
+                if speech_percentage < 30:
+                    print(
+                        f"⚠️  Soft quality gate: low measured speech activity "
+                        f"({speech_percentage:.1f}%) - continuing anyway"
+                    )
+                    warning = quality_out.get('quality_warning') or {'hints': []}
+                    warning.setdefault('hints', [])
+                    warning['hints'].append(
+                        "We had trouble hearing all the words - try speaking a little louder."
+                    )
+                    warning['speech_activity_percentage'] = float(speech_percentage)
+                    quality_out['quality_warning'] = warning
+            else:
+                # Require at least 30% speech activity
+                if speech_percentage < 30:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Audio appears to be mostly silent ({speech_percentage:.1f}% speech activity). Please record clearer audio with speech."
+                    )
         
         # Determine if we should use client phonemes/words or extract on server
         use_client_phonemes = False
@@ -414,6 +472,14 @@ async def analyze_audio_file_event_stream(
                 "per_summary": sanitize(per_summary),
             },
         }
+        # Additive, optional field. Only present when soft quality gates are
+        # enabled AND the recording had something worth gently mentioning.
+        # Existing keys ("type", "data", the analysis keys) are untouched, so
+        # the frontend contract is preserved.
+        if quality_out.get('quality_warning') is not None:
+            analysis_payload["data"]["quality_warning"] = sanitize(
+                quality_out['quality_warning']
+            )
         print("📤 Sending analysis payload...")
         yield f"data: {json.dumps(analysis_payload)}\n\n"
         await asyncio.sleep(0.01)  # Yield control to the event loop with small delay to ensure flush

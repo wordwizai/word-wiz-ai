@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import { createHash } from "crypto";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -132,9 +133,53 @@ function discoverRoutes() {
  * entirely while /login and /signup were listed despite being auth pages.
  * Deriving it from the same list that produces the HTML makes that
  * impossible.
+ *
+ * lastmod is content-derived, not build-derived. Stamping every URL with the
+ * build date would claim all 154 pages changed on every deploy, and Google
+ * ignores lastmod when it is inconsistent with actual changes — so the naive
+ * version degrades the signal it is trying to send. Each page's visible text,
+ * title and description are hashed and compared against a committed manifest;
+ * only pages whose content actually moved get a new date.
+ *
+ * The hash deliberately covers rendered text rather than raw HTML, because
+ * asset filenames change on every build and would make every page look dirty.
  */
 function writeSitemap(pages, distPath) {
   const today = new Date().toISOString().slice(0, 10);
+  const manifestPath = join(projectRoot, "sitemap-lastmod.json");
+
+  let previous = {};
+  if (existsSync(manifestPath)) {
+    try {
+      previous = JSON.parse(readFileSync(manifestPath, "utf-8"));
+    } catch {
+      console.warn("  (sitemap-lastmod.json unreadable, treating all pages as new)");
+    }
+  }
+
+  const manifest = {};
+  let changed = 0;
+
+  for (const { route, html, text } of pages) {
+    const clean = stripComments(html);
+    const signature = [
+      titleOf(clean) ?? "",
+      descriptionsOf(clean)[0] ?? "",
+      text ?? "",
+    ].join("");
+
+    const hash = createHash("sha256").update(signature).digest("hex").slice(0, 16);
+    const prior = previous[route];
+
+    if (prior && prior.hash === hash) {
+      manifest[route] = prior;
+    } else {
+      manifest[route] = { hash, lastmod: today };
+      changed += 1;
+    }
+  }
+
+  writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf-8");
 
   const priorityFor = (route) => {
     if (route === "/") return "1.0";
@@ -150,7 +195,7 @@ function writeSitemap(pages, distPath) {
       return [
         "  <url>",
         `    <loc>${loc}</loc>`,
-        `    <lastmod>${today}</lastmod>`,
+        `    <lastmod>${manifest[route].lastmod}</lastmod>`,
         `    <priority>${priorityFor(route)}</priority>`,
         "  </url>",
       ].join("\n");
@@ -165,7 +210,7 @@ ${body}
 `;
 
   writeFileSync(join(distPath, "sitemap.xml"), xml, "utf-8");
-  return pages.length;
+  return { total: pages.length, changed };
 }
 
 // HTML comments can legitimately mention tag names (index.html documents why
@@ -570,13 +615,13 @@ async function prerender() {
   }
 
   const llms = writeLlmsFiles(pages, distPath);
-  const sitemapUrls = writeSitemap(pages, distPath);
+  const sitemap = writeSitemap(pages, distPath);
 
   console.log(`Validation passed. Wrote ${pages.length} prerendered pages.`);
   console.log(
     `Wrote llms.txt (${(llms.indexBytes / 1024).toFixed(1)}kb), ` +
       `llms-full.txt (${(llms.fullBytes / 1024).toFixed(0)}kb) and ` +
-      `sitemap.xml (${sitemapUrls} URLs).\n`
+      `sitemap.xml (${sitemap.total} URLs, ${sitemap.changed} with a new lastmod).\n`
   );
 }
 

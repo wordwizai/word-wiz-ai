@@ -1,0 +1,618 @@
+{
+  "/": {
+    "hash": "d631333aa41872e5",
+    "lastmod": "2026-09-09"
+  },
+  "/about": {
+    "hash": "8b01bf4bba40c1b4",
+    "lastmod": "2026-09-09"
+  },
+  "/articles/child-cant-blend-sounds-into-words": {
+    "hash": "6f93911ac19f0e5a",
+    "lastmod": "2026-09-09"
+  },
+  "/articles/child-confuses-b-d-letters": {
+    "hash": "bd1421030a58cc9a",
+    "lastmod": "2026-09-09"
+  },
+  "/articles/child-memorizes-books-instead-reading": {
+    "hash": "b17bb8fe756b6266",
+    "lastmod": "2026-09-09"
+  },
+  "/articles/child-pronounces-words-wrong": {
+    "hash": "81bb91406842f91b",
+    "lastmod": "2026-09-09"
+  },
+  "/articles/child-reads-slowly-struggles-with-fluency": {
+    "hash": "c223ac83ff333eb8",
+    "lastmod": "2026-09-09"
+  },
+  "/articles/decodable-books-vs-leveled-readers": {
+    "hash": "7570cca06ccd408f",
+    "lastmod": "2026-09-09"
+  },
+  "/articles/first-grader-skips-words-when-reading-aloud": {
+    "hash": "0d802bf96a68da9b",
+    "lastmod": "2026-09-09"
+  },
+  "/articles/kindergartener-guesses-words-instead-sounding-out": {
+    "hash": "6182568eb106e0da",
+    "lastmod": "2026-09-09"
+  },
+  "/articles/why-child-hates-reading": {
+    "hash": "3cc7ed9e36e4423c",
+    "lastmod": "2026-09-09"
+  },
+  "/comparisons/abcmouse-vs-hooked-on-phonics-vs-word-wiz-ai": {
+    "hash": "fd5b29ca1dad655b",
+    "lastmod": "2026-09-09"
+  },
+  "/comparisons/ai-reading-app-vs-traditional-phonics-program": {
+    "hash": "7b2626e9ca649e67",
+    "lastmod": "2026-09-09"
+  },
+  "/comparisons/best-free-reading-apps": {
+    "hash": "9a19da388a578b32",
+    "lastmod": "2026-09-09"
+  },
+  "/comparisons/best-phonics-app-kindergarten-struggling-readers": {
+    "hash": "b2f14e23f9079b16",
+    "lastmod": "2026-09-09"
+  },
+  "/comparisons/free-phonics-apps-vs-paid-reading-programs": {
+    "hash": "717f7e064ac5a5e2",
+    "lastmod": "2026-09-09"
+  },
+  "/comparisons/homer-vs-khan-academy-kids-vs-word-wiz-ai": {
+    "hash": "5807b36b1c9e8004",
+    "lastmod": "2026-09-09"
+  },
+  "/comparisons/hooked-on-phonics-vs-word-wiz-ai": {
+    "hash": "02628f48f19cc976",
+    "lastmod": "2026-09-09"
+  },
+  "/comparisons/ixl-vs-duolingo-abc-vs-word-wiz-ai": {
+    "hash": "92fb4ef579e61ae7",
+    "lastmod": "2026-09-09"
+  },
+  "/comparisons/lexia-vs-raz-kids-vs-word-wiz-ai": {
+    "hash": "e3202cc635e8a2ee",
+    "lastmod": "2026-09-09"
+  },
+  "/comparisons/phonics-worksheets-vs-interactive-reading": {
+    "hash": "f44ab3e7ccc7c444",
+    "lastmod": "2026-09-09"
+  },
+  "/comparisons/reading-eggs-vs-starfall-vs-word-wiz-ai": {
+    "hash": "73f8464836277d51",
+    "lastmod": "2026-09-09"
+  },
+  "/comparisons/reading-tutor-vs-reading-app": {
+    "hash": "df7ce5a30d8ea5a3",
+    "lastmod": "2026-09-09"
+  },
+  "/comparisons/teach-your-monster-vs-abcya-vs-word-wiz-ai": {
+    "hash": "c5da08688ac9fe01",
+    "lastmod": "2026-09-09"
+  },
+  "/contact": {
+    "hash": "2ceaf40fb0bd22f5",
+    "lastmod": "2026-09-09"
+  },
+  "/guides/daily-phonics-practice-routine-kindergarten-at-home": {
+    "hash": "90d420b9bb4bf0bc",
+    "lastmod": "2026-09-09"
+  },
+  "/guides/decodable-sentences-for-beginning-readers": {
+    "hash": "cd2e07d8b5e0d7a1",
+    "lastmod": "2026-09-09"
+  },
+  "/guides/first-grade-reading-practice-activities-home": {
+    "hash": "cefcbd048d809c40",
+    "lastmod": "2026-09-09"
+  },
+  "/guides/five-minute-reading-practice-activities-kids": {
+    "hash": "00ac6fe0024ca2ad",
+    "lastmod": "2026-09-09"
+  },
+  "/guides/how-to-choose-reading-app": {
+    "hash": "84ad948e87d9b8eb",
+    "lastmod": "2026-09-09"
+  },
+  "/guides/how-to-teach-cvc-words-to-struggling-readers": {
+    "hash": "4edb1e85aa85a720",
+    "lastmod": "2026-09-09"
+  },
+  "/guides/how-to-teach-phonics-at-home": {
+    "hash": "8fa4c1bd64e7c7ac",
+    "lastmod": "2026-09-09"
+  },
+  "/guides/is-teacher-teaching-enough-phonics": {
+    "hash": "1cf20317de40f7f9",
+    "lastmod": "2026-09-09"
+  },
+  "/guides/long-vowel-sounds-practice-first-grade": {
+    "hash": "199c64c38b22c3ae",
+    "lastmod": "2026-09-09"
+  },
+  "/guides/phoneme-awareness-complete-guide": {
+    "hash": "8aa147f74ebf8528",
+    "lastmod": "2026-09-09"
+  },
+  "/guides/phonics-activities-5-year-old-struggling-reader": {
+    "hash": "b6f94e29a0430470",
+    "lastmod": "2026-09-09"
+  },
+  "/guides/phonics-practice-without-worksheets-kindergarten": {
+    "hash": "ec09914fc9a5153d",
+    "lastmod": "2026-09-09"
+  },
+  "/guides/r-controlled-vowels-teaching-strategies-parents": {
+    "hash": "cee4afcea4368dd6",
+    "lastmod": "2026-09-09"
+  },
+  "/guides/reading-practice-kids-hate-reading": {
+    "hash": "c0e2b4407b4b272d",
+    "lastmod": "2026-09-09"
+  },
+  "/guides/short-vowel-sounds-exercises-beginning-readers": {
+    "hash": "1b95ed574c86d939",
+    "lastmod": "2026-09-09"
+  },
+  "/guides/silent-e-words-practice-for-kids": {
+    "hash": "366086fc929b7804",
+    "lastmod": "2026-09-09"
+  },
+  "/guides/teaching-consonant-blends-kindergarten-at-home": {
+    "hash": "24a7bba00a193a4e",
+    "lastmod": "2026-09-09"
+  },
+  "/guides/vowel-digraphs-activities-first-graders": {
+    "hash": "39357baaed768f85",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words": {
+    "hash": "c3112888c3da9ee7",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ab-family": {
+    "hash": "d030f40f5ddee480",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ack-family": {
+    "hash": "9ad71466d1a0e163",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ad-family": {
+    "hash": "06fb4b3a3daf6da7",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ag-family": {
+    "hash": "393397959f2286ec",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ai-vowel-team": {
+    "hash": "8ad24ee06d379876",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/am-family": {
+    "hash": "88b3bc78c89294c0",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/amp-family": {
+    "hash": "6850da340674e89b",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/an-family": {
+    "hash": "e880ecb09707c64a",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/and-family": {
+    "hash": "f9c56ee16e812dbd",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ang-family": {
+    "hash": "e47ce6e692327feb",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ank-family": {
+    "hash": "16a68ac049a5d50d",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ap-family": {
+    "hash": "48fe51bdf92e389f",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ar-r-controlled": {
+    "hash": "9f6d3c830ed408ca",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ash-family": {
+    "hash": "50baab00ace925df",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ast-family": {
+    "hash": "6dadebce8e3e12ec",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/at-family": {
+    "hash": "e1b4d158662f80cf",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/atch-family": {
+    "hash": "360a7e9563577b32",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/au-vowel-team": {
+    "hash": "11112883af10f2ff",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/aw-vowel-team": {
+    "hash": "0bd23bdabab0bda9",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ay-vowel-team": {
+    "hash": "feff2878edca6f0c",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/bl-blend": {
+    "hash": "25fb30323ec8cc25",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/br-blend": {
+    "hash": "080cc057a134b552",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ch-digraph": {
+    "hash": "137fd79923d663d7",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ck-digraph": {
+    "hash": "81ad7fd804b807c5",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/cl-blend": {
+    "hash": "32667daf5527e060",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/cr-blend": {
+    "hash": "f5a6a709b34d611a",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/dr-blend": {
+    "hash": "09a65a4ee825914b",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ea-vowel-team": {
+    "hash": "aac4b31136082882",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/eck-family": {
+    "hash": "9f9bb9ffc6933eeb",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ed-family": {
+    "hash": "458ec8539f4ffbb8",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ee-vowel-team": {
+    "hash": "aa9dfdcdc96a098a",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/eg-family": {
+    "hash": "b8f9848ec8cb3c0b",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ell-family": {
+    "hash": "24639d27250278d2",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/elt-family": {
+    "hash": "506cef8f0c25fadf",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/en-family": {
+    "hash": "6c3de7fc212dab8f",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/end-family": {
+    "hash": "4c74fa5d92d852b7",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ent-family": {
+    "hash": "1b235cae189dafe3",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/er-r-controlled": {
+    "hash": "06e2c731adad54be",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/est-family": {
+    "hash": "52d250965d2d89ac",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/et-family": {
+    "hash": "9d4767349515ed27",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/fl-blend": {
+    "hash": "6edd4a503d241795",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/fr-blend": {
+    "hash": "545dc3bf3fdb8531",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/gl-blend": {
+    "hash": "b3a68b549eecd729",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/gr-blend": {
+    "hash": "471c307e2b241b20",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ick-family": {
+    "hash": "56567b516e62ac02",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/id-family": {
+    "hash": "c69c12f72ebb2c0a",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ie-vowel-team": {
+    "hash": "29f02dbf6e971041",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ift-family": {
+    "hash": "7e06a2143ae2777e",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ig-family": {
+    "hash": "41b8c83b626a3f90",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ill-family": {
+    "hash": "2963a682e7d4e48c",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ilt-family": {
+    "hash": "2026c6d8def3ca59",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/imp-family": {
+    "hash": "4af102435a596f02",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/in-family": {
+    "hash": "36b13b7d68f3fb5c",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ing-family": {
+    "hash": "b3c6bf1f2f65c3f9",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ink-family": {
+    "hash": "510c88bf9af5634b",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ip-family": {
+    "hash": "f51cb07f2e318b0f",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ir-r-controlled": {
+    "hash": "dfcab92981071575",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ist-family": {
+    "hash": "2546b8df60ea4c7c",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/it-family": {
+    "hash": "8f7ab371cd06a075",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ng-digraph": {
+    "hash": "368bc3adc598ede5",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/oa-vowel-team": {
+    "hash": "b73f2ff1e32d695c",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ob-family": {
+    "hash": "0b44e66bb2565d40",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ock-family": {
+    "hash": "391d274c481a30d2",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/oe-vowel-team": {
+    "hash": "5411b799d1a3ee82",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/oft-family": {
+    "hash": "b8a72df77b8bd52b",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/og-family": {
+    "hash": "4067ca5292275664",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/oi-vowel-team": {
+    "hash": "406d7112567e6172",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ond-family": {
+    "hash": "8ec12cda56a9c0c5",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ong-family": {
+    "hash": "ce07aa28520169ee",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/oo-vowel-team": {
+    "hash": "df2080eb3e470bbb",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/op-family": {
+    "hash": "cd2f9e138bdea656",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/or-r-controlled": {
+    "hash": "123f85e2372dad94",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/oss-family": {
+    "hash": "d52ca17d298330d5",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ot-family": {
+    "hash": "e31db425ce8c2117",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ou-vowel-team": {
+    "hash": "08fae8149bbe13fe",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ow-vowel-team": {
+    "hash": "b1269b8e7919c10d",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ox-family": {
+    "hash": "b785f7fea2750ed4",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/oy-vowel-team": {
+    "hash": "bdaa885bd8287003",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ph-digraph": {
+    "hash": "bd35ac4cf8b2e418",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/pl-blend": {
+    "hash": "f27b8097fb3c61fc",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/pr-blend": {
+    "hash": "2ca58a65d2d1338f",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/sc-blend": {
+    "hash": "e56bd5380f919d93",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/sh-digraph": {
+    "hash": "6f9db7c1f2580df0",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/sk-blend": {
+    "hash": "236e2c41b5b61c7d",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/sl-blend": {
+    "hash": "7641bec1da019ff1",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/sm-blend": {
+    "hash": "53b04d03af0798c2",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/sn-blend": {
+    "hash": "a7f9648ba40bb8c0",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/sp-blend": {
+    "hash": "dd4fef1b21480f57",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/st-blend": {
+    "hash": "9dc5251478692177",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/sw-blend": {
+    "hash": "495729c5017019ab",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/th-digraph": {
+    "hash": "b2cf071cc2a7ac1d",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/tr-blend": {
+    "hash": "a9acd38e3f5427d5",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/tw-blend": {
+    "hash": "c9c289e61a2197d8",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ub-family": {
+    "hash": "104d172ee15e663c",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/uck-family": {
+    "hash": "00f3fa3ac4086324",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ue-vowel-team": {
+    "hash": "527d4a6838a10852",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/uff-family": {
+    "hash": "ad697e03ff98076a",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ug-family": {
+    "hash": "140fb03b27de1c89",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ui-vowel-team": {
+    "hash": "077059c84d346928",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/um-family": {
+    "hash": "e875c460c7016042",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ump-family": {
+    "hash": "b5cbf030b19c532c",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/un-family": {
+    "hash": "5b08da97b876bfa4",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/unch-family": {
+    "hash": "fc7df01d041935a1",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/unk-family": {
+    "hash": "863400cb84bc42a1",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/up-family": {
+    "hash": "229fdf434ca1b5dd",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ur-r-controlled": {
+    "hash": "1fdfe468186349f9",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ust-family": {
+    "hash": "4e846c766c2b961f",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/ut-family": {
+    "hash": "1a15eb596c3581d2",
+    "lastmod": "2026-09-09"
+  },
+  "/practice-words/wh-digraph": {
+    "hash": "30b6dde55d14e657",
+    "lastmod": "2026-09-09"
+  },
+  "/privacy": {
+    "hash": "5d0c01db2d9af0a9",
+    "lastmod": "2026-09-09"
+  }
+}

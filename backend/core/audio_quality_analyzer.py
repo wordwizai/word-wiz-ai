@@ -10,43 +10,225 @@ This module provides utilities for:
 Created as part of Phase 1: Adaptive Noise Reduction & Audio Quality Validation
 """
 
+import os
+
 import numpy as np
 import librosa
-from typing import Dict, Tuple, List
+from typing import Dict, Tuple, List, Optional
 import logging
 
 logger = logging.getLogger(__name__)
 
 
+# ---------------------------------------------------------------------------
+# Feature flag
+# ---------------------------------------------------------------------------
+# WWAI_SOFT_QUALITY_GATES controls BOTH:
+#   1. which measurement method this module uses (legacy head/tail SNR +
+#      relative-to-peak clipping vs. robust percentile SNR + absolute
+#      full-scale clipping), and
+#   2. whether audio_processing_handler treats quality problems as hard HTTP
+#      400 rejections or as soft warnings attached to the response.
+#
+# It defaults to OFF. With the flag unset every number this module produces and
+# every rejection the handler raises is identical to the pre-change behavior.
+# ---------------------------------------------------------------------------
+
+_TRUTHY = ("1", "true", "yes", "on")
+
+
+def soft_quality_gates_enabled() -> bool:
+    """Return True when WWAI_SOFT_QUALITY_GATES is set to a truthy value.
+
+    Read at call time (not import time) so tests and deployments can toggle it
+    without reimporting the module.
+    """
+    return os.getenv("WWAI_SOFT_QUALITY_GATES", "0").strip().lower() in _TRUTHY
+
+
 class AudioQualityAnalyzer:
     """Analyzes audio quality metrics before processing."""
-    
-    def __init__(self, sr: int = 16000):
+
+    # SNR reported when frame energies are too flat to separate speech from
+    # noise (e.g. a pure synthetic tone, or a recording with no pauses at all).
+    # Deliberately neutral-positive: an unmeasurable noise floor is not
+    # evidence of a bad recording, and must not cause a rejection.
+    STATIONARY_SNR_DB = 20.0
+
+    # SNR reported when frame energies are flat AND the waveform is
+    # noise-like: speech and background cannot be separated at all.
+    NOISE_LIKE_SNR_DB = 3.0
+
+    # Below this peak amplitude the recording is treated as digital silence.
+    DIGITAL_SILENCE_PEAK = 1e-6
+
+    def __init__(self, sr: int = 16000, robust_metrics: Optional[bool] = None):
         """
         Initialize the audio quality analyzer.
-        
+
         Args:
             sr: Sample rate (default 16000 Hz)
+            robust_metrics: Force the measurement method. None (default) means
+                "follow the WWAI_SOFT_QUALITY_GATES env flag". True selects the
+                percentile-noise-floor SNR and absolute full-scale clipping
+                detector; False selects the legacy head/tail SNR and
+                relative-to-peak clipping detector.
         """
         self.sr = sr
-        
+        self._robust_metrics_override = robust_metrics
+
+    @property
+    def robust_metrics(self) -> bool:
+        """Whether the robust (percentile / absolute-scale) metrics are active."""
+        if self._robust_metrics_override is not None:
+            return self._robust_metrics_override
+        return soft_quality_gates_enabled()
+
+    # ------------------------------------------------------------------
+    # Framing helper
+    # ------------------------------------------------------------------
+    def _frame_rms(self, audio: np.ndarray) -> np.ndarray:
+        """Frame-wise RMS energy using 25 ms frames with a 10 ms hop.
+
+        Short frames matter: a child's inter-word gaps and stop closures are
+        tens of milliseconds long, and they are what makes a noise-floor
+        estimate possible at all.
+        """
+        frame_length = max(64, int(0.025 * self.sr))
+        hop_length = max(16, int(0.010 * self.sr))
+
+        if len(audio) < frame_length:
+            # Too short to frame: treat the whole clip as one frame.
+            return np.array([float(np.sqrt(np.mean(np.square(audio))))]) if len(audio) else np.array([0.0])
+
+        return librosa.feature.rms(
+            y=np.asarray(audio, dtype=np.float64),
+            frame_length=frame_length,
+            hop_length=hop_length,
+            center=True,
+        )[0]
+
+    @staticmethod
+    def _lag1_autocorrelation(audio: np.ndarray) -> float:
+        """Normalized lag-1 autocorrelation. ~1 for tonal/voiced, ~0 for noise."""
+        x = np.asarray(audio, dtype=np.float64)
+        if len(x) < 2:
+            return 0.0
+        x = x - float(np.mean(x))
+        energy = float(np.dot(x, x))
+        if energy <= 0.0:
+            return 0.0
+        return float(np.dot(x[:-1], x[1:]) / energy)
+
+    # ------------------------------------------------------------------
+    # SNR
+    # ------------------------------------------------------------------
+    def _calculate_snr_percentile(
+        self,
+        audio: np.ndarray,
+        noise_percentile: float = 10.0,
+    ) -> float:
+        """Robust SNR using a percentile noise floor over the whole recording.
+
+        The legacy method assumed the first and last 0.5 s were noise. A child
+        who starts reading the instant the recorder opens puts SPEECH in that
+        window, which makes noise_rms ~= signal_rms and reports ~0 dB for a
+        perfectly good recording. Estimating the noise floor from the
+        lowest-energy frames anywhere in the clip removes that assumption.
+        """
+        if len(audio) == 0:
+            return 0.0
+
+        peak = float(np.max(np.abs(audio)))
+        if peak < self.DIGITAL_SILENCE_PEAK:
+            logger.warning("No signal detected in audio (digital silence)")
+            return 0.0
+
+        frame_rms = self._frame_rms(audio)
+        if len(frame_rms) < 3:
+            logger.debug("Too few frames for a percentile noise floor; assuming moderate quality")
+            return 10.0
+
+        noise_rms = float(np.percentile(frame_rms, noise_percentile))
+        loud_rms = float(np.percentile(frame_rms, 95.0))
+
+        if loud_rms < 1e-12:
+            logger.warning("No signal detected in audio")
+            return 0.0
+
+        if noise_rms < 1e-10:
+            # Digital-silence pauses: nothing measurable in the gaps.
+            logger.debug("Extremely low noise floor detected - assuming high quality audio")
+            return 60.0
+
+        # If the frame energies are essentially flat there are no pauses to
+        # measure a noise floor in. Two very different things look like this:
+        # a sustained tonal signal (a synthetic test tone, a held vowel), and
+        # broadband noise that drowns the speech. Lag-1 autocorrelation tells
+        # them apart cheaply - voiced/tonal audio is strongly correlated
+        # sample to sample (~0.9+), broadband noise is not (~0).
+        if loud_rms / noise_rms < 1.26:  # < 2 dB spread
+            correlation = self._lag1_autocorrelation(audio)
+            logger.debug(
+                "Frame energies are flat (spread %.2f dB, r1=%.2f); noise floor unmeasurable",
+                20 * np.log10(max(loud_rms / noise_rms, 1e-12)),
+                correlation,
+            )
+            if correlation >= 0.5:
+                # Tonal and steady: no measurable noise floor is not evidence
+                # of a bad recording, so do not punish it.
+                return float(self.STATIONARY_SNR_DB)
+            # Noise-like and steady: speech, if any, is not separable from the
+            # background. Report a low (but not zero) SNR.
+            return float(self.NOISE_LIKE_SNR_DB)
+
+        # Speech frames: everything at least 6 dB above the noise floor.
+        speech_mask = frame_rms > (noise_rms * 2.0)
+        if np.any(speech_mask):
+            signal_rms = float(np.sqrt(np.mean(np.square(frame_rms[speech_mask]))))
+        else:
+            signal_rms = loud_rms
+
+        snr_db = 20.0 * np.log10(signal_rms / noise_rms)
+        return float(np.clip(snr_db, 0.0, 60.0))
+
     def calculate_snr(self, audio: np.ndarray, noise_duration: float = 0.5) -> float:
         """
         Calculate Signal-to-Noise Ratio.
-        
-        Method: Assumes first and last noise_duration seconds contain primarily noise.
-        Calculates RMS of signal vs noise to estimate SNR.
-        
+
+        Two methods are available; which one runs is decided by
+        `self.robust_metrics` (see WWAI_SOFT_QUALITY_GATES).
+
+        Robust method (flag ON): estimates the noise floor from the
+        lowest-energy percentile of frames across the WHOLE recording, so
+        speech at the very start or end of the clip does not get counted as
+        noise.
+
+        Legacy method (flag OFF, default): assumes the first and last
+        noise_duration seconds contain primarily noise.
+
         Args:
             audio: Input audio signal as numpy array
             noise_duration: Duration in seconds to sample for noise estimation
-            
+                (legacy method only; ignored by the robust method)
+
         Returns:
             SNR in dB. Returns 60.0 for essentially noise-free audio,
             10.0 for very short audio where reliable SNR cannot be calculated.
         """
+        if self.robust_metrics:
+            return self._calculate_snr_percentile(audio)
+
+        return self._calculate_snr_legacy(audio, noise_duration=noise_duration)
+
+    def _calculate_snr_legacy(self, audio: np.ndarray, noise_duration: float = 0.5) -> float:
+        """Original head/tail-window SNR estimate. Preserved verbatim.
+
+        Method: Assumes first and last noise_duration seconds contain primarily
+        noise. Calculates RMS of signal vs noise to estimate SNR.
+        """
         noise_samples = int(noise_duration * self.sr)
-        
+
         if len(audio) < 3 * noise_samples:
             # Audio too short for reliable SNR
             logger.debug(f"Audio too short ({len(audio)} samples) for reliable SNR calculation")
@@ -79,36 +261,116 @@ class AudioQualityAnalyzer:
         
         return float(snr_db)
     
+    # ------------------------------------------------------------------
+    # Clipping
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _full_scale(audio: np.ndarray) -> float:
+        """Digital full scale for this audio buffer.
+
+        Float audio is ±1.0 by convention (soundfile decodes to that range).
+        Integer PCM uses the dtype maximum. A float buffer whose peak already
+        exceeds 1.0 is not normalized to the usual convention, so fall back to
+        its own peak rather than declaring every sample clipped.
+        """
+        dtype = getattr(audio, "dtype", None)
+        if dtype is not None and np.issubdtype(dtype, np.integer):
+            return float(np.iinfo(dtype).max)
+
+        peak = float(np.max(np.abs(audio))) if len(audio) else 0.0
+        return max(1.0, peak)
+
+    def _detect_clipping_absolute(self, audio: np.ndarray, threshold: float = 0.99) -> Dict:
+        """Clipping measured against ABSOLUTE digital full scale.
+
+        The legacy detector compared samples to `threshold * max(|audio|)` --
+        the clip's own peak. By construction at least one sample always sits at
+        that peak, so any peaky-but-clean recording reports nonzero "clipping".
+        Real clipping means samples pinned at the converter's rails, so compare
+        against full scale instead, and require a run of consecutive pinned
+        samples (a genuine flat top) rather than a single grazing sample.
+        """
+        if len(audio) == 0:
+            return {'is_clipped': False, 'clipping_percentage': 0.0, 'max_amplitude': 0.0}
+
+        max_val = float(np.max(np.abs(audio)))
+        full_scale = self._full_scale(audio)
+
+        at_rail = np.abs(audio) >= (threshold * full_scale)
+
+        if not np.any(at_rail):
+            clipped_count = 0
+        else:
+            # Keep only runs of >= 3 consecutive pinned samples. A sine that
+            # merely grazes full scale crosses it briefly; a clipped waveform
+            # sits there.
+            clipped_count = int(np.sum(self._long_runs(at_rail, min_run=3)))
+
+        clipping_percentage = clipped_count / len(audio) * 100
+
+        return {
+            'is_clipped': clipping_percentage > 1.0,  # More than 1% clipped = issue
+            'clipping_percentage': float(clipping_percentage),
+            'max_amplitude': max_val,
+        }
+
+    @staticmethod
+    def _long_runs(mask: np.ndarray, min_run: int = 3) -> np.ndarray:
+        """Boolean mask keeping only runs of at least `min_run` consecutive Trues."""
+        if min_run <= 1 or not np.any(mask):
+            return mask
+
+        padded = np.concatenate(([False], mask, [False]))
+        diffs = np.diff(padded.astype(np.int8))
+        starts = np.flatnonzero(diffs == 1)
+        ends = np.flatnonzero(diffs == -1)
+
+        out = np.zeros_like(mask, dtype=bool)
+        for start, end in zip(starts, ends):
+            if end - start >= min_run:
+                out[start:end] = True
+        return out
+
     def detect_clipping(self, audio: np.ndarray, threshold: float = 0.99) -> Dict:
         """
         Detect if audio is clipped/distorted.
-        
+
         Clipping occurs when audio signal exceeds the maximum representable value,
         causing distortion and loss of information.
-        
+
+        Which detector runs is decided by `self.robust_metrics`
+        (see WWAI_SOFT_QUALITY_GATES). Robust: absolute digital full scale.
+        Legacy (default): relative to the signal's own peak.
+
         Args:
             audio: Input audio signal
-            threshold: Threshold as fraction of max amplitude (default 0.99)
-            
+            threshold: Threshold as fraction of full scale, or of max amplitude
+                under the legacy method (default 0.99)
+
         Returns:
             Dictionary with:
                 - is_clipped: bool, True if clipping detected (>1% samples clipped)
                 - clipping_percentage: float, percentage of samples that are clipped
                 - max_amplitude: float, maximum absolute amplitude in the signal
         """
+        if self.robust_metrics:
+            return self._detect_clipping_absolute(audio, threshold=threshold)
+
+        # Legacy behavior, preserved verbatim.
         # Find maximum amplitude
         max_val = np.max(np.abs(audio))
-        
+
         # Count samples near max/min (likely clipped)
         clipped = np.abs(audio) > threshold * max_val
         clipping_percentage = np.sum(clipped) / len(audio) * 100
-        
+
         return {
             'is_clipped': clipping_percentage > 1.0,  # More than 1% clipped = issue
             'clipping_percentage': float(clipping_percentage),
             'max_amplitude': float(max_val)
         }
-    
+
+
     def calculate_silence_percentage(self, audio: np.ndarray, 
                                      threshold_db: int = -40) -> float:
         """
@@ -278,7 +540,10 @@ class AudioQualityAnalyzer:
             'quality_score': quality_score,
             'quality_level': quality_level,
             'issues': issues,
-            'recommendations': recommendations
+            'recommendations': recommendations,
+            # Additive: tells callers/logs which measurement method produced
+            # the numbers above. Existing keys are untouched.
+            'metrics_mode': 'robust' if self.robust_metrics else 'legacy',
         }
         
         logger.info(f"Audio quality analysis complete: {quality_level} (score: {quality_score:.1f})")
@@ -286,6 +551,71 @@ class AudioQualityAnalyzer:
             logger.warning(f"Quality issues detected: {', '.join(issues)}")
         
         return result
+
+
+def assess_processability(audio: np.ndarray) -> Tuple[bool, Optional[str]]:
+    """Decide whether audio is fundamentally unprocessable.
+
+    This is the ONLY thing that should hard-reject a recording when soft
+    quality gates are enabled. Everything else -- noise, clipping, long pauses,
+    a quiet child -- is a warning, not a refusal.
+
+    Args:
+        audio: Input audio signal
+
+    Returns:
+        (is_processable, reason). `reason` is None when processable.
+    """
+    if audio is None or len(audio) == 0:
+        return False, "No audio was received. Please try recording again."
+
+    finite = np.isfinite(audio)
+    if not np.all(finite):
+        return False, "Audio contains invalid samples and could not be read. Please try recording again."
+
+    peak = float(np.max(np.abs(audio)))
+    if peak < AudioQualityAnalyzer.DIGITAL_SILENCE_PEAK:
+        return False, (
+            "No sound was recorded. Please check that the microphone is connected "
+            "and allowed, then try again."
+        )
+
+    return True, None
+
+
+def build_quality_warning(quality_info: Dict) -> Optional[Dict]:
+    """Turn a quality report into an optional, child-friendly warning payload.
+
+    Returns None when there is nothing worth mentioning. The shape is additive:
+    callers attach it under a NEW key and never remove existing ones.
+    """
+    hints: List[str] = []
+
+    snr_db = quality_info.get('snr_db')
+    if snr_db is not None and snr_db < 5.0:
+        hints.append("It sounds noisy where you are - somewhere quieter might help.")
+
+    clipping = quality_info.get('clipping_percentage')
+    if clipping is not None and clipping > 10.0:
+        hints.append("That was very loud - try sitting back a little from the microphone.")
+
+    silence = quality_info.get('silence_percentage')
+    if silence is not None and silence > 85.0:
+        hints.append("We heard mostly quiet - try speaking a bit closer to the microphone.")
+
+    if not hints:
+        return None
+
+    return {
+        'quality_level': quality_info.get('quality_level'),
+        'quality_score': quality_info.get('quality_score'),
+        'snr_db': snr_db,
+        'clipping_percentage': clipping,
+        'silence_percentage': silence,
+        'hints': hints,
+        # Kept for parity with the analyzer report; frontend may ignore these.
+        'issues': quality_info.get('issues', []),
+    }
 
 
 # Convenience function for quick quality check

@@ -153,8 +153,14 @@ class PhonemeExtractorONNX:
         
         # Optimize audio preprocessing if enabled
         if use_optimized_preprocessing:
+            # Format conditioning ONLY (mono / sample-rate reconciliation /
+            # silence trim / float32). Noise reduction and peak normalization
+            # belong to core.audio_preprocessing.preprocess_audio and must not
+            # be repeated here - normalize=False is explicit for that reason.
+            # A sample-rate mismatch is now resampled rather than silently
+            # relabelled as target_sr.
             audio, sampling_rate = self.audio_preprocessor.preprocess_audio(
-                audio, sampling_rate
+                audio, sr=sampling_rate, normalize=False, trim_silence=True
             )
         
         # Tokenize the audio file

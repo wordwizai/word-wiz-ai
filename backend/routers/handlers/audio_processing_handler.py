@@ -190,9 +190,16 @@ async def load_and_preprocess_audio_bytes(
     print("🔊 Starting audio preprocessing...")
     # Run preprocessing in thread pool to avoid blocking event loop
     audio_array = await asyncio.to_thread(
-        preprocess_audio, audio_array, sr=sample_rate, audio_length_seconds=audio_duration, use_adaptive=True
+        preprocess_audio, audio_array, sr=sample_rate, audio_length_seconds=audio_duration,
+        use_adaptive=True, already_preprocessed=False
     )
-    
+    # This is THE preprocessing pass for this request. Record it here (not inside
+    # the worker thread - asyncio.to_thread runs on a copied context, so a mark
+    # set in there would be discarded) so later stages can skip redundant noise
+    # reduction / normalization when WWAI_SINGLE_PREPROCESS is enabled.
+    from core.audio_preprocessing import mark_preprocessed
+    mark_preprocessed(audio_array)
+
     # CACHE POINT 3: Save preprocessed audio
     cache_start = time.time()
     # Run cache I/O in thread pool to avoid blocking event loop

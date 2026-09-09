@@ -1,10 +1,10 @@
 from datetime import timedelta
-from click import prompt
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from authlib.integrations.starlette_client import OAuth
 import os
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from auth.auth_handler import (
@@ -63,14 +63,40 @@ async def google_auth_callback(request: Request, db: Session = Depends(get_db)):
     # Check your database: If user exists, log them in; if not, create a new one
     db_user = get_user(db, email)
     if db_user is None:
-        # Create a new user if they don't exist
-        db_user = User(
+        # Build a unique username from the email prefix.
+        # Query all existing usernames with the same prefix in one shot to avoid
+        # repeated round-trips when many users share the same email prefix.
+        base_username = email.split("@")[0]
+        existing = {
+            row.username
+            for row in db.query(User.username)
+            .filter(User.username.like(f"{base_username}%"))
+            .all()
+        }
+        username = base_username
+        counter = 1
+        while username in existing:
+            username = f"{base_username}{counter}"
+            counter += 1
+
+        new_user = User(
             email=email,
             full_name=name,
-            username=email.split("@")[0],  # Use email prefix as username
+            username=username,
             hashed_password=None,  # Password is not needed for OAuth
         )
-        create_user(db, db_user)
+        try:
+            create_user(db, new_user)
+            db_user = new_user
+        except IntegrityError:
+            # Race condition: another request inserted this Google account
+            # concurrently (duplicate email). Roll back and reuse the existing row.
+            db.rollback()
+            db_user = get_user(db, email)
+            if db_user is None:
+                raise HTTPException(
+                    status_code=500, detail="Failed to create or retrieve user account"
+                )
 
     # Generate a session or JWT for the frontend
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)

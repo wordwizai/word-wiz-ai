@@ -1,0 +1,4 @@
+{
+  "tags": ["synthetic", "bad-audio", "expect-rejection"],
+  "notes": "A deliberately bad clip: only one word came back. The pipeline is supposed to REJECT it, and rejecting it the same way every time is as much a regression target as scoring it the same way. The baseline pins the exact error string on both paths."
+}

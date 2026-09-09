@@ -1,0 +1,4 @@
+{
+  "tags": ["synthetic", "known-bug", "oov"],
+  "notes": "grapheme_to_phoneme('wordwiz') returns ['w','o','r','d','w','i','z'] - letters, not sounds - because eng_to_ipa marks out-of-vocabulary words with '*' and the code strips the star and list()s the spelling. A large PER on this word is the BUG, not the child. If an agent fixes the OOV path, this case's baseline is EXPECTED to move: re-pin it deliberately with --update-baseline, do not widen the epsilon to hide it."
+}

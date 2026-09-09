@@ -1,0 +1,4 @@
+{
+  "tags": ["synthetic", "known-bug", "ligature"],
+  "notes": "A perfect reading that scores badly purely because of notation: grapheme_to_phoneme emits the ligatures U+02A7 and U+02A4, the wav2vec2-TIMIT-IPA model emits t+U+0283 and d+U+0292, so they can never match. The baseline pins today's inflated PER. A phoneme-normalisation fix will move it, and that is a deliberate re-pin, not an epsilon widening."
+}

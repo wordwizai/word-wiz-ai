@@ -1,0 +1,5 @@
+{
+  "words": ["the", "cat", "sat"],
+  "phonemes_by_word": [["ð", "ə"], ["k", "æ", "t"], ["s", "æ", "t"]],
+  "source": "hand-written; perfect pronunciation, PER should be 0.0"
+}

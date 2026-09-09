@@ -1,0 +1,306 @@
+{
+  "case_id": "case_synth_03_oov_word",
+  "client_path": {
+    "highest_per_word": "wordwiz",
+    "problem_types": [
+      "high_frequency_errors",
+      "most_common_phoneme",
+      "most_common_word",
+      "phoneme_articulatory_info",
+      "phoneme_difficulty_levels",
+      "phoneme_error_counts",
+      "phoneme_group_errors",
+      "recommended_focus_phoneme",
+      "word_error_counts"
+    ],
+    "sentence_per": 0.176471,
+    "total_errors": 3,
+    "total_phonemes": 17,
+    "words": [
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "m",
+          "a",
+          "ɪ"
+        ],
+        "ground_truth_word": "my",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "m",
+          "a",
+          "ɪ"
+        ],
+        "predicted_word": "my",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 3,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "d",
+          "ɔ",
+          "g"
+        ],
+        "ground_truth_word": "dog",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "d",
+          "ɔ",
+          "g"
+        ],
+        "predicted_word": "dog",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 3,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "w",
+          "o",
+          "r",
+          "d",
+          "w",
+          "i",
+          "z"
+        ],
+        "ground_truth_word": "wordwiz",
+        "missed": [
+          "o"
+        ],
+        "per": 0.4286,
+        "phonemes": [
+          "w",
+          "ɝ",
+          "d",
+          "w",
+          "ɪ",
+          "z"
+        ],
+        "predicted_word": "wordwiz",
+        "substituted": [
+          [
+            "r",
+            "ɝ"
+          ],
+          [
+            "i",
+            "ɪ"
+          ]
+        ],
+        "total_errors": 3,
+        "total_phonemes": 7,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "n",
+          "æ",
+          "p",
+          "s"
+        ],
+        "ground_truth_word": "naps",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "n",
+          "æ",
+          "p",
+          "s"
+        ],
+        "predicted_word": "naps",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 4,
+        "type": "match"
+      }
+    ]
+  },
+  "fixture": {
+    "phonemes_by_word": [
+      [
+        "m",
+        "a",
+        "ɪ"
+      ],
+      [
+        "d",
+        "ɔ",
+        "g"
+      ],
+      [
+        "w",
+        "ɝ",
+        "d",
+        "w",
+        "ɪ",
+        "z"
+      ],
+      [
+        "n",
+        "æ",
+        "p",
+        "s"
+      ]
+    ],
+    "phonemes_flat": [
+      "m",
+      "a",
+      "ɪ",
+      "d",
+      "ɔ",
+      "g",
+      "w",
+      "ɝ",
+      "d",
+      "w",
+      "ɪ",
+      "z",
+      "n",
+      "æ",
+      "p",
+      "s"
+    ],
+    "source": "hand-written; probes the eng_to_ipa out-of-vocabulary fallback",
+    "words": [
+      "my",
+      "dog",
+      "wordwiz",
+      "naps"
+    ]
+  },
+  "format_version": 1,
+  "path_comparison_structural_count": 0,
+  "path_divergence": 0.0,
+  "sentence": "my dog wordwiz naps",
+  "server_path": {
+    "highest_per_word": "wordwiz",
+    "problem_types": [
+      "high_frequency_errors",
+      "most_common_phoneme",
+      "most_common_word",
+      "phoneme_articulatory_info",
+      "phoneme_difficulty_levels",
+      "phoneme_error_counts",
+      "phoneme_group_errors",
+      "recommended_focus_phoneme",
+      "word_error_counts"
+    ],
+    "sentence_per": 0.176471,
+    "total_errors": 3,
+    "total_phonemes": 17,
+    "words": [
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "m",
+          "a",
+          "ɪ"
+        ],
+        "ground_truth_word": "my",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "m",
+          "a",
+          "ɪ"
+        ],
+        "predicted_word": "my",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 3,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "d",
+          "ɔ",
+          "g"
+        ],
+        "ground_truth_word": "dog",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "d",
+          "ɔ",
+          "g"
+        ],
+        "predicted_word": "dog",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 3,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "w",
+          "o",
+          "r",
+          "d",
+          "w",
+          "i",
+          "z"
+        ],
+        "ground_truth_word": "wordwiz",
+        "missed": [
+          "o"
+        ],
+        "per": 0.4286,
+        "phonemes": [
+          "w",
+          "ɝ",
+          "d",
+          "w",
+          "ɪ",
+          "z"
+        ],
+        "predicted_word": "wordwiz",
+        "substituted": [
+          [
+            "r",
+            "ɝ"
+          ],
+          [
+            "i",
+            "ɪ"
+          ]
+        ],
+        "total_errors": 3,
+        "total_phonemes": 7,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "n",
+          "æ",
+          "p",
+          "s"
+        ],
+        "ground_truth_word": "naps",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "n",
+          "æ",
+          "p",
+          "s"
+        ],
+        "predicted_word": "naps",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 4,
+        "type": "match"
+      }
+    ]
+  }
+}

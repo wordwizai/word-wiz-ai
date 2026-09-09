@@ -1,0 +1,322 @@
+{
+  "case_id": "case_synth_04_ligature_mismatch",
+  "client_path": {
+    "highest_per_word": "church",
+    "problem_types": [
+      "high_frequency_errors",
+      "most_common_phoneme",
+      "most_common_word",
+      "phoneme_articulatory_info",
+      "phoneme_difficulty_levels",
+      "phoneme_error_counts",
+      "phoneme_group_errors",
+      "recommended_focus_phoneme",
+      "word_error_counts"
+    ],
+    "sentence_per": 0.666667,
+    "total_errors": 8,
+    "total_phonemes": 12,
+    "words": [
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "ð",
+          "ə"
+        ],
+        "ground_truth_word": "the",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "ð",
+          "ə"
+        ],
+        "predicted_word": "the",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 2,
+        "type": "match"
+      },
+      {
+        "added": [
+          "t",
+          "t"
+        ],
+        "ground_truth_phonemes": [
+          "ʧ",
+          "ə",
+          "r",
+          "ʧ"
+        ],
+        "ground_truth_word": "church",
+        "missed": [],
+        "per": 1.0,
+        "phonemes": [
+          "t",
+          "ʃ",
+          "ə",
+          "r",
+          "t",
+          "ʃ"
+        ],
+        "predicted_word": "church",
+        "substituted": [
+          [
+            "ʧ",
+            "ʃ"
+          ],
+          [
+            "ʧ",
+            "ʃ"
+          ]
+        ],
+        "total_errors": 4,
+        "total_phonemes": 4,
+        "type": "match"
+      },
+      {
+        "added": [
+          "d",
+          "d"
+        ],
+        "ground_truth_phonemes": [
+          "ʤ",
+          "ə",
+          "ʤ",
+          "d"
+        ],
+        "ground_truth_word": "judged",
+        "missed": [],
+        "per": 1.0,
+        "phonemes": [
+          "d",
+          "ʒ",
+          "ə",
+          "d",
+          "ʒ",
+          "d"
+        ],
+        "predicted_word": "judged",
+        "substituted": [
+          [
+            "ʤ",
+            "ʒ"
+          ],
+          [
+            "ʤ",
+            "ʒ"
+          ]
+        ],
+        "total_errors": 4,
+        "total_phonemes": 4,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "ɪ",
+          "m"
+        ],
+        "ground_truth_word": "him",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "ɪ",
+          "m"
+        ],
+        "predicted_word": "him",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 2,
+        "type": "match"
+      }
+    ]
+  },
+  "fixture": {
+    "phonemes_by_word": [
+      [
+        "ð",
+        "ə"
+      ],
+      [
+        "t",
+        "ʃ",
+        "ə",
+        "r",
+        "t",
+        "ʃ"
+      ],
+      [
+        "d",
+        "ʒ",
+        "ə",
+        "d",
+        "ʒ",
+        "d"
+      ],
+      [
+        "ɪ",
+        "m"
+      ]
+    ],
+    "phonemes_flat": [
+      "ð",
+      "ə",
+      "t",
+      "ʃ",
+      "ə",
+      "r",
+      "t",
+      "ʃ",
+      "d",
+      "ʒ",
+      "ə",
+      "d",
+      "ʒ",
+      "d",
+      "ɪ",
+      "m"
+    ],
+    "source": "hand-written; the model emits t+esh and d+ezh as two codepoints while the ground truth emits the single-codepoint ligatures",
+    "words": [
+      "the",
+      "church",
+      "judged",
+      "him"
+    ]
+  },
+  "format_version": 1,
+  "path_comparison_structural_count": 0,
+  "path_divergence": 0.0,
+  "sentence": "the church judged him",
+  "server_path": {
+    "highest_per_word": "judged",
+    "problem_types": [
+      "high_frequency_errors",
+      "most_common_phoneme",
+      "most_common_word",
+      "phoneme_articulatory_info",
+      "phoneme_difficulty_levels",
+      "phoneme_error_counts",
+      "phoneme_group_errors",
+      "recommended_focus_phoneme",
+      "word_error_counts"
+    ],
+    "sentence_per": 0.666667,
+    "total_errors": 8,
+    "total_phonemes": 12,
+    "words": [
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "ð",
+          "ə"
+        ],
+        "ground_truth_word": "the",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "ð",
+          "ə"
+        ],
+        "predicted_word": "the",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 2,
+        "type": "match"
+      },
+      {
+        "added": [
+          "t"
+        ],
+        "ground_truth_phonemes": [
+          "ʧ",
+          "ə",
+          "r",
+          "ʧ"
+        ],
+        "ground_truth_word": "church",
+        "missed": [],
+        "per": 0.75,
+        "phonemes": [
+          "t",
+          "ʃ",
+          "ə",
+          "r",
+          "t"
+        ],
+        "predicted_word": "church",
+        "substituted": [
+          [
+            "ʧ",
+            "ʃ"
+          ],
+          [
+            "ʧ",
+            "t"
+          ]
+        ],
+        "total_errors": 3,
+        "total_phonemes": 4,
+        "type": "match"
+      },
+      {
+        "added": [
+          "ʃ",
+          "d",
+          "d"
+        ],
+        "ground_truth_phonemes": [
+          "ʤ",
+          "ə",
+          "ʤ",
+          "d"
+        ],
+        "ground_truth_word": "judged",
+        "missed": [],
+        "per": 1.25,
+        "phonemes": [
+          "ʃ",
+          "d",
+          "ʒ",
+          "ə",
+          "d",
+          "ʒ",
+          "d"
+        ],
+        "predicted_word": "judged",
+        "substituted": [
+          [
+            "ʤ",
+            "ʒ"
+          ],
+          [
+            "ʤ",
+            "ʒ"
+          ]
+        ],
+        "total_errors": 5,
+        "total_phonemes": 4,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "ɪ",
+          "m"
+        ],
+        "ground_truth_word": "him",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "ɪ",
+          "m"
+        ],
+        "predicted_word": "him",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 2,
+        "type": "match"
+      }
+    ]
+  }
+}

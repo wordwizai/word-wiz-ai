@@ -1,0 +1,5 @@
+{
+  "words": ["the", "church", "judged", "him"],
+  "phonemes_by_word": [["ð", "ə"], ["t", "ʃ", "ə", "r", "t", "ʃ"], ["d", "ʒ", "ə", "d", "ʒ", "d"], ["ɪ", "m"]],
+  "source": "hand-written; the model emits t+esh and d+ezh as two codepoints while the ground truth emits the single-codepoint ligatures"
+}

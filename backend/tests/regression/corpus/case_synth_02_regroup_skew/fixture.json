@@ -1,0 +1,6 @@
+{
+  "words": ["the", "big", "red", "dog", "ran"],
+  "phonemes_by_word": [["ð", "ə"], ["b", "ɪ"], ["g", "r", "ɛ", "d"], ["d", "ɔ", "g"], ["r", "æ", "n"]],
+  "phonemes_flat": ["ð", "ə", "b", "ɪ", "g", "r", "ɛ", "d", "d", "ɔ", "g", "r", "æ", "n"],
+  "source": "hand-written; the client's word boundaries are deliberately skewed (the 'g' of 'big' is grouped onto 'red') relative to the same flat stream the server regroups"
+}

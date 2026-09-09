@@ -1,0 +1,4 @@
+{
+  "tags": ["synthetic", "path-divergence"],
+  "notes": "Same flat phoneme stream, different word boundaries on the client than the server's regrouping produces. This is the client-vs-server divergence class the project is trying to eliminate, reproduced with no models. The baseline's path_divergence pins how far apart the two paths are today; the path-agreement test ratchets on it."
+}

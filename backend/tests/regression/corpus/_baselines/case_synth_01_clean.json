@@ -1,0 +1,201 @@
+{
+  "case_id": "case_synth_01_clean",
+  "client_path": {
+    "highest_per_word": "the",
+    "problem_types": [
+      "high_frequency_errors",
+      "most_common_phoneme",
+      "most_common_word",
+      "phoneme_articulatory_info",
+      "phoneme_difficulty_levels",
+      "phoneme_error_counts",
+      "phoneme_group_errors",
+      "recommended_focus_phoneme",
+      "word_error_counts"
+    ],
+    "sentence_per": 0.0,
+    "total_errors": 0,
+    "total_phonemes": 8,
+    "words": [
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "ð",
+          "ə"
+        ],
+        "ground_truth_word": "the",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "ð",
+          "ə"
+        ],
+        "predicted_word": "the",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 2,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "k",
+          "æ",
+          "t"
+        ],
+        "ground_truth_word": "cat",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "k",
+          "æ",
+          "t"
+        ],
+        "predicted_word": "cat",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 3,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "s",
+          "æ",
+          "t"
+        ],
+        "ground_truth_word": "sat",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "s",
+          "æ",
+          "t"
+        ],
+        "predicted_word": "sat",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 3,
+        "type": "match"
+      }
+    ]
+  },
+  "fixture": {
+    "phonemes_by_word": [
+      [
+        "ð",
+        "ə"
+      ],
+      [
+        "k",
+        "æ",
+        "t"
+      ],
+      [
+        "s",
+        "æ",
+        "t"
+      ]
+    ],
+    "phonemes_flat": [
+      "ð",
+      "ə",
+      "k",
+      "æ",
+      "t",
+      "s",
+      "æ",
+      "t"
+    ],
+    "source": "hand-written; perfect pronunciation, PER should be 0.0",
+    "words": [
+      "the",
+      "cat",
+      "sat"
+    ]
+  },
+  "format_version": 1,
+  "path_comparison_structural_count": 0,
+  "path_divergence": 0.0,
+  "sentence": "the cat sat",
+  "server_path": {
+    "highest_per_word": "the",
+    "problem_types": [
+      "high_frequency_errors",
+      "most_common_phoneme",
+      "most_common_word",
+      "phoneme_articulatory_info",
+      "phoneme_difficulty_levels",
+      "phoneme_error_counts",
+      "phoneme_group_errors",
+      "recommended_focus_phoneme",
+      "word_error_counts"
+    ],
+    "sentence_per": 0.0,
+    "total_errors": 0,
+    "total_phonemes": 8,
+    "words": [
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "ð",
+          "ə"
+        ],
+        "ground_truth_word": "the",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "ð",
+          "ə"
+        ],
+        "predicted_word": "the",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 2,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "k",
+          "æ",
+          "t"
+        ],
+        "ground_truth_word": "cat",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "k",
+          "æ",
+          "t"
+        ],
+        "predicted_word": "cat",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 3,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "s",
+          "æ",
+          "t"
+        ],
+        "ground_truth_word": "sat",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "s",
+          "æ",
+          "t"
+        ],
+        "predicted_word": "sat",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 3,
+        "type": "match"
+      }
+    ]
+  }
+}

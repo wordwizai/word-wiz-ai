@@ -1,0 +1,307 @@
+{
+  "case_id": "case_synth_02_regroup_skew",
+  "client_path": {
+    "highest_per_word": "big",
+    "problem_types": [
+      "high_frequency_errors",
+      "most_common_phoneme",
+      "most_common_word",
+      "phoneme_articulatory_info",
+      "phoneme_difficulty_levels",
+      "phoneme_error_counts",
+      "phoneme_group_errors",
+      "recommended_focus_phoneme",
+      "word_error_counts"
+    ],
+    "sentence_per": 0.142857,
+    "total_errors": 2,
+    "total_phonemes": 14,
+    "words": [
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "ð",
+          "ə"
+        ],
+        "ground_truth_word": "the",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "ð",
+          "ə"
+        ],
+        "predicted_word": "the",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 2,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "b",
+          "ɪ",
+          "g"
+        ],
+        "ground_truth_word": "big",
+        "missed": [
+          "g"
+        ],
+        "per": 0.3333,
+        "phonemes": [
+          "b",
+          "ɪ"
+        ],
+        "predicted_word": "big",
+        "substituted": [],
+        "total_errors": 1,
+        "total_phonemes": 3,
+        "type": "match"
+      },
+      {
+        "added": [
+          "g"
+        ],
+        "ground_truth_phonemes": [
+          "r",
+          "ɛ",
+          "d"
+        ],
+        "ground_truth_word": "red",
+        "missed": [],
+        "per": 0.3333,
+        "phonemes": [
+          "g",
+          "r",
+          "ɛ",
+          "d"
+        ],
+        "predicted_word": "red",
+        "substituted": [],
+        "total_errors": 1,
+        "total_phonemes": 3,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "d",
+          "ɔ",
+          "g"
+        ],
+        "ground_truth_word": "dog",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "d",
+          "ɔ",
+          "g"
+        ],
+        "predicted_word": "dog",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 3,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "r",
+          "æ",
+          "n"
+        ],
+        "ground_truth_word": "ran",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "r",
+          "æ",
+          "n"
+        ],
+        "predicted_word": "ran",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 3,
+        "type": "match"
+      }
+    ]
+  },
+  "fixture": {
+    "phonemes_by_word": [
+      [
+        "ð",
+        "ə"
+      ],
+      [
+        "b",
+        "ɪ"
+      ],
+      [
+        "g",
+        "r",
+        "ɛ",
+        "d"
+      ],
+      [
+        "d",
+        "ɔ",
+        "g"
+      ],
+      [
+        "r",
+        "æ",
+        "n"
+      ]
+    ],
+    "phonemes_flat": [
+      "ð",
+      "ə",
+      "b",
+      "ɪ",
+      "g",
+      "r",
+      "ɛ",
+      "d",
+      "d",
+      "ɔ",
+      "g",
+      "r",
+      "æ",
+      "n"
+    ],
+    "source": "hand-written; the client's word boundaries are deliberately skewed (the 'g' of 'big' is grouped onto 'red') relative to the same flat stream the server regroups",
+    "words": [
+      "the",
+      "big",
+      "red",
+      "dog",
+      "ran"
+    ]
+  },
+  "format_version": 1,
+  "path_comparison_structural_count": 0,
+  "path_divergence": 0.142857,
+  "sentence": "the big red dog ran",
+  "server_path": {
+    "highest_per_word": "the",
+    "problem_types": [
+      "high_frequency_errors",
+      "most_common_phoneme",
+      "most_common_word",
+      "phoneme_articulatory_info",
+      "phoneme_difficulty_levels",
+      "phoneme_error_counts",
+      "phoneme_group_errors",
+      "recommended_focus_phoneme",
+      "word_error_counts"
+    ],
+    "sentence_per": 0.0,
+    "total_errors": 0,
+    "total_phonemes": 14,
+    "words": [
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "ð",
+          "ə"
+        ],
+        "ground_truth_word": "the",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "ð",
+          "ə"
+        ],
+        "predicted_word": "the",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 2,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "b",
+          "ɪ",
+          "g"
+        ],
+        "ground_truth_word": "big",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "b",
+          "ɪ",
+          "g"
+        ],
+        "predicted_word": "big",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 3,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "r",
+          "ɛ",
+          "d"
+        ],
+        "ground_truth_word": "red",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "r",
+          "ɛ",
+          "d"
+        ],
+        "predicted_word": "red",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 3,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "d",
+          "ɔ",
+          "g"
+        ],
+        "ground_truth_word": "dog",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "d",
+          "ɔ",
+          "g"
+        ],
+        "predicted_word": "dog",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 3,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "r",
+          "æ",
+          "n"
+        ],
+        "ground_truth_word": "ran",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "r",
+          "æ",
+          "n"
+        ],
+        "predicted_word": "ran",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 3,
+        "type": "match"
+      }
+    ]
+  }
+}

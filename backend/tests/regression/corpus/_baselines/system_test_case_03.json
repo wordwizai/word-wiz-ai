@@ -1,0 +1,608 @@
+{
+  "case_id": "system_test_case_03",
+  "client_path": {
+    "highest_per_word": "sun",
+    "problem_types": [
+      "high_frequency_errors",
+      "most_common_phoneme",
+      "most_common_word",
+      "phoneme_articulatory_info",
+      "phoneme_difficulty_levels",
+      "phoneme_error_counts",
+      "phoneme_group_errors",
+      "recommended_focus_phoneme",
+      "word_error_counts"
+    ],
+    "sentence_per": 0.111111,
+    "total_errors": 4,
+    "total_phonemes": 36,
+    "words": [
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "t",
+          "ɪ",
+          "m"
+        ],
+        "ground_truth_word": "tim",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "t",
+          "ɪ",
+          "m"
+        ],
+        "predicted_word": "tim",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 3,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "s",
+          "ɔ"
+        ],
+        "ground_truth_word": "saw",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "s",
+          "ɔ"
+        ],
+        "predicted_word": "saw",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 2,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "ð",
+          "ə"
+        ],
+        "ground_truth_word": "the",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "ð",
+          "ə"
+        ],
+        "predicted_word": "the",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 2,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "l",
+          "e",
+          "ɪ",
+          "z",
+          "i"
+        ],
+        "ground_truth_word": "lazy",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "l",
+          "e",
+          "ɪ",
+          "z",
+          "i"
+        ],
+        "predicted_word": "lazy",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 5,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "d",
+          "ɔ",
+          "g"
+        ],
+        "ground_truth_word": "dog",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "d",
+          "ɔ",
+          "g"
+        ],
+        "predicted_word": "dog",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 3,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "p",
+          "l",
+          "e",
+          "ɪ",
+          "ɪ",
+          "ŋ"
+        ],
+        "ground_truth_word": "playing",
+        "missed": [
+          "ɪ",
+          "ŋ"
+        ],
+        "per": 0.3333,
+        "phonemes": [
+          "p",
+          "l",
+          "e",
+          "ɪ"
+        ],
+        "predicted_word": "playing",
+        "substituted": [],
+        "total_errors": 2,
+        "total_phonemes": 6,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "ə",
+          "n",
+          "d",
+          "ə",
+          "r"
+        ],
+        "ground_truth_word": "under",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "ə",
+          "n",
+          "d",
+          "ə",
+          "r"
+        ],
+        "predicted_word": "under",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 5,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "ð",
+          "ə"
+        ],
+        "ground_truth_word": "the",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "ð",
+          "ə"
+        ],
+        "predicted_word": "the",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 2,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "b",
+          "r",
+          "a",
+          "ɪ",
+          "t"
+        ],
+        "ground_truth_word": "bright",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "b",
+          "r",
+          "a",
+          "ɪ",
+          "t"
+        ],
+        "predicted_word": "bright",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 5,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "s",
+          "ə",
+          "n"
+        ],
+        "ground_truth_word": "sun",
+        "missed": [
+          "ə"
+        ],
+        "per": 0.6667,
+        "phonemes": [
+          "s",
+          "ɔ"
+        ],
+        "predicted_word": "sun",
+        "substituted": [
+          [
+            "n",
+            "ɔ"
+          ]
+        ],
+        "total_errors": 2,
+        "total_phonemes": 3,
+        "type": "match"
+      }
+    ]
+  },
+  "fixture": {
+    "phonemes_by_word": [
+      [
+        "t",
+        "ɪ",
+        "m"
+      ],
+      [
+        "s",
+        "ɔ"
+      ],
+      [
+        "ð",
+        "ə"
+      ],
+      [
+        "l",
+        "e",
+        "ɪ",
+        "z",
+        "i"
+      ],
+      [
+        "d",
+        "ɔ",
+        "g"
+      ],
+      [
+        "p",
+        "l",
+        "e",
+        "ɪ"
+      ],
+      [
+        "ə",
+        "n",
+        "d",
+        "ə",
+        "r"
+      ],
+      [
+        "ð",
+        "ə"
+      ],
+      [
+        "b",
+        "r",
+        "a",
+        "ɪ",
+        "t"
+      ],
+      [
+        "s",
+        "ɔ"
+      ]
+    ],
+    "phonemes_flat": [
+      "t",
+      "ɪ",
+      "m",
+      "s",
+      "ɔ",
+      "ð",
+      "ə",
+      "l",
+      "e",
+      "ɪ",
+      "z",
+      "i",
+      "d",
+      "ɔ",
+      "g",
+      "p",
+      "l",
+      "e",
+      "ɪ",
+      "ə",
+      "n",
+      "d",
+      "ə",
+      "r",
+      "ð",
+      "ə",
+      "b",
+      "r",
+      "a",
+      "ɪ",
+      "t",
+      "s",
+      "ɔ"
+    ],
+    "source": "tests/system/test_case_03/result.json",
+    "words": [
+      "tim",
+      "saw",
+      "the",
+      "lazy",
+      "dog",
+      "playing",
+      "under",
+      "the",
+      "bright",
+      "sun"
+    ]
+  },
+  "format_version": 1,
+  "path_comparison_structural_count": 0,
+  "path_divergence": 0.0,
+  "sentence": "tim saw the lazy dog playing under the bright sun",
+  "server_path": {
+    "highest_per_word": "sun",
+    "problem_types": [
+      "high_frequency_errors",
+      "most_common_phoneme",
+      "most_common_word",
+      "phoneme_articulatory_info",
+      "phoneme_difficulty_levels",
+      "phoneme_error_counts",
+      "phoneme_group_errors",
+      "recommended_focus_phoneme",
+      "word_error_counts"
+    ],
+    "sentence_per": 0.111111,
+    "total_errors": 4,
+    "total_phonemes": 36,
+    "words": [
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "t",
+          "ɪ",
+          "m"
+        ],
+        "ground_truth_word": "tim",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "t",
+          "ɪ",
+          "m"
+        ],
+        "predicted_word": "tim",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 3,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "s",
+          "ɔ"
+        ],
+        "ground_truth_word": "saw",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "s",
+          "ɔ"
+        ],
+        "predicted_word": "saw",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 2,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "ð",
+          "ə"
+        ],
+        "ground_truth_word": "the",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "ð",
+          "ə"
+        ],
+        "predicted_word": "the",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 2,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "l",
+          "e",
+          "ɪ",
+          "z",
+          "i"
+        ],
+        "ground_truth_word": "lazy",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "l",
+          "e",
+          "ɪ",
+          "z",
+          "i"
+        ],
+        "predicted_word": "lazy",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 5,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "d",
+          "ɔ",
+          "g"
+        ],
+        "ground_truth_word": "dog",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "d",
+          "ɔ",
+          "g"
+        ],
+        "predicted_word": "dog",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 3,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "p",
+          "l",
+          "e",
+          "ɪ",
+          "ɪ",
+          "ŋ"
+        ],
+        "ground_truth_word": "playing",
+        "missed": [
+          "ɪ",
+          "ŋ"
+        ],
+        "per": 0.3333,
+        "phonemes": [
+          "p",
+          "l",
+          "e",
+          "ɪ"
+        ],
+        "predicted_word": "playing",
+        "substituted": [],
+        "total_errors": 2,
+        "total_phonemes": 6,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "ə",
+          "n",
+          "d",
+          "ə",
+          "r"
+        ],
+        "ground_truth_word": "under",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "ə",
+          "n",
+          "d",
+          "ə",
+          "r"
+        ],
+        "predicted_word": "under",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 5,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "ð",
+          "ə"
+        ],
+        "ground_truth_word": "the",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "ð",
+          "ə"
+        ],
+        "predicted_word": "the",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 2,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "b",
+          "r",
+          "a",
+          "ɪ",
+          "t"
+        ],
+        "ground_truth_word": "bright",
+        "missed": [],
+        "per": 0.0,
+        "phonemes": [
+          "b",
+          "r",
+          "a",
+          "ɪ",
+          "t"
+        ],
+        "predicted_word": "bright",
+        "substituted": [],
+        "total_errors": 0,
+        "total_phonemes": 5,
+        "type": "match"
+      },
+      {
+        "added": [],
+        "ground_truth_phonemes": [
+          "s",
+          "ə",
+          "n"
+        ],
+        "ground_truth_word": "sun",
+        "missed": [
+          "ə"
+        ],
+        "per": 0.6667,
+        "phonemes": [
+          "s",
+          "ɔ"
+        ],
+        "predicted_word": "sun",
+        "substituted": [
+          [
+            "n",
+            "ɔ"
+          ]
+        ],
+        "total_errors": 2,
+        "total_phonemes": 3,
+        "type": "match"
+      }
+    ]
+  }
+}

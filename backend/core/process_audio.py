@@ -11,11 +11,97 @@ from .speech_problem_classifier import SpeechProblemClassifier
 from .audio_preprocessing import preprocess_audio
 import asyncio
 
+import os as _os
+from .phonetic_distance import (
+    phonetic_distance as _phonetic_distance,
+    deletion_cost as _deletion_cost,
+    insertion_cost as _insertion_cost,
+    normalize_phoneme_sequence as _normalize_phoneme_sequence,
+)
+
+# WWAI_WEIGHTED_PER: when true, compute_per uses phonetically weighted
+# substitution/deletion/insertion costs instead of flat 1.0 costs, so normal
+# allophonic variation (t-flapping, schwa reduction, unreleased final stops)
+# stops being scored as mispronunciation. DEFAULTS TO OFF — with the variable
+# unset, compute_per is byte-for-byte the original unweighted implementation.
+# Read once at import; the hot path must not touch os.environ.
+_WEIGHTED_PER = _os.getenv("WWAI_WEIGHTED_PER", "false").strip().lower() in (
+    "1", "true", "yes", "on",
+)
+
+
+def set_weighted_per(enabled: bool) -> None:
+    """Toggle the weighted-PER flag at runtime (used by tests)."""
+    global _WEIGHTED_PER
+    _WEIGHTED_PER = bool(enabled)
+
+
+def _compute_per_weighted(gt_phonemes, pred_phonemes):
+    """Phonetically weighted PER. Only reachable when WWAI_WEIGHTED_PER is on.
+
+    Differences from the unweighted path, all flag-gated:
+      * substitutions cost `phonetic_distance(a, b)` in [0, 1] instead of 1.0
+      * deleting the FINAL ground-truth phoneme when it is a stop is cheap
+        (unreleased final stops are normal and often inaudible)
+      * inserting a glottal stop / epenthetic schwa / stray h is cheap
+      * 'ər'-style sequences are collapsed to 'ɚ' on BOTH sides first
+      * the result is clamped to 1.0. The unweighted path divides by len(gt)
+        only, so insertions can push it above 1.0; downstream code and the
+        frontend treat PER as 0-1, so the weighted path fixes that. The
+        denominator itself is unchanged (max(len(gt), 1)) to keep the two
+        paths comparable.
+    """
+    gt = _normalize_phoneme_sequence(gt_phonemes)
+    pred = _normalize_phoneme_sequence(pred_phonemes)
+
+    if not gt and not pred:
+        return 0.0
+    if not gt:
+        return 1.0
+    if gt == pred:
+        return 0.0
+
+    m, n = len(gt), len(pred)
+    denom = max(m, 1)  # normalized ground-truth length; mirrors max(m, 1) above
+
+    # Plain Python lists of floats: faster than numpy scalar indexing here.
+    prev = [0.0] * (n + 1)
+    for j in range(1, n + 1):
+        prev[j] = prev[j - 1] + _insertion_cost(pred[j - 1])
+
+    cur = [0.0] * (n + 1)
+    for i in range(1, m + 1):
+        gt_sym = gt[i - 1]
+        del_cost = _deletion_cost(gt_sym, is_final=(i == m))
+        cur[0] = prev[0] + del_cost
+        for j in range(1, n + 1):
+            pred_sym = pred[j - 1]
+            if gt_sym == pred_sym:
+                sub = prev[j - 1]
+            else:
+                sub = prev[j - 1] + _phonetic_distance(gt_sym, pred_sym)
+            deletion = prev[j] + del_cost
+            insertion = cur[j - 1] + _insertion_cost(pred_sym)
+            best = sub
+            if deletion < best:
+                best = deletion
+            if insertion < best:
+                best = insertion
+            cur[j] = best
+        prev, cur = cur, prev
+
+    per = prev[n] / denom
+    return 1.0 if per > 1.0 else per
+
+
 def compute_per(gt_phonemes, pred_phonemes):
     """
     Compute the Phoneme Error Rate (PER) between two phoneme sequences.
     Optimized version with fast paths and efficient memory usage.
     """
+    if _WEIGHTED_PER:
+        return _compute_per_weighted(gt_phonemes, pred_phonemes)
+
     if not gt_phonemes and not pred_phonemes:
         return 0.0
     if not gt_phonemes:

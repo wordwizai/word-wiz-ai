@@ -48,3 +48,6 @@ gsc-service-account*.json
 *gsc*key*.json
 growth/*credentials*.json
 growth/*service-account*.json
+
+# Deploy connection settings for scripts/deploy-backend.sh (host, key path)
+.env.deploy

@@ -73,6 +73,10 @@ export WWAI_KEY=/path/to/your-ec2-key.pem   # chmod 600; never commit
 
 ### Deploy
 
+`scripts/deploy-backend.sh` (or `/deploy-backend` in Claude Code) runs these
+steps and the checks below from your laptop. `--check` is a read-only connection test.
+By hand:
+
 ```bash
 ssh -i "$WWAI_KEY" "$WWAI_USER@$WWAI_HOST"
 cd ~/word-wiz-ai && git pull

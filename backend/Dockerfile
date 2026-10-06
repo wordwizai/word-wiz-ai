@@ -28,6 +28,10 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+# Unbuffered stdout so model-load lines show up in `docker compose logs` right away
+# (scripts/deploy-backend.sh checks them)
+ENV PYTHONUNBUFFERED=1
+
 # Copy installed Python packages from builder
 COPY --from=builder /usr/local /usr/local
 

@@ -19,7 +19,7 @@ set -euo pipefail
 root=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
 main_root=$(cd "$(git -C "$root" rev-parse --git-common-dir)/.." && pwd)  # worktrees share the main checkout's .env.deploy
 for f in "$root/.env.deploy" "$main_root/.env.deploy"; do
-  if [[ -f $f ]]; then set -a; . <(tr -d '\r' < "$f"); set +a; break; fi
+  if [[ -s $f ]]; then set -a; . <(tr -d '\r' < "$f"); set +a; break; fi
 done
 : "${WWAI_HOST:?set WWAI_HOST in the environment or .env.deploy}"
 
@@ -38,7 +38,8 @@ ssh_opts=(-o BatchMode=yes -o ConnectTimeout=15 -o ServerAliveInterval=20 -o Str
 
 if [[ $ref == --check ]]; then  # read-only: what's live and what's running
   ssh "${ssh_opts[@]}" "${WWAI_USER:-ubuntu}@$WWAI_HOST" \
-    'cd ~/word-wiz-ai && git log -1 --format="live: %h %s (%cr)" && cd backend && docker compose ps --format "{{.Service}}: {{.Status}}"'
+    'cd ~/word-wiz-ai && git log -1 --format="checkout: %h %s (%cr)" && cd backend && docker compose ps --format "{{.Service}}: {{.Status}}" &&
+     df -h / | awk "NR==2 {print \"disk: \" \$4 \" free of \" \$2 \" (\" \$5 \" used)\"}" && docker system df'
   exit
 fi
 

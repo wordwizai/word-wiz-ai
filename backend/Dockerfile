@@ -28,12 +28,14 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Unbuffered stdout so model-load lines show up in `docker compose logs` right away
-# (scripts/deploy-backend.sh checks them)
-ENV PYTHONUNBUFFERED=1
-
 # Copy installed Python packages from builder
 COPY --from=builder /usr/local /usr/local
+
+# Unbuffered stdout so model-load lines show up in `docker compose logs` right away
+# (scripts/deploy-backend.sh checks them). Keep this below the COPY above: any
+# change before it invalidates that multi-GB layer, and the box's disk can't
+# hold a second copy.
+ENV PYTHONUNBUFFERED=1
 
 # Copy project files (excluding large or sensitive files via .dockerignore)
 COPY . .

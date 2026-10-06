@@ -1,4 +1,5 @@
 import builtins
+import copy
 import json
 import os
 import tempfile
@@ -264,6 +265,129 @@ class TestReplay(unittest.TestCase):
         words = R.ReplayWordExtractor(R.CacheEntry(self.cache, "u1"), check_inputs=False)
         with self.assertRaises(common.StaleCacheError):
             words.extract_words(self.audio)
+
+
+def _real_onnx_extractor():
+    """A PhonemeExtractorONNX built by its own __init__, with every load patched out."""
+    from core.phoneme_extractor_onnx import PhonemeExtractorONNX
+
+    with (
+        mock.patch("core.phoneme_extractor_onnx.Wav2Vec2Processor"),
+        mock.patch("huggingface_hub.hf_hub_download"),
+        mock.patch("onnxruntime.InferenceSession"),
+    ):
+        return PhonemeExtractorONNX(optimization_config={"model_cache_enabled": False, "warmup_runs": 0})
+
+
+def _replay_extractor():
+    return R.ReplayPhonemeExtractor(mock.Mock(phoneme_calls=[]), mock.Mock())
+
+
+class TestExtractorsMatchProduction(unittest.TestCase):
+    """Replay and the fake build their extractor by hand instead of calling PhonemeExtractorONNX.__init__
+    (which loads the model). If __init__ later builds its OptimizedAudioPreprocessor differently, for
+    example with a new trimming option, replay would feed the old logits through a different front end
+    and report nothing. These tests make that change fail here, by name."""
+
+    #: Set by the constructor from its arguments or the loaded model, not part of the front end.
+    SKIPPED_ON_THE_EXTRACTOR = {"config", "model_name"}
+
+    def _same_state(self, real, other, where):
+        """Same attribute names, and the same values. Objects are compared by type and their own state."""
+        real_state, other_state = vars(real), vars(other)
+        self.assertEqual(set(real_state), set(other_state), where)
+        for name, value in real_state.items():
+            if name == "enable_logging":
+                continue  # follows enable_performance_logging, which the replay does not use
+            mine = f"{where}.{name}"
+            theirs = other_state[name]
+            if hasattr(value, "__dict__") and not callable(value):
+                self.assertIs(type(value), type(theirs), mine)
+                self._same_state(value, theirs, mine)
+            else:
+                self.assertEqual(value, theirs, mine)
+
+    def _check(self, other, label):
+        real = _real_onnx_extractor()
+        self.assertLessEqual(set(vars(real)) - self.SKIPPED_ON_THE_EXTRACTOR, set(vars(other)),
+                             f"{label} lacks an attribute PhonemeExtractorONNX.__init__ sets")
+        self._same_state(real.audio_preprocessor, other.audio_preprocessor, f"{label}.audio_preprocessor")
+        self.assertEqual(real._performance_logging, other._performance_logging)
+
+    def test_the_replay_extractor_builds_the_same_front_end(self):
+        self._check(_replay_extractor(), "ReplayPhonemeExtractor")
+
+    def test_the_fake_extractor_builds_the_same_front_end(self):
+        self._check(U.fake_onnx_extractor(mock.Mock()), "fake_onnx_extractor")
+
+    def test_the_guard_notices_a_new_preprocessor_option(self):
+        # What a future change to PhonemeExtractorONNX.__init__ would look like.
+        from core import phoneme_extractor_onnx as module
+
+        original = module.OptimizedAudioPreprocessor
+
+        def with_a_new_option(*args, **kwargs):
+            preprocessor = original(*args, **kwargs)
+            preprocessor.trim_top_db = 20
+            return preprocessor
+
+        with mock.patch.object(module, "OptimizedAudioPreprocessor", with_a_new_option):
+            real = _real_onnx_extractor()
+        replay = _replay_extractor()
+        with self.assertRaises(AssertionError):
+            self._same_state(real.audio_preprocessor, replay.audio_preprocessor, "audio_preprocessor")
+
+    def test_the_guard_notices_a_new_extractor_attribute(self):
+        real = _real_onnx_extractor()
+        real.new_option = True
+        constructor_sets = set(vars(real)) - self.SKIPPED_ON_THE_EXTRACTOR
+        self.assertIn("new_option", constructor_sets - set(vars(_replay_extractor())))
+
+    def test_the_guard_notices_a_changed_nested_value(self):
+        real = _real_onnx_extractor()
+        replay = _replay_extractor()
+        replay.audio_preprocessor.phoneme_trimmer.sr = 8000
+        with self.assertRaises(AssertionError):
+            self._same_state(real.audio_preprocessor, replay.audio_preprocessor, "audio_preprocessor")
+
+
+class TestReplayExtractorAttributes(unittest.TestCase):
+    def test_a_missing_attribute_says_the_extractor_changed(self):
+        replay = _replay_extractor()
+        with self.assertRaises(common.StaleCacheError) as ctx:
+            replay.some_new_attribute
+        self.assertEqual(
+            str(ctx.exception),
+            "replay extractor has no attribute some_new_attribute: PhonemeExtractorONNX changed; update replay.py",
+        )
+
+    def test_attributes_replay_sets_are_unaffected(self):
+        replay = _replay_extractor()
+        for name in ("processor", "audio_preprocessor", "model_output_processing", "_performance_logging",
+                     "session", "entry", "extract_phoneme", "extract_logits", "_model_cache"):
+            with self.subTest(name=name):
+                getattr(replay, name)
+        self.assertIsInstance(replay.session, R.ReplaySession)
+
+    def test_constructor_only_attributes_are_not_set_on_a_replay_extractor(self):
+        replay = _replay_extractor()
+        for name in ("config", "model_name"):
+            with self.subTest(name=name), self.assertRaises(common.StaleCacheError):
+                getattr(replay, name)
+
+    def test_a_default_in_getattr_does_not_hide_staleness(self):
+        # hasattr and getattr(.., default) only swallow AttributeError, so they cannot be used to
+        # probe past the guard.
+        with self.assertRaises(common.StaleCacheError):
+            getattr(_replay_extractor(), "some_new_attribute", None)
+
+    def test_special_method_probes_still_raise_attribute_error(self):
+        # copy, pickle, inspect and asyncio probe instances for dunders such as __setstate__ and
+        # __wrapped__. They expect AttributeError, and a RuntimeError would break them.
+        replay = _replay_extractor()
+        self.assertFalse(hasattr(replay, "__wrapped__"))
+        clone = copy.copy(replay)
+        self.assertIs(clone.session, replay.session)
 
 
 def _write_wav(path, audio):

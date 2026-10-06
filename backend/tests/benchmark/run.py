@@ -66,9 +66,14 @@ def production_threshold() -> float:
     return float(HIGH_PER_THRESHOLD)
 
 
-def check_cache(directory: str, half: str | None = None) -> dict:
+def check_cache(directory: str, half: str | None = None, flags=None) -> dict:
     """The cache's metadata, or StaleCacheError when it is missing, unreadable, built for another
-    half than ``half`` or built with another model revision than the current pin."""
+    half than ``half``, built with another model revision than the current pin, or built under a
+    different value of a recording flag than ``flags`` (default: the environment).
+
+    The input hashes catch a change in what the models are fed. A recording flag such as
+    WWAI_ASR_FALLBACK changes what Deepgram's call returns for the same audio, so replaying words
+    recorded under another ASR mode would not be faithful and no hash would show it."""
     from .stage_cache import CACHE_META
 
     meta_path = os.path.join(directory, CACHE_META)
@@ -92,6 +97,15 @@ def check_cache(directory: str, half: str | None = None) -> dict:
         raise common.StaleCacheError(
             f"cache was built with model revision {meta.get('model_revision')}, current is {current}"
         )
+    active = common.active_wwai_flags() if flags is None else flags
+    recorded = meta.get("flags") or {}
+    for flag in common.RECORDING_FLAGS:
+        if active.get(flag, "") != recorded.get(flag, ""):
+            raise common.StaleCacheError(
+                f"{flag} is {active.get(flag, '')!r} now but was {recorded.get(flag, '')!r} when the cache "
+                "was built. Words recorded under a different ASR mode are not faithful to replay. "
+                "Match the flag, or build a new cache with tests.benchmark.stage_cache"
+            )
     return meta
 
 
@@ -262,7 +276,7 @@ def main(argv=None) -> int:
     start = time.time()
     try:
         # Neither of these reads labels, so a stale cache does not use up a look on the test half.
-        cache_meta = check_cache(directory, args.half)
+        cache_meta = check_cache(directory, args.half, active)
         threshold = args.threshold if args.threshold is not None else production_threshold()
         if args.half == "test":
             append_ledger(args.name, args.reason, sha, flags=active, threshold=threshold)

@@ -103,6 +103,17 @@ class TestFormatSummary(unittest.TestCase):
         self.assertIn("flagging every word 0.5556", text)
 
 
+def _write_cache_meta(directory, half, flags=None):
+    """A _cache_meta.json for the current model pin, with or without a flags entry."""
+    from core.model_registry import resolve_revision
+
+    meta = {"half": half, "model_revision": resolve_revision("PHONEME_IPA_ONNX")}
+    if flags is not None:
+        meta["flags"] = flags
+    with open(os.path.join(directory, SC.CACHE_META), "w", encoding="utf-8") as fh:
+        json.dump(meta, fh)
+
+
 class TestCacheChecks(unittest.TestCase):
     def test_missing_cache(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -117,10 +128,7 @@ class TestCacheChecks(unittest.TestCase):
                 RUN.check_cache(tmp)
 
     def _write_meta(self, tmp, half):
-        from core.model_registry import resolve_revision
-
-        with open(os.path.join(tmp, SC.CACHE_META), "w", encoding="utf-8") as fh:
-            json.dump({"half": half, "model_revision": resolve_revision("PHONEME_IPA_ONNX")}, fh)
+        _write_cache_meta(tmp, half)
 
     def test_a_cache_built_for_the_other_half_is_stale(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -145,6 +153,58 @@ class TestCacheChecks(unittest.TestCase):
                 fh.write("{not json")
             with self.assertRaises(common.StaleCacheError):
                 RUN.check_cache(tmp, "dev")
+
+
+class TestRecordingFlags(unittest.TestCase):
+    """Flags that change what the models returned. Replaying words recorded under another ASR mode
+    is not faithful, and nothing else in the input hash would show it."""
+
+    def _write_meta(self, tmp, flags=None):
+        _write_cache_meta(tmp, "dev", flags)
+
+    def test_a_recording_flag_that_differs_is_stale_and_named(self):
+        for flag in common.RECORDING_FLAGS:
+            for cached, active in (({}, {flag: "1"}), ({flag: "1"}, {}), ({flag: "1"}, {flag: "0"}),
+                                   ({flag: "0"}, {})):
+                with self.subTest(flag=flag, cached=cached, active=active), tempfile.TemporaryDirectory() as tmp:
+                    self._write_meta(tmp, cached)
+                    with self.assertRaises(common.StaleCacheError) as ctx:
+                        RUN.check_cache(tmp, "dev", active)
+                    self.assertIn(flag, str(ctx.exception))
+
+    def test_matching_recording_flags_are_fine(self):
+        flags = {"WWAI_ASR_FALLBACK": "0", "WWAI_ASR_TYPED_ERRORS": "0"}
+        with tempfile.TemporaryDirectory() as tmp:
+            self._write_meta(tmp, flags)
+            self.assertEqual(RUN.check_cache(tmp, "dev", dict(flags))["half"], "dev")
+            self._write_meta(tmp, {})
+            self.assertEqual(RUN.check_cache(tmp, "dev", {})["half"], "dev")
+
+    def test_a_cache_without_a_flags_entry_counts_as_empty(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self._write_meta(tmp)  # no "flags" key at all
+            self.assertEqual(RUN.check_cache(tmp, "dev", {})["half"], "dev")
+            with self.assertRaises(common.StaleCacheError):
+                RUN.check_cache(tmp, "dev", {"WWAI_ASR_TYPED_ERRORS": "1"})
+
+    def test_other_flags_are_not_checked_here(self):
+        # Gate and scoring flags change no recorded output, and front-end flags are covered by
+        # the input hashes and the cache name.
+        with tempfile.TemporaryDirectory() as tmp:
+            self._write_meta(tmp, {"WWAI_SINGLE_PREPROCESS": "1"})
+            self.assertEqual(RUN.check_cache(tmp, "dev", {"WWAI_WEIGHTED_PER": "1"})["half"], "dev")
+
+    def test_the_active_flags_default_to_the_environment(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self._write_meta(tmp, {})
+            with mock.patch.dict(os.environ, {"WWAI_ASR_FALLBACK": "1"}):
+                with self.assertRaises(common.StaleCacheError) as ctx:
+                    RUN.check_cache(tmp, "dev")
+            self.assertIn("WWAI_ASR_FALLBACK", str(ctx.exception))
+            with mock.patch.dict(os.environ):
+                for flag in common.RECORDING_FLAGS:
+                    os.environ.pop(flag, None)
+                self.assertEqual(RUN.check_cache(tmp, "dev")["half"], "dev")
 
 
 class TestTrackedByGit(unittest.TestCase):
@@ -318,6 +378,24 @@ class TestEndToEnd(unittest.TestCase):
         self.assertEqual(results["threshold"], 0.4)
         self.assertEqual(results["summary"]["clips"], 2)
         self.assertTrue(os.path.isfile(out[:-5] + ".summary.json"))
+
+    def test_a_recording_flag_that_differs_from_the_cache_is_a_stale_cache(self):
+        out = os.path.join(self.tmp.name, "r", "t_dev.json")
+        with mock.patch.dict(os.environ, {"WWAI_ASR_TYPED_ERRORS": "1"}):
+            code, err = self._main("--name", "t", "--workers", "1", "--out", out)
+        self.assertEqual(code, RUN.EXIT_STALE)
+        self.assertIn("WWAI_ASR_TYPED_ERRORS", err)
+        self.assertFalse(os.path.exists(out))
+
+    def test_a_recording_flag_that_differs_adds_no_ledger_line_on_the_test_half(self):
+        self._record("test")
+        out = os.path.join(self.tmp.name, "r", "final_test.json")
+        with self._unlocked(), mock.patch.dict(os.environ, {"WWAI_ASR_FALLBACK": "1"}):
+            code, err = self._main("--half", "test", "--name", "final", "--reason", "first",
+                                   "--workers", "1", "--out", out)
+        self.assertEqual(code, RUN.EXIT_STALE)
+        self.assertIn("WWAI_ASR_FALLBACK", err)
+        self.assertFalse(os.path.exists(self.ledger))
 
     def test_stale_cache_exit_code(self):
         self.assertEqual(RUN.main(["--name", "t", "--workers", "1", "--cache", "nope",

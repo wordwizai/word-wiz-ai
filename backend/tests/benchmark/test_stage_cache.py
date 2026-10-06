@@ -563,13 +563,15 @@ class TestMainRefusesAsrFallback(unittest.TestCase):
         err = io.StringIO()
         with (
             mock.patch.object(SC.common, "dotenv_wwai_keys", return_value=[]),
+            mock.patch.object(SC.common, "apply_flags"),  # core is already imported in this process
             mock.patch.object(SC, "build", return_value={"needs_retry": []}) as build,
             mock.patch.dict(os.environ, env),
             contextlib.redirect_stderr(err),
             contextlib.redirect_stdout(io.StringIO()),
         ):
-            if "WWAI_ASR_FALLBACK" not in env:
-                os.environ.pop("WWAI_ASR_FALLBACK", None)
+            for flag in SC.common.RECORDING_FLAGS:
+                if flag not in env:
+                    os.environ.pop(flag, None)
             code = SC.main(["--half", "dev", *argv])
         return code, build, err.getvalue()
 
@@ -583,8 +585,32 @@ class TestMainRefusesAsrFallback(unittest.TestCase):
                 build.assert_not_called()
                 self.assertIn("WWAI_ASR_FALLBACK", err)
 
+    def test_refuses_typed_errors_the_same_way(self):
+        # It makes WordExtractorOnline raise instead of return [], which changes the recorded
+        # words and stops retries of 401, 403 and 429. The benchmark measures production defaults.
+        cases = (
+            (["--flag", "WWAI_ASR_TYPED_ERRORS=1"], {}),
+            ([], {"WWAI_ASR_TYPED_ERRORS": "true"}),
+            ([], {"WWAI_ASR_TYPED_ERRORS": " On "}),
+            (["--flag", "WWAI_ASR_TYPED_ERRORS=1"], {"WWAI_ASR_FALLBACK": "0"}),
+        )
+        for argv, env in cases:
+            with self.subTest(argv=argv, env=env):
+                code, build, err = self._main(argv, env)
+                self.assertEqual(code, 2)
+                build.assert_not_called()
+                self.assertIn("WWAI_ASR_TYPED_ERRORS", err)
+
     def test_an_explicit_off_is_allowed(self):
-        code, build, _err = self._main([], {"WWAI_ASR_FALLBACK": "0"})
+        for env in ({"WWAI_ASR_FALLBACK": "0"}, {"WWAI_ASR_TYPED_ERRORS": "0"}, {"WWAI_ASR_TYPED_ERRORS": "false"}):
+            with self.subTest(env=env):
+                code, build, _err = self._main([], env)
+                self.assertEqual(code, 0)
+                build.assert_called_once()
+
+    def test_a_flag_argument_overrides_the_environment(self):
+        # --flag is applied over the environment, so what it says is what the workers see.
+        code, build, _err = self._main(["--flag", "WWAI_ASR_TYPED_ERRORS=0"], {"WWAI_ASR_TYPED_ERRORS": "1"})
         self.assertEqual(code, 0)
         build.assert_called_once()
 

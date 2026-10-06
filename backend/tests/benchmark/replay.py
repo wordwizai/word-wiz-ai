@@ -177,6 +177,18 @@ class ReplayPhonemeExtractor(PhonemeExtractorONNX):
         self._performance_logging = False
         self.session = ReplaySession(entry, check_inputs)
 
+    def __getattr__(self, name):
+        """Only called for an attribute that is missing. Production's extractor sets more in
+        __init__ (config, model_name) than replay needs, and test_replay compares the two. A
+        method that starts reading something new would otherwise fail with a bare AttributeError,
+        which analyze_clip would score as an unexpected harness failure."""
+        if name.startswith("__") and name.endswith("__"):
+            # copy, pickle and inspect probe for special methods and expect AttributeError.
+            raise AttributeError(name)
+        raise common.StaleCacheError(
+            f"replay extractor has no attribute {name}: PhonemeExtractorONNX changed; update replay.py"
+        )
+
 
 class ReplayWordExtractor(_Replay):
     kind = "word"

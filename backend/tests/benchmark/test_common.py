@@ -60,6 +60,12 @@ class TestFlags(unittest.TestCase):
         env = {"WWAI_WEIGHTED_PER": "1", "WWAI_BENCH_VERBOSE": "1", "PATH": "x"}
         self.assertEqual(common.active_wwai_flags(env), {"WWAI_WEIGHTED_PER": "1"})
 
+    def test_recording_flags_are_the_asr_mode_flags(self):
+        self.assertEqual(common.RECORDING_FLAGS, ("WWAI_ASR_FALLBACK", "WWAI_ASR_TYPED_ERRORS"))
+        # They change what the recorded models return, not what they are fed, so they do not
+        # belong in the cache name.
+        self.assertFalse(set(common.RECORDING_FLAGS) & set(common.FRONT_END_FLAGS))
+
     def test_active_wwai_flags_skips_deploy_settings(self):
         # CLAUDE.md's deploy section exports these. WWAI_KEY can hold a private key, and the flags
         # are written into _cache_meta.json and the committed results files of a public repo.

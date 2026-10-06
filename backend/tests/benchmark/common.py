@@ -38,6 +38,10 @@ FRONT_END_FLAGS = (
     "WWAI_CHUNK_MIN_DURATION",
 )
 
+#: Flags that change what the recorded models returned, not what they are fed. The input hashes
+#: cannot see them, so replay compares them with the cache's recorded flags (run.check_cache).
+RECORDING_FLAGS = ("WWAI_ASR_FALLBACK", "WWAI_ASR_TYPED_ERRORS")
+
 #: WWAI_* variables that are not experiment flags. CLAUDE.md's backend deploy section has people
 #: export these (WWAI_KEY can hold the path to, or the text of, a private key), and flags are
 #: written into _cache_meta.json and the committed results files of a public repo.

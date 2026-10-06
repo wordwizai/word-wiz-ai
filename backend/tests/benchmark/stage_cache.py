@@ -42,8 +42,19 @@ CACHE_META = "_cache_meta.json"
 #: If the first this many completed clips that called Deepgram all need a word retry, Deepgram
 #: is down or the key or balance is wrong, and recording the rest would only spend time.
 EARLY_ABORT_CLIPS = 20
-#: How core.word_extractor reads WWAI_ASR_FALLBACK.
-_ASR_FALLBACK_TRUTHY = {"1", "true", "t", "yes", "y", "on"}
+#: How core.word_extractor reads WWAI_ASR_FALLBACK and WWAI_ASR_TYPED_ERRORS.
+_ASR_TRUTHY = {"1", "true", "t", "yes", "y", "on"}
+#: Why main() refuses each recording flag. The benchmark measures production defaults.
+_REFUSED_ASR_FLAGS = {
+    "WWAI_ASR_FALLBACK": (
+        "It loads a second 1.2 GB wav2vec2 model in every worker, "
+        "and it changes the recorded words without changing the cache name."
+    ),
+    "WWAI_ASR_TYPED_ERRORS": (
+        "It makes the word extractor raise and skip retries instead of returning [], so it changes "
+        "the recorded words without changing the cache name."
+    ),
+}
 _COMMIT_SHA = re.compile(r"[0-9a-f]{40}")
 _models: dict = {}
 
@@ -476,14 +487,10 @@ def main(argv=None) -> int:
         return 2
 
     flags = common.parse_flag_args(args.flag)
-    fallback = flags.get("WWAI_ASR_FALLBACK", os.environ.get("WWAI_ASR_FALLBACK", ""))
-    if fallback.strip().lower() in _ASR_FALLBACK_TRUTHY:
-        print(
-            "error: WWAI_ASR_FALLBACK is on. It loads a second 1.2 GB wav2vec2 model in every worker, "
-            "and it changes the recorded words without changing the cache name. Unset it.",
-            file=sys.stderr,
-        )
-        return 2
+    for flag, why in _REFUSED_ASR_FLAGS.items():
+        if flags.get(flag, os.environ.get(flag, "")).strip().lower() in _ASR_TRUTHY:
+            print(f"error: {flag} is on. {why} Unset it.", file=sys.stderr)
+            return 2
     common.apply_flags(flags)
     active = common.active_wwai_flags()
     name = args.name or common.front_end_cache_name(active)

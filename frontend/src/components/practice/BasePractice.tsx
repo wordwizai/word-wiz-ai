@@ -1,45 +1,40 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, type ReactElement } from "react";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useHybridAudioAnalysis } from "@/hooks/useHybridAudioAnalysis";
+import { useFeedbackAudio } from "@/hooks/useFeedbackAudio";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getCurrentSessionState, type Session } from "@/api";
-import { showErrorToast, showAudioPlaybackError } from "@/utils/errorHandling";
+import { showErrorToast } from "@/utils/errorHandling";
+import type { PracticeStageState, PronunciationAnalysis } from "./types";
+
+export interface BasePracticeRenderProps extends PracticeStageState {
+  currentSentence: string | null;
+  isModelLoading: boolean;
+  modelLoadProgress: number;
+  displayNextSentence: () => void;
+  nextSentence: string | null;
+  showNextButton: boolean;
+}
 
 interface BasePracticeProps {
   session: Session;
-  renderContent: (props: {
-    currentSentence: string | null;
-    wordArray: string[];
-    analysisData: {
-      pronunciation_dataframe: { per: number[]; ground_truth_word: string[] };
-    } | null;
-    feedback: string | null;
-    showHighlightedWords: boolean;
-    isRecording: boolean;
-    isProcessing: boolean;
-    isModelLoading: boolean;
-    modelLoadProgress: number;
-    onStartRecording: () => void;
-    onStopRecording: () => void;
-    displayNextSentence: () => void;
-    nextSentence: string | null;
-    showNextButton: boolean;
-  }) => JSX.Element;
+  renderContent: (props: BasePracticeRenderProps) => ReactElement;
 }
+
+const FALLBACK_SENTENCE = "The quick brown fox jumped over the lazy dog";
 
 const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
   const [currentSentence, setCurrentSentence] = useState<string | null>(null);
-  const [analysisData, setAnalysisData] = useState<{
-    pronunciation_dataframe: { per: number[]; ground_truth_word: string[] };
-  } | null>(null);
+  const [analysisData, setAnalysisData] =
+    useState<PronunciationAnalysis | null>(null);
   const [showHighlightedWords, setShowHighlightedWords] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [nextSentence, setNextSentence] = useState<string | null>(null);
   const [showNextButton, setShowNextButton] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const { token } = useContext(AuthContext);
+  const feedbackAudio = useFeedbackAudio();
 
-  // Initialize hybrid audio analysis
   const {
     processAudio,
     initializeModels,
@@ -62,52 +57,14 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
       setFeedback(data.text);
     },
     onNextSentence: (data) => {
-      // Arrives after GPT call (in parallel with TTS audio).
-      // This is the sentence the user reads next — NOT played via TTS.
+      // Arrives after the GPT call (in parallel with TTS audio). This is the
+      // sentence the child reads next; it is not spoken aloud.
       setNextSentence(data.sentence);
       setTimeout(() => {
         setShowNextButton(true);
       }, 1000);
     },
-    onAudioFeedback: (url) => {
-      // Log audio details for debugging
-      console.log(
-        "[AudioFeedback] Received audio URL:",
-        url.substring(0, 50) + "..."
-      );
-
-      const audio = new Audio(url);
-
-      // Add error handling for audio playback
-      audio.addEventListener("error", (e) => {
-        console.error("[AudioFeedback] Playback error:", e);
-        console.error("[AudioFeedback] Audio error code:", audio.error?.code);
-        console.error(
-          "[AudioFeedback] Audio error message:",
-          audio.error?.message
-        );
-      });
-
-      // Log when audio is ready to play
-      audio.addEventListener("canplaythrough", () => {
-        console.log("[AudioFeedback] Audio ready to play");
-      });
-
-      // Log playback events
-      audio.addEventListener("playing", () => {
-        console.log("[AudioFeedback] Audio started playing");
-      });
-
-      audio.addEventListener("ended", () => {
-        console.log("[AudioFeedback] Audio finished playing");
-      });
-
-      // Attempt to play with error handling
-      audio.play().catch((error) => {
-        console.error("[AudioFeedback] Failed to play audio:", error);
-        showAudioPlaybackError(error);
-      });
-    },
+    onAudioFeedback: feedbackAudio.play,
     onError: (err) => {
       console.error("Stream error:", err);
       showErrorToast(err);
@@ -116,7 +73,7 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
     sessionId: session.id,
   });
 
-  // Initialize both models when component mounts (if client extraction is enabled)
+  // Load the in-browser models up front when client extraction is enabled.
   useEffect(() => {
     if (isClientExtractionEnabled) {
       initializeModels();
@@ -126,44 +83,39 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
   useEffect(() => {
     const getCurrentSentence = async () => {
       try {
-        const fetchedSentence = await getCurrentSessionState(
-          token ?? "",
-          session.id
-        );
-        if (fetchedSentence.type === "full-feedback-state") {
-          setCurrentSentence(fetchedSentence.data.gpt_response.sentence);
+        const state = await getCurrentSessionState(token ?? "", session.id);
+        if (state.type === "full-feedback-state") {
+          setCurrentSentence(state.data.gpt_response.sentence);
         } else if (session.activity.activity_settings?.first_sentence) {
-          setCurrentSentence(session.activity.activity_settings?.first_sentence);
+          setCurrentSentence(session.activity.activity_settings.first_sentence);
         } else {
-          setCurrentSentence("The quick brown fox jumped over the lazy dog");
+          setCurrentSentence(FALLBACK_SENTENCE);
         }
       } catch (error) {
         console.error("Failed to fetch session state:", error);
         showErrorToast("Failed to load practice session. Please try refreshing.");
         if (session.activity.activity_settings?.first_sentence) {
-          setCurrentSentence(session.activity.activity_settings?.first_sentence);
+          setCurrentSentence(session.activity.activity_settings.first_sentence);
         }
       }
     };
     getCurrentSentence();
   }, [session.id, token]);
 
-  const { isRecording, startRecording, stopRecording } = useAudioRecorder(
-    (audioFile: File) => {
+  const { isRecording, startRecording, stopRecording, levelRef } =
+    useAudioRecorder((audioFile: File) => {
       processAudio(audioFile, currentSentence ?? "");
-    }
-  );
+    });
 
   const displayNextSentence = () => {
     setShowHighlightedWords(false);
     setAnalysisData(null);
-    setCurrentSentence(
-      nextSentence || "The quick brown fox jumped over the lazy dog"
-    );
+    setCurrentSentence(nextSentence || FALLBACK_SENTENCE);
     setNextSentence(null);
     setFeedback(null);
     setShowNextButton(false);
-    setIsProcessing(false); // Clear processing state when moving to next sentence
+    setIsProcessing(false);
+    feedbackAudio.reset();
   };
 
   const wordArray =
@@ -177,10 +129,12 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
     showHighlightedWords,
     isRecording,
     isProcessing,
+    audioLevel: levelRef,
     isModelLoading,
     modelLoadProgress,
     onStartRecording: startRecording,
     onStopRecording: stopRecording,
+    onReplayFeedback: feedbackAudio.replay,
     displayNextSentence,
     nextSentence,
     showNextButton,

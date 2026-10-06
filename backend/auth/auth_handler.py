@@ -9,7 +9,8 @@ from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
 from models import User, UserSettings
 from passlib.context import CryptContext
-from schemas.token_user import TokenData
+from schemas.token_user import TokenData, normalize_email
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 ALGORITHM = "HS256"
@@ -86,7 +87,13 @@ def get_user(db: Session, email: str):
     Returns:
         User | None: The user object if found, else None.
     """
-    db_user = db.query(User).filter(User.email == email).first()
+    # Case-insensitive: older accounts may have been stored with capitals,
+    # and "Jane@x.com" at login should find "jane@x.com".
+    db_user = (
+        db.query(User)
+        .filter(func.lower(User.email) == normalize_email(email))
+        .first()
+    )
     return db_user
 
 

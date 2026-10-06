@@ -6,26 +6,35 @@ interface ViewToggleProps {
   onChange: (mode: "student" | "teacher") => void;
 }
 
+// A segmented control, not two buttons: the selected side reads as raised
+// rather than as a second primary action next to "Join Class".
+const segment = (active: boolean) =>
+  active
+    ? "rounded-lg bg-background text-foreground shadow-xs hover:bg-background"
+    : "rounded-lg text-muted-foreground hover:bg-background/60 hover:text-foreground";
+
 const ViewToggle = ({ mode, onChange }: ViewToggleProps) => {
   return (
-    <div className="flex items-center gap-2 p-1 bg-muted rounded-lg">
+    <div className="flex items-center gap-1 rounded-xl bg-muted p-1" role="group" aria-label="View as">
       <Button
-        variant={mode === "student" ? "default" : "ghost"}
+        variant="ghost"
         size="sm"
         onClick={() => onChange("student")}
-        className={mode === "student" ? "" : "hover:bg-background"}
+        aria-pressed={mode === "student"}
+        className={segment(mode === "student")}
       >
-        <User className="w-4 h-4 mr-2" />
-        Student View
+        <User />
+        Student
       </Button>
       <Button
-        variant={mode === "teacher" ? "default" : "ghost"}
+        variant="ghost"
         size="sm"
         onClick={() => onChange("teacher")}
-        className={mode === "teacher" ? "" : "hover:bg-background"}
+        aria-pressed={mode === "teacher"}
+        className={segment(mode === "teacher")}
       >
-        <GraduationCap className="w-4 h-4 mr-2" />
-        Teacher View
+        <GraduationCap />
+        Teacher
       </Button>
     </div>
   );

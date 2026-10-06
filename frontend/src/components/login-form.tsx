@@ -15,6 +15,8 @@ import React from "react";
 import { AlertCircleIcon } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { googleLogin } from "@/api";
+import { getApiErrorMessage, getErrorStatus } from "@/utils/errorHandling";
+import { SUPPORT_EMAIL, supportMailto } from "@/config/contact";
 
 export function LoginForm({
   className,
@@ -24,6 +26,7 @@ export function LoginForm({
   const [password, setPassword] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [showResetHelp, setShowResetHelp] = React.useState(false);
 
   const { loginWithEmailAndPassword } = useContext(AuthContext);
 
@@ -32,14 +35,14 @@ export function LoginForm({
     setLoading(true);
     setError(null);
     try {
-      await loginWithEmailAndPassword(email, password);
-      window.location.href = "/dashboard";
+      // Navigates on success (back to the page that sent them here, or the dashboard).
+      await loginWithEmailAndPassword(email.trim(), password);
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("An unexpected error occurred");
-      }
+      setError(
+        getErrorStatus(err) === 401
+          ? "That email and password don't match. Check for typos and try again."
+          : getApiErrorMessage(err),
+      );
     } finally {
       setLoading(false);
     }
@@ -89,6 +92,7 @@ export function LoginForm({
                     id="email"
                     type="email"
                     required
+                    autoComplete="email"
                     placeholder="you@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -99,22 +103,46 @@ export function LoginForm({
                 <div className="grid gap-1.5">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="password" className="text-sm font-medium">Password</Label>
-                    <a
-                      href="#"
+                    <button
+                      type="button"
+                      onClick={() => setShowResetHelp((v) => !v)}
+                      aria-expanded={showResetHelp}
+                      aria-controls="reset-help"
                       className="text-xs text-muted-foreground hover:text-primary transition-colors underline-offset-4 hover:underline"
                     >
                       Forgot password?
-                    </a>
+                    </button>
                   </div>
                   <Input
                     id="password"
                     type="password"
                     required
+                    autoComplete="current-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={loading}
                     className="h-11 rounded-xl"
                   />
+                  {showResetHelp && (
+                    <p
+                      id="reset-help"
+                      className="text-xs text-muted-foreground bg-muted/60 rounded-lg p-3"
+                    >
+                      Password resets aren't automatic yet. Email{" "}
+                      <a
+                        href={supportMailto(
+                          "Help resetting my Word Wiz password",
+                          `Hi, I can't sign in to the account for ${email || "[your email]"}. Could you help me reset the password?`,
+                        )}
+                        className="text-primary font-medium underline underline-offset-2"
+                      >
+                        {SUPPORT_EMAIL}
+                      </a>{" "}
+                      from the address you signed up with and we'll help you
+                      get back in. If you signed up with Google, use
+                      "Continue with Google" instead.
+                    </p>
+                  )}
                 </div>
 
                 {error && (

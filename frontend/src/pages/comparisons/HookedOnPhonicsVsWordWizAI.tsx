@@ -9,8 +9,6 @@ const HookedOnPhonicsComparison = () => {
       paid: "$19.99/mo + physical materials",
       trial: "$1 trial",
     },
-    rating: 4.5,
-    reviewCount: 15000,
     website: "https://www.hookedonphonics.com",
   };
 
@@ -19,10 +17,7 @@ const HookedOnPhonicsComparison = () => {
     tagline: "AI-powered phoneme-level pronunciation feedback",
     pricing: {
       free: "Free forever",
-      paid: "Premium features available",
     },
-    rating: 4.8,
-    reviewCount: 2500,
     website: "https://wordwizai.com",
   };
 
@@ -305,46 +300,6 @@ const HookedOnPhonicsComparison = () => {
     },
   ];
 
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "ComparisonPage",
-    name: "Hooked on Phonics vs Word Wiz AI",
-    description:
-      "Head-to-head comparison of Hooked on Phonics and Word Wiz AI phonics programs",
-    mainEntity: [
-      {
-        "@type": "Product",
-        name: "Hooked on Phonics",
-        description: product1Details.description,
-        offers: {
-          "@type": "Offer",
-          price: "19.99",
-          priceCurrency: "USD",
-        },
-        aggregateRating: {
-          "@type": "AggregateRating",
-          ratingValue: "4.5",
-          reviewCount: "15000",
-        },
-      },
-      {
-        "@type": "Product",
-        name: "Word Wiz AI",
-        description: product2Details.description,
-        offers: {
-          "@type": "Offer",
-          price: "0",
-          priceCurrency: "USD",
-        },
-        aggregateRating: {
-          "@type": "AggregateRating",
-          ratingValue: "4.8",
-          reviewCount: "2500",
-        },
-      },
-    ],
-  };
-
   return (
     <ComparisonPage
       product1={product1}
@@ -354,14 +309,13 @@ const HookedOnPhonicsComparison = () => {
       product1Details={product1Details}
       product2Details={product2Details}
       wordWizDetails={wordWizDetails}
-      metaTitle="Hooked on Phonics vs Word Wiz AI (2025): Which Phonics Program is Better?"
+      metaTitle="Hooked on Phonics vs Word Wiz AI: Which Phonics Program is Better?"
       metaDescription="Detailed comparison of Hooked on Phonics and Word Wiz AI. Compare speech recognition, pricing, effectiveness, and features to find the best phonics program for your child."
       canonicalUrl="https://wordwizai.com/comparisons/hooked-on-phonics-vs-word-wiz-ai"
-      h1Title="Hooked on Phonics vs Word Wiz AI: Which Phonics Program is Better? (2025)"
+      h1Title="Hooked on Phonics vs Word Wiz AI: Which Phonics Program is Better?"
       introText="Hooked on Phonics costs about $240 a year and delivers systematic phonics with physical workbooks, but a parent has to judge pronunciation by ear. Word Wiz AI is free and analyzes speech at the phoneme level automatically. Choose Hooked on Phonics for tangible materials and structure; choose Word Wiz AI for automated pronunciation feedback."
       verdict={verdict}
       faqs={faqs}
-      structuredData={structuredData}
     />
   );
 };

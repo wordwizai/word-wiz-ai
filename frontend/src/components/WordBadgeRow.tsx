@@ -1,24 +1,20 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { WordBadge } from "./WordBadge";
+import type { PronunciationAnalysis } from "./practice/types";
 
 interface WordBadgeRowProps {
   showHighlightedWords: boolean;
-  analysisData?: {
-    pronunciation_dataframe: {
-      type: Record<number, string>;
-      per: Record<number, number | null>;
-      ground_truth_word: Record<number, string | null>;
-      predicted_word: Record<number, string | null>;
-    };
-  } | null;
+  analysisData?: PronunciationAnalysis | null;
   wordArray: string[];
+  splitIntoSounds?: boolean;
 }
 
 const WordBadgeRow = ({
   showHighlightedWords,
   analysisData,
   wordArray,
-}: WordBadgeRowProps & {}) => {
+  splitIntoSounds = false,
+}: WordBadgeRowProps) => {
   const formatWord = (word: string | null | undefined) => {
     // Handle null/undefined values (e.g., insertions/deletions)
     if (!word) return "";
@@ -35,8 +31,8 @@ const WordBadgeRow = ({
     }
 
     // The dataframe is converted to dict format: {0: value1, 1: value2, ...}
-    const groundTruthWords = analysisData.pronunciation_dataframe
-      .ground_truth_word as any;
+    const groundTruthWords =
+      analysisData.pronunciation_dataframe.ground_truth_word;
 
     // Convert object to array of [index, value] pairs
     Object.entries(groundTruthWords).forEach(([idx, word]) => {
@@ -149,7 +145,7 @@ const WordBadgeRow = ({
 
   return (
     <motion.div
-      className="flex flex-row items-center justify-center gap-2 md:gap-4 flex-wrap w-full md:max-w-2/3"
+      className="flex w-full max-w-3xl flex-row flex-wrap items-center justify-center gap-2 md:gap-3"
       layout
     >
       <AnimatePresence>
@@ -164,6 +160,7 @@ const WordBadgeRow = ({
               analysisPer={item.per ?? undefined}
               isInsertion={item.isInsertion}
               isDeletion={item.isDeletion}
+              splitIntoSounds={splitIntoSounds}
               key={`${item.word}-${item.analysisIdx ?? displayIdx}`}
             />
           );

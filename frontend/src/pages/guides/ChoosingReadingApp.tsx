@@ -803,7 +803,7 @@ const ChoosingReadingApp = () => {
 
   return (
     <ArticlePageTemplate
-      metaTitle="How to Choose the Right Reading App for Your Child (2024 Guide)"
+      metaTitle="How to Choose the Right Reading App for Your Child"
       metaDescription="Overwhelmed by reading app choices? Use this 5-step framework to select the best app for your child. Includes comparison worksheet, red flags, and expert recommendations."
       canonicalUrl="https://wordwizai.com/guides/how-to-choose-reading-app"
       heroImage="https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=1920&h=1080&fit=crop"

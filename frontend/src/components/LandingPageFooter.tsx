@@ -39,28 +39,8 @@ const LandingPageFooter = () => {
           <div>
             <h4 className="font-semibold mb-3 text-sm uppercase">Resources</h4>
             <div className="flex flex-col gap-2 text-sm">
-              <Link
-                to="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  alert("Coming soon");
-                }}
-                className="hover:underline"
-              >
-                For Educators
-              </Link>
               <Link to="/privacy" className="hover:underline">
                 Privacy Policy
-              </Link>
-              <Link
-                to="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  alert("Coming soon");
-                }}
-                className="hover:underline"
-              >
-                Terms of Service
               </Link>
             </div>
           </div>

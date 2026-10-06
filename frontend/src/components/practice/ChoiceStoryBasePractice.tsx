@@ -1,51 +1,47 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, type ReactElement } from "react";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useHybridAudioAnalysis } from "@/hooks/useHybridAudioAnalysis";
+import { useFeedbackAudio } from "@/hooks/useFeedbackAudio";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getCurrentSessionState, type Session } from "@/api";
-import { showErrorToast } from "@/utils/errorHandling";
+import { showPracticeErrorToast } from "@/utils/errorHandling";
+import type {
+  PracticeStageState,
+  PronunciationAnalysis,
+  SentenceOptions,
+} from "./types";
 
-interface SentenceOption {
-  sentence: string;
-  icon: string;
-  action: string;
-}
-
-interface SentenceOptions {
-  option_1: SentenceOption;
-  option_2: SentenceOption;
+export interface ChoiceStoryRenderProps extends PracticeStageState {
+  currentSentence: string | null;
+  isModelLoading: boolean;
+  modelLoadProgress: number;
+  displayNextSentence: (nextSentence: string) => void;
+  sentenceOptions: SentenceOptions | null;
+  showSentenceOptions: boolean;
 }
 
 interface ChoiceStoryBasePracticeProps {
   session: Session;
-  renderContent: (props: {
-    currentSentence: string | null;
-    wordArray: string[];
-    analysisData: {
-      pronunciation_dataframe: { per: number[]; ground_truth_word: string[] };
-    } | null;
-    feedback: string | null;
-    showHighlightedWords: boolean;
-    isRecording: boolean;
-    isProcessing: boolean;
-    isModelLoading: boolean;
-    modelLoadProgress: number;
-    onStartRecording: () => void;
-    onStopRecording: () => void;
-    displayNextSentence: (nextSentence: string) => void;
-    sentenceOptions: SentenceOptions | null;
-    showSentenceOptions: boolean;
-  }) => JSX.Element;
+  renderContent: (props: ChoiceStoryRenderProps) => ReactElement;
 }
+
+const isValidOptions = (value: unknown): value is SentenceOptions => {
+  const options = value as SentenceOptions | null | undefined;
+  return (
+    typeof options?.option_1?.sentence === "string" &&
+    typeof options?.option_1?.action === "string" &&
+    typeof options?.option_2?.sentence === "string" &&
+    typeof options?.option_2?.action === "string"
+  );
+};
 
 const ChoiceStoryBasePractice = ({
   session,
   renderContent,
 }: ChoiceStoryBasePracticeProps) => {
   const [currentSentence, setCurrentSentence] = useState<string | null>(null);
-  const [analysisData, setAnalysisData] = useState<{
-    pronunciation_dataframe: { per: number[]; ground_truth_word: string[] };
-  } | null>(null);
+  const [analysisData, setAnalysisData] =
+    useState<PronunciationAnalysis | null>(null);
   const [showHighlightedWords, setShowHighlightedWords] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [sentenceOptions, setSentenceOptions] =
@@ -53,8 +49,8 @@ const ChoiceStoryBasePractice = ({
   const [showSentenceOptions, setShowSentenceOptions] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const { token } = useContext(AuthContext);
+  const feedbackAudio = useFeedbackAudio();
 
-  // Initialize hybrid audio analysis
   const {
     processAudio,
     initializeModels,
@@ -69,55 +65,33 @@ const ChoiceStoryBasePractice = ({
       setIsProcessing(false);
     },
     onAnalysis: (data) => {
-      console.log("Analysis:", data);
       setShowHighlightedWords(true);
       setAnalysisData(data);
     },
-    onGptResponse: (data) => {
-      console.log("GPT:", data);
-      
-      // Validate GPT response structure
-      if (!data || typeof data !== 'object') {
-        console.error("Invalid GPT response: not an object", data);
-        showErrorToast("Invalid response from server");
+    // The server sends feedback text and the two story branches as separate
+    // events (`feedback`, then `next_sentence` with {option_1, option_2}).
+    // This page used to wait for a single combined GPT event that no longer
+    // exists, so the choices never appeared.
+    onFeedback: (data) => {
+      setFeedback(data.text);
+    },
+    onNextSentence: (data) => {
+      if (!isValidOptions(data?.sentence)) {
+        console.error("Invalid sentence options received", data);
+        showPracticeErrorToast("We couldn't load the next part of the story. Please try reading again.");
         return;
       }
-
-      // Validate sentence options structure
-      if (data.sentence) {
-        const hasValidOption1 = data.sentence.option_1 && 
-          typeof data.sentence.option_1.sentence === 'string' &&
-          typeof data.sentence.option_1.action === 'string';
-        
-        const hasValidOption2 = data.sentence.option_2 && 
-          typeof data.sentence.option_2.sentence === 'string' &&
-          typeof data.sentence.option_2.action === 'string';
-
-        if (!hasValidOption1 || !hasValidOption2) {
-          console.error("Invalid sentence options structure", data.sentence);
-          showErrorToast("Invalid sentence options received");
-          return;
-        }
-        
-        setSentenceOptions(data.sentence);
-      }
-      
-      setFeedback(data.feedback || null);
-      setShowSentenceOptions(!!data.sentence);
+      setSentenceOptions(data.sentence);
+      setShowSentenceOptions(true);
     },
-    onAudioFeedback: (url) => {
-      const audio = new Audio(url);
-      audio.play();
-    },
-    onError: (err) => {
-      console.error("Stream error:", err);
-      showErrorToast(err);
+    onAudioFeedback: feedbackAudio.play,
+    onError: () => {
+      // useAudioTransport already showed the message; just reset the UI.
       setIsProcessing(false);
     },
     sessionId: session.id,
   });
 
-  // Initialize both models when component mounts (if client extraction is enabled)
   useEffect(() => {
     if (isClientExtractionEnabled) {
       initializeModels();
@@ -126,30 +100,22 @@ const ChoiceStoryBasePractice = ({
 
   useEffect(() => {
     const getCurrentSentence = async () => {
-      const fetchedSentence = await getCurrentSessionState(
-        token ?? "",
-        session.id
-      );
-      console.log("Fetched sentence:", fetchedSentence);
-      if (fetchedSentence.type === "full-feedback-state") {
-        setCurrentSentence(fetchedSentence.data.sentence);
-        setFeedback(fetchedSentence.data.gpt_response?.feedback || null);
-        
-        // Validate sentence options before setting
-        const sentenceOptions = fetchedSentence.data.gpt_response?.sentence;
-        if (sentenceOptions?.option_1?.sentence && sentenceOptions?.option_2?.sentence) {
-          setSentenceOptions(sentenceOptions);
+      const state = await getCurrentSessionState(token ?? "", session.id);
+      if (state.type === "full-feedback-state") {
+        setCurrentSentence(state.data.sentence);
+        setFeedback(state.data.gpt_response?.feedback || null);
+        const options = state.data.gpt_response?.sentence;
+        if (isValidOptions(options)) {
+          setSentenceOptions(options);
           setShowSentenceOptions(true);
         } else {
-          console.warn("Invalid or missing sentence options in session state");
           setSentenceOptions(null);
           setShowSentenceOptions(false);
         }
-        
-        setAnalysisData(fetchedSentence.data.phoneme_analysis);
+        setAnalysisData(state.data.phoneme_analysis);
         setShowHighlightedWords(true);
-      } else if (fetchedSentence.type === "activity-settings") {
-        setCurrentSentence(fetchedSentence.data.first_sentence);
+      } else if (state.type === "activity-settings") {
+        setCurrentSentence(state.data.first_sentence);
         setFeedback(null);
         setSentenceOptions(null);
         setShowSentenceOptions(false);
@@ -160,11 +126,10 @@ const ChoiceStoryBasePractice = ({
     getCurrentSentence();
   }, [session.id, token]);
 
-  const { isRecording, startRecording, stopRecording } = useAudioRecorder(
-    (audioFile: File) => {
+  const { isRecording, startRecording, stopRecording, levelRef } =
+    useAudioRecorder((audioFile: File) => {
       processAudio(audioFile, currentSentence ?? "");
-    }
-  );
+    });
 
   const displayNextSentence = (nextSentence: string) => {
     if (!nextSentence) {
@@ -177,7 +142,8 @@ const ChoiceStoryBasePractice = ({
     setSentenceOptions(null);
     setFeedback(null);
     setShowSentenceOptions(false);
-    setIsProcessing(false); // Clear processing state when moving to next sentence
+    setIsProcessing(false);
+    feedbackAudio.reset();
   };
 
   const wordArray =
@@ -191,10 +157,12 @@ const ChoiceStoryBasePractice = ({
     showHighlightedWords,
     isRecording,
     isProcessing,
+    audioLevel: levelRef,
     isModelLoading,
     modelLoadProgress,
     onStartRecording: startRecording,
     onStopRecording: stopRecording,
+    onReplayFeedback: feedbackAudio.replay,
     displayNextSentence,
     sentenceOptions,
     showSentenceOptions,

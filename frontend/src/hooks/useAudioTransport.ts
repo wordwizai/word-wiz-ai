@@ -16,7 +16,11 @@ import type {
   AudioTransport,
   AudioAnalysisEvent,
 } from "@/services/audioTransport";
-import { showErrorToast, showNetworkError } from "@/utils/errorHandling";
+import {
+  showErrorToast,
+  showNetworkError,
+  showPracticeErrorToast,
+} from "@/utils/errorHandling";
 
 export interface UseAudioTransportOptions {
   onAnalysis?: (data: any) => void;
@@ -83,7 +87,8 @@ export function useAudioTransport(options: UseAudioTransportOptions) {
           typeof event.data === "string"
             ? event.data
             : event.data?.message || event.data?.error || "An error occurred";
-        showErrorToast(errorMsg);
+        // The backend writes these for parents and kids, so show them as-is.
+        showPracticeErrorToast(errorMsg);
         opts.onError?.(errorMsg);
         break;
       }
@@ -104,6 +109,7 @@ export function useAudioTransport(options: UseAudioTransportOptions) {
     const transport = options.useWebSocket
       ? new WebSocketTransport()
       : new SSETransport();
+    let cancelled = false;
 
     transport
       .connect({
@@ -125,6 +131,10 @@ export function useAudioTransport(options: UseAudioTransportOptions) {
         },
       })
       .catch((err) => {
+        // Cleanup below closes a socket that may still be connecting (React
+        // StrictMode's double mount in dev, or a session/setting change).
+        // That rejection is expected and must not surface as a network error.
+        if (cancelled) return;
         console.error("Failed to initialize transport:", err);
         showNetworkError(err);
         optionsRef.current.onError?.("Failed to connect. Please try again.");
@@ -133,6 +143,7 @@ export function useAudioTransport(options: UseAudioTransportOptions) {
     transportRef.current = transport;
 
     return () => {
+      cancelled = true;
       transport.disconnect();
       transportRef.current = null;
     };
@@ -147,8 +158,19 @@ export function useAudioTransport(options: UseAudioTransportOptions) {
     ) => {
       const transport = transportRef.current;
 
+      // Nothing upstream catches a throw here (the recorder fires and
+      // forgets), so a dropped connection used to discard the recording
+      // silently. Tell the reader instead; the socket reconnects on its own.
+      const lostConnection = () => {
+        const message =
+          "We lost the connection for a moment. Please tap the mic and read the sentence again.";
+        showPracticeErrorToast(message);
+        optionsRef.current.onError?.(message);
+      };
+
       if (!transport || !transport.isConnected()) {
-        throw new Error("Transport not connected");
+        lostConnection();
+        return;
       }
 
       setIsProcessing(true);
@@ -158,7 +180,7 @@ export function useAudioTransport(options: UseAudioTransportOptions) {
       } catch (err: any) {
         setIsProcessing(false);
         console.error("Failed to send audio:", err);
-        throw err;
+        lostConnection();
       }
     },
     []

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar, ChevronDown, ChevronUp, BookOpen } from "lucide-react";
 import { type SessionActivity } from "@/api";
+import { parseServerDate } from "@/lib/activities";
 
 interface SessionHistoryListProps {
   sessions: SessionActivity[];
@@ -16,7 +17,7 @@ const SessionHistoryList = ({
   const displayedSessions = expanded ? sessions : sessions.slice(0, 5);
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+    const date = parseServerDate(dateString);
     return date.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",

@@ -33,7 +33,9 @@ Frontend (Vercel) ←→ FastAPI Backend (AWS EC2) ←→ External APIs (OpenAI,
 ### Backend (from `/backend`)
 ```bash
 pip install -r requirements.txt
-python main.py                                          # Dev server on :8000
+python dev_server.py                                    # Dev server on :8000, local SQLite (dev/dev.db), seeded
+python dev_server.py --reset                            # Wipe dev/dev.db and reseed
+python main.py                                          # Uses DATABASE_URL from .env (the shared RDS DB!)
 python -m tests.analysis.run_analysis_tests             # Analysis tests
 python -m tests.extraction.run_extraction_tests         # Extraction tests
 python -m tests.system.run_system_tests                 # Full E2E tests
@@ -128,6 +130,10 @@ export WWAI_KEY=/path/to/your-ec2-key.pem   # chmod 600; never commit
 ```
 
 ### Deploy
+
+`scripts/deploy-backend.sh` (or `/deploy-backend` in Claude Code) runs these
+steps and the checks below from your laptop. `--check` is a read-only connection test.
+By hand:
 
 ```bash
 ssh -i "$WWAI_KEY" "$WWAI_USER@$WWAI_HOST"

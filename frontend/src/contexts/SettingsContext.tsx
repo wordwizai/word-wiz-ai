@@ -22,7 +22,8 @@ type SettingsContextType = {
   loading: boolean;
   error: string | null;
   fetchSettings: () => Promise<void>;
-  updateSettings: (newSettings: Partial<Settings>) => Promise<void>;
+  /** Resolves to the saved settings, or null if the save failed (it doesn't throw). */
+  updateSettings: (newSettings: Partial<Settings>) => Promise<Settings | null>;
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(

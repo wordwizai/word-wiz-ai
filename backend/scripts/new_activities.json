@@ -1,0 +1,218 @@
+[
+  {
+    "title": "The Three Little Pigs",
+    "description": "Three pigs build three houses out of straw, sticks, and bricks. Then the big bad wolf shows up.",
+    "emoji_icon": "BrickWall",
+    "activity_type": "story",
+    "activity_settings": { "story_name": "three_little_pigs" }
+  },
+  {
+    "title": "The Gingerbread Man",
+    "description": "A cookie jumps out of the oven and runs off, and nobody can catch him. Then he meets a fox at the river.",
+    "emoji_icon": "Cookie",
+    "activity_type": "story",
+    "activity_settings": { "story_name": "the_gingerbread_man" }
+  },
+  {
+    "title": "The Three Billy Goats Gruff",
+    "description": "Three goats want the sweet grass on the other side of the bridge. A grumpy troll lives under it.",
+    "emoji_icon": "Footprints",
+    "activity_type": "story",
+    "activity_settings": { "story_name": "the_three_billy_goats_gruff" }
+  },
+  {
+    "title": "The Boy Who Cried Wolf",
+    "description": "A bored shepherd boy keeps yelling that a wolf is coming. The trick works twice.",
+    "emoji_icon": "Megaphone",
+    "activity_type": "story",
+    "activity_settings": { "story_name": "the_boy_who_cried_wolf" }
+  },
+  {
+    "title": "The Ugly Duckling",
+    "description": "One duckling hatches big and gray, and nobody on the farm wants him around. Wait until spring.",
+    "emoji_icon": "Bird",
+    "activity_type": "story",
+    "activity_settings": { "story_name": "the_ugly_duckling" }
+  },
+  {
+    "title": "The Lion and the Mouse",
+    "description": "A mouse promises to help a lion someday, and the lion laughs at him. Then the lion gets caught in a net.",
+    "emoji_icon": "PawPrint",
+    "activity_type": "story",
+    "activity_settings": { "story_name": "the_lion_and_the_mouse" }
+  },
+  {
+    "title": "The Little Red Hen",
+    "description": "\"Not I,\" said the cat. \"Not I,\" said the dog. The hen does all the work, so who gets the bread?",
+    "emoji_icon": "Wheat",
+    "activity_type": "story",
+    "activity_settings": { "story_name": "the_little_red_hen" }
+  },
+  {
+    "title": "The Elves and the Shoemaker",
+    "description": "Every morning, a poor shoemaker finds new shoes finished on his bench. One night he hides to see who is making them.",
+    "emoji_icon": "Hammer",
+    "activity_type": "story",
+    "activity_settings": { "story_name": "the_elves_and_the_shoemaker" }
+  },
+  {
+    "title": "Stone Soup",
+    "description": "Nobody in the village will share their food, so a hungry traveler makes soup out of a stone.",
+    "emoji_icon": "CookingPot",
+    "activity_type": "story",
+    "activity_settings": { "story_name": "stone_soup" }
+  },
+  {
+    "title": "The Princess and the Pea",
+    "description": "A soaking wet girl knocks on the castle gate and says she is a real princess. The queen has a test.",
+    "emoji_icon": "BedDouble",
+    "activity_type": "story",
+    "activity_settings": { "story_name": "the_princess_and_the_pea" }
+  },
+  {
+    "title": "The Emperor's New Clothes",
+    "description": "Two tricksters sell the emperor a suit that only smart people can see. Nobody wants to admit they can't see it.",
+    "emoji_icon": "Crown",
+    "activity_type": "story",
+    "activity_settings": { "story_name": "the_emperors_new_clothes" }
+  },
+  {
+    "title": "The Enormous Turnip",
+    "description": "The turnip is too big to pull up. Grandpa needs help, and then more help, and then a little more.",
+    "emoji_icon": "Sprout",
+    "activity_type": "story",
+    "activity_settings": { "story_name": "the_enormous_turnip" }
+  },
+  {
+    "title": "Henny Penny",
+    "description": "An acorn bonks Henny Penny on the head, and she's sure the sky is falling. She has to tell the king!",
+    "emoji_icon": "Cloud",
+    "activity_type": "story",
+    "activity_settings": { "story_name": "henny_penny" }
+  },
+  {
+    "title": "The Town Mouse and the Country Mouse",
+    "description": "The town mouse says his cousin's dinner is boring. So the country mouse goes to town to try cake and cheese.",
+    "emoji_icon": "Rat",
+    "activity_type": "story",
+    "activity_settings": { "story_name": "the_town_mouse_and_the_country_mouse" }
+  },
+  {
+    "title": "The Bremen Town Musicians",
+    "description": "A donkey, a dog, a cat, and a rooster run away to start a band. Their singing is so bad it scares off a gang of robbers.",
+    "emoji_icon": "Music",
+    "activity_type": "story",
+    "activity_settings": { "story_name": "the_bremen_town_musicians" }
+  },
+  {
+    "title": "Rumpelstiltskin",
+    "description": "A strange little man can spin straw into gold, but he wants something in return. The queen has three days to guess his name.",
+    "emoji_icon": "Coins",
+    "activity_type": "story",
+    "activity_settings": { "story_name": "rumpelstiltskin" }
+  },
+  {
+    "title": "The Tale of Peter Rabbit",
+    "description": "Peter's mother told him to stay out of Mr. McGregor's garden. Peter went straight there.",
+    "emoji_icon": "Rabbit",
+    "activity_type": "story",
+    "activity_settings": { "story_name": "the_tale_of_peter_rabbit" }
+  },
+  {
+    "title": "The Magic Porridge Pot",
+    "description": "The pot makes all the porridge you want, as long as you remember the words to make it stop.",
+    "emoji_icon": "Soup",
+    "activity_type": "story",
+    "activity_settings": { "story_name": "the_magic_porridge_pot" }
+  },
+  {
+    "title": "The Dragon in the Library",
+    "description": "A dragon about the size of a cat is living in the town library. Priya and Sam have to keep it a secret, but it sneezes sparks every time it gets dusty.",
+    "emoji_icon": "Flame",
+    "activity_type": "choice-story",
+    "activity_settings": {
+      "story_context": "Priya and her friend Sam go to the town library every Saturday. This week they find a small green dragon, about the size of a cat, curled up on the warm book return cart. Only the two of them know it is there. The dragon likes to sleep on top of books about dragons, eats cheese crackers, and sneezes little sparks whenever it gets dusty, which is a big problem in a building full of paper. The kids have to keep it hidden from Mr. Ortiz, the librarian, while they figure out where it came from and where it could live. The dragon causes small messes along the way, like a scorched bookmark, a missing sandwich, and a sneeze that sets off the smoke alarm during story time. In the end they find out that Mr. Ortiz has known about the dragon all along and has been leaving crackers out for it every night.",
+      "first_sentence": "Something behind the book cart sneezed, and a little puff of smoke floated up to the ceiling."
+    }
+  },
+  {
+    "title": "Snow Day on Maple Street",
+    "description": "School is canceled! Marcus and his little sister Bea want to build the biggest snow fort on the street, but the twins next door have the same idea.",
+    "emoji_icon": "Snowflake",
+    "activity_type": "choice-story",
+    "activity_settings": {
+      "story_context": "A storm dropped two feet of snow overnight, and school is canceled. Marcus, who is eight, and his little sister Bea, who is five, want to build the biggest snow fort on Maple Street. The Hoffman twins next door are building one too, and it turns into a contest. The kids have to decide things like whether to build tall walls or dig a tunnel, how to pack snow bricks with a sand bucket, how many snowballs to stack up, and when to go inside for hot chocolate because their mittens are soaked. Bea is small, but she has good ideas. Somebody's wall might cave in, and the dog might steal a mitten. By the end of the day, the two families join their forts into one giant fort with a tunnel between them.",
+      "first_sentence": "Marcus looked out the window and saw that the snow was almost as tall as the mailbox."
+    }
+  },
+  {
+    "title": "The Lemonade Stand",
+    "description": "Rosie and her grandpa open a lemonade stand on the hottest day of the summer. Then the kid across the street opens a cookie stand.",
+    "emoji_icon": "Citrus",
+    "activity_type": "choice-story",
+    "activity_settings": {
+      "story_context": "It is the hottest day of the summer, and Rosie wants to earn enough money for a new bike helmet with sparkles on it. Her grandpa helps her squeeze lemons and paint a sign, and they set up a lemonade stand at the end of the driveway. Business is slow at first. Then Dev, a boy who lives across the street, opens a cookie stand, and people start going to his side instead. Rosie has to decide what to do, like lowering her price, making a bigger sign, adding more ice, or teaming up with Dev. Things go wrong too. They might run out of cups, a dog might knock over the pitcher, or a rain shower might send everyone running. In the end Rosie and Dev put their tables together into one lemonade and cookie stand, and they sell out before dinner.",
+      "first_sentence": "Rosie squeezed the last lemon into the pitcher and wiped her sticky hands on her shorts."
+    }
+  },
+  {
+    "title": "Camping in the Backyard",
+    "description": "Wes and his dad are sleeping in a tent in the backyard for the very first time. Then something starts scratching outside.",
+    "emoji_icon": "Tent",
+    "activity_type": "choice-story",
+    "activity_settings": {
+      "story_context": "Wes is seven and has never been camping, so his dad sets up a tent in the backyard for one night. They roast marshmallows over a little fire pit, tell bad jokes, and look for stars. After they turn off the flashlight, Wes hears strange sounds outside the tent, like scratching, crunching, and a trash can lid hitting the ground. He sees a pair of shiny eyes by the fence and little lights blinking in the bushes. Wes has to decide whether to wake up his dad, peek out with the flashlight, or stay brave inside his sleeping bag. Nothing is truly dangerous, and the story should be a little spooky but never scary. The noises turn out to be a family of raccoons stealing the bag of marshmallows, and the blinking lights are fireflies. In the morning Wes is proud that he stayed out all night.",
+      "first_sentence": "Wes zipped his sleeping bag all the way up to his chin and listened to the crickets."
+    }
+  },
+  {
+    "title": "The Map in Grandma's Attic",
+    "description": "June finds a treasure map drawn in crayon in an old shoebox. Grandma says she made it when she was seven, but she can't remember what she buried.",
+    "emoji_icon": "Map",
+    "activity_type": "choice-story",
+    "activity_settings": {
+      "story_context": "June is helping her grandma clean out the attic when she finds a treasure map drawn in crayon inside a dusty shoebox. Grandma laughs and says she drew it when she was seven years old and lived in this same house, but she cannot remember what she buried. The map has a big X, a drawing of an apple tree, an arrow pointing at the shed, and the words ten big steps from the birdbath. Some things in the yard have changed since Grandma was little, so June has to work out which tree, fence, or path the map is talking about. Grandma helps by telling stories about what the house was like when she was a kid. At the end they dig under the old apple tree and find a rusty cookie tin with marbles, a lucky penny, a photo of Grandma as a little girl, and a note she wrote to her grown-up self.",
+      "first_sentence": "Under a pile of old blankets in the attic, June found a shoebox with a map inside."
+    }
+  },
+  {
+    "title": "Omar's Runaway Robot",
+    "description": "Omar built a robot for the science fair. It worked fine at home, but this morning it rolled out of the gym and kept going.",
+    "emoji_icon": "Bot",
+    "activity_type": "choice-story",
+    "activity_settings": {
+      "story_context": "Omar is in third grade and spent two weeks building a robot named Bolt out of a shoebox, the wheels from an old toy truck, and a small motor. Bolt is supposed to roll forward, beep twice, and hand out a sticker. On the morning of the school science fair, something goes wrong, and Bolt zooms out of the gym and down the hallway. Omar and his best friend Lucia chase Bolt through the school, past the cafeteria, into the music room, and right up to the principal's office, trying not to get in trouble. They have to decide how to catch it, like building a ramp out of books, blocking the hallway with chairs, or getting help from the custodian. When they finally catch Bolt, they find the problem, a loose wire, and fix it with tape just before the judges arrive. The judges say Bolt is the funniest project at the fair.",
+      "first_sentence": "Omar set his robot on the table, pressed the green button, and held his breath."
+    }
+  },
+  {
+    "title": "The Night the Turtles Hatched",
+    "description": "Jonah's aunt protects sea turtle nests on the beach. Tonight a nest is hatching, but the lights from the pier are pulling the babies the wrong way.",
+    "emoji_icon": "Shell",
+    "activity_type": "choice-story",
+    "activity_settings": {
+      "story_context": "Jonah is spending the summer with his Aunt Rosa, who volunteers to protect sea turtle nests on a beach in Florida. Each nest is marked with wooden stakes and yellow tape. Tonight, one nest starts to hatch, and dozens of baby turtles dig their way out of the sand. Baby sea turtles find the ocean by heading toward the brightest light, which is usually the moon shining on the water, but tonight the lights from a fishing pier and a beach house are pulling some of them the wrong way. Jonah and Aunt Rosa have to help without picking the turtles up. They use red flashlights because red light does not confuse the turtles. They might ask the neighbors to turn off their porch lights, stand in a line to block the glow, or make a path in the sand. They also have to keep watch for crabs and seagulls. In the end every baby turtle reaches the water, and Jonah watches the last one swim out under the moon.",
+      "first_sentence": "Aunt Rosa pointed her red flashlight at the nest, where the sand was starting to move."
+    }
+  },
+  {
+    "title": "Captain Barnacle Gets Seasick",
+    "description": "Captain Barnacle is the fiercest pirate on the sea, except for one problem. Every time the waves get big, he turns green.",
+    "emoji_icon": "Ship",
+    "activity_type": "choice-story",
+    "activity_settings": {
+      "story_context": "Captain Barnacle is a pirate who wants everyone to think he is the fiercest captain on the sea. His secret is that he gets seasick every time the waves get big. His first mate is Pearl, a ten-year-old girl who is the best sailor on the ship, and his parrot, Biscuit, repeats everything the captain says at the worst possible times. The crew is sailing to Turtle Rock Island to find a buried treasure, but a storm is coming, and a rival pirate named Peg-Leg Polly is racing them there. Pearl has to keep the ship on course and help the captain keep his secret by trying cures like ginger cookies, staring at the horizon, and resting in a hammock. In the end Pearl steers them through the storm, they reach the island first, and the treasure chest is full of gold coins and old maps. The captain finally tells the crew his secret, and they like him even more for it.",
+      "first_sentence": "The ship rocked to the left, then to the right, and Captain Barnacle grabbed the rail."
+    }
+  },
+  {
+    "title": "The House at the End of Willow Street",
+    "description": "Everybody says the old house at the end of Willow Street is haunted. On Halloween night, Frankie and Imani are going to find out.",
+    "emoji_icon": "Ghost",
+    "activity_type": "choice-story",
+    "activity_settings": {
+      "story_context": "Every kid in town says the old gray house at the end of Willow Street is haunted. People say they have heard spooky music coming from it at night and seen a white shape moving in the upstairs window. On Halloween, while they are trick-or-treating, Frankie and her best friend Imani decide to find out the truth. They walk up the creaky porch steps, hear organ music playing inside, and see the white shape move again. They have to decide whether to knock, peek in a window, sneak around the back, or run. The story should be a little spooky but never scary. The truth is that the house belongs to Mr. Abernathy, a lonely old man who used to play the organ at church, and the white shape is his fluffy cat, Snowball. He has a big bowl of candy ready every Halloween, but nobody ever knocks on his door. The kids end up eating cookies with him on the porch, and the next year they bring the whole neighborhood.",
+      "first_sentence": "Frankie stopped on the sidewalk and stared at the dark house at the end of Willow Street."
+    }
+  }
+]

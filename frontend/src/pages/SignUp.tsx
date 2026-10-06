@@ -1,8 +1,16 @@
 import { CreateAccountForm } from "@/components/create-account-form";
 import { wordWizIcon } from "@/assets";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import { useContext, useState } from "react";
+import { AuthContext } from "@/contexts/AuthContext";
 
 const SignUp = () => {
+  const { token } = useContext(AuthContext);
+  // Only bounce people who arrive already signed in. Checking the live
+  // token would race the form's own redirect once sign-in succeeds.
+  const [signedInOnArrival] = useState(() => !!token);
+  if (signedInOnArrival) return <Navigate to="/dashboard" replace />;
+
   return (
     <div className="relative flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4 overflow-hidden">
       {/* Decorative orbs */}

@@ -16,6 +16,10 @@ import { AlertCircleIcon } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { googleLogin } from "@/api";
 import { trackSignupClick } from "@/utils/analytics";
+import { getApiErrorMessage, getErrorStatus } from "@/utils/errorHandling";
+import { Link, useNavigate } from "react-router-dom";
+
+const MIN_PASSWORD_LENGTH = 8;
 
 export function CreateAccountForm({
   className,
@@ -27,25 +31,41 @@ export function CreateAccountForm({
   const [password, setPassword] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [emailTaken, setEmailTaken] = React.useState(false);
+  const navigate = useNavigate();
 
   const { register, loginWithEmailAndPassword } =
     useContext<AuthContextType>(AuthContext);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+    setEmailTaken(false);
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      setError(`Please use a password with at least ${MIN_PASSWORD_LENGTH} characters.`);
+      return;
+    }
+    setLoading(true);
+    const cleanEmail = email.trim();
     try {
       trackSignupClick('signup_form', 'email');
-      await register(username, email, password, fullName);
-      await loginWithEmailAndPassword(username, password);
-      window.location.href = "/dashboard";
+      await register(username.trim(), cleanEmail, password, fullName.trim());
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
+      const message = getApiErrorMessage(err);
+      if (getErrorStatus(err) === 400 && /already registered/i.test(message)) {
+        setEmailTaken(true);
       } else {
-        setError("An unexpected error occurred");
+        setError(message);
       }
+      setLoading(false);
+      return;
+    }
+    try {
+      // Sign straight in; this navigates to the dashboard on success.
+      await loginWithEmailAndPassword(cleanEmail, password);
+    } catch {
+      // The account exists; only the automatic sign-in failed.
+      navigate("/login", { replace: true });
     } finally {
       setLoading(false);
     }
@@ -99,6 +119,8 @@ export function CreateAccountForm({
                     id="name"
                     type="text"
                     placeholder="Your name"
+                    autoComplete="name"
+                    maxLength={100}
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
@@ -112,6 +134,8 @@ export function CreateAccountForm({
                     id="username"
                     type="text"
                     placeholder="Choose a username"
+                    autoComplete="username"
+                    maxLength={50}
                     required
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
@@ -125,6 +149,7 @@ export function CreateAccountForm({
                     id="signup-email"
                     type="email"
                     placeholder="you@example.com"
+                    autoComplete="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -138,12 +163,32 @@ export function CreateAccountForm({
                     id="signup-password"
                     type="password"
                     required
+                    autoComplete="new-password"
+                    aria-describedby="signup-password-hint"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={loading}
                     className="h-11 rounded-xl"
                   />
+                  <p id="signup-password-hint" className="text-xs text-muted-foreground">
+                    At least {MIN_PASSWORD_LENGTH} characters.
+                  </p>
                 </div>
+
+                {emailTaken && (
+                  <Alert variant="destructive" className="rounded-xl">
+                    <AlertCircleIcon className="h-4 w-4" />
+                    <AlertTitle>You already have an account</AlertTitle>
+                    <AlertDescription>
+                      <span>
+                        An account with this email already exists.{" "}
+                        <Link to="/login" className="font-medium underline underline-offset-2">
+                          Sign in instead
+                        </Link>
+                      </span>
+                    </AlertDescription>
+                  </Alert>
+                )}
 
                 {error && (
                   <Alert variant="destructive" className="rounded-xl">

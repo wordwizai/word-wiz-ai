@@ -47,15 +47,22 @@ def delete_feedback_entry(db: Session, feedback_id: int):
 def get_feedback_entries_by_user(
     db: Session, user_id: int, skip: int = 0, limit: int = 100
 ):
-    return (
+    """
+    The user's `limit` most recent entries (after skipping the newest `skip`),
+    returned oldest-first so charts read left to right. Ordering ascending
+    before the limit used to return the *first* entries ever recorded, which
+    froze the Progress charts once a child passed `limit` readings.
+    """
+    newest_first = (
         db.query(FeedbackEntry)
         .join(SessionModel, FeedbackEntry.session_id == SessionModel.id)
         .filter(SessionModel.user_id == user_id)
-        .order_by(SessionModel.created_at.asc())
-        .offset(skip)
-        .limit(limit)
+        .order_by(FeedbackEntry.created_at.desc(), FeedbackEntry.id.desc())
+        .offset(max(skip, 0))
+        .limit(max(limit, 0))
         .all()
     )
+    return list(reversed(newest_first))
 
 
 def get_user_statistics(db: Session, user_id: int) -> dict:

@@ -21,7 +21,7 @@ router = APIRouter(prefix="/health", tags=["health"])
 
 
 @router.get("/model-optimization")
-async def model_optimization_health() -> Dict[str, Any]:
+def model_optimization_health() -> Dict[str, Any]:
     """
     Health check for model optimization status.
     Returns optimization configuration and performance metrics.
@@ -148,7 +148,7 @@ async def performance_test() -> Dict[str, Any]:
 
 
 @router.get("/system-resources")
-async def system_resources() -> Dict[str, Any]:
+def system_resources() -> Dict[str, Any]:
     """
     Get current system resource usage.
     """

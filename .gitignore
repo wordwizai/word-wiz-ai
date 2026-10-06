@@ -48,3 +48,9 @@ gsc-service-account*.json
 *gsc*key*.json
 growth/*credentials*.json
 growth/*service-account*.json
+
+# Local dev backend database (backend/dev_server.py)
+backend/dev/*.db
+
+# Deploy connection settings for scripts/deploy-backend.sh (host, SSH key)
+.env.deploy

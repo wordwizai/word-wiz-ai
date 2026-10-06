@@ -51,6 +51,7 @@ CONTRACT_KEYS = {
     "type", "predicted_word", "ground_truth_word", "phonemes",
     "ground_truth_phonemes", "expected_phonemes", "actual_phonemes",
     "per", "missed", "added", "substituted", "total_phonemes", "total_errors",
+    "phoneme_alignment",
 }
 
 

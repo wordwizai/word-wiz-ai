@@ -155,6 +155,21 @@ def align_sequences(gt: list, pred: list) -> list[tuple]:
     return operations
 
 
+def phoneme_alignment_records(ops: list[tuple]) -> list[dict]:
+    """
+    Turn ``align_sequences`` output into the ordered per-phoneme list the
+    frontend draws as sound tiles, one ``{"type", "expected", "actual"}`` per op.
+
+    ``type`` reuses the word-level names (match / substitution / deletion /
+    insertion). ``expected`` is None for an added phoneme and ``actual`` is None
+    for a missed one.
+    """
+    return [
+        {"type": op, "expected": gt_item, "actual": pred_item}
+        for op, gt_item, pred_item in ops
+    ]
+
+
 # --------------------------------------------------------------------------- #
 # Secondary ASR signal
 # --------------------------------------------------------------------------- #
@@ -396,16 +411,20 @@ def _proportional_segments(flat: list[str], words: list[list[str]]) -> list[list
 
 
 def _phoneme_errors(gt_phonemes: list[str], pred_phonemes: list[str]):
-    """Return ``(missed, added, substituted)`` for one word."""
+    """
+    Return ``(missed, added, substituted, phoneme_alignment)`` for one word,
+    all read off one op list so they always agree.
+    """
+    ops = align_sequences(gt_phonemes, pred_phonemes)
     missed, added, substituted = [], [], []
-    for pop, gph, pph in align_sequences(gt_phonemes, pred_phonemes):
+    for pop, gph, pph in ops:
         if pop == 'deletion':
             missed.append(gph)
         elif pop == 'insertion':
             added.append(pph)
         elif pop == 'substitution':
             substituted.append((gph, pph))
-    return missed, added, substituted
+    return missed, added, substituted, phoneme_alignment_records(ops)
 
 
 def _insertion_record(pred_word: str) -> dict:
@@ -422,6 +441,7 @@ def _insertion_record(pred_word: str) -> dict:
         "missed": [],
         "added": [],
         "substituted": [],
+        "phoneme_alignment": [],
         "total_phonemes": 0,
         "total_errors": 0,
         "error": "Extra word predicted.",
@@ -443,6 +463,7 @@ def _deletion_record(gt_word: str, gt_phonemes: list[str]) -> dict:
         "missed": list(gt_phonemes),   # every phoneme in the word was missed
         "added": [],
         "substituted": [],
+        "phoneme_alignment": phoneme_alignment_records(align_sequences(gt_phonemes, [])),
         "total_phonemes": len(gt_phonemes),
         "total_errors": len(gt_phonemes),
         "error": "Word missing in prediction.",
@@ -502,7 +523,7 @@ def align_to_ground_truth(
             results.append(_deletion_record(gt_word, gt_phs))
             continue
 
-        missed, added, substituted = _phoneme_errors(gt_phs, segment)
+        missed, added, substituted, phoneme_alignment = _phoneme_errors(gt_phs, segment)
         total_errors = len(missed) + len(added) + len(substituted)
         per = total_errors / max(len(gt_phs), 1)
 
@@ -518,6 +539,7 @@ def align_to_ground_truth(
             "missed": missed,
             "added": added,
             "substituted": substituted,
+            "phoneme_alignment": phoneme_alignment,
             "total_phonemes": len(gt_phs),
             "total_errors": total_errors,
         })

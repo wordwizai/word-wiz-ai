@@ -49,9 +49,12 @@ Each word record gets `phoneme_alignment`, an ordered list:
 
 ### Invariant
 
-For every word record, the number of non-`match` entries in `phoneme_alignment`
-equals `total_errors`. The tile colors therefore never disagree with the PER
-that colors the whole word.
+For every record, the `deletion` entries of `phoneme_alignment` are exactly
+`missed` (in order), the `insertion` entries are exactly `added`, and the
+`substitution` entries are exactly `substituted`. For the expected words that
+means the non-`match` count equals `total_errors`, so the tile colors never
+disagree with the PER that colors the whole word. (Extra-word records keep
+`total_errors` at 0 as they do today, so the count rule does not apply to them.)
 
 ### What else sees it
 
@@ -106,8 +109,10 @@ carry the result. Each status changes shape as well as color:
 | deletion     | no fill, dashed pink border, faded, struck through        |
 | insertion    | smaller, no fill, dashed muted border, italic, muted text |
 
-Tapping the badge still reads the word slowly. Each tile has an accessible name
-such as "t, left out" / "short a, said a different sound" / "s, extra sound".
+Tapping the badge still reads the word slowly. A button's own label hides its
+children from screen readers, so the per-sound result is appended to the badge's
+`aria-label` instead, e.g. "Hear "cat", almost. Sounds: k said right, short a
+said a different sound, t left out".
 
 ## Testing
 

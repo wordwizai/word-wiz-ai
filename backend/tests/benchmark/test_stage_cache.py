@@ -1,6 +1,7 @@
 import contextlib
 import io
 import json
+import logging
 import os
 import tempfile
 import types
@@ -25,13 +26,29 @@ class TestEntryHasWordError(unittest.TestCase):
     def test_error_type_counts(self):
         self.assertTrue(SC.entry_has_word_error({"word_calls": [{"input_sha": "x", "error_type": "TimeoutError"}]}))
 
-    def test_empty_or_missing_words_count(self):
-        self.assertTrue(SC.entry_has_word_error({"word_calls": [{"input_sha": "x", "words": []}]}))
-        self.assertTrue(SC.entry_has_word_error({"word_calls": [{"input_sha": "x", "words": None}]}))
-        self.assertTrue(SC.entry_has_word_error({"word_calls": [{"input_sha": "x"}]}))
+    def test_empty_or_missing_words_without_a_failure_are_kept(self):
+        # Deepgram genuinely returns an empty transcript for some young children's speech.
+        self.assertFalse(SC.entry_has_word_error({"word_calls": [{"input_sha": "x", "words": []}]}))
+        self.assertFalse(SC.entry_has_word_error({"word_calls": [{"input_sha": "x", "words": None}]}))
+        self.assertFalse(SC.entry_has_word_error({"word_calls": [{"input_sha": "x"}]}))
+
+    def test_empty_words_after_a_retryable_failure_count(self):
+        failure = {"code": "upstream.timeout", "category": "upstream", "retryable": True}
+        self.assertTrue(SC.entry_has_word_error(
+            {"word_calls": [{"input_sha": "x", "words": [], "asr_failure": failure}]}))
+        self.assertTrue(SC.entry_has_word_error(
+            {"word_calls": [{"input_sha": "x", "words": None, "asr_failure": failure}]}))
+
+    def test_empty_words_after_a_non_retryable_failure_are_kept(self):
+        failure = {"code": "audio.empty", "category": "empty_audio", "retryable": False}
+        self.assertFalse(SC.entry_has_word_error(
+            {"word_calls": [{"input_sha": "x", "words": [], "asr_failure": failure}]}))
 
     def test_words_present_is_not_an_error(self):
         self.assertFalse(SC.entry_has_word_error({"word_calls": [{"input_sha": "x", "words": ["a", "b"]}]}))
+        failure = {"code": "upstream.timeout", "category": "upstream", "retryable": True}
+        self.assertFalse(SC.entry_has_word_error(
+            {"word_calls": [{"input_sha": "x", "words": ["a"], "asr_failure": failure}]}))
 
     def test_no_word_calls_is_not_an_error(self):
         self.assertFalse(SC.entry_has_word_error({"word_calls": []}))
@@ -46,6 +63,43 @@ class _FailingWords:
 class _ValueErrorWords:
     def extract_words(self, audio, sampling_rate=16000, **_kwargs):
         raise ValueError("nope")
+
+
+def _log_final_failure(code, category, retryable):
+    """Log the way core.word_extractor does when Deepgram fails (ERROR, structured payload)."""
+    logging.getLogger("core.word_extractor").error(
+        "asr.word_extraction failed",
+        extra={"wwai": {"final_failure": {"code": code, "category": category, "retryable": retryable}}},
+    )
+
+
+class _OutageWords:
+    """Returns [] after a retryable failure, like WordExtractorOnline with default flags."""
+
+    def extract_words(self, audio, sampling_rate=16000, **_kwargs):
+        _log_final_failure("upstream.timeout", "upstream", True)
+        return []
+
+
+class _EmptyTranscriptWords:
+    """Returns [] after a failure that is not worth retrying."""
+
+    def extract_words(self, audio, sampling_rate=16000, **_kwargs):
+        _log_final_failure("audio.empty", "empty_audio", False)
+        return []
+
+
+class _TwoFailuresWords:
+    def extract_words(self, audio, sampling_rate=16000, **_kwargs):
+        _log_final_failure("upstream.timeout", "upstream", True)
+        _log_final_failure("audio.empty", "empty_audio", False)
+        return []
+
+
+class _LoggingThenRaisingWords:
+    def extract_words(self, audio, sampling_rate=16000, **_kwargs):
+        _log_final_failure("upstream.timeout", "upstream", True)
+        raise TimeoutError("deepgram slow")
 
 
 class TestWorkerStartup(unittest.TestCase):
@@ -158,6 +212,52 @@ class TestRecordClip(unittest.TestCase):
             meta = json.load(fh)
         self.assertEqual(meta["word_calls"][0]["error_type"], "ValueError")
         self.assertIs(meta["word_calls"][0]["is_value_error"], True)
+
+    def _record(self, words):
+        result = SC.record_clip(
+            "000020022", self.wav, U.SAMPLE_TEXT, self.cache, U.FakeOnnx(self.processor), words
+        )
+        with open(os.path.join(self.cache, "000020022.json"), encoding="utf-8") as fh:
+            return result, json.load(fh)
+
+    def test_retryable_failure_is_recorded_and_the_entry_is_retried(self):
+        (_utt, _status, word_error), meta = self._record(_OutageWords())
+        call = meta["word_calls"][0]
+        self.assertEqual(call["words"], [])
+        self.assertEqual(call["asr_failure"], {"code": "upstream.timeout", "category": "upstream", "retryable": True})
+        self.assertTrue(SC.entry_has_word_error(meta))
+        self.assertTrue(word_error)
+
+    def test_non_retryable_empty_transcript_is_kept(self):
+        (_utt, _status, word_error), meta = self._record(_EmptyTranscriptWords())
+        call = meta["word_calls"][0]
+        self.assertEqual(call["words"], [])
+        self.assertIs(call["asr_failure"]["retryable"], False)
+        self.assertFalse(SC.entry_has_word_error(meta))
+        self.assertFalse(word_error)
+
+    def test_a_clean_call_records_no_asr_failure(self):
+        _result, meta = self._record(U.FakeWords())
+        self.assertNotIn("asr_failure", meta["word_calls"][0])
+
+    def test_the_last_final_failure_wins(self):
+        _result, meta = self._record(_TwoFailuresWords())
+        self.assertEqual(meta["word_calls"][0]["asr_failure"]["code"], "audio.empty")
+        self.assertFalse(SC.entry_has_word_error(meta))
+
+    def test_the_log_handler_is_removed_afterwards(self):
+        logger = logging.getLogger("core.word_extractor")
+        before = list(logger.handlers)
+        self._record(_OutageWords())
+        self.assertEqual(logger.handlers, before)
+
+    def test_the_log_handler_is_removed_when_the_extractor_raises(self):
+        logger = logging.getLogger("core.word_extractor")
+        before = list(logger.handlers)
+        _result, meta = self._record(_LoggingThenRaisingWords())
+        self.assertEqual(logger.handlers, before)
+        self.assertEqual(meta["word_calls"][0]["error_type"], "TimeoutError")
+        self.assertTrue(SC.entry_has_word_error(meta))
 
     def test_gates_are_not_applied_when_recording(self):
         from core import request_audio

@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import logging
 import os
 import sys
 import time
@@ -65,8 +66,33 @@ class RecordingPhonemeExtractor:
         return decode_logits(logits, self.inner.processor, self.inner.model_output_processing)
 
 
+class _AsrFailureCapture(logging.Handler):
+    """Collects the structured payloads core.word_extractor attaches to its log records.
+
+    With default flags WordExtractorOnline returns [] for an outage and for a genuine empty
+    transcript alike. Only the ``wwai`` payload on its log record tells them apart.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.payloads: list[dict] = []
+
+    def emit(self, record):
+        payload = getattr(record, "wwai", None)
+        if isinstance(payload, dict):
+            self.payloads.append(payload)
+
+    def last_final_failure(self) -> dict | None:
+        failures = [p["final_failure"] for p in self.payloads if isinstance(p.get("final_failure"), dict)]
+        return failures[-1] if failures else None
+
+
 class RecordingWordExtractor:
-    """Wraps the word extractor (Deepgram) and records every call's words or error."""
+    """Wraps the word extractor (Deepgram) and records every call's words or error.
+
+    When the extractor logs a final failure, the call also gets ``asr_failure`` (code,
+    category, retryable) so entry_has_word_error can tell an outage from an empty transcript.
+    """
 
     def __init__(self, inner):
         self.inner = inner
@@ -75,22 +101,40 @@ class RecordingWordExtractor:
     def extract_words(self, audio, sampling_rate=16000, **_kwargs):
         call = {"input_sha": audio_sha(audio, sampling_rate)}
         self.calls.append(call)
+        capture = _AsrFailureCapture()
+        word_logger = logging.getLogger("core.word_extractor")
+        word_logger.addHandler(capture)
         try:
             words = self.inner.extract_words(audio, sampling_rate=sampling_rate)
         except Exception as exc:
             call.update(error_type=type(exc).__name__, error=str(exc), is_value_error=isinstance(exc, ValueError))
             raise
+        finally:
+            word_logger.removeHandler(capture)
+            failure = capture.last_final_failure()
+            if failure is not None:
+                call["asr_failure"] = {
+                    "code": failure.get("code"),
+                    "category": failure.get("category"),
+                    "retryable": bool(failure.get("retryable")),
+                }
         call["words"] = None if words is None else [str(w) for w in words]
         return words
 
 
 def entry_has_word_error(meta: dict) -> bool:
-    """True when a word call failed or came back empty.
+    """True when a word call raised, or came back empty after a retryable failure (an outage).
 
-    With default flags a Deepgram failure returns [] instead of raising, and every
-    speechocean762 clip contains speech, so an empty transcript is retried too.
+    Deepgram genuinely returns an empty transcript for some young children's speech; those
+    are real outcomes and are kept, not retried.
     """
-    return any("error_type" in call or not call.get("words") for call in meta.get("word_calls", []))
+    for call in meta.get("word_calls", []):
+        if "error_type" in call:
+            return True
+        failure = call.get("asr_failure") or {}
+        if not call.get("words") and failure.get("retryable"):
+            return True
+    return False
 
 
 def write_entry(directory, utt_id, phon: RecordingPhonemeExtractor, words: RecordingWordExtractor,

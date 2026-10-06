@@ -47,6 +47,9 @@ account or his name in a new way), `submitted`, `live`, `rejected`,
 | queued | Alberta Teachers' Association Library | email library@ata.ab.ca | contactwordwizai@gmail.com | AQ-054 |
 | queued | Internet4Classrooms | email susan.brooks@ / bill.byles@internet4classrooms.com | contactwordwizai@gmail.com | AQ-055 |
 | queued | Homeschool Quest "Free And Affordable Resources" Facebook group | Facebook post (Bruce) | n/a | AQ-056, optional |
+| queued | Learning Reading Hub, Laura Diaz | contact form | contactwordwizai@gmail.com | AQ-057 (earlier noted as no route; the form is real) |
+| queued | Read To Succeed Asheville/Buncombe | email info@r2sasheville.org | contactwordwizai@gmail.com | AQ-058 |
+| queued | Easterseals Crossroads AT blog (INDATA) | email tech@eastersealscrossroads.org | contactwordwizai@gmail.com | AQ-059 |
 
 Follow-up rule: one polite follow-up at most, 10+ days after the first message, only with Bruce's approval.
 
@@ -113,6 +116,9 @@ Ranked by expected real users for a K-2 reading tool.
 | How To Homeschool For Free | Google Form "Submit A FREE Homeschooling Resource!" | Site dormant since Nov 2024. Fit 2 |
 | The Simple Homeschooler (Lauren Schmitz) | contact form, no CAPTCHA | Free-resources post invites additions, but the site is dormant since Sep 2024. Fit 2 |
 | Homeschool Quest magazine mini-article | form with CAPTCHA | 100-200 words, no self-promotion allowed, next issue Spring 2027. Fit 1 |
+| The Learning Agency, The Cutting Ed (speech recognition for early reading articles) | info@the-learning-agency.com | Articles, not updated lists; better for a data or story angle later. Fit 3 |
+| KidsAiTools "AI Reading Apps for Kids" | support@kidsaitools.com (errors inbox) | Sells memberships, earns referral commissions, template-like content. Fit 2 |
+| MMGuardian blog "Free Reading Apps for Kids" | support@mmguardian.com | Corporate blog whose bar is on-device audio and no sign-in. Hold until AQ-036 is done. Fit 2 |
 
 ## Excluded (don't revisit unless the terms change)
 

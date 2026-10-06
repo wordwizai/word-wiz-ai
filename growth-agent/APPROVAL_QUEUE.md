@@ -1750,6 +1750,87 @@ Verified 2026-10-06: the rule and member count on https://homeschoolbusinessques
 
 ---
 
+## AQ-057 | Contact form | Learning Reading Hub, Laura Diaz (https://learningreadinghub.com/contact-us/) | Parent blogger whose "best learn-to-read apps" ranking ("Last Update – January 2026") came up first in our research for "Ello alternatives", "free alternative to Ello" and "reading app that listens to child read". The listening apps on it (Readability, Ello) are paid. Her Ello review says "Their voice recognition technology isn't perfect. Sometimes, if a child says a similar-sounding word, the app may not catch the mistake." YouTube channel shows 2.7K subscribers | Low. Affiliate-run site, so a free tool earns her nothing. Earlier sessions had this site as "no clear contact route"; the form is real | Status: PENDING
+
+Verified 2026-10-06: the form (Name, Email, Comment or Message) on the contact page; both quotes on https://learningreadinghub.com/blog/apps/best-learn-to-read-apps/ and https://learningreadinghub.com/blog/phonics/read-with-ello-reading-app-review/. A CAPTCHA isn't visible but WPForms may add one; once approved I'll try it, and if one appears it's yours. Email field: contactwordwizai@gmail.com.
+
+> Dear Laura,
+>
+> I read your ranking of learn-to-read apps and your Ello review, where you
+> mention its voice recognition can miss it when a child says a similar-sounding
+> word. That's the problem I've been working on. I built Word Wiz AI, a free
+> reading tutor where a child reads a sentence out loud and it checks each
+> sound inside the word, so it can show that "ship" came out as "sip," then it
+> writes the next sentence around those sounds.
+>
+> It isn't perfect either (a muffled mic throws it off), but it's free with no
+> ads or subscription, and kids can try three sentences without an account at
+> wordwizai.com/try. Since the listening apps I saw on your list are paid, I
+> thought a free one might be useful for your readers.
+>
+> I'm a high school student and built it on my own, so I'd really appreciate
+> your honest take on it, even if it doesn't make the ranking.
+>
+> Best,
+> Bruce Peters
+
+---
+
+## AQ-058 | Email | Read To Succeed Asheville/Buncombe, "Free Reading Apps for Kids" (info@r2sasheville.org) | A K-5 tutoring nonprofit that has "served more than 2,500 PreK- 5th grade students over the past fifteen years". Its list is all free apps, and the only one that listens is Reading Hero ("the first of its kind, providing feedback to a child as they read") | Low | Status: PENDING
+
+Verified 2026-10-06: list and quotes on https://www.r2sasheville.org/free-reading-apps-for-kids.html; the address is on that page (hidden from scrapers, decoded) and on the contact page.
+
+Send from contactwordwizai@gmail.com.
+
+**Subject:** One more free reading app for your list
+
+> Dear Read To Succeed team,
+>
+> I came across your list of free reading apps for kids and wanted to suggest
+> one more. Like Reading Hero, Word Wiz AI listens to a child read and gives
+> feedback, and it's free with no ads. A child reads a sentence out loud, it
+> shows which sounds inside each word came out wrong (like "cake" read as
+> "cack"), and then it writes the next sentence around those sounds.
+>
+> It runs in a browser, so it works on a computer or Chromebook, and kids can
+> try three sentences without an account at wordwizai.com/try. Regular practice
+> needs a free account. I'm a high school student and built it on my own, so
+> I'd also be grateful for any feedback from your tutors.
+>
+> Best,
+> Bruce Peters
+
+---
+
+## AQ-059 | Email | Easterseals Crossroads assistive technology blog, INDATA (tech@eastersealscrossroads.org) | Very active (weekly "Monday Tech Tip", a long-running AT podcast). It covered Read with Ello as "not a curriculum but would make a wonderful supplement to any early literacy program." | Low-medium. Disability-focused audience, so the note says plainly Word Wiz isn't assistive tech or designed for any disability | Status: PENDING
+
+Verified 2026-10-06: the address and the quote on https://eastersealstech.com/2024/03/05/read-with-ello-app.
+
+Send from contactwordwizai@gmail.com.
+
+**Subject:** A free reading practice tool for a Monday Tech Tip
+
+> Dear Easterseals Crossroads tech team,
+>
+> I saw your post on Read with Ello, where you called it not a curriculum but a
+> wonderful supplement to an early literacy program. I built a free tool in the
+> same spirit that might be worth a Monday Tech Tip. Word Wiz AI is a reading
+> tutor where a child reads a sentence out loud and it shows which individual
+> sounds came out wrong, then writes the next sentence around those sounds.
+>
+> It's free with no ads, runs in a browser, and kids can try three sentences
+> without an account at wordwizai.com/try. To be clear, it isn't designed as
+> assistive technology or for any specific disability, and it hasn't been
+> formally studied. It works best with a decent microphone.
+>
+> I'm a high school student and built it on my own, so I'd really appreciate
+> any feedback.
+>
+> Best,
+> Bruce Peters
+
+---
+
 <!-- wave3-end -->
 
 ## Notes for Bruce (not approval items)

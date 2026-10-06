@@ -1,28 +1,32 @@
 <!-- Title: Growth agent: SEO fixes and state (running PR) -->
-<!-- Open at: https://github.com/wordwizai/word-wiz-ai/compare/main...growth-agent?expand=1 and paste everything below. The agent keeps this file current each session. -->
+<!-- Bruce ships by merging growth-agent into dev and dev into main, so no PR is open. This file is the running summary instead. -->
 
-Running summary of the growth agent's work. Bruce currently ships it by merging `growth-agent` into `dev` and `dev` into `main`.
+Running summary of the growth agent's work. Bruce ships it by merging `growth-agent` into `dev` and `dev` into `main`.
 
-## Live (merged to main 2026-10-05, deployed 2026-10-06)
+## Live (on main, deployed 2026-10-06)
 
-Session 1: removed invented review ratings from comparison schema, retitled the ABCmouse vs Hooked on Phonics page and the silent-e guide, dropped stale 2024/2025 titles, added 20 magic-e sentences.
+- Session 1: removed invented review ratings from comparison schema, retitled the ABCmouse vs Hooked on Phonics page and the silent-e guide, dropped stale 2024/2025 titles, added 20 magic-e sentences.
+- Session 2: About page "Who built this" (AQ-005), four magic-e practice pages, the public guest analysis route and `/try/:slug` page with guide CTAs pointing at it, the digital-silence fix, and the try-page privacy line (AQ-011). Backend deployed 9583b5d; frontend in main 2e9d41a.
 
-## In dev, not yet on main (session 2, 2026-10-06)
-
-**Deploy the backend before merging dev into main.** The guides' new "Try it out loud" buttons call `/guest/analyze-audio`; until it exists the try page shows a "not available right now" screen with a signup button.
+## On growth-agent, not on main yet (session 3, 2026-10-06)
 
 | Commit | Change |
 |---|---|
-| `9c84b9a` | About page "Who built this" (approved, AQ-005) |
-| `895cbdd` | Four magic-e practice pages (a_e, i_e, o_e, u_e) |
-| `47c92d1`, `e4a6965` | Public guest analysis route (no account, no DB writes, nothing saved, rate-limited) |
-| `50e1a11` | Fix: recordings with digital silence failed the whole pipeline, for signed-in users too |
-| `46a50ce` | `/try/:slug` page; guide and practice-page CTAs point to it; try-funnel analytics |
+| `d819ec7` | b/d article title and description: "Child Confuses B and D? When It's Normal and How to Fix It" |
+| `48f77d6` | Long-vowel guide title and description: "Long Vowel Sounds Practice: 200+ First Grade Words and Games" |
+| `d864a4c` | sitemap-lastmod.json hashes after the build |
+| `a05b4a0` and later | growth-agent/ files only (queue, listings, state, log, FHD graphic). Not served |
 
-Verified: backend test suite, an end-to-end run of the guest route on the real model, and a full frontend build with prerender.
+Verified: `npm ci && npm run build` (158 pages prerendered, validation passed).
+
+**Not pushed yet**: this cloud session got a 403 on push. If these commits aren't on origin, apply the patch Bruce was sent (`git am growth-agent-session3.patch` on `growth-agent`).
 
 ## Waiting on Bruce
 
-See `growth-agent/APPROVAL_QUEUE.md`: AQ-011 (privacy line), AQ-012 (production quality-gate flag), AQ-013 to AQ-020 (outreach batch, send after the try page is live).
+See `growth-agent/APPROVAL_QUEUE.md`:
+- Approved and ready to send now that the try page is live: AQ-013/AQ-014 (Reddit, a day apart), AQ-017/AQ-020 (emails), AQ-018/AQ-019 (forms with CAPTCHAs).
+- Pending: AQ-021 to AQ-030 (outreach wave 2), AQ-031 (ISTE listing edit), AQ-032 (Free Homeschool Deals), AQ-033 (Product Hunt relaunch).
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+https://claude.ai/code/session_01SFrJ4DTLdLaNBSaNr8HLwV

@@ -166,3 +166,69 @@ on the server (1.4 GB -> 6.6 GB free), ran `scripts/deploy-backend.sh 9583b5d`.
 /docs 200, ONNX loaded. In production: arbitrary sentence -> 400, guest
 analysis full stream, digital-silence recording now scores. Pruned again
 after the swap (6.6 GB free).
+
+---
+
+## 2026-10-06 - Session 3 (cloud)
+
+Cloud session, none of Bruce's local access (no Search Console or Vercel
+logins, no prod DB, no deploy key, no Reddit), so no metrics this time.
+
+**Loaded**: merged `origin/main` into `growth-agent` (already up to date,
+main at 2e9d41a). Read AGENT_PROMPT, STATE, the queue, both earlier run log
+entries and LISTINGS.
+
+**Measured**: GSC, Vercel analytics, signups all n/a (cloud session).
+
+**Checked**: session 2's frontend is on main (2e9d41a, merged Oct 6 07:45 PT).
+Rendered https://wordwizai.com/try and /try/at-family in headless Chromium.
+Both show the try intro ("No account needed... doesn't save recordings from
+this page"). The About page shows "Who built this".
+
+**Approved items**: AQ-018 (Lead in Literacy) and AQ-019 (TeachersFirst) were
+mine to submit once the try page was live. Both forms have a CAPTCHA, so I
+didn't submit them; they're marked for Bruce with final copy. The rest of the
+approved batch (AQ-013, AQ-014, AQ-017, AQ-020) were already Bruce's sends and
+can go now.
+
+**Research** (four parallel passes, nothing sent or submitted):
+- Listicle authors, teacher and homeschool resource lists, dyslexia and
+  literacy sites. 25+ pages checked, contact routes confirmed on the live
+  sites, spot-checked 9 of them myself. Paid-placement sites excluded.
+- Found that **Word Wiz is already on the ISTE EdTech Index** (approved
+  Dec 14, 2025). LISTINGS had it as not submitted.
+- Product Hunt's page is /products/word-wiz. A relaunch needs 6 months (met)
+  and a "significant update".
+- Free Homeschool Deals takes submissions by email, not a form.
+
+**Queued** (all in Bruce's voice, contactwordwizai@gmail.com, linking
+wordwizai.com/try, writing-rule check passed: no em dashes, no colons in
+prose, no banned words):
+- AQ-021 to AQ-030, outreach wave 2: Proud to be Primary, Simply Kinder,
+  Differentiated Teaching, Learning at the Primary Pond, Let's Read San Mateo
+  County, Frontier Charter School, Wisconsin Dyslexia Roadmap, Undivided,
+  Worcester Education Collaborative, Contra Costa County Library.
+- AQ-031 ISTE listing edit, AQ-032 Free Homeschool Deals (post text plus a
+  1000x1500 graphic in `assets/`, built in the og-image style), AQ-033
+  Product Hunt (ask first, then launch copy and first comment).
+
+**SEO changes** (one hypothesis each, verified with `npm ci && npm run build`:
+158 pages prerendered and validated, new titles in the built HTML):
+1. `d819ec7` b/d article title and description, aimed at the "is it normal?"
+   question that wins that search. *Expect:* page CTR up from 0.6% (90d) at
+   pos 6.9. Check 3-4 weeks after it's live.
+2. `48f77d6` long-vowel guide title and description, saying what's on the
+   page (212 unique words, 8 decodable sentences, 4 games). *Expect:* page CTR
+   up from 0.7% (90d) at pos 8.1. Same bet as the silent-e retitle on a
+   different page. Check 3-4 weeks after it's live.
+3. `d864a4c` sitemap-lastmod.json hashes (32 pages hashed differently on this
+   build; lastmod dates unchanged).
+
+**Blocked**: pushing. `git push` returned 403 ("Claude doesn't have GitHub
+access to wordwizai/word-wiz-ai"), and the GitHub connector's write also
+returned 403. Reads work. Sent Bruce a patch of every session 3 commit
+instead. Fix: reconnect GitHub at https://claude.ai/connect-github or
+install the Claude GitHub App on the org.
+
+**Check next session**: whether the commits reached origin, which outreach
+went out, and the try-funnel events since Oct 6.

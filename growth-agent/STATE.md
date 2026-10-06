@@ -1,6 +1,6 @@
 # Growth agent state
 
-Last session: 2026-10-06 (session 2). Next session: read this,
+Last session: 2026-10-06 (session 3, cloud). Next session: read this,
 `APPROVAL_QUEUE.md`, the last 5 entries of `RUN_LOG.md`, and `LISTINGS.md`.
 
 **Bruce, 2026-10-06: "you aren't a coding agent, you are an advertising
@@ -49,6 +49,13 @@ backend work only when it directly blocks getting users, and keep it short.
 - Gmail connector = brucebpeters12@gmail.com. Bruce wants
   **contactwordwizai@gmail.com** on all outreach, so emails go out from that
   account by Bruce (or connect it). Forms: use contactwordwizai@gmail.com.
+- **Cloud session 3 couldn't push.** `git push` and the GitHub connector's writes
+  both returned 403 ("Claude doesn't have GitHub access to wordwizai/word-wiz-ai").
+  Reads work. Fix: reconnect GitHub at https://claude.ai/connect-github or install
+  the Claude GitHub App on the wordwizai org. Check `git log origin/growth-agent`
+  first thing; if session 3's commits (d819ec7..) aren't there, apply
+  `growth-agent-session3.patch` (sent to Bruce) with `git am`.
+- Contact forms with a CAPTCHA are Bruce's. Don't try to get past one.
 - Daily GSC indexing routine: `C:\Users\bruce\.claude\scheduled-tasks\gsc-request-indexing\`.
   Session 2 moved the silent-e guide and ABCmouse comparison to the front
   of its queue (quota was used up).
@@ -59,6 +66,7 @@ backend work only when it directly blocks getting users, and keep it short.
 |---|---|---|---|---|---|---|---|---|---|
 | 2026-10-05 | 306 (prev 314) | 22.8K (prev 29.6K) | 1.3% | 7.4 | 45 / 130 | n/a | n/a | n/a | n/a |
 | 2026-10-06 | (same window) | | | | 45 / 130 | 774 | 65 | 39 | 20 |
+| 2026-10-06 (s3) | n/a (cloud session) | n/a (cloud session) | n/a (cloud session) | n/a (cloud session) | n/a (cloud session) | n/a (cloud session) | n/a (cloud session) | n/a (cloud session) | n/a (cloud session) |
 
 Other 2026-10-06 reads: GSC shows 15 invalid merchant listings, 15 product
 snippets and 15 review snippets, all from the fake schema removed in
@@ -81,12 +89,14 @@ guides produced ~9 signup-click visitors in total; the homepage converts
 | Stale years removed (11 pages) | bb5399c | **Live 2026-10-06** | Small; check with the rest |
 | Silent-e guide retitle | a3fe0f3 | **Live 2026-10-06** | CTR on "silent e words" (0.1% at pos 8) ~Nov 1 |
 | Silent-e guide +20 sentences | 04c34e3 | **Live 2026-10-06** | Pos for "magic e sentences" (6.2) ~Nov 1 |
-| About page founder section | 9c84b9a | In dev, not main | |
-| Privacy line for the try page (AQ-011) | 4c0c2c8 | In dev, not main | |
+| About page founder section | 9c84b9a | **Live 2026-10-06** (main 2e9d41a; "Who built this" seen on the live page) | |
+| Privacy line for the try page (AQ-011) | 4c0c2c8 | **Live 2026-10-06** (main 2e9d41a) | |
 | Robust quality gates (AQ-012, Bruce set the env) | n/a | **Live 2026-10-06**, confirmed `Metrics mode: robust` | Users with a scored reading (baseline 20/40) |
-| 4 magic-e practice pages | 895cbdd | In dev, not main | Indexing; "magic e words" pos 17.2 |
-| Guest route + try page + guide CTAs | 47c92d1, e4a6965, 46a50ce | **Backend live 2026-10-06** (9583b5d, verified in prod). Frontend in dev, waiting on dev -> main | `try_link_click` / `try_attempt` / `try_completed` events; signup clicks per guide visit |
+| 4 magic-e practice pages | 895cbdd | **Live 2026-10-06** (main 2e9d41a) | Indexing; "magic e words" pos 17.2 |
+| Guest route + try page + guide CTAs | 47c92d1, e4a6965, 46a50ce | **Live 2026-10-06** (backend 9583b5d; frontend main 2e9d41a). Session 3 rendered /try and /try/at-family in a browser | `try_link_click` / `try_attempt` / `try_completed` events; signup clicks per guide visit |
 | Digital-silence fix | 50e1a11 | **Live 2026-10-06** (backend) | Users with a scored reading (baseline 20/40) |
+| b/d article retitle ("Child Confuses B and D? When It's Normal and How to Fix It") | d819ec7 | On growth-agent, **not pushed** (see setup notes) | Page CTR, baseline 0.6%/90d at pos 6.9 (0.7% on 1,822 impr/28d to ~Oct 3). Judge 3-4 weeks after it's live |
+| Long-vowel guide retitle ("Long Vowel Sounds Practice: 200+ First Grade Words and Games") | 48f77d6 | On growth-agent, **not pushed** | Page CTR, baseline 0.7%/90d at pos 8.1 (0.6% on 1,708 impr/28d). Judge 3-4 weeks after it's live |
 
 ## What's working
 
@@ -96,40 +106,50 @@ guides produced ~9 signup-click visitors in total; the homepage converts
 
 ## What isn't working
 
-- Guides convert almost nobody (fix shipped to dev: try page CTAs).
+- Guides convert almost nobody (fix live 2026-10-06: try page CTAs. Not measured yet).
 - Half of new users never get a reading scored. Two leads found: the
-  digital-silence failure (fixed in dev) and legacy quality gates (AQ-012).
+  digital-silence failure (fix live 2026-10-06) and legacy quality gates
+  (AQ-012, robust mode live 2026-10-06). Not re-measured yet.
 - 110+ practice-words pages still "Discovered - not indexed".
 
 ## Backlog (advertising first)
 
-1. **Once the try page is live** (dev -> main): submit AQ-018 and AQ-019 contact forms; remind Bruce to post AQ-013/AQ-014 (a day apart) and send AQ-017/AQ-020 from contactwordwizai@gmail.com. HN and LinkedIn were rejected.
-   Then one follow-up wave of 4-6 more listicle authors from research
-   (spellingjoy, learningreadinghub, mmguardian have no clear contact route;
-   skip comment-section link drops).
-2. **AlternativeTo + SaaSHub** (Bruce's logins): add "alternative to" links
+1. **Send the approved outreach now that the try page is live.** Bruce: AQ-013
+   then AQ-014 a day apart (Reddit), AQ-017 and AQ-020 (emails), AQ-018 and
+   AQ-019 (forms with CAPTCHAs). Then wave 2 (AQ-021 to AQ-030) as approved.
+   I can submit AQ-023 and AQ-025 myself (no CAPTCHA).
+2. **ISTE EdTech Index edit** (AQ-031). Already listed since Dec 2025; fix grades,
+   OSes, and the "evidence-based" line.
+3. **Free Homeschool Deals** (AQ-032). Email plus the graphic in `assets/`.
+4. **Product Hunt relaunch** (AQ-033). Email hello@producthunt.com first.
+5. **AlternativeTo + SaaSHub** (Bruce's logins): add "alternative to" links
    for Starfall, Reading Eggs, Khan Academy Kids, Google Read Along, Ello;
    claim SaaSHub. Fix "Open Source" label.
-3. **Product Hunt relaunch** around the try page (last launch Dec 16, 2025,
-   1 upvote). Needs screenshots/video and Bruce.
-4. **Free Homeschool Deals** feature (needs a 150-word third-person blurb
-   and a 1000x1500 graphic) and **ISTE EdTech Index** (Bruce's account).
-5. **Homepage title** around "reading app that listens to your child read"
+6. **AASL Best Digital Tools** (deadline Feb 1, 2027). Needs a test login for
+   the committee. Draft in Dec/Jan if Bruce wants it.
+7. **Homepage title** around "reading app that listens to your child read"
    (research: product pages win those queries). Careful, homepage CTR is 5.6%.
-6. **Comparisons vs apps that listen** (Read Along, Reading Coach, Ello,
+8. **Comparisons vs apps that listen** (Read Along, Reading Coach, Ello,
    Readability) and "free alternatives to X" pages.
-7. b/d article title + "is it normal or dyslexia?" section.
-8. Long-vowel guide CTR (1,708 impr/28d, 0.6%).
 9. Comparison pages are dead ends (no related links); HoP page shows Word
    Wiz twice; competitor prices unverified.
 10. Bylines "Word Wiz AI Editorial Team" -> "Word Wiz AI".
+11. Wave 3 outreach if wave 2 gets replies: NorCal IDA and Reading Rockets
+    (couldn't fetch from the cloud), Corona and Danbury libraries.
 
-## Next actions (session 3)
+Done from the old backlog: b/d article title (d819ec7; the article already
+had a "When to Worry" section, so no new section), long-vowel guide title
+(48f77d6).
 
-1. Merge `origin/main`, read the queue, execute APPROVED items.
-2. Backend is deployed (verified). Check the frontend: https://wordwizai.com/try/at-family
-   should show the try intro, not the homepage. If live, send AQ-018/AQ-019.
-3. Re-read Vercel: `try_link_click`, `try_attempt`, `try_completed`,
-   `signup_button_click` by page. Re-read GSC for the session-1 pages.
-4. Check contactwordwizai@gmail.com replies are being handled (Bruce) and
-   whether Freedom Homeschooling confirmed (AQ-009).
+## Next actions (session 4)
+
+1. Merge `origin/main`. Check that session 3's commits reached origin (see
+   setup notes); if not, ask Bruce whether he applied the patch.
+2. Read the queue and execute anything APPROVED (AQ-023 and AQ-025 are forms I
+   can submit; the rest are Bruce's sends).
+3. Measure (local session): Vercel `try_link_click`, `try_attempt`,
+   `try_completed`, `signup_button_click` by page since 2026-10-06; GSC for
+   the session-1 pages (due ~Nov 1) and the merchant/review snippet count.
+4. Ask Bruce which outreach went out and log it in LISTINGS.md. Check
+   contactwordwizai@gmail.com replies and whether Freedom Homeschooling
+   confirmed (AQ-009).

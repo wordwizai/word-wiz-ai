@@ -37,6 +37,9 @@ export interface SentenceOptions {
 export interface PracticeStageState {
   wordArray: string[];
   analysisData: PronunciationAnalysis | null;
+  // Must go back to null when a new attempt starts processing. PracticeStage
+  // closes an attempt on the first render with a new analysis and non-null
+  // feedback, so stale text here would be paired with the new analysis.
   feedback: string | null;
   showHighlightedWords: boolean;
   isRecording: boolean;

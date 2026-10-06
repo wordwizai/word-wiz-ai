@@ -472,18 +472,24 @@ class TestFeatureFlag(unittest.TestCase):
         if self._saved is not None:
             os.environ[GT_ANCHORED_FLAG] = self._saved
 
-    def test_defaults_off(self):
+    def test_defaults_on(self):
         self.assertEqual(GT_ANCHORED_FLAG, "WWAI_GT_ANCHORED_ALIGNMENT")
-        self.assertFalse(is_gt_anchored_enabled())
+        self.assertTrue(is_gt_anchored_enabled())
 
-    def test_falsy_values_stay_off(self):
-        for value in ("", "0", "false", "no", "off", "  ", "maybe"):
+    def test_falsy_values_turn_it_off(self):
+        for value in ("0", "false", "FALSE", " False ", "no", "off", "n", "f"):
             with self.subTest(value=value):
                 os.environ[GT_ANCHORED_FLAG] = value
                 self.assertFalse(is_gt_anchored_enabled())
 
-    def test_truthy_values_turn_it_on(self):
+    def test_truthy_values_keep_it_on(self):
         for value in ("1", "true", "TRUE", " True ", "yes", "on"):
+            with self.subTest(value=value):
+                os.environ[GT_ANCHORED_FLAG] = value
+                self.assertTrue(is_gt_anchored_enabled())
+
+    def test_empty_or_unknown_values_keep_the_default(self):
+        for value in ("", "  ", "maybe"):
             with self.subTest(value=value):
                 os.environ[GT_ANCHORED_FLAG] = value
                 self.assertTrue(is_gt_anchored_enabled())
@@ -491,7 +497,7 @@ class TestFeatureFlag(unittest.TestCase):
 
 class TestProcessAudioArrayHook(unittest.TestCase):
     """
-    The hook in ``process_audio_array`` must be inert unless the flag is set.
+    The hook in ``process_audio_array`` is on by default and the flag turns it off.
 
     Everything expensive is stubbed: no model, no audio preprocessing, no g2p,
     no network.
@@ -541,16 +547,14 @@ class TestProcessAudioArrayHook(unittest.TestCase):
             use_chunking=False,
         ))
 
-    def test_flag_unset_uses_the_legacy_path(self):
-        os.environ.pop(GT_ANCHORED_FLAG, None)
+    def test_flag_off_uses_the_legacy_path(self):
+        os.environ[GT_ANCHORED_FLAG] = "false"
         results = self._run()
         # Legacy types come from the ASR word list, so the mispronounced word
         # is still labelled "match" because the ASR spelled it "cat".
         self.assertEqual([r["type"] for r in results], ["match", "match", "match"])
 
-    def test_flag_set_uses_the_anchored_path(self):
-        os.environ[GT_ANCHORED_FLAG] = "true"
-        results = self._run()
+    def _assert_anchored(self, results):
         self.assertEqual([r["type"] for r in results],
                          ["match", "substitution", "match"])
         self.assertEqual(
@@ -559,6 +563,14 @@ class TestProcessAudioArrayHook(unittest.TestCase):
                 ['the', 'cat', 'sat'],
             ),
         )
+
+    def test_flag_unset_uses_the_anchored_path(self):
+        os.environ.pop(GT_ANCHORED_FLAG, None)
+        self._assert_anchored(self._run())
+
+    def test_flag_set_uses_the_anchored_path(self):
+        os.environ[GT_ANCHORED_FLAG] = "true"
+        self._assert_anchored(self._run())
 
 
 class TestRobustness(unittest.TestCase):

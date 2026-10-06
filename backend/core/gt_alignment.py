@@ -51,8 +51,8 @@ so ``analyze_results``, ``SpeechProblemClassifier``,
 
 FEATURE FLAG
 ------------
-``WWAI_GT_ANCHORED_ALIGNMENT`` -- defaults to OFF. Nothing in this module runs
-unless it is explicitly enabled.
+``WWAI_GT_ANCHORED_ALIGNMENT`` -- defaults to ON. Set it to a falsy value
+("0", "false", "no", "off") to go back to the legacy ASR-driven alignment.
 """
 
 from __future__ import annotations
@@ -67,16 +67,21 @@ import re
 GT_ANCHORED_FLAG = "WWAI_GT_ANCHORED_ALIGNMENT"
 
 _TRUTHY = frozenset({"1", "true", "t", "yes", "y", "on"})
+_FALSY = frozenset({"0", "false", "f", "no", "n", "off"})
 
 
 def is_gt_anchored_enabled() -> bool:
     """
-    True when ``WWAI_GT_ANCHORED_ALIGNMENT`` is set to a truthy value.
+    True unless ``WWAI_GT_ANCHORED_ALIGNMENT`` is set to a falsy value.
+
+    ON by default: the speechocean762 benchmark accepted it over the legacy
+    ASR-driven alignment. An unset, empty or unrecognised value keeps the
+    default; only an explicit "0" / "false" / "no" / "off" turns it off.
 
     Read at call time (not import time) so that it can be toggled in tests and
     so a deploy-time env change does not require a code reload.
     """
-    return os.environ.get(GT_ANCHORED_FLAG, "").strip().lower() in _TRUTHY
+    return os.environ.get(GT_ANCHORED_FLAG, "").strip().lower() not in _FALSY
 
 
 # --------------------------------------------------------------------------- #

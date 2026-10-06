@@ -67,6 +67,10 @@ class ReplayedError(Exception):
         return (type(self), (self.error_type, self.message))
 
 
+class ReplayedValueError(ReplayedError, ValueError):
+    """A recorded exception that was a ValueError, replayed so `except ValueError` still matches."""
+
+
 def data_dir() -> str:
     return os.getenv(DATA_DIR_ENV) or os.path.join(BENCH_ROOT, "data")
 

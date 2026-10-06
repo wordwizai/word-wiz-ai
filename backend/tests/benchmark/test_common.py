@@ -120,6 +120,14 @@ class TestExceptions(unittest.TestCase):
         self.assertIs(type(err), _SubReplayedError)
         self.assertEqual((err.error_type, err.message), ("T", "m"))
 
+    def test_replayed_value_error_is_both_kinds_and_pickles(self):
+        err = common.ReplayedValueError("EmptyAudioError", "no audio")
+        self.assertIsInstance(err, ValueError)
+        self.assertIsInstance(err, common.ReplayedError)
+        back = pickle.loads(pickle.dumps(err))
+        self.assertIs(type(back), common.ReplayedValueError)
+        self.assertEqual((back.error_type, back.message), ("EmptyAudioError", "no audio"))
+
     def test_git_sha_format(self):
         self.assertRegex(common.git_sha(), r"^([0-9a-f]{40}(-dirty)?|unknown)$")
 

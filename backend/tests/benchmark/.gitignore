@@ -5,3 +5,4 @@ results/*.json
 !results/baseline_dev.json
 !results/*_speed.json
 !results/human_reference_*.json
+!test_runs.log

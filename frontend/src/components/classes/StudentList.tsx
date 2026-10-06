@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getClassStudents, type StudentWithStats } from "@/api";
+import { Skeleton } from "@/components/ui/skeleton";
 import StudentCard from "./StudentCard";
 
 interface StudentListProps {
@@ -34,8 +35,9 @@ const StudentList = ({ classId }: StudentListProps) => {
 
   if (loading) {
     return (
-      <div className="text-center text-gray-600 py-4">
-        Loading students...
+      <div className="space-y-2 py-2" aria-label="Loading students">
+        <Skeleton className="h-14 w-full rounded-xl" />
+        <Skeleton className="h-14 w-full rounded-xl" />
       </div>
     );
   }
@@ -50,21 +52,21 @@ const StudentList = ({ classId }: StudentListProps) => {
 
   if (students.length === 0) {
     return (
-      <div className="text-center text-gray-600 py-4">
+      <div className="py-4 text-center text-sm text-muted-foreground">
         <p>No students have joined this class yet.</p>
-        <p className="text-sm mt-2">
-          Share the join code with students to get started!
-        </p>
+        <p className="mt-1">Share the join code above to get them started.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-2">
+    <ul className="divide-y">
       {students.map((student) => (
-        <StudentCard key={student.id} student={student} />
+        <li key={student.id}>
+          <StudentCard student={student} />
+        </li>
       ))}
-    </div>
+    </ul>
   );
 };
 

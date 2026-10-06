@@ -1,10 +1,9 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Plus } from "lucide-react";
-import { AppPage, PageHeader } from "@/components/AppPage";
+import { AppPage, PageHeader, SectionHeader } from "@/components/AppPage";
 import {
   getMyClasses,
   getMyStudentClasses,
@@ -110,6 +109,8 @@ const ClassesPage = () => {
     setSelectedStudent(null);
   };
 
+  const visibleClasses: (Class | ClassWithTeacher)[] =
+    viewMode === "student" ? studentClasses : myClasses;
 
   // If viewing student details, show student detail view
   if (selectedStudent !== null && selectedClassId !== null) {
@@ -151,111 +152,80 @@ const ClassesPage = () => {
         actions={<ViewToggle mode={viewMode} onChange={handleViewChange} />}
       />
 
-      {/* Tabs */}
-      <Tabs defaultValue="my-classes" className="-mt-4">
-        {/* My Classes Tab */}
-        <TabsContent
-          value="my-classes"
-          className="space-y-4"
-        >
-          {/* Student View - Show only enrolled classes */}
-          {viewMode === "student" && (
-            <Card className="rounded-2xl shadow-xs">
-              <CardHeader className="p-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-bold text-foreground">
-                    My Classes
-                  </h2>
-                  <Button
-                    onClick={() => setShowJoinDialog(true)}
-                    variant="default"
-                    size="sm"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Join Class
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 pt-0">
-                {loading ? (
-                  <div className="text-center text-muted-foreground py-8">
-                    Loading...
-                  </div>
-                ) : studentClasses.length > 0 ? (
-                  <div className="space-y-3">
-                    {studentClasses.map((classItem) => (
-                      <ClassCard
-                        key={classItem.id}
-                        classItem={classItem}
-                        isTeacher={false}
-                        viewMode="student"
-                        onDeleted={handleClassDeleted}
-                        onLeft={handleClassLeft}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center text-muted-foreground py-8">
-                    <p>You haven't joined any classes yet.</p>
-                    <p className="text-sm mt-2">
-                      Click "Join Class" to get started!
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+      <section aria-labelledby="classes-heading">
+        <SectionHeader
+          id="classes-heading"
+          title={viewMode === "student" ? "My classes" : "Classes I teach"}
+          action={
+            viewMode === "student" ? (
+              <Button
+                onClick={() => setShowJoinDialog(true)}
+                size="sm"
+                className="rounded-xl"
+              >
+                <Plus />
+                Join class
+              </Button>
+            ) : (
+              <Button
+                onClick={() => setShowCreateDialog(true)}
+                size="sm"
+                className="rounded-xl"
+              >
+                <Plus />
+                Create class
+              </Button>
+            )
+          }
+        />
 
-          {/* Teacher View - Show taught classes only */}
-          {viewMode === "teacher" && (
-            <Card className="rounded-2xl shadow-xs">
-              <CardHeader className="p-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-bold text-foreground">
-                    Classes I Teach
-                  </h2>
-                  <Button
-                    onClick={() => setShowCreateDialog(true)}
-                    variant="default"
-                    size="sm"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create Class
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 pt-0">
-                {loading ? (
-                  <div className="text-center text-muted-foreground py-8">
-                    Loading...
-                  </div>
-                ) : myClasses.length > 0 ? (
-                  <div className="space-y-3">
-                    {myClasses.map((classItem) => (
-                      <ClassCard
-                        key={classItem.id}
-                        classItem={classItem}
-                        isTeacher={true}
-                        viewMode="teacher"
-                        onDeleted={handleClassDeleted}
-                        onLeft={handleClassLeft}
-                        onViewDetails={handleViewClassDetails}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center text-muted-foreground py-8">
-                    <p>You haven't created any classes yet.</p>
-                    <p className="text-sm mt-2">
-                      Click "Create Class" to get started!
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-      </Tabs>
+        {loading ? (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }, (_, i) => (
+              <Skeleton key={i} className="h-28 rounded-2xl" />
+            ))}
+          </div>
+        ) : visibleClasses.length > 0 ? (
+          <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {visibleClasses.map((classItem) => (
+              <ClassCard
+                key={classItem.id}
+                classItem={classItem}
+                isTeacher={viewMode === "teacher"}
+                viewMode={viewMode}
+                onDeleted={handleClassDeleted}
+                onLeft={handleClassLeft}
+                onViewDetails={
+                  viewMode === "teacher" ? handleViewClassDetails : undefined
+                }
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed px-6 py-10 text-center">
+            {viewMode === "student" ? (
+              <>
+                <p className="font-medium text-foreground">
+                  You haven't joined a class yet
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  If a teacher gave you a join code, choose Join class to
+                  enter it.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="font-medium text-foreground">
+                  You haven't created a class yet
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Create one to get a join code you can share with students.
+                </p>
+              </>
+            )}
+          </div>
+        )}
+      </section>
 
       {/* Dialogs */}
       <CreateClassDialog

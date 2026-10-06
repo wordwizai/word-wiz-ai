@@ -13,10 +13,10 @@ interface PhonemeInsightsCardProps {
 
 const PhonemeInsightsCard = ({ insights }: PhonemeInsightsCardProps) => {
   const getDifficultyColor = (level?: number) => {
-    if (!level) return "bg-gray-200";
-    if (level <= 2) return "bg-green-200";
-    if (level === 3) return "bg-yellow-200";
-    return "bg-orange-200";
+    if (!level) return "bg-background text-muted-foreground";
+    if (level <= 2) return "bg-pastel-mint text-pastel-mint-foreground";
+    if (level === 3) return "bg-pastel-yellow text-pastel-yellow-foreground";
+    return "bg-pastel-coral text-pastel-coral-foreground";
   };
 
   const getDifficultyLabel = (level?: number) => {
@@ -41,11 +41,11 @@ const PhonemeInsightsCard = ({ insights }: PhonemeInsightsCardProps) => {
       {insights.slice(0, 5).map((insight, index) => (
         <div
           key={insight.phoneme}
-          className="bg-muted rounded-lg p-4 border-l-4 border-orange-500"
+          className="bg-muted rounded-xl p-4 border-l-4 border-pastel-coral-foreground"
         >
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-center gap-3">
-              <div className="text-3xl font-mono font-bold text-foreground">
+              <div className="text-3xl font-ipa text-foreground">
                 /{insight.phoneme}/
               </div>
               <div>
@@ -55,7 +55,7 @@ const PhonemeInsightsCard = ({ insights }: PhonemeInsightsCardProps) => {
                     {insight.error_count === 1 ? "error" : "errors"}
                   </span>
                   <span
-                    className={`text-xs px-2 py-0.5 rounded ${getDifficultyColor(
+                    className={`text-xs font-medium px-2 py-0.5 rounded-full ${getDifficultyColor(
                       insight.difficulty_level
                     )}`}
                   >
@@ -63,7 +63,7 @@ const PhonemeInsightsCard = ({ insights }: PhonemeInsightsCardProps) => {
                   </span>
                 </div>
                 {index === 0 && (
-                  <span className="text-xs text-orange-600 font-medium">
+                  <span className="text-xs text-pastel-coral-foreground font-medium">
                     🎯 Primary Focus
                   </span>
                 )}

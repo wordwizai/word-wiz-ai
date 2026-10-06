@@ -60,3 +60,19 @@ const LABELS: Record<string, { letters: string; example: string }> = {
 export function phonemeLabel(ipa: string) {
   return LABELS[ipa] ?? null;
 }
+
+const MACRONS: Record<string, string> = { a: "ā", e: "ē", i: "ī", o: "ō" };
+
+// A label short enough for a sound tile. "short a" becomes "a", "long a"
+// becomes "ā" (the mark phonics lessons use) and "long oo" stays "oo".
+// IPA with no label shows as itself.
+export function phonemeTileLabel(ipa: string) {
+  const letters = LABELS[ipa]?.letters;
+  if (!letters) return ipa;
+  if (letters.startsWith("short ")) return letters.slice("short ".length);
+  if (letters.startsWith("long ")) {
+    const vowel = letters.slice("long ".length);
+    return MACRONS[vowel] ?? vowel;
+  }
+  return letters;
+}

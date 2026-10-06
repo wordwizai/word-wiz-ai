@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { WordBadge } from "./WordBadge";
-import type { PronunciationAnalysis } from "./practice/types";
+import type { PhonemeOp, PronunciationAnalysis } from "./practice/types";
 
 interface WordBadgeRowProps {
   showHighlightedWords: boolean;
@@ -61,6 +61,7 @@ const WordBadgeRow = ({
         per: null,
         isInsertion: false,
         isDeletion: false,
+        phonemeAlignment: null,
       }));
     }
 
@@ -73,6 +74,7 @@ const WordBadgeRow = ({
       per: number | null;
       isInsertion: boolean;
       isDeletion: boolean;
+      phonemeAlignment: PhonemeOp[] | null;
     }> = [];
 
     // First, map ground truth words to their analysis data
@@ -94,6 +96,10 @@ const WordBadgeRow = ({
           per: analysisData.pronunciation_dataframe.per[analysisIdx] ?? null,
           isInsertion: false,
           isDeletion: errorType === "deletion", // Word was not spoken
+          phonemeAlignment:
+            analysisData.pronunciation_dataframe.phoneme_alignment?.[
+              analysisIdx
+            ] ?? null,
         });
       } else {
         // Word not found in analysis (shouldn't happen normally)
@@ -104,6 +110,7 @@ const WordBadgeRow = ({
           per: null,
           isInsertion: false,
           isDeletion: false,
+          phonemeAlignment: null,
         });
       }
     });
@@ -124,6 +131,7 @@ const WordBadgeRow = ({
                 per: null, // Insertions don't have PER
                 isInsertion: true,
                 isDeletion: false,
+                phonemeAlignment: null,
               });
             }
           }
@@ -161,6 +169,7 @@ const WordBadgeRow = ({
               isInsertion={item.isInsertion}
               isDeletion={item.isDeletion}
               splitIntoSounds={splitIntoSounds}
+              phonemeAlignment={item.phonemeAlignment ?? undefined}
               key={`${item.word}-${item.analysisIdx ?? displayIdx}`}
             />
           );

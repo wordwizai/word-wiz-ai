@@ -115,7 +115,7 @@ const ClassesPage = () => {
   // If viewing student details, show student detail view
   if (selectedStudent !== null && selectedClassId !== null) {
     return (
-      <AppPage>
+      <AppPage title="Classes">
         <StudentDetailView
           student={selectedStudent}
           classId={selectedClassId}
@@ -128,7 +128,7 @@ const ClassesPage = () => {
   // If viewing class details, show detail view
   if (selectedClassId !== null) {
     return (
-      <AppPage>
+      <AppPage title="Classes">
         <ClassDetailView
           classId={selectedClassId}
           className={selectedClassName}
@@ -141,7 +141,7 @@ const ClassesPage = () => {
   }
 
   return (
-    <AppPage>
+    <AppPage title="Classes">
       <PageHeader
         title="Classes"
         description={

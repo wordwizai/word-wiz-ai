@@ -28,7 +28,7 @@ const PracticeDashboard = () => {
   const { activities } = useActivities();
 
   return (
-    <AppPage>
+    <AppPage title="Practice">
       <PageHeader
         title="Practice"
         description="Pick a story or free practice. Every activity listens to your child read and points out the sounds to work on."

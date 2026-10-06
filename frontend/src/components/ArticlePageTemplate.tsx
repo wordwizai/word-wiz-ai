@@ -492,6 +492,7 @@ const ShareButtons: React.FC<{ url: string; title: string }> = ({
           <Button size="sm" variant="outline" asChild>
             <a
               href={shareUrls.twitter}
+              aria-label="Share on X (Twitter)"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -501,6 +502,7 @@ const ShareButtons: React.FC<{ url: string; title: string }> = ({
           <Button size="sm" variant="outline" asChild>
             <a
               href={shareUrls.facebook}
+              aria-label="Share on Facebook"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -510,6 +512,7 @@ const ShareButtons: React.FC<{ url: string; title: string }> = ({
           <Button size="sm" variant="outline" asChild>
             <a
               href={shareUrls.linkedin}
+              aria-label="Share on LinkedIn"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -517,7 +520,7 @@ const ShareButtons: React.FC<{ url: string; title: string }> = ({
             </a>
           </Button>
           <Button size="sm" variant="outline" asChild>
-            <a href={shareUrls.email}>
+            <a href={shareUrls.email} aria-label="Share by email">
               <Mail className="w-4 h-4" />
             </a>
           </Button>

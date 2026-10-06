@@ -98,7 +98,7 @@ const Dashboard = () => {
   };
 
   return (
-    <AppPage>
+    <AppPage title="Dashboard">
       <PageHeader
         title={firstName ? `${greeting()}, ${firstName}` : "Welcome back"}
         actions={

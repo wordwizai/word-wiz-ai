@@ -1,6 +1,7 @@
 import { CreateAccountForm } from "@/components/create-account-form";
 import { wordWizIcon } from "@/assets";
 import { Link, Navigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { useContext, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 
@@ -13,6 +14,10 @@ const SignUp = () => {
 
   return (
     <div className="relative flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4 overflow-hidden">
+      <Helmet>
+        <title>Sign up | Word Wiz AI</title>
+      </Helmet>
+
       {/* Decorative orbs */}
       <div className="absolute -top-24 -left-24 w-72 h-72 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-accent/10 rounded-full blur-3xl pointer-events-none" />

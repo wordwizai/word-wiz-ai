@@ -92,7 +92,7 @@ const Settings = () => {
   };
 
   return (
-    <AppPage width="narrow">
+    <AppPage width="narrow" title="Settings">
       <PageHeader
         title="Settings"
         description="Your account, how the app looks, and how it processes audio."

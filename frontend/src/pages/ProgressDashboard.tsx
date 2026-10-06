@@ -34,7 +34,7 @@ const ProgressDashboard = () => {
   ];
 
   return (
-    <AppPage>
+    <AppPage title="Progress">
       <PageHeader
         title="Progress"
         description="How reading is going, and which sounds still need practice."

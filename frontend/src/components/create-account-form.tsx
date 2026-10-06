@@ -78,7 +78,9 @@ export function CreateAccountForm({
     >
       <Card className="rounded-2xl border-2 border-border shadow-lg">
         <CardHeader className="text-center pb-2">
-          <CardTitle className="text-2xl font-bold">Create your account</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            <h1>Create your account</h1>
+          </CardTitle>
           <CardDescription className="text-sm">
             Start your reading journey today
           </CardDescription>

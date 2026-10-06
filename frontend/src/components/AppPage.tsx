@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Helmet } from "react-helmet-async";
 import { cn } from "@/lib/utils";
 
 // Shared frame for the signed-in pages. One width, one gutter, one rhythm,
@@ -8,10 +9,13 @@ export const AppPage = ({
   children,
   className,
   width = "default",
+  title,
 }: {
   children: ReactNode;
   className?: string;
   width?: "default" | "narrow";
+  /** Browser tab title. Without it every page showed the homepage title. */
+  title?: string;
 }) => (
   <main
     className={cn(
@@ -20,6 +24,11 @@ export const AppPage = ({
       className
     )}
   >
+    {title && (
+      <Helmet>
+        <title>{`${title} | Word Wiz AI`}</title>
+      </Helmet>
+    )}
     {children}
   </main>
 );

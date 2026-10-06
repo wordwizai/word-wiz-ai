@@ -16,7 +16,11 @@ import type {
   AudioTransport,
   AudioAnalysisEvent,
 } from "@/services/audioTransport";
-import { showErrorToast, showNetworkError } from "@/utils/errorHandling";
+import {
+  showErrorToast,
+  showNetworkError,
+  showPracticeErrorToast,
+} from "@/utils/errorHandling";
 
 export interface UseAudioTransportOptions {
   onAnalysis?: (data: any) => void;
@@ -83,7 +87,8 @@ export function useAudioTransport(options: UseAudioTransportOptions) {
           typeof event.data === "string"
             ? event.data
             : event.data?.message || event.data?.error || "An error occurred";
-        showErrorToast(errorMsg);
+        // The backend writes these for parents and kids, so show them as-is.
+        showPracticeErrorToast(errorMsg);
         opts.onError?.(errorMsg);
         break;
       }
@@ -153,8 +158,19 @@ export function useAudioTransport(options: UseAudioTransportOptions) {
     ) => {
       const transport = transportRef.current;
 
+      // Nothing upstream catches a throw here (the recorder fires and
+      // forgets), so a dropped connection used to discard the recording
+      // silently. Tell the reader instead; the socket reconnects on its own.
+      const lostConnection = () => {
+        const message =
+          "We lost the connection for a moment. Please tap the mic and read the sentence again.";
+        showPracticeErrorToast(message);
+        optionsRef.current.onError?.(message);
+      };
+
       if (!transport || !transport.isConnected()) {
-        throw new Error("Transport not connected");
+        lostConnection();
+        return;
       }
 
       setIsProcessing(true);
@@ -164,7 +180,7 @@ export function useAudioTransport(options: UseAudioTransportOptions) {
       } catch (err: any) {
         setIsProcessing(false);
         console.error("Failed to send audio:", err);
-        throw err;
+        lostConnection();
       }
     },
     []

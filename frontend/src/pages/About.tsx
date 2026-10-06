@@ -298,7 +298,7 @@ const About = () => {
               {
                 icon: <Mail className="w-6 h-6" />,
                 label: "Email",
-                href: "mailto:contact@wordwizai.com",
+                href: "mailto:contactwordwizai@gmail.com",
                 color: "from-blue-400 to-cyan-600",
               },
             ].map((social, i) => (

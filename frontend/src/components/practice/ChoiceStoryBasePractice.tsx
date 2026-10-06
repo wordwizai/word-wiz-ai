@@ -4,7 +4,7 @@ import { useHybridAudioAnalysis } from "@/hooks/useHybridAudioAnalysis";
 import { useFeedbackAudio } from "@/hooks/useFeedbackAudio";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getCurrentSessionState, type Session } from "@/api";
-import { showErrorToast } from "@/utils/errorHandling";
+import { showPracticeErrorToast } from "@/utils/errorHandling";
 import type {
   PracticeStageState,
   PronunciationAnalysis,
@@ -78,16 +78,15 @@ const ChoiceStoryBasePractice = ({
     onNextSentence: (data) => {
       if (!isValidOptions(data?.sentence)) {
         console.error("Invalid sentence options received", data);
-        showErrorToast("Invalid sentence options received");
+        showPracticeErrorToast("We couldn't load the next part of the story. Please try reading again.");
         return;
       }
       setSentenceOptions(data.sentence);
       setShowSentenceOptions(true);
     },
     onAudioFeedback: feedbackAudio.play,
-    onError: (err) => {
-      console.error("Stream error:", err);
-      showErrorToast(err);
+    onError: () => {
+      // useAudioTransport already showed the message; just reset the UI.
       setIsProcessing(false);
     },
     sessionId: session.id,

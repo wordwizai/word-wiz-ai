@@ -4,7 +4,7 @@ import { useHybridAudioAnalysis } from "@/hooks/useHybridAudioAnalysis";
 import { useFeedbackAudio } from "@/hooks/useFeedbackAudio";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getCurrentSessionState, type Session } from "@/api";
-import { showErrorToast } from "@/utils/errorHandling";
+import { showPracticeErrorToast } from "@/utils/errorHandling";
 import type { PracticeStageState, PronunciationAnalysis } from "./types";
 
 export interface BasePracticeRenderProps extends PracticeStageState {
@@ -65,9 +65,8 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
       }, 1000);
     },
     onAudioFeedback: feedbackAudio.play,
-    onError: (err) => {
-      console.error("Stream error:", err);
-      showErrorToast(err);
+    onError: () => {
+      // useAudioTransport already showed the message; just reset the UI.
       setIsProcessing(false);
     },
     sessionId: session.id,
@@ -93,7 +92,8 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
         }
       } catch (error) {
         console.error("Failed to fetch session state:", error);
-        showErrorToast("Failed to load practice session. Please try refreshing.");
+        // showErrorToast would recategorize this as a model-loading failure.
+        showPracticeErrorToast("We couldn't load this practice session. Please refresh the page.");
         if (session.activity.activity_settings?.first_sentence) {
           setCurrentSentence(session.activity.activity_settings.first_sentence);
         }

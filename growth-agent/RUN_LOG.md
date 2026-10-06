@@ -149,3 +149,20 @@ posted from here.
 
 **Expect**: once backend + dev->main deploy, try-page events start; signup
 clicks per guide visitor should rise from ~9 per 30 days. Check in session 3.
+
+**Later in session 2 (Bruce's second round of answers)**: AQ-011 approved
+(privacy line added, 4c0c2c8). AQ-012 done by Bruce (he updated the server
+env; confirmed `WWAI_SOFT_QUALITY_GATES=1` in the container and "Metrics
+mode: robust" on live requests). Reddit posts approved (Bruce posts). HN and
+LinkedIn rejected. All contact forms and emails approved; the two emails
+(KidvoKit, OFTP) are Bruce's to send from contactwordwizai@gmail.com, the
+two forms (Lead in Literacy, TeachersFirst) wait for the try page.
+
+**Deployed the backend** at Bruce's request: merged growth-agent into dev
+(one conflict in prerender.mjs's excluded routes, resolved by keeping both
+"/dev" and "/try"), verified merged dev (all backend tests, full frontend
+build, 158 pages), pushed dev, cleared Docker build cache and unused images
+on the server (1.4 GB -> 6.6 GB free), ran `scripts/deploy-backend.sh 9583b5d`.
+/docs 200, ONNX loaded. In production: arbitrary sentence -> 400, guest
+analysis full stream, digital-silence recording now scores. Pruned again
+after the swap (6.6 GB free).

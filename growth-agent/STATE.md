@@ -72,9 +72,11 @@ guides produced ~9 signup-click visitors in total; the homepage converts
 | Silent-e guide retitle | a3fe0f3 | **Live 2026-10-06** | CTR on "silent e words" (0.1% at pos 8) ~Nov 1 |
 | Silent-e guide +20 sentences | 04c34e3 | **Live 2026-10-06** | Pos for "magic e sentences" (6.2) ~Nov 1 |
 | About page founder section | 9c84b9a | In dev, not main | |
+| Privacy line for the try page (AQ-011) | 4c0c2c8 | In dev, not main | |
+| Robust quality gates (AQ-012, Bruce set the env) | n/a | **Live 2026-10-06**, confirmed `Metrics mode: robust` | Users with a scored reading (baseline 20/40) |
 | 4 magic-e practice pages | 895cbdd | In dev, not main | Indexing; "magic e words" pos 17.2 |
-| Guest route + try page + guide CTAs | 47c92d1, e4a6965, 46a50ce | In dev, not main. **Backend must deploy first** | `try_link_click` / `try_attempt` / `try_completed` events; signup clicks per guide visit |
-| Digital-silence fix | 50e1a11 | In dev, needs backend deploy | Users with a scored reading (baseline 20/40) |
+| Guest route + try page + guide CTAs | 47c92d1, e4a6965, 46a50ce | **Backend live 2026-10-06** (9583b5d, verified in prod). Frontend in dev, waiting on dev -> main | `try_link_click` / `try_attempt` / `try_completed` events; signup clicks per guide visit |
+| Digital-silence fix | 50e1a11 | **Live 2026-10-06** (backend) | Users with a scored reading (baseline 20/40) |
 
 ## What's working
 
@@ -91,7 +93,7 @@ guides produced ~9 signup-click visitors in total; the homepage converts
 
 ## Backlog (advertising first)
 
-1. **Send the AQ-013..AQ-020 outreach batch** once the try page is live.
+1. **Once the try page is live** (dev -> main): submit AQ-018 and AQ-019 contact forms; remind Bruce to post AQ-013/AQ-014 (a day apart) and send AQ-017/AQ-020 from contactwordwizai@gmail.com. HN and LinkedIn were rejected.
    Then one follow-up wave of 4-6 more listicle authors from research
    (spellingjoy, learningreadinghub, mmguardian have no clear contact route;
    skip comment-section link drops).
@@ -115,9 +117,8 @@ guides produced ~9 signup-click visitors in total; the homepage converts
 ## Next actions (session 3)
 
 1. Merge `origin/main`, read the queue, execute APPROVED items.
-2. Check whether the backend deployed and the try page is live
-   (`curl -s -o /dev/null -w "%{http_code}" -X POST https://api.wordwizai.com/guest/analyze-audio`
-   should be 422, not 404). If live, send approved outreach.
+2. Backend is deployed (verified). Check the frontend: https://wordwizai.com/try/at-family
+   should show the try intro, not the homepage. If live, send AQ-018/AQ-019.
 3. Re-read Vercel: `try_link_click`, `try_attempt`, `try_completed`,
    `signup_button_click` by page. Re-read GSC for the session-1 pages.
 4. Check contactwordwizai@gmail.com replies are being handled (Bruce) and

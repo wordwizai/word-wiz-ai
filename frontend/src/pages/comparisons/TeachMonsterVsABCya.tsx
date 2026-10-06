@@ -9,8 +9,6 @@ const TeachMonsterABCyaComparison = () => {
       paid: "$4.99 (mobile app, optional)",
       trial: "Free forever (web)",
     },
-    rating: 4.7,
-    reviewCount: 8500,
     website: "https://www.teachyourmonstertoread.com",
   };
 
@@ -22,8 +20,6 @@ const TeachMonsterABCyaComparison = () => {
       paid: "$99/year (ad-free)",
       trial: "Free tier available",
     },
-    rating: 4.3,
-    reviewCount: 12000,
     website: "https://www.abcya.com",
   };
 
@@ -34,8 +30,6 @@ const TeachMonsterABCyaComparison = () => {
       free: "Free forever",
       paid: "All features free",
     },
-    rating: 4.8,
-    reviewCount: 250,
     website: "https://wordwizai.com",
   };
 
@@ -262,61 +256,6 @@ const TeachMonsterABCyaComparison = () => {
     },
   ];
 
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "ComparisonPage",
-    name: "Teach Your Monster vs ABCya vs Word Wiz AI",
-    description:
-      "Compare free phonics games: Teach Your Monster, ABCya, and Word Wiz AI. See which is best for your child's reading practice.",
-    mainEntity: [
-      {
-        "@type": "Product",
-        name: "Teach Your Monster to Read",
-        description: "Free phonics game for ages 3-6",
-        offers: {
-          "@type": "Offer",
-          price: "0",
-          priceCurrency: "USD",
-        },
-        aggregateRating: {
-          "@type": "AggregateRating",
-          ratingValue: "4.7",
-          reviewCount: "8500",
-        },
-      },
-      {
-        "@type": "Product",
-        name: "ABCya",
-        description: "Educational game portal with 400+ games",
-        offers: {
-          "@type": "Offer",
-          price: "99",
-          priceCurrency: "USD",
-        },
-        aggregateRating: {
-          "@type": "AggregateRating",
-          ratingValue: "4.3",
-          reviewCount: "12000",
-        },
-      },
-      {
-        "@type": "Product",
-        name: "Word Wiz AI",
-        description: "Free speech recognition for pronunciation practice",
-        offers: {
-          "@type": "Offer",
-          price: "0",
-          priceCurrency: "USD",
-        },
-        aggregateRating: {
-          "@type": "AggregateRating",
-          ratingValue: "4.8",
-          reviewCount: "250",
-        },
-      },
-    ],
-  };
-
   return (
     <ComparisonPage
       product1={product1}
@@ -333,7 +272,6 @@ const TeachMonsterABCyaComparison = () => {
       introText="Teach Your Monster is free in the browser and $4.99 on mobile, ABCya is free with ads or $99/year ad-free, and Word Wiz AI is free with no ads and the only one giving spoken pronunciation feedback. Teach Your Monster plus Word Wiz AI is the strongest free combination: engaging phonics games plus accuracy checking."
       verdict={verdict}
       faqs={faqs}
-      structuredData={structuredData}
     />
   );
 };

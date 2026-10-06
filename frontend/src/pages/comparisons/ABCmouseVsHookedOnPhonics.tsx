@@ -9,8 +9,6 @@ const ABCmouseHookedOnPhonicsComparison = () => {
       paid: "$14.99/mo or $45/yr",
       trial: "30 days free",
     },
-    rating: 4.6,
-    reviewCount: 50000,
     website: "https://www.abcmouse.com",
   };
 
@@ -22,8 +20,6 @@ const ABCmouseHookedOnPhonicsComparison = () => {
       paid: "$19.99/mo + materials",
       trial: "$1 trial month",
     },
-    rating: 4.5,
-    reviewCount: 15000,
     website: "https://www.hookedonphonics.com",
   };
 
@@ -32,10 +28,7 @@ const ABCmouseHookedOnPhonicsComparison = () => {
     tagline: "AI-powered phoneme-level pronunciation feedback",
     pricing: {
       free: "Free forever",
-      paid: "Premium features available",
     },
-    rating: 4.8,
-    reviewCount: 2500,
     website: "https://wordwizai.com",
   };
 
@@ -357,64 +350,6 @@ const ABCmouseHookedOnPhonicsComparison = () => {
     },
   ];
 
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "ComparisonPage",
-    name: "ABCmouse vs Hooked on Phonics vs Word Wiz AI",
-    description:
-      "Comprehensive comparison of ABCmouse, Hooked on Phonics, and Word Wiz AI for teaching children to read",
-    mainEntity: [
-      {
-        "@type": "Product",
-        name: "ABCmouse",
-        description: product1Details.description,
-        offers: {
-          "@type": "Offer",
-          price: "14.99",
-          priceCurrency: "USD",
-          availability: "https://schema.org/InStock",
-        },
-        aggregateRating: {
-          "@type": "AggregateRating",
-          ratingValue: "4.6",
-          reviewCount: "50000",
-        },
-      },
-      {
-        "@type": "Product",
-        name: "Hooked on Phonics",
-        description: product2Details.description,
-        offers: {
-          "@type": "Offer",
-          price: "19.99",
-          priceCurrency: "USD",
-          availability: "https://schema.org/InStock",
-        },
-        aggregateRating: {
-          "@type": "AggregateRating",
-          ratingValue: "4.5",
-          reviewCount: "15000",
-        },
-      },
-      {
-        "@type": "Product",
-        name: "Word Wiz AI",
-        description: wordWizDetails.description,
-        offers: {
-          "@type": "Offer",
-          price: "0",
-          priceCurrency: "USD",
-          availability: "https://schema.org/InStock",
-        },
-        aggregateRating: {
-          "@type": "AggregateRating",
-          ratingValue: "4.8",
-          reviewCount: "2500",
-        },
-      },
-    ],
-  };
-
   return (
     <ComparisonPage
       product1={product1}
@@ -431,7 +366,6 @@ const ABCmouseHookedOnPhonicsComparison = () => {
       introText="ABCmouse costs $14.99/month for the broadest curriculum, Hooked on Phonics runs $19.99/month plus materials for traditional systematic phonics, and Word Wiz AI is free and is the only one of the three that listens to a child read aloud and corrects pronunciation. Choose ABCmouse for breadth, Hooked on Phonics for structure, and Word Wiz AI for pronunciation accuracy."
       verdict={verdict}
       faqs={faqs}
-      structuredData={structuredData}
     />
   );
 };

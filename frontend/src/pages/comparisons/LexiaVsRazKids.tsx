@@ -9,8 +9,6 @@ const LexiaRazKidsComparison = () => {
       paid: "$50-80/student/year",
       trial: "School/district trials available",
     },
-    rating: 4.2,
-    reviewCount: 1200,
     website: "https://www.lexialearning.com",
   };
 
@@ -22,8 +20,6 @@ const LexiaRazKidsComparison = () => {
       paid: "$120/classroom/year (36 students)",
       trial: "14 days free",
     },
-    rating: 4.6,
-    reviewCount: 3400,
     website: "https://www.raz-kids.com",
   };
 
@@ -34,8 +30,6 @@ const LexiaRazKidsComparison = () => {
       free: "Free forever",
       paid: "All features free",
     },
-    rating: 4.8,
-    reviewCount: 250,
     website: "https://wordwizai.com",
   };
 
@@ -345,78 +339,6 @@ const LexiaRazKidsComparison = () => {
     },
   ];
 
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "ComparisonPage",
-    name: "Lexia vs Raz-Kids vs Word Wiz AI Comparison",
-    description:
-      "Compare Lexia Core5, Raz-Kids, and Word Wiz AI reading programs for schools. See pricing, features, and which is best for your classroom.",
-    mainEntity: [
-      {
-        "@type": "Product",
-        name: "Lexia Core5 Reading",
-        description: "Adaptive reading intervention software for K-5 schools",
-        offers: {
-          "@type": "Offer",
-          price: "50-80",
-          priceCurrency: "USD",
-          priceSpecification: {
-            "@type": "UnitPriceSpecification",
-            referenceQuantity: {
-              "@type": "QuantitativeValue",
-              value: "1",
-              unitText: "student per year",
-            },
-          },
-        },
-        aggregateRating: {
-          "@type": "AggregateRating",
-          ratingValue: "4.2",
-          reviewCount: "1200",
-        },
-      },
-      {
-        "@type": "Product",
-        name: "Raz-Kids",
-        description: "Leveled reading library for K-5 classrooms",
-        offers: {
-          "@type": "Offer",
-          price: "120",
-          priceCurrency: "USD",
-          priceSpecification: {
-            "@type": "UnitPriceSpecification",
-            referenceQuantity: {
-              "@type": "QuantitativeValue",
-              value: "1",
-              unitText: "classroom per year",
-            },
-          },
-        },
-        aggregateRating: {
-          "@type": "AggregateRating",
-          ratingValue: "4.6",
-          reviewCount: "3400",
-        },
-      },
-      {
-        "@type": "Product",
-        name: "Word Wiz AI",
-        description:
-          "Free AI-powered pronunciation feedback with speech recognition",
-        offers: {
-          "@type": "Offer",
-          price: "0",
-          priceCurrency: "USD",
-        },
-        aggregateRating: {
-          "@type": "AggregateRating",
-          ratingValue: "4.8",
-          reviewCount: "250",
-        },
-      },
-    ],
-  };
-
   return (
     <ComparisonPage
       product1={product1}
@@ -433,7 +355,6 @@ const LexiaRazKidsComparison = () => {
       introText="For classrooms, Lexia Core5 runs $50-80 per student per year for assessment-driven intervention, Raz-Kids costs $120 per classroom of 36 for a leveled reading library, and Word Wiz AI is free and adds the pronunciation feedback neither provides. Many schools pair one paid tool with Word Wiz AI rather than choosing between them."
       verdict={verdict}
       faqs={faqs}
-      structuredData={structuredData}
     />
   );
 };

@@ -9,8 +9,6 @@ const HomerKhanAcademyKidsComparison = () => {
       paid: "$12.99/mo or $79.99/yr",
       trial: "30 days free",
     },
-    rating: 4.6,
-    reviewCount: 22000,
     website: "https://learnwithhomer.com",
   };
 
@@ -22,8 +20,6 @@ const HomerKhanAcademyKidsComparison = () => {
       paid: "N/A",
       trial: "All features free",
     },
-    rating: 4.8,
-    reviewCount: 45000,
     website: "https://www.khanacademykids.org",
   };
 
@@ -32,10 +28,7 @@ const HomerKhanAcademyKidsComparison = () => {
     tagline: "AI-powered phoneme-level pronunciation feedback",
     pricing: {
       free: "Free forever",
-      paid: "Premium features available",
     },
-    rating: 4.8,
-    reviewCount: 2500,
     website: "https://wordwizai.com",
   };
 
@@ -344,61 +337,6 @@ const HomerKhanAcademyKidsComparison = () => {
     },
   ];
 
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "ComparisonPage",
-    name: "HOMER vs Khan Academy Kids vs Word Wiz AI",
-    description:
-      "Comparison of HOMER, Khan Academy Kids, and Word Wiz AI for personalized early learning",
-    mainEntity: [
-      {
-        "@type": "Product",
-        name: "HOMER",
-        description: product1Details.description,
-        offers: {
-          "@type": "Offer",
-          price: "12.99",
-          priceCurrency: "USD",
-        },
-        aggregateRating: {
-          "@type": "AggregateRating",
-          ratingValue: "4.6",
-          reviewCount: "22000",
-        },
-      },
-      {
-        "@type": "Product",
-        name: "Khan Academy Kids",
-        description: product2Details.description,
-        offers: {
-          "@type": "Offer",
-          price: "0",
-          priceCurrency: "USD",
-        },
-        aggregateRating: {
-          "@type": "AggregateRating",
-          ratingValue: "4.8",
-          reviewCount: "45000",
-        },
-      },
-      {
-        "@type": "Product",
-        name: "Word Wiz AI",
-        description: wordWizDetails.description,
-        offers: {
-          "@type": "Offer",
-          price: "0",
-          priceCurrency: "USD",
-        },
-        aggregateRating: {
-          "@type": "AggregateRating",
-          ratingValue: "4.8",
-          reviewCount: "2500",
-        },
-      },
-    ],
-  };
-
   return (
     <ComparisonPage
       product1={product1}
@@ -415,7 +353,6 @@ const HomerKhanAcademyKidsComparison = () => {
       introText="Khan Academy Kids is free with no paid tier, HOMER costs $12.99/month or $79.99/year for interest-based personalization, and Word Wiz AI is free and the only one that listens to a child read aloud. Khan Academy Kids paired with Word Wiz AI covers both breadth and pronunciation at no cost."
       verdict={verdict}
       faqs={faqs}
-      structuredData={structuredData}
     />
   );
 };

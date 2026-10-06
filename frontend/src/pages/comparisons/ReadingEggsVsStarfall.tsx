@@ -9,8 +9,6 @@ const ReadingEggsStarfallComparison = () => {
       paid: "$12.99/mo or $79.99/yr",
       trial: "30 days free",
     },
-    rating: 4.4,
-    reviewCount: 35000,
     website: "https://readingeggs.com",
   };
 
@@ -22,8 +20,6 @@ const ReadingEggsStarfallComparison = () => {
       paid: "$60/yr for full access",
       trial: "Free tier available",
     },
-    rating: 4.7,
-    reviewCount: 28000,
     website: "https://www.starfall.com",
   };
 
@@ -32,10 +28,7 @@ const ReadingEggsStarfallComparison = () => {
     tagline: "AI-powered phoneme-level pronunciation feedback",
     pricing: {
       free: "Free forever",
-      paid: "Premium features available",
     },
-    rating: 4.8,
-    reviewCount: 2500,
     website: "https://wordwizai.com",
   };
 
@@ -337,61 +330,6 @@ const ReadingEggsStarfallComparison = () => {
     },
   ];
 
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "ComparisonPage",
-    name: "Reading Eggs vs Starfall vs Word Wiz AI",
-    description:
-      "Comprehensive comparison of Reading Eggs, Starfall, and Word Wiz AI for online reading education",
-    mainEntity: [
-      {
-        "@type": "Product",
-        name: "Reading Eggs",
-        description: product1Details.description,
-        offers: {
-          "@type": "Offer",
-          price: "12.99",
-          priceCurrency: "USD",
-        },
-        aggregateRating: {
-          "@type": "AggregateRating",
-          ratingValue: "4.4",
-          reviewCount: "35000",
-        },
-      },
-      {
-        "@type": "Product",
-        name: "Starfall",
-        description: product2Details.description,
-        offers: {
-          "@type": "Offer",
-          price: "60",
-          priceCurrency: "USD",
-        },
-        aggregateRating: {
-          "@type": "AggregateRating",
-          ratingValue: "4.7",
-          reviewCount: "28000",
-        },
-      },
-      {
-        "@type": "Product",
-        name: "Word Wiz AI",
-        description: wordWizDetails.description,
-        offers: {
-          "@type": "Offer",
-          price: "0",
-          priceCurrency: "USD",
-        },
-        aggregateRating: {
-          "@type": "AggregateRating",
-          ratingValue: "4.8",
-          reviewCount: "2500",
-        },
-      },
-    ],
-  };
-
   return (
     <ComparisonPage
       product1={product1}
@@ -408,7 +346,6 @@ const ReadingEggsStarfallComparison = () => {
       introText="Reading Eggs costs $12.99/month or $79.99/year for a structured curriculum, Starfall is free with limits or $60/year in full, and Word Wiz AI is free and the only one that listens to a child read and flags mispronounced sounds. Use Reading Eggs for sequence, Starfall for accessibility, and Word Wiz AI for pronunciation."
       verdict={verdict}
       faqs={faqs}
-      structuredData={structuredData}
     />
   );
 };

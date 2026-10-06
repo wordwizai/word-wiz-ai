@@ -30,14 +30,49 @@ class TestLock(unittest.TestCase):
     def test_ledger(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = os.path.join(tmp, "log")
+            RUN.append_ledger("final", "freeze", "abc123", path=path, flags={"WWAI_X": "1"}, threshold=0.4)
+            with open(path, encoding="utf-8") as fh:
+                fields = fh.read().rstrip("\n").split("\t")
+        self.assertEqual(fields[1:], ["abc123", "final", "freeze", '{"WWAI_X":"1"}', "0.4"])
+
+    def test_ledger_without_flags_or_threshold_still_has_every_column(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "log")
             RUN.append_ledger("final", "freeze", "abc123", path=path)
             with open(path, encoding="utf-8") as fh:
                 fields = fh.read().rstrip("\n").split("\t")
-        self.assertEqual(fields[1:], ["abc123", "final", "freeze"])
+        self.assertEqual(fields[1:], ["abc123", "final", "freeze", "{}", ""])
+
+    def test_ledger_free_text_cannot_break_the_columns(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "log")
+            RUN.append_ledger("a\tb\nc", "why\r\nnot\there  now", "abc123", path=path, flags={}, threshold=0.4)
+            with open(path, encoding="utf-8", newline="") as fh:
+                text = fh.read()
+        self.assertEqual(text.count("\n"), 1)
+        self.assertNotIn("\r", text)
+        fields = text.rstrip("\n").split("\t")
+        self.assertEqual(len(fields), 6)
+        self.assertEqual(fields[2:4], ["a b c", "why not here now"])
+
+    def test_ledger_path_follows_a_patched_log(self):
+        # The default used to be bound when the function was defined, so patching the log did nothing.
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "log")
+            with mock.patch.object(common, "TEST_RUNS_LOG", path):
+                RUN.append_ledger("final", "freeze", "abc123")
+            with open(path, encoding="utf-8") as fh:
+                self.assertEqual(len(fh.read().splitlines()), 1)
 
     def test_main_refuses_locked_test_half(self):
-        with mock.patch.dict(os.environ, {common.UNLOCK_ENV: ""}):
+        err = io.StringIO()
+        with (
+            mock.patch.dict(os.environ, {common.UNLOCK_ENV: ""}),
+            mock.patch.object(common, "dotenv_wwai_keys", return_value=[]),
+            contextlib.redirect_stderr(err),
+        ):
             self.assertEqual(RUN.main(["--half", "test", "--name", "x"]), 2)
+        self.assertIn("sealed", err.getvalue())
 
     def test_main_refuses_wwai_keys_in_dotenv(self):
         err = io.StringIO()
@@ -81,6 +116,145 @@ class TestCacheChecks(unittest.TestCase):
             with self.assertRaises(common.StaleCacheError):
                 RUN.check_cache(tmp)
 
+    def _write_meta(self, tmp, half):
+        from core.model_registry import resolve_revision
+
+        with open(os.path.join(tmp, SC.CACHE_META), "w", encoding="utf-8") as fh:
+            json.dump({"half": half, "model_revision": resolve_revision("PHONEME_IPA_ONNX")}, fh)
+
+    def test_a_cache_built_for_the_other_half_is_stale(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self._write_meta(tmp, "dev")
+            with self.assertRaises(common.StaleCacheError) as ctx:
+                RUN.check_cache(tmp, "test")
+        self.assertIn("dev half", str(ctx.exception))
+
+    def test_a_cache_for_the_requested_half_is_fine(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self._write_meta(tmp, "test")
+            self.assertEqual(RUN.check_cache(tmp, "test")["half"], "test")
+
+    def test_the_half_is_only_checked_when_asked_for(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self._write_meta(tmp, "dev")
+            self.assertEqual(RUN.check_cache(tmp)["half"], "dev")
+
+    def test_an_unreadable_meta_file_is_stale(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with open(os.path.join(tmp, SC.CACHE_META), "w", encoding="utf-8") as fh:
+                fh.write("{not json")
+            with self.assertRaises(common.StaleCacheError):
+                RUN.check_cache(tmp, "dev")
+
+
+class TestTrackedByGit(unittest.TestCase):
+    def test_a_committed_file_is_tracked(self):
+        self.assertTrue(RUN._tracked_by_git(os.path.join(common.BENCH_ROOT, "run.py")))
+
+    def test_a_file_outside_the_repository_is_not(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "baseline_dev.json")
+            with open(path, "w", encoding="utf-8") as fh:
+                fh.write("{}")
+            self.assertFalse(RUN._tracked_by_git(path))
+
+    def test_a_missing_git_means_not_tracked(self):
+        with mock.patch("subprocess.run", side_effect=FileNotFoundError("git")):
+            self.assertFalse(RUN._tracked_by_git(os.path.join(common.BENCH_ROOT, "run.py")))
+
+
+CLEAN_SHA = "0123456789abcdef0123456789abcdef01234567"
+
+
+class TestUsageErrors(unittest.TestCase):
+    """Bad inputs and a sealed half return 2 with a message, never a traceback, and never use up a look."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        U.make_temp_dataset(self.tmp.name)
+        self.ledger = os.path.join(self.tmp.name, "test_runs.log")
+        stack = contextlib.ExitStack()
+        self.addCleanup(self.tmp.cleanup)
+        self.addCleanup(stack.close)
+        stack.enter_context(mock.patch.dict(os.environ, {
+            common.DATA_DIR_ENV: self.tmp.name, common.CACHE_DIR_ENV: os.path.join(self.tmp.name, "cache"),
+        }))
+        stack.enter_context(mock.patch.object(common, "dotenv_wwai_keys", return_value=[]))
+        stack.enter_context(mock.patch.object(common, "git_sha", return_value=CLEAN_SHA))
+        stack.enter_context(mock.patch.object(common, "TEST_RUNS_LOG", self.ledger))
+
+    def _main(self, *argv, unlock=False):
+        err = io.StringIO()
+        with (
+            mock.patch.dict(os.environ, {common.UNLOCK_ENV: "1" if unlock else ""}),
+            contextlib.redirect_stderr(err),
+            contextlib.redirect_stdout(io.StringIO()),
+        ):
+            code = RUN.main(list(argv))
+        return code, err.getvalue()
+
+    def test_a_name_with_a_path_separator_is_refused(self):
+        code, err = self._main("--name", "bad/name")
+        self.assertEqual(code, 2)
+        self.assertIn("--name", err)
+
+    def test_a_cache_name_with_a_path_separator_is_refused(self):
+        code, err = self._main("--name", "ok", "--cache", "../elsewhere")
+        self.assertEqual(code, 2)
+        self.assertIn("--cache", err)
+
+    def test_ordinary_names_are_accepted(self):
+        # These get past the name check and stop at the missing cache instead.
+        code, _err = self._main("--name", "Weighted-PER_v1.2", "--cache", "base.line-2", "--workers", "1")
+        self.assertEqual(code, RUN.EXIT_STALE)
+
+    def test_a_missing_subset_is_a_usage_error(self):
+        code, err = self._main("--name", "x", "--subset", "no_such_subset")
+        self.assertEqual(code, 2)
+        self.assertIn("error:", err)
+
+    def test_a_subset_naming_unknown_clips_is_a_usage_error(self):
+        from tests.benchmark import dataset
+
+        with tempfile.TemporaryDirectory() as subsets:
+            dataset.write_subset("bad", ["not-a-clip"], subsets)
+            with mock.patch.object(common, "SUBSETS_DIR", subsets):
+                code, err = self._main("--name", "x", "--subset", "bad")
+        self.assertEqual(code, 2)
+        self.assertIn("not in the dev half", err)
+
+    def test_a_missing_dataset_is_a_usage_error(self):
+        with tempfile.TemporaryDirectory() as empty:
+            with mock.patch.dict(os.environ, {common.DATA_DIR_ENV: empty}):
+                code, err = self._main("--name", "x")
+        self.assertEqual(code, 2)
+        self.assertIn("speechocean762 not found", err)
+
+    def test_a_flag_value_that_cannot_name_a_cache_is_a_usage_error(self):
+        with mock.patch.dict(os.environ, {"WWAI_CHUNK_OVERLAP_SECONDS": "a/b"}):
+            code, err = self._main("--name", "x")
+        self.assertEqual(code, 2)
+        self.assertIn("WWAI_CHUNK_OVERLAP_SECONDS", err)
+
+    def test_the_test_half_is_refused_when_the_tree_is_dirty(self):
+        for sha in (CLEAN_SHA + "-dirty", "unknown"):
+            with self.subTest(sha=sha), mock.patch.object(common, "git_sha", return_value=sha):
+                code, err = self._main("--half", "test", "--name", "x", "--reason", "final", unlock=True)
+                self.assertEqual(code, 2)
+                self.assertIn("git", err)
+                self.assertFalse(os.path.exists(self.ledger))
+
+    def test_a_dirty_tree_does_not_stop_dev_runs(self):
+        with mock.patch.object(common, "git_sha", return_value=CLEAN_SHA + "-dirty"):
+            code, _err = self._main("--name", "x", "--workers", "1", "--cache", "nope")
+        self.assertEqual(code, RUN.EXIT_STALE)  # it got as far as the cache
+
+    def test_a_bad_subset_on_the_test_half_does_not_use_a_look(self):
+        code, _err = self._main("--half", "test", "--name", "x", "--reason", "final",
+                                "--subset", "no_such_subset", unlock=True)
+        self.assertEqual(code, 2)
+        self.assertFalse(os.path.exists(self.ledger))
+
 
 class TestEndToEnd(unittest.TestCase):
     @classmethod
@@ -91,20 +265,49 @@ class TestEndToEnd(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.root = U.make_temp_dataset(self.tmp.name)
         self.cache_root = os.path.join(self.tmp.name, "cache")
+        self.real_ledger = common.TEST_RUNS_LOG
+        self.ledger = os.path.join(self.tmp.name, "test_runs.log")
         env = {common.DATA_DIR_ENV: self.tmp.name, common.CACHE_DIR_ENV: self.cache_root}
         self.env = mock.patch.dict(os.environ, env)
         self.env.start()
-        directory = SC.cache_dir("dev", "baseline")
-        SC.write_meta(directory, "dev", "baseline", {})
-        from tests.benchmark.dataset import load_half
-
-        for clip in load_half(self.root, "dev"):
-            SC.record_clip(clip.utt_id, clip.wav_path, clip.text, directory, U.fake_onnx_extractor(self.processor), U.FakeWords())
+        self.dotenv = mock.patch.object(common, "dotenv_wwai_keys", return_value=[])
+        self.dotenv.start()
+        self._record("dev")
 
     def tearDown(self):
+        self.dotenv.stop()
         self.env.stop()
         self.tmp.cleanup()
         RUN._init_error = None
+
+    def _record(self, half, meta_half=None):
+        """A valid fake cache for one half of the fixture."""
+        from tests.benchmark.dataset import load_half
+
+        directory = SC.cache_dir(half, "baseline")
+        SC.write_meta(directory, meta_half or half, "baseline", {})
+        for clip in load_half(self.root, half):
+            SC.record_clip(clip.utt_id, clip.wav_path, clip.text, directory, U.fake_onnx_extractor(self.processor), U.FakeWords())
+
+    def _main(self, *argv):
+        err = io.StringIO()
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(err):
+            code = RUN.main(list(argv))
+        return code, err.getvalue()
+
+    @contextlib.contextmanager
+    def _unlocked(self):
+        """The environment of a deliberate test-half run, with the ledger redirected into the temp dir."""
+        with (
+            mock.patch.dict(os.environ, {common.UNLOCK_ENV: "1", "WWAI_LEDGER_TEST_FLAG": "1"}),
+            mock.patch.object(common, "git_sha", return_value=CLEAN_SHA),
+            mock.patch.object(common, "TEST_RUNS_LOG", self.ledger),
+        ):
+            yield
+
+    def _ledger_lines(self):
+        with open(self.ledger, encoding="utf-8", newline="") as fh:
+            return fh.read().splitlines()
 
     def test_run_writes_results_and_summary(self):
         out = os.path.join(self.tmp.name, "r", "t_dev.json")
@@ -119,6 +322,127 @@ class TestEndToEnd(unittest.TestCase):
     def test_stale_cache_exit_code(self):
         self.assertEqual(RUN.main(["--name", "t", "--workers", "1", "--cache", "nope",
                                    "--out", os.path.join(self.tmp.name, "x.json")]), RUN.EXIT_STALE)
+
+    def test_test_half_run_logs_one_sanitized_look(self):
+        self._record("test")
+        with open(self.real_ledger, "rb") as fh:
+            real_before = fh.read()
+        out = os.path.join(self.tmp.name, "r", "final_test.json")
+        with self._unlocked():
+            code, _err = self._main("--half", "test", "--name", "final", "--workers", "1", "--out", out,
+                                    "--reason", "first look\twith a tab\nand a newline")
+            expected_flags = common.active_wwai_flags()
+        self.assertEqual(code, 0)
+        self.assertTrue(os.path.isfile(out))
+        self.assertTrue(os.path.isfile(out[:-5] + ".summary.json"))
+        with open(out, encoding="utf-8") as fh:
+            self.assertEqual(sorted(json.load(fh)["outcomes"]), ["000030033"])
+        lines = self._ledger_lines()
+        self.assertEqual(len(lines), 1)
+        fields = lines[0].split("\t")
+        self.assertEqual(len(fields), 6)
+        self.assertEqual(fields[1:4], [CLEAN_SHA, "final", "first look with a tab and a newline"])
+        self.assertEqual(json.loads(fields[4]), expected_flags)
+        self.assertEqual(expected_flags["WWAI_LEDGER_TEST_FLAG"], "1")
+        self.assertEqual(float(fields[5]), 0.4)
+        with open(self.real_ledger, "rb") as fh:
+            self.assertEqual(fh.read(), real_before, "the real test_runs.log must not be touched by tests")
+
+    def test_a_missing_cache_on_the_second_test_half_run_adds_no_ledger_line(self):
+        self._record("test")
+        out = os.path.join(self.tmp.name, "r", "final_test.json")
+        with self._unlocked():
+            self.assertEqual(self._main("--half", "test", "--name", "final", "--reason", "first",
+                                        "--workers", "1", "--out", out)[0], 0)
+            self.assertEqual(len(self._ledger_lines()), 1)
+            code, err = self._main("--half", "test", "--name", "final", "--reason", "second",
+                                   "--workers", "1", "--cache", "nope", "--out", out)
+        self.assertEqual(code, RUN.EXIT_STALE)
+        self.assertIn("stale cache", err)
+        self.assertEqual(len(self._ledger_lines()), 1)
+
+    def test_a_cache_built_for_the_other_half_adds_no_ledger_line(self):
+        self._record("test", meta_half="dev")
+        out = os.path.join(self.tmp.name, "r", "final_test.json")
+        with self._unlocked():
+            code, err = self._main("--half", "test", "--name", "final", "--reason", "first",
+                                   "--workers", "1", "--out", out)
+        self.assertEqual(code, RUN.EXIT_STALE)
+        self.assertIn("dev half", err)
+        self.assertFalse(os.path.exists(self.ledger))
+
+    def test_a_scoring_attempt_still_uses_a_look(self):
+        # The cache looks valid, so scoring starts, and only then is the missing entry found.
+        self._record("test")
+        os.remove(os.path.join(SC.cache_dir("test", "baseline"), "000030033.json"))
+        out = os.path.join(self.tmp.name, "r", "final_test.json")
+        with self._unlocked():
+            code, _err = self._main("--half", "test", "--name", "final", "--reason", "first",
+                                    "--workers", "1", "--out", out)
+        self.assertEqual(code, RUN.EXIT_STALE)
+        self.assertEqual(len(self._ledger_lines()), 1)
+
+    def test_two_workers_in_a_real_spawn_pool_match_one_worker(self):
+        one = os.path.join(self.tmp.name, "r", "one_dev.json")
+        two = os.path.join(self.tmp.name, "r", "two_dev.json")
+        # The children inherit this environment. Offline keeps them from asking the network for the processor.
+        with mock.patch.dict(os.environ, {"HF_HUB_OFFLINE": "1", "TRANSFORMERS_OFFLINE": "1"}):
+            self.assertEqual(self._main("--name", "one", "--workers", "1", "--out", one)[0], 0)
+            self.assertEqual(self._main("--name", "two", "--workers", "2", "--out", two)[0], 0)
+        results = {}
+        for key, path in (("one", one), ("two", two)):
+            with open(path, encoding="utf-8") as fh:
+                results[key] = json.load(fh)
+        self.assertEqual(sorted(results["two"]["outcomes"]), ["000010011", "000020022"])
+        self.assertEqual(results["two"]["outcomes"], results["one"]["outcomes"])
+        self.assertEqual(results["two"]["summary"], results["one"]["summary"])
+
+    def _existing_results(self):
+        out = os.path.join(self.tmp.name, "r", "baseline_dev.json")
+        os.makedirs(os.path.dirname(out))
+        with open(out, "w", encoding="utf-8") as fh:
+            fh.write('{"committed": true}')
+        return out
+
+    def test_a_tracked_results_file_is_not_overwritten_without_force(self):
+        out = self._existing_results()
+        with mock.patch.object(RUN, "_tracked_by_git", return_value=True):
+            code, err = self._main("--name", "baseline", "--workers", "1", "--out", out)
+        self.assertEqual(code, 2)
+        self.assertIn("--force", err)
+        with open(out, encoding="utf-8") as fh:
+            self.assertEqual(fh.read(), '{"committed": true}')
+
+    def test_force_overwrites_a_tracked_results_file(self):
+        out = self._existing_results()
+        with mock.patch.object(RUN, "_tracked_by_git", return_value=True):
+            code, _err = self._main("--name", "baseline", "--workers", "1", "--out", out, "--force")
+        self.assertEqual(code, 0)
+        with open(out, encoding="utf-8") as fh:
+            self.assertIn("outcomes", json.load(fh))
+
+    def test_a_tracked_summary_file_is_protected_too(self):
+        out = os.path.join(self.tmp.name, "r", "baseline_dev.json")
+        os.makedirs(os.path.dirname(out))
+        with open(out[:-5] + ".summary.json", "w", encoding="utf-8") as fh:
+            fh.write("{}")
+        with mock.patch.object(RUN, "_tracked_by_git", side_effect=lambda path: path.endswith(".summary.json")):
+            code, _err = self._main("--name", "baseline", "--workers", "1", "--out", out)
+        self.assertEqual(code, 2)
+        self.assertFalse(os.path.exists(out))
+
+    def test_a_tracked_path_that_does_not_exist_yet_is_fine(self):
+        out = os.path.join(self.tmp.name, "r", "new_dev.json")
+        with mock.patch.object(RUN, "_tracked_by_git", return_value=True):
+            code, _err = self._main("--name", "new", "--workers", "1", "--out", out)
+        self.assertEqual(code, 0)
+
+    def test_an_untracked_existing_results_file_is_overwritten(self):
+        out = self._existing_results()
+        code, _err = self._main("--name", "baseline", "--workers", "1", "--out", out)
+        self.assertEqual(code, 0)
+        with open(out, encoding="utf-8") as fh:
+            self.assertIn("outcomes", json.load(fh))
 
     def _pooled(self, argv):
         with (

@@ -4,10 +4,12 @@
     python -m tests.benchmark.run --name weighted --flag WWAI_WEIGHTED_PER=1
     python -m tests.benchmark.run --name quick --subset smoke_dev
 
-The test half needs WWAI_BENCH_UNLOCK_TEST=1 and --reason, and every such run is
-appended to test_runs.log. Exit codes are 0 for ok, 2 for a usage error or a locked
-half, 3 for a stale or missing cache, and 4 when clips failed with unexpected errors
-(the results are still written so the failures can be inspected).
+The test half needs WWAI_BENCH_UNLOCK_TEST=1, --reason and a clean git tree (every look
+has to be reproducible from its recorded SHA), and every such run that gets as far as
+scoring is appended to test_runs.log. A results file that git tracks, such as the committed
+baseline, is only overwritten with --force. Exit codes are 0 for ok, 2 for a usage error or
+a locked half, 3 for a stale or missing cache, and 4 when clips failed with unexpected
+errors (the results are still written so the failures can be inspected).
 """
 
 from __future__ import annotations
@@ -15,6 +17,8 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
+import subprocess
 import sys
 import time
 from concurrent.futures import ProcessPoolExecutor
@@ -24,6 +28,7 @@ from . import common
 
 EXIT_STALE = 3
 EXIT_UNEXPECTED = 4
+_NAME = re.compile(r"[\w.\-]+")
 _worker: dict = {}
 _init_error: str | None = None
 
@@ -40,9 +45,19 @@ def check_test_unlock(half: str, reason, env=None) -> None:
         raise PermissionError("test-half runs need --reason")
 
 
-def append_ledger(name: str, reason: str, sha: str, path: str = common.TEST_RUNS_LOG) -> None:
+def _one_line(text) -> str:
+    """Collapse tabs, newlines and runs of spaces so free text cannot break the TSV."""
+    return " ".join(str(text).split())
+
+
+def append_ledger(name: str, reason: str, sha: str, path: str | None = None, flags=None, threshold=None) -> None:
+    """Append one look at the test half: time, sha, name, reason, active flags (JSON) and threshold."""
+    path = path or common.TEST_RUNS_LOG  # looked up here, so patching common.TEST_RUNS_LOG redirects it
+    flags_json = json.dumps(flags or {}, sort_keys=True, separators=(",", ":"))
+    shown = "" if threshold is None else str(threshold)
     with open(path, "a", encoding="utf-8", newline="\n") as fh:
-        fh.write(f"{time.strftime('%Y-%m-%dT%H:%M:%S')}\t{sha}\t{name}\t{reason.strip()}\n")
+        fh.write("\t".join([time.strftime("%Y-%m-%dT%H:%M:%S"), _one_line(sha), _one_line(name),
+                            _one_line(reason), flags_json, shown]) + "\n")
 
 
 def production_threshold() -> float:
@@ -51,14 +66,25 @@ def production_threshold() -> float:
     return float(HIGH_PER_THRESHOLD)
 
 
-def check_cache(directory: str) -> dict:
+def check_cache(directory: str, half: str | None = None) -> dict:
+    """The cache's metadata, or StaleCacheError when it is missing, unreadable, built for another
+    half than ``half`` or built with another model revision than the current pin."""
     from .stage_cache import CACHE_META
 
     meta_path = os.path.join(directory, CACHE_META)
     if not os.path.isfile(meta_path):
         raise common.StaleCacheError(f"no cache at {directory}; build it with tests.benchmark.stage_cache")
-    with open(meta_path, encoding="utf-8") as fh:
-        meta = json.load(fh)
+    try:
+        with open(meta_path, encoding="utf-8") as fh:
+            meta = json.load(fh)
+        if not isinstance(meta, dict):
+            raise ValueError("not a JSON object")
+    except ValueError as exc:
+        raise common.StaleCacheError(f"{meta_path} is unreadable ({exc}); rebuild the cache") from exc
+    if half is not None and meta.get("half") != half:
+        raise common.StaleCacheError(
+            f"cache at {directory} was built for the {meta.get('half')} half, not the {half} half"
+        )
     from core.model_registry import resolve_revision
 
     current = resolve_revision("PHONEME_IPA_ONNX")
@@ -122,16 +148,30 @@ def score_clips(clips, directory: str, workers: int) -> dict:
     return dict(sorted(outcomes.items()))
 
 
+def summary_path(out_path: str) -> str:
+    base = out_path[:-5] if out_path.endswith(".json") else out_path
+    return base + ".summary.json"
+
+
+def _tracked_by_git(path: str) -> bool:
+    """True when git tracks this file. A file outside the repository, or no git at all, is not tracked."""
+    try:
+        done = subprocess.run(["git", "ls-files", "--error-unmatch", os.path.abspath(path)],
+                              cwd=common.REPO_ROOT, capture_output=True)
+    except OSError:
+        return False
+    return done.returncode == 0
+
+
 def write_results(results: dict, out_path: str) -> tuple[str, str]:
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     with open(out_path, "w", encoding="utf-8", newline="\n") as fh:
         json.dump(results, fh, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-    base = out_path[:-5] if out_path.endswith(".json") else out_path
-    summary_path = base + ".summary.json"
-    with open(summary_path, "w", encoding="utf-8", newline="\n") as fh:
+    short = summary_path(out_path)
+    with open(short, "w", encoding="utf-8", newline="\n") as fh:
         json.dump({k: v for k, v in results.items() if k != "outcomes"}, fh,
                   ensure_ascii=False, sort_keys=True, indent=2)
-    return out_path, summary_path
+    return out_path, short
 
 
 def format_summary(summary: dict) -> str:
@@ -169,6 +209,7 @@ def main(argv=None) -> int:
     parser.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) // 2))
     parser.add_argument("--out", help="results path (default: tests/benchmark/results/<name>_<half>.json)")
     parser.add_argument("--reason", help="required for --half test")
+    parser.add_argument("--force", action="store_true", help="overwrite a results file that git tracks")
     args = parser.parse_args(argv)
 
     # core loads backend/.env on import, so WWAI_* flags set there would apply without being recorded.
@@ -184,6 +225,25 @@ def main(argv=None) -> int:
     except (ValueError, PermissionError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
+    for option, value in (("--name", args.name), ("--cache", args.cache)):
+        if value is not None and not _NAME.fullmatch(value):
+            print(f"error: {option} {value!r} may only contain letters, digits, _ . and -", file=sys.stderr)
+            return 2
+
+    suffix = f"_{args.subset}" if args.subset else ""
+    out = args.out or os.path.join(common.results_dir(), f"{args.name}_{args.half}{suffix}.json")
+    tracked = [p for p in (out, summary_path(out)) if os.path.exists(p) and _tracked_by_git(p)]
+    if tracked and not args.force:
+        print(f"error: {', '.join(tracked)} is tracked by git, so a run would overwrite committed results. "
+              "Use another --name or --out, or pass --force", file=sys.stderr)
+        return 2
+
+    sha = common.git_sha()
+    if args.half == "test" and (sha == "unknown" or sha.endswith("-dirty")):
+        print(f"error: the test half needs a clean git tree, but the state is {sha!r}. Commit first, so that "
+              "every look can be reproduced from its recorded SHA", file=sys.stderr)
+        return 2
+
     common.apply_flags(flags)
     active = common.active_wwai_flags()
 
@@ -191,17 +251,21 @@ def main(argv=None) -> int:
     from .scoring import build_items, summarize
     from .stage_cache import cache_dir
 
-    cache_name = args.cache or common.front_end_cache_name(active)
-    directory = cache_dir(args.half, cache_name)
-    clips = load_clips(args.half, args.subset)
-    sha = common.git_sha()
-    if args.half == "test":
-        append_ledger(args.name, args.reason, sha)
+    try:
+        cache_name = args.cache or common.front_end_cache_name(active)
+        directory = cache_dir(args.half, cache_name)
+        clips = load_clips(args.half, args.subset)
+    except (ValueError, FileNotFoundError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
 
     start = time.time()
     try:
-        cache_meta = check_cache(directory)
+        # Neither of these reads labels, so a stale cache does not use up a look on the test half.
+        cache_meta = check_cache(directory, args.half)
         threshold = args.threshold if args.threshold is not None else production_threshold()
+        if args.half == "test":
+            append_ledger(args.name, args.reason, sha, flags=active, threshold=threshold)
         outcomes = score_clips(clips, directory, args.workers)
     except common.StaleCacheError as exc:
         print(f"stale cache: {exc}", file=sys.stderr)
@@ -222,8 +286,6 @@ def main(argv=None) -> int:
         "summary": summary,
         "outcomes": outcomes,
     }
-    suffix = f"_{args.subset}" if args.subset else ""
-    out = args.out or os.path.join(common.results_dir(), f"{args.name}_{args.half}{suffix}.json")
     full, short = write_results(results, out)
     print(format_summary(summary))
     print(f"wrote {full}\n      {short}")

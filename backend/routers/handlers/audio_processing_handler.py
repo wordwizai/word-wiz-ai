@@ -10,7 +10,6 @@ import pandas as pd
 import soundfile as sf
 import base64 as _base64
 
-from core.audio_quality_analyzer import soft_quality_gates_enabled
 from core.request_audio import AudioRejected, check_speech_activity, gate_and_preprocess
 from core.modes.base_mode import BaseMode
 from core.phoneme_assistant import PhonemeAssistant

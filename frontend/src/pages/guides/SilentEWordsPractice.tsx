@@ -355,8 +355,8 @@ const SilentEWordsPractice = () => {
 
   return (
     <ArticlePageTemplate
-      metaTitle="Silent E Words Practice for Kids: Complete Magic E Guide"
-      metaDescription="Master silent e words (magic e) with proven practice activities for kids. Includes word lists, exercises, and a 4-6 week practice plan for reading success."
+      metaTitle="Silent E Words: 100+ Magic E Words and Sentences for Kids"
+      metaDescription="100+ silent e (magic e) words sorted by vowel, 28 decodable sentences, and simple activities to help kids read a_e, i_e, o_e and u_e words."
       canonicalUrl="https://wordwizai.com/guides/silent-e-words-practice-for-kids"
       heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
       heroImageAlt="Child practicing silent e words with cards"

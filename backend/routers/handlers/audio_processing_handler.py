@@ -148,7 +148,7 @@ async def load_and_preprocess_audio_bytes(
             gate_and_preprocess, audio_array, sample_rate, audio_duration, quality_out
         )
     except AudioRejected as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
     # This is THE preprocessing pass for this request. Record it here (not inside
     # the worker thread - asyncio.to_thread runs on a copied context, so a mark
     # set in there would be discarded) so later stages can skip redundant noise

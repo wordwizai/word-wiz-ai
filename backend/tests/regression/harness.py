@@ -410,25 +410,18 @@ def run_client_path(case: RegressionCase) -> dict:
 class _StubPhonemeExtractor:
     """Replays a recorded phoneme stream. Ignores audio entirely."""
 
-    def __init__(self, phonemes_flat: list[str], phonemes_by_word: list[list[str]] | None = None):
-        # process_audio_array immediately re-flattens, so only the NUMBER of groups
-        # matters. Its "no speech" guard rejects one group or fewer, and with
-        # ground-truth-anchored alignment that is the only speech check left. The real
-        # extractor groups at word boundaries, so replay the recorded grouping when it
-        # covers the same stream.
-        flat = list(phonemes_flat or [])
-        grouped = [list(g) for g in (phonemes_by_word or [])]
-        if grouped and [p for g in grouped for p in g] == flat:
-            self._groups = grouped
-        else:
-            # Two "words" so the len(...) <= 1 guard in process_audio_array passes.
-            half = max(1, len(flat) // 2)
-            self._groups = [flat[:half], flat[half:]]
+    def __init__(self, phonemes_flat: list[str]):
+        # process_audio_array immediately re-flattens, so the grouping we hand back here
+        # is irrelevant; one group keeps the >1-element guard happy.
+        self._payload = [list(phonemes_flat)] if phonemes_flat else []
         self.calls = 0
 
     def extract_phoneme(self, audio=None, sampling_rate=16000, **_kwargs):
         self.calls += 1
-        return [list(g) for g in self._groups]
+        # Two "words" so the len(...) <= 1 guard in process_audio_array passes.
+        flat = self._payload[0] if self._payload else []
+        half = max(1, len(flat) // 2)
+        return [flat[:half], flat[half:]]
 
 
 class _StubWordExtractor:
@@ -477,9 +470,7 @@ def run_server_path(case: RegressionCase) -> dict:
                 ground_truth_phonemes=gt,
                 audio_array=_synthetic_audio(),
                 sampling_rate=16000,
-                phoneme_extraction_model=_StubPhonemeExtractor(
-                    case.fixture.phonemes_flat, case.fixture.phonemes_by_word,
-                ),
+                phoneme_extraction_model=_StubPhonemeExtractor(case.fixture.phonemes_flat),
                 word_extraction_model=_StubWordExtractor(case.fixture.words),
                 use_chunking=False,
             )

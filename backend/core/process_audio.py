@@ -752,18 +752,7 @@ async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=
 
         phoneme_predictions, predicted_words = await extract_data()
 
-    from .gt_alignment import is_gt_anchored_enabled, align_to_ground_truth
-    gt_anchored = is_gt_anchored_enabled()  # WWAI_GT_ANCHORED_ALIGNMENT, default ON
-
-    if gt_anchored:
-        # Anchored to the sentence, the ASR words are only hints, so only the
-        # phonemes are required. Deepgram often returns an empty transcript for
-        # a young child's correct reading that the phoneme model heard fine.
-        if phoneme_predictions is None or len(phoneme_predictions) <= 1:
-            raise ValueError("The audio provided has no speech inside")
-        if predicted_words is None:
-            predicted_words = []
-    elif phoneme_predictions is None or predicted_words is None or len(phoneme_predictions) <= 1 or len(predicted_words) <= 1:
+    if phoneme_predictions is None or predicted_words is None or len(phoneme_predictions) <= 1 or len(predicted_words) <= 1:
         raise ValueError("The audio provided has no speech inside")
 
     print("unaligned phoneme predictions: ", phoneme_predictions)
@@ -774,14 +763,15 @@ async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=
     
     # Filter out any non-string items and ensure we have valid words
     predicted_words = [str(word) for word in predicted_words if word]
-    if not predicted_words and not gt_anchored:
+    if not predicted_words:
         raise ValueError("No valid words extracted from audio")
 
     # regroup the phonemes to reflect the words that were spoken
     import time
     alignment_start = time.time()
     flattened_phoneme_predictions = [item for sublist in phoneme_predictions for item in sublist]
-    if gt_anchored:
+    from .gt_alignment import is_gt_anchored_enabled, align_to_ground_truth
+    if is_gt_anchored_enabled():  # WWAI_GT_ANCHORED_ALIGNMENT, default ON
         return align_to_ground_truth(flattened_phoneme_predictions, ground_truth_phonemes, predicted_words)
     predicted_words_phonemes = g2p(" ".join(predicted_words)) # take the words our model thinks we said and get the phonemes for them
     alignment = align_phonemes_to_words(flattened_phoneme_predictions, predicted_words_phonemes)

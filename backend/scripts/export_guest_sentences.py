@@ -60,7 +60,8 @@ def main() -> int:
     rendered = json.dumps(data, indent=2, ensure_ascii=False) + "\n"
     if "--check" in sys.argv:
         current = TARGET.read_text(encoding="utf-8") if TARGET.exists() else ""
-        if current != rendered:
+        # git may check the file out with CRLF endings on Windows.
+        if current.replace("\r\n", "\n") != rendered:
             print(f"{TARGET} is stale. Run: python scripts/export_guest_sentences.py")
             return 1
         print(f"{TARGET} is up to date ({len(data['patterns'])} patterns).")

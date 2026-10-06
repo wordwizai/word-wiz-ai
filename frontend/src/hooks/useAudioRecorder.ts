@@ -1,10 +1,14 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import hark from "hark";
+import { toast } from "sonner";
 
 export function useAudioRecorder(onFinish: (audioFile: File) => void) {
   const [isRecording, setIsRecording] = useState(false);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const stopHandlerRef = useRef<(() => Promise<void>) | null>(null);
+  // Live input loudness (RMS, roughly 0-0.3 for speech). A ref rather than
+  // state: it changes ~12 times a second and only the level meter reads it.
+  const levelRef = useRef(0);
 
   useEffect(() => {
     return () => {
@@ -29,6 +33,9 @@ export function useAudioRecorder(onFinish: (audioFile: File) => void) {
       processor.onaudioprocess = (event) => {
         const inputData = event.inputBuffer.getChannelData(0);
         audioChunks.push(new Float32Array(inputData));
+        let sum = 0;
+        for (let i = 0; i < inputData.length; i++) sum += inputData[i] ** 2;
+        levelRef.current = Math.sqrt(sum / inputData.length);
       };
 
       source.connect(processor);
@@ -54,6 +61,7 @@ export function useAudioRecorder(onFinish: (audioFile: File) => void) {
       const stopHandler = async () => {
         if (isStopping) return;
         isStopping = true;
+        levelRef.current = 0;
         processor.disconnect();
         source.disconnect();
         stream.getTracks().forEach((track) => track.stop());
@@ -133,6 +141,12 @@ export function useAudioRecorder(onFinish: (audioFile: File) => void) {
     } catch (error) {
       setIsRecording(false);
       console.error("Error starting audio recording:", error);
+      // Usually a blocked or missing microphone. Without this the button
+      // just did nothing, which a child can't diagnose.
+      toast.error("Microphone is off", {
+        description:
+          "Allow microphone access for this site in the browser, then tap the microphone again.",
+      });
     }
   }, [onFinish]);
 
@@ -140,5 +154,5 @@ export function useAudioRecorder(onFinish: (audioFile: File) => void) {
     stopHandlerRef.current?.();
   }, []);
 
-  return { isRecording, startRecording, stopRecording };
+  return { isRecording, startRecording, stopRecording, levelRef };
 }

@@ -8,7 +8,7 @@ type LayoutProps = {
 
 const Layout = ({ children }: LayoutProps) => {
   return (
-    <div className="flex h-screen flex-col md:flex-row relative overflow-hidden">
+    <div className="flex h-dvh flex-col md:flex-row relative overflow-hidden bg-background">
       <div className="hidden md:flex h-full relative z-10">
         <Sidebar />
       </div>

@@ -3,7 +3,8 @@ import { AuthContext } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { Plus, Users } from "lucide-react";
+import { Plus } from "lucide-react";
+import { AppPage, PageHeader } from "@/components/AppPage";
 import {
   getMyClasses,
   getMyStudentClasses,
@@ -113,20 +114,20 @@ const ClassesPage = () => {
   // If viewing student details, show student detail view
   if (selectedStudent !== null && selectedClassId !== null) {
     return (
-      <main className="flex-1 p-4 sm:p-6 bg-background space-y-6 overflow-y-auto flex flex-col min-h-0 h-full">
+      <AppPage>
         <StudentDetailView
           student={selectedStudent}
           classId={selectedClassId}
           onBack={handleBackToClassDetail}
         />
-      </main>
+      </AppPage>
     );
   }
 
   // If viewing class details, show detail view
   if (selectedClassId !== null) {
     return (
-      <main className="flex-1 p-4 sm:p-6 bg-background space-y-6 overflow-y-auto flex flex-col min-h-0 h-full">
+      <AppPage>
         <ClassDetailView
           classId={selectedClassId}
           className={selectedClassName}
@@ -134,44 +135,32 @@ const ClassesPage = () => {
           onBack={handleBackToList}
           onViewStudent={handleViewStudent}
         />
-      </main>
+      </AppPage>
     );
   }
 
   return (
-    <main className="flex-1 p-4 sm:p-6 bg-background space-y-6 overflow-y-auto flex flex-col min-h-0 h-full">
-      {/* Header */}
-      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 via-accent/5 to-primary/5 border border-primary/20 p-6">
-        <div className="relative z-10 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl md:text-4xl font-bold text-foreground mb-2">
-              Classes
-            </h1>
-            <p className="text-sm md:text-base text-muted-foreground/80">
-              {viewMode === "student"
-                ? "Your learning journey"
-                : "Manage your classes and view student progress"}
-            </p>
-          </div>
-          <Users className="w-12 h-12 md:w-16 md:h-16 text-primary/20" />
-        </div>
-      </div>
-
-      {/* View Toggle - Always shown */}
-      <div className="flex justify-center">
-        <ViewToggle mode={viewMode} onChange={handleViewChange} />
-      </div>
+    <AppPage>
+      <PageHeader
+        title="Classes"
+        description={
+          viewMode === "student"
+            ? "Classes you've joined with a teacher's code."
+            : "Classes you teach, and how each student is reading."
+        }
+        actions={<ViewToggle mode={viewMode} onChange={handleViewChange} />}
+      />
 
       {/* Tabs */}
-      <Tabs defaultValue="my-classes" className="flex-1 flex flex-col min-h-0">
+      <Tabs defaultValue="my-classes" className="-mt-4">
         {/* My Classes Tab */}
         <TabsContent
           value="my-classes"
-          className="flex-1 overflow-y-auto space-y-4"
+          className="space-y-4"
         >
           {/* Student View - Show only enrolled classes */}
           {viewMode === "student" && (
-            <Card className="rounded-2xl bg-card border-2 border-border shadow-md">
+            <Card className="rounded-2xl shadow-xs">
               <CardHeader className="p-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-bold text-foreground">
@@ -219,7 +208,7 @@ const ClassesPage = () => {
 
           {/* Teacher View - Show taught classes only */}
           {viewMode === "teacher" && (
-            <Card className="rounded-2xl bg-card border-2 border-border shadow-md">
+            <Card className="rounded-2xl shadow-xs">
               <CardHeader className="p-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-bold text-foreground">
@@ -280,7 +269,7 @@ const ClassesPage = () => {
         onJoined={handleClassJoined}
         showAsCard={false}
       />
-    </main>
+    </AppPage>
   );
 };
 

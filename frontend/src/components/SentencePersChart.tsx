@@ -18,7 +18,9 @@ import {
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getSentencePers } from "@/api";
-import { TrendingUp } from "lucide-react";
+import { Skeleton } from "./ui/skeleton";
+
+const AVG_COLOR = "oklch(0.6 0.118 184.704)";
 
 const SentencePersChart = ({
   className = "",
@@ -28,6 +30,7 @@ const SentencePersChart = ({
   const [chartData, setChartData] = useState<
     { date: Date; per: number; avg5: number | null }[]
   >([]);
+  const [loaded, setLoaded] = useState(false);
   const { token } = useContext(AuthContext);
 
   useEffect(() => {
@@ -59,121 +62,105 @@ const SentencePersChart = ({
       setChartData(withAvg5);
     };
     if (token) {
-      fetchChartData().catch((error) => {
-        console.error("Error fetching chart data:", error);
-      });
+      fetchChartData()
+        .catch((error) => {
+          console.error("Error fetching chart data:", error);
+        })
+        .finally(() => setLoaded(true));
     }
   }, [token]);
 
+  // Brand purple for the raw series, teal for the average. Checked with the
+  // dataviz palette validator against both card surfaces (light and dark).
   const chartConfig = {
-    per: {
-      label: "Error rate",
-      color: "--var(--chart-3)",
-    },
+    per: { label: "Error rate", color: "var(--primary)" },
+    avg5: { label: "Average of last 5", color: AVG_COLOR },
   } satisfies ChartConfig;
 
   return (
     <Card
       className={
-        "w-full h-48 sm:h-56 md:h-64 flex flex-col space-y-0 gap-0 px-0 rounded-2xl border-2 border-border bg-card shadow-sm " +
-        className
+        "w-full gap-0 rounded-2xl py-0 shadow-xs " + className
       }
-      style={{ minHeight: 0 }}
     >
-      <CardHeader className="flex-shrink-0 p-3 sm:p-4">
-        <div className="flex items-center gap-3">
-          <TrendingUp className="w-5 h-5 text-primary" />
-          <div>
-            <h3 className="text-lg font-bold text-foreground">
-              Error Rate Progress
-            </h3>
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              Track your improvement over time.
+      <CardHeader className="flex flex-col gap-1 px-5 pt-5 pb-0 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-muted-foreground">
+          Share of sounds read wrong in each sentence. Lower is better.
+        </p>
+        {chartData.length > 0 && (
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5">
+              <span className="size-2.5 rounded-full bg-primary" />
+              Each sentence
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="size-2.5 rounded-full" style={{ backgroundColor: AVG_COLOR }} />
+              Average of last 5
+            </span>
+          </div>
+        )}
+      </CardHeader>
+      <CardContent className="px-2 pt-4 pb-4 sm:px-4">
+        {!loaded ? (
+          <Skeleton className="h-56 w-full rounded-xl" />
+        ) : chartData.length === 0 ? (
+          <div className="flex h-56 flex-col items-center justify-center gap-1 text-center">
+            <p className="font-medium text-foreground">No readings yet</p>
+            <p className="max-w-md text-sm text-balance text-muted-foreground">
+              Read a few sentences in any activity and this chart fills in.
             </p>
           </div>
-        </div>
-      </CardHeader>
-      <CardContent className="flex-1 min-h-0 relative pt-0 px-2 sm:px-4 flex flex-col justify-end">
-        <ChartContainer
-          config={chartConfig}
-          className="h-full w-full min-h-0"
-          style={{ minHeight: "120px" }}
-        >
-          <AreaChart
-            accessibilityLayer
-            data={chartData}
-            height={undefined}
-            width={undefined}
-            style={{ height: "100%", width: "100%", minHeight: "120px" }}
-          >
-            <defs>
-              <linearGradient id="perGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--chart-2)"
-                  stopOpacity={0.8}
-                />
-                <stop offset="95%" stopColor="var(--chart-2)" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="avg5Gradient" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--chart-3)"
-                  stopOpacity={0.8}
-                />
-                <stop offset="95%" stopColor="var(--chart-3)" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid
-              vertical={false}
-              strokeDasharray="3 3"
-              stroke="rgba(139, 92, 246, 0.1)"
-            />
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              tick={{ fill: "rgba(139, 92, 246, 0.7)", fontSize: 10 }}
-              tickFormatter={(date) =>
-                typeof date === "string"
-                  ? date
-                  : date instanceof Date
-                  ? date.toLocaleDateString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                    })
-                  : ""
-              }
-            />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent indicator="line" />}
-            />
-            <Area
-              dataKey="per"
-              type="natural"
-              stroke="var(--chart-2)"
-              strokeWidth={3}
-              fill="url(#perGradient)"
-              name="Raw PER"
-              connectNulls={false}
-              dot={{ fill: "var(--chart-2)", strokeWidth: 2, r: 4 }}
-              isAnimationActive={true}
-            />
-            <Area
-              dataKey="avg5"
-              type="natural"
-              stroke="var(--chart-3)"
-              strokeWidth={3}
-              fill="url(#avg5Gradient)"
-              name="Average (5) "
-              connectNulls={false}
-              dot={{ fill: "var(--chart-3)", strokeWidth: 2, r: 4 }}
-              isAnimationActive={true}
-            />
-          </AreaChart>
-        </ChartContainer>
+        ) : (
+          <ChartContainer config={chartConfig} className="h-56 w-full">
+            <AreaChart accessibilityLayer data={chartData}>
+              <defs>
+                <linearGradient id="perGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid vertical={false} stroke="var(--border)" />
+              <XAxis
+                dataKey="date"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                minTickGap={56}
+                tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
+                tickFormatter={(date) =>
+                  date instanceof Date
+                    ? date.toLocaleDateString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                      })
+                    : String(date)
+                }
+              />
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent indicator="line" />}
+              />
+              <Area
+                dataKey="per"
+                type="monotone"
+                stroke="var(--primary)"
+                strokeWidth={2}
+                fill="url(#perGradient)"
+                connectNulls={false}
+                dot={{ fill: "var(--primary)", r: 4, strokeWidth: 2, stroke: "var(--card)" }}
+              />
+              <Area
+                dataKey="avg5"
+                type="monotone"
+                stroke={AVG_COLOR}
+                strokeWidth={2}
+                fill="none"
+                connectNulls={false}
+                dot={false}
+              />
+            </AreaChart>
+          </ChartContainer>
+        )}
       </CardContent>
     </Card>
   );

@@ -99,7 +99,11 @@ export class WebSocketTransport implements AudioTransport {
         };
 
         this.ws.onerror = (error) => {
-          console.error("❌ WebSocket error:", error);
+          // disconnect() on a still-connecting socket fires this too; that
+          // one was cancelled on purpose, so don't log it as a failure.
+          if (!this.isManualDisconnect) {
+            console.error("❌ WebSocket error:", error);
+          }
           reject(new Error("WebSocket connection failed"));
         };
 

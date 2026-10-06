@@ -13,6 +13,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
+#: Words at or above this PER count as clearly mispronounced when picking the focus
+#: phoneme. Module level so the accuracy benchmark scores the same cutoff.
+HIGH_PER_THRESHOLD = 0.4
+
 
 @dataclass
 class FeedbackResult:
@@ -332,8 +336,6 @@ def _focus_from_high_per_words(
     This ensures the single worst word always wins rather than a common phoneme
     that happens to appear in multiple mildly-wrong words (e.g. schwa in 'the').
     """
-    HIGH_PER_THRESHOLD = 0.4
-
     # Sort clearly mispronounced words worst-first.
     # Use total_errors (absolute count) as the primary key so a short word like
     # "the" (2 phonemes → 100% PER from 1 mistake) doesn't beat a longer word

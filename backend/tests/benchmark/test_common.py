@@ -60,6 +60,28 @@ class TestFlags(unittest.TestCase):
         env = {"WWAI_WEIGHTED_PER": "1", "WWAI_BENCH_VERBOSE": "1", "PATH": "x"}
         self.assertEqual(common.active_wwai_flags(env), {"WWAI_WEIGHTED_PER": "1"})
 
+    def test_active_wwai_flags_skips_deploy_settings(self):
+        # CLAUDE.md's deploy section exports these. WWAI_KEY can hold a private key, and the flags
+        # are written into _cache_meta.json and the committed results files of a public repo.
+        env = {
+            "WWAI_HOST": "203.0.113.7", "WWAI_USER": "ubuntu", "WWAI_KEY": "/home/me/key.pem",
+            "WWAI_WEIGHTED_PER": "1", "WWAI_BENCH_VERBOSE": "1",
+        }
+        self.assertEqual(common.active_wwai_flags(env), {"WWAI_WEIGHTED_PER": "1"})
+
+    def test_the_deny_list_names_exactly_the_deploy_settings(self):
+        self.assertEqual(set(common._NOT_FLAGS), {"WWAI_HOST", "WWAI_USER", "WWAI_KEY"})
+
+    def test_active_wwai_flags_reads_the_real_environment_by_default(self):
+        with mock.patch.dict(os.environ, {"WWAI_KEY": "secret", "WWAI_WEIGHTED_PER": "1"}):
+            flags = common.active_wwai_flags()
+        self.assertNotIn("WWAI_KEY", flags)
+        self.assertEqual(flags["WWAI_WEIGHTED_PER"], "1")
+
+    def test_a_flag_that_only_starts_like_a_deploy_setting_is_still_a_flag(self):
+        env = {"WWAI_KEYBOARD": "1", "WWAI_USERNAME": "x", "WWAI_HOSTS": "y"}
+        self.assertEqual(common.active_wwai_flags(env), env)
+
     def test_env_flag(self):
         self.assertTrue(common.env_flag("X", {"X": "TRUE"}))
         self.assertFalse(common.env_flag("X", {"X": "0"}))
@@ -85,6 +107,15 @@ class TestDotenvWwaiKeys(unittest.TestCase):
             path = os.path.join(tmp, ".env")
             with open(path, "w", encoding="utf-8") as fh:
                 fh.write("WWAI_WEIGHTED_PER=1\nWWAI_BENCH_VERBOSE=1\nDEEPGRAM_KEY=x\n")
+            self.assertEqual(common.dotenv_wwai_keys(path), ["WWAI_WEIGHTED_PER"])
+
+    def test_deploy_settings_are_not_experiment_flags(self):
+        # backend/.env is not where the deploy settings live, but if they are there they must not
+        # make every benchmark command refuse to start.
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, ".env")
+            with open(path, "w", encoding="utf-8") as fh:
+                fh.write("WWAI_HOST=1.2.3.4\nWWAI_USER=ubuntu\nWWAI_KEY=/k.pem\nWWAI_WEIGHTED_PER=1\n")
             self.assertEqual(common.dotenv_wwai_keys(path), ["WWAI_WEIGHTED_PER"])
 
     def test_missing_file_is_empty(self):

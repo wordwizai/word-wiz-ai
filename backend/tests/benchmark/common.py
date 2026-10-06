@@ -38,6 +38,11 @@ FRONT_END_FLAGS = (
     "WWAI_CHUNK_MIN_DURATION",
 )
 
+#: WWAI_* variables that are not experiment flags. CLAUDE.md's backend deploy section has people
+#: export these (WWAI_KEY can hold the path to, or the text of, a private key), and flags are
+#: written into _cache_meta.json and the committed results files of a public repo.
+_NOT_FLAGS = ("WWAI_HOST", "WWAI_USER", "WWAI_KEY")
+
 _TRUTHY = {"1", "true", "yes", "on"}
 _FALSY = {"", "0", "false", "no", "off"}
 _BOOLEAN_FRONT_END_FLAGS = ("WWAI_SINGLE_PREPROCESS", "WWAI_CHUNK_PRESERVE_PAUSES")
@@ -122,24 +127,27 @@ def apply_flags(flags: dict[str, str]) -> None:
     os.environ.update(flags)
 
 
+def is_experiment_flag(name: str) -> bool:
+    """True for a WWAI_* variable that selects a pipeline behaviour. Harness settings
+    (WWAI_BENCH_*) and the deploy settings in _NOT_FLAGS are not experiment flags."""
+    return name.startswith("WWAI_") and not name.startswith("WWAI_BENCH_") and name not in _NOT_FLAGS
+
+
 def active_wwai_flags(env=None) -> dict[str, str]:
     source = os.environ if env is None else env
-    return {
-        k: v
-        for k, v in sorted(source.items())
-        if k.startswith("WWAI_") and not k.startswith("WWAI_BENCH_")
-    }
+    return {k: v for k, v in sorted(source.items()) if is_experiment_flag(k)}
 
 
 def dotenv_wwai_keys(path: str | None = None) -> list[str]:
     """WWAI_* experiment flags set in backend/.env. core loads .env on import, so these
-    would apply without being recorded. Harness settings (WWAI_BENCH_*) are ignored."""
+    would apply without being recorded. Harness settings (WWAI_BENCH_*) and deploy settings
+    (_NOT_FLAGS) are ignored."""
     from dotenv import dotenv_values
 
     path = path or os.path.join(BACKEND_ROOT, ".env")
     if not os.path.isfile(path):
         return []
-    return sorted(k for k in dotenv_values(path) if k.startswith("WWAI_") and not k.startswith("WWAI_BENCH_"))
+    return sorted(k for k in dotenv_values(path) if is_experiment_flag(k))
 
 
 def front_end_cache_name(flags: dict[str, str]) -> str:

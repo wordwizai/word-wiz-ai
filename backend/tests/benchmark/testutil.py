@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import functools
 import os
 import shutil
 import unittest
@@ -32,18 +33,23 @@ def make_temp_dataset(tmpdir: str) -> str:
     return root
 
 
-def real_processor_or_skip():
-    """The real wav2vec2 tokenizer from the local HF cache, or SkipTest."""
-    try:
-        from transformers import Wav2Vec2Processor
-        from core.model_registry import from_pretrained_kwargs, repo_id
+@functools.lru_cache(maxsize=1)
+def _load_processor():
+    from transformers import Wav2Vec2Processor
+    from core.model_registry import from_pretrained_kwargs, repo_id
 
-        with common.quiet():
-            return Wav2Vec2Processor.from_pretrained(
-                repo_id("PHONEME_IPA_ONNX"), **from_pretrained_kwargs("PHONEME_IPA_ONNX")
-            )
-    except Exception as exc:  # noqa: BLE001
-        raise unittest.SkipTest(f"wav2vec2 processor unavailable: {exc}")
+    with common.quiet():
+        return Wav2Vec2Processor.from_pretrained(
+            repo_id("PHONEME_IPA_ONNX"), local_files_only=True, **from_pretrained_kwargs("PHONEME_IPA_ONNX")
+        )
+
+
+def real_processor_or_skip():
+    """The real wav2vec2 tokenizer from the local HF cache, or SkipTest when it is not cached."""
+    try:
+        return _load_processor()
+    except OSError as exc:
+        raise unittest.SkipTest(f"wav2vec2 processor not in the local HF cache: {exc}")
 
 
 class FakeOnnx:
@@ -58,7 +64,13 @@ class FakeOnnx:
 
     def extract_logits(self, audio, sampling_rate=16000, **_kwargs):
         vocab = self.processor.tokenizer.get_vocab()
-        ids = [vocab["|"] if ch == " " else vocab[ch] for ch in self._transcription]
+        pad = vocab[self.processor.tokenizer.pad_token]
+        ids = []
+        for ch in self._transcription:
+            token_id = vocab["|"] if ch == " " else vocab[ch]
+            if ids and ids[-1] == token_id:
+                ids.append(pad)
+            ids.append(token_id)
         logits = np.full((1, len(ids), len(vocab)), -10.0, dtype=np.float32)
         logits[0, np.arange(len(ids)), ids] = 10.0
         return logits

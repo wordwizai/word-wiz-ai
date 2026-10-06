@@ -11,6 +11,7 @@ import contextlib
 import io
 import logging
 import os
+import re
 import subprocess
 import sys
 
@@ -38,6 +39,13 @@ FRONT_END_FLAGS = (
 )
 
 _TRUTHY = {"1", "true", "yes", "on"}
+_FALSY = {"", "0", "false", "no", "off"}
+_BOOLEAN_FRONT_END_FLAGS = ("WWAI_SINGLE_PREPROCESS", "WWAI_CHUNK_PRESERVE_PAUSES")
+_CACHE_NAME_VALUE = re.compile(r"[\w.\-]+")
+_STATUS_EXCLUDES = (
+    ":(exclude)backend/tests/benchmark/test_runs.log",
+    ":(exclude)backend/tests/benchmark/results",
+)
 
 if BACKEND_ROOT not in sys.path:
     sys.path.insert(0, BACKEND_ROOT)
@@ -56,7 +64,7 @@ class ReplayedError(Exception):
         self.message = message
 
     def __reduce__(self):
-        return (ReplayedError, (self.error_type, self.message))
+        return (type(self), (self.error_type, self.message))
 
 
 def data_dir() -> str:
@@ -84,6 +92,10 @@ def parse_flag_args(pairs) -> dict[str, str]:
         key = key.strip()
         if not sep or not key.startswith("WWAI_"):
             raise ValueError(f"--flag expects WWAI_NAME=VALUE, got {pair!r}")
+        if key.startswith("WWAI_BENCH_"):
+            raise ValueError(
+                f"{key} is a harness setting and must be set as an environment variable, not with --flag"
+            )
         flags[key] = value.strip()
     return flags
 
@@ -113,7 +125,18 @@ def active_wwai_flags(env=None) -> dict[str, str]:
 
 def front_end_cache_name(flags: dict[str, str]) -> str:
     """Default cache for a flag set. 'baseline' unless a front-end flag is set."""
-    parts = [f"{k}={flags[k]}" for k in sorted(flags) if k in FRONT_END_FLAGS and flags[k] != ""]
+    parts = []
+    for key in sorted(flags):
+        if key not in FRONT_END_FLAGS:
+            continue
+        value = str(flags[key])
+        if value == "" or (key in _BOOLEAN_FRONT_END_FLAGS and value.strip().lower() in _FALSY):
+            continue
+        if not _CACHE_NAME_VALUE.fullmatch(value):
+            raise ValueError(
+                f"{key}={value!r} cannot be part of a cache directory name (allowed characters are letters, digits, _ . -)"
+            )
+        parts.append(f"{key}={value}")
     return "+".join(parts) if parts else "baseline"
 
 
@@ -136,11 +159,11 @@ def git_sha(cwd: str = REPO_ROOT) -> str:
     """HEAD commit, with '-dirty' when tracked files have uncommitted changes."""
     try:
         sha = subprocess.run(
-            ["git", "rev-parse", "HEAD"], cwd=cwd, capture_output=True, text=True, check=True
+            ["git", "rev-parse", "HEAD"], cwd=cwd, capture_output=True, text=True, encoding="utf-8", check=True
         ).stdout.strip()
         dirty = subprocess.run(
-            ["git", "status", "--porcelain", "--untracked-files=no"],
-            cwd=cwd, capture_output=True, text=True, check=True,
+            ["git", "status", "--porcelain", "--untracked-files=no", "--", ".", *_STATUS_EXCLUDES],
+            cwd=cwd, capture_output=True, check=True,
         ).stdout.strip()
     except (OSError, subprocess.CalledProcessError):
         return "unknown"

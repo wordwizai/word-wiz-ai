@@ -1,11 +1,18 @@
 import io
+import logging
 import os
 import pickle
+import re
+import sys
 import unittest
 from contextlib import redirect_stdout
 from unittest import mock
 
 from tests.benchmark import common
+
+
+class _SubReplayedError(common.ReplayedError):
+    pass
 
 
 class TestFlags(unittest.TestCase):
@@ -21,6 +28,10 @@ class TestFlags(unittest.TestCase):
         with self.assertRaises(ValueError):
             common.parse_flag_args(["WWAI_NO_EQUALS"])
 
+    def test_parse_flag_args_rejects_bench_settings(self):
+        with self.assertRaises(ValueError):
+            common.parse_flag_args(["WWAI_BENCH_DATA_DIR=x"])
+
     def test_front_end_cache_name(self):
         self.assertEqual(common.front_end_cache_name({}), "baseline")
         self.assertEqual(common.front_end_cache_name({"WWAI_WEIGHTED_PER": "1"}), "baseline")
@@ -29,6 +40,20 @@ class TestFlags(unittest.TestCase):
             "WWAI_SINGLE_PREPROCESS=1",
         )
         self.assertEqual(common.front_end_cache_name({"WWAI_SINGLE_PREPROCESS": ""}), "baseline")
+
+    def test_front_end_cache_name_treats_falsy_booleans_as_unset(self):
+        for value in ("0", "false", "False", "no", "OFF"):
+            self.assertEqual(common.front_end_cache_name({"WWAI_SINGLE_PREPROCESS": value}), "baseline")
+            self.assertEqual(common.front_end_cache_name({"WWAI_CHUNK_PRESERVE_PAUSES": value}), "baseline")
+        self.assertEqual(
+            common.front_end_cache_name({"WWAI_CHUNK_OVERLAP_SECONDS": "0.5"}),
+            "WWAI_CHUNK_OVERLAP_SECONDS=0.5",
+        )
+
+    def test_front_end_cache_name_rejects_unsafe_values(self):
+        for bad in ("..\\x", "a:b", "a*b"):
+            with self.assertRaises(ValueError):
+                common.front_end_cache_name({"WWAI_CHUNK_OVERLAP_SECONDS": bad})
 
     def test_active_wwai_flags_skips_bench_and_other_vars(self):
         env = {"WWAI_WEIGHTED_PER": "1", "WWAI_BENCH_VERBOSE": "1", "PATH": "x"}
@@ -40,11 +65,17 @@ class TestFlags(unittest.TestCase):
         self.assertFalse(common.env_flag("X", {}))
 
     def test_apply_flags_refuses_after_core_import(self):
+        # Leaves core imported for the rest of the process.
         import core.model_registry  # noqa: F401  (any core import counts)
 
         with self.assertRaises(RuntimeError):
             common.apply_flags({"WWAI_WEIGHTED_PER": "1"})
         common.apply_flags({})  # nothing to apply is always fine
+
+    def test_apply_flags_sets_environment_before_core_import(self):
+        with mock.patch.object(common, "_core_imported", return_value=False), mock.patch.dict(os.environ):
+            common.apply_flags({"WWAI_WEIGHTED_PER": "1"})
+            self.assertEqual(os.environ["WWAI_WEIGHTED_PER"], "1")
 
 
 class TestDirs(unittest.TestCase):
@@ -67,14 +98,39 @@ class TestQuiet(unittest.TestCase):
         self.assertEqual(outer.getvalue(), "")
 
 
+    def test_quiet_restores_state_after_exception(self):
+        disable, out, err = logging.root.manager.disable, sys.stdout, sys.stderr
+        with mock.patch.dict(os.environ, {common.VERBOSE_ENV: ""}):
+            with self.assertRaises(KeyError):
+                with common.quiet():
+                    raise KeyError("boom")
+        self.assertEqual(logging.root.manager.disable, disable)
+        self.assertIs(sys.stdout, out)
+        self.assertIs(sys.stderr, err)
+
+
 class TestExceptions(unittest.TestCase):
     def test_replayed_error_pickles(self):
         err = pickle.loads(pickle.dumps(common.ReplayedError("DeepgramTimeout", "slow")))
         self.assertEqual(err.error_type, "DeepgramTimeout")
         self.assertEqual(err.message, "slow")
 
-    def test_git_sha_is_a_string(self):
-        self.assertIsInstance(common.git_sha(), str)
+    def test_replayed_error_subclass_pickles_as_subclass(self):
+        err = pickle.loads(pickle.dumps(_SubReplayedError("T", "m")))
+        self.assertIs(type(err), _SubReplayedError)
+        self.assertEqual((err.error_type, err.message), ("T", "m"))
+
+    def test_git_sha_format(self):
+        self.assertRegex(common.git_sha(), r"^([0-9a-f]{40}(-dirty)?|unknown)$")
+
+
+class TestRealProcessor(unittest.TestCase):
+    def test_real_processor_has_vocab_and_is_memoized(self):
+        from tests.benchmark import testutil
+
+        first = testutil.real_processor_or_skip()
+        self.assertIn("|", first.tokenizer.get_vocab())
+        self.assertIs(testutil.real_processor_or_skip(), first)
 
 
 if __name__ == "__main__":

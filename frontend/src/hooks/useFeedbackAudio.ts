@@ -18,6 +18,9 @@ export function useFeedbackAudio() {
 
   const play = useCallback((url: string) => {
     audioRef.current?.pause();
+    // The old clip has stopped. The new one turns this back on once it is
+    // actually playing, so a clip the browser refuses to start never talks.
+    setIsPlaying(false);
     const audio = new Audio(url);
     // Only the current clip may change isPlaying. A replaced clip's late
     // pause event would otherwise cut the new clip's talking short.
@@ -27,6 +30,8 @@ export function useFeedbackAudio() {
     audio.addEventListener("playing", track(true));
     audio.addEventListener("pause", track(false));
     audio.addEventListener("ended", track(false));
+    // Silent while it buffers; `playing` fires again when it resumes.
+    audio.addEventListener("waiting", track(false));
     audio.addEventListener("error", () => {
       console.error("[AudioFeedback] Playback error:", audio.error?.message);
       track(false)();

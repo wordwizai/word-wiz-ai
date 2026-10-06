@@ -1633,6 +1633,77 @@ and don't paste the same text into several subs.
 
 ---
 
+## AQ-052 | Suggestion form | Niagara University Library, Online Teacher's Studio (https://library.niagara.edu/ots/suggestions) | A teacher-prep collection of classroom tech for "teacher candidates and practicing P-12 teachers" and partner districts. Its English Language Arts list already has Lalilo ("a research-based phonics and comprehension program for grades K through 2"), Fluency Tutor, Starfall and Epic!, and the site says "Individuals can provide suggestions for technology to be added to OTS" | Low | Status: PENDING
+
+Verified 2026-10-06: the "Suggest a Technology Resource to add to OTS" Qualtrics form (SV_6s8N1YMzNviqoE6) is embedded on the suggestions page; Lalilo's entry checked on https://library.niagara.edu/ots. Fields are the resource's name, link and a brief description. A CAPTCHA wasn't visible to the research pass but isn't ruled out. Once approved I can try submitting it; if a CAPTCHA appears it's yours.
+
+| Field | Answer |
+|---|---|
+| Name | Word Wiz AI |
+| Link | https://wordwizai.com |
+| Brief description | below |
+
+> Word Wiz AI is a free reading tutor for grades K through 2. A student reads a
+> sentence out loud, and it shows which individual sounds came out wrong (for
+> example, "ship" read as "sip"), then writes the next practice sentence around
+> those sounds. Teachers can make a free class with a join code and see which
+> sounds each student misses most. Free with no ads. Students can try three
+> sentences without an account at wordwizai.com/try, and a free account is
+> needed for regular practice. Works best with a decent microphone.
+
+---
+
+## AQ-053 | Email | Clark County Public Library (Ohio), "Youth & Family Resource Guide" (ce@ccplohio.org) | Updated Sep 22, 2026, with an "Educational Apps" box (Duolingo, Khan Academy Kids). The guide says "To suggest updates and corrections to this page, please call (937) 328-0204 or email ce@ccplohio.org." | Low. Local families in Clark County, Ohio | Status: PENDING
+
+Verified 2026-10-06: the suggestion line and the apps box on https://ccplohio.libguides.com/youth-and-family. (Their "share resources" form is for local events, so email is the right route.)
+
+Send from contactwordwizai@gmail.com.
+
+**Subject:** Suggestion for the Youth & Family Resource Guide
+
+> Dear Clark County Public Library team,
+>
+> Your Youth & Family Resource Guide asks for suggestions, so I wanted to share
+> a free resource for the Educational Apps section, next to Khan Academy Kids.
+> Word Wiz AI is a reading tutor for kids in about K-2. A child reads a sentence
+> out loud, it shows which sounds came out wrong (like "ship" read as "sip"),
+> and then it writes the next sentence around those sounds.
+>
+> It's free with no ads and runs in a browser, so families don't need to
+> install anything, and kids can try three sentences without an account at
+> wordwizai.com/try. I'm a high school student and built it on my own, so I'd
+> also really appreciate any feedback.
+>
+> Best,
+> Bruce Peters
+
+---
+
+## AQ-054 | Email | Alberta Teachers' Association Library, "Building Early Reading Skills" guide (library@ata.ab.ca) | A guide of free phonics activities for teachers (C-A-T Word Machines, Starfall ABC's, Zac the Rat Stories), updated Sep 18, 2026. The ATA library says "We love hearing your suggestions!" | Low. Canadian, member-facing; the invitation is mainly about collection titles | Status: PENDING
+
+Verified by the research pass 2026-10-06: guide at https://teachers-ab.libguides.com/englishk-6/early_reading; library@ata.ab.ca and the "suggestions" line on https://teachers.ab.ca/professional-development/ata-library. (The guide's own "Report a problem" link goes to its author; library@ is the cleaner door.)
+
+Send from contactwordwizai@gmail.com.
+
+**Subject:** A free site for Building Early Reading Skills
+
+> Dear ATA Library team,
+>
+> I wanted to suggest a free site for your Building Early Reading Skills guide,
+> next to the C-A-T word machines and Starfall. Word Wiz AI is a reading tutor
+> for kids in about K-2 where a child reads a sentence out loud, it shows which
+> sounds came out wrong, and then it writes the next sentence around those
+> sounds. Kids can try three sentences without signing in at wordwizai.com/try,
+> and a free account is needed for regular practice.
+>
+> It's free with no ads. I'm a high school student and built it on my own, so
+> I'd appreciate any feedback from teachers who try it.
+>
+> Best,
+> Bruce Peters
+
+---
+
 <!-- wave3-end -->
 
 ## Notes for Bruce (not approval items)

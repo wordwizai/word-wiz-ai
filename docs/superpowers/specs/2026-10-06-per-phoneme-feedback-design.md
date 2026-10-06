@@ -97,6 +97,19 @@ The label comes from `lib/phonemeLabels.ts`, shortened to fit a tile:
 Substitution and deletion tiles are labelled with the expected sound. Insertion
 tiles are labelled with the sound that was added.
 
+### Vowels written as two symbols
+
+eng_to_ipa and the TIMIT model both write the diphthongs as two symbols
+(`e ɪ`, `a ɪ`, `o ʊ`, `a ʊ`, `ɔ ɪ`), and the backend scores them as two
+phonemes. A child hears one sound, so `lib/soundTiles.ts` joins each adjacent
+pair into one tile before drawing (`ā ī ō ow oy`). Scoring is unchanged. If the
+two halves have the same result the tile keeps it. If they differ, half the
+vowel was wrong, so the tile shows "said a different sound". An added sound
+never joins an expected one.
+
+Both sources also use a bare `i` for the long e in "see" (ARPAbet `iy`), so
+`phonemeLabels.ts` labels it long e (`ē`), not short i.
+
 ### Tile styles
 
 In sound-tile mode the badge drops its PER color and goes neutral, and the tiles

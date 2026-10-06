@@ -1,7 +1,9 @@
 // How to show an IPA phoneme to a parent: the letters that usually spell it
 // and a short word that has it. Matches the letter names the backend uses in
 // spoken feedback (_IPA_TO_DISPLAY in core/phoneme_feedback_formatter.py),
-// including the bare vowels the wav2vec2-TIMIT model emits.
+// including the bare vowels the wav2vec2-TIMIT model emits. The one
+// exception is bare "i": eng_to_ipa and the TIMIT model both use it for the
+// long e in "see" (ARPAbet iy), so it is long e here, not short i.
 const LABELS: Record<string, { letters: string; example: string }> = {
   θ: { letters: "th", example: "thin" },
   ð: { letters: "th", example: "this" },
@@ -25,7 +27,7 @@ const LABELS: Record<string, { letters: string; example: string }> = {
   ɛ: { letters: "short e", example: "bed" },
   e: { letters: "short e", example: "bed" },
   ɪ: { letters: "short i", example: "sit" },
-  i: { letters: "short i", example: "sit" },
+  i: { letters: "long e", example: "see" },
   iː: { letters: "long e", example: "see" },
   ɔ: { letters: "aw", example: "saw" },
   ɔː: { letters: "aw", example: "saw" },

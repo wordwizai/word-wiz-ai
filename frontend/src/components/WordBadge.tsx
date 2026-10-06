@@ -2,6 +2,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useMemo, type CSSProperties } from "react";
 import { useSpeechSynthesis } from "@/hooks/useSpeechSynthesis";
 import { phonemeLabel, phonemeTileLabel } from "@/lib/phonemeLabels";
+import { mergeDiphthongs } from "@/lib/soundTiles";
 import { cn } from "@/lib/utils";
 import type { PhonemeOp } from "./practice/types";
 
@@ -134,7 +135,7 @@ export const WordBadge = ({
 
   const sounds =
     splitIntoSounds && !isInsertion && phonemeAlignment?.length
-      ? phonemeAlignment.map((op) => {
+      ? mergeDiphthongs(phonemeAlignment).map((op) => {
           const ipa = (op.type === "insertion" ? op.actual : op.expected) ?? "";
           return { ipa, label: phonemeTileLabel(ipa), ...SOUND_STYLE[op.type] };
         })

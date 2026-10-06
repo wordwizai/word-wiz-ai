@@ -16,6 +16,11 @@ Last session: 2026-10-05 (session 1). Next session: start by reading this,
   worktree. `npm run typecheck` has 16 errors on `main` already; only check
   that the files you touched add none.
 - No Vercel preview for this branch until AQ-002 is applied.
+- No `gh` CLI and GitHub isn't signed in to the built-in browser, so the PR
+  can't be opened or edited from here (AQ-010). Keep `growth-agent/PR_BODY.md`
+  current every session; it's the PR description.
+- Pushing `growth-agent` works (`git push origin growth-agent`, never `main`,
+  never force).
 - Search Console is readable through the built-in browser (persistent Google
   sign-in). Performance URL with all metrics:
   `https://search.google.com/search-console/performance/search-analytics?resource_id=sc-domain%3Awordwizai.com&num_of_days=28&metrics=CLICKS%2CIMPRESSIONS%2CCTR%2CPOSITION`
@@ -137,7 +142,8 @@ Nothing from this branch is live yet. Everything below is waiting on the PR.
 
 ## Next actions (session 2)
 
-1. Merge `origin/main`, read the queue, execute anything APPROVED.
+1. Merge `origin/main`, read the queue, execute anything APPROVED. Check
+   whether the PR exists (AQ-010) and whether it was merged.
 2. Re-read GSC 28d totals and the five pages above. Expect no movement yet if
    the PR isn't merged; say so at the top of the report.
 3. Build the four magic-e practice pages (backlog #1).

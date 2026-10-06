@@ -74,9 +74,9 @@ move, and when to check it.
 Commits 4 and 5 touch the same page. They test different things (snippet CTR
 vs ranking for sentence queries), measured on different queries.
 
-**Queued for Bruce**: AQ-001 to AQ-009 (analytics access, preview deploys,
+**Queued for Bruce**: AQ-001 to AQ-010 (analytics access, preview deploys,
 account-fact conflict, guest mode, About page founder line, 3 outreach
-emails, Freedom Homeschooling listing).
+emails, Freedom Homeschooling listing, opening the PR).
 
 **Listings**: none submitted. Found 3 existing listings (AlternativeTo,
 SaaSHub, Product Hunt) and researched 16 candidates plus an excluded list;
@@ -87,6 +87,10 @@ skipped on purpose (listing count isn't the goal).
 
 **Blocked**: editing `vercel.json` to enable branch previews was denied by my
 permission classifier. Moved to AQ-002 with the exact diff.
+
+**Pushed** `growth-agent` to origin (7 commits). **Couldn't open the PR**:
+no `gh` CLI, and GitHub isn't signed in to the built-in browser. The PR
+description is in `PR_BODY.md`; AQ-010 asks Bruce to open it.
 
 **Check next session**: whether the PR was merged. If it was, nothing will
 have moved yet (Google needs 2-4 weeks), so just confirm the pages re-crawled

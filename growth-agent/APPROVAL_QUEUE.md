@@ -249,6 +249,22 @@ before submitting.
 
 ---
 
+## AQ-010 | Access | GitHub PR for `growth-agent` | Nothing goes live until the PR exists and you merge it. I pushed the branch but couldn't open the PR | None | Status: PENDING
+
+`gh` isn't installed on this machine, and the built-in browser isn't signed
+in to GitHub (I won't sign in for you or pull a token out of git's
+credential store).
+
+1. **Now, one click:** open
+   https://github.com/wordwizai/word-wiz-ai/compare/main...growth-agent?expand=1,
+   title it "Growth agent: SEO fixes and state (running PR)", and paste the
+   contents of `growth-agent/PR_BODY.md` as the description.
+2. **So I can keep it updated myself (optional):** `winget install GitHub.cli`
+   then `gh auth login`. After that I'll edit the PR description each session
+   instead of asking you to.
+
+---
+
 ## Notes for Bruce (not approval items)
 
 - **AlternativeTo lists Word Wiz as "Open Source"**, but the repo has no

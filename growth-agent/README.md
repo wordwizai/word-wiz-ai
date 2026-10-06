@@ -7,6 +7,7 @@ branch only and are not part of the site.
 - `APPROVAL_QUEUE.md` - drafts waiting on Bruce (emails, posts, anything public or hard to undo)
 - `RUN_LOG.md` - one entry per session
 - `LISTINGS.md` - every directory submission, so nothing is submitted twice
+- `PR_BODY.md` - the running description for the `growth-agent` -> `main` PR
 - `data/` - dated metric snapshots copied out of Search Console
 
 Not served: Vercel's Root Directory is `frontend/`, so nothing at the repo root

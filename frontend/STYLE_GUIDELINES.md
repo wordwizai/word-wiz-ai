@@ -72,6 +72,17 @@ The application uses a sophisticated color system defined in `src/index.css` wit
 - **Section Headers**: `text-xl font-bold` with appropriate color schemes
 - **Card Titles**: `text-lg font-semibold` or `font-bold`
 
+### Handwriting (Teacher's Pen)
+Marketing pages can carry a hand-drawn layer over the real product UI, as if a reading teacher had marked it up. It's what keeps the landing page from looking like a template, so use it with restraint.
+
+- **Font**: Nanum Pen Script (`font-hand`), loaded from Google Fonts (`family=Nanum+Pen+Script`) only on pages that use it.
+- **Ink**: `text-pen-ink` / `stroke-pen-ink` (`#5a4fcf` light, `#a9a4f0` dark). It's never used as a fill, a button, or a link color.
+- **Notes**: 30px, lowercase, one short phrase, rotated between -4° and 2°. A note usually points at something with a short arrow.
+- **Step numbers**: 104px, overlapping the top-left corner of a step card, rotated between -6° and 4°.
+- **Marks**: inline SVG strokes, 2.5 to 3.5px, round caps and joins, slightly irregular paths that overshoot where they started (a loop around the sound that slipped, a wavy underline, a tick, an arrow). No filled shapes, and no icon-library glyphs.
+- **Limits**: at most 3 or 4 marks per section. Never on forms, the practice screen, or anything the child reads. Never set IPA in it, since the font has no IPA glyphs.
+- **Motion**: each stroke draws itself along its length (ease-in-out, 0.3 to 0.9s depending on length) when its section scrolls into view, and notes fade up after the stroke they belong to. With reduced motion, marks appear already drawn.
+
 ### Spacing System
 - **Main Container**: `space-y-8` for vertical spacing between major sections
 - **Card Content**: `gap-4` for internal spacing

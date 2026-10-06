@@ -13,6 +13,18 @@ import { googleLogin } from "@/api";
 import { GoogleIcon } from "@/components/GoogleIcon";
 import { trackSignupClick } from "@/utils/analytics";
 import { AuthContext } from "@/contexts/AuthContext";
+import LandingSection from "@/components/landing/LandingSection";
+import ScrollCue from "@/components/landing/ScrollCue";
+import SoundBoxesSection from "@/components/landing/SoundBoxesSection";
+import SessionStepsSection from "@/components/landing/SessionStepsSection";
+import RecordingSection from "@/components/landing/RecordingSection";
+import {
+  PenGroup,
+  PenMark,
+  PenStroke,
+} from "@/components/landing/TeacherPen";
+import { sectionTitle } from "@/components/landing/styles";
+import { PEN_PATHS } from "@/components/landing/penPaths";
 
 const fadeUpVariant = {
   hidden: { opacity: 0, y: 30 },
@@ -105,7 +117,7 @@ const LandingPage = () => {
         <LandingPageNavbar />
 
         {/* Hero Section */}
-        <section className="relative px-4 sm:px-6 py-16 sm:py-20 md:py-24 bg-background text-foreground">
+        <section className="relative px-4 sm:px-6 pt-16 pb-16 sm:pt-20 sm:pb-20 md:pt-24 md:pb-24 lg:pb-10 bg-background text-foreground">
           {/* Content */}
           <div className="relative z-10 max-w-7xl mx-auto">
             <div className="flex flex-col lg:flex-row items-center gap-8 md:gap-12 lg:gap-16">
@@ -191,125 +203,36 @@ const LandingPage = () => {
                 </div>
               </motion.div>
             </div>
+            <ScrollCue href="#how-it-hears" />
           </div>
         </section>
 
-        {/* What Makes Word Wiz Unique */}
-        <motion.section
-          className="px-6 py-20 bg-gradient-to-b from-primary/5 to-background"
-          variants={fadeUpVariant}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.6 }}
-        >
+        <SoundBoxesSection id="how-it-hears" />
+
+        <SessionStepsSection id="how-it-works-section" />
+
+        {/* Who It's For */}
+        <LandingSection className="bg-muted/50 px-4 py-20 sm:px-6 md:py-24">
           <div className="max-w-6xl mx-auto">
-            <div className="max-w-2xl space-y-4">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-                What Makes Word Wiz Unique?
-              </h2>
-              <p className="text-muted-foreground text-lg">
-                Most reading apps can tell your child a word was wrong. Word Wiz
-                tells them which sound was wrong.
-              </p>
-            </div>
-
-            <motion.div
-              className="mt-12 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start"
-              variants={staggerContainer}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-            >
-              {/* Lead claim, shown rather than described */}
-              <motion.div
-                className="lg:col-span-7 rounded-2xl border border-border bg-card p-6 sm:p-8"
-                variants={childVariant}
-              >
-                <h3 className="text-xl font-semibold">
-                  Feedback down to a single sound
-                </h3>
-                <p className="mt-2 text-muted-foreground">
-                  Speech recognition breaks each word into its phonemes, so
-                  practice targets the exact sound that slipped rather than the
-                  whole word.
-                </p>
-
-                <div className="mt-7 rounded-xl bg-muted/50 p-5 sm:p-6">
-                  <div className="flex flex-wrap items-end gap-2">
-                    {[
-                      { chunk: "b", sound: "/b/" },
-                      { chunk: "r", sound: "/r/" },
-                      { chunk: "ow", sound: "/aʊ/", missed: true },
-                      { chunk: "n", sound: "/n/" },
-                    ].map((part) => (
-                      <div key={part.chunk} className="text-center">
-                        <div
-                          className={
-                            part.missed
-                              ? "rounded-lg border-2 border-rose-400 bg-rose-400/15 px-3.5 py-2 text-2xl font-semibold text-rose-700 dark:text-rose-300"
-                              : "rounded-lg border-2 border-border bg-background px-3.5 py-2 text-2xl font-semibold"
-                          }
-                        >
-                          {part.chunk}
-                        </div>
-                        <div className="mt-1.5 text-xs text-muted-foreground">
-                          {part.sound}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="mt-5 text-sm text-muted-foreground">
-                    Reading{" "}
-                    <span className="font-medium text-foreground">brown</span>,
-                    your reader said the vowel team as{" "}
-                    <span className="font-medium text-foreground">
-                      /o&#650;/
-                    </span>
-                    . The next few sentences quietly work that sound back in.
-                  </p>
-                </div>
-              </motion.div>
-
-              {/* Supporting claims, grouped by a rule instead of boxed in cards */}
-              <div className="lg:col-span-5 divide-y divide-border">
-                {[
-                  {
-                    title: "Practice that follows the reader",
-                    text: "Sentences are generated around the letter sounds and phonics patterns your child keeps missing, so no two sessions look alike.",
-                  },
-                  {
-                    title: "Free, and staying that way",
-                    text: "No ads, no subscription, no card on file. Word Wiz exists to help more children read, which does not work if it costs money.",
-                  },
-                ].map((item) => (
-                  <motion.div
-                    key={item.title}
-                    className="py-6 first:pt-0 last:pb-0 lg:first:pt-2"
-                    variants={childVariant}
+            <PenGroup>
+              <h2 className={sectionTitle}>
+                Who it&rsquo;s{" "}
+                <span className="relative inline-block text-primary">
+                  for
+                  <PenMark
+                    viewBox="0 0 100 14"
+                    strokeWidth={3.5}
+                    className="absolute -bottom-2.5 -left-[8%] h-3.5 w-[120%]"
                   >
-                    <h3 className="text-lg font-semibold">{item.title}</h3>
-                    <p className="mt-2 text-muted-foreground">{item.text}</p>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        </motion.section>
-
-        {/* Who It's For Section */}
-        <motion.section
-          className="px-6 py-20 bg-background"
-          variants={fadeUpVariant}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-              Who It&apos;s For
-            </h2>
+                    <PenStroke
+                      d={PEN_PATHS.underlineBold}
+                      delay={0.3}
+                      duration={0.37}
+                    />
+                  </PenMark>
+                </span>
+              </h2>
+            </PenGroup>
 
             <motion.dl
               className="mt-10 border-t border-border"
@@ -355,118 +278,10 @@ const LandingPage = () => {
               ))}
             </motion.dl>
           </div>
-        </motion.section>
+        </LandingSection>
 
-        {/* How It Works */}
-        <motion.section
-          id="how-it-works-section"
-          className="px-6 py-20 bg-gradient-to-b from-background to-primary/5"
-          variants={fadeUpVariant}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-center">
-              How It Works
-            </h2>
+        <RecordingSection />
 
-            <motion.ol
-              className="relative mt-12 grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-8"
-              variants={staggerContainer}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-            >
-              {[
-                {
-                  step: "1",
-                  title: "Your child reads aloud",
-                  text: "A practice sentence appears and Word Wiz listens through the microphone. Nothing is kept for anyone else to hear.",
-                },
-                {
-                  step: "2",
-                  title: "Every sound gets checked",
-                  text: "The audio is split into phonemes and compared against how the sentence should sound, word by word.",
-                },
-                {
-                  step: "3",
-                  title: "Feedback, then a new sentence",
-                  text: "Your child hears what to try differently, and the next sentence is built around the sounds that need the practice.",
-                },
-              ].map((step, i, steps) => (
-                <motion.li
-                  key={step.step}
-                  className="relative flex gap-4 md:block"
-                  variants={childVariant}
-                >
-                  {/* Connector to the next step. Decorative, so the last step has none. */}
-                  {i < steps.length - 1 && (
-                    <span
-                      aria-hidden="true"
-                      className="pointer-events-none absolute left-[1.0625rem] top-10 h-[calc(100%+1.25rem-2.5rem)] w-px bg-border md:left-10 md:top-[1.0625rem] md:h-px md:w-[calc(100%-2.5rem+2rem)]"
-                    />
-                  )}
-                  <span className="relative z-10 flex h-9 w-9 flex-none items-center justify-center rounded-full border border-primary/25 bg-primary/10 text-sm font-semibold text-primary">
-                    {step.step}
-                  </span>
-                  <div className="md:mt-5">
-                    <h3 className="text-lg font-semibold">{step.title}</h3>
-                    <p className="mt-2 text-muted-foreground">{step.text}</p>
-                  </div>
-                </motion.li>
-              ))}
-            </motion.ol>
-          </div>
-        </motion.section>
-
-        {/* Testimonials Section */}
-        {/*<motion.section
-        className="px-6 py-20 bg-muted/50"
-        variants={fadeUpVariant}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.3 }}
-        transition={{ duration: 0.6 }}
-      >
-        <div className="max-w-4xl mx-auto text-center space-y-10">
-          <h2 className="text-3xl md:text-4xl font-bold">
-            What Readers Are Saying
-          </h2>
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-6"
-            variants={staggerContainer}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-          >
-            {[
-              {
-                name: "Alex, Grade 4",
-                quote:
-                  "Word Wiz made reading fun and helped me feel more confident!",
-              },
-              {
-                name: "Mrs. Rivera, Teacher",
-                quote:
-                  "A game changer in my classroom. Every student is improving.",
-              },
-            ].map((testimonial, i) => (
-              <motion.div key={i} variants={childVariant}>
-                <Card className="p-6 bg-background border border-border rounded-2xl shadow-sm">
-                  <CardContent className="space-y-4">
-                    <p className="italic">“{testimonial.quote}”</p>
-                    <p className="font-semibold">— {testimonial.name}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </motion.section>
-
-      {/* FAQ Section */}
         <FAQ />
 
         {/* CTA button */}

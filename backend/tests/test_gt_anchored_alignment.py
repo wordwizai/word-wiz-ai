@@ -205,6 +205,14 @@ class TestWithinWordMispronunciation(unittest.TestCase):
 
 LEGACY_SCORING_FLAG = "WWAI_LEGACY_WORD_SCORING"
 
+# Keys every ground-truth-anchored record carries on top of
+# _process_word_alignment's contract (scoring v2.1).
+V21_KEYS = {"canonical_phonemes", "edge_insertions"}
+
+
+def without_v21_keys(records):
+    return [{k: v for k, v in r.items() if k not in V21_KEYS} for r in records]
+
 
 def pre_v2_align_to_ground_truth(flat_phonemes, ground_truth_phonemes, predicted_words=None):
     """
@@ -260,7 +268,8 @@ def pre_v2_align_to_ground_truth(flat_phonemes, ground_truth_phonemes, predicted
         })
     for extra in insertions.get(len(gtp), ()):
         results.append(_insertion_record(extra))
-    return results
+    # The reused record helpers now add the v2.1 keys, which pre-v2 did not have.
+    return without_v21_keys(results)
 
 
 class _ScoringEnv(unittest.TestCase):
@@ -582,10 +591,17 @@ class TestLegacyWordScoringKillSwitch(_ScoringEnv):
             os.environ[LEGACY_SCORING_FLAG] = value
             for flat, gt, asr in self.CASES:
                 with self.subTest(value=value, flat=flat):
+                    records = align_to_ground_truth(list(flat), gt, asr)
                     self.assertEqual(
-                        align_to_ground_truth(list(flat), gt, asr),
+                        without_v21_keys(records),
                         pre_v2_align_to_ground_truth(list(flat), gt, asr),
                     )
+                    # The added keys say nothing new: nothing is forgiven, and
+                    # the canonical pronunciation is the one scored against.
+                    for r in records:
+                        self.assertEqual(r["edge_insertions"], [])
+                        if r["type"] != "insertion":
+                            self.assertEqual(r["canonical_phonemes"], r["expected_phonemes"])
 
     def test_falsy_kill_switch_keeps_v2(self):
         for value in ("", "0", "false", "off"):
@@ -596,7 +612,7 @@ class TestLegacyWordScoringKillSwitch(_ScoringEnv):
     def test_the_comparison_is_not_vacuous(self):
         changed = [
             flat for flat, gt, asr in self.CASES
-            if align_to_ground_truth(list(flat), gt, asr)
+            if without_v21_keys(align_to_ground_truth(list(flat), gt, asr))
             != pre_v2_align_to_ground_truth(list(flat), gt, asr)
         ]
         self.assertGreaterEqual(len(changed), 6)
@@ -623,23 +639,127 @@ class TestFeedbackFormatterOnV2Records(_ScoringEnv):
         self.assertIn("cat", feedback.text)
         self.assertIn('ph="kæt"', feedback.ssml)
 
-    def test_formatter_models_the_word_with_the_chosen_variant(self):
+    def test_formatter_models_the_word_with_its_canonical_pronunciation(self):
         from core.phoneme_feedback_formatter import generate_feedback
         from core.process_audio import analyze_results
 
         # "to" read as [d u]: one substitution from "tu", two from the primary "tɪ".
-        # The record is scored against "tu", so the TTS models the word as "tu".
+        # The record is scored against "tu", but the spoken feedback models the
+        # word with its canonical (primary G2P) pronunciation, "tɪ".
         gt = [('go', ['g', 'o', 'ʊ']), ('to', ['t', 'ɪ'])]
         records = align_to_ground_truth(['g', 'o', 'ʊ', 'd', 'u'], gt, ['go', 'to'])
         to = by_word(records, 'to')[0]
         self.assertEqual(to["expected_phonemes"], ['t', 'u'])
+        self.assertEqual(to["canonical_phonemes"], ['t', 'ɪ'])
         self.assertEqual(to["substituted"], [('t', 'd')])
         self.assertEqual(to["per"], 0.5)
 
         _df, _highest, problems, per_summary = analyze_results(records)
         feedback = generate_feedback(problems, per_summary, records)
         self.assertIn("'to'", feedback.text)
-        self.assertIn('ph="tu">to</phoneme>', feedback.ssml)
+        self.assertIn('ph="tɪ">to</phoneme>', feedback.ssml)
+
+        # The same records through a DataFrame round trip, as the handler does.
+        df, _highest, problems, per_summary = analyze_results(records)
+        feedback = generate_feedback(problems, per_summary, df.to_dict('records'))
+        self.assertIn('ph="tɪ">to</phoneme>', feedback.ssml)
+
+    def test_a_repeated_word_is_modelled_from_its_worst_occurrence(self):
+        from core.phoneme_feedback_formatter import generate_feedback
+
+        def record(per, errors, substituted, expected, canonical=None):
+            r = {
+                "type": "substitution", "ground_truth_word": "the", "predicted_word": "the",
+                "per": per, "total_errors": errors, "total_phonemes": 2,
+                "missed": [], "added": [], "substituted": substituted,
+                "expected_phonemes": expected, "ground_truth_phonemes": expected,
+            }
+            if canonical is not None:
+                r["canonical_phonemes"] = canonical
+            return r
+
+        # Records without canonical_phonemes (the legacy path): the IPA comes from
+        # the occurrence with the highest per, not from the first one.
+        records = [
+            record(0.5, 1, [('ə', 'ɪ')], ['ð', 'i']),
+            record(1.0, 2, [('ð', 'd'), ('ə', 'ɪ')], ['ð', 'ə']),
+        ]
+        feedback = generate_feedback({}, {"sentence_per": 0.75}, records)
+        self.assertIn('ph="ðə">the</phoneme>', feedback.ssml)
+        self.assertNotIn('ph="ði"', feedback.ssml)
+
+        # canonical_phonemes, when present, wins over expected_phonemes.
+        records = [
+            record(0.5, 1, [('ə', 'ɪ')], ['ð', 'i'], canonical=['ð', 'ə']),
+            record(1.0, 2, [('ð', 'd'), ('i', 'ɪ')], ['ð', 'i'], canonical=['ð', 'ə']),
+        ]
+        feedback = generate_feedback({}, {"sentence_per": 0.75}, records)
+        self.assertIn('ph="ðə">the</phoneme>', feedback.ssml)
+
+
+class TestCanonicalPhonemesAndEdgeInsertions(_ScoringEnv):
+    """What a record was scored against, and what was forgiven, stay visible."""
+
+    def test_records_carry_the_canonical_phonemes_and_forgiven_edges(self):
+        r = self.score_one(['h', 'k', 'æ', 't', 's'], CAT)
+        self.assertEqual(r["canonical_phonemes"], ['k', 'æ', 't'])
+        self.assertEqual(r["edge_insertions"], ['h', 's'])
+        self.assertEqual(r["added"], [])
+
+        r = self.score_one(['ə', 'h', 'k', 'æ', 't'], CAT)
+        self.assertEqual(r["edge_insertions"], ['ə'])
+        self.assertEqual(r["added"], ['h'])
+
+        r = self.score_one(['k', 'æ', 't'], CAT)
+        self.assertEqual(r["edge_insertions"], [])
+
+    def test_canonical_is_the_primary_even_when_a_variant_is_scored(self):
+        r = align_to_ground_truth(['t', 'u', 'n'], [('to', ['t', 'ɪ'])], ['to'])[0]
+        self.assertEqual(r["expected_phonemes"], ['t', 'u'])
+        self.assertEqual(r["canonical_phonemes"], ['t', 'ɪ'])
+        self.assertEqual(r["edge_insertions"], ['n'])
+        self.assertEqual(r["per"], 0.0)
+
+    def test_nothing_is_forgiven_under_the_miscue_guard(self):
+        r = align_to_ground_truth(['s', 'ɪ', 't'], [('it', ['ɪ', 't'])], ['sit'])[0]
+        self.assertEqual(r["edge_insertions"], [])
+        self.assertEqual(r["added"], ['s'])
+        self.assertEqual(r["canonical_phonemes"], ['ɪ', 't'])
+
+    def test_every_record_type_carries_the_keys(self):
+        flat = ['ð', 'ə', 't', 'æ', 't', 's', 'æ', 't', 'ɑ', 'n', 'ð', 'ə']
+        results = align_to_ground_truth(flat, GT_LONG, ['the', 'cat', 'sat', 'on', 'the', 'mat', 'now'])
+        self.assertEqual({r["type"] for r in results}, {"match", "substitution", "deletion", "insertion"})
+        for r in results:
+            with self.subTest(record=r["type"], word=r["ground_truth_word"]):
+                self.assertTrue(V21_KEYS.issubset(r.keys()))
+                self.assertIsInstance(r["canonical_phonemes"], list)
+                self.assertIsInstance(r["edge_insertions"], list)
+        deletion = [r for r in results if r["type"] == "deletion"][0]
+        self.assertEqual((deletion["canonical_phonemes"], deletion["edge_insertions"]), (['m', 'æ', 't'], []))
+        insertion = [r for r in results if r["type"] == "insertion"][0]
+        self.assertEqual((insertion["canonical_phonemes"], insertion["edge_insertions"]), ([], []))
+
+    def test_records_do_not_share_lists(self):
+        r = self.score_one(['h', 'k', 'æ', 't'], CAT)
+        r["canonical_phonemes"].append('x')
+        r["edge_insertions"].append('y')
+        self.assertEqual(CAT[1], ['k', 'æ', 't'])
+        again = self.score_one(['h', 'k', 'æ', 't'], CAT)
+        self.assertEqual((again["canonical_phonemes"], again["edge_insertions"]), (['k', 'æ', 't'], ['h']))
+
+
+class TestScoringVersion(unittest.TestCase):
+
+    def test_per_summary_carries_the_scoring_version(self):
+        from core.gt_alignment import SCORING_VERSION
+        from core.process_audio import analyze_results
+
+        self.assertEqual(SCORING_VERSION, 2)
+        records = align_to_ground_truth(flatten(GT_SHORT), GT_SHORT, ['the', 'cat', 'sat'])
+        _df, _highest, _problems, per_summary = analyze_results(records)
+        self.assertEqual(per_summary["scoring_version"], 2)
+        self.assertEqual(per_summary["sentence_per"], 0.0)
 
 
 class TestSkippedWords(unittest.TestCase):
@@ -886,8 +1006,9 @@ class TestOutputContract(unittest.TestCase):
             # "match" and "substitution" share one record shape in the legacy code.
             legacy_type = 'match' if r["type"] == 'substitution' else r["type"]
             if legacy_type in legacy_keys:
+                # The anchored records add exactly the scoring v2.1 keys.
                 self.assertEqual(
-                    set(r.keys()), legacy_keys[legacy_type],
+                    set(r.keys()), legacy_keys[legacy_type] | V21_KEYS,
                     f"key drift for record type {r['type']!r}",
                 )
 

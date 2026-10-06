@@ -498,17 +498,27 @@ def generate_feedback(
 
     tip = (GRAPHEME_TIPS.get(grapheme) if grapheme else None) or PRONUNCIATION_TIPS.get(focus_phoneme)
 
-    # Build full-word IPA from expected_phonemes in pronunciation_data so we can
-    # wrap the focus word in a <phoneme> tag — this gives Google TTS the correct
-    # pronunciation of the whole word, not just the isolated sound.
+    # Build full-word IPA from pronunciation_data so we can wrap the focus word
+    # in a <phoneme> tag — this gives Google TTS the correct pronunciation of
+    # the whole word, not just the isolated sound. Prefer canonical_phonemes
+    # (the primary G2P pronunciation): with word scoring v2, expected_phonemes
+    # is whichever variant the child's attempt came closest to, which is not
+    # necessarily the one to model. When the word appears more than once, use
+    # the occurrence with the highest PER, the one the feedback is about.
     word_ipa: Optional[str] = None
+    word_ipa_per: Optional[float] = None
     for entry in pronunciation_data:
         w = (entry.get("ground_truth_word") or "").strip().lower()
-        if w == focus_word.lower():
+        if w != focus_word.lower():
+            continue
+        phonemes = entry.get("canonical_phonemes")
+        if not (isinstance(phonemes, list) and phonemes):
             phonemes = entry.get("expected_phonemes")
-            if isinstance(phonemes, list) and phonemes:
-                word_ipa = "".join(phonemes)
-            break
+        if not (isinstance(phonemes, list) and phonemes):
+            continue
+        per = entry.get("per") or 0
+        if word_ipa_per is None or per > word_ipa_per:
+            word_ipa, word_ipa_per = "".join(phonemes), per
 
     def _word_ssml(word: str, ipa: Optional[str]) -> str:
         if ipa:

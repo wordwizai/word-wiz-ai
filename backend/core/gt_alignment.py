@@ -58,9 +58,12 @@ WHAT THIS MODULE DOES
    primary-only scoring with every insertion counted.
 
 The returned value matches the existing contract of
-``process_audio._process_word_alignment`` exactly -- same keys, same types --
-so ``analyze_results``, ``SpeechProblemClassifier``,
-``phoneme_feedback_formatter`` and the frontend need no changes.
+``process_audio._process_word_alignment`` -- same keys, same types -- so
+``analyze_results``, ``SpeechProblemClassifier``,
+``phoneme_feedback_formatter`` and the frontend need no changes. Every record
+also carries two extra keys: ``canonical_phonemes`` (the primary G2P
+phonemes, which spoken feedback uses to model the word) and
+``edge_insertions`` (the edge phonemes that were forgiven).
 
 FEATURE FLAG
 ------------
@@ -432,6 +435,14 @@ def _phoneme_errors(gt_phonemes: list[str], pred_phonemes: list[str]):
 
 LEGACY_WORD_SCORING_FLAG = "WWAI_LEGACY_WORD_SCORING"
 
+#: Version of the word scoring code, stamped on ``analyze_results``'
+#: ``per_summary`` so stored stats can be told apart across scoring changes.
+#: 2 = word scoring v2 (closest CMUdict pronunciation, one forgiven edge
+#: phoneme per side, the miscue guard). It marks the code release, not the
+#: path one request took: the kill switches and the client-phoneme path still
+#: produce pre-v2 numbers under it.
+SCORING_VERSION = 2
+
 
 def is_legacy_word_scoring() -> bool:
     """
@@ -512,29 +523,31 @@ def _score_word(
     variants=(), forgive_edges: bool = True,
 ):
     """
-    Return ``(expected, missed, added, substituted)`` for one non-empty segment.
+    Return ``(expected, missed, added, substituted, edge_insertions)`` for one
+    non-empty segment.
 
     v2: the primary phonemes and every pronunciation in ``variants`` are
     candidates. Each candidate is aligned with the segment, at most one
     edge insertion per side is set aside (none when ``forgive_edges`` is
     False), and the candidate with the fewest counted errors wins (the earliest
     on a tie, so the primary wins ties). The error lists come from the
-    winner's alignment, so forgiven edge phonemes never reach ``added``.
+    winner's alignment, so forgiven edge phonemes never reach ``added``; they
+    are returned as ``edge_insertions`` instead.
     """
     if legacy:
-        return (list(gt_phonemes),) + _phoneme_errors(gt_phonemes, segment)
+        return (list(gt_phonemes),) + _phoneme_errors(gt_phonemes, segment) + ([],)
 
     best = None
     for candidate in _pronunciation_candidates(gt_phonemes, variants):
-        errors, ops, _edges = _counted_ops(candidate, segment, forgive_edges)
+        errors, ops, edges = _counted_ops(candidate, segment, forgive_edges)
         if best is None or errors < best[0]:
-            best = (errors, candidate, ops)
-    _errors, expected, ops = best
+            best = (errors, candidate, ops, edges)
+    _errors, expected, ops, edges = best
 
     missed = [gph for op, gph, _pph in ops if op == 'deletion']
     added = [pph for op, _gph, pph in ops if op == 'insertion']
     substituted = [(gph, pph) for op, gph, pph in ops if op == 'substitution']
-    return list(expected), missed, added, substituted
+    return list(expected), missed, added, substituted, list(edges)
 
 
 def _insertion_record(pred_word: str) -> dict:
@@ -553,6 +566,8 @@ def _insertion_record(pred_word: str) -> dict:
         "substituted": [],
         "total_phonemes": 0,
         "total_errors": 0,
+        "canonical_phonemes": [],
+        "edge_insertions": [],
         "error": "Extra word predicted.",
     }
 
@@ -574,6 +589,8 @@ def _deletion_record(gt_word: str, gt_phonemes: list[str]) -> dict:
         "substituted": [],
         "total_phonemes": len(gt_phonemes),
         "total_errors": len(gt_phonemes),
+        "canonical_phonemes": list(gt_phonemes),
+        "edge_insertions": [],
         "error": "Word missing in prediction.",
     }
 
@@ -616,6 +633,10 @@ def align_to_ground_truth(
           interior insertions still count, so ``per`` can still exceed 1.0.
           When the ASR heard a different word in the slot, no edge phoneme is
           forgiven (the miscue guard).
+        * Every record also has ``canonical_phonemes`` (the primary G2P
+          phonemes, ``[]`` on an insertion record) and ``edge_insertions``
+          (the forgiven edge phonemes, in segment order; always ``[]`` on
+          deletion and insertion records and under the kill switch).
     """
     gtp = [(word, list(phs or [])) for word, phs in (ground_truth_phonemes or [])]
     if not gtp:
@@ -652,7 +673,7 @@ def align_to_ground_truth(
             idx in pred_labels
             and _normalize_word(pred_labels[idx]) != _normalize_word(gt_word)
         )
-        expected, missed, added, substituted = _score_word(
+        expected, missed, added, substituted, edge_insertions = _score_word(
             gt_phs, segment, legacy_scoring,
             variants=variants.get(gt_word, ()),
             forgive_edges=not asr_heard_other_word,
@@ -674,6 +695,8 @@ def align_to_ground_truth(
             "substituted": substituted,
             "total_phonemes": len(expected),
             "total_errors": total_errors,
+            "canonical_phonemes": list(gt_phs),
+            "edge_insertions": edge_insertions,
         })
 
     for extra in insertions.get(len(gtp), ()):

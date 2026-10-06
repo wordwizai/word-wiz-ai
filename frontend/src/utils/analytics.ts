@@ -34,3 +34,12 @@ export const trackTryEvent = (
 ) => {
   track(event, { pattern, location });
 };
+
+/**
+ * Track downloads of the free printables linked from guides
+ * @param file - The printable's file name (e.g. 'magic-e-sentences.pdf')
+ * @param location - Where the link was clicked (e.g. 'inline_cta')
+ */
+export const trackPrintableDownload = (file: string, location: string) => {
+  track('printable_download', { file, location });
+};

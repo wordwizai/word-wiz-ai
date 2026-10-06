@@ -431,6 +431,18 @@ const SilentEWordsPractice = () => {
     },
   ];
 
+  const inlineCTAs = [
+    {
+      // Right after the last vowel set (the list under the u_e heading).
+      afterSection: content.findIndex((s) => s.id === "u-e-sentences") + 1,
+      title: "Print all 20 magic e sentences",
+      description:
+        "A free two-page PDF with the four vowel sets above, warm-up word lists, and a box to check after each sentence. No sign-up needed.",
+      buttonText: "Download the PDF",
+      buttonHref: "/printables/magic-e-sentences.pdf",
+    },
+  ];
+
   return (
     <ArticlePageTemplate
       metaTitle="Silent E Words: 100+ Magic E Words and Sentences for Kids"
@@ -449,6 +461,7 @@ const SilentEWordsPractice = () => {
       category="Phonics Practice"
       content={content}
       relatedArticles={relatedArticles}
+      inlineCTAs={inlineCTAs}
       breadcrumbs={[
         { label: "Home", href: "/" },
         { label: "Guides", href: "/guides/how-to-choose-reading-app" },

@@ -23,7 +23,11 @@ import {
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import LandingPageFooter from "@/components/LandingPageFooter";
 import { DEFAULT_OG_IMAGE } from "@/components/SeoHead";
-import { trackSignupClick, trackTryEvent } from "@/utils/analytics";
+import {
+  trackPrintableDownload,
+  trackSignupClick,
+  trackTryEvent,
+} from "@/utils/analytics";
 import { getPracticeLinksForArticle } from "@/data/articlePracticeLinks";
 import { phonicsPatterns } from "@/data/phonicsPatterns";
 
@@ -316,17 +320,35 @@ const InlineCTAComponent: React.FC<{ cta: InlineCTA; context?: string }> = ({ ct
           <p className="text-sm text-muted-foreground">{cta.description}</p>
         </div>
         <Button asChild size="lg" className="flex-shrink-0">
-          <Link 
-            to={cta.buttonHref}
-            onClick={() => {
-              if (cta.buttonHref.includes('/signup')) {
-                trackSignupClick('inline_cta', 'link', context);
+          {/* Files like the printable PDFs are served from public/, so they
+              need a real link rather than client-side navigation. */}
+          {/\.pdf$/i.test(cta.buttonHref) ? (
+            <a
+              href={cta.buttonHref}
+              download
+              onClick={() =>
+                trackPrintableDownload(
+                  cta.buttonHref.split("/").pop() ?? cta.buttonHref,
+                  "inline_cta"
+                )
               }
-            }}
-          >
-            {cta.buttonText}
-            <ArrowRight className="ml-2 w-4 h-4" />
-          </Link>
+            >
+              {cta.buttonText}
+              <ArrowRight className="ml-2 w-4 h-4" />
+            </a>
+          ) : (
+            <Link
+              to={cta.buttonHref}
+              onClick={() => {
+                if (cta.buttonHref.includes('/signup')) {
+                  trackSignupClick('inline_cta', 'link', context);
+                }
+              }}
+            >
+              {cta.buttonText}
+              <ArrowRight className="ml-2 w-4 h-4" />
+            </Link>
+          )}
         </Button>
       </div>
     </CardContent>

@@ -4,13 +4,13 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, House, Loader2, Mic, Puzzle, Volume2 } from "lucide-react";
 import type { Session } from "@/api";
 import WordBadgeRow from "@/components/WordBadgeRow";
-import { FeedbackAnimatedText } from "@/components/FeedbackAnimatedText";
 import { Button } from "@/components/ui/button";
 import { useSpeechSynthesis } from "@/hooks/useSpeechSynthesis";
 import { activityTypeLabel } from "@/lib/activities";
 import { cn } from "@/lib/utils";
-import { wordWizIcon } from "@/assets";
 import type { PracticeStageState, SentenceOptions } from "./types";
+import PracticeCompanion from "./PracticeCompanion";
+import { companionMood, isPraise } from "./companionMood";
 
 // The children using this screen are still learning to read, so no step
 // depends on reading an instruction. Every control is an icon whose look
@@ -35,6 +35,7 @@ const PracticeStage = ({
   showHighlightedWords,
   isRecording,
   isProcessing,
+  isFeedbackPlaying,
   audioLevel,
   onStartRecording,
   onStopRecording,
@@ -51,6 +52,30 @@ const PracticeStage = ({
   // steps back to "read it again".
   const micIsSecondary = showNext || showChoices;
   const hasAttempted = showHighlightedWords || !!feedback;
+
+  // Celebrate a read the tutor praises, once per attempt. Feedback that
+  // comes back with a saved session isn't an attempt, so the trigger waits
+  // until this screen has seen the attempt being processed.
+  const [celebrating, setCelebrating] = useState(false);
+  const attemptInFlight = useRef(false);
+
+  useEffect(() => {
+    if (isRecording) setCelebrating(false);
+    if (isProcessing) attemptInFlight.current = true;
+  }, [isRecording, isProcessing]);
+
+  useEffect(() => {
+    if (!feedback || !attemptInFlight.current) return;
+    attemptInFlight.current = false;
+    if (isPraise(feedback)) setCelebrating(true);
+  }, [feedback]);
+
+  const mascotMood = companionMood({
+    isRecording,
+    isProcessing,
+    isFeedbackPlaying,
+    celebrating,
+  });
 
   const spokenHelp = () => {
     if (isRecording) return "I'm listening. Read the words out loud.";
@@ -115,15 +140,14 @@ const PracticeStage = ({
             splitIntoSounds={splitIntoSounds}
           />
 
-          <AnimatePresence>
-            {feedback && (
-              <FeedbackBubble
-                key="feedback"
-                feedback={feedback}
-                onReplay={onReplayFeedback}
-              />
-            )}
-          </AnimatePresence>
+          {/* Old feedback is about the last attempt, so hide it while the
+              child reads again. */}
+          <PracticeCompanion
+            mood={mascotMood}
+            feedback={isRecording || isProcessing ? null : feedback}
+            onReplay={onReplayFeedback}
+            onCelebrateEnd={() => setCelebrating(false)}
+          />
 
           {showChoices && choices?.options && (
             <ChoicePicker
@@ -289,40 +313,6 @@ const LevelBars = ({ levelRef }: { levelRef: RefObject<number> }) => {
     </span>
   );
 };
-
-const FeedbackBubble = ({
-  feedback,
-  onReplay,
-}: {
-  feedback: string;
-  onReplay: (() => void) | null;
-}) => (
-  <motion.div
-    initial={{ opacity: 0, y: 8 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0 }}
-    className="flex w-full max-w-2xl items-start gap-3 rounded-2xl bg-muted/70 p-3 sm:p-4"
-  >
-    <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-card shadow-xs">
-      <img src={wordWizIcon} alt="" className="size-8" />
-    </span>
-    <FeedbackAnimatedText
-      feedback={feedback}
-      className="flex-1 self-center text-base text-foreground sm:text-lg"
-    />
-    {onReplay && (
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onReplay}
-        aria-label="Hear this again"
-        className="shrink-0 rounded-xl text-primary hover:bg-card"
-      >
-        <Volume2 className="size-5" />
-      </Button>
-    )}
-  </motion.div>
-);
 
 const ChoicePicker = ({
   options,

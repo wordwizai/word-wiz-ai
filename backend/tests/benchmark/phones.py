@@ -1,9 +1,16 @@
 """ARPAbet to IPA helpers and phone-position mapping for phone-level scoring.
 
 speechocean762 labels canonical phones in ARPAbet with stress digits. Production G2P
-emits IPA through eng_to_ipa, tokenized one codepoint per phoneme (legacy) or
-longest-match (WWAI_PHONEME_NORMALIZATION). Mapping works on characters, so it holds
-for either tokenization.
+emits IPA through eng_to_ipa. With WWAI_G2P_STRICT off it is one codepoint per phoneme.
+With it on it is longest-match (tokenize_ipa), with "<unk>" for OOV words and no symbol
+aliasing, so ʧ/ʤ stay ligatures. WWAI_PHONEME_NORMALIZATION never touches G2P output. It
+only rewrites the recognized phones (ʧ to tʃ, ʤ to dʒ, y to j, bare a/e/o folded), which
+gt_error_flags sees through `actual`.
+
+Mapping works on characters, so it holds for either tokenization. When strict mode joins
+characters from two canonical phones into one token (D R AO IH NG gives "ɔɪ"), both
+canonical phones map to that one system phone and share its error flag, which matches
+how production scores it.
 """
 
 from __future__ import annotations

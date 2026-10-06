@@ -21,6 +21,7 @@ class TestArpabet(unittest.TestCase):
             "sing": "S IH1 NG", "food": "F UW1 D", "go": "G OW1", "day": "D EY1", "my": "M AY1",
             "book": "B UH1 K", "father": "F AA1 DH ER0", "caught": "K AO1 T", "this": "DH IH1 S",
             "ship": "SH IH1 P", "see": "S IY1", "hat": "HH AE1 T",
+            "lives": "L IH1 V Z", "wear": "W EH1 R",  # with these, all 39 entries are checked
         }
         for word, arpa in cases.items():
             with self.subTest(word=word):
@@ -32,8 +33,13 @@ class TestMapping(unittest.TestCase):
     def test_legacy_tokenization_splits_diphthongs(self):
         self.assertEqual(P.map_canonical_to_system(["m", "aɪ"], ["m", "a", "ɪ"]), [[0], [1, 2]])
 
-    def test_normalized_tokenization(self):
+    def test_strict_tokenization(self):
         self.assertEqual(P.map_canonical_to_system(["m", "aɪ"], ["m", "aɪ"]), [[0], [1]])
+
+    def test_two_canonical_phones_can_share_one_system_phone(self):
+        # "drawing" D R AO IH NG: strict G2P joins ɔ and ɪ into one token.
+        self.assertEqual(P.map_canonical_to_system(["d", "r", "ɔ", "ɪ", "ŋ"], ["d", "r", "ɔɪ", "ŋ"]),
+                         [[0], [1], [2], [2], [3]])
 
     def test_missing_system_phone_is_unmapped(self):
         self.assertEqual(P.map_canonical_to_system(["k", "æ", "t"], ["k", "æ"]), [[0], [1], []])

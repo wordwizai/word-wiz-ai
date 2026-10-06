@@ -1884,6 +1884,36 @@ Send from contactwordwizai@gmail.com.
 
 ---
 
+## AQ-062 | Email | Santa Clara County Library District Reading Program (readingprogram@lib.sccgov.org) | Bay Area. The library's literacy program page "Literacy Resources for Learners and Tutors" (updated Aug 2026 per its sitemap) has a Family Literacy section (1000 Books Before 6, Reading Rockets) for parents in the program. A free tool for their kids' practice at home fits there | Low. The program mainly serves adult learners, so the family section is short | Status: PENDING
+
+Verified 2026-10-06: the Family Literacy section on https://sccld.org/reading-program/literacy-resources/ and the address on https://sccld.org/reading-program/about/.
+
+Send from contactwordwizai@gmail.com.
+
+**Subject:** A free reading tool for your Family Literacy resources
+
+> Dear Reading Program team,
+>
+> I'm a high school student in the Bay Area, and I saw the Family Literacy
+> section of your Literacy Resources for Learners and Tutors page. I built a
+> free tool called Word Wiz AI that parents in your program might find useful
+> for their kids. A child reads a sentence out loud, it shows which sounds came
+> out wrong (like "ship" read as "sip"), and then it writes the next sentence
+> around those sounds.
+>
+> It's free with no ads and runs in a browser, so it works on library computers
+> or at home. Kids can try three sentences without an account at
+> wordwizai.com/try. It's built for kids in about K-2 and works best with a
+> decent microphone.
+>
+> I'd really appreciate it if you took a look, and I'm happy to answer any
+> questions.
+>
+> Best,
+> Bruce Peters
+
+---
+
 <!-- wave3-end -->
 
 ## Notes for Bruce (not approval items)

@@ -52,6 +52,7 @@ account or his name in a new way), `submitted`, `live`, `rejected`,
 | queued | Easterseals Crossroads AT blog (INDATA) | email tech@eastersealscrossroads.org | contactwordwizai@gmail.com | AQ-059 |
 | queued | Literacy Mid-South, Lenell Burton | email lburton@literacymidsouth.org | contactwordwizai@gmail.com | AQ-060 |
 | queued | Read On Arizona, Terri Clark | email tclark@readonarizona.org | contactwordwizai@gmail.com | AQ-061 |
+| queued | Santa Clara County Library District Reading Program | email readingprogram@lib.sccgov.org | contactwordwizai@gmail.com | AQ-062 |
 
 Follow-up rule: one polite follow-up at most, 10+ days after the first message, only with Bruce's approval.
 
@@ -125,6 +126,13 @@ Ranked by expected real users for a K-2 reading tool.
 | Thrive by Five Tampa Bay early literacy guides | dsantangelo@cftampabay.org | 0-5 focus, PDF guides. Fit 2 |
 | Literacy Coalition of Onondaga County | onliteracy.org/contact form | Invites program highlights but keeps no app list; blog stale since 2023. Fit 2 |
 | READ JAX, Boston Reads, Pinellas CGLR, Read Charlotte, Virginia DOE family literacy, The Literacy Cooperative | various | No app list, no contact, or expert-screened only. Fit 1 |
+| Cincinnati & Hamilton County PL early literacy hub | chpl.org comment form (reCAPTCHA) | New Sept 2026 science-of-reading hub, but its community list is organizations, not tools. Fit 2 |
+| St. Louis County Library "Gateway to Reading" | Jotform needs an SLCL card number | Best content match (phonics, ages 5-8) but no usable route. Fit 3 if a route turns up |
+| Santa Clara City Library "Online Games for Kids" | suggestions form (reCAPTCHA) | Mostly entertainment games. Fit 2-3, Bay Area |
+| Sonoma County Library "More Fun" | ask@sonomacounty.libanswers.com | Short free-sites list incl. Starfall; update date unknown. Fit 3, Bay Area |
+| Lexington PL (KY) educational games; Arlington PL (TX) homeschool guide; Arapahoe Libraries (CO) struggling readers post | CAPTCHA forms / LibWizard | Free-site lists with Starfall; forms only. Fit 3 |
+| Fairfax County PL at-home learning guide | robert.solka@fairfaxcounty.gov | Pandemic-era content. Fit 2 |
+| Hennepin County Library "Let's Read Tutors" | LetsRead@hclib.org (family inbox) | Free K-5 tutoring program, same shape as Project READ (AQ-037); find a staff route first |
 
 ## Excluded (don't revisit unless the terms change)
 
@@ -161,6 +169,7 @@ Ranked by expected real users for a K-2 reading tool.
 | Thrifty Homeschoolers, Homeschool Printables for Free, NC Homeschool-ology, The Old Schoolhouse freebie directory | Dormant (newest posts 2019-2022) |
 | Homeschool Freebie of the Day, SEA Homeschoolers, Find My Homeschool, AIEducator.tools, Kidtopia | No submission route |
 | INFOhio, Learning Online Blog, Classroom Freebies, Freebies4Mom, Simple Homeschool, CHEA of California | Not eligible or wrong fit (Ohio educators only, paid items only, printables only, sponsored post, groups directory) |
+| Most big library systems (San Jose, SFPL kids, Alameda County, Oakland, Berkeley, LA, LA County, Hennepin, Denver, Multnomah, Houston, Dallas, Salt Lake, NYPL, KCLS, Chicago, Miami-Dade, Gwinnett, Seattle, Phoenix...) | Kids' pages now list only library-card databases, or are stale (checked 2026-10-06) |
 
 ## Listing copy (checked against the code on 2026-10-05)
 

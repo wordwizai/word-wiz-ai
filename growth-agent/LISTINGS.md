@@ -50,6 +50,8 @@ account or his name in a new way), `submitted`, `live`, `rejected`,
 | queued | Learning Reading Hub, Laura Diaz | contact form | contactwordwizai@gmail.com | AQ-057 (earlier noted as no route; the form is real) |
 | queued | Read To Succeed Asheville/Buncombe | email info@r2sasheville.org | contactwordwizai@gmail.com | AQ-058 |
 | queued | Easterseals Crossroads AT blog (INDATA) | email tech@eastersealscrossroads.org | contactwordwizai@gmail.com | AQ-059 |
+| queued | Literacy Mid-South, Lenell Burton | email lburton@literacymidsouth.org | contactwordwizai@gmail.com | AQ-060 |
+| queued | Read On Arizona, Terri Clark | email tclark@readonarizona.org | contactwordwizai@gmail.com | AQ-061 |
 
 Follow-up rule: one polite follow-up at most, 10+ days after the first message, only with Bruce's approval.
 
@@ -119,6 +121,10 @@ Ranked by expected real users for a K-2 reading tool.
 | The Learning Agency, The Cutting Ed (speech recognition for early reading articles) | info@the-learning-agency.com | Articles, not updated lists; better for a data or story angle later. Fit 3 |
 | KidsAiTools "AI Reading Apps for Kids" | support@kidsaitools.com (errors inbox) | Sells memberships, earns referral commissions, template-like content. Fit 2 |
 | MMGuardian blog "Free Reading Apps for Kids" | support@mmguardian.com | Corporate blog whose bar is on-device audio and no sign-in. Hold until AQ-036 is done. Fit 2 |
+| Get Georgia Reading Campaign summer toolkit | GGR@gafcp.org | Seasonal page refreshed around May; ask around April 2027. Fit 2 |
+| Thrive by Five Tampa Bay early literacy guides | dsantangelo@cftampabay.org | 0-5 focus, PDF guides. Fit 2 |
+| Literacy Coalition of Onondaga County | onliteracy.org/contact form | Invites program highlights but keeps no app list; blog stale since 2023. Fit 2 |
+| READ JAX, Boston Reads, Pinellas CGLR, Read Charlotte, Virginia DOE family literacy, The Literacy Cooperative | various | No app list, no contact, or expert-screened only. Fit 1 |
 
 ## Excluded (don't revisit unless the terms change)
 

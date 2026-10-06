@@ -1831,6 +1831,59 @@ Send from contactwordwizai@gmail.com.
 
 ---
 
+## AQ-060 | Email | Literacy Mid-South (Memphis), Lenell Burton, Family Engagement Specialist (lburton@literacymidsouth.org) | Runs a "Whole-Family Literacy Tech Hub" page of free digital tools (Starfall, Reading Bear, Storyline Online, Khan Academy, Tennessee's free K-2 decodable books) and five physical tech hub locations in Memphis, so families use these tools on site too. Its stated vision is "100% literacy across the Mid-South" | Low. No date on the page; newest items added in early 2025 | Status: PENDING
+
+Verified 2026-10-06: the page and its tools on https://literacymidsouth.org/wholefamily-literacy-tech-hub; name, title and email on https://literacymidsouth.org/meet-the-team.
+
+Send from contactwordwizai@gmail.com.
+
+**Subject:** A free reading tool for the Literacy Tech Hub
+
+> Dear Lenell,
+>
+> I came across Literacy Mid-South's Literacy Tech Hub page and wanted to
+> suggest a free tool for the Kids section, next to Starfall and Reading Bear.
+> Word Wiz AI is a reading tutor for kids in about K-2. A child reads a sentence
+> out loud, it shows which sounds came out wrong (like "ship" read as "sip"),
+> and then it writes the next sentence around those sounds.
+>
+> It's free with no ads and runs in a browser, so it would work at home or on
+> the computers at your tech hubs (a headset with a mic works best). Kids can try
+> three sentences without an account at wordwizai.com/try. I'm a high school
+> student and built it on my own, so I'd also really appreciate any feedback
+> from families who try it.
+>
+> Best,
+> Bruce Peters
+
+---
+
+## AQ-061 | Email | Read On Arizona, Terri Clark, Arizona Literacy Director (tclark@readonarizona.org) | The statewide early-literacy collaboration for Arizona, whose "More Literacy Resources" page has a "Grades K-5" list (Khan Academy Kids, Starfall, Storyline Online, Unite for Literacy, CommonLit). Active news through Sept 2026 | Low. The list was last modified Feb 2024, and they lean on "evidence-based" strategies elsewhere, so the note says plainly it hasn't been studied | Status: PENDING
+
+Verified 2026-10-06: the list on https://readonarizona.org/resources/more-literacy-resources/ and the name, title and email on https://readonarizona.org/about-us/contact/.
+
+Send from contactwordwizai@gmail.com.
+
+**Subject:** A free K-2 reading tool for your resources page
+
+> Dear Terri,
+>
+> I wanted to suggest a free resource for the Grades K-5 list on Read On
+> Arizona's More Literacy Resources page, next to Khan Academy Kids and
+> Starfall. Word Wiz AI is a reading tutor where a child reads a sentence out
+> loud and it shows which sounds came out wrong (like "cake" read as "cack"),
+> then writes the next sentence around those sounds.
+>
+> It's free with no ads, runs in a browser, and families can try three sentences
+> without an account at wordwizai.com/try. It hasn't been formally studied, so I
+> see it as extra practice at home. I'm a high school student and built it on
+> my own, so I'd really appreciate any feedback.
+>
+> Best,
+> Bruce Peters
+
+---
+
 <!-- wave3-end -->
 
 ## Notes for Bruce (not approval items)

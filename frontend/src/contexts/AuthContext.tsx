@@ -1,6 +1,8 @@
 import { createContext, useState, useEffect, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser, fetchUserProfile, registerUser } from "../api";
+import { getErrorStatus } from "@/utils/errorHandling";
+import { consumePostLoginRedirect } from "@/lib/postLoginRedirect";
 
 interface User {
   id: string;
@@ -14,7 +16,7 @@ interface AuthContextType {
   token: string | null;
   user: User | null;
   loginWithEmailAndPassword: (
-    username: string,
+    email: string,
     password: string,
   ) => Promise<void>;
   register: (
@@ -25,6 +27,9 @@ interface AuthContextType {
   ) => Promise<void>;
   logout: () => void;
   loginWithGoogleToken: (token: string) => Promise<void>;
+  /** True when the profile couldn't be loaded for a reason other than a bad token (offline, server down). */
+  profileLoadFailed: boolean;
+  retryProfileLoad: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -34,6 +39,8 @@ const AuthContext = createContext<AuthContextType>({
   register: async () => {},
   logout: () => {},
   loginWithGoogleToken: async () => {},
+  profileLoadFailed: false,
+  retryProfileLoad: () => {},
 });
 
 const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -41,6 +48,8 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.getItem("token"),
   );
   const [user, setUser] = useState<User | null>(null);
+  const [profileLoadFailed, setProfileLoadFailed] = useState(false);
+  const [profileAttempt, setProfileAttempt] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,27 +58,40 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
           const user = await fetchUserProfile(token);
           setUser(user);
+          setProfileLoadFailed(false);
         } catch (error) {
           console.error("Error fetching user profile:", error);
-          logout(); // Logout if token is invalid
+          const status = getErrorStatus(error);
+          // Only a rejected token means "sign in again". A dropped
+          // connection or a backend restart must not throw away the session.
+          if (status === 401 || status === 403 || status === 404) {
+            logout();
+          } else {
+            setProfileLoadFailed(true);
+          }
         }
       };
       getUser();
     }
-  }, [token]);
+  }, [token, profileAttempt]);
+
+  const retryProfileLoad = () => {
+    setProfileLoadFailed(false);
+    setProfileAttempt((n) => n + 1);
+  };
 
   const loginWithEmailAndPassword = async (
-    username: string,
+    email: string,
     password: string,
   ): Promise<void> => {
-    // username is an alias for email in this context
-    const response = await loginUser({ username, password });
+    // The backend's OAuth2 form calls the field "username", but it is the email.
+    const response = await loginUser({ username: email, password });
     if (response?.access_token) {
       setToken(response.access_token);
       localStorage.setItem("token", response.access_token);
       const userProfile = await fetchUserProfile(response.access_token);
       setUser(userProfile);
-      navigate("/dashboard");
+      navigate(consumePostLoginRedirect(), { replace: true });
     }
   };
 
@@ -78,7 +100,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem("token", token);
     const userProfile = await fetchUserProfile(token);
     setUser(userProfile);
-    navigate("/dashboard");
+    navigate(consumePostLoginRedirect(), { replace: true });
   };
 
   const register = async (
@@ -88,12 +110,12 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     full_name: string,
   ): Promise<void> => {
     await registerUser({ username, email, password, full_name });
-    navigate("/login");
   };
 
   const logout = () => {
     setToken(null);
     setUser(null);
+    setProfileLoadFailed(false);
     localStorage.removeItem("token");
     navigate("/login");
   };
@@ -107,6 +129,8 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
         register,
         logout,
         loginWithGoogleToken,
+        profileLoadFailed,
+        retryProfileLoad,
       }}
     >
       {children}

@@ -24,7 +24,9 @@ async def update_user_settings(
     if not settings:
         settings = UserSettings(user_id=current_user.id)
         db.add(settings)
-    for field, value in settings_update.dict(exclude_unset=True).items():
+    # exclude_none: an explicit null would write NULL into a non-null column
+    # and then fail the response model on the next read.
+    for field, value in settings_update.model_dump(exclude_unset=True, exclude_none=True).items():
         setattr(settings, field, value)
     db.commit()
     db.refresh(settings)

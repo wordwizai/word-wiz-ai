@@ -1,91 +1,89 @@
-import { Play } from "lucide-react";
-import { Button } from "./ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
-import { Badge } from "./ui/badge";
+import { ArrowRight, Loader2 } from "lucide-react";
 import DynamicIcon from "./DynamicIcon";
+import {
+  activityPastel,
+  activityTypeLabel,
+  type Activity,
+} from "@/lib/activities";
+import { cn } from "@/lib/utils";
 
 interface ActivityCardProps {
-  activity: {
-    id: number;
-    title: string;
-    description: string;
-    emoji_icon: string;
-    activity_type: string;
-    activity_settings: Record<string, unknown>;
-  };
-  onActivityClick: (activity: Record<string, unknown>) => void;
+  activity: Activity;
+  onStart: (activityId: number) => void;
+  isStarting?: boolean;
+  disabled?: boolean;
 }
 
-const activityColors = [
-  "pastel-blue",
-  "pastel-mint",
-  "pastel-peach",
-  "pastel-purple",
-  "pastel-pink",
-  "pastel-lavender",
-  "pastel-yellow",
-  "pastel-coral",
-  "pastel-teal",
-];
-
-const ActivityCard = ({ activity, onActivityClick }: ActivityCardProps) => {
-  const colorIndex = Math.abs(activity.id) % activityColors.length;
-  const cardColor = activityColors[colorIndex];
+// The whole card is the button: one tap target, sized for small hands.
+// Its pastel comes from the activity id, so a story keeps its colour on
+// every screen it shows up on.
+const ActivityCard = ({
+  activity,
+  onStart,
+  isStarting = false,
+  disabled = false,
+}: ActivityCardProps) => {
+  const pastel = activityPastel(activity.id);
 
   return (
-    <Card
-      className="group cursor-pointer rounded-2xl border-2 border-white/80 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex flex-col h-full"
-      style={{ backgroundColor: `var(--${cardColor})` }}
-      onClick={() => onActivityClick(activity)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") onActivityClick(activity);
-      }}
+    <button
+      type="button"
+      onClick={() => onStart(activity.id)}
+      disabled={disabled}
+      aria-busy={isStarting}
+      aria-label={`Start ${activity.title}`}
+      className={cn(
+        "group flex h-full w-full flex-col rounded-2xl p-5 text-left",
+        "shadow-sm ring-1 ring-inset ring-black/5 dark:ring-white/10",
+        "transition-all duration-200 outline-none",
+        "hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-[0.99]",
+        "focus-visible:ring-[3px] focus-visible:ring-ring/60",
+        "disabled:cursor-default disabled:hover:translate-y-0 disabled:hover:shadow-sm",
+        disabled && !isStarting && "opacity-60"
+      )}
+      style={{ backgroundColor: pastel.background }}
     >
-      <CardHeader className="p-4 pb-3">
-        <div className="flex items-start gap-3">
-          {/* Icon container */}
-          <div className="flex-shrink-0 w-10 h-10 bg-white/60 rounded-xl flex items-center justify-center shadow-sm">
-            <DynamicIcon
-              name={activity.emoji_icon}
-              className="w-5 h-5 text-foreground/80"
-              fallback="BookOpen"
-            />
-          </div>
+      <span
+        className="flex size-10 items-center justify-center rounded-xl bg-white/60 dark:bg-black/20"
+        style={{ color: pastel.foreground }}
+      >
+        <DynamicIcon
+          name={activity.emoji_icon}
+          className="size-5"
+          fallback="BookOpen"
+        />
+      </span>
 
-          {/* Content */}
-          <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-base text-foreground mb-1 leading-tight">
-              {activity.title}
-            </h3>
-            <Badge
-              variant="secondary"
-              className="px-2 py-0.5 text-xs font-medium rounded-full bg-white/60 text-foreground/70 border border-white/40"
-            >
-              {activity.activity_type}
-            </Badge>
-          </div>
-        </div>
-      </CardHeader>
+      <span className="mt-4 text-xs font-medium text-foreground/70">
+        {activityTypeLabel(activity.activity_type)}
+      </span>
+      <span
+        className="mt-0.5 text-lg font-semibold leading-snug"
+        style={{ color: pastel.foreground }}
+      >
+        {activity.title}
+      </span>
+      <span className="mt-2 line-clamp-2 text-sm leading-relaxed text-foreground/70">
+        {activity.description}
+      </span>
 
-      <CardContent className="px-4 pb-3 flex-1">
-        <p className="text-sm text-foreground/60 leading-relaxed line-clamp-3">
-          {activity.description}
-        </p>
-      </CardContent>
-
-      <CardFooter className="p-4 pt-0 mt-auto">
-        <Button
-          size="sm"
-          className="w-full bg-white/70 hover:bg-white text-foreground border border-white/80 hover:border-white rounded-xl font-semibold shadow-sm hover:shadow-md transition-all duration-200 group-hover:bg-white"
-          aria-label={`Start activity ${activity.title}`}
-        >
-          <Play className="w-3.5 h-3.5 mr-1.5" fill="currentColor" />
-          Start Practice
-        </Button>
-      </CardFooter>
-    </Card>
+      <span
+        className="mt-auto inline-flex items-center gap-1.5 pt-5 text-sm font-semibold"
+        style={{ color: pastel.foreground }}
+      >
+        {isStarting ? (
+          <>
+            <Loader2 className="size-4 animate-spin" />
+            Starting…
+          </>
+        ) : (
+          <>
+            Start
+            <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+          </>
+        )}
+      </span>
+    </button>
   );
 };
 

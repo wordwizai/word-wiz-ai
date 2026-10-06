@@ -116,10 +116,10 @@ const Privacy = () => {
                   <p className="text-foreground leading-relaxed">
                     For questions about privacy, please contact:{" "}
                     <a
-                      href="mailto:contact@wordwizai.com"
+                      href="mailto:contactwordwizai@gmail.com"
                       className="text-primary hover:underline font-medium"
                     >
-                      contact@wordwizai.com
+                      contactwordwizai@gmail.com
                     </a>
                   </p>
                 </div>

@@ -81,6 +81,12 @@ def join_class(
             detail="Class not found with that join code"
         )
     
+    if db_class.teacher_id == current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You're the teacher of this class, so you don't need to join it."
+        )
+
     # Check if already a member
     if class_membership_crud.is_member(db, db_class.id, current_user.id):
         raise HTTPException(

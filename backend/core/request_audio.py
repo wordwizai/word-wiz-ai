@@ -64,20 +64,19 @@ def gate_audio(audio_array: np.ndarray, sample_rate: int, quality_out: dict | No
         # HARD GATES (default). Unchanged behavior.
         if quality_info['snr_db'] < 5.0:
             raise AudioRejected(
-                f"Audio quality too low (SNR: {quality_info['snr_db']:.1f} dB). "
-                "Please record in a quieter environment or use a better microphone."
+                "It was too noisy to hear the words clearly. Try somewhere quieter, "
+                "or hold the device a little closer."
             )
 
         if quality_info['clipping_percentage'] > 10.0:
             raise AudioRejected(
-                f"Audio is severely clipped ({quality_info['clipping_percentage']:.1f}% of samples). "
-                "Please reduce microphone gain or speak further from the microphone."
+                "That recording came out too loud and fuzzy. Try reading a little softer, "
+                "or hold the device a bit farther away."
             )
 
         if quality_info['silence_percentage'] > 85.0:
             raise AudioRejected(
-                f"Audio is mostly silence ({quality_info['silence_percentage']:.1f}%). "
-                "Please ensure you are speaking into the microphone."
+                "We could barely hear you. Read the sentence out loud, close to the microphone."
             )
 
     # Warn about quality issues but continue processing

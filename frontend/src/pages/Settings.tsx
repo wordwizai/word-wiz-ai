@@ -22,24 +22,14 @@ import { Separator } from "@/components/ui/separator";
 import { AuthContext } from "@/contexts/AuthContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {
   Settings2,
   User,
   Bell,
   Palette,
   Zap,
   CheckCircle2,
-  Sparkles,
 } from "lucide-react";
+import { AppPage, PageHeader } from "@/components/AppPage";
 type Settings = {
   preferred_language?: string;
   theme?: "dark" | "light" | "system" | null;
@@ -88,46 +78,25 @@ const Settings = () => {
   };
 
   const handleSave = async () => {
-    try {
-      await updateSettings(tempSettings);
+    // updateSettings reports failure by resolving to null rather than
+    // throwing, so this used to say "saved" even when nothing was saved.
+    const saved = await updateSettings(tempSettings);
+    if (saved) {
       setSavedStatus("Settings saved successfully!");
       setTimeout(() => setSavedStatus(""), 3000);
-    } catch (error) {
-      setSavedStatus("Failed to save settings.");
-      console.error("Settings update error:", error);
+    } else {
+      setSavedStatus("Failed to save settings. Please try again.");
     }
   };
 
   return (
-    <div className="flex-1 overflow-auto bg-background">
-      {/* Hero Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-accent/5 to-primary/5 border-b border-border px-6 py-6">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
-          <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-accent/10 rounded-full blur-3xl" />
-          <Sparkles className="absolute top-4 right-16 w-6 h-6 text-primary/10 rotate-45" />
-        </div>
-        <div className="relative z-10 flex items-center gap-4 max-w-4xl mx-auto">
-          <div className="hidden sm:flex shrink-0">
-            <div className="relative w-14 h-14">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl rotate-6" />
-              <div className="absolute inset-0 bg-gradient-to-tl from-accent/20 to-primary/20 rounded-2xl -rotate-6" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Settings2 className="w-7 h-7 text-primary" />
-              </div>
-            </div>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">Configuration</p>
-            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary via-primary/80 to-accent bg-clip-text text-transparent">
-              Settings
-            </h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Manage your account, preferences, and app behaviour</p>
-          </div>
-        </div>
-      </div>
+    <AppPage width="narrow">
+      <PageHeader
+        title="Settings"
+        description="Your account, how the app looks, and how it processes audio."
+      />
 
-      <div className="container mx-auto py-6 px-4 max-w-4xl">
+      <div>
       <Tabs
         value={tab}
         onValueChange={(value) => {
@@ -160,7 +129,7 @@ const Settings = () => {
         </TabsList>
 
         <TabsContent value="profile">
-          <Card className="rounded-2xl border-2 border-border shadow-sm">
+          <Card className="rounded-2xl shadow-xs">
             <CardHeader>
               <CardTitle>Profile Settings</CardTitle>
               <CardDescription>
@@ -194,7 +163,7 @@ const Settings = () => {
         </TabsContent>
 
         <TabsContent value="account">
-          <Card className="rounded-2xl border-2 border-border shadow-sm">
+          <Card className="rounded-2xl shadow-xs">
             <CardHeader>
               <CardTitle>Account Settings</CardTitle>
               <CardDescription>
@@ -221,38 +190,26 @@ const Settings = () => {
 
               <Separator />
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-4">
                 <div>
-                  <h4 className="font-medium">Delete Account</h4>
+                  <h4 className="font-medium">Delete account</h4>
                   <p className="text-sm text-muted-foreground">
-                    Permanently delete your account and all associated data.
+                    Email contactwordwizai@gmail.com from this address and we'll
+                    permanently delete your account and its reading data.
                   </p>
                 </div>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="destructive">Delete Account</Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        Feature not implemented
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Deleting your account is not implemented yet.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Close</AlertDialogCancel>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                <Button variant="outline" asChild>
+                  <a href="mailto:contactwordwizai@gmail.com?subject=Delete%20my%20account">
+                    Email us
+                  </a>
+                </Button>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="appearance">
-          <Card className="rounded-2xl border-2 border-border shadow-sm">
+          <Card className="rounded-2xl shadow-xs">
             <CardHeader>
               <CardTitle>Appearance Settings</CardTitle>
               <CardDescription>
@@ -288,7 +245,7 @@ const Settings = () => {
         </TabsContent>
 
         <TabsContent value="notifications">
-          <Card className="rounded-2xl border-2 border-border shadow-sm">
+          <Card className="rounded-2xl shadow-xs">
             <CardHeader>
               <CardTitle>Notification Settings</CardTitle>
               <CardDescription>
@@ -332,7 +289,7 @@ const Settings = () => {
         </TabsContent>
 
         <TabsContent value="performance">
-          <Card className="rounded-2xl border-2 border-border shadow-sm">
+          <Card className="rounded-2xl shadow-xs">
             <CardHeader>
               <CardTitle>Performance Settings</CardTitle>
               <CardDescription>
@@ -420,7 +377,7 @@ const Settings = () => {
         </Button>
       </div>
       </div>
-    </div>
+    </AppPage>
   );
 };
 

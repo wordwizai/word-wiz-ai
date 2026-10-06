@@ -2,8 +2,14 @@ import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { wordWizIcon } from "@/assets";
 import { trackSignupClick } from "@/utils/analytics";
+import { useContext } from "react";
+import { AuthContext } from "@/contexts/AuthContext";
 
 const LandingPageNavbar = () => {
+  // Parents who are already signed in come back through the home page too;
+  // offer them the app, not another sign-up.
+  const { token } = useContext(AuthContext);
+
   return (
     <nav className="w-full px-4 sm:px-6 py-4 sticky top-0 z-50 glass-navbar flex flex-row items-center justify-between gap-3 sm:gap-0">
       <Link className="flex items-center gap-2" to="/">
@@ -27,6 +33,12 @@ const LandingPageNavbar = () => {
       </div>
 
       <div className="flex flex-row items-center gap-2 w-auto">
+        {token ? (
+          <Button asChild size="default">
+            <Link to="/dashboard">Go to dashboard</Link>
+          </Button>
+        ) : (
+          <>
         <Link to="/login" className="hidden sm:block">
           <Button variant="ghost" size="default">
             Log In
@@ -40,6 +52,8 @@ const LandingPageNavbar = () => {
             <span>Sign Up</span>
           </Button>
         </Link>
+          </>
+        )}
       </div>
     </nav>
   );

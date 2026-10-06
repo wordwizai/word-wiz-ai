@@ -50,14 +50,13 @@ class TestGates(unittest.TestCase):
         # setUp already unset WWAI_SOFT_QUALITY_GATES, so these are the default hard gates.
         cases = [
             ("low SNR", 2.0, 0.0, 0.0,
-             "Audio quality too low (SNR: 2.0 dB). "
-             "Please record in a quieter environment or use a better microphone."),
+             "It was too noisy to hear the words clearly. Try somewhere quieter, "
+             "or hold the device a little closer."),
             ("clipping", 20.0, 12.34, 0.0,
-             "Audio is severely clipped (12.3% of samples). "
-             "Please reduce microphone gain or speak further from the microphone."),
+             "That recording came out too loud and fuzzy. Try reading a little softer, "
+             "or hold the device a bit farther away."),
             ("silence", 20.0, 0.0, 90.0,
-             "Audio is mostly silence (90.0%). "
-             "Please ensure you are speaking into the microphone."),
+             "We could barely hear you. Read the sentence out loud, close to the microphone."),
         ]
         for gate, snr_db, clipping, silence, expected in cases:
             with self.subTest(gate=gate):

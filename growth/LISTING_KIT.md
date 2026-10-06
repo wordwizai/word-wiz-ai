@@ -20,7 +20,7 @@ submit a number you haven't confirmed.
 | Audience | Parents and teachers of children ages 5–8 |
 | Pricing | Free. No ads, no subscription, no in-app purchases |
 | Platforms | Any modern web browser (desktop, tablet, Chromebook). No install |
-| Account required | Optional — practice works without signing up |
+| Account required | **Unresolved: the code requires sign-in before practice. See `growth-agent/APPROVAL_QUEUE.md` AQ-003** |
 | Founded | Built solo by a high school student |
 | Recognition | 2nd Place, Congressional App Challenge (CA-15) |
 
@@ -70,7 +70,7 @@ Word Wiz AI is a free, browser-based reading tutor for children ages 5-8, built 
 
 Most reading apps check whether a child got a word right. Word Wiz AI works a level below that. A child reads a sentence aloud, and the app transcribes their speech into phonemes — the individual sounds inside each word — then compares those against the expected pronunciation. The result is specific: not "that word was wrong", but "the /th/ at the start became /f/". Feedback is written in language a young child understands, and the next practice sentence is generated to target the exact sounds they missed.
 
-It runs in any modern browser with nothing to install, works on a school Chromebook, and is free — no ads, no subscription, no in-app purchases. Practice does not require an account.
+It runs in any modern browser with nothing to install, works on a school Chromebook, and is free — no ads, no subscription, no in-app purchases.
 
 The app was built solo by a high school student and placed 2nd in the Congressional App Challenge for California's 15th district.
 ```
@@ -128,7 +128,7 @@ The app uses a speech recognition model that outputs phonemes rather than words,
 | Is there a free version? | The entire product is free. |
 | Do you collect data from children? | Audio is processed for pronunciation analysis. See https://wordwizai.com/privacy |
 | COPPA / student data privacy | Point to the privacy policy; be prepared for a privacy review |
-| Does it require an account? | No — practice works without one. Accounts only save progress |
+| Does it require an account? | **Unresolved: the code requires sign-in before practice. See `growth-agent/APPROVAL_QUEUE.md` AQ-003** |
 | What grades? | Pre-K through 2nd (ages 5–8) |
 | Subjects | Reading, phonics, early literacy, speech |
 | Accessibility | Browser-based; keyboard navigable. No formal WCAG audit yet — say so |

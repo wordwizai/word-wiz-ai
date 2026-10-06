@@ -652,7 +652,7 @@ const TeachingPhonicsAtHome = () => {
 
   return (
     <ArticlePageTemplate
-      metaTitle="How to Teach Phonics at Home: Complete Parent Guide (2024)"
+      metaTitle="How to Teach Phonics at Home: Complete Parent Guide"
       metaDescription="Step-by-step guide for parents teaching phonics at home. Includes 10 activities, daily routine, common mistakes to avoid, and free resources. No teaching degree needed."
       canonicalUrl="https://wordwizai.com/guides/how-to-teach-phonics-at-home"
       heroImage="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=1920&h=1080&fit=crop"

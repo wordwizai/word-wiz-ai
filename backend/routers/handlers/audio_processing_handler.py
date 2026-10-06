@@ -120,7 +120,7 @@ async def load_and_preprocess_audio_bytes(
     if audio_duration < 0.5:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Audio too short ({audio_duration:.1f}s). Please record at least 0.5 seconds of speech."
+            detail="That recording was too short. Tap the mic and read the whole sentence."
         )
     
     # CACHE POINT 2: Save audio after format conversion but before preprocessing
@@ -225,9 +225,16 @@ async def analyze_audio_file_event_stream(
             )
             print("✅ Audio preprocessing completed")
         except Exception as e:
+            # HTTPException details above are written for the reader; anything
+            # else is internal and only belongs in the log.
+            if isinstance(e, HTTPException):
+                message = e.detail
+            else:
+                print(f"❌ Audio preprocessing failed: {e}")
+                message = "We couldn't read that recording. Please try recording again."
             error_payload = {
                 "type": "error",
-                "data": {"message": f"Failed to process audio file: {str(e)}"},
+                "data": {"message": message},
             }
             yield f"data: {json.dumps(error_payload)}\n\n"
             return
@@ -285,7 +292,7 @@ async def analyze_audio_file_event_stream(
                 if speech_percentage < 30:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
-                        detail=f"Audio appears to be mostly silent ({speech_percentage:.1f}% speech activity). Please record clearer audio with speech."
+                        detail="We could barely hear you. Read the sentence out loud, close to the microphone."
                     )
         
         # Determine if we should use client phonemes/words or extract on server
@@ -532,9 +539,14 @@ async def analyze_audio_file_event_stream(
                     await asyncio.sleep(0.01)
 
     except Exception as e:
+        if isinstance(e, HTTPException):
+            message = e.detail
+        else:
+            print(f"❌ AI processing failed: {e}")
+            message = "Something went wrong while checking your reading. Please try again."
         error_payload = {
             "type": "error",
-            "data": {"message": f"AI processing failed: {str(e)}"},
+            "data": {"message": message},
         }
         yield f"data: {json.dumps(error_payload)}\n\n"
         return

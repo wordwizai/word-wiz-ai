@@ -117,39 +117,52 @@ Windows, as with the regression harness.
 
 ### `stage_cache.py`
 
-For each clip it runs production preprocessing, then the ONNX model, and saves
-`logits` (float16), the greedy phoneme output and per-stage timings to
-`cache/<fingerprint>/<utt_id>.npz`. It calls Deepgram on the same preprocessed audio the
-production pipeline would send and saves the word list to `cache/<fingerprint>/deepgram/<utt_id>.json`.
+For each clip it runs the real request path (preprocessing, chunking, then both models)
+with recording wrappers around the ONNX extractor and the Deepgram extractor. For every
+model call it saves a hash of the exact audio the model received plus the model's output,
+which is the raw logits (float32, so replayed argmax is exact) for ONNX and the word list
+for Deepgram. Entries live in `cache/<half>/<name>/<utt_id>.npz` and `.json`. Gates are not
+applied while recording, so every clip has model outputs, and gates run at scoring time.
 
-The fingerprint is a hash of the ONNX model repo and resolved revision plus every flag and
-constant that changes preprocessing. A results file records the fingerprint it was built
-from, and `run.py` refuses to run when the current code's fingerprint does not match the
-cache it was pointed at. Caching is resumable (existing entries are skipped) and parallel
-across processes. Deepgram calls are rate-limited and retried using the existing typed error
-handling in `core/word_extractor.py`.
+Replay checks each call's audio hash, so any change in what the models would receive
+(preprocessing code, chunking, a front-end flag) stops the run and asks for a new cache.
+This replaces fingerprinting source files and catches changes no file list would. The
+cache also records the ONNX model revision, and `run.py` refuses a cache built on a
+different revision. The cache name defaults to `baseline` or to the front-end flags that
+are set. Caching is resumable (existing entries are skipped) and parallel across
+processes. Clips whose Deepgram call failed are recorded with the error and re-run with
+`--retry-errors`.
 
 An agent that changes preprocessing builds its own cache. While exploring it may reuse the
 baseline Deepgram transcripts, and the proposal must say so. Before such a proposal is
 accepted, Deepgram is re-run on the new preprocessing so the final measurement is faithful.
 The cache directory is gitignored.
 
-### One production change
+### Production changes (all behavior-preserving)
 
-`PhonemeExtractorONNX` gains `extract_logits(audio, sampling_rate)` returning the raw
-logits, and a module-level `decode_logits(logits, processor)` that does what the end of
-`extract_phoneme` does today. `extract_phoneme` becomes `decode_logits(extract_logits(...))`.
-Behavior is unchanged, and a test proves byte-identical output on sample audio. `replay.py`
-decodes cached logits through `decode_logits`, so a decoding change made in `core/` is what
-the benchmark measures.
+- `PhonemeExtractorONNX` gains `extract_logits(audio, sampling_rate)` returning the raw
+  logits, and a module-level `decode_logits(logits, processor)` that does what the end of
+  `extract_phoneme` does today. `extract_phoneme` becomes `decode_logits(extract_logits(...))`,
+  and a golden test proves identical output on sample audio. `replay.py` decodes cached
+  logits through `decode_logits`, so a decoding change made in `core/` is what the
+  benchmark measures.
+- The quality gates move from the router into `core/request_audio.py` (`gate_audio`,
+  `gate_and_preprocess`, `AudioRejected`). The handler converts `AudioRejected` into the
+  same 400 responses as before. Without this the benchmark could not run the real gates,
+  and the soft-gates flag could not be measured.
+- `clean_sentence()` is extracted from `PhonemeAssistant.process_audio` so both score the
+  same ground truth.
+- `HIGH_PER_THRESHOLD` moves to module level in `core/phoneme_feedback_formatter.py` so
+  the benchmark reads production's cutoff.
+- The ONNX model revision is pinned in `core/model_registry.py` and passed to the loader.
 
 ### `run.py`
 
 For each clip in the chosen half (or smoke subset), it runs production G2P on the text, calls
 the real `process_audio_array` with the replay stand-ins, and records the per-word analysis
 output the app would receive. Output is a results JSON with the config name, git SHA, cache
-fingerprint, active `WWAI_*` flags, operating threshold, per-clip per-word predictions and a
-metrics summary. Clips run in parallel across processes. The pipeline's `print()` output is
+name and model revision, active `WWAI_*` flags, operating threshold, per-clip per-word
+predictions and a metrics summary. Clips run in parallel across processes. The pipeline's `print()` output is
 suppressed unless `WWAI_BENCH_VERBOSE=1`.
 
 Messy cases are counted rather than dropped.
@@ -291,8 +304,9 @@ before Round 1, after confirming each has no unmerged commits or uncommitted cha
 - `decode_logits(extract_logits(x))` is tested to equal today's `extract_phoneme(x)` on
   sample audio.
 - Replay is tested to match a live run on a handful of clips.
-- `compare.py` exit codes are tested for pass, each failing condition, and mismatched
-  fingerprints.
+- `compare.py` exit codes are tested for pass, each failing condition, and inputs that
+  cannot be compared. `run.py` is tested to stop with its own exit code on a missing or
+  stale cache.
 - The test-half lock is tested to refuse without the variable and to append to
   `test_runs.log` with it.
 
@@ -335,8 +349,8 @@ before Round 1, after confirming each has no unmerged commits or uncommitted cha
   reference shows how much of the remaining error any system could realistically remove.
 - **CPU contention.** Six agents on one machine make their own timings meaningless, which is
   why only the orchestrator measures speed.
-- **Stale caches.** Fingerprints stop a results file from being built on a cache that no
-  longer matches the code.
+- **Stale caches.** Per-call audio hashes stop a results file from being built on a cache
+  that no longer matches what the code feeds the models.
 - **Unpinned models.** Every model in `core/model_registry.py` is unpinned, so a push upstream
   could shift results between the baseline and the final run. Resolving and pinning the ONNX
   model revision is part of week 1.

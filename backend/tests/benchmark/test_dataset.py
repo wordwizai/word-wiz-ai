@@ -1,7 +1,10 @@
 import json
 import os
+import shutil
+import tarfile
 import tempfile
 import unittest
+from pathlib import Path
 
 from tests.benchmark import dataset as D
 from tests.benchmark import testutil as U
@@ -105,6 +108,110 @@ class TestSubsets(unittest.TestCase):
             D.write_subset("bad", ["999"], directory=tmp)
             with self.assertRaises(ValueError):
                 D.load_clips("dev", "bad", root=root, subsets_dir=tmp)
+
+
+def _first_wav(root):
+    return os.path.join(root, "WAVE", "SPEAKER0001", "000010011.WAV")
+
+
+class TestHardening(unittest.TestCase):
+    def test_check_reports_truncated_audio(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = U.make_temp_dataset(tmp)
+            wav = _first_wav(root)
+            size = os.path.getsize(wav)
+            with open(wav, "r+b") as fh:
+                fh.truncate(size // 2)
+            report = D.check(root)
+        self.assertTrue(any("truncated audio" in p for p in report["problems"]), report["problems"])
+
+    def test_check_reports_unreadable_audio(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = U.make_temp_dataset(tmp)
+            with open(_first_wav(root), "r+b") as fh:
+                fh.truncate(10)
+            report = D.check(root)
+        self.assertTrue(any("unreadable audio" in p for p in report["problems"]), report["problems"])
+
+    def test_missing_age_is_value_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = U.make_temp_dataset(tmp)
+            path = os.path.join(root, "train", "spk2age")
+            with open(path, encoding="utf-8") as fh:
+                lines = [ln for ln in fh if not ln.startswith("0002")]
+            with open(path, "w", encoding="utf-8") as fh:
+                fh.writelines(lines)
+            with self.assertRaises(ValueError) as ctx:
+                D.load_half(root, "dev")
+        self.assertIn("spk2age", str(ctx.exception))
+
+    def test_missing_scores_entry_is_value_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = U.make_temp_dataset(tmp)
+            path = os.path.join(root, "scores.json")
+            with open(path, encoding="utf-8") as fh:
+                scores = json.load(fh)
+            del scores["000020022"]
+            with open(path, "w", encoding="utf-8") as fh:
+                json.dump(scores, fh)
+            with self.assertRaises(ValueError) as ctx:
+                D.load_half(root, "dev")
+        self.assertIn("scores.json", str(ctx.exception))
+
+    def test_bom_in_wav_scp(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = U.make_temp_dataset(tmp)
+            path = os.path.join(root, "train", "wav.scp")
+            with open(path, encoding="utf-8") as fh:
+                text = fh.read()
+            with open(path, "w", encoding="utf-8-sig") as fh:
+                fh.write(text)
+            self.assertEqual(len(D.load_half(root, "dev")), 2)
+
+    def test_check_reports_id_missing_from_wav_scp(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = U.make_temp_dataset(tmp)
+            with open(os.path.join(root, "train", "text"), "a", encoding="utf-8") as fh:
+                fh.write("999999999 EXTRA WORDS\n")
+            report = D.check(root)
+        self.assertTrue(any("in text but not wav.scp" in p for p in report["problems"]), report["problems"])
+
+    def test_find_root_in_oddly_named_folder(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            shutil.copytree(U.MINI_DATASET, os.path.join(tmp, "some_other_name"))
+            self.assertEqual(D.find_dataset_root(tmp), os.path.join(tmp, "some_other_name"))
+
+    def test_empty_subset_is_value_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = U.make_temp_dataset(tmp)
+            with open(D.subset_path("empty", tmp), "w", encoding="utf-8") as fh:
+                fh.write("\n")
+            with self.assertRaises(ValueError):
+                D.load_clips("dev", "empty", root=root, subsets_dir=tmp)
+
+
+class TestDownload(unittest.TestCase):
+    def test_download_end_to_end_offline(self):
+        with tempfile.TemporaryDirectory() as src, tempfile.TemporaryDirectory() as dest:
+            root = U.make_temp_dataset(src)
+            archive = os.path.join(src, "pack.tar.gz")
+            with tarfile.open(archive, "w:gz") as tar:
+                tar.add(root, arcname="speechocean762")
+            got = D.download(dest=dest, mirrors=(Path(archive).as_uri(),))
+            self.assertTrue(os.path.isdir(os.path.join(got, "train")))
+            self.assertTrue(os.path.isfile(os.path.join(dest, D.EXTRACTED_MARKER)))
+            self.assertFalse(os.path.exists(os.path.join(dest, "speechocean762.tar.gz.part")))
+            os.remove(os.path.join(dest, "speechocean762.tar.gz"))
+            self.assertEqual(D.download(dest=dest, mirrors=()), got)
+
+    def test_corrupt_archive_is_deleted(self):
+        with tempfile.TemporaryDirectory() as dest:
+            archive = os.path.join(dest, "speechocean762.tar.gz")
+            with open(archive, "wb") as fh:
+                fh.write(os.urandom(100))
+            with self.assertRaises(RuntimeError):
+                D.download(dest=dest, mirrors=())
+            self.assertFalse(os.path.exists(archive))
 
 
 if __name__ == "__main__":

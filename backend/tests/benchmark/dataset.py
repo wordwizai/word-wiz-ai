@@ -11,11 +11,15 @@ sealed test half (run.py enforces the unlock rule).
 from __future__ import annotations
 
 import argparse
+import contextlib
+import http.client
 import json
 import os
 import random
 import tarfile
 import urllib.request
+import wave
+import zlib
 from dataclasses import dataclass, field
 
 from . import common
@@ -26,6 +30,8 @@ MIRRORS = (
     "https://openslr.elda.org/resources/101/speechocean762.tar.gz",
     "https://openslr.magicdatatech.com/resources/101/speechocean762.tar.gz",
 )
+USER_AGENT = "word-wiz-ai-benchmark/1.0"
+EXTRACTED_MARKER = ".extracted"
 HALF_DIRS = {"dev": "train", "test": "test"}
 CHILD_MAX_AGE = 17  # a child is a speaker under 18
 SMOKE_SUBSET = ("smoke_dev", 250, 1234)
@@ -58,7 +64,11 @@ class Clip:
 
 def find_dataset_root(base: str | None = None) -> str:
     base = base or common.data_dir()
-    for candidate in (base, os.path.join(base, "speechocean762")):
+    candidates = [base, os.path.join(base, "speechocean762")]
+    if os.path.isdir(base):
+        candidates += [os.path.join(base, d) for d in sorted(os.listdir(base))
+                       if os.path.isdir(os.path.join(base, d))]
+    for candidate in candidates:
         if all(os.path.isdir(os.path.join(candidate, d)) for d in HALF_DIRS.values()):
             return candidate
     raise FileNotFoundError(
@@ -75,7 +85,7 @@ def find_resource(root: str, name: str) -> str:
 
 def _read_kaldi_map(path: str) -> dict[str, str]:
     out: dict[str, str] = {}
-    with open(path, encoding="utf-8") as fh:
+    with open(path, encoding="utf-8-sig") as fh:
         for line in fh:
             parts = line.strip().split(None, 1)
             if parts:
@@ -102,8 +112,14 @@ def load_half(root: str, half: str, scores: dict | None = None) -> list[Clip]:
     scores = scores if scores is not None else load_scores(root)
     clips = []
     for utt_id in sorted(wav):
+        if utt_id not in scores:
+            raise ValueError(f"scores.json has no entry for {utt_id} ({half} half)")
         entry = scores[utt_id]
+        if utt_id not in utt2spk:
+            raise ValueError(f"{HALF_DIRS[half]}/utt2spk has no speaker for utt {utt_id}")
         speaker = utt2spk[utt_id]
+        if speaker not in spk2age:
+            raise ValueError(f"{HALF_DIRS[half]}/spk2age has no age for speaker {speaker!r} (utt {utt_id})")
         path = wav[utt_id]
         if not os.path.isabs(path):
             path = os.path.normpath(os.path.join(root, path))
@@ -166,6 +182,8 @@ def load_clips(half: str, subset: str | None = None, root: str | None = None,
     clips = load_half(root or find_dataset_root(), half)
     if subset:
         wanted = set(read_subset(subset, subsets_dir))
+        if not wanted:
+            raise ValueError(f"subset {subset!r} is empty")
         clips = [c for c in clips if c.utt_id in wanted]
         missing = wanted - {c.utt_id for c in clips}
         if missing:
@@ -173,14 +191,49 @@ def load_clips(half: str, subset: str | None = None, root: str | None = None,
     return clips
 
 
+def _audio_problem(path: str):
+    """None if the WAV looks complete, else a short description of what is wrong."""
+    try:
+        with wave.open(path, "rb") as w:
+            nframes, width, channels, rate = w.getnframes(), w.getsampwidth(), w.getnchannels(), w.getframerate()
+    except (wave.Error, EOFError, OSError) as exc:
+        return f"unreadable audio {path}: {exc}"
+    if nframes == 0:
+        return f"empty audio {path}"
+    if rate != 16000:
+        return f"audio {path} is {rate} Hz, expected 16000"
+    if os.path.getsize(path) < nframes * width * channels:
+        return f"truncated audio {path}"
+    return None
+
+
+def _key_set_problems(root: str) -> list[str]:
+    problems = []
+    for half, directory in HALF_DIRS.items():
+        base = os.path.join(root, directory)
+        keys = {name: set(_read_kaldi_map(os.path.join(base, name))) for name in ("wav.scp", "utt2spk", "text")}
+        for name, ids in keys.items():
+            for other, other_ids in keys.items():
+                if other == name:
+                    continue
+                extra = sorted(ids - other_ids)
+                if extra:
+                    problems.append(f"{directory}: {len(extra)} utt id(s) in {name} but not {other}: {extra[:10]}")
+    return problems
+
+
 def check(root: str) -> dict:
     scores = load_scores(root)
     dev, test = load_half(root, "dev", scores), load_half(root, "test", scores)
     check_speaker_disjoint(dev, test)
-    problems = []
+    problems = _key_set_problems(root)
     for clip in dev + test:
         if not os.path.isfile(clip.wav_path):
             problems.append(f"{clip.utt_id}: missing audio {clip.wav_path}")
+        else:
+            problem = _audio_problem(clip.wav_path)
+            if problem:
+                problems.append(f"{clip.utt_id}: {problem}")
         if len(clip.text.split()) != len(clip.words):
             problems.append(f"{clip.utt_id}: {len(clip.text.split())} text tokens but {len(clip.words)} scored words")
         for w in clip.words:
@@ -202,43 +255,64 @@ def check(root: str) -> dict:
     }
 
 
+def _fetch(url: str, archive: str) -> None:
+    tmp = archive + ".part"
+    try:
+        request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        with urllib.request.urlopen(request, timeout=60) as resp, open(tmp, "wb") as out:
+            total = int(resp.headers.get("Content-Length") or 0)
+            done = 0
+            while True:
+                chunk = resp.read(1 << 20)
+                if not chunk:
+                    break
+                out.write(chunk)
+                done += len(chunk)
+                if total:
+                    print(f"\r  {done * 100 // total}%", end="", flush=True)
+        print()
+        if total and done != total:
+            raise OSError(f"short download: {done} of {total} bytes")
+        os.replace(tmp, archive)
+    except BaseException:
+        with contextlib.suppress(OSError):
+            os.remove(tmp)
+        raise
+
+
 def download(dest: str | None = None, mirrors=MIRRORS) -> str:
     dest = dest or common.data_dir()
     os.makedirs(dest, exist_ok=True)
+    marker = os.path.join(dest, EXTRACTED_MARKER)
+    if os.path.isfile(marker):
+        return find_dataset_root(dest)
     archive = os.path.join(dest, "speechocean762.tar.gz")
     if not os.path.isfile(archive):
         last_error = None
         for url in mirrors:
-            tmp = archive + ".part"
             try:
                 print(f"Downloading {url} (~520 MB)...")
-                with urllib.request.urlopen(url, timeout=60) as resp, open(tmp, "wb") as out:
-                    total = int(resp.headers.get("Content-Length") or 0)
-                    done = 0
-                    while True:
-                        chunk = resp.read(1 << 20)
-                        if not chunk:
-                            break
-                        out.write(chunk)
-                        done += len(chunk)
-                        if total:
-                            print(f"\r  {done * 100 // total}%", end="", flush=True)
-                print()
-                os.replace(tmp, archive)
+                _fetch(url, archive)
                 break
-            except OSError as exc:
+            except (OSError, http.client.HTTPException) as exc:
                 print(f"  failed: {exc}")
                 last_error = exc
         else:
             raise RuntimeError(f"all mirrors failed: {last_error}")
-    try:
-        return find_dataset_root(dest)
-    except FileNotFoundError:
-        pass
     print("Extracting...")
-    with tarfile.open(archive, "r:gz") as tar:
-        tar.extractall(dest, filter="data")
-    return find_dataset_root(dest)
+    try:
+        with tarfile.open(archive, "r:gz") as tar:
+            tar.extractall(dest, filter="data")
+    except (tarfile.TarError, EOFError, zlib.error) as exc:
+        with contextlib.suppress(OSError):
+            os.remove(archive)
+        raise RuntimeError(
+            f"archive was corrupt ({exc}) and has been deleted. Run download again."
+        ) from exc
+    root = find_dataset_root(dest)
+    with open(marker, "w", encoding="utf-8") as fh:
+        fh.write(root)
+    return root
 
 
 def main(argv=None) -> int:
@@ -254,7 +328,11 @@ def main(argv=None) -> int:
         return 0
     root = find_dataset_root()
     if args.cmd == "check":
-        report = check(root)
+        try:
+            report = check(root)
+        except ValueError as exc:
+            print(f"PROBLEM {exc}")
+            return 1
         for key, value in report.items():
             if key != "problems":
                 print(f"{key:16s} {value}")

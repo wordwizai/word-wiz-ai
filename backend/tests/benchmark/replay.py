@@ -70,7 +70,9 @@ def load_processor():
 def _raise_recorded(call: dict):
     """Raise a recorded exception again so that the pipeline treats it as the live run did.
 
-    1. A builtin keeps its type, so `except ValueError` and analyze_clip see the original.
+    1. A builtin keeps its type, so `except ValueError` and analyze_clip see the original. Unless
+       the call says whether it was a ValueError and the builtin disagrees. That is another
+       class that shares the builtin's name, so it falls through to rules 2 to 4.
     2. Any other recorded ValueError becomes ReplayedValueError. It was an expected rejection
        live, and process_audio_array's chunk loop swallowed it, so it must still be a ValueError.
     3. A core.errors.WordWizError becomes ReplayedError, an expected rejection as in production.
@@ -80,7 +82,11 @@ def _raise_recorded(call: dict):
     """
     error_type, message = call["error_type"], call.get("error", "")
     exc_cls = getattr(builtins, error_type, None)
-    if isinstance(exc_cls, type) and issubclass(exc_cls, Exception):
+    if (
+        isinstance(exc_cls, type)
+        and issubclass(exc_cls, Exception)
+        and bool(call.get("is_value_error", issubclass(exc_cls, ValueError))) == issubclass(exc_cls, ValueError)
+    ):
         try:
             exc = exc_cls(message)
         except TypeError:
@@ -151,6 +157,13 @@ class ReplaySession(_Replay):
         return [types.SimpleNamespace(name="input_values")]
 
     def run(self, output_names, feeds):
+        if len(feeds) != 1:
+            # The hash covers one tensor. A StaleCacheError and not a ValueError, because
+            # process_audio_array's chunk loop would swallow a ValueError and score deletions.
+            raise common.StaleCacheError(
+                f"{self.entry.utt_id}: the ONNX session was given {len(feeds)} inputs, but the cache hashes "
+                "exactly one; update RecordingSession and ReplaySession, then build a new cache"
+            )
         values = next(iter(feeds.values()))
         call = self._take(lambda: model_input_sha(values))  # recorded errors are raised here, unwrapped
         try:

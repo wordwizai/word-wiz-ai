@@ -226,6 +226,13 @@ def main(argv=None) -> int:
     parser.add_argument("--force", action="store_true", help="overwrite a results file that git tracks")
     args = parser.parse_args(argv)
 
+    # With --workers 1 the pipeline's prints reach this process's console, and a cp1252 console
+    # raises UnicodeEncodeError on IPA. Under WWAI_BENCH_VERBOSE that would be reported as a
+    # rejection of the clip. A backslash escape is ugly but never fatal.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(errors="backslashreplace")
+
     # core loads backend/.env on import, so WWAI_* flags set there would apply without being recorded.
     dotenv_keys = common.dotenv_wwai_keys()
     if dotenv_keys:

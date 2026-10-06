@@ -3,6 +3,7 @@ import logging
 import os
 import pickle
 import re
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -186,6 +187,36 @@ class TestExceptions(unittest.TestCase):
 
     def test_git_sha_format(self):
         self.assertRegex(common.git_sha(), r"^([0-9a-f]{40}(-dirty)?|unknown)$")
+
+
+class TestGitSha(unittest.TestCase):
+    def _run(self, status_output=b""):
+        commands = []
+
+        def fake_run(command, **kwargs):
+            commands.append(command)
+            stdout = "0123456789abcdef0123456789abcdef01234567\n" if "rev-parse" in command else status_output
+            return subprocess.CompletedProcess(command, 0, stdout=stdout)
+
+        with mock.patch("subprocess.run", fake_run):
+            return common.git_sha(), commands
+
+    def test_status_does_not_take_the_index_lock(self):
+        # A plain `git status` refreshes the index and can hold index.lock while the person
+        # running the benchmark commits, which then fails with "Unable to create index.lock".
+        _sha, commands = self._run()
+        status = [c for c in commands if "status" in c]
+        self.assertEqual(len(status), 1)
+        self.assertEqual(status[0][:3], ["git", "--no-optional-locks", "status"])
+
+    def test_clean_and_dirty(self):
+        sha = "0123456789abcdef0123456789abcdef01234567"
+        self.assertEqual(self._run(b"")[0], sha)
+        self.assertEqual(self._run(b" M backend/core/x.py\n")[0], sha + "-dirty")
+
+    def test_no_git_is_unknown(self):
+        with mock.patch("subprocess.run", side_effect=FileNotFoundError("git")):
+            self.assertEqual(common.git_sha(), "unknown")
 
 
 class TestRealProcessor(unittest.TestCase):

@@ -193,7 +193,10 @@ def git_sha(cwd: str = REPO_ROOT) -> str:
             ["git", "rev-parse", "HEAD"], cwd=cwd, capture_output=True, text=True, encoding="utf-8", check=True
         ).stdout.strip()
         dirty = subprocess.run(
-            ["git", "status", "--porcelain", "--untracked-files=no", "--", ".", *_STATUS_EXCLUDES],
+            # --no-optional-locks: a plain status refreshes the index and can hold index.lock,
+            # which makes a commit made at the same moment fail.
+            ["git", "--no-optional-locks", "status", "--porcelain", "--untracked-files=no", "--", ".",
+             *_STATUS_EXCLUDES],
             cwd=cwd, capture_output=True, check=True,
         ).stdout.strip()
     except (OSError, subprocess.CalledProcessError):

@@ -267,6 +267,71 @@ class TestReplay(unittest.TestCase):
             words.extract_words(self.audio)
 
 
+class TestRaiseRecorded(unittest.TestCase):
+    """_raise_recorded when the recorded type name matches a builtin that is not what was raised."""
+
+    def _raised(self, **call):
+        call.setdefault("error", "m")
+        with self.assertRaises(Exception) as ctx:
+            R._raise_recorded(call)
+        return ctx.exception
+
+    def test_a_builtin_name_is_the_builtin_when_the_flag_agrees_or_is_absent(self):
+        self.assertIs(type(self._raised(error_type="KeyError", is_value_error=False)), KeyError)
+        self.assertIs(type(self._raised(error_type="ValueError", is_value_error=True)), ValueError)
+        self.assertIs(type(self._raised(error_type="KeyError")), KeyError)
+        self.assertIs(type(self._raised(error_type="ValueError")), ValueError)
+
+    def test_a_name_clash_with_a_non_value_error_builtin_stays_a_value_error(self):
+        # A class from another library that is named like a builtin, but was a ValueError. The
+        # chunk loop swallowed it live, so the replay must be a ValueError and not a KeyError.
+        exc = self._raised(error_type="KeyError", is_value_error=True)
+        self.assertNotIsInstance(exc, KeyError)
+        self.assertIsInstance(exc, ValueError)
+        self.assertIsInstance(exc, common.ReplayedValueError)
+        self.assertEqual((exc.error_type, str(exc)), ("KeyError", "m"))
+
+    def test_a_name_clash_with_the_value_error_builtin_is_not_a_value_error(self):
+        # Named "ValueError" but not one, so it was not an expected rejection and must not become one.
+        exc = self._raised(error_type="ValueError", is_value_error=False)
+        self.assertNotIsInstance(exc, ValueError)
+        self.assertEqual(type(exc).__name__, "ValueError")
+        self.assertEqual(str(exc), "m")
+
+    def test_a_clash_with_a_builtin_value_error_subclass_follows_the_flag(self):
+        self.assertIsInstance(self._raised(error_type="UnicodeError", is_value_error=True), UnicodeError)
+        exc = self._raised(error_type="UnicodeError", is_value_error=False)
+        self.assertNotIsInstance(exc, ValueError)
+
+    def test_a_project_error_still_replays_as_a_project_error(self):
+        exc = self._raised(error_type="UpstreamTransientError", is_value_error=False)
+        self.assertIsInstance(exc, common.ReplayedError)
+        self.assertNotIsInstance(exc, ValueError)
+
+
+class TestReplaySessionFeeds(unittest.TestCase):
+    def _session(self):
+        entry = mock.Mock(utt_id="u1", phoneme_calls=[{"input_sha": "x", "logits_key": "logits_0"}])
+        return R.ReplaySession(entry, check_inputs=False)
+
+    def test_more_than_one_input_is_stale_not_a_rejection(self):
+        feeds = {"input_values": np.zeros((1, 50), np.float32), "attention_mask": np.ones((1, 50))}
+        with self.assertRaises(common.StaleCacheError) as ctx:
+            self._session().run(None, feeds)
+        self.assertNotIsInstance(ctx.exception, ValueError)  # the chunk loop would swallow a ValueError
+        self.assertIn("u1", str(ctx.exception))
+
+    def test_the_call_is_not_used_up_by_a_refused_run(self):
+        session = self._session()
+        with self.assertRaises(common.StaleCacheError):
+            session.run(None, {"a": np.zeros(3), "b": np.zeros(3)})
+        self.assertEqual(session._next, 0)
+
+    def test_no_input_is_stale_too(self):
+        with self.assertRaises(common.StaleCacheError):
+            self._session().run(None, {})
+
+
 def _real_onnx_extractor():
     """A PhonemeExtractorONNX built by its own __init__, with every load patched out."""
     from core.phoneme_extractor_onnx import PhonemeExtractorONNX

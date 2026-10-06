@@ -55,6 +55,20 @@ class TestRecordingSession(unittest.TestCase):
         self.assertNotIn("logits_key", call)
         self.assertEqual(session.logits, [])
 
+    def test_more_than_one_input_is_refused_at_record_time(self):
+        # The input hash is of the first feed only. A second input (an attention mask, say) would
+        # be recorded unhashed, so replay could not tell that it had changed.
+        inner = mock.Mock()
+        session = SC.RecordingSession(inner)
+        feeds = {"input_values": np.zeros((1, 50), dtype=np.float32), "attention_mask": np.ones((1, 50))}
+        with self.assertRaises(ValueError) as ctx:
+            session.run(None, feeds)
+        self.assertIn("2", str(ctx.exception))
+        inner.run.assert_not_called()
+        self.assertEqual(session.calls, [])
+        with self.assertRaises(ValueError):
+            session.run(None, {})
+
     def test_get_inputs_comes_from_the_real_session(self):
         inner = mock.Mock()
         self.assertIs(SC.RecordingSession(inner).get_inputs(), inner.get_inputs.return_value)
@@ -72,6 +86,80 @@ def _failure(status_code=None, **overrides):
 
 def _empty_call(failure):
     return {"word_calls": [{"input_sha": "x", "words": [], "asr_failure": failure}]}
+
+
+class TestLockedFiles(unittest.TestCase):
+    """Windows antivirus and indexers briefly lock a file they scan, so os.replace and os.remove
+    raise PermissionError for a moment. That must not lose a clip's entry."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.path = os.path.join(self.tmp.name, "a.json")
+
+    def _flaky(self, real, failures):
+        attempts = []
+
+        def operation(*args):
+            attempts.append(args)
+            if len(attempts) <= failures:
+                raise PermissionError(13, "The process cannot access the file")
+            return real(*args)
+
+        return operation, attempts
+
+    def test_a_locked_replace_is_retried(self):
+        replace, attempts = self._flaky(os.replace, 2)
+        with mock.patch.object(SC.os, "replace", replace), mock.patch.object(SC.time, "sleep") as sleep:
+            SC._atomic_write(self.path, lambda fh: fh.write("{}"))
+        self.assertEqual(len(attempts), 3)
+        self.assertEqual([c.args for c in sleep.call_args_list], [(0.2,), (0.2,)])
+        with open(self.path, encoding="utf-8") as fh:
+            self.assertEqual(fh.read(), "{}")
+        self.assertEqual(os.listdir(self.tmp.name), ["a.json"])  # no temporary file left
+
+    def test_a_replace_that_stays_locked_raises_and_leaves_no_temporary_file(self):
+        replace, attempts = self._flaky(os.replace, 99)
+        with mock.patch.object(SC.os, "replace", replace), mock.patch.object(SC.time, "sleep") as sleep:
+            with self.assertRaises(PermissionError):
+                SC._atomic_write(self.path, lambda fh: fh.write("{}"))
+        self.assertEqual(len(attempts), 5)
+        self.assertEqual(sleep.call_count, 4)  # no wait after the last attempt
+        self.assertEqual(os.listdir(self.tmp.name), [])
+
+    def test_a_locked_remove_is_retried(self):
+        with open(self.path, "w", encoding="utf-8") as fh:
+            fh.write("{}")
+        remove, attempts = self._flaky(os.remove, 2)
+        with mock.patch.object(SC.os, "remove", remove), mock.patch.object(SC.time, "sleep") as sleep:
+            SC._remove(self.path)
+        self.assertEqual(len(attempts), 3)
+        self.assertEqual(sleep.call_count, 2)
+        self.assertFalse(os.path.exists(self.path))
+
+    def test_a_remove_that_stays_locked_raises(self):
+        with open(self.path, "w", encoding="utf-8") as fh:
+            fh.write("{}")
+        remove, attempts = self._flaky(os.remove, 99)
+        with mock.patch.object(SC.os, "remove", remove), mock.patch.object(SC.time, "sleep"):
+            with self.assertRaises(PermissionError):
+                SC._remove(self.path)
+        self.assertEqual(len(attempts), 5)
+        self.assertTrue(os.path.exists(self.path))
+
+    def test_a_missing_file_is_not_an_error_and_is_not_retried(self):
+        with mock.patch.object(SC.time, "sleep") as sleep:
+            SC._remove(os.path.join(self.tmp.name, "nope.json"))
+        sleep.assert_not_called()
+
+    def test_other_errors_are_not_retried(self):
+        def broken(*_args):
+            raise OSError("disk full")
+
+        with mock.patch.object(SC.os, "replace", broken), mock.patch.object(SC.time, "sleep") as sleep:
+            with self.assertRaises(OSError):
+                SC._atomic_write(self.path, lambda fh: fh.write("{}"))
+        sleep.assert_not_called()
 
 
 class TestEntryHasWordError(unittest.TestCase):
@@ -279,7 +367,7 @@ class TestWorkerStartup(unittest.TestCase):
         ):
             SC._init_worker()  # must not raise: the error is reported by the task, with its cause
         with self.assertRaises(RuntimeError) as ctx:
-            SC._record_task(("u", "w", "t", "d"))
+            SC._record_task(("u", "w", "t", "d", "sha"))
         self.assertIn("no key", str(ctx.exception))
         self.assertIn("ValueError", str(ctx.exception))
 
@@ -293,8 +381,8 @@ class TestWorkerStartup(unittest.TestCase):
             SC._init_worker()
         self.assertIsNone(SC._init_error)
         with mock.patch.object(SC, "record_clip", return_value={"utt_id": "u"}) as record:
-            self.assertEqual(SC._record_task(("u", "w", "t", "d")), {"utt_id": "u"})
-        record.assert_called_once_with("u", "w", "t", "d", phoneme, words)
+            self.assertEqual(SC._record_task(("u", "w", "t", "d", "sha")), {"utt_id": "u"})
+        record.assert_called_once_with("u", "w", "t", "d", phoneme, words, git_sha="sha")
 
 
 class TestBuildFailsFast(unittest.TestCase):
@@ -334,7 +422,7 @@ class TestRecordAll(unittest.TestCase):
                 self.assertEqual(init_worker.call_count, 1)
 
     def test_uses_a_spawn_process_pool_with_the_worker_initializer(self):
-        todo = [("u1", "w", "t", "d"), ("u2", "w", "t", "d")]
+        todo = [("u1", "w", "t", "d", "sha"), ("u2", "w", "t", "d", "sha")]
         entries = self._run(lambda task: {"utt_id": task[0]}, todo)
         self.assertEqual(sorted(e["utt_id"] for e in entries), ["u1", "u2"])
         pool = U.InlineExecutor.last
@@ -522,6 +610,42 @@ class TestBuild(unittest.TestCase):
         self.assertEqual([task[0] for task in todo], ["u2"])
         self.assertEqual(summary["needs_retry"], ["u0"])
 
+    def test_git_sha_is_computed_once_and_sent_to_every_task(self):
+        # Per clip it ran git status twice, which gave clean, dirty and different SHAs inside one
+        # build while the recording code never changed, and it could take index.lock mid-commit.
+        sha = "ab" * 20 + "-dirty"
+        clips = [_clip(f"u{i}") for i in range(3)]
+        with mock.patch.object(SC.common, "git_sha", return_value=sha) as git_sha:
+            with mock.patch.object(SC, "write_meta") as write_meta:
+                _summary, record_all = self._build(clips, [_entry(c.utt_id) for c in clips])
+        self.assertEqual(git_sha.call_count, 1)
+        todo = record_all.call_args.args[0]
+        self.assertEqual([task[4] for task in todo], [sha] * 3)
+        self.assertEqual(write_meta.call_args.kwargs.get("git_sha"), sha)  # the meta file says the same
+
+    def test_an_entry_whose_logits_file_is_missing_is_recorded_again(self):
+        # On a plain resume too: replay would find no logits for it and stop the whole run.
+        has_logits = [{"input_sha": "x", "logits_key": "logits_0"}]
+        self._cache(_entry("u0", phoneme_calls=has_logits))  # u0.npz is missing
+        self._cache(_entry("u1", phoneme_calls=has_logits))
+        np.savez(os.path.join(self.directory, "u1.npz"), logits_0=np.zeros((1, 2, 3), dtype=np.float32))
+        self._cache(_entry("u2"))  # no phoneme call, so there never was a logits file
+        failed_before_the_model = [{"input_sha": "x", "error_type": "ValueError", "error": "e", "is_value_error": True}]
+        self._cache(_entry("u3", "rejected", "ValueError", phoneme_calls=failed_before_the_model))
+        clips = [_clip(f"u{i}") for i in range(4)]
+        for retry_errors in (False, True):
+            with self.subTest(retry_errors=retry_errors):
+                summary, record_all = self._build(clips, [_entry("u0")], retry_errors=retry_errors)
+                self.assertEqual([task[0] for task in record_all.call_args.args[0]], ["u0"])
+                self.assertEqual(summary["recorded"], 1)
+
+    def test_an_entry_with_a_word_error_and_missing_logits_is_recorded_again_without_retry_errors(self):
+        has_logits = [{"input_sha": "x", "logits_key": "logits_0"}]
+        self._cache(_entry("u0", word_calls=_OUTAGE, phoneme_calls=has_logits))
+        summary, record_all = self._build([_clip("u0")], [_entry("u0")])
+        self.assertEqual([task[0] for task in record_all.call_args.args[0]], ["u0"])
+        self.assertEqual(summary["needs_retry"], [])
+
     def test_an_unreadable_cached_entry_is_recorded_again(self):
         with open(os.path.join(self.directory, "u0.json"), "w", encoding="utf-8") as fh:
             fh.write("{")
@@ -627,6 +751,10 @@ class TestWriteMeta(unittest.TestCase):
         self.assertEqual(SC.write_meta(self.directory, "dev", "baseline", {"WWAI_X": "1"}), first)
         self.assertEqual(os.listdir(self.directory), [SC.CACHE_META])  # no temporary file left
 
+    def test_a_given_git_sha_is_the_one_recorded(self):
+        meta = SC.write_meta(self.directory, "dev", "baseline", {}, git_sha="beef" * 10)
+        self.assertEqual(meta["git_sha"], "beef" * 10)
+
     def test_refuses_different_flags_and_names_them(self):
         SC.write_meta(self.directory, "dev", "baseline", {"WWAI_X": "1", "WWAI_Y": "1"})
         with self.assertRaises(SystemExit) as ctx:
@@ -691,6 +819,14 @@ class TestRecordClip(unittest.TestCase):
         self.assertEqual(meta["word_calls"][0]["words"], U.SAMPLE_TEXT.split())
         with np.load(os.path.join(self.cache, "000020022.npz")) as data:
             self.assertEqual(data["logits_0"].dtype, np.float32)
+
+    def test_a_given_git_sha_is_written_without_running_git(self):
+        with mock.patch.object(SC.common, "git_sha", side_effect=AssertionError("git was run")):
+            entry = SC.record_clip("000020022", self.wav, U.SAMPLE_TEXT, self.cache,
+                                   U.fake_onnx_extractor(self.processor), U.FakeWords(), git_sha="cafe" * 10)
+        self.assertEqual(entry["git_sha"], "cafe" * 10)
+        with open(os.path.join(self.cache, "000020022.json"), encoding="utf-8") as fh:
+            self.assertEqual(json.load(fh)["git_sha"], "cafe" * 10)
 
     def _files(self):
         return sorted(os.listdir(self.cache))

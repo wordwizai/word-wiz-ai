@@ -2,6 +2,7 @@ import contextlib
 import io
 import json
 import os
+import sys
 import tempfile
 import unittest
 from unittest import mock
@@ -81,6 +82,44 @@ class TestLock(unittest.TestCase):
                 self.assertEqual(RUN.main(["--name", "x"]), 2)
         self.assertIn("backend/.env sets WWAI_X", err.getvalue())
         self.assertIn("--flag", err.getvalue())
+
+
+class TestOutputNeverRaises(unittest.TestCase):
+    """The workers=1 path prints from the main process. A console that cannot encode a character
+    (cp1252 and IPA, say) must print a backslash escape and not raise UnicodeEncodeError."""
+
+    def _ascii_stream(self):
+        return io.TextIOWrapper(io.BytesIO(), encoding="ascii", errors="strict", write_through=True)
+
+    def test_main_makes_stdout_and_stderr_replace_what_they_cannot_encode(self):
+        out, err = self._ascii_stream(), self._ascii_stream()
+        with (
+            mock.patch.object(sys, "stdout", out),
+            mock.patch.object(sys, "stderr", err),
+            mock.patch.object(common, "dotenv_wwai_keys", return_value=["WWAI_\u00c9\u0259"]),
+        ):
+            self.assertEqual(RUN.main(["--name", "x"]), 2)  # prints the key's name to stderr
+            print("\u0259 \u00e6", file=sys.stdout)  # must not raise
+        self.assertEqual((out.errors, err.errors), ("backslashreplace", "backslashreplace"))
+        self.assertIn("WWAI_\\xc9\\u0259", err.buffer.getvalue().decode("ascii"))
+
+    def test_streams_without_reconfigure_are_left_alone(self):
+        # unittest and redirect_stdout use StringIO, which has no reconfigure().
+        with (
+            mock.patch.object(sys, "stdout", io.StringIO()),
+            mock.patch.object(sys, "stderr", io.StringIO()),
+            mock.patch.object(common, "dotenv_wwai_keys", return_value=["WWAI_X"]),
+        ):
+            self.assertEqual(RUN.main(["--name", "x"]), 2)
+
+    def test_a_missing_stream_is_fine(self):
+        # pythonw has no stdout at all.
+        with (
+            mock.patch.object(sys, "stdout", None),
+            mock.patch.object(sys, "stderr", io.StringIO()),
+            mock.patch.object(common, "dotenv_wwai_keys", return_value=["WWAI_X"]),
+        ):
+            self.assertEqual(RUN.main(["--name", "x"]), 2)
 
 
 class TestFormatSummary(unittest.TestCase):

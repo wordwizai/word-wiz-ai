@@ -56,6 +56,8 @@ _REFUSED_ASR_FLAGS = {
     ),
 }
 _COMMIT_SHA = re.compile(r"[0-9a-f]{40}")
+_LOCK_ATTEMPTS = 5
+_LOCK_WAIT_SECONDS = 0.2
 _models: dict = {}
 
 
@@ -70,6 +72,21 @@ def cache_dir(half: str, name: str) -> str:
     return os.path.join(common.cache_root(), half, name)
 
 
+def _retry_if_locked(operation, *args):
+    """Run an os function again when it raises PermissionError, up to _LOCK_ATTEMPTS tries in all.
+
+    On Windows an antivirus scanner or the search indexer briefly holds a file it has just seen
+    written, and os.replace or os.remove on it then fails for a moment. Any other error, and a
+    lock that outlasts the attempts, is raised as before."""
+    for attempt in range(1, _LOCK_ATTEMPTS + 1):
+        try:
+            return operation(*args)
+        except PermissionError:
+            if attempt == _LOCK_ATTEMPTS:
+                raise
+            time.sleep(_LOCK_WAIT_SECONDS)
+
+
 def _atomic_write(path: str, write, binary: bool = False) -> None:
     """Write through a temporary file next to ``path`` and move it into place, so a crash or a
     full disk never leaves a partial file under the real name, or a temporary file behind."""
@@ -77,7 +94,7 @@ def _atomic_write(path: str, write, binary: bool = False) -> None:
     try:
         with (open(tmp, "wb") if binary else open(tmp, "w", encoding="utf-8")) as fh:
             write(fh)
-        os.replace(tmp, path)
+        _retry_if_locked(os.replace, tmp, path)
     except BaseException:
         with contextlib.suppress(OSError):
             os.remove(tmp)
@@ -86,7 +103,7 @@ def _atomic_write(path: str, write, binary: bool = False) -> None:
 
 def _remove(path: str) -> None:
     with contextlib.suppress(FileNotFoundError):
-        os.remove(path)
+        _retry_if_locked(os.remove, path)
 
 
 def read_entry(path: str) -> dict:
@@ -124,6 +141,13 @@ class RecordingSession:
         return self._inner.get_inputs()
 
     def run(self, output_names, feeds):
+        # The recorded hash covers one tensor. With a second input (an attention mask, say) the
+        # model would be fed something the hash never saw, and replay could not notice a change in it.
+        if len(feeds) != 1:
+            raise ValueError(
+                f"the ONNX session was given {len(feeds)} inputs ({', '.join(map(str, feeds))}), but the "
+                "cache hashes exactly one; update RecordingSession and ReplaySession to hash them all"
+            )
         values = next(iter(feeds.values()))
         call = {"input_sha": model_input_sha(values)}
         self.calls.append(call)
@@ -231,8 +255,17 @@ def entry_needs_retry(meta: dict) -> bool:
     return error_type.startswith("unexpected:")
 
 
+def entry_logits_missing(directory, utt_id, meta: dict) -> bool:
+    """True when an entry's phoneme calls refer to logits but its .npz file is not there.
+
+    Replay cannot use such an entry and stops the whole run on it, so it is recorded again.
+    An entry whose calls all failed before producing logits never had a file."""
+    wants_logits = any(isinstance(call, dict) and "logits_key" in call for call in meta.get("phoneme_calls", []))
+    return wants_logits and not os.path.isfile(os.path.join(directory, f"{utt_id}.npz"))
+
+
 def write_entry(directory, utt_id, session: RecordingSession, words: RecordingWordExtractor,
-                outcome, seconds: float) -> dict:
+                outcome, seconds: float, git_sha: str | None = None) -> dict:
     os.makedirs(directory, exist_ok=True)
     json_path = os.path.join(directory, f"{utt_id}.json")
     npz_path = os.path.join(directory, f"{utt_id}.npz")
@@ -249,7 +282,7 @@ def write_entry(directory, utt_id, session: RecordingSession, words: RecordingWo
         "phoneme_calls": session.calls,
         "word_calls": words.calls,
         "outcome": {"status": outcome.status, "error_type": outcome.error_type, "error": outcome.error},
-        "git_sha": common.git_sha(),
+        "git_sha": common.git_sha() if git_sha is None else git_sha,
         "seconds": round(seconds, 3),
     }
     # Written last: the .json marks the entry complete.
@@ -257,12 +290,15 @@ def write_entry(directory, utt_id, session: RecordingSession, words: RecordingWo
     return meta
 
 
-def record_clip(utt_id, wav_path, text, directory, phoneme_extractor, word_inner) -> dict:
+def record_clip(utt_id, wav_path, text, directory, phoneme_extractor, word_inner, git_sha=None) -> dict:
     """Record one clip with the given models. Returns the entry it wrote.
 
     ``phoneme_extractor`` is a real PhonemeExtractorONNX (or a test double with the same
     attributes). It is shared between clips and never modified: the clip runs on a shallow
     copy whose session records every call.
+
+    ``git_sha`` is what the entry records. build() works it out once and passes it in, so every
+    entry of a build agrees. Without it the entry asks git itself.
     """
     from .pipeline import analyze_clip, load_audio
 
@@ -271,10 +307,10 @@ def record_clip(utt_id, wav_path, text, directory, phoneme_extractor, word_inner
     words = RecordingWordExtractor(word_inner)
     start = time.perf_counter()
     outcome = analyze_clip(load_audio(wav_path), text, view, words, apply_gates=False)
-    return write_entry(directory, utt_id, session, words, outcome, time.perf_counter() - start)
+    return write_entry(directory, utt_id, session, words, outcome, time.perf_counter() - start, git_sha)
 
 
-def write_meta(directory: str, half: str, name: str, flags: dict) -> dict:
+def write_meta(directory: str, half: str, name: str, flags: dict, git_sha: str | None = None) -> dict:
     """Write the cache's _cache_meta.json, or check the existing one against this run.
 
     A cache holds the outputs of one model revision under one set of flags. The revision must
@@ -296,7 +332,7 @@ def write_meta(directory: str, half: str, name: str, flags: dict) -> dict:
         "model_repo": repo_id("PHONEME_IPA_ONNX"),
         "model_revision": revision,
         "flags": flags,
-        "git_sha": common.git_sha(),
+        "git_sha": common.git_sha() if git_sha is None else git_sha,
         "created": time.strftime("%Y-%m-%dT%H:%M:%S"),
     }
     if os.path.isfile(path):
@@ -359,8 +395,8 @@ def _init_worker() -> None:
 def _record_task(task):
     if _init_error is not None:
         raise RuntimeError(f"benchmark worker could not load its models: {_init_error}")
-    utt_id, wav_path, text, directory = task
-    return record_clip(utt_id, wav_path, text, directory, _models["phoneme"], _models["words"])
+    utt_id, wav_path, text, directory, git_sha = task
+    return record_clip(utt_id, wav_path, text, directory, _models["phoneme"], _models["words"], git_sha=git_sha)
 
 
 def _record_all(todo, workers):
@@ -398,7 +434,11 @@ def build(half, name, flags, workers, retry_errors=False, subset=None, limit=Non
     if limit:
         clips = clips[:limit]
     directory = cache_dir(half, name)
-    write_meta(directory, half, name, flags)
+    # Once per build. Asked per clip it ran git status twice each time, which gave clean, dirty and
+    # different SHAs inside one build while the recording code never changed, and it could take
+    # index.lock while someone was committing.
+    sha = common.git_sha()
+    write_meta(directory, half, name, flags, git_sha=sha)
     todo, needs_retry = [], []
     for clip in clips:
         meta_path = os.path.join(directory, f"{clip.utt_id}.json")
@@ -407,13 +447,15 @@ def build(half, name, flags, workers, retry_errors=False, subset=None, limit=Non
                 cached = read_entry(meta_path)
             except ValueError:
                 cached = None  # unreadable, so it is recorded again like a missing entry
+            if cached is not None and entry_logits_missing(directory, clip.utt_id, cached):
+                cached = None  # replay would stop on it, so it is recorded again, retry_errors or not
             if cached is not None:
                 if not entry_needs_retry(cached):
                     continue
                 if not retry_errors:
                     needs_retry.append(clip.utt_id)
                     continue
-        todo.append((clip.utt_id, clip.wav_path, clip.text, directory))
+        todo.append((clip.utt_id, clip.wav_path, clip.text, directory, sha))
     print(f"{len(clips)} clips, {len(clips) - len(todo)} cached, {len(todo)} to record into {directory}")
     if needs_retry:
         print(f"{len(needs_retry)} cached clips need recording again; run with --retry-errors")

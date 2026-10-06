@@ -34,6 +34,17 @@ def default_model_output_processing(transcription):
     return [list(word.replace("ˈ", "")) for word in words]
 
 
+def decode_logits(logits, processor, model_output_processing=default_model_output_processing):
+    """Greedy CTC decode. Argmax per frame, collapse with the processor, group into words.
+
+    ``PhonemeExtractorONNX.extract_phoneme`` is exactly this applied to
+    ``extract_logits``. The accuracy benchmark caches logits and calls this to replay.
+    """
+    predicted_ids = np.argmax(logits, axis=-1)
+    transcription = processor.batch_decode(predicted_ids)
+    return model_output_processing(transcription)
+
+
 class PhonemeExtractorONNX:
     """ONNX Runtime-based phoneme extractor for faster inference."""
     
@@ -133,39 +144,32 @@ class PhonemeExtractorONNX:
                     print(f"Warmup run {i+1} failed: {e}")
                 break
     
-    def extract_phoneme(self, audio, sampling_rate=16000, use_optimized_preprocessing=True):
+    def extract_logits(self, audio, sampling_rate=16000, use_optimized_preprocessing=True):
         """
-        Extract phonemes from audio using ONNX Runtime.
-        
-        Args:
-            audio: Audio data as numpy array
-            sampling_rate: Sample rate of the audio (default: 16000)
-            use_optimized_preprocessing: Whether to use optimized audio preprocessing
-            
+        Validate and condition the audio, then run the acoustic model.
+
         Returns:
-            Processed phoneme transcription
-            
+            Raw logits, shape (1, frames, vocab).
+
         Raises:
             ValueError: If audio is invalid
         """
-        start_time = time.time() if self._performance_logging else None
-        
         # Validate audio input
         if audio is None or len(audio) == 0:
             raise ValueError("❌ Audio is empty - cannot extract phonemes")
-        
+
         audio_duration = len(audio) / sampling_rate
-        
+
         if audio_duration < 0.3:
             raise ValueError(f"❌ Audio too short ({audio_duration:.2f}s) - need at least 0.3s")
-        
+
         audio_rms = np.sqrt(np.mean(audio ** 2))
         if audio_rms < 0.001:
             raise ValueError(f"❌ Audio appears to be silent (RMS: {audio_rms:.6f})")
-        
+
         if self._performance_logging:
             print(f"[INFO] Audio validation: duration={audio_duration:.2f}s, RMS={audio_rms:.4f}, samples={len(audio)}")
-        
+
         # Optimize audio preprocessing if enabled
         if use_optimized_preprocessing:
             # Format conditioning ONLY (mono / sample-rate reconciliation /
@@ -177,26 +181,39 @@ class PhonemeExtractorONNX:
             audio, sampling_rate = self.audio_preprocessor.preprocess_audio(
                 audio, sr=sampling_rate, normalize=False, trim_silence=True
             )
-        
+
         # Tokenize the audio file
         processor_outputs = self.processor(audio, sampling_rate=sampling_rate, return_tensors="np")
         input_values = processor_outputs.input_values
-        
+
         # Run ONNX inference
         onnx_inputs = {self.session.get_inputs()[0].name: input_values.astype(np.float32)}
-        logits = self.session.run(None, onnx_inputs)[0]
-        
-        # Get predicted IDs
-        predicted_ids = np.argmax(logits, axis=-1)
-        
-        # Decode the token sequences
-        transcription = self.processor.batch_decode(predicted_ids)
-        transcription = self.model_output_processing(transcription)
-        
+        return self.session.run(None, onnx_inputs)[0]
+
+    def extract_phoneme(self, audio, sampling_rate=16000, use_optimized_preprocessing=True):
+        """
+        Extract phonemes from audio using ONNX Runtime.
+
+        Args:
+            audio: Audio data as numpy array
+            sampling_rate: Sample rate of the audio (default: 16000)
+            use_optimized_preprocessing: Whether to use optimized audio preprocessing
+
+        Returns:
+            Processed phoneme transcription
+
+        Raises:
+            ValueError: If audio is invalid
+        """
+        start_time = time.time() if self._performance_logging else None
+
+        logits = self.extract_logits(audio, sampling_rate, use_optimized_preprocessing)
+        transcription = decode_logits(logits, self.processor, self.model_output_processing)
+
         if self._performance_logging and start_time:
             inference_time = time.time() - start_time
             print(f"ONNX phoneme extraction took {inference_time:.3f}s")
-        
+
         return transcription
     
     def set_performance_logging(self, enabled: bool):

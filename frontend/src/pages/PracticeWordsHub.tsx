@@ -21,7 +21,7 @@ const SITE_ORIGIN = "https://wordwizai.com";
 const PracticeWordsHub = () => {
   const canonicalUrl = `${SITE_ORIGIN}/practice-words`;
   const metaTitle = "Phonics Word Lists & Practice by Pattern";
-  const metaDescription = `Free phonics word lists for ${phonicsPatterns.length} patterns — word families, digraphs, blends, vowel teams and r-controlled vowels. Each list has decodable sentences, teaching tips and out-loud practice.`;
+  const metaDescription = `Free phonics word lists for ${phonicsPatterns.length} patterns — word families, digraphs, blends, magic e, vowel teams and r-controlled vowels. Each list has decodable sentences, teaching tips and out-loud practice.`;
 
   const populatedCategories = patternCategories.filter(
     (category) => getPatternsByCategory(category).length > 0

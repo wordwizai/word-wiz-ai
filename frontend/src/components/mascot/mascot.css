@@ -1,0 +1,201 @@
+/* Moods for <Mascot>, picked by its data-mood attribute. Transform origins
+   are in the SVG's 363x316 user space: the body and head pivot at the bottom
+   of the head, the hat at the middle of the brim. */
+.mascot .mascot-body,
+.mascot .mascot-head {
+  transform-origin: 191px 290px;
+}
+
+.mascot .mascot-hat,
+.mascot .mascot-under-brim {
+  transform-origin: 190px 205px;
+}
+
+.mascot .mascot-sparkle {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* The rounded top of the head is only needed while the hat lifts off. */
+.mascot .mascot-head-top {
+  display: none;
+}
+
+.mascot[data-mood="celebrating"] .mascot-head-top {
+  display: inline;
+}
+
+/* Idle: a slow float, a little hat sway, sparkles twinkling out of step.
+   The stars on the hat never move on their own. */
+.mascot[data-mood="idle"] .mascot-body {
+  animation: mascot-float 3.2s ease-in-out infinite alternate;
+}
+
+.mascot[data-mood="idle"] .mascot-hat {
+  animation: mascot-sway 3.2s ease-in-out infinite alternate;
+}
+
+.mascot[data-mood="idle"] .mascot-sparkle {
+  animation: mascot-twinkle 2.4s var(--twinkle-delay, 0s) ease-in-out infinite;
+}
+
+/* Talking: the hat bobs and the head squashes on each beat. */
+.mascot[data-mood="talking"] .mascot-hat {
+  animation: mascot-bob 0.34s ease-in-out infinite alternate;
+}
+
+.mascot[data-mood="talking"] .mascot-head {
+  animation: mascot-squash 0.34s ease-in-out infinite alternate;
+}
+
+.mascot[data-mood="talking"] .mascot-sparkle {
+  animation: mascot-twinkle 1.2s var(--twinkle-delay, 0s) ease-in-out infinite;
+}
+
+/* Listening: head and hat lean in together (tilting only the hat showed the
+   flat top of the head), and the sparkles pulse in step. */
+.mascot[data-mood="listening"] .mascot-body {
+  animation: mascot-lean 1.8s ease-in-out infinite alternate;
+}
+
+.mascot[data-mood="listening"] .mascot-sparkle {
+  animation: mascot-pulse 1.8s ease-in-out infinite alternate;
+}
+
+/* Celebrating: one hop. The hat pops up, the clip that keeps the rounded
+   head top under the brim follows it, and the sparkles burst outward.
+   Runs once; <Mascot> reports the end through onCelebrateEnd. */
+.mascot[data-mood="celebrating"] .mascot-body {
+  animation: mascot-hop 1.6s cubic-bezier(0.3, 0.7, 0.4, 1);
+}
+
+.mascot[data-mood="celebrating"] .mascot-hat,
+.mascot[data-mood="celebrating"] .mascot-under-brim {
+  animation: mascot-hat-pop 1.6s ease-in-out;
+}
+
+.mascot[data-mood="celebrating"] .mascot-sparkle {
+  animation: mascot-burst 1.6s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mascot * {
+    animation: none !important;
+  }
+}
+
+@keyframes mascot-float {
+  to {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes mascot-sway {
+  from {
+    transform: rotate(-2deg);
+  }
+  to {
+    transform: rotate(2deg);
+  }
+}
+
+@keyframes mascot-twinkle {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.45);
+    opacity: 0.4;
+  }
+}
+
+@keyframes mascot-bob {
+  from {
+    transform: rotate(-4deg) translateY(-7px);
+  }
+  to {
+    transform: rotate(3deg) translateY(3px);
+  }
+}
+
+@keyframes mascot-squash {
+  to {
+    transform: scale(1.05, 0.93);
+  }
+}
+
+@keyframes mascot-lean {
+  from {
+    transform: rotate(-5deg);
+  }
+  to {
+    transform: rotate(-9deg) translateY(-3px);
+  }
+}
+
+@keyframes mascot-pulse {
+  from {
+    transform: scale(0.75);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+@keyframes mascot-hop {
+  0%,
+  88%,
+  100% {
+    transform: none;
+  }
+  12% {
+    transform: scale(1.1, 0.86);
+  }
+  32% {
+    transform: translateY(-55px) scale(0.94, 1.08);
+  }
+  48% {
+    transform: translateY(-62px);
+  }
+  66% {
+    transform: translateY(0) scale(1.12, 0.88);
+  }
+  78% {
+    transform: scale(0.97, 1.03);
+  }
+}
+
+@keyframes mascot-hat-pop {
+  0%,
+  25%,
+  80%,
+  100% {
+    transform: none;
+  }
+  42% {
+    transform: translateY(-34px) rotate(-14deg);
+  }
+  58% {
+    transform: translateY(-30px) rotate(12deg);
+  }
+}
+
+@keyframes mascot-burst {
+  0%,
+  28%,
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+  50% {
+    transform: translate(var(--burst-x), var(--burst-y)) scale(1.7) rotate(45deg);
+  }
+  75% {
+    opacity: 0.3;
+    transform: translate(var(--burst-x), var(--burst-y)) scale(0.6);
+  }
+}

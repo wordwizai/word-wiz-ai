@@ -15,6 +15,7 @@ export interface AudioAnalysisEvent {
     | "feedback"          // local feedback text + ssml (arrives before TTS)
     | "next_sentence"     // GPT-generated sentence (arrives in parallel with audio)
     | "audio_feedback_file"
+    | "complete"          // guest (try-it) stream only: nothing more is coming
     | "error"
     | "pong";
   data: any;
@@ -231,6 +232,43 @@ export class WebSocketTransport implements AudioTransport {
 }
 
 /**
+ * Read a text/event-stream response body and hand each `data:` event to
+ * `onEvent`. Shared by the signed-in SSE transport and the guest try-it page.
+ */
+export async function readSSEStream(
+  response: Response,
+  onEvent: (event: AudioAnalysisEvent) => void
+): Promise<void> {
+  const reader = response.body?.getReader();
+  const decoder = new TextDecoder("utf-8");
+  let buffer = "";
+
+  while (reader) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+
+    let boundary = buffer.indexOf("\n\n");
+    while (boundary !== -1) {
+      const rawEvent = buffer.slice(0, boundary).trim();
+      buffer = buffer.slice(boundary + 2);
+
+      if (rawEvent.startsWith("data: ")) {
+        try {
+          const event = JSON.parse(rawEvent.slice(6)) as AudioAnalysisEvent;
+          onEvent(event);
+        } catch (err) {
+          console.error("Failed to parse SSE message:", err);
+        }
+      }
+
+      boundary = buffer.indexOf("\n\n");
+    }
+  }
+}
+
+/**
  * SSE-based transport (creates new connection per request)
  */
 export class SSETransport implements AudioTransport {
@@ -296,33 +334,7 @@ export class SSETransport implements AudioTransport {
         throw new Error(await response.text());
       }
 
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder("utf-8");
-      let buffer = "";
-
-      while (reader) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-
-        let boundary = buffer.indexOf("\n\n");
-        while (boundary !== -1) {
-          const rawEvent = buffer.slice(0, boundary).trim();
-          buffer = buffer.slice(boundary + 2);
-
-          if (rawEvent.startsWith("data: ")) {
-            try {
-              const event = JSON.parse(rawEvent.slice(6)) as AudioAnalysisEvent;
-              this.options.onEvent(event);
-            } catch (err) {
-              console.error("Failed to parse SSE message:", err);
-            }
-          }
-
-          boundary = buffer.indexOf("\n\n");
-        }
-      }
+      await readSSEStream(response, this.options.onEvent);
     } catch (err: any) {
       if (err.name === "AbortError") {
         console.log("SSE request aborted");

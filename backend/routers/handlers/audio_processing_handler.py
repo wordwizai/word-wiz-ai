@@ -44,6 +44,8 @@ async def load_and_preprocess_audio_bytes(
     content_type: str,
     session_id: str | None = None,
     quality_out: dict | None = None,
+    cache_audio: bool = True,
+    max_duration_seconds: float | None = None,
 ) -> tuple[np.ndarray, str]:
     """
     Load and preprocess audio from bytes with caching at key stages.
@@ -58,6 +60,11 @@ async def load_and_preprocess_audio_bytes(
             soft quality gates are enabled and something is worth mentioning, a
             child-friendly warning under key "quality_warning". Purely
             additive - the return value is unchanged.
+        cache_audio (bool): When False, the audio is never written to the
+            temp audio cache, even if ENABLE_AUDIO_CACHE is set. The guest
+            "try it" path uses this, since it promises not to keep recordings.
+        max_duration_seconds (float, optional): Reject recordings longer
+            than this. None (the default) means no limit.
 
     Returns:
         tuple[np.ndarray, str]: The preprocessed audio array and cache session ID.
@@ -86,21 +93,22 @@ async def load_and_preprocess_audio_bytes(
         return np.array([]), session_id
     
     # CACHE POINT 1: Save original uploaded audio
-    cache_start = time.time()
-    # Run cache I/O in thread pool to avoid blocking event loop
-    await asyncio.to_thread(
-        audio_cache.save_audio_bytes,
-        audio_bytes, 
-        "original", 
-        session_id,
-        f"uploaded_{filename}",
-        metadata={
-            "filename": filename,
-            "content_type": content_type,
-            "size_bytes": len(audio_bytes)
-        }
-    )
-    print(f"⏱️  Cache save (original) took {time.time() - cache_start:.3f}s")
+    if cache_audio:
+        cache_start = time.time()
+        # Run cache I/O in thread pool to avoid blocking event loop
+        await asyncio.to_thread(
+            audio_cache.save_audio_bytes,
+            audio_bytes,
+            "original",
+            session_id,
+            f"uploaded_{filename}",
+            metadata={
+                "filename": filename,
+                "content_type": content_type,
+                "size_bytes": len(audio_bytes)
+            }
+        )
+        print(f"⏱️  Cache save (original) took {time.time() - cache_start:.3f}s")
     
     decode_start = time.time()
     # Run soundfile decoding in thread pool to avoid blocking event loop
@@ -127,25 +135,32 @@ async def load_and_preprocess_audio_bytes(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="That recording was too short. Tap the mic and read the whole sentence."
         )
-    
+
+    if max_duration_seconds is not None and audio_duration > max_duration_seconds:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="That recording was too long. Tap the mic, read just the one sentence, and tap again to stop."
+        )
+
     # CACHE POINT 2: Save audio after format conversion but before preprocessing
-    cache_start = time.time()
-    # Run cache I/O in thread pool to avoid blocking event loop
-    await asyncio.to_thread(
-        audio_cache.save_audio,
-        audio_array,
-        "analysis",
-        session_id,
-        sample_rate,
-        "pre_preprocessing",
-        metadata={
-            "stage": "after_format_conversion",
-            "original_shape": str(audio_array.shape),
-            "sample_rate": sample_rate,
-            "duration_seconds": audio_duration
-        }
-    )
-    print(f"⏱️  Cache save (pre-preprocessing) took {time.time() - cache_start:.3f}s")
+    if cache_audio:
+        cache_start = time.time()
+        # Run cache I/O in thread pool to avoid blocking event loop
+        await asyncio.to_thread(
+            audio_cache.save_audio,
+            audio_array,
+            "analysis",
+            session_id,
+            sample_rate,
+            "pre_preprocessing",
+            metadata={
+                "stage": "after_format_conversion",
+                "original_shape": str(audio_array.shape),
+                "sample_rate": sample_rate,
+                "duration_seconds": audio_duration
+            }
+        )
+        print(f"⏱️  Cache save (pre-preprocessing) took {time.time() - cache_start:.3f}s")
     
     # QUALITY VALIDATION: Analyze audio quality before preprocessing
     print("🔍 Analyzing audio quality...")
@@ -238,24 +253,25 @@ async def load_and_preprocess_audio_bytes(
     mark_preprocessed(audio_array)
 
     # CACHE POINT 3: Save preprocessed audio
-    cache_start = time.time()
-    # Run cache I/O in thread pool to avoid blocking event loop
-    await asyncio.to_thread(
-        audio_cache.save_audio,
-        audio_array,
-        "preprocessed",
-        session_id,
-        sample_rate,
-        "final",
-        metadata={
-            "stage": "after_preprocessing",
-            "preprocessing_applied": "noise_reduction_and_normalization",
-            "final_shape": str(audio_array.shape),
-            "sample_rate": sample_rate
-        }
-    )
-    print(f"⏱️  Cache save (preprocessed) took {time.time() - cache_start:.3f}s")
-    
+    if cache_audio:
+        cache_start = time.time()
+        # Run cache I/O in thread pool to avoid blocking event loop
+        await asyncio.to_thread(
+            audio_cache.save_audio,
+            audio_array,
+            "preprocessed",
+            session_id,
+            sample_rate,
+            "final",
+            metadata={
+                "stage": "after_preprocessing",
+                "preprocessing_applied": "noise_reduction_and_normalization",
+                "final_shape": str(audio_array.shape),
+                "sample_rate": sample_rate
+            }
+        )
+        print(f"⏱️  Cache save (preprocessed) took {time.time() - cache_start:.3f}s")
+
     return audio_array, session_id
 
 
@@ -271,6 +287,70 @@ def sanitize(obj):
     elif isinstance(obj, pd.DataFrame):
         return sanitize(obj.to_dict())
     return obj
+
+
+def check_speech_activity(audio_array: np.ndarray, quality_out: dict) -> None:
+    """Refuse (hard gates) or flag (soft gates) recordings with little speech.
+
+    Shared by the signed-in and guest analysis streams so both apply the same
+    rule. Raises HTTPException when the recording should be refused.
+    """
+    from core.audio_chunking import estimate_speech_activity
+    speech_percentage = estimate_speech_activity(audio_array, sr=16000)
+    print(f"🎤 Speech activity: {speech_percentage:.1f}%")
+
+    if soft_quality_gates_enabled():
+        # estimate_speech_activity thresholds relative to the LOUDEST
+        # frame, so one emphatic word can push several quieter ones
+        # below the bar and drag the whole recording under 30%. Do not
+        # refuse the recording over it -- warn and analyze.
+        if speech_percentage < 30:
+            print(
+                f"⚠️  Soft quality gate: low measured speech activity "
+                f"({speech_percentage:.1f}%) - continuing anyway"
+            )
+            warning = quality_out.get('quality_warning') or {'hints': []}
+            warning.setdefault('hints', [])
+            warning['hints'].append(
+                "We had trouble hearing all the words - try speaking a little louder."
+            )
+            warning['speech_activity_percentage'] = float(speech_percentage)
+            quality_out['quality_warning'] = warning
+    else:
+        # Require at least 30% speech activity
+        if speech_percentage < 30:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="We could barely hear you. Read the sentence out loud, close to the microphone."
+            )
+
+
+def build_analysis_payload(
+    pronunciation_dataframe: pd.DataFrame,
+    highest_per_word,
+    problem_summary,
+    per_summary,
+    quality_out: dict,
+) -> dict:
+    """The "analysis" SSE event, shared by the signed-in and guest streams."""
+    analysis_payload = {
+        "type": "analysis",
+        "data": {
+            "pronunciation_dataframe": sanitize(pronunciation_dataframe.to_dict()),
+            "highest_per_word": sanitize(highest_per_word),
+            "problem_summary": sanitize(problem_summary),
+            "per_summary": sanitize(per_summary),
+        },
+    }
+    # Additive, optional field. Only present when soft quality gates are
+    # enabled AND the recording had something worth gently mentioning.
+    # Existing keys ("type", "data", the analysis keys) are untouched, so
+    # the frontend contract is preserved.
+    if quality_out.get('quality_warning') is not None:
+        analysis_payload["data"]["quality_warning"] = sanitize(
+            quality_out['quality_warning']
+        )
+    return analysis_payload
 
 
 async def analyze_audio_file_event_stream(
@@ -346,36 +426,8 @@ async def analyze_audio_file_event_stream(
                 )
             print("📭 Empty audio received - using full client extraction")
         else:
-            # Validate audio has speech content using VAD
-            from core.audio_chunking import estimate_speech_activity
-            speech_percentage = estimate_speech_activity(audio_array, sr=16000)
-            print(f"🎤 Speech activity: {speech_percentage:.1f}%")
+            check_speech_activity(audio_array, quality_out)
 
-            if soft_quality_gates_enabled():
-                # estimate_speech_activity thresholds relative to the LOUDEST
-                # frame, so one emphatic word can push several quieter ones
-                # below the bar and drag the whole recording under 30%. Do not
-                # refuse the recording over it -- warn and analyze.
-                if speech_percentage < 30:
-                    print(
-                        f"⚠️  Soft quality gate: low measured speech activity "
-                        f"({speech_percentage:.1f}%) - continuing anyway"
-                    )
-                    warning = quality_out.get('quality_warning') or {'hints': []}
-                    warning.setdefault('hints', [])
-                    warning['hints'].append(
-                        "We had trouble hearing all the words - try speaking a little louder."
-                    )
-                    warning['speech_activity_percentage'] = float(speech_percentage)
-                    quality_out['quality_warning'] = warning
-            else:
-                # Require at least 30% speech activity
-                if speech_percentage < 30:
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="We could barely hear you. Read the sentence out loud, close to the microphone."
-                    )
-        
         # Determine if we should use client phonemes/words or extract on server
         use_client_phonemes = False
         use_client_words = False
@@ -476,23 +528,13 @@ async def analyze_audio_file_event_stream(
             per_summary=per_summary,
             highest_per_word=highest_per_word,
         )
-        analysis_payload = {
-            "type": "analysis",
-            "data": {
-                "pronunciation_dataframe": sanitize(pronunciation_dataframe.to_dict()),
-                "highest_per_word": sanitize(highest_per_word),
-                "problem_summary": sanitize(problem_summary),
-                "per_summary": sanitize(per_summary),
-            },
-        }
-        # Additive, optional field. Only present when soft quality gates are
-        # enabled AND the recording had something worth gently mentioning.
-        # Existing keys ("type", "data", the analysis keys) are untouched, so
-        # the frontend contract is preserved.
-        if quality_out.get('quality_warning') is not None:
-            analysis_payload["data"]["quality_warning"] = sanitize(
-                quality_out['quality_warning']
-            )
+        analysis_payload = build_analysis_payload(
+            pronunciation_dataframe,
+            highest_per_word,
+            problem_summary,
+            per_summary,
+            quality_out,
+        )
         print("📤 Sending analysis payload...")
         yield f"data: {json.dumps(analysis_payload)}\n\n"
         await asyncio.sleep(0.01)  # Yield control to the event loop with small delay to ensure flush
@@ -630,4 +672,119 @@ async def analyze_audio_file_event_stream(
             "data": {"message": message},
         }
         yield f"data: {json.dumps(error_payload)}\n\n"
+        return
+
+
+# Guest recordings longer than this are refused. The try-it sentences are
+# 4-8 words, which take a young reader well under 10 seconds.
+GUEST_MAX_AUDIO_SECONDS = 20.0
+
+
+async def analyze_audio_guest_event_stream(
+    phoneme_assistant: PhonemeAssistant,
+    audio_bytes: bytes,
+    audio_filename: str,
+    audio_content_type: str,
+    attempted_sentence: str,
+):
+    """SSE stream for the public "try it" page (no account).
+
+    Same scoring and feedback as the signed-in stream, minus everything that
+    needs an account: no GPT next sentence, nothing written to the database,
+    and the recording is never written to the temp audio cache. Events:
+    processing_started, analysis, feedback, audio_feedback_file, complete
+    (or error).
+    """
+    try:
+        yield f"data: {json.dumps({'type': 'processing_started', 'data': {'message': 'Audio received, analyzing...'}})}\n\n"
+        await asyncio.sleep(0.01)
+
+        quality_out: dict = {}
+        try:
+            audio_array, _ = await load_and_preprocess_audio_bytes(
+                audio_bytes,
+                audio_filename,
+                audio_content_type,
+                None,
+                quality_out=quality_out,
+                cache_audio=False,
+                max_duration_seconds=GUEST_MAX_AUDIO_SECONDS,
+            )
+        except Exception as e:
+            if isinstance(e, HTTPException):
+                message = e.detail
+            else:
+                print(f"❌ Guest audio preprocessing failed: {e}")
+                message = "We couldn't read that recording. Please try recording again."
+            yield f"data: {json.dumps({'type': 'error', 'data': {'message': message}})}\n\n"
+            return
+
+        if len(audio_array) == 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="We didn't get any audio. Tap the mic and read the sentence out loud.",
+            )
+
+        check_speech_activity(audio_array, quality_out)
+
+        pronunciation_dataframe, highest_per_word, problem_summary, per_summary = (
+            await phoneme_assistant.process_audio(
+                attempted_sentence, audio_array, verbose=False
+            )
+        )
+
+        analysis_payload = build_analysis_payload(
+            pronunciation_dataframe,
+            highest_per_word,
+            problem_summary,
+            per_summary,
+            quality_out,
+        )
+        yield f"data: {json.dumps(analysis_payload)}\n\n"
+        await asyncio.sleep(0.01)
+
+        feedback_result = generate_phoneme_feedback(
+            problem_summary=problem_summary,
+            per_summary=per_summary,
+            pronunciation_data=pronunciation_dataframe.to_dict("records"),
+        )
+        feedback_payload = {
+            "type": "feedback",
+            "data": {"text": feedback_result.text, "ssml": feedback_result.ssml},
+        }
+        yield f"data: {json.dumps(feedback_payload)}\n\n"
+        await asyncio.sleep(0.01)
+
+        # Spoken feedback matters here: the reader is usually 5-7 and may not
+        # be able to read the feedback text yet. A TTS failure shouldn't throw
+        # away the analysis the child already has on screen, so it is reported
+        # as its own error event and the stream still completes.
+        try:
+            loop = asyncio.get_event_loop()
+            audio_file_result = await loop.run_in_executor(
+                None,
+                phoneme_assistant.feedback_to_audio,
+                feedback_result.text,
+                feedback_result.ssml,
+            )
+            audio_payload = {
+                "type": "audio_feedback_file",
+                "data": audio_file_result["data"],
+                "filename": audio_file_result["filename"],
+                "mimetype": audio_file_result["mimetype"],
+            }
+            yield f"data: {json.dumps(audio_payload)}\n\n"
+            await asyncio.sleep(0.01)
+        except Exception as tts_err:
+            print(f"⚠️  Guest TTS failed: {tts_err}")
+
+        yield f"data: {json.dumps({'type': 'complete', 'data': {}})}\n\n"
+
+    except Exception as e:
+        if isinstance(e, HTTPException):
+            message = e.detail
+        else:
+            print(f"❌ Guest analysis failed: {e}")
+            message = "Something went wrong while checking your reading. Please try again."
+        yield f"data: {json.dumps({'type': 'error', 'data': {'message': message}})}\n\n"
         return

@@ -14,6 +14,7 @@ import LandingPageNavbar from "@/components/LandingPageNavbar";
 import SeoHead from "@/components/SeoHead";
 import LandingPageFooter from "@/components/LandingPageFooter";
 import LandingPageCTA from "@/components/LandingPageCTA";
+import { Link } from "react-router-dom";
 
 const fadeUpVariant = {
   hidden: { opacity: 0, y: 30 },
@@ -46,6 +47,10 @@ const About = () => {
         description:
           "Free AI-powered reading tutor helping children learn to read with phoneme-level pronunciation feedback",
         url: "https://wordwizai.com",
+        founder: {
+          "@type": "Person",
+          name: "Bruce Peters",
+        },
         sameAs: [
           "https://instagram.com/wordwizai",
           "https://github.com/wordwizai",
@@ -174,6 +179,45 @@ const About = () => {
               </div>
             ))}
           </motion.div>
+        </div>
+      </motion.section>
+
+      {/* Founder Section */}
+      <motion.section
+        className="px-6 py-20 bg-background"
+        variants={fadeUpVariant}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="max-w-3xl mx-auto space-y-6">
+          <h2 className="text-3xl md:text-4xl font-bold text-center">
+            Who built this
+          </h2>
+          <p className="text-muted-foreground leading-relaxed">
+            I'm Bruce Peters, a high school student in the Bay Area, and I
+            built Word Wiz AI on my own. Most reading apps tell a kid that a
+            word was wrong. I wanted something that could hear which sound
+            inside the word was off, the way a tutor sitting next to them
+            would. Word Wiz placed 2nd in the Congressional App Challenge for
+            California's 15th district.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            I'm also doing research on AI in education at Boston University
+            (one of my projects looks at noticing when a student has drifted
+            off task while reading). The goal is the same as Word Wiz, which
+            is making tools like this actually work for the people who matter,
+            kids learning to read and the parents and teachers helping them.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            It's free, and if something isn't working for your child, I'd
+            honestly like to hear about it through the{" "}
+            <Link to="/contact" className="text-primary underline">
+              contact page
+            </Link>
+            .
+          </p>
         </div>
       </motion.section>
 

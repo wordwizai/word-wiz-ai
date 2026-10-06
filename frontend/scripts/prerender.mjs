@@ -29,6 +29,11 @@ const EXCLUDED_ROUTES = [
   "/signup",
   "/oauth-callback",
   "/toast-test",
+  // Dev-only pages; App.tsx doesn't route them in production builds.
+  "/dev",
+  // Guest try-it practice: an app screen, noindex, and one URL per pattern
+  // would only duplicate the practice-word pages that are meant to rank.
+  "/try",
 ];
 
 /**

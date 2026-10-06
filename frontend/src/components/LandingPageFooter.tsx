@@ -2,8 +2,10 @@ import { Link } from "react-router-dom";
 import { trackSignupClick } from "@/utils/analytics";
 
 const LandingPageFooter = () => {
+  // Dark mode's primary is a light lavender, which made the footer a bright
+  // slab under a dark page, so it drops to a purple tint there.
   return (
-    <footer className="bg-primary text-primary-foreground py-12 px-6 mt-12">
+    <footer className="bg-primary text-primary-foreground dark:bg-primary/15 dark:text-foreground py-12 px-6 mt-12">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-8 mb-8">
           {/* Brand */}
@@ -347,7 +349,7 @@ const LandingPageFooter = () => {
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-primary-foreground/20 pt-6 text-center text-sm">
+        <div className="border-t border-primary-foreground/20 dark:border-border pt-6 text-center text-sm">
           <p>{new Date().getFullYear()} Word Wiz AI</p>
         </div>
       </div>

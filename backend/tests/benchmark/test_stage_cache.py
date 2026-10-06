@@ -60,6 +60,20 @@ class TestRecordingSession(unittest.TestCase):
         self.assertIs(SC.RecordingSession(inner).get_inputs(), inner.get_inputs.return_value)
 
 
+def _failure(status_code=None, **overrides):
+    """What the recorder stores in asr_failure, built from the real error classes in core.errors."""
+    from core import errors
+
+    log = errors.classify_http_status(status_code, service="deepgram", operator_detail="x").to_log_record()
+    failure = {"code": log["code"], "category": log["category"], "retryable": log["retryable"]}
+    failure.update(overrides)
+    return failure
+
+
+def _empty_call(failure):
+    return {"word_calls": [{"input_sha": "x", "words": [], "asr_failure": failure}]}
+
+
 class TestEntryHasWordError(unittest.TestCase):
     def test_error_type_counts(self):
         self.assertTrue(SC.entry_has_word_error({"word_calls": [{"input_sha": "x", "error_type": "TimeoutError"}]}))
@@ -70,32 +84,69 @@ class TestEntryHasWordError(unittest.TestCase):
         self.assertFalse(SC.entry_has_word_error({"word_calls": [{"input_sha": "x", "words": None}]}))
         self.assertFalse(SC.entry_has_word_error({"word_calls": [{"input_sha": "x"}]}))
 
-    def test_empty_words_after_a_retryable_failure_count(self):
-        failure = {"code": "upstream.timeout", "category": "upstream", "retryable": True}
-        self.assertTrue(SC.entry_has_word_error(
-            {"word_calls": [{"input_sha": "x", "words": [], "asr_failure": failure}]}))
+    def test_the_failure_categories_are_the_ones_core_defines(self):
+        # The cases below use these strings. If core renames one, this fails before they go stale.
+        self.assertEqual(
+            (_failure(503)["category"], _failure(401)["category"], _failure(402)["category"],
+             _failure(429)["category"], _failure(400)["category"]),
+            ("upstream_transient", "upstream_auth", "upstream_quota", "upstream_quota", "internal"),
+        )
+        from core import errors
+
+        self.assertEqual(errors.CATEGORY_EMPTY_AUDIO, "empty_audio")
+
+    def test_empty_words_after_a_transient_failure_count(self):
+        failure = _failure(503)
+        self.assertTrue(failure["retryable"])
+        self.assertTrue(SC.entry_has_word_error(_empty_call(failure)))
         self.assertTrue(SC.entry_has_word_error(
             {"word_calls": [{"input_sha": "x", "words": None, "asr_failure": failure}]}))
 
-    def test_empty_words_after_a_non_retryable_failure_are_kept(self):
+    def test_empty_words_after_a_failure_core_calls_not_retryable_still_count(self):
+        # With default flags WordExtractorOnline returns [] for every final failure, and core marks
+        # 401, 402, 429 and 400 as not retryable. A key that was rotated or a balance that ran out
+        # mid-build must not be saved as a clip nobody could hear. Only empty_audio is a real result.
+        for status in (401, 403, 402, 429, 400):
+            with self.subTest(status=status):
+                failure = _failure(status)
+                self.assertFalse(failure["retryable"])
+                self.assertTrue(SC.entry_has_word_error(_empty_call(failure)))
+        self.assertTrue(SC.entry_has_word_error(
+            _empty_call({"code": "upstream.transient", "category": "upstream_transient", "retryable": False})))
+
+    def test_empty_words_after_an_unreadable_failure_count(self):
+        # A failure payload without a category cannot be shown to be a genuine empty transcript.
+        self.assertTrue(SC.entry_has_word_error(_empty_call({"code": "x", "retryable": False})))
+        self.assertTrue(SC.entry_has_word_error(_empty_call({"code": "x", "category": None, "retryable": False})))
+
+    def test_empty_words_after_an_empty_audio_failure_are_kept(self):
         failure = {"code": "audio.empty", "category": "empty_audio", "retryable": False}
+        self.assertFalse(SC.entry_has_word_error(_empty_call(failure)))
         self.assertFalse(SC.entry_has_word_error(
-            {"word_calls": [{"input_sha": "x", "words": [], "asr_failure": failure}]}))
+            {"word_calls": [{"input_sha": "x", "words": None, "asr_failure": failure}]}))
 
     def test_words_present_is_not_an_error(self):
         self.assertFalse(SC.entry_has_word_error({"word_calls": [{"input_sha": "x", "words": ["a", "b"]}]}))
-        failure = {"code": "upstream.timeout", "category": "upstream", "retryable": True}
         self.assertFalse(SC.entry_has_word_error(
-            {"word_calls": [{"input_sha": "x", "words": ["a"], "asr_failure": failure}]}))
+            {"word_calls": [{"input_sha": "x", "words": ["a"], "asr_failure": _failure(503)}]}))
 
     def test_no_word_calls_is_not_an_error(self):
         self.assertFalse(SC.entry_has_word_error({"word_calls": []}))
         self.assertFalse(SC.entry_has_word_error({}))
 
+    def test_any_failing_call_among_several_counts(self):
+        good = {"input_sha": "x", "words": ["a"]}
+        empty = {"input_sha": "y", "words": [], "asr_failure": {"category": "empty_audio", "retryable": False}}
+        bad = {"input_sha": "z", "words": [], "asr_failure": _failure(401)}
+        self.assertFalse(SC.entry_has_word_error({"word_calls": [good, empty]}))
+        self.assertTrue(SC.entry_has_word_error({"word_calls": [good, empty, bad]}))
+
 
 _WORDS_OK = [{"input_sha": "x", "words": ["a", "b"]}]
 _OUTAGE = [{"input_sha": "x", "words": [],
-            "asr_failure": {"code": "upstream.timeout", "category": "upstream_transient", "retryable": True}}]
+            "asr_failure": {"code": "upstream.transient", "category": "upstream_transient", "retryable": True}}]
+_AUTH_FAILURE = [{"input_sha": "x", "words": [],
+                  "asr_failure": {"code": "upstream.auth", "category": "upstream_auth", "retryable": False}}]
 
 
 def _outcome(status="ok", error_type=None):
@@ -118,6 +169,13 @@ class TestEntryNeedsRetry(unittest.TestCase):
 
     def test_a_word_error_is_retried(self):
         self.assertTrue(SC.entry_needs_retry({"phoneme_calls": [], "word_calls": _OUTAGE, "outcome": _outcome()}))
+
+    def test_an_auth_failure_is_retried_even_though_core_says_not_retryable(self):
+        # A rotated key or an exhausted balance fixes itself only when a person fixes it, so the
+        # clip must be recorded again after that, not kept as "no speech".
+        meta = {"phoneme_calls": [{"input_sha": "x", "logits_key": "logits_0"}], "word_calls": _AUTH_FAILURE,
+                "outcome": _outcome("rejected", "ValueError")}
+        self.assertTrue(SC.entry_needs_retry(meta))
 
     def test_a_session_value_error_is_kept(self):
         meta = {
@@ -165,7 +223,15 @@ class _OutageWords:
     """Returns [] after a retryable failure, like WordExtractorOnline with default flags."""
 
     def extract_words(self, audio, sampling_rate=16000, **_kwargs):
-        _log_final_failure("upstream.timeout", "upstream", True)
+        _log_final_failure("upstream.transient", "upstream_transient", True)
+        return []
+
+
+class _AuthFailureWords:
+    """Returns [] after a 401, which core marks not retryable."""
+
+    def extract_words(self, audio, sampling_rate=16000, **_kwargs):
+        _log_final_failure("upstream.auth", "upstream_auth", False)
         return []
 
 
@@ -179,14 +245,14 @@ class _EmptyTranscriptWords:
 
 class _TwoFailuresWords:
     def extract_words(self, audio, sampling_rate=16000, **_kwargs):
-        _log_final_failure("upstream.timeout", "upstream", True)
+        _log_final_failure("upstream.transient", "upstream_transient", True)
         _log_final_failure("audio.empty", "empty_audio", False)
         return []
 
 
 class _LoggingThenRaisingWords:
     def extract_words(self, audio, sampling_rate=16000, **_kwargs):
-        _log_final_failure("upstream.timeout", "upstream", True)
+        _log_final_failure("upstream.transient", "upstream_transient", True)
         raise TimeoutError("deepgram slow")
 
 
@@ -367,27 +433,80 @@ class TestBuild(unittest.TestCase):
         self.assertEqual(summary["needs_retry"], ["u2", "u3"])
         self.assertEqual(summary["word_errors"], ["u3"])
 
-    def test_stops_when_deepgram_fails_for_each_of_the_first_20_clips(self):
+    def _abort_message(self, entries, clips):
+        """Build with a generator of entries. Returns (the SystemExit message or None, entries consumed, closed)."""
         consumed, closed = [], []
 
-        def entries():
+        def stream():
             try:
-                for i in range(25):
+                for i, entry in enumerate(entries):
                     consumed.append(i)
-                    yield _entry(f"u{i:02d}", "rejected", "ValueError", word_calls=_OUTAGE)
+                    yield entry
             finally:
                 closed.append(True)
 
         with (
-            mock.patch("tests.benchmark.dataset.load_clips", return_value=[_clip(f"u{i:02d}") for i in range(25)]),
-            mock.patch.object(SC, "_record_all", return_value=entries()),
+            mock.patch("tests.benchmark.dataset.load_clips", return_value=clips),
+            mock.patch.object(SC, "_record_all", return_value=stream()),
         ):
-            with self.assertRaises(SystemExit) as ctx:
+            try:
                 SC.build("dev", "baseline", {}, workers=2)
-        self.assertEqual(str(ctx.exception),
-                         "Deepgram failed for every one of the first 20 clips; check the key and balance")
+            except SystemExit as exc:
+                return str(exc), consumed, closed
+        return None, consumed, closed
+
+    def test_stops_when_deepgram_fails_for_each_of_the_first_20_clips(self):
+        entries = [_entry(f"u{i:02d}", "rejected", "ValueError", word_calls=_OUTAGE) for i in range(25)]
+        message, consumed, closed = self._abort_message(entries, [_clip(e["utt_id"]) for e in entries])
+        self.assertEqual(message, "Deepgram failed for every one of the first 20 clips that called it; "
+                                  "check the key and balance")
         self.assertEqual(len(consumed), 20)
         self.assertEqual(closed, [True])  # the pool is shut down, not left running
+
+    def test_stops_on_an_auth_failure_that_core_does_not_call_retryable(self):
+        entries = [_entry(f"u{i:02d}", "rejected", "ValueError", word_calls=_AUTH_FAILURE) for i in range(25)]
+        message, consumed, _closed = self._abort_message(entries, [_clip(e["utt_id"]) for e in entries])
+        self.assertIn("Deepgram failed", message)
+        self.assertEqual(len(consumed), 20)
+
+    def test_clips_without_a_word_call_do_not_count_toward_the_first_20(self):
+        # A one-word text is rejected before any model is called, so it has no word calls. On a
+        # fresh dev build these are mixed in, and "all of the first 20 need a retry" would never fire.
+        entries = []
+        for i in range(60):
+            if i % 2 == 0:
+                entries.append(_entry(f"u{i:02d}", "rejected", "ValueError", word_calls=[]))
+            else:
+                entries.append(_entry(f"u{i:02d}", "rejected", "ValueError", word_calls=_OUTAGE))
+        message, consumed, _closed = self._abort_message(entries, [_clip(e["utt_id"]) for e in entries])
+        self.assertIn("Deepgram failed for every one of the first 20 clips that called it", message)
+        self.assertEqual(len(consumed), 40)  # the 20th failing clip is the 40th entry
+
+    def test_does_not_stop_while_a_clip_with_a_word_call_succeeds(self):
+        entries = []
+        for i in range(60):
+            if i % 2 == 0:
+                entries.append(_entry(f"u{i:02d}", "rejected", "ValueError", word_calls=[]))
+            else:
+                entries.append(_entry(f"u{i:02d}", word_calls=_WORDS_OK if i == 21 else _OUTAGE))
+        message, consumed, _closed = self._abort_message(entries, [_clip(e["utt_id"]) for e in entries])
+        self.assertIsNone(message)
+        self.assertEqual(len(consumed), 60)
+
+    def test_a_genuine_empty_transcript_among_the_first_20_keeps_the_build_going(self):
+        empty = [{"input_sha": "x", "words": [],
+                  "asr_failure": {"code": "audio.empty", "category": "empty_audio", "retryable": False}}]
+        entries = [_entry(f"u{i:02d}", "rejected", "ValueError", word_calls=empty if i == 3 else _OUTAGE)
+                   for i in range(25)]
+        message, consumed, _closed = self._abort_message(entries, [_clip(e["utt_id"]) for e in entries])
+        self.assertIsNone(message)
+        self.assertEqual(len(consumed), 25)
+
+    def test_clips_that_never_call_deepgram_never_stop_the_build(self):
+        entries = [_entry(f"u{i:02d}", "rejected", "ValueError", word_calls=[]) for i in range(30)]
+        message, consumed, _closed = self._abort_message(entries, [_clip(e["utt_id"]) for e in entries])
+        self.assertIsNone(message)
+        self.assertEqual(len(consumed), 30)
 
     def test_keeps_going_when_one_of_the_first_20_clips_has_words(self):
         entries = [_entry(f"u{i:02d}", word_calls=_WORDS_OK if i == 7 else _OUTAGE) for i in range(25)]
@@ -627,7 +746,15 @@ class TestRecordClip(unittest.TestCase):
         meta = self._record(_OutageWords())
         call = meta["word_calls"][0]
         self.assertEqual(call["words"], [])
-        self.assertEqual(call["asr_failure"], {"code": "upstream.timeout", "category": "upstream", "retryable": True})
+        self.assertEqual(call["asr_failure"], {"code": "upstream.transient", "category": "upstream_transient", "retryable": True})
+        self.assertTrue(SC.entry_has_word_error(meta))
+        self.assertTrue(SC.entry_needs_retry(meta))
+
+    def test_a_non_retryable_auth_failure_is_recorded_and_the_entry_is_retried(self):
+        meta = self._record(_AuthFailureWords())
+        call = meta["word_calls"][0]
+        self.assertEqual(call["words"], [])
+        self.assertEqual(call["asr_failure"], {"code": "upstream.auth", "category": "upstream_auth", "retryable": False})
         self.assertTrue(SC.entry_has_word_error(meta))
         self.assertTrue(SC.entry_needs_retry(meta))
 

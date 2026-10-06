@@ -39,8 +39,8 @@ import numpy as np
 from . import common
 
 CACHE_META = "_cache_meta.json"
-#: If this many clips complete first and every one needs a word retry, Deepgram is down or
-#: the key is wrong, and recording the rest would only spend time.
+#: If the first this many completed clips that called Deepgram all need a word retry, Deepgram
+#: is down or the key or balance is wrong, and recording the rest would only spend time.
 EARLY_ABORT_CLIPS = 20
 #: How core.word_extractor reads WWAI_ASR_FALLBACK.
 _ASR_FALLBACK_TRUTHY = {"1", "true", "t", "yes", "y", "on"}
@@ -152,7 +152,7 @@ class RecordingWordExtractor:
     """Wraps the word extractor (Deepgram) and records every call's words or error.
 
     When the extractor logs a final failure, the call also gets ``asr_failure`` (code,
-    category, retryable) so entry_has_word_error can tell an outage from an empty transcript.
+    category, retryable) so entry_has_word_error can tell a failure from an empty transcript.
     """
 
     def __init__(self, inner):
@@ -184,22 +184,31 @@ class RecordingWordExtractor:
 
 
 def entry_has_word_error(meta: dict) -> bool:
-    """True when a word call raised, or came back empty after a retryable failure (an outage).
+    """True when a word call raised, or came back empty after any failure but a genuine empty
+    transcript.
 
-    Deepgram genuinely returns an empty transcript for some young children's speech; those
-    are real outcomes and are kept, not retried.
+    With default flags WordExtractorOnline returns [] for every final failure, and it logs
+    ``retryable`` False for a rotated key (401, 403), an exhausted balance or rate limit (402,
+    429) and a request the provider refused (400). None of those say anything about the child's
+    recording, so they are not kept. A key that expires or a balance that runs out in the
+    middle of a build would otherwise be saved as "no speech" rejections and never retried.
+
+    Only ``asr_failure["category"] == "empty_audio"`` is a real result. Deepgram answered and
+    heard nothing, which it does for some young children's speech. A call with no words and no
+    ``asr_failure`` at all is kept too, since nothing says it failed.
     """
     for call in meta.get("word_calls", []):
         if "error_type" in call:
             return True
         failure = call.get("asr_failure") or {}
-        if not call.get("words") and failure.get("retryable"):
+        if not call.get("words") and failure and failure.get("category") != "empty_audio":
             return True
     return False
 
 
 def entry_needs_retry(meta: dict) -> bool:
-    """A cached clip worth recording again: a retryable word failure, an ONNX session error
+    """A cached clip worth recording again: a word failure that is not an empty transcript (see
+    entry_has_word_error), an ONNX session error
     that was not a ValueError (memory or runtime failures are usually transient), or an
     outcome the pipeline flagged as unexpected."""
     if entry_has_word_error(meta):
@@ -405,7 +414,7 @@ def build(half, name, flags, workers, retry_errors=False, subset=None, limit=Non
         _load_deepgram_key()  # fail fast here for the common case, before any worker starts
         if not os.getenv("DEEPGRAM_KEY"):
             raise SystemExit("DEEPGRAM_KEY is not set (environment or backend/.env)")
-        i = 0
+        i = called = called_and_failed = 0
         with closing(_record_all(todo, workers)) as entries:
             try:
                 for i, entry in enumerate(entries, 1):
@@ -413,14 +422,22 @@ def build(half, name, flags, workers, retry_errors=False, subset=None, limit=Non
                     statuses[outcome["status"]] += 1
                     if outcome["error_type"]:
                         error_types[outcome["error_type"]] += 1
-                    if entry_has_word_error(entry):
+                    word_error = entry_has_word_error(entry)
+                    if word_error:
                         word_errors.append(entry["utt_id"])
                     if entry_needs_retry(entry):
                         needs_retry.append(entry["utt_id"])
-                    if i == EARLY_ABORT_CLIPS and len(word_errors) == i:
-                        raise SystemExit(
-                            f"Deepgram failed for every one of the first {i} clips; check the key and balance"
-                        )
+                    # A one-word text is rejected before any model call, so only clips that did
+                    # call Deepgram say anything about it. Counting all clips would let those
+                    # rejections stop the abort from ever firing on a fresh build.
+                    if entry.get("word_calls"):
+                        called += 1
+                        called_and_failed += word_error
+                        if called == EARLY_ABORT_CLIPS and called_and_failed == called:
+                            raise SystemExit(
+                                f"Deepgram failed for every one of the first {called} clips that called it; "
+                                "check the key and balance"
+                            )
                     if i % 50 == 0 or i == len(todo):
                         print(f"  {i}/{len(todo)} recorded ({len(needs_retry)} need a retry)")
             except BrokenProcessPool as exc:

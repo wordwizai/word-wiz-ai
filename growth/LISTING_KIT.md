@@ -20,7 +20,7 @@ submit a number you haven't confirmed.
 | Audience | Parents and teachers of children ages 5–8 |
 | Pricing | Free. No ads, no subscription, no in-app purchases |
 | Platforms | Any modern web browser (desktop, tablet, Chromebook). No install |
-| Account required | **Unresolved: the code requires sign-in before practice. See `growth-agent/APPROVAL_QUEUE.md` AQ-003** |
+| Account required | Yes, a free account (Google or email) is needed to practice (confirmed by Bruce 2026-10-06) |
 | Founded | Built solo by a high school student |
 | Recognition | 2nd Place, Congressional App Challenge (CA-15) |
 
@@ -128,7 +128,7 @@ The app uses a speech recognition model that outputs phonemes rather than words,
 | Is there a free version? | The entire product is free. |
 | Do you collect data from children? | Audio is processed for pronunciation analysis. See https://wordwizai.com/privacy |
 | COPPA / student data privacy | Point to the privacy policy; be prepared for a privacy review |
-| Does it require an account? | **Unresolved: the code requires sign-in before practice. See `growth-agent/APPROVAL_QUEUE.md` AQ-003** |
+| Does it require an account? | Yes, a free account (Google or email). A no-account try-it mode is being built |
 | What grades? | Pre-K through 2nd (ages 5–8) |
 | Subjects | Reading, phonics, early literacy, speech |
 | Accessibility | Browser-based; keyboard navigable. No formal WCAG audit yet — say so |

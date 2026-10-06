@@ -16,7 +16,12 @@ import { companionMood, isPraise } from "./companionMood";
 // depends on reading an instruction. Every control is an icon whose look
 // changes with its state, and the speaker button says out loud what to do.
 interface PracticeStageProps extends PracticeStageState {
-  session: Session;
+  // Signed-in practice passes the session; the guest try-it page has none and
+  // passes title/subtitle/homeHref instead.
+  session?: Session;
+  title?: string;
+  subtitle?: string;
+  homeHref?: string;
   // Story and free practice: an arrow to the next sentence.
   next?: { visible: boolean; onNext: () => void };
   // Choice stories: two branches to pick from after reading.
@@ -29,6 +34,9 @@ interface PracticeStageProps extends PracticeStageState {
 
 const PracticeStage = ({
   session,
+  title,
+  subtitle,
+  homeHref = "/dashboard",
   wordArray,
   analysisData,
   feedback,
@@ -105,7 +113,7 @@ const PracticeStage = ({
           asChild
           className="justify-self-start rounded-xl text-muted-foreground hover:text-foreground"
         >
-          <Link to="/dashboard" aria-label="Home">
+          <Link to={homeHref} aria-label="Home">
             <House className="size-5" />
             <span className="hidden sm:inline">Home</span>
           </Link>
@@ -113,10 +121,11 @@ const PracticeStage = ({
 
         <div className="min-w-0 text-center">
           <h1 className="line-clamp-2 text-sm leading-snug font-semibold text-balance text-foreground sm:text-lg">
-            {session.activity.title}
+            {title ?? session?.activity.title}
           </h1>
           <p className="text-xs text-muted-foreground">
-            {activityTypeLabel(session.activity.activity_type)}
+            {subtitle ??
+              (session ? activityTypeLabel(session.activity.activity_type) : "")}
           </p>
         </div>
 

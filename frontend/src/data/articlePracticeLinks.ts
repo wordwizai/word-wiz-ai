@@ -77,12 +77,12 @@ const articlePracticeLinks: Record<string, string[]> = {
     "ue-vowel-team",
   ],
   "/guides/silent-e-words-practice-for-kids": [
+    "a-e-magic-e",
+    "i-e-magic-e",
+    "o-e-magic-e",
+    "u-e-magic-e",
     "at-family",
-    "ap-family",
-    "in-family",
     "it-family",
-    "ot-family",
-    "ub-family",
   ],
   "/guides/how-to-teach-phonics-at-home": [
     "at-family",

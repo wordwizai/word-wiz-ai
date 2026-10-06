@@ -2,9 +2,9 @@
 //
 // Each entry powers a page at /practice-words/[slug] built from real,
 // parent-facing teaching guidance plus an age-appropriate word list and
-// decodable sample sentences. Content is organized into five categories:
-// word families (rimes), digraphs, blends, vowel teams, and r-controlled
-// vowels. See frontend/src/components/PracticePageTemplate.tsx for how
+// decodable sample sentences. Content is organized into six categories:
+// word families (rimes), digraphs, blends, silent e (magic e), vowel teams,
+// and r-controlled vowels. See frontend/src/components/PracticePageTemplate.tsx for how
 // this data is rendered, and frontend/src/pages/PracticeWordsHub.tsx for
 // the category index page.
 
@@ -12,6 +12,7 @@ export type PatternCategory =
   | "word-family"
   | "digraph"
   | "blend"
+  | "silent-e"
   | "vowel-team"
   | "r-controlled";
 
@@ -41,6 +42,7 @@ export const categoryLabels: Record<PatternCategory, string> = {
   "word-family": "Word Families",
   digraph: "Digraphs",
   blend: "Consonant Blends",
+  "silent-e": "Silent E (Magic E)",
   "vowel-team": "Vowel Teams",
   "r-controlled": "R-Controlled Vowels",
 };
@@ -52,6 +54,8 @@ export const categoryDescriptions: Record<PatternCategory, string> = {
     "Digraphs are two letters that combine to make one brand-new sound, like the 'sh' in ship or the 'th' in thin. Neither letter keeps its usual sound, which is why digraphs need to be taught explicitly rather than sounded out letter by letter.",
   blend:
     "Consonant blends are two or three consonants that sit next to each other and keep their own individual sounds, said quickly together, like the 'bl' in black or the 'st' in stop. Unlike digraphs, each letter in a blend is still audible.",
+  "silent-e":
+    "Silent e, often called magic e, is an e at the end of a word that you don't hear but that changes the vowel before it from short to long, so 'cap' becomes 'cape' and 'kit' becomes 'kite.' It is usually taught right after short vowels and blends, and it unlocks hundreds of common words.",
   "vowel-team":
     "Vowel teams are two letters that work together to make one vowel sound, often a long vowel, like the 'ai' in rain or the 'oa' in boat. English has dozens of these teams, and many share the same sound, which is what makes them tricky.",
   "r-controlled":
@@ -2983,6 +2987,123 @@ export const phonicsPatterns: PhonicsPattern[] = [
     relatedSlugs: ["er-r-controlled", "ir-r-controlled", "ar-r-controlled"],
   },
   // ===END-BATCH-7===
+  // ===BATCH-8: SILENT E (MAGIC E)===
+  {
+    slug: "a-e-magic-e",
+    pattern: "a_e",
+    displayName: "A_E Magic E",
+    category: "silent-e",
+    gradeLevel: "Grade 1",
+    words: [
+      "cake", "make", "lake", "name", "game", "same", "gate", "late",
+      "cape", "tape", "made", "wave", "cave", "plate", "snake", "grape",
+      "skate", "shape", "flame", "brave",
+    ],
+    sampleSentences: [
+      "Jake made a cake for the game.",
+      "A snake slid past the gate.",
+      "Dave can skate fast on the lake.",
+      "Tape the cape on the crate.",
+      "It is late, so we must save the rest.",
+    ],
+    teachingNotes: [
+      "A_e is usually the first magic e pattern children learn, and for good reason. The long A sound is very different from the short A in 'cat,' so a child can hear the change clearly when 'cap' becomes 'cape' or 'mad' becomes 'made.' Start with pairs like those before handing over a list of a_e words on their own, since the contrast is the whole lesson.",
+      "Watch for the e being read out loud ('cak-ee') or the vowel staying short ('cak' for 'cake'). Both mean the child is reading left to right without looking ahead to the end of the word. A habit that helps is running a finger to the end of the word first, checking for an e, and only then going back to read it.",
+    ],
+    commonErrors: [
+      "Reading the final e out loud, so 'cake' becomes 'cak-ee'",
+      "Keeping the short A, so 'made' comes out as 'mad'",
+      "Mixing up a_e and ai, which make the same sound but are spelled differently",
+    ],
+    relatedSlugs: ["i-e-magic-e", "ai-vowel-team", "at-family"],
+  },
+  {
+    slug: "i-e-magic-e",
+    pattern: "i_e",
+    displayName: "I_E Magic E",
+    category: "silent-e",
+    gradeLevel: "Grade 1",
+    words: [
+      "bike", "like", "hike", "kite", "bite", "time", "dime", "line",
+      "nine", "pine", "ride", "side", "hide", "wide", "five", "dive",
+      "smile", "slide", "white", "prize",
+    ],
+    sampleSentences: [
+      "I like to hike up the hill.",
+      "Nine kites flap in the wind.",
+      "Five kids dive in at nine.",
+      "Hide the dime in the white box.",
+      "Smile and slide to the end.",
+    ],
+    teachingNotes: [
+      "I_e works exactly like a_e, so once your child can read 'cake,' show them that 'kit' becomes 'kite' and 'pin' becomes 'pine' in the same way. Long I is easy to hear because it says the letter's name, and many common i_e words ('like,' 'time,' 'five,' 'ride') show up in early books, so this pattern pays off quickly.",
+      "Children who have just learned i_e sometimes start giving every i a long sound, reading 'win' as 'wine.' That's actually a good sign, because it means they're applying the rule, but it's worth practicing short and long pairs side by side ('rid / ride,' 'bit / bite,' 'fin / fine') until they check for the e every time.",
+    ],
+    commonErrors: [
+      "Reading 'kite' as 'kit' because the e at the end gets skipped",
+      "Over-applying the rule so short words like 'win' turn into 'wine'",
+      "Pronouncing the e as an extra syllable",
+    ],
+    relatedSlugs: ["a-e-magic-e", "o-e-magic-e", "it-family", "ie-vowel-team"],
+  },
+  {
+    slug: "o-e-magic-e",
+    pattern: "o_e",
+    displayName: "O_E Magic E",
+    category: "silent-e",
+    gradeLevel: "Grade 1",
+    words: [
+      "home", "hope", "rope", "nose", "rose", "bone", "cone", "stone",
+      "phone", "hole", "pole", "mole", "joke", "poke", "woke", "note",
+      "vote", "rode", "globe", "stove",
+    ],
+    sampleSentences: [
+      "The dog hid a bone in a hole.",
+      "I hope the rope will not snap.",
+      "Rose woke up and rode home.",
+      "A mole dug by the stone.",
+      "Tom has a joke on a note.",
+    ],
+    teachingNotes: [
+      "Long O is one of the easier long vowels for children to say, so o_e words usually go smoothly once a_e and i_e are in place. Pairs like 'hop / hope,' 'not / note' and 'rob / robe' make the change easy to hear, and words like 'home,' 'nose' and 'bone' are ones kids already say every day.",
+      "The tricky part is that a few very common words look like o_e but don't follow it. 'Come,' 'some,' 'done,' 'gone' and 'love' are the usual ones. It's worth telling your child plainly that these are exceptions to learn by sight, so they don't decide the rule is broken when they meet one in a book.",
+    ],
+    commonErrors: [
+      "Reading 'hope' as 'hop' by keeping the short O",
+      "Applying the rule to exceptions, so 'come' is read to rhyme with 'home'",
+      "Confusing o_e with oa, which makes the same long O sound",
+    ],
+    relatedSlugs: ["i-e-magic-e", "u-e-magic-e", "oa-vowel-team", "ot-family"],
+  },
+  {
+    slug: "u-e-magic-e",
+    pattern: "u_e",
+    displayName: "U_E Magic E",
+    category: "silent-e",
+    gradeLevel: "Grade 1",
+    words: [
+      "cube", "tube", "cute", "mute", "huge", "mule", "rule", "tune",
+      "June", "dune", "rude", "flute", "prune", "use", "fuse",
+    ],
+    sampleSentences: [
+      "The cute mule ate a prune.",
+      "Put the cube in the tube.",
+      "A huge dune is in the sun.",
+      "We use a rule in this game.",
+      "It is rude to cut in line.",
+    ],
+    teachingNotes: [
+      "U_e is the one magic e pattern with two sounds, and it's worth saying so up front. In 'cute,' 'cube' and 'huge' it says /yoo/, like the letter's name. In 'rule,' 'flute' and 'June' it says /oo/. Both are correct, and which one a word uses mostly depends on the sound before it, so children usually pick it up by ear once they've read a few of each.",
+      "Because u_e words are less common than a_e or i_e words, it helps to save this pattern for last and keep sessions short. If your child reads 'cut' for 'cute,' go back to a pair like 'cub / cube' and let them hear how the e changes the word before moving on.",
+    ],
+    commonErrors: [
+      "Reading 'cute' as 'cut' because the e gets skipped",
+      "Using /oo/ in a word that needs /yoo/, so 'cute' sounds like 'coot'",
+      "Mixing up u_e with ue and ew, which make the same sounds",
+    ],
+    relatedSlugs: ["o-e-magic-e", "a-e-magic-e", "ue-vowel-team", "ub-family"],
+  },
+  // ===END-BATCH-8===
 ];
 
 export function getPatternBySlug(slug: string): PhonicsPattern | undefined {
@@ -2999,6 +3120,7 @@ export const patternCategories: PatternCategory[] = [
   "word-family",
   "digraph",
   "blend",
+  "silent-e",
   "vowel-team",
   "r-controlled",
 ];

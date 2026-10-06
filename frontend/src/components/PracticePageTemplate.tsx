@@ -14,7 +14,7 @@ import {
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import LandingPageFooter from "@/components/LandingPageFooter";
 import { DEFAULT_OG_IMAGE } from "@/components/SeoHead";
-import { trackSignupClick } from "@/utils/analytics";
+import { trackTryEvent } from "@/utils/analytics";
 import {
   categoryLabels,
   getPatternBySlug,
@@ -186,19 +186,19 @@ const PracticePageTemplate = ({ pattern }: { pattern: PhonicsPattern }) => {
                   Practice these words out loud
                 </h2>
                 <p className="text-muted-foreground mb-4 max-w-xl mx-auto">
-                  Word Wiz AI listens to your child read and shows exactly which
-                  sounds they missed — not just whether the word was right. Free,
-                  no ads.
+                  Have your child read these sentences to Word Wiz AI. It
+                  listens and shows exactly which sounds they missed, not just
+                  whether the word was right. Free, no sign-up needed to try.
                 </p>
                 <Button
                   asChild
                   size="lg"
                   onClick={() =>
-                    trackSignupClick("practice-words", "link", slug)
+                    trackTryEvent("try_link_click", slug, "practice-words")
                   }
                 >
-                  <Link to="/signup">
-                    Start practicing free
+                  <Link to={`/try/${slug}`}>
+                    Try these out loud
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>

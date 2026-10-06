@@ -35,6 +35,7 @@ from core.grapheme_to_phoneme import (  # noqa: E402
     grapheme_to_phoneme_detailed,
     oov_words,
     pronunciation_variants,
+    sentence_pronunciation_variants,
 )
 
 
@@ -366,6 +367,23 @@ class TestPronunciationVariants(unittest.TestCase):
                 self.assertEqual(pronunciation_variants("3", strict=strict), [])
                 self.assertEqual(pronunciation_variants("", strict=strict), [])
 
+    def test_digit_only_tokens_have_no_variants(self):
+        # eng_to_ipa marks an unknown word with "*" but returns a bare number
+        # unmarked, so numbers are rejected before the lookup.
+        from unittest import mock
+        import core.grapheme_to_phoneme as g2p_module
+
+        self.assertEqual(eng_to_ipa.ipa_list("2024")[0], ["2024"])
+        with mock.patch.object(g2p_module.G2p, "ipa_list", wraps=eng_to_ipa.ipa_list) as spy:
+            for strict in (False, True):
+                for token in ("3", "2024", "0"):
+                    with self.subTest(token=token, strict=strict):
+                        self.assertEqual(pronunciation_variants(token, strict=strict), [])
+            self.assertEqual(spy.call_count, 0)
+            got = sentence_pronunciation_variants(["i", "have", "3", "cats"], strict=False)
+        self.assertEqual(got["3"], [])
+        self.assertIn(["k", "æ", "t", "s"], got["cats"])
+
     def test_a_raising_eng_to_ipa_gives_no_variants(self):
         from unittest import mock
         import core.grapheme_to_phoneme as g2p_module
@@ -375,6 +393,28 @@ class TestPronunciationVariants(unittest.TestCase):
         clear_cache()
         with mock.patch.object(g2p_module, "tokenize_ipa", side_effect=RuntimeError("bad symbol")):
             self.assertEqual(pronunciation_variants("to", strict=True), [])
+
+    def test_a_failed_lookup_is_not_cached(self):
+        # A transient sqlite error must not be remembered as "no variants".
+        from unittest import mock
+        import core.grapheme_to_phoneme as g2p_module
+
+        for strict in (False, True):
+            with self.subTest(strict=strict):
+                clear_cache()
+                with mock.patch.object(g2p_module.G2p, "ipa_list", side_effect=RuntimeError("db locked")):
+                    self.assertEqual(pronunciation_variants("to", strict=strict), [])
+                    self.assertEqual(
+                        sentence_pronunciation_variants(["go", "to"], strict=strict),
+                        {"go": [], "to": []},
+                    )
+                self.assertIn(["t", "u"], pronunciation_variants("to", strict=strict))
+                self.assertIn(["t", "u"], sentence_pronunciation_variants(["go", "to"], strict=strict)["to"])
+
+        clear_cache()
+        with mock.patch.object(g2p_module, "tokenize_ipa", side_effect=RuntimeError("bad symbol")):
+            self.assertEqual(pronunciation_variants("to", strict=True), [])
+        self.assertIn(["t", "u"], pronunciation_variants("to", strict=True))
 
     def test_strict_none_reads_the_environment(self):
         from unittest import mock
@@ -389,6 +429,63 @@ class TestPronunciationVariants(unittest.TestCase):
         first[0].append("x")
         first.append(["y"])
         self.assertEqual(pronunciation_variants("to", strict=False), [["t", "u"], ["t", "ə"], ["t", "ɪ"]])
+
+        batch = sentence_pronunciation_variants(["to"], strict=False)
+        batch["to"][0].append("x")
+        self.assertEqual(sentence_pronunciation_variants(["to"], strict=False)["to"][0], ["t", "u"])
+
+
+class TestSentencePronunciationVariants(unittest.TestCase):
+    """One dictionary query per sentence, the same answers as word by word."""
+
+    SENTENCE = "the quick brown fox can read to wordwiz and the lazy dog"
+
+    def setUp(self):
+        clear_cache()
+
+    def tearDown(self):
+        clear_cache()
+
+    def test_batching_matches_per_word_lookups(self):
+        words = self.SENTENCE.split()
+        for strict in (False, True):
+            with self.subTest(strict=strict):
+                clear_cache()
+                batch = sentence_pronunciation_variants(words, strict=strict)
+                clear_cache()
+                per_word = {w: pronunciation_variants(w, strict=strict) for w in words}
+                self.assertEqual(batch, per_word)
+                self.assertEqual(batch["wordwiz"], [])
+                self.assertIn(["t", "u"], batch["to"])
+
+    def test_one_query_per_sentence_and_repeated_words_stay_cached(self):
+        from unittest import mock
+        import core.grapheme_to_phoneme as g2p_module
+
+        words = self.SENTENCE.split()
+        with mock.patch.object(g2p_module.G2p, "ipa_list", wraps=eng_to_ipa.ipa_list) as spy:
+            sentence_pronunciation_variants(words, strict=False)
+            self.assertEqual(spy.call_count, 1)
+            # "the" is asked for once even though the sentence has it twice.
+            self.assertEqual(spy.call_args.args[0].split().count("the"), 1)
+
+            sentence_pronunciation_variants(words, strict=False)
+            pronunciation_variants("dog", strict=False)
+            self.assertEqual(spy.call_count, 1)
+
+            sentence_pronunciation_variants(["the", "big", "dog"], strict=False)
+            self.assertEqual(spy.call_count, 2)
+            self.assertEqual(spy.call_args.args[0], "big")
+
+    def test_strict_and_legacy_are_cached_separately(self):
+        self.assertIn(["e", "ɪ"], sentence_pronunciation_variants(["a"], strict=False)["a"])
+        self.assertIn(["eɪ"], sentence_pronunciation_variants(["a"], strict=True)["a"])
+
+    def test_odd_tokens_never_raise(self):
+        got = sentence_pronunciation_variants(["", "--", "a b", "to"], strict=False)
+        self.assertEqual((got[""], got["--"], got["a b"]), ([], [], []))
+        self.assertIn(["t", "u"], got["to"])
+        self.assertEqual(sentence_pronunciation_variants([], strict=False), {})
 
 
 if __name__ == "__main__":

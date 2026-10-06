@@ -314,6 +314,26 @@ class TestClosestValidPronunciation(_ScoringEnv):
         self.assertEqual(r["expected_phonemes"], ['ð', 'i'])
         self.assertEqual(r["per"], 0.0)
 
+    def test_variants_are_looked_up_once_per_sentence(self):
+        from unittest import mock
+        import eng_to_ipa
+        import core.grapheme_to_phoneme as g2p_module
+
+        g2p_module.clear_cache()
+        self.addCleanup(g2p_module.clear_cache)
+        with mock.patch.object(g2p_module.G2p, "ipa_list", wraps=eng_to_ipa.ipa_list) as spy:
+            align_to_ground_truth(flatten(GT_LONG), GT_LONG, ['the', 'cat', 'sat', 'on', 'the', 'mat'])
+            self.assertEqual(spy.call_count, 1)
+            self.assertEqual(sorted(spy.call_args.args[0].split()), ['cat', 'mat', 'on', 'sat', 'the'])
+
+            align_to_ground_truth(flatten(GT_SHORT), GT_SHORT)
+            self.assertEqual(spy.call_count, 1)
+
+            os.environ[LEGACY_SCORING_FLAG] = "1"
+            g2p_module.clear_cache()
+            align_to_ground_truth(flatten(GT_SHORT), GT_SHORT)
+            self.assertEqual(spy.call_count, 1)
+
     def test_segmentation_still_uses_the_primary_phonemes(self):
         cases = [
             (['ð', 'i', 'k', 'æ', 't', 's', 'æ', 't'], GT_SHORT),

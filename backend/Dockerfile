@@ -40,6 +40,11 @@ ENV PYTHONUNBUFFERED=1
 # Copy project files (excluding large or sensitive files via .dockerignore)
 COPY . .
 
+# Index eng_to_ipa's CMU dictionary by word (core/cmu_index.py). Without it every
+# pronunciation lookup scans the whole 134k-row table. It only makes lookups
+# faster, so a failure prints a [WARN] line and the build carries on.
+RUN python -m core.cmu_index
+
 # Expose HTTPS port for direct WebSocket access
 EXPOSE 8443
 

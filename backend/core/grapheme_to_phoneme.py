@@ -40,6 +40,8 @@ import logging
 import os
 import re
 import string
+import threading
+from collections import OrderedDict, namedtuple
 from functools import lru_cache
 
 # idk why I needed to do this this is gonna be a very simple program
@@ -390,24 +392,125 @@ def oov_words(grapheme, strict: bool | None = None) -> list[str]:
     return [w.word for w in grapheme_to_phoneme(grapheme, strict=strict) if w.oov]
 
 
-@lru_cache(maxsize=_CACHE_SIZE)
-def _variants_cached(word: str, strict: bool) -> tuple:
-    try:
-        if not _HAS_ALNUM.search(word) or not _isin_cmu(word):
-            return ()
-        variants = []
-        for raw in G2p.ipa_list(word)[0]:
-            if "*" in raw:  # eng_to_ipa's out-of-vocabulary marker
+# ---------------------------------------------------------------------------
+# Pronunciation variants (word scoring v2)
+#
+# eng_to_ipa opens its sqlite database and scans the whole dictionary table on
+# every query (core/cmu_index.py adds an index at image build), so variants are
+# fetched for a whole sentence in ONE query and cached per word.  Only
+# successful lookups are cached: a transient sqlite error must not be
+# remembered as "this word has no variants".
+# ---------------------------------------------------------------------------
+
+#: A token with no letter at all (a number such as "3", or punctuation).
+#: eng_to_ipa marks an unknown word with "*", but hands a bare number back
+#: unmarked, so these are rejected before the lookup.
+_HAS_LETTER = re.compile(r"[^\W\d_]", re.UNICODE)
+
+_variant_cache: "OrderedDict[tuple[str, bool], tuple]" = OrderedDict()
+_variant_cache_lock = threading.Lock()
+_variant_stats = {"hits": 0, "misses": 0}
+
+VariantCacheInfo = namedtuple("VariantCacheInfo", "hits misses maxsize currsize")
+
+
+def _parse_variants(raws, strict: bool) -> tuple:
+    """eng_to_ipa's transcriptions of one word -> unique phoneme tuples."""
+    variants = []
+    for raw in raws:
+        if "*" in raw:  # eng_to_ipa's out-of-vocabulary marker
+            continue
+        if strict:
+            phonemes = tuple(tokenize_ipa(_strict_clean(raw)))
+        else:
+            phonemes = tuple(_legacy_clean(raw))
+        if phonemes and phonemes not in variants:
+            variants.append(phonemes)
+    return tuple(variants)
+
+
+def _lookup_variants(words: list[str], strict: bool) -> dict[str, tuple]:
+    """
+    Variants for each distinct word, with at most one dictionary query.
+
+    Raises when that query fails, so nothing is cached for the words it was
+    for.  A word whose transcription cannot be tokenized gets ``()`` for this
+    call only.
+    """
+    found: dict[str, tuple] = {}
+    missing: list[str] = []
+    with _variant_cache_lock:
+        for word in words:
+            if word in found or word in missing:
                 continue
-            if strict:
-                phonemes = tuple(tokenize_ipa(_strict_clean(raw)))
+            if not _HAS_LETTER.search(word) or any(ch.isspace() for ch in word):
+                found[word] = ()
+                continue
+            key = (word, strict)
+            if key in _variant_cache:
+                _variant_cache.move_to_end(key)
+                _variant_stats["hits"] += 1
+                found[word] = _variant_cache[key]
             else:
-                phonemes = tuple(_legacy_clean(raw))
-            if phonemes and phonemes not in variants:
-                variants.append(phonemes)
-        return tuple(variants)
-    except Exception:  # never fail the request over an optional lookup
-        return ()
+                missing.append(word)
+
+    if not missing:
+        return found
+
+    per_word = G2p.ipa_list(" ".join(missing))
+    if len(per_word) != len(missing):  # pragma: no cover - defensive
+        raise ValueError(
+            f"eng_to_ipa returned {len(per_word)} entries for {len(missing)} words"
+        )
+
+    parsed: dict[str, tuple] = {}
+    for word, raws in zip(missing, per_word):
+        try:
+            parsed[word] = _parse_variants(raws, strict)
+        except Exception:  # never fail the request over an optional lookup
+            found[word] = ()
+
+    with _variant_cache_lock:
+        _variant_stats["misses"] += len(missing)
+        for word, variants in parsed.items():
+            _variant_cache[(word, strict)] = variants
+            _variant_cache.move_to_end((word, strict))
+        while len(_variant_cache) > _CACHE_SIZE:
+            _variant_cache.popitem(last=False)
+
+    found.update(parsed)
+    return found
+
+
+def sentence_pronunciation_variants(
+    words, strict: bool | None = None,
+) -> dict[str, list[list[str]]]:
+    """:func:`pronunciation_variants` for every word of a sentence at once.
+
+    Words not cached yet are looked up in ONE dictionary query, and repeated
+    words are asked for once.  Returns ``{word: variants}`` with a key for
+    every word given.  Never raises.  If the lookup fails, those words get
+    ``[]`` and nothing is cached, so the next call tries again.
+
+    Args:
+        words: already-cleaned words, e.g. the words of the ground truth.
+        strict: override ``WWAI_G2P_STRICT``.  ``None`` (default) reads the
+            environment variable, like :func:`grapheme_to_phoneme`.
+    """
+    if strict is None:
+        strict = _strict_enabled()
+    words = [str(w or "") for w in (words or [])]
+    try:
+        found = _lookup_variants(words, bool(strict))
+    except Exception as exc:  # never fail the request over an optional lookup
+        logger.warning(
+            "pronunciation variant lookup failed for %d word(s) (%s: %s); "
+            "scoring against the primary pronunciation only",
+            len(words), type(exc).__name__, exc,
+        )
+        found = {}
+    # Fresh mutable copies every call -- callers must never see cached state.
+    return {w: [list(v) for v in found.get(w, ())] for w in words}
 
 
 def pronunciation_variants(word: str, strict: bool | None = None) -> list[list[str]]:
@@ -419,17 +522,17 @@ def pronunciation_variants(word: str, strict: bool | None = None) -> list[list[s
     tokenizes the word in the same mode, so the primary pronunciation is always
     one of them.  Order follows ``eng_to_ipa`` and duplicates are dropped.
 
-    Returns ``[]`` for out-of-vocabulary words and never raises.
+    Returns ``[]`` for out-of-vocabulary words and numbers, and never raises.
+    For a whole sentence, :func:`sentence_pronunciation_variants` makes one
+    dictionary query instead of one per word.
 
     Args:
         word: one word, already cleaned the way the sentence is before G2P.
         strict: override ``WWAI_G2P_STRICT``.  ``None`` (default) reads the
             environment variable, like :func:`grapheme_to_phoneme`.
     """
-    if strict is None:
-        strict = _strict_enabled()
-    # Fresh mutable copies every call -- callers must never see cached state.
-    return [list(v) for v in _variants_cached(str(word or ""), bool(strict))]
+    word = str(word or "")
+    return sentence_pronunciation_variants([word], strict=strict)[word]
 
 
 def clear_cache() -> None:
@@ -437,16 +540,22 @@ def clear_cache() -> None:
     _convert_cached.cache_clear()
     _convert_raw.cache_clear()
     _isin_cmu.cache_clear()
-    _variants_cached.cache_clear()
+    with _variant_cache_lock:
+        _variant_cache.clear()
+        _variant_stats.update(hits=0, misses=0)
 
 
 def cache_info() -> dict:
     """Memoisation statistics, for diagnostics."""
+    with _variant_cache_lock:
+        variants = VariantCacheInfo(
+            _variant_stats["hits"], _variant_stats["misses"], _CACHE_SIZE, len(_variant_cache),
+        )
     return {
         "sentences": _convert_cached.cache_info(),
         "words": _convert_raw.cache_info(),
         "cmudict_lookups": _isin_cmu.cache_info(),
-        "variants": _variants_cached.cache_info(),
+        "variants": variants,
         "ipa_tokenizer": "phoneme_inventory.tokenize_ipa"
         if _HAVE_IPA_TOKENIZER
         else "list() fallback",

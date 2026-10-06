@@ -444,16 +444,20 @@ def is_legacy_word_scoring() -> bool:
     return os.environ.get(LEGACY_WORD_SCORING_FLAG, "").strip().lower() in _TRUTHY
 
 
-def _pronunciation_candidates(gt_word: str, gt_phonemes: list[str]) -> list[list[str]]:
+def _sentence_variants(gt_words: list[str]) -> dict[str, list[list[str]]]:
+    """Every CMUdict pronunciation of each word, fetched in one lookup per sentence."""
+    try:
+        from .grapheme_to_phoneme import sentence_pronunciation_variants
+        return sentence_pronunciation_variants(gt_words)
+    except Exception:  # no variants is always a safe answer
+        return {}
+
+
+def _pronunciation_candidates(gt_phonemes: list[str], variants) -> list[list[str]]:
     """The primary G2P phonemes first, then every other CMUdict pronunciation."""
     candidates = [list(gt_phonemes)]
-    try:
-        from .grapheme_to_phoneme import pronunciation_variants
-        variants = pronunciation_variants(gt_word)
-    except Exception:  # no variants is always a safe answer
-        variants = []
-    for variant in variants:
-        if variant not in candidates:
+    for variant in variants or ():
+        if list(variant) not in candidates:
             candidates.append(list(variant))
     return candidates
 
@@ -504,13 +508,14 @@ def _counted_ops(
 
 
 def _score_word(
-    gt_word: str, gt_phonemes: list[str], segment: list[str], legacy: bool,
-    forgive_edges: bool = True,
+    gt_phonemes: list[str], segment: list[str], legacy: bool,
+    variants=(), forgive_edges: bool = True,
 ):
     """
     Return ``(expected, missed, added, substituted)`` for one non-empty segment.
 
-    v2: every candidate pronunciation is aligned with the segment, at most one
+    v2: the primary phonemes and every pronunciation in ``variants`` are
+    candidates. Each candidate is aligned with the segment, at most one
     edge insertion per side is set aside (none when ``forgive_edges`` is
     False), and the candidate with the fewest counted errors wins (the earliest
     on a tie, so the primary wins ties). The error lists come from the
@@ -520,7 +525,7 @@ def _score_word(
         return (list(gt_phonemes),) + _phoneme_errors(gt_phonemes, segment)
 
     best = None
-    for candidate in _pronunciation_candidates(gt_word, gt_phonemes):
+    for candidate in _pronunciation_candidates(gt_phonemes, variants):
         errors, ops, _edges = _counted_ops(candidate, segment, forgive_edges)
         if best is None or errors < best[0]:
             best = (errors, candidate, ops)
@@ -622,6 +627,8 @@ def align_to_ground_truth(
 
     skip_hints, pred_labels, insertions = derive_asr_hints(gt_words, asr_words)
     segments = segment_phonemes_by_ground_truth(flat_phonemes, gtp, skip_hints)
+    # One dictionary lookup for the whole sentence, before the scoring loop.
+    variants = {} if legacy_scoring else _sentence_variants(gt_words)
 
     results: list[dict] = []
     for idx, (gt_word, gt_phs) in enumerate(gtp):
@@ -646,7 +653,8 @@ def align_to_ground_truth(
             and _normalize_word(pred_labels[idx]) != _normalize_word(gt_word)
         )
         expected, missed, added, substituted = _score_word(
-            gt_word, gt_phs, segment, legacy_scoring,
+            gt_phs, segment, legacy_scoring,
+            variants=variants.get(gt_word, ()),
             forgive_edges=not asr_heard_other_word,
         )
         total_errors = len(missed) + len(added) + len(substituted)

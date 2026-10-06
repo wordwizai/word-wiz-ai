@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getPhonemesPerMistakeType } from "@/api";
 import { Skeleton } from "./ui/skeleton";
+import { phonemeLabel } from "@/lib/phonemeLabels";
 
 type ErrorType = "substitution" | "insertion" | "deletion";
 
@@ -73,11 +74,10 @@ const SoundErrorsCard = ({ errorType }: { errorType: ErrorType }) => {
             {rows.map((row) => (
               <li
                 key={row.phoneme}
-                className="grid grid-cols-[3.25rem_1fr_2rem] items-center gap-3"
+                className="grid grid-cols-[6.5rem_1fr_2rem] items-center gap-3"
               >
-                <span className="font-ipa text-lg leading-none text-foreground">
-                  /{row.phoneme}/
-                </span>
+                <PhonemeName ipa={row.phoneme} />
+
                 <span
                   className="h-2 rounded-full bg-primary"
                   style={{ width: `${Math.max(6, (row.count / max) * 100)}%` }}
@@ -92,6 +92,26 @@ const SoundErrorsCard = ({ errorType }: { errorType: ErrorType }) => {
         )}
       </div>
     </div>
+  );
+};
+
+// Parents don't read IPA, so lead with the letters and a word that has the
+// sound; keep the symbol small for teachers.
+const PhonemeName = ({ ipa }: { ipa: string }) => {
+  const label = phonemeLabel(ipa);
+  if (!label) {
+    return (
+      <span className="font-ipa text-lg leading-none text-foreground">/{ipa}/</span>
+    );
+  }
+  return (
+    <span className="leading-tight">
+      <span className="block text-base font-medium text-foreground">
+        {label.letters}{" "}
+        <span className="font-ipa text-xs font-normal text-muted-foreground">/{ipa}/</span>
+      </span>
+      <span className="block text-xs text-muted-foreground">as in "{label.example}"</span>
+    </span>
   );
 };
 

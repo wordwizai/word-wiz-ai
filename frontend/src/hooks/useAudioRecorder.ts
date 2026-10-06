@@ -123,6 +123,12 @@ export function useAudioRecorder(onFinish: (audioFile: File) => void) {
     }
 
     const audioContext = new AudioContext();
+    // Created after an await, so some browsers (Safari especially) start it
+    // suspended; a suspended context delivers no samples and the recording
+    // comes out empty.
+    if (audioContext.state === "suspended") {
+      await audioContext.resume().catch(() => {});
+    }
     const source = audioContext.createMediaStreamSource(stream);
 
     const bufferSize = 4096;

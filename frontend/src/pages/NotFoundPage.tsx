@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { AuthContext } from "@/contexts/AuthContext";
-import { wordWizIcon } from "@/assets";
+import Mascot from "@/components/mascot/Mascot";
 
 // Every unknown URL lands here: typos, old bookmarks, renamed pages. It used
 // to say the site was "under construction", which read as if the whole app
@@ -18,7 +18,7 @@ const NotFoundPage = () => {
         <meta name="robots" content="noindex" />
       </Helmet>
       <div className="max-w-md space-y-5 text-center">
-        <img src={wordWizIcon} alt="" className="mx-auto size-16" />
+        <Mascot mood="idle" className="mx-auto size-16" />
         <h1 className="text-3xl font-bold text-foreground">
           We can't find that page
         </h1>

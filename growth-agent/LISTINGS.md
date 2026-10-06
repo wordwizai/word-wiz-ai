@@ -28,6 +28,23 @@ account or his name in a new way), `submitted`, `live`, `rejected`,
 | queued | Undivided ("Reading Curricula, Tech, Apps, and More!") | email support@undivided.io | contactwordwizai@gmail.com | AQ-028 |
 | queued | Worcester Education Collaborative ("Raising Readers Together") | email worcesteredcollab@gmail.com | contactwordwizai@gmail.com | AQ-029 |
 | queued | Contra Costa County Library ("Resources for New and Struggling Readers") | library form (reCAPTCHA) | contactwordwizai@gmail.com | AQ-030, Bruce submits |
+| queued | EdSurge Voices (essay pitch) | email voices@edsurge.com | contactwordwizai@gmail.com | AQ-034, Bruce rewrites and sends |
+| queued | AASL Best Digital Tools | vendor Google Form | contactwordwizai@gmail.com | AQ-035, after AQ-036 |
+| queued | Project READ Redwood City, Kathleen Endaya | email kendaya@redwoodcity.org | contactwordwizai@gmail.com | AQ-037 |
+| queued | NorCal IDA (links page) | email admin.ncal@dyslexiaida.org | contactwordwizai@gmail.com | AQ-038 |
+| queued | Oakland Literacy Coalition / Oakland Reads | email team@oaklandliteracycoalition.org | contactwordwizai@gmail.com | AQ-039, a week after AQ-025 |
+| queued | The Oakland REACH | email info@oaklandreach.org | contactwordwizai@gmail.com | AQ-040, after AQ-036 |
+| queued | Larry Ferlazzo (pronunciation feedback list) | email MrFerlazzo@aol.com | contactwordwizai@gmail.com | AQ-041 |
+| queued | Eric Curts, Control Alt Achieve | email ericcurts@gmail.com | contactwordwizai@gmail.com | AQ-042 |
+| queued | Tony Vincent, Learning in Hand | contact form, no CAPTCHA | contactwordwizai@gmail.com | AQ-043 |
+| queued | Homeschool Together Podcast | email homeschooltogetherpodcast@gmail.com | contactwordwizai@gmail.com | AQ-044 |
+| queued | My EdTech Life podcast | contact form | contactwordwizai@gmail.com | AQ-045, Bruce submits |
+| queued | AI for Kids podcast, Amber Ivey | email contact@aidigitales.com | contactwordwizai@gmail.com | AQ-046 |
+| queued | Well-Trained Mind forums, PreK and K | forum post (Bruce) | contactwordwizai@gmail.com | AQ-047 |
+| queued | r/kindergarten, r/edtech, r/Parenting, r/teachingresources or r/ElementaryTeachers | Reddit posts (Bruce) | contactwordwizai@gmail.com | AQ-048 to AQ-051 |
+| queued | Niagara University Online Teacher's Studio | suggestion form | contactwordwizai@gmail.com | AQ-052 |
+| queued | Clark County Public Library (Ohio) youth guide | email ce@ccplohio.org | contactwordwizai@gmail.com | AQ-053 |
+| queued | Alberta Teachers' Association Library | email library@ata.ab.ca | contactwordwizai@gmail.com | AQ-054 |
 
 Follow-up rule: one polite follow-up at most, 10+ days after the first message, only with Bruce's approval.
 
@@ -79,6 +96,17 @@ Ranked by expected real users for a K-2 reading tool.
 | A Teachable Teacher, "5 Shockingly Free Phonics Websites" | ateachableteacher@gmail.com | Good fit, but last updated 2020 and the site looks abandoned (newest post 2021) |
 | New Literacies (Mike Overell), "The Best Reading Apps for Kids" | none (X / LinkedIn / Substack only) | No clean route. Author works at ClassDojo |
 | Reading Rockets literacy apps; IDA branch pages (KS-MO, PA, Austin, NorCal) | unknown | Returned 403 to our fetcher. Worth a manual look, especially NorCal IDA (Bay Area) |
+| Raising A Reader (Milpitas) | hello@raisingareader.org | No digital tools list; screen-light book-sharing model with its own app. Low odds, not drafted |
+| Reading Partners SF Bay Area | national contact form (invisible reCAPTCHA) | Shares only its own resources; no regional suggestion route. Not drafted |
+| SFPL FOG Readers | bridgeevent@sfpl.org (weak route) | Tutoring must stick to their curriculum; home-practice mention only |
+| Sacramento County READS (SCOE) | sacramentocountyreads@scoe.net | Lists only large established resources. Fit 2 |
+| Educators Technology (Med Kharbach) | info@educatorstechnology.com | Reviews K-2 tools, but the contact page doesn't invite tool tips; template-style reviews. Fit 3 |
+| Homeschooling Down South podcast | hello@homeschoolingdownsouth.com | Regional (US South) show with published guest criteria. Fit 3 |
+| Innovation World Young Collaborators podcast | guest form (reCAPTCHA, phone, guardian if under 18) | Student-founder slot; audience is young innovators, not parents. Fit 3 |
+| Relay GSE Library AI tools guide; University of Cincinnati CECH AI guide | library@relay.edu; foranmkn@ucmail.uc.edu | Problem-report inbox only / content from 2024 |
+| Rowan University LRC-South ELA page | LRC_south@rowan.edu | Focus on students with disabilities; careful framing needed |
+| Algona Public Library (Iowa) | kwind@algonalibrary.org (spelling unconfirmed) | Small reach |
+| Homeschool Together's Secular Resource Database | unknown | Found via podcast research; submission route not checked |
 
 ## Excluded (don't revisit unless the terms change)
 
@@ -104,6 +132,13 @@ Ranked by expected real users for a K-2 reading tool.
 | Dyslexia On Demand | Orton-Gillingham therapy business; page argues for professional programs over tools |
 | Teachers Pay Teachers, Tes, Share My Lesson, Teach Simple | Sellers must be 18+ (TpT ToS 12/08/2025, Tes author code, SML ToS). TpT also charges a $29 seller fee even for free-only stores. Checked 2026-10-06 |
 | Teachers Notebook | Gone (domain now shows an OverDrive page) |
+| Free Technology for Teachers / Practical Ed Tech | Richard Byrne left edtech (Dec 2024); domains now redirect to a vendor or unrelated sites |
+| Cool Cat Teacher / 10 Minute Teacher, Class Tech Tips / Easy EdTech | Sell sponsored placements and sponsored episodes |
+| Ditch That Textbook, Shake Up Learning | No unsolicited product pitches / sponsorship form only |
+| Decoding Dyslexia CA | Lists organizations only, no apps |
+| DC Urban Moms and Dads, A to Z Teacher Stuff, Teachers.Net | Forum rules ban promoting your own product |
+| Berkeley Parents Network | Business posts are paid subscriptions only |
+| 10 Minute Teacher guest slot | "If you're a business, don't ask to be a guest, you'd be better as an advertiser" |
 
 ## Listing copy (checked against the code on 2026-10-05)
 

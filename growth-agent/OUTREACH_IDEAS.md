@@ -35,3 +35,23 @@ Sources checked for this list: https://www.edsurge.com/submission-guidelines,
 https://kevinmullin.house.gov/2025/08/22/2025-congressional-app-challenge-last-seasons-winners,
 https://freetech4teach.teachermade.com/?p=13900,
 https://patch.com/california/sancarlos/serra-high-student-invents-iphone-app.
+
+## Where each yes ended up (session 3, later)
+
+| # | Idea | Result |
+|---|---|---|
+| 4 | EdSurge Voices | AQ-034. EdSurge requires human-written essays and AI-help disclosure, so the item is a pitch to rewrite plus an outline and fact sheet |
+| 7 | Free Technology for Teachers | Dead (Richard Byrne left edtech; the domain is now a vendor's). Replaced by Larry Ferlazzo (AQ-041), Eric Curts (AQ-042), Tony Vincent (AQ-043) |
+| 10 | Raising A Reader | Researched, not drafted. No digital tools list, screen-light model, own app |
+| 11 | Reading Partners Bay Area | Researched, not drafted. Only shares its own resources. Bay Area alternatives queued instead: Project READ Redwood City (AQ-037), Oakland Literacy Coalition (AQ-039), Oakland REACH (AQ-040) |
+| 12 | NorCal IDA | AQ-038 (its links page already lists an AI reading tool) |
+| 14 | Well-Trained Mind | AQ-047 (one-time invitation post; confirm the rule wording first) |
+| 15 | More Reddit | AQ-048 r/kindergarten, AQ-049 r/edtech, AQ-050 r/Parenting, AQ-051 teacher subs (rules unreadable from the cloud) |
+| 16 | Teachers Pay Teachers printable | TpT is out (sellers must be 18+, $29 seller fee). The printable was made anyway and lives on the site: `/printables/magic-e-sentences.pdf`, linked from the silent-e guide (f51d6ad) |
+| 18 | AASL Best Digital Tools | AQ-035 (all 19 fields answered; submit after AQ-036) |
+| 19 | Podcasts | AQ-044 Homeschool Together, AQ-045 My EdTech Life, AQ-046 AI for Kids |
+| 20 | Cool Cat Teacher, Class Tech Tips | Both sell sponsored placements, so excluded |
+
+Found along the way: **AQ-036**, recordings go to Deepgram without its
+training opt-out flag, and the privacy page doesn't mention AI or deletion.
+Also library guides AQ-052 to AQ-054.

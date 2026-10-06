@@ -35,10 +35,9 @@ const PracticeCompanion = ({
     <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-card shadow-xs">
       <Mascot mood={mood} onCelebrateEnd={onCelebrateEnd} className="size-9" />
     </span>
-    {/* No exit animation: AnimatePresence's exit got stuck after a hidden
-        (quiet) feedback was cleared and then held back every later one.
-        Old feedback only leaves while it's already invisible or when the
-        sentence changes, so a fade-out isn't missed. */}
+    {/* No exit animation. Old feedback only leaves while it's already
+        invisible (after the child stops reading) or when the sentence
+        changes, so a fade-out would never be seen. */}
     {feedback && (
       <motion.div
         key={feedback}

@@ -264,7 +264,8 @@ credential store).
 
 Everything from AQ-013 on is timed for **after the try page is live**
 (backend deployed, then dev merged to main), because "try it without an
-account" is the hook. Use **contactwordwizai@gmail.com** for every reply
+account" is the hook. **It is live as of 2026-10-06** (checked in session 3:
+/try and /try/at-family render the try page), so all of them can go now. Use **contactwordwizai@gmail.com** for every reply
 address. The Gmail account connected to Claude is your personal one, so for
 the emails either send them from contactwordwizai@gmail.com yourself or
 connect that account and I'll send them. Approve any subset; each item
@@ -398,6 +399,8 @@ Send after: the try page is live. From contactwordwizai@gmail.com.
 
 > **Outcome (2026-10-06):** Agent submits the contact form once the try page is live.
 
+> **Session 3 (2026-10-06):** The try page is live (rendered /try and /try/at-family in a browser). The form turned out to have a CAPTCHA (Ninja Forms with reCAPTCHA/hCaptcha/Turnstile scripts), which I won't try to get past, so this one is yours to paste and submit. The copy below is final. Reply address contactwordwizai@gmail.com.
+
 Send after: the try page is live. Reply address contactwordwizai@gmail.com.
 
 > Dear Christina,
@@ -425,6 +428,8 @@ Send after: the try page is live. Reply address contactwordwizai@gmail.com.
 ## AQ-019 | Contact form | TeachersFirst (https://www.teachersfirst.org/contact.cfm) | Nonprofit, ad-free, 16,000+ educator-reviewed resources with weekly updates. A listing reaches K-2 teachers directly | Low | Status: APPROVED
 
 > **Outcome (2026-10-06):** Agent submits the contact form once the try page is live.
+
+> **Session 3 (2026-10-06):** The try page is live. The form has a reCAPTCHA checkbox, so it's yours to paste and submit (name, email contactwordwizai@gmail.com, subject, message). The copy below is final.
 
 Send after: the try page is live. Reply address contactwordwizai@gmail.com.
 
@@ -474,6 +479,510 @@ Send after: the try page is live. From contactwordwizai@gmail.com.
 
 ---
 
+## Wave 2 outreach (session 3, 2026-10-06)
+
+Ten more, from three research passes (listicle authors, teacher and homeschool
+resource lists, dyslexia and literacy sites). Every contact route was checked
+on the live site on 2026-10-06, and every note is built from what's actually
+on that page. All link to wordwizai.com/try and use contactwordwizai@gmail.com.
+Ranked roughly by expected reach. Send any subset; each stands alone.
+
+What each one needs from you once approved:
+
+| ID | Who | How it goes out |
+|---|---|---|
+| AQ-021 | Proud to be Primary | You email it |
+| AQ-022 | Simply Kinder | You email it |
+| AQ-023 | Differentiated Teaching | I can submit (no CAPTCHA) |
+| AQ-024 | Learning at the Primary Pond | You email it |
+| AQ-025 | Let's Read San Mateo County | I can submit (no CAPTCHA), or you email it |
+| AQ-026 | Frontier Charter School | You email it |
+| AQ-027 | Wisconsin Dyslexia Roadmap | You email it |
+| AQ-028 | Undivided | You email it |
+| AQ-029 | Worcester Education Collaborative | You email it |
+| AQ-030 | Contra Costa County Library | You submit (reCAPTCHA) |
+
+---
+
+## AQ-021 | Email | Proud to be Primary, Elyse Rycroft (proudtobeprimary@gmail.com) | "Online Reading for Kids: Best Programs and Apps" is a K-3 list of about 39 tools, modified 2026-09-08 per its page metadata, written by a Vancouver primary teacher. It already lists free web programs (Reading Bear, Progressive Phonics), and nothing on it listens to a child read | Low. Her post has affiliate links, so a free tool earns her nothing. Expect a no-reply | Status: PENDING
+
+Verified 2026-10-06: the address is the "Email Me" link on https://proudtobeprimary.com/contact/ and on the article. The site's contact form uses invisible reCAPTCHA, so email is the cleaner route.
+Page: https://proudtobeprimary.com/online-reading-for-kids/
+
+Send from contactwordwizai@gmail.com.
+
+**Subject:** A free phonics tool for your online reading list
+
+> Dear Elyse,
+>
+> I came across your list of online reading programs and apps and wanted to
+> suggest one for the "Online Phonics Programs and Apps" section. I built Word
+> Wiz AI, a free reading tutor where a child reads a sentence out loud and it
+> shows which sounds were off (like "ship" read as "sip"), then writes the next
+> sentence around those sounds.
+>
+> Although your list already has a lot of great phonics practice, I didn't see
+> one that listens to the child read, which is the part I focused on. It runs
+> in a browser with no ads, and kids can try three sentences without an
+> account at wordwizai.com/try. It works best with a decent microphone.
+>
+> I'm a high school student and built it on my own, so I'd really appreciate
+> any feedback, even if it doesn't end up on the list.
+>
+> Best,
+> Bruce Peters
+
+---
+
+## AQ-022 | Email | Simply Kinder (hello@SimplyKinder.com) | "The Best Free Kindergarten Apps For Reading" is a free-only list built from questions in the Simply Kinder Teacher Facebook Group, and it says "if you come across an app that you love for your classroom, please share it." Ranked #1 in our research search for "best reading apps for kindergarten teacher blog free" | Low. The post was last modified in 2022, so it may not be actively updated | Status: PENDING
+
+Verified 2026-10-06: hello@SimplyKinder.com is the general address on https://www.simplykinder.com/contact/. Jennifer@ on the same page is for brand partnerships, so don't use it.
+Page: https://www.simplykinder.com/kindergarten-apps-for-reading/
+
+Send from contactwordwizai@gmail.com.
+
+**Subject:** An app to share for your kindergarten reading apps list
+
+> Dear Simply Kinder team,
+>
+> Your post on free kindergarten apps for reading says you're adding apps as
+> you see them, so I wanted to share one. I built Word Wiz AI, a free reading
+> tutor where a child reads a sentence out loud and it shows which sounds they
+> missed, then gives them a new sentence built around those sounds.
+>
+> Since the post reminds teachers to read the privacy policy before
+> downloading anything, I'll mention that part up front. Kids can try three
+> sentences at wordwizai.com/try without an account, and recordings from that
+> page aren't saved. Regular practice needs a free account, and the policy is
+> at wordwizai.com/privacy.
+>
+> It's free with no ads and runs in a browser, so there's nothing to download
+> (it works best with a decent mic). I'm a high school student and built it on
+> my own, so feedback from kindergarten teachers would honestly help a lot.
+>
+> Best,
+> Bruce Peters
+
+---
+
+## AQ-023 | Contact form | Differentiated Teaching, Rebecca Davies (https://www.differentiatedteaching.com/contact-rebecca/) | Former teacher and instructional coach, now homeschooling. Her "20 Best Free Reading Websites for Kids" (updated May 2, 2026) ends with "if you know any other great resources, send them my way!!" and is all books and read-alouds, nothing that listens to a child read. Her "Best Free Reading Intervention Programs" (updated June 3, 2026) is free-only and lists Lalilo for K-2. Readers are teachers and homeschool parents. All three research passes found her | Low. She leans on "research-based", so the note says plainly Word Wiz hasn't been studied | Status: PENDING
+
+Verified 2026-10-06: the form has Name, Email, Role, Message Topic and Message, with no CAPTCHA. Use Role "Other", Topic "I have a product or blog post request.", Email contactwordwizai@gmail.com. Once approved I can submit it from any session.
+Pages: https://www.differentiatedteaching.com/free-reading-websites-for-kids/ and https://www.differentiatedteaching.com/10-websites-for-reading-intervention/
+
+> Dear Rebecca,
+>
+> Your post on the 20 best free reading websites for kids says to send more
+> resources your way, so I wanted to share one I built. Word Wiz AI is a free
+> reading tutor where a child reads a sentence out loud and it shows which
+> sounds inside each word were off (like "cake" read as "cack"), then writes
+> the next sentence around those sounds.
+>
+> Although most of the list is books and read-alouds, I didn't see anything
+> that listens to the child read and gives feedback, which is the part Word
+> Wiz does. It might also fit next to Lalilo on your free intervention list
+> for the K-2 kids. To be upfront, it hasn't been formally studied. It's free
+> with no ads, and kids can try three sentences without an account at
+> wordwizai.com/try.
+>
+> I'm a high school student and built it on my own, so I'd really appreciate
+> your take on it as a former teacher, even if it doesn't make either list.
+>
+> Best,
+> Bruce Peters
+
+---
+
+## AQ-024 | Email | Learning at the Primary Pond, Alison (alison@learningattheprimarypond.com) | A literacy specialist with a large K-2 teacher audience. "Free Websites for Teachers (K-2)" ranked #1 in our research search for "free reading websites for kids teacher list K-2" and lists Epic, Starfall, ReadWorks and Storyline Online | Low. The post is from Feb 14, 2021 and covers teacher tools in general, so it may not be updated | Status: PENDING
+
+Verified 2026-10-06: the address is a mailto link on the article. She sells courses and memberships; I saw no paid placements on this post.
+Page: https://learningattheprimarypond.com/blog/free-websites-for-teachers-k-2/
+
+Send from contactwordwizai@gmail.com.
+
+**Subject:** A free K-2 reading site for your teacher list
+
+> Dear Alison,
+>
+> I came across your post on free websites for K-2 teachers and wanted to
+> suggest one for the reading side of it. I built Word Wiz AI, a free reading
+> tutor where a student reads a sentence out loud and it shows which sounds
+> were off (like "ship" read as "sip"), then writes the next sentence around
+> those sounds.
+>
+> Your post starts with how little time teachers have to check out new sites,
+> so the quickest way to see it is wordwizai.com/try, where a student can
+> read three sentences without an account. It runs in a browser with no ads.
+> It works best with a decent mic, which I know can be hit or miss on school
+> laptops.
+>
+> I'm a high school student and built it on my own, so feedback from a
+> literacy specialist would honestly mean a lot.
+>
+> Best,
+> Bruce Peters
+
+---
+
+## AQ-025 | Contact form | Let's Read San Mateo County, The Big Lift (https://letsreadsmc.org/lets-read-san-mateo-county/) | A county-wide K-3 literacy site led by the County of San Mateo, San Mateo County Libraries and the County Office of Education, with K, 1st and 2nd grade pages and a phonics page (Starfall, ABCya). It asks "Have ideas for ways to improve...?" Word Wiz's CAC placing is for CA-15, so the local angle is real | Low. A research-minded county project may not add an unstudied tool | Status: PENDING
+
+Verified 2026-10-06: the About page has a form (Name, Email, Message, and a mailing-list checkbox to leave unticked) with no CAPTCHA, and bigliftsanmateocounty@gmail.com in the footer. Once approved I can submit the form with contactwordwizai@gmail.com, or you can email it.
+Pages: https://letsreadsmc.org/phonics/
+
+If you live in San Mateo County, it might be worth saying so in the first line. I left it as "Bay Area" because I can't confirm it.
+
+> Dear Let's Read San Mateo County team,
+>
+> I'm a high school student in the Bay Area, and I wanted to suggest a free
+> tool for your phonics page. I built Word Wiz AI, a reading tutor where a
+> child reads a sentence out loud and it shows which sounds they got wrong
+> (like "ship" read as "sip"), then writes the next sentence around those
+> sounds. It placed 2nd in the Congressional App Challenge for California's
+> 15th district.
+>
+> It's free with no ads and runs in a browser, so families can use it at home
+> on a laptop or Chromebook. Kids can try three sentences without an account
+> at wordwizai.com/try. It's built for roughly K-2, which lines up with your
+> grade pages, and it works best with a decent microphone.
+>
+> Although it hasn't been formally studied, I'd really appreciate it if your
+> team took a look, and I'm happy to answer any questions.
+>
+> Best,
+> Bruce Peters
+> contactwordwizai@gmail.com
+
+---
+
+## AQ-026 | Email | Frontier Charter School, Anchorage School District homeschool program (hook_carli@asdk12.org) | A parent-directed homeschool program whose "Curriculum & Resources" page has a Reading Instructional Support list (Freedom Homeschooling, Lexia Core5, Teach Your Monster, Reading Rockets) and says "To suggest any edits, please email us at hook_carli@asdk12.org" | Low. Small reach (one district program) | Status: PENDING
+
+Verified 2026-10-06: the address and invitation are on the page.
+Page: https://frontier.asdk12.org/curriculum-resources
+
+Send from contactwordwizai@gmail.com.
+
+**Subject:** Suggestion for your Reading Instructional Support list
+
+> Dear Ms. Hook,
+>
+> Your Curriculum & Resources page says to email you with edits, so I wanted
+> to suggest a free resource for the Reading Instructional Support section.
+> Word Wiz AI is a reading tutor for early readers (roughly K-2) where a child
+> reads a sentence out loud and it shows which sounds they got wrong, then
+> gives them a new sentence built around those sounds.
+>
+> It's free with no ads and runs in a browser, so families can use it at home
+> with nothing to install. It's meant as extra practice next to whatever
+> phonics program a family already uses, not a full curriculum. Kids can try
+> three sentences without an account at wordwizai.com/try.
+>
+> I'm a high school student and built it on my own, so I'd be grateful for any
+> feedback from your families.
+>
+> Best,
+> Bruce Peters
+
+---
+
+## AQ-027 | Email | Wisconsin Dyslexia Roadmap (widyslexiaroadmap@gmail.com) | A statewide parent guide whose Parent Resources page has a game-based apps section (Teach Your Monster to Read, Starfall, Nessy) and says "Please send feed back, suggestions, and celebrations to widyslexiaroadmap@gmail.com." | Medium. Built around structured literacy, and parents of dyslexic kids may be wary of an unstudied AI tool. The note says plainly it isn't an intervention | Status: PENDING
+
+Verified 2026-10-06: the address and the invitation are on the page itself.
+Page: https://www.widyslexiaroadmap.org/parents/parent-resources
+
+Send from contactwordwizai@gmail.com.
+
+**Subject:** A suggestion for your Parent Resources apps list
+
+> Dear Wisconsin Dyslexia Roadmap team,
+>
+> Your Parent Resources page asks for suggestions, so I wanted to share a free
+> tool for the game-based apps section. Word Wiz AI is a reading tutor where a
+> child reads a sentence out loud and it shows which individual sounds were
+> off (for example, /b/ read as /d/), then gives them a new sentence built
+> around those sounds.
+>
+> I want to be clear that it isn't a dyslexia intervention and it hasn't been
+> formally studied, so it wouldn't replace a tutor or structured instruction.
+> Although it's built for general K-2 phonics practice, I thought the
+> sound-by-sound feedback might help parents practicing at home between
+> sessions. It's free, and kids can try three sentences without an account at
+> wordwizai.com/try.
+>
+> I'm a high school student and built it on my own, so I'd honestly
+> appreciate any feedback, even if it isn't a fit.
+>
+> Best,
+> Bruce Peters
+
+---
+
+## AQ-028 | Email | Undivided, "Reading Curricula, Tech, Apps, and More!" by Karen Ford Cull (support@undivided.io) | Updated Aug 21, 2026. It has an "AI reading tools" section (Socrat.ai, Cubox, Read.ai, EdCafe.ai) with nothing for kids who are still learning to sound out words. Audience is California families of kids with disabilities | Medium. Sensitive audience. The note says plainly Word Wiz isn't designed for any disability and hasn't been studied | Status: PENDING
+
+Verified 2026-10-06: support@undivided.io is on the page, next to a "Give feedback to the Undivided team" link. Undivided runs a paid membership; I saw no paid placements on this page.
+Page: https://undivided.io/resources/learning-resources-reading-and-literacy-8
+
+Send from contactwordwizai@gmail.com.
+
+**Subject:** An early-reader tool for your AI reading tools section
+
+> Dear Undivided team,
+>
+> I read Karen Ford Cull's guide to reading curricula, tech and apps and
+> noticed the AI reading tools section doesn't have anything for kids who are
+> still learning to sound out words. I built a free one called Word Wiz AI. A
+> child reads a sentence out loud, it shows which individual sounds were off
+> (for example, /b/ read as /d/), and then it writes the next sentence around
+> those sounds.
+>
+> It isn't designed for any specific disability and it hasn't been formally
+> studied, so I'm not claiming it treats anything. It's free with no ads, runs
+> in a browser, and kids can try three sentences without an account at
+> wordwizai.com/try. It works best with a decent microphone.
+>
+> I'm a high school student and built it on my own. If you think it fits, I'd
+> really appreciate you taking a look.
+>
+> Best,
+> Bruce Peters
+
+---
+
+## AQ-029 | Email | Worcester Education Collaborative, Raising Readers Together (worcesteredcollab@gmail.com) | A citywide literacy initiative whose family page lists "Eight vendors that offer free literacy applications" with descriptions and pricing (Starfall, PBS, Duck Duck Moose, Blending Board...). Exactly the format a free tool belongs in | Low. The page footer says 2021, so it may not be maintained | Status: PENDING
+
+Verified 2026-10-06: worcesteredcollab@gmail.com is in the page footer. Staff emails are on https://www.wecollaborative.org/contact, but the general address is the right first step.
+Page: https://www.wecollaborative.org/family-resources
+
+Send from contactwordwizai@gmail.com.
+
+**Subject:** A free literacy app for Raising Readers Together
+
+> Dear Worcester Education Collaborative team,
+>
+> I came across the free applications list on your Raising Readers Together
+> page and wanted to suggest one more for families. Word Wiz AI is a free
+> reading tutor for kids in about K-2. A child reads a sentence out loud, it
+> shows which sounds were off (like "cake" read as "cack"), and then it gives
+> them a new sentence built around those sounds.
+>
+> For the pricing note on your list, it's completely free with no ads and
+> nothing to buy. It runs in a browser, and families can try three sentences
+> without an account at wordwizai.com/try (regular practice needs a free
+> account).
+>
+> I'm a high school student and built it on my own, so any feedback from your
+> families would honestly help.
+>
+> Best,
+> Bruce Peters
+
+---
+
+## AQ-030 | Contact form (Bruce submits) | Contra Costa County Library, "Resources for New and Struggling Readers" (https://ccclib.org/contact-us/email-form/) | Updated 2026-09-24. Its "Free Online Resources with Tips for Teaching Reading" section lists Khan Academy Kids, Starfall, FCRR and Reading Rockets. A Bay Area library system, so the local-student angle is real | Low. The form is protected by reCAPTCHA, so it's yours to submit | Status: PENDING
+
+Verified 2026-10-06: the page and section exist as described. No staff email is published. The form's comment option is "This is a comment/question about the Library", and it requires "Which library do you use?". **If you don't use a Contra Costa branch and there's no "other" option, skip this one** rather than pick a branch.
+Page: https://ccclib.org/resources-for-new-and-struggling-readers/
+
+> Dear Contra Costa County Library,
+>
+> I saw your Resources for New and Struggling Readers page and wanted to
+> suggest a free tool for the Free Online Resources section. I'm a high school
+> student in the Bay Area, and I built Word Wiz AI, a reading tutor where a
+> child reads a sentence out loud and it shows which sounds they got wrong
+> (like "ship" read as "sip"), then writes the next sentence around those
+> sounds.
+>
+> It's free with no ads and runs in a browser. Families can try three
+> sentences without an account at wordwizai.com/try, and regular practice
+> needs a free account. It's built for roughly K-2 and works best with a
+> decent microphone.
+>
+> I'd really appreciate it if someone on your team took a look.
+>
+> Best,
+> Bruce Peters
+> contactwordwizai@gmail.com
+
+---
+
+## Bigger listings (paste-ready, all need your account or your name)
+
+These three are from the "Bigger listings" part of your checklist. Each one is
+yours to submit. I've written the text so approving is a yes/no.
+
+---
+
+## AQ-031 | Listing update (your ISTE login) | ISTE+ASCD EdTech Index, existing Word Wiz AI listing | **Word Wiz is already listed** (ULTID P78D-8135-5C53-C4C6-98, approved Dec 14, 2025, https://edtechindex.org/product/ultid/P78D-8135-5C53-C4C6-98/). The listing is missing 2nd grade, claims every operating system including Tizen, and its description says it "supports evidence-based reading instruction", which reads as a research claim we can't back. Fixing it keeps the one curated school directory accurate and adds the try link | Low. Edits go back through ISTE review (Published / Edits Required / Excluded, by email). Free; ignore the Premium upsell | Status: PENDING
+
+Sign in at https://ltd.iste.org/ and edit the existing product. Don't register a new one. Only change these fields.
+
+| Field | Change to |
+|---|---|
+| Description (no lists, aim under 500 characters) | See below (487 characters) |
+| Educational Level | Keep Transitional Kindergarten, Kindergarten, 1st Grade. **Add 2nd Grade** |
+| Supported Operating Systems | Web Browser, Chrome OS, Windows, macOS. **Untick Tizen and Other.** Keep iOS, iPadOS and Android only if you've checked that recording works in mobile Safari and Chrome |
+| Software Requirements | See below |
+| End User(s) | Student, Teacher/Tutor, Parent |
+| Plan Type | Free |
+| Pricing Description | Keep "Free forever" |
+| Plain Language Privacy Statement | Keep yours, and add the try-page paragraph below (the wording you approved for /privacy in AQ-011) |
+| Supporting Evidence | Leave empty. Nothing to cite yet |
+
+**Description**
+
+> Word Wiz AI is a free, browser-based reading tutor for kindergarten through
+> 2nd grade. A student reads a sentence out loud and Word Wiz checks it sound by
+> sound, so instead of only marking a word wrong it shows that the "sh" in
+> "ship" came out as "s". It then writes the next practice sentence around the
+> sounds the student missed. Students can try three sentences without an
+> account at wordwizai.com/try, and regular practice uses a free account. It
+> works best with a decent microphone.
+
+**Software Requirements**
+
+> A web browser with microphone access and an internet connection. Works on
+> laptops, desktops and Chromebooks. A decent microphone in a quiet room gives
+> the most accurate feedback, since a muffled mic lowers accuracy.
+
+**Add to the privacy statement**
+
+> Practicing without an account. On wordwizai.com/try, a child can read a few
+> practice sentences without creating an account. The recording is sent to our
+> server, analyzed to give pronunciation feedback, and then discarded. Word Wiz
+> AI doesn't save it or link it to anyone.
+
+One thing to check first. Your current statement says voice input "is not
+stored permanently". In the code that holds as long as `ENABLE_AUDIO_CACHE`
+is not set on the server (it's off by default and the try page ignores it).
+I can't see the server from a cloud session, so it might be worth a quick
+`grep ENABLE_AUDIO_CACHE backend/.env` before you resubmit.
+
+---
+
+## AQ-032 | Freebie submission (email) | Free Homeschool Deals, contact@freehomeschooldeals.com | Chosen submissions get a post, social promotion and a spot in their e-blast to "over 30,000+ families" (their number). They post free educational apps (a free iOS app, ChantCode, ran in Sept 2026). One-time spike, not a lasting listing | Low. They may decline, and the submit page doesn't say whether an account requirement is OK, so the post is upfront about it | Status: PENDING
+
+Rules (from https://www.freehomeschooldeals.com/submit/, read 2026-10-06): email
+contact@freehomeschooldeals.com with subject "Freebie submission", the link,
+a post of 150+ words in third person that isn't copied from our site, a large
+graphic (preferably 1000x1500) as an attachment, and any end date. No affiliate
+links. No fee is mentioned.
+
+**Graphic**: a draft 1000x1500 PNG is at `growth-agent/assets/fhd-graphic-1000x1500.png`
+(same look as the site's og-image). Swap in your own if you prefer.
+
+Send from contactwordwizai@gmail.com.
+
+**Subject:** Freebie submission
+
+> Dear Free Homeschool Deals team,
+>
+> I'd like to submit a free reading tool for your educational apps posts. The
+> link is wordwizai.com/try, the post is below, and the graphic is attached
+> (1000x1500). It isn't time-sensitive.
+>
+> Best,
+> Bruce Peters
+
+**Post title:** Free Reading Tutor That Listens to Your Child Read (Word Wiz AI)
+
+**Post text** (third person, 248 words)
+
+> Word Wiz AI is a free reading tutor for kids in kindergarten through 2nd
+> grade, and it does something most phonics apps don't. Instead of only
+> checking whether a whole word was right, it listens to a child read a
+> sentence out loud and points out the exact sound that went wrong, like the
+> "sh" in "ship" coming out as "s". Then it writes the next practice sentence
+> around those sounds, so practice keeps aiming at what the child actually
+> needs.
+>
+> **What's Included**
+>
+> Unlimited practice sentences, a story mode, and a choose-your-own-adventure
+> mode. After each sentence, Word Wiz shows which sounds came out wrong and
+> says what to fix out loud.
+>
+> **Who It's For**
+>
+> Families teaching phonics at home to early readers, roughly ages 5 to 8. It
+> works well as a few minutes of extra practice next to whatever phonics
+> program a family already uses.
+>
+> **How to Use It**
+>
+> Families can try three sentences right away at wordwizai.com/try with no
+> account, and nothing from that page is saved. To keep practicing, a parent
+> creates a free account with Google or email. Word Wiz runs in a web browser
+> on a computer, Chromebook or tablet, so there is nothing to install. A quiet
+> room and a decent microphone give the most accurate feedback, since a
+> muffled mic makes it less accurate.
+>
+> Word Wiz AI was built by Bruce Peters, a high school student in the Bay
+> Area, and placed 2nd in the Congressional App Challenge for California's
+> 15th district. There are no ads and nothing to buy.
+
+---
+
+## AQ-033 | Product Hunt relaunch (two steps) | producthunt.com, existing page https://www.producthunt.com/products/word-wiz (launch post /posts/word-wiz-ai, 1 point) | The first launch (Dec 16, 2025) required an account before any feedback. The try page fixes exactly that, and Product Hunt visitors click straight through to try things | Medium. Product Hunt only allows a relaunch after 6 months (met) **and** a "significant update", and says "New UIs, pricing plan changes, etc. are not considered significant." The try page plus the rebuilt app might count or might not, so step 1 asks them first, which their help page recommends | Status: PENDING
+
+Rules (from help.producthunt.com, "Can I relaunch my product?", updated Jul 7, 2026): six months between posts for the same product, plus a significant update such as "a new mobile app or a complete product redesign with new functionality". Asking for upvotes is against the rules and can get the post dropped from the homepage, so ask friends to try it and comment instead.
+
+**Step 1. Email hello@producthunt.com** (from contactwordwizai@gmail.com)
+
+**Subject:** Relaunch question for Word Wiz AI
+
+> Dear Product Hunt team,
+>
+> I launched Word Wiz AI on Product Hunt on December 16, 2025
+> (producthunt.com/products/word-wiz), and I wanted to check whether the
+> changes since then count as a significant update before I post again. Word
+> Wiz is a free reading tutor that listens to a child read and shows which
+> sounds they got wrong.
+>
+> Since the first launch I added a page where any kid can try it without an
+> account (wordwizai.com/try), rebuilt the signed-in app, and added an animated
+> character that listens and reacts while the child reads. Although the core
+> idea is the same, the no-account page changes who can actually use it, so I
+> wasn't sure which side of the line it falls on.
+>
+> Is a relaunch OK, and if so, should it go on the same product page?
+>
+> Best,
+> Bruce Peters
+
+**Step 2. If they say yes, the launch** (schedule it for 12:01am PT on a Tuesday, Wednesday or Thursday from your personal account)
+
+| Field | Text |
+|---|---|
+| Name | Word Wiz AI |
+| Tagline (60 max) | A free reading tutor that listens to your child read (52) |
+| Description (260 max) | Word Wiz AI is a free reading tutor for kids in K-2. Your child reads a sentence out loud, it shows which sounds they got wrong (like "ship" read as "sip"), and it writes the next sentence around those sounds. Try 3 sentences with no account. (242) |
+| Link | https://wordwizai.com/try |
+| Topics (3 max) | Education, Kids, Artificial Intelligence |
+| Pricing | Free |
+| Thumbnail | Square, 240x240, the Word Wiz logo |
+| Gallery (min 2, 1270x760) | 1) the try page intro, 2) a feedback screen showing a wrong sound highlighted, 3) story mode, 4) the mascot reacting. Real screenshots only |
+
+**First comment** (post it yourself right when it goes live)
+
+> Hi everyone, I'm Bruce, a high school student, and I built Word Wiz AI on my
+> own.
+>
+> When I first launched here last December, you had to make an account before
+> hearing a single piece of feedback, which is a lot to ask from a parent who
+> just wants to see if it works. So the biggest change is wordwizai.com/try.
+> Any kid can read three sentences there and see exactly which sounds came out
+> wrong, with no account and nothing saved.
+>
+> Most reading apps only tell a kid whether a whole word was right. A tutor
+> sitting next to them would hear that the "sh" in "ship" came out as an "s"
+> and practice that sound next, so that's what Word Wiz tries to do. It's
+> free, there are no ads, and it's built for roughly K-2.
+>
+> Two honest caveats. It works best with a decent mic, and it's still a
+> student project, so I'd really appreciate hearing what breaks or what's
+> confusing.
+
+---
+
 ## Notes for Bruce (not approval items)
 
 - **AlternativeTo lists Word Wiz as "Open Source"**, but the repo has no
@@ -494,6 +1003,8 @@ Send after: the try page is live. From contactwordwizai@gmail.com.
   and "doesn't need an account to try". Neither is verified (see AQ-001,
   AQ-003). It might be worth not sending those as written. I haven't
   re-proposed them here.
+- **ISTE EdTech Index already lists Word Wiz** (approved Dec 14, 2025). LISTINGS.md
+  had it as "not submitted". AQ-031 is an edit to that listing, not a new one.
 - Notion isn't connected in this session (it needs authorizing in your
   claude.ai connector settings), so there are no Notion tasks for these items.
 

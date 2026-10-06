@@ -1361,29 +1361,30 @@ Send from contactwordwizai@gmail.com.
 
 ---
 
-## AQ-041 | Email | Larry Ferlazzo, "Websites of the Day" (MrFerlazzo@aol.com) | His list "The Best Sites For Online Pronunciation Feedback" (modified 2026-09-11) ends with "Do you know of other sites that use software/Artificial Intelligence to provide speakers with immediate feedback on their pronunciation?" He posts daily, has written up free AI pronunciation tools this year (Spelly, LineSpeak), and says his newsletter "has over 3,000 subscribers" | Low. His readers are mostly secondary ESL teachers, and he's skeptical of AI tutors, so the note stays modest | Status: PENDING
+## AQ-041 | Email | Larry Ferlazzo, "Websites of the Day" (MrFerlazzo@aol.com) | Two of his lists fit. "The Best Websites To Help Beginning Readers" is free sites only, calls Starfall "still the best", and includes Google's Read Along. "The Best Sites For Online Pronunciation Feedback" (modified 2026-09-11) ends with "Do you know of other sites that use software/Artificial Intelligence to provide speakers with immediate feedback on their pronunciation?" He posts daily and says his newsletter "has over 3,000 subscribers" | Low. His readers lean toward ESL/ELL teachers and he's skeptical of AI tutors, so the note stays modest and makes no ELL claims beyond "might" | Status: PENDING
 
-Verified 2026-10-06: the closing question is on https://larryferlazzo.edublogs.org/2020/02/08/the-best-sites-for-online-pronunciation-feedback-do-you-know-more/; the email is on https://larryferlazzo.edublogs.org/contact-me/ (he says the form there is "a little glitchy").
+Verified 2026-10-06: both lists on larryferlazzo.edublogs.org (https://larryferlazzo.edublogs.org/2008/01/22/the-best-websites-to-help-beginning-readers/ and https://larryferlazzo.edublogs.org/2020/02/08/the-best-sites-for-online-pronunciation-feedback-do-you-know-more/); the email is on https://larryferlazzo.edublogs.org/contact-me/ (he says the form there is "a little glitchy").
 
 Send from contactwordwizai@gmail.com.
 
-**Subject:** A free site for your pronunciation feedback list
+**Subject:** A free site for your beginning readers list
 
 > Dear Larry,
 >
-> Your list of sites that give feedback on pronunciation asks whether readers
-> know others, so I wanted to share one I built. Word Wiz AI is a free reading
+> I saw your list of the best websites to help beginning readers, and your list
+> of sites that give feedback on pronunciation, which asks whether readers know
+> others. I built a free tool that might fit both. Word Wiz AI is a reading
 > tutor where a child reads a sentence out loud and it shows which individual
 > sounds came out wrong (like "ship" read as "sip"), then writes the next
 > sentence around those sounds.
 >
 > It's built for early readers in about K-2, although it might also help young
 > English learners hear which sounds they're missing. Anyone can try three
-> sentences without an account at wordwizai.com/try, and nothing from that
-> page is saved. Regular practice needs a free account.
+> sentences without an account at wordwizai.com/try, and nothing from that page
+> is saved. Regular practice needs a free account.
 >
 > I'm a high school student and built it on my own, so I'd really appreciate
-> your take on it, even if it doesn't make the list.
+> your take on it, even if it doesn't make either list.
 >
 > Best,
 > Bruce Peters
@@ -1701,6 +1702,51 @@ Send from contactwordwizai@gmail.com.
 >
 > Best,
 > Bruce Peters
+
+---
+
+## AQ-055 | Email | Internet4Classrooms (susan.brooks@internet4classrooms.com, cc bill.byles@internet4classrooms.com) | A free PreK-12 resource site for teachers and parents running since 1997 that says "Feel free to suggest your site for inclusion on one of our pages if you have high-quality, free resources which can be used in classroom instruction... or as an exercise for building a student's skill on a specific concept." Active (posts in Sept 2026) | Low. The founders' addresses may not reach the current CEO. They sell ads, but listings aren't paid ("We will never link to another site simply because they have a link to us") | Status: PENDING
+
+Verified 2026-10-06: the invitation and both addresses on https://www.internet4classrooms.com/introducing_i4c.htm.
+
+Send from contactwordwizai@gmail.com.
+
+**Subject:** Site suggestion for your K-2 reading pages
+
+> Dear Susan and Bill,
+>
+> Your site says to suggest free resources for inclusion, so I wanted to share
+> one for your early reading pages. Word Wiz AI is a free reading tutor for
+> kids in about K-2 where a child reads a sentence out loud and it shows which
+> sounds came out wrong (like "cake" read as "cack"), then writes the next
+> sentence around those sounds. It works on one skill at a time, which seems to
+> match how your pages are organized.
+>
+> It's free with no ads and runs in a browser. Kids can try three sentences
+> without an account at wordwizai.com/try, and teachers can make a free class
+> with a join code. I'm a high school student and built it on my own, so any
+> feedback would help too.
+>
+> Best,
+> Bruce Peters
+
+---
+
+## AQ-056 | Facebook group post (you post) | Homeschool Quest "Free And Affordable Resources" group (https://www.facebook.com/groups/homeschoolfreeandaffordable) | Their rules explicitly allow it, "As long as each post is unique, you are able to share up to 4 posts a day with your freebies, products, and blog posts!" They say the group has "232,000+ members" (their number; another of their pages says 300,000). You said "idk" to Facebook groups, so skip this if you'd rather not | Low. Probably a crowded feed. **Post after the printable is live on main.** Joining may need approval | Status: PENDING
+
+Verified 2026-10-06: the rule and member count on https://homeschoolbusinessquest.com/FreeMarketingOpportunities.
+
+> Free magic e printable for early readers, plus a free tool that listens to
+> them read
+>
+> I made a free two-page magic e printable with 20 decodable sentences (five
+> each for a_e, i_e, o_e and u_e) and warm-up word lists. It's at
+> wordwizai.com/printables/magic-e-sentences.pdf
+>
+> I'm a high school student, and I also built Word Wiz AI, a free reading tutor
+> that listens to your child read a sentence and shows which sounds came out
+> wrong, like "cake" read as "cack." You can try three sentences without an
+> account at wordwizai.com/try. No ads and nothing to buy.
 
 ---
 

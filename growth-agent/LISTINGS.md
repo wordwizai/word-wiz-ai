@@ -34,7 +34,7 @@ account or his name in a new way), `submitted`, `live`, `rejected`,
 | queued | NorCal IDA (links page) | email admin.ncal@dyslexiaida.org | contactwordwizai@gmail.com | AQ-038 |
 | queued | Oakland Literacy Coalition / Oakland Reads | email team@oaklandliteracycoalition.org | contactwordwizai@gmail.com | AQ-039, a week after AQ-025 |
 | queued | The Oakland REACH | email info@oaklandreach.org | contactwordwizai@gmail.com | AQ-040, after AQ-036 |
-| queued | Larry Ferlazzo (pronunciation feedback list) | email MrFerlazzo@aol.com | contactwordwizai@gmail.com | AQ-041 |
+| queued | Larry Ferlazzo (beginning readers list + pronunciation feedback list) | email MrFerlazzo@aol.com | contactwordwizai@gmail.com | AQ-041 |
 | queued | Eric Curts, Control Alt Achieve | email ericcurts@gmail.com | contactwordwizai@gmail.com | AQ-042 |
 | queued | Tony Vincent, Learning in Hand | contact form, no CAPTCHA | contactwordwizai@gmail.com | AQ-043 |
 | queued | Homeschool Together Podcast | email homeschooltogetherpodcast@gmail.com | contactwordwizai@gmail.com | AQ-044 |
@@ -45,6 +45,8 @@ account or his name in a new way), `submitted`, `live`, `rejected`,
 | queued | Niagara University Online Teacher's Studio | suggestion form | contactwordwizai@gmail.com | AQ-052 |
 | queued | Clark County Public Library (Ohio) youth guide | email ce@ccplohio.org | contactwordwizai@gmail.com | AQ-053 |
 | queued | Alberta Teachers' Association Library | email library@ata.ab.ca | contactwordwizai@gmail.com | AQ-054 |
+| queued | Internet4Classrooms | email susan.brooks@ / bill.byles@internet4classrooms.com | contactwordwizai@gmail.com | AQ-055 |
+| queued | Homeschool Quest "Free And Affordable Resources" Facebook group | Facebook post (Bruce) | n/a | AQ-056, optional |
 
 Follow-up rule: one polite follow-up at most, 10+ days after the first message, only with Bruce's approval.
 
@@ -107,6 +109,10 @@ Ranked by expected real users for a K-2 reading tool.
 | Rowan University LRC-South ELA page | LRC_south@rowan.edu | Focus on students with disabilities; careful framing needed |
 | Algona Public Library (Iowa) | kwind@algonalibrary.org (spelling unconfirmed) | Small reach |
 | Homeschool Together's Secular Resource Database | unknown | Found via podcast research; submission route not checked |
+| CT Homeschool Network "K-12 Curricula" | CHNBoard@outlook.com | Phonics section lists Teach Your Monster and Starfall, but many links date from ~2014 and there's no invitation. Fit 2 |
+| How To Homeschool For Free | Google Form "Submit A FREE Homeschooling Resource!" | Site dormant since Nov 2024. Fit 2 |
+| The Simple Homeschooler (Lauren Schmitz) | contact form, no CAPTCHA | Free-resources post invites additions, but the site is dormant since Sep 2024. Fit 2 |
+| Homeschool Quest magazine mini-article | form with CAPTCHA | 100-200 words, no self-promotion allowed, next issue Spring 2027. Fit 1 |
 
 ## Excluded (don't revisit unless the terms change)
 
@@ -139,6 +145,10 @@ Ranked by expected real users for a K-2 reading tool.
 | DC Urban Moms and Dads, A to Z Teacher Stuff, Teachers.Net | Forum rules ban promoting your own product |
 | Berkeley Parents Network | Business posts are paid subscriptions only |
 | 10 Minute Teacher guest slot | "If you're a business, don't ask to be a guest, you'd be better as an advertiser" |
+| Homeschool Giveaways, Hip Homeschool Moms, Homeschool.com, Homeschool Buyers Club, HSC marketplace, OHEN, Mommy Poppins | Freebie or resource placement is paid (checked 2026-10-06) |
+| Thrifty Homeschoolers, Homeschool Printables for Free, NC Homeschool-ology, The Old Schoolhouse freebie directory | Dormant (newest posts 2019-2022) |
+| Homeschool Freebie of the Day, SEA Homeschoolers, Find My Homeschool, AIEducator.tools, Kidtopia | No submission route |
+| INFOhio, Learning Online Blog, Classroom Freebies, Freebies4Mom, Simple Homeschool, CHEA of California | Not eligible or wrong fit (Ohio educators only, paid items only, printables only, sponsored post, groups directory) |
 
 ## Listing copy (checked against the code on 2026-10-05)
 

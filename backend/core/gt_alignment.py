@@ -38,21 +38,24 @@ WHAT THIS MODULE DOES
        single phoneme of real acoustic evidence,
      * words the ASR heard that are not in the sentence are reported as
        ``insertion`` records,
-     * the ASR word matched to each expected word is used only as the
-       ``predicted_word`` label.
+     * the ASR word matched to each expected word is the ``predicted_word``
+       label, and when it differs from the expected word it switches off edge
+       forgiveness for that word (see 5). It can only take leniency away.
 4. Is deterministic. All DP arithmetic is integer (costs are scaled by
    ``_COST_SCALE``) and every tie is broken by an explicit total ordering, so
    the same input always produces byte-identical output.
 5. Scores each word against its closest valid pronunciation (word scoring
    v2). Segmentation uses the primary G2P phonemes, but a word is then scored
    against whichever CMUdict pronunciation its segment matches best ("to" read
-   as tu is not an error just because G2P picked tɪ), and the leading and
-   trailing runs of inserted phonemes in its alignment do not count. The
-   segmenter has to hand every acoustic phoneme to some word, so stray
-   phonemes at a word boundary land on one side or the other and say nothing
-   about how that word was read. Interior insertions still count. Set
-   ``WWAI_LEGACY_WORD_SCORING`` to go back to primary-only scoring with every
-   insertion counted.
+   as tu is not an error just because G2P picked tɪ), and one inserted
+   phoneme at each edge of its segment does not count. The segmenter has to
+   hand every acoustic phoneme to some word, so a stray phoneme at a word
+   boundary lands on one side or the other and says nothing about how that
+   word was read. Longer edge runs and interior insertions still count, and
+   nothing at the edges is forgiven when the ASR heard a different word in
+   that slot ("sit" for "it"), because then the extra sounds are probably a
+   reading miscue. Set ``WWAI_LEGACY_WORD_SCORING`` to go back to
+   primary-only scoring with every insertion counted.
 
 The returned value matches the existing contract of
 ``process_audio._process_word_alignment`` exactly -- same keys, same types --
@@ -455,61 +458,70 @@ def _pronunciation_candidates(gt_word: str, gt_phonemes: list[str]) -> list[list
     return candidates
 
 
-def _without_edge_insertions(ops: list[tuple]) -> list[tuple]:
-    """``ops`` minus its leading and trailing runs of ``insertion`` ops."""
-    lo, hi = 0, len(ops)
-    while lo < hi and ops[lo][0] == 'insertion':
-        lo += 1
-    while hi > lo and ops[hi - 1][0] == 'insertion':
-        hi -= 1
-    return ops[lo:hi]
+# (leading, trailing) phonemes to set aside, cheapest first. At most ONE phoneme
+# is forgiven at each edge: that covers the stray boundary phoneme the
+# segmenter has to hand to some word, while a longer run ("run" read as
+# "running", a garbled segment containing the word) still counts.
+_EDGE_TRIMS = ((0, 0), (1, 0), (0, 1), (1, 1))
 
 
-def _counted_ops(expected: list[str], segment: list[str]) -> tuple[int, list[tuple]]:
+def _counted_ops(
+    expected: list[str], segment: list[str], forgive_edges: bool = True,
+) -> tuple[int, list[tuple], list[str]]:
     """
-    Align ``expected`` with ``segment`` and set the edge insertions aside.
+    Align ``expected`` with ``segment``, forgiving at most one inserted
+    phoneme at each edge.
 
-    Returns ``(counted_errors, ops)``, where ``ops`` is the alignment with its
-    leading and trailing runs of insertions removed and ``counted_errors`` is
-    the number of non-match ops left. Interior insertions, substitutions and
-    deletions all still count.
+    Returns ``(counted_errors, ops, edge_insertions)``. ``ops`` aligns
+    ``expected`` with the segment minus the forgiven edge phonemes,
+    ``counted_errors`` is the number of non-match ops in it, and
+    ``edge_insertions`` lists the forgiven phonemes in segment order.
+    Interior insertions, substitutions and deletions all still count.
 
-    ``align_sequences`` backtracks from the end, so when an inserted phoneme
-    could sit on either side of an identical neighbour it always lands on the
-    side nearer the start. A doubled first phoneme ([k k æ t] for "cat") then
-    comes out as a leading insertion, but a doubled last one ([k æ t t]) comes
-    out as an interior insertion and counts. To treat both edges alike, the
-    mirrored alignment (both sequences reversed, ops reversed back) is also
-    tried. It is just as optimal, and it is used only when it leaves strictly
-    fewer counted errors.
+    Forgiving the first phoneme is the same as aligning the rest of the
+    segment, so each of the four trims in ``_EDGE_TRIMS`` is aligned and the
+    one with the fewest counted errors wins. A trim is used only when it
+    strictly lowers the count, so a wrong last phoneme stays a substitution
+    instead of turning into a missed phoneme plus a free edge insertion.
+    Trimming the segment, rather than the ops of one alignment, also treats a
+    doubled first phoneme and a doubled last one alike.
+
+    With ``forgive_edges`` False nothing is set aside, and the count is the
+    plain edit distance the pre-v2 scoring used.
     """
-    forward = align_sequences(expected, segment)
-    mirrored = align_sequences(expected[::-1], segment[::-1])[::-1]
+    trims = _EDGE_TRIMS if forgive_edges else _EDGE_TRIMS[:1]
+    n = len(segment)
 
     best = None
-    for ops in (forward, mirrored):
-        kept = _without_edge_insertions(ops)
-        errors = sum(1 for op, _gt, _pred in kept if op != 'match')
+    for lead, trail in trims:
+        if lead + trail > n:
+            continue
+        ops = align_sequences(expected, segment[lead:n - trail])
+        errors = sum(1 for op, _gt, _pred in ops if op != 'match')
         if best is None or errors < best[0]:
-            best = (errors, kept)
+            best = (errors, ops, list(segment[:lead]) + list(segment[n - trail:]))
     return best
 
 
-def _score_word(gt_word: str, gt_phonemes: list[str], segment: list[str], legacy: bool):
+def _score_word(
+    gt_word: str, gt_phonemes: list[str], segment: list[str], legacy: bool,
+    forgive_edges: bool = True,
+):
     """
     Return ``(expected, missed, added, substituted)`` for one non-empty segment.
 
-    v2: every candidate pronunciation is aligned with the segment, edge
-    insertions are set aside, and the candidate with the fewest counted errors
-    wins (the earliest on a tie, so the primary wins ties). The error lists
-    come from the winner's alignment, so edge insertions never reach ``added``.
+    v2: every candidate pronunciation is aligned with the segment, at most one
+    edge insertion per side is set aside (none when ``forgive_edges`` is
+    False), and the candidate with the fewest counted errors wins (the earliest
+    on a tie, so the primary wins ties). The error lists come from the
+    winner's alignment, so forgiven edge phonemes never reach ``added``.
     """
     if legacy:
         return (list(gt_phonemes),) + _phoneme_errors(gt_phonemes, segment)
 
     best = None
     for candidate in _pronunciation_candidates(gt_word, gt_phonemes):
-        errors, ops = _counted_ops(candidate, segment)
+        errors, ops, _edges = _counted_ops(candidate, segment, forgive_edges)
         if best is None or errors < best[0]:
             best = (errors, candidate, ops)
     _errors, expected, ops = best
@@ -593,10 +605,12 @@ def align_to_ground_truth(
         * Word scoring v2 (off under ``WWAI_LEGACY_WORD_SCORING``): a read word
           is scored against its closest CMUdict pronunciation, which becomes
           its ``ground_truth_phonemes`` / ``expected_phonemes`` and sets
-          ``total_phonemes``. Phonemes inserted at either edge of its segment
-          stay in ``phonemes`` / ``actual_phonemes`` but are left out of
-          ``added``, ``total_errors`` and ``per``. Interior insertions still
-          count, so ``per`` can still exceed 1.0.
+          ``total_phonemes``. One phoneme inserted at each edge of its segment
+          stays in ``phonemes`` / ``actual_phonemes`` but is left out of
+          ``added``, ``total_errors`` and ``per``. Further edge insertions and
+          interior insertions still count, so ``per`` can still exceed 1.0.
+          When the ASR heard a different word in the slot, no edge phoneme is
+          forgiven (the miscue guard).
     """
     gtp = [(word, list(phs or [])) for word, phs in (ground_truth_phonemes or [])]
     if not gtp:
@@ -622,8 +636,18 @@ def align_to_ground_truth(
             results.append(_deletion_record(gt_word, gt_phs))
             continue
 
+        # Miscue guard. When the ASR heard a different word in this slot
+        # ("sit" for "it", "running" for "run"), extra sounds at the word's
+        # edge are probably that other word, not segmentation noise, so none
+        # are forgiven. This only takes leniency away: the count is never
+        # higher than the pre-v2 scoring's.
+        asr_heard_other_word = (
+            idx in pred_labels
+            and _normalize_word(pred_labels[idx]) != _normalize_word(gt_word)
+        )
         expected, missed, added, substituted = _score_word(
             gt_word, gt_phs, segment, legacy_scoring,
+            forgive_edges=not asr_heard_other_word,
         )
         total_errors = len(missed) + len(added) + len(substituted)
         per = total_errors / max(len(expected), 1)

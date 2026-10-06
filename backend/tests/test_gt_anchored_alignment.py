@@ -341,26 +341,41 @@ class TestEdgeInsertions(_ScoringEnv):
             ['h', 'k', 'æ', 't'],        # before
             ['k', 'æ', 't', 's'],        # after
             ['h', 'k', 'æ', 't', 's'],   # both
-            ['ə', 'h', 'k', 'æ', 't'],   # a run of two
             ['k', 'k', 'æ', 't'],        # doubled first phoneme
             ['k', 'æ', 't', 't'],        # doubled last phoneme
         ):
-            with self.subTest(segment=segment):
-                r = self.score_one(segment, CAT)
-                self.assertEqual(r["per"], 0.0)
-                self.assertEqual(r["added"], [])
-                self.assertEqual(r["total_errors"], 0)
-                self.assertEqual(r["type"], "match")
-                self.assertEqual(r["total_phonemes"], 3)
-                # Every acoustic phoneme is still reported on the record.
-                self.assertEqual(r["phonemes"], segment)
-                self.assertEqual(r["actual_phonemes"], segment)
+            for asr in (None, ['cat']):
+                with self.subTest(segment=segment, asr=asr):
+                    r = align_to_ground_truth(segment, [CAT], asr)[0]
+                    self.assertEqual(r["per"], 0.0)
+                    self.assertEqual(r["added"], [])
+                    self.assertEqual(r["total_errors"], 0)
+                    self.assertEqual(r["type"], "match")
+                    self.assertEqual(r["total_phonemes"], 3)
+                    # Every acoustic phoneme is still reported on the record.
+                    self.assertEqual(r["phonemes"], segment)
+                    self.assertEqual(r["actual_phonemes"], segment)
+
+    def test_only_one_phoneme_is_forgiven_at_each_edge(self):
+        # A run of two before the word: the outer one is forgiven, the next counts.
+        r = self.score_one(['ə', 'h', 'k', 'æ', 't'], CAT)
+        self.assertEqual((r["missed"], r["added"], r["substituted"]), ([], ['h'], []))
+        self.assertEqual(r["per"], round(1 / 3, 4))
+
+        r = self.score_one(['k', 'æ', 't', 's', 'z'], CAT)
+        self.assertEqual(r["added"], ['s'])
+        self.assertEqual(r["per"], round(1 / 3, 4))
+
+        r = self.score_one(['ə', 'h', 'k', 'æ', 't', 's', 'z'], CAT)
+        self.assertEqual(r["added"], ['h', 's'])
+        self.assertEqual(r["per"], round(2 / 3, 4))
 
     def test_one_stray_phoneme_on_a_two_phoneme_word(self):
         # The motivating false alarm. Each of these used to score PER 0.5 on "the".
         for segment in (['ð', 'ə', 'n'], ['ð', 'ə', 'ə'], ['t', 'ð', 'ə']):
-            with self.subTest(segment=segment):
-                self.assertEqual(self.score_one(segment, THE)["per"], 0.0)
+            for asr in (None, ['the']):
+                with self.subTest(segment=segment, asr=asr):
+                    self.assertEqual(align_to_ground_truth(segment, [THE], asr)[0]["per"], 0.0)
 
     def test_stray_phonemes_between_words_do_not_count(self):
         flat = ['ð', 'ə', 'ə', 'k', 'æ', 't', 'h', 's', 'æ', 't', 't']
@@ -419,6 +434,107 @@ class TestEdgeInsertions(_ScoringEnv):
         self.assertEqual(r["added"], [])
 
 
+def g2p_flat(sentence):
+    """The flat phoneme stream of a perfect reading of ``sentence`` (real G2P)."""
+    from core.grapheme_to_phoneme import grapheme_to_phoneme
+    return [p for _, phs in grapheme_to_phoneme(sentence) for p in phs]
+
+
+class TestReadingMiscues(_ScoringEnv):
+    """
+    Reading a different word that adds sounds at an edge is a real mistake.
+
+    speechocean762 speakers always attempt the right word, so the benchmark
+    cannot show these. Forgiving whole edge runs scored every one of them 0.0
+    and the child heard "Great job!".
+    """
+
+    # (sentence to read, what the child read, the word that was misread)
+    MISCUES = [
+        ("it is big", "sit is big", "it"),
+        ("we run home", "we running home", "run"),
+        ("go to the top", "go to the stop", "top"),
+        ("an egg", "man egg", "an"),
+        ("i see it", "i seeing it", "see"),
+        ("put it on", "put it upon", "on"),
+        ("the dog ran", "the dogs ran", "dog"),
+        ("i can jump", "i can jumped", "jump"),
+        ("i can jump", "my can jump", "i"),
+    ]
+
+    def _score(self, sentence, flat, asr):
+        from core.grapheme_to_phoneme import grapheme_to_phoneme
+        return align_to_ground_truth(flat, grapheme_to_phoneme(sentence), asr)
+
+    def _legacy(self, sentence, flat, asr):
+        os.environ[LEGACY_SCORING_FLAG] = "1"
+        try:
+            return self._score(sentence, flat, asr)
+        finally:
+            os.environ.pop(LEGACY_SCORING_FLAG)
+
+    def test_no_forgiveness_when_the_asr_heard_another_word(self):
+        for target, read, word in self.MISCUES:
+            with self.subTest(target=target, read=read):
+                flat = g2p_flat(read)
+                v2 = by_word(self._score(target, flat, read.split()), word)[0]
+                old = by_word(self._legacy(target, flat, read.split()), word)[0]
+                self.assertNotEqual(v2["predicted_word"], word)
+                self.assertGreater(v2["per"], 0.0)
+                self.assertEqual(v2["type"], "substitution")
+                # The ASR can only take leniency away. It never adds errors
+                # beyond what the pre-v2 scoring counted.
+                self.assertLessEqual(v2["per"], old["per"])
+
+    def test_the_miscue_guard_only_touches_the_misheard_slot(self):
+        for target, read, word in self.MISCUES:
+            with self.subTest(target=target, read=read):
+                flat = g2p_flat(read)
+                heard = self._score(target, flat, read.split())
+                agreed = self._score(target, flat, target.split())
+                self.assertEqual(
+                    [r["per"] for r in heard if r["ground_truth_word"] != word],
+                    [r["per"] for r in agreed if r["ground_truth_word"] != word],
+                )
+
+    def test_the_best_variant_still_applies_under_the_guard(self):
+        # "an" read as "man": counted against æn (one insertion), not ən (two errors).
+        r = by_word(self._score("an egg", g2p_flat("man egg"), ["man", "egg"]), "an")[0]
+        self.assertEqual(r["expected_phonemes"], ['æ', 'n'])
+        self.assertEqual(r["added"], ['m'])
+        self.assertEqual(r["per"], 0.5)
+
+        # "to" read correctly as tu, with the ASR writing "two": no insertion to
+        # forgive, and tu is still a valid pronunciation of "to".
+        r = self._score("go to", g2p_flat("go") + ['t', 'u'], ["go", "two"])[1]
+        self.assertEqual((r["ground_truth_word"], r["predicted_word"]), ("to", "two"))
+        self.assertEqual(r["expected_phonemes"], ['t', 'u'])
+        self.assertEqual(r["per"], 0.0)
+
+    def test_long_edge_runs_count_without_the_asr(self):
+        # Only one phoneme is forgiven at each edge, so a longer miscue still
+        # registers when the ASR is missing or wrote the expected word.
+        cases = [
+            ("we run home", g2p_flat("we running home"), "run", round(1 / 3, 4)),
+            ("i see it", g2p_flat("i seeing it"), "see", 0.5),
+            ("a big dog", ['ə'] + list("mɪbɪgəl") + g2p_flat("dog"), "big", round(2 / 3, 4)),
+            ("the cat sat", g2p_flat("the") + g2p_flat("scatter") + g2p_flat("sat"),
+             "cat", round(1 / 3, 4)),
+        ]
+        for target, flat, word, per in cases:
+            for asr in (None, target.split()):
+                with self.subTest(target=target, flat=flat, asr=asr):
+                    r = by_word(self._score(target, flat, asr), word)[0]
+                    self.assertEqual(r["per"], per)
+
+    def test_a_garbled_segment_containing_the_word_counts(self):
+        flat = g2p_flat("the") + list("spɪ") + g2p_flat("cat") + list("ɹʌnɪ") + g2p_flat("sat")
+        for asr in (None, ["the", "cat", "sat"]):
+            with self.subTest(asr=asr):
+                r = by_word(self._score("the cat sat", flat, asr), "cat")[0]
+                self.assertGreaterEqual(r["per"], 1.0)
+
+
 class TestLegacyWordScoringKillSwitch(_ScoringEnv):
     """WWAI_LEGACY_WORD_SCORING brings back the pre-v2 numbers exactly."""
 
@@ -434,6 +550,11 @@ class TestLegacyWordScoringKillSwitch(_ScoringEnv):
         (['ð', 'ə', 't', 'æ', 't', 's', 'æ', 't', 'ɑ', 'n', 'ð', 'ə'], GT_LONG,
          ['the', 'cat', 'sat', 'on', 'the', 'mat', 'now']),
         ([], GT_SHORT, None),
+        # Reading miscues, with and without the ASR hearing the other word.
+        (['s', 'ɪ', 't'], [('it', ['ɪ', 't'])], ['sit']),
+        (['ð', 'ə', 's', 'k', 'æ', 't', 'ə', 'r', 's', 'æ', 't'], GT_SHORT, ['the', 'scatter', 'sat']),
+        (['ð', 'ə', 's', 'k', 'æ', 't', 'ə', 'r', 's', 'æ', 't'], GT_SHORT, None),
+        (['ə', 'h', 'k', 'æ', 't'], [CAT], ['cat']),
     ]
 
     def test_kill_switch_matches_the_pre_v2_function(self):

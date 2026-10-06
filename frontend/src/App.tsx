@@ -21,9 +21,7 @@ const ClassesPage = lazy(() => import("./pages/ClassesPage.tsx"));
 const OAuthRedirect = lazy(() => import("./components/OAuthRedirect.tsx"));
 const PracticeRouter = lazy(() => import("./pages/PracticeRouter.tsx"));
 const PracticeDashboard = lazy(() => import("./pages/PracticeDashboard.tsx"));
-const UnderConstructionPage = lazy(
-  () => import("./pages/UnderConstructionPage.tsx")
-);
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage.tsx"));
 const About = lazy(() => import("./pages/About.tsx"));
 const Contact = lazy(() => import("./pages/Contact.tsx"));
 const Privacy = lazy(() => import("./pages/Privacy.tsx"));
@@ -392,7 +390,7 @@ function App() {
                     <Route path="/practice" element={<PracticeDashboard />} />
                     <Route path="/classes" element={<ClassesPage />} />
                   </Route>
-                  <Route path="*" element={<UnderConstructionPage />} />
+                  <Route path="*" element={<NotFoundPage />} />
                 </Routes>
               </Suspense>
             </ThemeProvider>

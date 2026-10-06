@@ -78,13 +78,14 @@ const Settings = () => {
   };
 
   const handleSave = async () => {
-    try {
-      await updateSettings(tempSettings);
+    // updateSettings reports failure by resolving to null rather than
+    // throwing, so this used to say "saved" even when nothing was saved.
+    const saved = await updateSettings(tempSettings);
+    if (saved) {
       setSavedStatus("Settings saved successfully!");
       setTimeout(() => setSavedStatus(""), 3000);
-    } catch (error) {
-      setSavedStatus("Failed to save settings.");
-      console.error("Settings update error:", error);
+    } else {
+      setSavedStatus("Failed to save settings. Please try again.");
     }
   };
 

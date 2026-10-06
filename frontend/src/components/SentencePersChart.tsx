@@ -19,6 +19,7 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getSentencePers } from "@/api";
 import { Skeleton } from "./ui/skeleton";
+import { parseServerDate } from "@/lib/activities";
 
 const AVG_COLOR = "oklch(0.6 0.118 184.704)";
 
@@ -38,7 +39,7 @@ const SentencePersChart = ({
       if (!token) return;
       const response = await getSentencePers(token);
       const processed = response.map((item: { date: string; per: number }) => ({
-        date: new Date(item.date),
+        date: parseServerDate(item.date),
         per: item.per,
       }));
       // Calculate rolling average over groups of 5

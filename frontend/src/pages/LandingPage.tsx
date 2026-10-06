@@ -12,6 +12,7 @@ import TrustBadgeCarousel from "@/components/TrustBadgeCarousel";
 import { googleLogin } from "@/api";
 import { GoogleIcon } from "@/components/GoogleIcon";
 import { trackSignupClick } from "@/utils/analytics";
+import { AuthContext } from "@/contexts/AuthContext";
 
 const fadeUpVariant = {
   hidden: { opacity: 0, y: 30 },
@@ -33,6 +34,10 @@ const childVariant = {
 };
 
 const LandingPage = () => {
+  // Signed-in parents get one button back into the app instead of sign-up
+  // buttons. The prerendered HTML is the signed-out version.
+  const signedIn = !!React.useContext(AuthContext).token;
+
   // Add structured data for SEO
   React.useEffect(() => {
     const structuredData = {
@@ -106,7 +111,7 @@ const LandingPage = () => {
             <div className="flex flex-col lg:flex-row items-center gap-8 md:gap-12 lg:gap-16">
               {/* Left side - Text and CTAs */}
               <motion.div
-                className="flex-1 space-y-6 md:space-y-8 text-center lg:text-left max-w-2xl"
+                className="flex-1 w-full min-w-0 space-y-6 md:space-y-8 text-center lg:text-left max-w-2xl"
                 variants={fadeUpVariant}
                 initial="hidden"
                 whileInView="visible"
@@ -130,6 +135,16 @@ const LandingPage = () => {
 
                 {/* CTAs */}
                 <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start items-center">
+                  {signedIn ? (
+                    <Button
+                      asChild
+                      size="lg"
+                      className="w-full sm:w-auto min-h-[56px] px-8 text-base font-semibold"
+                    >
+                      <Link to="/dashboard">Continue reading</Link>
+                    </Button>
+                  ) : (
+                    <>
                   {/* Primary CTA - Google Sign In */}
                   <Button
                     size="lg"
@@ -154,6 +169,8 @@ const LandingPage = () => {
                       Create Account
                     </Button>
                   </Link>
+                    </>
+                  )}
                 </div>
 
                 {/* Social proof */}

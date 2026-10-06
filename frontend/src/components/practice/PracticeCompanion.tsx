@@ -37,9 +37,10 @@ const PracticeCompanion = ({
       <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-card shadow-xs">
         <Mascot mood={mood} onCelebrateEnd={onCelebrateEnd} className="size-9" />
       </span>
-      {/* No exit animation. Old feedback only leaves while it's already
-          invisible (after the child stops reading) or when the sentence
-          changes, so a fade-out would never be seen. */}
+      {/* No exit animation. Old feedback usually leaves while it's already
+          invisible (after the child stops reading). AnimatePresence's wait
+          mode would hold the next feedback back until a fade-out finished,
+          and its default mode briefly shows two bubbles. */}
       {feedback && (
         <motion.div
           key={feedback}

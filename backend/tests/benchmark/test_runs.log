@@ -1,0 +1,2 @@
+# Every run against the sealed test half is appended here by tests/benchmark/run.py.
+# timestamp	git sha	config	reason

@@ -1,0 +1,7 @@
+data/
+cache/
+results/*.json
+!results/*.summary.json
+!results/baseline_dev.json
+!results/*_speed.json
+!results/human_reference_*.json

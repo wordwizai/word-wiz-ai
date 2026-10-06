@@ -7,7 +7,7 @@ import re
 
 import soundfile as sf
 import torch
-from core.grapheme_to_phoneme import grapheme_to_phoneme
+from core.grapheme_to_phoneme import clean_sentence, grapheme_to_phoneme
 from core.optimization_config import config
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -271,12 +271,7 @@ class PhonemeAssistant:
             status_callback("Loading audio from file...")
 
         # clean the sentence
-        attempted_sentence = (
-            (attempted_sentence.strip().lower().replace(".", "").replace(",", ""))
-            .replace("?", "")
-            .replace("!", "")
-            .replace("'", "")
-        )
+        attempted_sentence = clean_sentence(attempted_sentence)
 
         ground_truth_phonemes = grapheme_to_phoneme(attempted_sentence)
         pronunciation_data = await process_audio_array(

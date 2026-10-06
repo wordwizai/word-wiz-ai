@@ -331,6 +331,22 @@ def _convert_cached(grapheme: str, strict: bool) -> tuple:
 # ---------------------------------------------------------------------------
 
 
+def clean_sentence(sentence: str) -> str:
+    """The cleanup PhonemeAssistant.process_audio applies to a sentence before G2P.
+
+    Shared with the accuracy benchmark (backend/tests/benchmark) so both score the
+    exact same ground truth.
+    """
+    return (
+        sentence.strip().lower()
+        .replace(".", "")
+        .replace(",", "")
+        .replace("?", "")
+        .replace("!", "")
+        .replace("'", "")
+    )
+
+
 def grapheme_to_phoneme(grapheme, strict: bool | None = None) -> list[tuple]:
     """
     Converts a string of graphemes into phonemes by removing stress markers and

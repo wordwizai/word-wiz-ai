@@ -1,0 +1,161 @@
+"""Pure metric functions for the benchmark. No I/O and no core imports."""
+
+from __future__ import annotations
+
+import math
+from dataclasses import dataclass
+
+import numpy as np
+
+#: speechocean762 word rubric. 0-6 means phones wrong, the wrong word, or missed.
+WORD_MISTAKE_MAX = 6
+#: Phone rubric. 0 means incorrect or missed, 1 heavy accent, 2 correct.
+PHONE_MISTAKE_MAX = 0
+PHONE_MISTAKE_MAX_STRICT = 1
+F_BETA = 0.5
+
+
+def rounded(score: float) -> int:
+    """Round half up. Released phone scores are 5-annotator averages such as 1.8."""
+    return int(math.floor(float(score) + 0.5))
+
+
+def word_is_mistake(accuracy: float) -> bool:
+    return rounded(accuracy) <= WORD_MISTAKE_MAX
+
+
+def phone_is_mistake(accuracy: float, strict: bool = False) -> bool:
+    return rounded(accuracy) <= (PHONE_MISTAKE_MAX_STRICT if strict else PHONE_MISTAKE_MAX)
+
+
+def _ratio(num, den) -> float:
+    return float(num) / den if den else 0.0
+
+
+def f_beta_from_counts(counts, beta: float = F_BETA):
+    """F-beta from arrays shaped [..., 4] of (tp, fp, fn, tn). 0 where undefined."""
+    counts = np.asarray(counts, dtype=np.float64)
+    tp, fp, fn = counts[..., 0], counts[..., 1], counts[..., 2]
+    b2 = beta * beta
+    den = (1 + b2) * tp + b2 * fn + fp
+    with np.errstate(divide="ignore", invalid="ignore"):
+        return np.where(den > 0, (1 + b2) * tp / np.where(den > 0, den, 1), 0.0)
+
+
+@dataclass(frozen=True)
+class Counts:
+    tp: int = 0
+    fp: int = 0
+    fn: int = 0
+    tn: int = 0
+
+    @property
+    def n(self) -> int:
+        return self.tp + self.fp + self.fn + self.tn
+
+    @property
+    def precision(self) -> float:
+        return _ratio(self.tp, self.tp + self.fp)
+
+    @property
+    def recall(self) -> float:
+        return _ratio(self.tp, self.tp + self.fn)
+
+    @property
+    def false_alarm_rate(self) -> float:
+        """Share of correctly read items that the system flagged."""
+        return _ratio(self.fp, self.fp + self.tn)
+
+    def f_beta(self, beta: float = F_BETA) -> float:
+        return float(f_beta_from_counts([self.tp, self.fp, self.fn, self.tn], beta))
+
+
+def confusion(labels, flags) -> Counts:
+    if len(labels) != len(flags):
+        raise ValueError(f"labels ({len(labels)}) and flags ({len(flags)}) differ in length")
+    tp = fp = fn = tn = 0
+    for label, flag in zip(labels, flags):
+        if label and flag:
+            tp += 1
+        elif flag:
+            fp += 1
+        elif label:
+            fn += 1
+        else:
+            tn += 1
+    return Counts(tp, fp, fn, tn)
+
+
+def flags_at(scores, threshold: float) -> list[bool]:
+    return [s >= threshold for s in scores]
+
+
+def best_threshold(labels, scores, beta: float = F_BETA):
+    """(threshold, F-beta) maximizing F-beta, flagging score >= threshold.
+
+    Ties go to the higher threshold, which flags fewer words. Returns (None, 0.0) when no
+    threshold gives a positive F-beta.
+    """
+    best_t, best_f = None, 0.0
+    for t in sorted(set(scores), reverse=True):
+        f = confusion(labels, flags_at(scores, t)).f_beta(beta)
+        if f > best_f:
+            best_t, best_f = t, f
+    return best_t, best_f
+
+
+def pr_curve(labels, scores) -> list[dict]:
+    points = []
+    for t in sorted(set(scores)):
+        c = confusion(labels, flags_at(scores, t))
+        points.append({
+            "threshold": t,
+            "precision": c.precision,
+            "recall": c.recall,
+            "false_alarm_rate": c.false_alarm_rate,
+        })
+    return points
+
+
+def pearson(x, y):
+    """Pearson r, or None when undefined (fewer than 2 points or zero variance)."""
+    if len(x) != len(y):
+        raise ValueError("x and y differ in length")
+    if len(x) < 2:
+        return None
+    xa, ya = np.asarray(x, dtype=float), np.asarray(y, dtype=float)
+    if xa.std() == 0 or ya.std() == 0:
+        return None
+    return float(np.corrcoef(xa, ya)[0, 1])
+
+
+def per_speaker_counts(speakers, labels, flags) -> dict[str, np.ndarray]:
+    out: dict[str, np.ndarray] = {}
+    for speaker, label, flag in zip(speakers, labels, flags):
+        arr = out.setdefault(speaker, np.zeros(4, dtype=np.int64))
+        arr[0 if (label and flag) else 1 if flag else 2 if label else 3] += 1
+    return out
+
+
+def bootstrap_fbeta_delta(base_counts, cand_counts, n_resamples=2000, seed=0, beta=F_BETA):
+    """Paired speaker bootstrap of F-beta(candidate) minus F-beta(base).
+
+    Speakers are resampled with replacement and the same resample is applied to both
+    systems. Clips from one speaker are correlated, so resampling clips instead would
+    make noise look like signal.
+    """
+    speakers = sorted(set(base_counts) | set(cand_counts))
+    if not speakers:
+        raise ValueError("no speakers to resample")
+    zero = np.zeros(4, dtype=np.int64)
+    base = np.stack([base_counts.get(s, zero) for s in speakers])
+    cand = np.stack([cand_counts.get(s, zero) for s in speakers])
+    rng = np.random.default_rng(seed)
+    picks = rng.integers(0, len(speakers), size=(n_resamples, len(speakers)))
+    return f_beta_from_counts(cand[picks].sum(axis=1), beta) - f_beta_from_counts(base[picks].sum(axis=1), beta)
+
+
+def percentile_interval(values, level: float = 0.95) -> tuple[float, float]:
+    alpha = (1.0 - level) / 2.0
+    lo, hi = np.quantile(np.asarray(values, dtype=float), [alpha, 1.0 - alpha])
+    return float(lo), float(hi)

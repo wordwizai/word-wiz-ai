@@ -1,14 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
-import {
-  BadgeCheck,
-  BarChart3,
-  Bell,
-  House,
-  LogOut,
-  Settings,
-  Target,
-} from "lucide-react";
+import { LogOut, Settings, UserRound } from "lucide-react";
 import { useContext } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import type { AuthContextType } from "@/contexts/AuthContext";
@@ -22,22 +14,22 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { APP_NAV } from "@/config/appNav";
 
 interface MobileNavProps {
   className?: string;
 }
 
+// Same destinations as the desktop sidebar, plus Settings, which the
+// sidebar keeps in its footer.
 const navItems = [
-  { path: "/dashboard", icon: House, label: "Dashboard" },
-  { path: "/practice", icon: Target, label: "Practice" },
-  { path: "/progress", icon: BarChart3, label: "Progress" },
+  ...APP_NAV.map(({ to, icon, label }) => ({ path: to, icon, label })),
   { path: "/settings", icon: Settings, label: "Settings" },
 ];
 
@@ -111,7 +103,7 @@ const MobileNav = ({ className }: MobileNavProps) => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-              className="w-64 rounded-2xl border-2 border-border bg-card shadow-lg"
+              className="w-60"
               side="top"
               align="end"
               sideOffset={10}
@@ -138,39 +130,15 @@ const MobileNav = ({ className }: MobileNavProps) => {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <DropdownMenuItem
-                  asChild
-                  className="rounded-lg mx-2 hover:bg-secondary"
-                >
-                  <Link
-                    to="/settings#account"
-                    className="flex items-center gap-3"
-                  >
-                    <BadgeCheck size={18} className="text-primary" />
-                    <span>Account</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  asChild
-                  className="rounded-lg mx-2 hover:bg-secondary"
-                >
-                  <Link
-                    to="/settings#notifications"
-                    className="flex items-center gap-3"
-                  >
-                    <Bell size={18} className="text-primary" />
-                    <span>Notifications</span>
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={logout}
-                className="rounded-lg mx-2 hover:bg-destructive/10"
-              >
-                <LogOut size={18} className="text-destructive" />
-                <span>Log out</span>
+              <DropdownMenuItem asChild>
+                <Link to="/settings#account">
+                  <UserRound />
+                  Account
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={logout} variant="destructive">
+                <LogOut />
+                Log out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

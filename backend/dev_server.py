@@ -10,10 +10,9 @@ before anything imports database.py, and python-dotenv does not override a
 variable that is already set. The process refuses to start if the engine
 ends up pointing anywhere other than SQLite.
 
-The seed is the 13 activities from production (dev/seed_activities.json),
-any newer ones from scripts/new_activities.json, and a demo account with five
-days of reading history, so the dashboard, streak and Progress charts all
-have something to show. Log in with DEMO_EMAIL and
+The seed is the 13 real activities (dev/seed_activities.json) plus a demo
+account with five days of reading history, so the dashboard, streak and
+Progress charts all have something to show. Log in with DEMO_EMAIL and
 DEMO_PASSWORD below. They only exist inside dev/dev.db.
 
 OpenAI and Google TTS still use the keys in .env, so recording audio in a
@@ -96,40 +95,6 @@ def phoneme_analysis(per, errors):
     }
 
 
-def add_new_activities(db):
-    """Add scripts/new_activities.json entries that aren't in the DB yet.
-
-    Same skip rules as scripts/add_activities.py, and it runs on every start,
-    so an existing dev.db picks up activities added later.
-    """
-    try:
-        from scripts.add_activities import load_activities
-    except ImportError:
-        return 0
-    from models import Activity
-
-    existing = db.query(Activity).all()
-    titles = {a.title.lower() for a in existing}
-    stories = {
-        (a.activity_settings or {}).get("story_name")
-        for a in existing
-        if a.activity_type == "story"
-    }
-    to_add = [
-        a
-        for a in load_activities()
-        if a["title"].lower() not in titles
-        and not (
-            a["activity_type"] == "story"
-            and a["activity_settings"].get("story_name") in stories
-        )
-    ]
-    if to_add:
-        db.add_all(Activity(**a) for a in to_add)
-        db.commit()
-    return len(to_add)
-
-
 def seed():
     from auth.auth_handler import create_user, get_password_hash
     from database import Base, SessionLocal, engine
@@ -146,10 +111,6 @@ def seed():
                 db.add(Activity(**row))
             db.commit()
             print(f"Seeded {db.query(Activity).count()} activities")
-
-        added = add_new_activities(db)
-        if added:
-            print(f"Added {added} activities from scripts/new_activities.json")
 
         if db.query(User).filter(User.email == DEMO_EMAIL).first() is None:
             user = create_user(db, User(

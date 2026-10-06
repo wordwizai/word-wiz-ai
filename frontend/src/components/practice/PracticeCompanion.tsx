@@ -12,6 +12,9 @@ interface PracticeCompanionProps {
   mood: MascotMood;
   // Null while there's nothing to say. Then only the mascot shows.
   feedback: string | null;
+  // True while the child reads. The old feedback stays in place, unseen,
+  // so the sentence above doesn't move.
+  quiet?: boolean;
   onReplay: (() => void) | null;
   onCelebrateEnd: () => void;
 }
@@ -19,13 +22,14 @@ interface PracticeCompanionProps {
 const PracticeCompanion = ({
   mood,
   feedback,
+  quiet = false,
   onReplay,
   onCelebrateEnd,
 }: PracticeCompanionProps) => (
   <div
     className={cn(
       "flex w-full max-w-2xl items-start gap-3 rounded-2xl p-3 transition-colors duration-300 sm:p-4",
-      feedback ? "bg-muted/70" : "bg-transparent",
+      feedback && !quiet ? "bg-muted/70" : "bg-transparent",
     )}
   >
     <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-card shadow-xs">
@@ -38,7 +42,7 @@ const PracticeCompanion = ({
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0 }}
-          className="flex min-h-12 flex-1 items-start gap-3"
+          className={cn("flex min-h-12 flex-1 items-start gap-3", quiet && "invisible")}
         >
           <FeedbackAnimatedText
             feedback={feedback}

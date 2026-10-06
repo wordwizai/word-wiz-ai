@@ -53,22 +53,31 @@ const PracticeStage = ({
   const micIsSecondary = showNext || showChoices;
   const hasAttempted = showHighlightedWords || !!feedback;
 
-  // Celebrate a read the tutor praises, once per attempt. Feedback that
-  // comes back with a saved session isn't an attempt, so the trigger waits
-  // until this screen has seen the attempt being processed.
+  // An attempt runs from the moment the child starts reading until its
+  // result comes back. Results are matched by the analysis object, which is
+  // new for every attempt even when the feedback text repeats, so this
+  // doesn't depend on seeing `isProcessing` (the server's events can land in
+  // one render). Feedback restored with a saved session never opened an
+  // attempt, so it can't celebrate.
+  const [attemptOpen, setAttemptOpen] = useState(false);
   const [celebrating, setCelebrating] = useState(false);
-  const attemptInFlight = useRef(false);
+  const analysisAtStart = useRef(analysisData);
 
   useEffect(() => {
-    if (isRecording) setCelebrating(false);
-    if (isProcessing) attemptInFlight.current = true;
-  }, [isRecording, isProcessing]);
+    if (!isRecording) return;
+    setAttemptOpen(true);
+    setCelebrating(false);
+    // Anything that lands while the child is still reading belongs to an
+    // earlier attempt.
+    analysisAtStart.current = analysisData;
+  }, [isRecording, analysisData]);
 
   useEffect(() => {
-    if (!feedback || !attemptInFlight.current) return;
-    attemptInFlight.current = false;
+    if (isRecording || !attemptOpen || !feedback) return;
+    if (analysisData === analysisAtStart.current) return;
+    setAttemptOpen(false);
     if (isPraise(feedback)) setCelebrating(true);
-  }, [feedback]);
+  }, [isRecording, attemptOpen, feedback, analysisData]);
 
   const mascotMood = companionMood({
     isRecording,
@@ -140,11 +149,13 @@ const PracticeStage = ({
             splitIntoSounds={splitIntoSounds}
           />
 
-          {/* Old feedback is about the last attempt, so hide it while the
-              child reads again. */}
+          {/* While the child reads, the old feedback keeps its space (unseen)
+              so the sentence doesn't jump. Once they stop it's gone until
+              the new feedback arrives. */}
           <PracticeCompanion
             mood={mascotMood}
-            feedback={isRecording || isProcessing ? null : feedback}
+            feedback={attemptOpen && !isRecording ? null : feedback}
+            quiet={isRecording}
             onReplay={onReplayFeedback}
             onCelebrateEnd={() => setCelebrating(false)}
           />

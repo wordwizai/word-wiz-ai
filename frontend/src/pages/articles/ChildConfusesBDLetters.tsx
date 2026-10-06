@@ -476,8 +476,8 @@ const ChildConfusesBDLetters = () => {
 
   return (
     <ArticlePageTemplate
-      metaTitle="Child Confuses B and D Letters: Causes and Solutions"
-      metaDescription="Is your child confusing b and d letters? Learn why letter reversals happen, when to worry, and proven multisensory strategies to fix it in 4-6 weeks."
+      metaTitle="Child Confuses B and D? When It's Normal and How to Fix It"
+      metaDescription="Mixing up b and d is normal until about age 7 or 8 and is rarely a sign of dyslexia on its own. See when to worry, plus the bed and fist tricks that fix it."
       canonicalUrl="https://wordwizai.com/articles/child-confuses-b-d-letters"
       heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
       heroImageAlt="Child tracing b and d letters to reduce confusion"

@@ -71,7 +71,8 @@ class FakeOnnx:
             if ids and ids[-1] == token_id:
                 ids.append(pad)
             ids.append(token_id)
-        logits = np.full((1, len(ids), len(vocab)), -10.0, dtype=np.float32)
+        # Same width as the real model output (vocab_size, 44), not len(get_vocab()) (46).
+        logits = np.full((1, len(ids), self.processor.tokenizer.vocab_size), -10.0, dtype=np.float32)
         logits[0, np.arange(len(ids)), ids] = 10.0
         return logits
 

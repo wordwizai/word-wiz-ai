@@ -5,6 +5,7 @@ import re
 import time
 from typing import Optional
 from .optimization_config import config
+from .model_registry import from_pretrained_kwargs, key_for_repo
 from .audio_optimization import OptimizedAudioPreprocessor
 from .phoneme_inventory import normalization_enabled, normalize_phonemes
 
@@ -90,12 +91,16 @@ class PhonemeExtractorONNX:
             start_time = time.time()
             
             try:
+                # Pinned revision from core/model_registry.py ({} when unpinned or overridden)
+                pin_key = key_for_repo(model_name)
+                pin_kwargs = from_pretrained_kwargs(pin_key) if pin_key else {}
+
                 # Load processor (for tokenization)
-                self.processor = Wav2Vec2Processor.from_pretrained(model_name)
-                
+                self.processor = Wav2Vec2Processor.from_pretrained(model_name, **pin_kwargs)
+
                 # Load ONNX model
                 from huggingface_hub import hf_hub_download
-                onnx_path = hf_hub_download(repo_id=model_name, filename="model.onnx")
+                onnx_path = hf_hub_download(repo_id=model_name, filename="model.onnx", **pin_kwargs)
                 
                 # Create ONNX Runtime session with optimizations
                 sess_options = ort.SessionOptions()

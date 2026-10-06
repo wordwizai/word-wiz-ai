@@ -97,7 +97,8 @@ _MODELS: dict[str, ModelPin] = {
     "PHONEME_IPA_ONNX": ModelPin(
         key="PHONEME_IPA_ONNX",
         repo_id="Bobcat9/wav2vec2-timit-ipa-onnx",
-        revision=UNPINNED,  # TODO(pin): run `python -m core.model_registry --resolve`
+        # Pinned 2026-10-05 to the snapshot the accuracy benchmark baseline was built on.
+        revision="e3f5690ebe6cf47f514b34c6e27aec4a61e01569",
         purpose="wav2vec2-TIMIT-IPA, ONNX. Emits the IPA phonemes that PER is computed on.",
         consumers=(
             "backend/core/phoneme_extractor_onnx.py:PhonemeExtractorONNX.__init__",

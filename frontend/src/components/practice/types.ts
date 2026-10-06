@@ -41,6 +41,8 @@ export interface PracticeStageState {
   showHighlightedWords: boolean;
   isRecording: boolean;
   isProcessing: boolean;
+  // True while the spoken feedback is playing.
+  isFeedbackPlaying: boolean;
   audioLevel: RefObject<number>;
   onStartRecording: () => void;
   onStopRecording: () => void;

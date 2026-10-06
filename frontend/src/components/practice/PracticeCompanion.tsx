@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Volume2 } from "lucide-react";
 import Mascot, { type MascotMood } from "@/components/mascot/Mascot";
 import { FeedbackAnimatedText } from "@/components/FeedbackAnimatedText";
@@ -25,47 +25,50 @@ const PracticeCompanion = ({
   quiet = false,
   onReplay,
   onCelebrateEnd,
-}: PracticeCompanionProps) => (
-  <div
-    className={cn(
-      "flex w-full max-w-2xl items-start gap-3 rounded-2xl p-3 transition-colors duration-300 sm:p-4",
-      feedback && !quiet ? "bg-muted/70" : "bg-transparent",
-    )}
-  >
-    <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-card shadow-xs">
-      <Mascot mood={mood} onCelebrateEnd={onCelebrateEnd} className="size-9" />
-    </span>
-    {/* No exit animation. Old feedback only leaves while it's already
-        invisible (after the child stops reading) or when the sentence
-        changes, so a fade-out would never be seen. */}
-    {feedback && (
-      <motion.div
-        key={feedback}
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        className={cn(
-          "flex min-h-12 flex-1 items-start gap-3",
-          quiet && "invisible",
-        )}
-      >
-        <FeedbackAnimatedText
-          feedback={feedback}
-          className="flex-1 self-center text-base text-foreground sm:text-lg"
-        />
-        {onReplay && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onReplay}
-            aria-label="Hear this again"
-            className="shrink-0 rounded-xl text-primary hover:bg-card"
-          >
-            <Volume2 className="size-5" />
-          </Button>
-        )}
-      </motion.div>
-    )}
-  </div>
-);
+}: PracticeCompanionProps) => {
+  const reduceMotion = useReducedMotion();
+  return (
+    <div
+      className={cn(
+        "flex w-full max-w-2xl items-start gap-3 rounded-2xl p-3 transition-colors duration-300 sm:p-4",
+        feedback && !quiet ? "bg-muted/70" : "bg-transparent",
+      )}
+    >
+      <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-card shadow-xs">
+        <Mascot mood={mood} onCelebrateEnd={onCelebrateEnd} className="size-9" />
+      </span>
+      {/* No exit animation. Old feedback only leaves while it's already
+          invisible (after the child stops reading) or when the sentence
+          changes, so a fade-out would never be seen. */}
+      {feedback && (
+        <motion.div
+          key={feedback}
+          initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={cn(
+            "flex min-h-12 flex-1 items-start gap-3",
+            quiet && "invisible",
+          )}
+        >
+          <FeedbackAnimatedText
+            feedback={feedback}
+            className="flex-1 self-center text-base text-foreground sm:text-lg"
+          />
+          {onReplay && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onReplay}
+              aria-label="Hear this again"
+              className="shrink-0 rounded-xl text-primary hover:bg-card"
+            >
+              <Volume2 className="size-5" />
+            </Button>
+          )}
+        </motion.div>
+      )}
+    </div>
+  );
+};
 
 export default PracticeCompanion;

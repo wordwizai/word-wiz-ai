@@ -39,6 +39,8 @@ python main.py                                          # Uses DATABASE_URL from
 python -m tests.analysis.run_analysis_tests             # Analysis tests
 python -m tests.extraction.run_extraction_tests         # Extraction tests
 python -m tests.system.run_system_tests                 # Full E2E tests
+python -m tests.benchmark.run --name <config>           # Accuracy benchmark on speechocean762 (see tests/benchmark/README.md)
+python -m tests.benchmark.compare <base.json> <cand.json>  # Accept or reject a change against a baseline run
 ```
 
 ### Frontend (from `/frontend`)
@@ -366,6 +368,15 @@ Test JSON format example:
 - `OPENAI_API_KEY` - Required for GPT feedback
 - `DATABASE_URL` - MySQL connection string (prod)
 - `VITE_API_URL` - Frontend API base URL
+
+#### Scoring and audio flags
+`WWAI_*` flags read in `core/`. The speechocean762 benchmark (`backend/tests/benchmark/README.md`)
+decided the defaults below. Falsy values are `0`, `false`, `no` and `off`.
+- `WWAI_GT_ANCHORED_ALIGNMENT` (default on) - Align phonemes against the expected words, with the ASR transcript only as a hint. A falsy value restores the legacy ASR-driven alignment.
+- `WWAI_LEGACY_WORD_SCORING` (default off) - Kill switch for word scoring v2, which scores each word against its closest CMUdict pronunciation and forgives one stray phoneme at each edge. A truthy value goes back to primary-G2P scoring with every insertion counted.
+- `WWAI_SINGLE_PREPROCESS` and `WWAI_SOFT_QUALITY_GATES` (default on) - Preprocess the audio once instead of twice, and use the robust SNR measurement with soft quality warnings. A falsy value turns each off. Both change the audio the models receive, so the benchmark keeps a separate cache for each setting.
+- `WWAI_PHONEME_NORMALIZATION` (default off) - Rewrites recognized ʧ/ʤ to tʃ/dʒ while G2P keeps the ligatures, so every CH and JH word reads as an error. Known affricate mismatch, and the benchmark rejected it.
+- `WWAI_WEIGHTED_PER` (default off) - No effect on server scoring with GT-anchored alignment, since word scoring computes plain PER itself.
 
 ### Client-Side ML
 - Enabled per-user in `user_settings.use_client_phoneme_extraction`

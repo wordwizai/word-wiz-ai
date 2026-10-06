@@ -96,7 +96,7 @@ class TestReplay(unittest.TestCase):
         with open(path, encoding="utf-8") as fh:
             meta = json.load(fh)
         meta["word_calls"][0] = {"input_sha": meta["word_calls"][0]["input_sha"], "error_type": "ValueError", "error": "bad"}
-        meta["phoneme_calls"][0]["error_type"] = "DeepgramAuthError"
+        meta["phoneme_calls"][0]["error_type"] = "UpstreamAuthError"
         with open(path, "w", encoding="utf-8") as fh:
             json.dump(meta, fh)
         entry = R.CacheEntry(self.cache, "u1")
@@ -134,7 +134,7 @@ class TestReplay(unittest.TestCase):
         def edit(meta):
             sha = meta["phoneme_calls"][0]["input_sha"]
             meta["phoneme_calls"][0] = {
-                "input_sha": sha, "error_type": "DeepgramAuthError", "error": "401", "is_value_error": False,
+                "input_sha": sha, "error_type": "UpstreamTransientError", "error": "timeout", "is_value_error": False,
             }
 
         self._edit_meta(edit)
@@ -142,6 +142,28 @@ class TestReplay(unittest.TestCase):
         with self.assertRaises(common.ReplayedError) as ctx:
             replay.extract_phoneme(self.audio)
         self.assertNotIsInstance(ctx.exception, ValueError)
+        self.assertEqual((ctx.exception.error_type, str(ctx.exception)), ("UpstreamTransientError", "timeout"))
+
+    def test_unknown_recorded_error_is_unexpected_not_a_rejection(self):
+        # onnxruntime raises its own exception types (Fail, InvalidArgument). A crash like that
+        # must never be scored as a rejection a child would see.
+        def edit(meta):
+            sha = meta["phoneme_calls"][0]["input_sha"]
+            meta["phoneme_calls"][0] = {
+                "input_sha": sha, "error_type": "Fail", "error": "bad alloc", "is_value_error": False,
+            }
+
+        self._edit_meta(edit)
+        replay = R.ReplayPhonemeExtractor(R.CacheEntry(self.cache, "u1"), self.processor, check_inputs=False)
+        with self.assertRaises(Exception) as ctx:
+            replay.extract_phoneme(self.audio)
+        self.assertEqual(type(ctx.exception).__name__, "Fail")
+        self.assertNotIsInstance(ctx.exception, (ValueError, common.ReplayedError))
+        self.assertEqual(str(ctx.exception), "bad alloc")
+        outcome = PL.analyze_clip(self.audio, U.SAMPLE_TEXT,
+                                  R.ReplayPhonemeExtractor(R.CacheEntry(self.cache, "u1"), self.processor),
+                                  R.ReplayWordExtractor(R.CacheEntry(self.cache, "u1")))
+        self.assertEqual((outcome.status, outcome.error_type), ("rejected", "unexpected:Fail"))
 
     def test_builtin_needing_extra_constructor_arguments_replays_as_a_value_error(self):
         # UnicodeDecodeError cannot be built from one message, so it must fall back to the
@@ -161,7 +183,8 @@ class TestReplay(unittest.TestCase):
         self.assertEqual(ctx.exception.message, "x")
 
     @unittest.skipUnless(hasattr(builtins, "ExceptionGroup"), "ExceptionGroup needs Python 3.11")
-    def test_builtin_needing_extra_arguments_stays_a_plain_error_when_not_a_value_error(self):
+    def test_builtin_needing_extra_arguments_is_unexpected_when_not_a_value_error(self):
+        # A live ExceptionGroup is not an expected rejection, so its replay must not be one either.
         def edit(meta):
             sha = meta["word_calls"][0]["input_sha"]
             meta["word_calls"][0] = {
@@ -170,10 +193,25 @@ class TestReplay(unittest.TestCase):
 
         self._edit_meta(edit)
         words = R.ReplayWordExtractor(R.CacheEntry(self.cache, "u1"), check_inputs=False)
-        with self.assertRaises(common.ReplayedError) as ctx:
+        with self.assertRaises(Exception) as ctx:
             words.extract_words(self.audio)
-        self.assertNotIsInstance(ctx.exception, ValueError)
-        self.assertEqual(ctx.exception.error_type, "ExceptionGroup")
+        self.assertNotIsInstance(ctx.exception, (ValueError, common.ReplayedError))
+        self.assertEqual(type(ctx.exception).__name__, "ExceptionGroup")
+
+    def test_unknown_recorded_value_error_stays_a_value_error(self):
+        # A live ValueError of a type replay cannot rebuild (here numpy's AxisError) was an
+        # expected rejection, and the chunk loop swallowed it. Its replay must behave the same.
+        def edit(meta):
+            sha = meta["word_calls"][0]["input_sha"]
+            meta["word_calls"][0] = {
+                "input_sha": sha, "error_type": "AxisError", "error": "axis 2 is out of bounds", "is_value_error": True,
+            }
+
+        self._edit_meta(edit)
+        words = R.ReplayWordExtractor(R.CacheEntry(self.cache, "u1"), check_inputs=False)
+        with self.assertRaises(common.ReplayedValueError) as ctx:
+            words.extract_words(self.audio)
+        self.assertEqual(ctx.exception.error_type, "AxisError")
 
     def test_missing_logits_file_is_stale_not_a_recorded_error(self):
         os.remove(os.path.join(self.cache, "u1.npz"))
@@ -247,6 +285,52 @@ class TestChunkedReplay(unittest.TestCase):
             self.audio, U.SAMPLE_TEXT, R.ReplayPhonemeExtractor(entry, self.processor), R.ReplayWordExtractor(entry)
         )
         self.assertEqual(replay.to_dict(), direct.to_dict())
+
+
+class Fail(Exception):
+    """Named like onnxruntime's exception for a failed run, which is not a ValueError."""
+
+
+class TestSessionErrors(unittest.TestCase):
+    """A recorded session error replays to the outcome a live run gives."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.processor = U.real_processor_or_skip()
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.cache = os.path.join(self.tmp.name, "cache")
+        self.audio = PL.load_audio(U.SAMPLE_WAV)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _live_and_replay(self, exc):
+        def extractor():
+            return U.fake_onnx_extractor(self.processor, fail_on_call=0, exc=exc)
+
+        SC.record_clip("u1", U.SAMPLE_WAV, U.SAMPLE_TEXT, self.cache, extractor(), U.FakeWords())
+        entry = R.CacheEntry(self.cache, "u1")
+        live = PL.analyze_clip(self.audio, U.SAMPLE_TEXT, extractor(), U.FakeWords())
+        replay = PL.analyze_clip(self.audio, U.SAMPLE_TEXT, R.ReplayPhonemeExtractor(entry, self.processor),
+                                 R.ReplayWordExtractor(entry))
+        return entry, live, replay
+
+    def test_a_project_error_replays_with_the_live_type_and_message(self):
+        from core.errors import EmptyAudioError
+
+        entry, live, replay = self._live_and_replay(EmptyAudioError("no speech in the recording"))
+        self.assertEqual(entry.phoneme_calls[0]["error_type"], "EmptyAudioError")
+        self.assertEqual((live.error_type, live.error), ("EmptyAudioError", "no speech in the recording"))
+        self.assertEqual(replay.to_dict(), live.to_dict())
+
+    def test_an_unknown_runtime_error_replays_as_unexpected(self):
+        entry, live, replay = self._live_and_replay(Fail("onnxruntime could not allocate"))
+        self.assertIs(entry.phoneme_calls[0]["is_value_error"], False)
+        self.assertEqual(live.error_type, "unexpected:Fail")
+        self.assertEqual((replay.status, replay.error_type), (live.status, live.error_type))
+        self.assertTrue(replay.error.rstrip().endswith("Fail: onnxruntime could not allocate"))
 
 
 class TestErrorsBeforeTheSession(unittest.TestCase):

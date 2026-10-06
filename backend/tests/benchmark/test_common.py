@@ -129,6 +129,11 @@ class TestExceptions(unittest.TestCase):
         self.assertEqual(err.error_type, "DeepgramTimeout")
         self.assertEqual(err.message, "slow")
 
+    def test_replayed_error_text_is_the_recorded_message(self):
+        # analyze_clip stores str(exc), so a replayed rejection reads the same as the live one.
+        self.assertEqual(str(common.ReplayedError("EmptyAudioError", "no audio")), "no audio")
+        self.assertEqual(str(common.ReplayedValueError("EmptyAudioError", "no audio")), "no audio")
+
     def test_replayed_error_subclass_pickles_as_subclass(self):
         err = pickle.loads(pickle.dumps(_SubReplayedError("T", "m")))
         self.assertIs(type(err), _SubReplayedError)

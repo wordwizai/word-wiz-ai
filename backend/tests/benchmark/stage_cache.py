@@ -13,6 +13,8 @@ the gates at scoring time, which lets gate flags change without a new cache.
     python -m tests.benchmark.stage_cache --half dev
     python -m tests.benchmark.stage_cache --half dev --flag WWAI_SINGLE_PREPROCESS=1
     python -m tests.benchmark.stage_cache --half dev --retry-errors
+
+The exit code is 1 while any clip needs recording again (see entry_needs_retry).
 """
 
 from __future__ import annotations
@@ -25,6 +27,7 @@ import logging
 import os
 import sys
 import time
+from collections import Counter
 from multiprocessing import get_context
 
 import numpy as np
@@ -32,6 +35,9 @@ import numpy as np
 from . import common
 
 CACHE_META = "_cache_meta.json"
+#: If this many clips complete first and every one needs a word retry, Deepgram is down or
+#: the key is wrong, and recording the rest would only spend time.
+EARLY_ABORT_CLIPS = 20
 _models: dict = {}
 
 
@@ -155,8 +161,21 @@ def entry_has_word_error(meta: dict) -> bool:
     return False
 
 
+def entry_needs_retry(meta: dict) -> bool:
+    """A cached clip worth recording again: a retryable word failure, an ONNX session error
+    that was not a ValueError (memory or runtime failures are usually transient), or an
+    outcome the pipeline flagged as unexpected."""
+    if entry_has_word_error(meta):
+        return True
+    for call in meta.get("phoneme_calls", []):
+        if "error_type" in call and not call.get("is_value_error"):
+            return True
+    error_type = (meta.get("outcome") or {}).get("error_type") or ""
+    return error_type.startswith("unexpected:")
+
+
 def write_entry(directory, utt_id, session: RecordingSession, words: RecordingWordExtractor,
-                recorded_status: str, seconds: float) -> None:
+                outcome, seconds: float) -> dict:
     os.makedirs(directory, exist_ok=True)
     if session.logits:
         np.savez(os.path.join(directory, f"{utt_id}.npz"),
@@ -165,17 +184,19 @@ def write_entry(directory, utt_id, session: RecordingSession, words: RecordingWo
         "utt_id": utt_id,
         "phoneme_calls": session.calls,
         "word_calls": words.calls,
-        "recorded_status": recorded_status,
+        "outcome": {"status": outcome.status, "error_type": outcome.error_type, "error": outcome.error},
+        "git_sha": common.git_sha(),
         "seconds": round(seconds, 3),
     }
     tmp = os.path.join(directory, f"{utt_id}.json.tmp")
     with open(tmp, "w", encoding="utf-8") as fh:
         json.dump(meta, fh, ensure_ascii=False)
     os.replace(tmp, os.path.join(directory, f"{utt_id}.json"))  # the .json marks the entry complete
+    return meta
 
 
-def record_clip(utt_id, wav_path, text, directory, phoneme_extractor, word_inner):
-    """Record one clip with the given models. Returns (utt_id, status, word_error).
+def record_clip(utt_id, wav_path, text, directory, phoneme_extractor, word_inner) -> dict:
+    """Record one clip with the given models. Returns the entry it wrote.
 
     ``phoneme_extractor`` is a real PhonemeExtractorONNX (or a test double with the same
     attributes). It is shared between clips and never modified: the clip runs on a shallow
@@ -188,8 +209,7 @@ def record_clip(utt_id, wav_path, text, directory, phoneme_extractor, word_inner
     words = RecordingWordExtractor(word_inner)
     start = time.perf_counter()
     outcome = analyze_clip(load_audio(wav_path), text, view, words, apply_gates=False)
-    write_entry(directory, utt_id, session, words, outcome.status, time.perf_counter() - start)
-    return utt_id, outcome.status, entry_has_word_error({"word_calls": words.calls})
+    return write_entry(directory, utt_id, session, words, outcome, time.perf_counter() - start)
 
 
 def write_meta(directory: str, half: str, name: str, flags: dict) -> dict:
@@ -260,7 +280,21 @@ def _record_task(task):
     return record_clip(utt_id, wav_path, text, directory, _models["phoneme"], _models["words"])
 
 
+def _record_all(todo, workers):
+    """Record every task in worker processes and yield each entry as it completes."""
+    with get_context("spawn").Pool(processes=workers, initializer=_init_worker) as pool:
+        yield from pool.imap_unordered(_record_task, todo, chunksize=4)
+
+
 def build(half, name, flags, workers, retry_errors=False, subset=None, limit=None) -> dict:
+    """Record every clip that has no entry yet (with retry_errors, also those that need a retry).
+
+    The summary counts the outcomes recorded in this run by status and by error type.
+    ``needs_retry`` lists the clips recorded in this run that need a retry, plus cached
+    clips that need one but were skipped because retry_errors was off.
+    """
+    from contextlib import closing
+
     from .dataset import load_clips
 
     clips = load_clips(half, subset)
@@ -268,32 +302,53 @@ def build(half, name, flags, workers, retry_errors=False, subset=None, limit=Non
         clips = clips[:limit]
     directory = cache_dir(half, name)
     write_meta(directory, half, name, flags)
-    todo = []
+    todo, needs_retry = [], []
     for clip in clips:
         meta_path = os.path.join(directory, f"{clip.utt_id}.json")
         if os.path.isfile(meta_path):
-            if not retry_errors:
-                continue
             with open(meta_path, encoding="utf-8") as fh:
-                if not entry_has_word_error(json.load(fh)):
-                    continue
+                retry = entry_needs_retry(json.load(fh))
+            if not retry:
+                continue
+            if not retry_errors:
+                needs_retry.append(clip.utt_id)
+                continue
         todo.append((clip.utt_id, clip.wav_path, clip.text, directory))
     print(f"{len(clips)} clips, {len(clips) - len(todo)} cached, {len(todo)} to record into {directory}")
+    if needs_retry:
+        print(f"{len(needs_retry)} cached clips need recording again; run with --retry-errors")
 
     statuses = {"ok": 0, "rejected": 0}
+    error_types: Counter = Counter()
     word_errors = []
     if todo:
         _load_deepgram_key()  # fail fast here for the common case, before any worker starts
         if not os.getenv("DEEPGRAM_KEY"):
             raise SystemExit("DEEPGRAM_KEY is not set (environment or backend/.env)")
-        with get_context("spawn").Pool(processes=workers, initializer=_init_worker) as pool:
-            for i, (utt_id, status, word_error) in enumerate(pool.imap_unordered(_record_task, todo, chunksize=4), 1):
-                statuses[status] += 1
-                if word_error:
-                    word_errors.append(utt_id)
+        with closing(_record_all(todo, workers)) as entries:
+            for i, entry in enumerate(entries, 1):
+                outcome = entry["outcome"]
+                statuses[outcome["status"]] += 1
+                if outcome["error_type"]:
+                    error_types[outcome["error_type"]] += 1
+                if entry_has_word_error(entry):
+                    word_errors.append(entry["utt_id"])
+                if entry_needs_retry(entry):
+                    needs_retry.append(entry["utt_id"])
+                if i == EARLY_ABORT_CLIPS and len(word_errors) == i:
+                    raise SystemExit(
+                        f"Deepgram failed for every one of the first {i} clips; check the key and balance"
+                    )
                 if i % 50 == 0 or i == len(todo):
-                    print(f"  {i}/{len(todo)} recorded ({len(word_errors)} word-extraction errors)")
-    return {"cache": directory, "recorded": len(todo), "statuses": statuses, "word_errors": sorted(word_errors)}
+                    print(f"  {i}/{len(todo)} recorded ({len(needs_retry)} need a retry)")
+    return {
+        "cache": directory,
+        "recorded": len(todo),
+        "statuses": statuses,
+        "error_types": dict(sorted(error_types.items())),
+        "word_errors": sorted(word_errors),
+        "needs_retry": sorted(needs_retry),
+    }
 
 
 def main(argv=None) -> int:
@@ -321,7 +376,7 @@ def main(argv=None) -> int:
     name = args.name or common.front_end_cache_name(active)
     summary = build(args.half, name, active, args.workers, args.retry_errors, args.subset, args.limit)
     print(json.dumps(summary, indent=2))
-    return 1 if summary["word_errors"] else 0
+    return 1 if summary["needs_retry"] else 0
 
 
 if __name__ == "__main__":

@@ -63,6 +63,10 @@ class ReplayedError(Exception):
         self.error_type = error_type
         self.message = message
 
+    def __str__(self) -> str:
+        # analyze_clip stores str(exc), so the replayed outcome reads the same as the live one.
+        return self.message
+
     def __reduce__(self):
         return (type(self), (self.error_type, self.message))
 

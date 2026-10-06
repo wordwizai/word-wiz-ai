@@ -19,6 +19,7 @@ import types
 
 import numpy as np
 
+from core import errors as core_errors
 from core.audio_optimization import OptimizedAudioPreprocessor
 from core.phoneme_extractor_onnx import PhonemeExtractorONNX, default_model_output_processing
 
@@ -64,6 +65,16 @@ def load_processor():
 
 
 def _raise_recorded(call: dict):
+    """Raise a recorded exception again so that the pipeline treats it as the live run did.
+
+    1. A builtin keeps its type, so `except ValueError` and analyze_clip see the original.
+    2. Any other recorded ValueError becomes ReplayedValueError. It was an expected rejection
+       live, and process_audio_array's chunk loop swallowed it, so it must still be a ValueError.
+    3. A core.errors.WordWizError becomes ReplayedError, an expected rejection as in production.
+    4. Anything else (onnxruntime's Fail, a harness or runtime crash) becomes a fresh exception
+       class with the recorded name, so analyze_clip reports it as unexpected:<Name>. It must
+       never count as a rejection a child would see.
+    """
     error_type, message = call["error_type"], call.get("error", "")
     exc_cls = getattr(builtins, error_type, None)
     if isinstance(exc_cls, type) and issubclass(exc_cls, Exception):
@@ -71,15 +82,16 @@ def _raise_recorded(call: dict):
             exc = exc_cls(message)
         except TypeError:
             # Some builtins cannot be built from one message (UnicodeDecodeError takes five
-            # arguments). They are replayed through the types below, which respect is_value_error.
+            # arguments). They fall through to the rules below.
             pass
         else:
-            raise exc  # builtins keep their type, so `except ValueError` still matches
+            raise exc
     if call.get("is_value_error"):
-        # process_audio_array's chunk loop swallows ValueError, so a recorded ValueError subclass
-        # (for example a project exception type) must still be one when it is replayed.
         raise common.ReplayedValueError(error_type, message)
-    raise common.ReplayedError(error_type, message)
+    project_cls = getattr(core_errors, error_type, None)
+    if isinstance(project_cls, type) and issubclass(project_cls, core_errors.WordWizError):
+        raise common.ReplayedError(error_type, message)
+    raise type(error_type, (Exception,), {})(message)
 
 
 class _Replay:

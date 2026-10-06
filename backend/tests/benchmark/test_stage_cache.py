@@ -93,6 +93,56 @@ class TestEntryHasWordError(unittest.TestCase):
         self.assertFalse(SC.entry_has_word_error({}))
 
 
+_WORDS_OK = [{"input_sha": "x", "words": ["a", "b"]}]
+_OUTAGE = [{"input_sha": "x", "words": [],
+            "asr_failure": {"code": "upstream.timeout", "category": "upstream_transient", "retryable": True}}]
+
+
+def _outcome(status="ok", error_type=None):
+    return {"status": status, "error_type": error_type, "error": None if status == "ok" else "e"}
+
+
+class TestEntryNeedsRetry(unittest.TestCase):
+    def test_a_session_error_that_is_not_a_value_error_is_retried(self):
+        # Memory and runtime failures in the ONNX session are usually transient.
+        meta = {
+            "phoneme_calls": [{"input_sha": "x", "error_type": "Fail", "error": "oom", "is_value_error": False}],
+            "word_calls": _WORDS_OK,
+            "outcome": _outcome("rejected", "ReplayedError"),
+        }
+        self.assertTrue(SC.entry_needs_retry(meta))
+
+    def test_an_unexpected_outcome_is_retried(self):
+        meta = {"phoneme_calls": [], "word_calls": _WORDS_OK, "outcome": _outcome("rejected", "unexpected:KeyError")}
+        self.assertTrue(SC.entry_needs_retry(meta))
+
+    def test_a_word_error_is_retried(self):
+        self.assertTrue(SC.entry_needs_retry({"phoneme_calls": [], "word_calls": _OUTAGE, "outcome": _outcome()}))
+
+    def test_a_session_value_error_is_kept(self):
+        meta = {
+            "phoneme_calls": [{"input_sha": "x", "error_type": "ValueError", "error": "bad", "is_value_error": True}],
+            "word_calls": _WORDS_OK,
+            "outcome": _outcome("rejected", "ValueError"),
+        }
+        self.assertFalse(SC.entry_needs_retry(meta))
+
+    def test_a_genuine_empty_transcript_is_kept(self):
+        meta = {
+            "phoneme_calls": [{"input_sha": "x", "logits_key": "logits_0"}],
+            "word_calls": [{"input_sha": "x", "words": [],
+                            "asr_failure": {"code": "audio.empty", "category": "empty_audio", "retryable": False}}],
+            "outcome": _outcome("rejected", "ValueError"),
+        }
+        self.assertFalse(SC.entry_needs_retry(meta))
+
+    def test_an_ok_entry_is_kept(self):
+        meta = {"phoneme_calls": [{"input_sha": "x", "logits_key": "logits_0"}], "word_calls": _WORDS_OK,
+                "outcome": _outcome()}
+        self.assertFalse(SC.entry_needs_retry(meta))
+        self.assertFalse(SC.entry_needs_retry({}))
+
+
 class _FailingWords:
     def extract_words(self, audio, sampling_rate=16000, **_kwargs):
         raise TimeoutError("deepgram slow")
@@ -166,8 +216,8 @@ class TestWorkerStartup(unittest.TestCase):
         ):
             SC._init_worker()
         self.assertIsNone(SC._init_error)
-        with mock.patch.object(SC, "record_clip", return_value=("u", "ok", False)) as record:
-            self.assertEqual(SC._record_task(("u", "w", "t", "d")), ("u", "ok", False))
+        with mock.patch.object(SC, "record_clip", return_value={"utt_id": "u"}) as record:
+            self.assertEqual(SC._record_task(("u", "w", "t", "d")), {"utt_id": "u"})
         record.assert_called_once_with("u", "w", "t", "d", phoneme, words)
 
 
@@ -188,6 +238,125 @@ class TestBuildFailsFast(unittest.TestCase):
                 SC.build("dev", "baseline", {}, workers=1)
         self.assertIn("DEEPGRAM_KEY", str(ctx.exception))
         get_context.assert_not_called()
+
+
+def _clip(utt_id):
+    return types.SimpleNamespace(utt_id=utt_id, wav_path=f"{utt_id}.wav", text="hi there")
+
+
+def _entry(utt_id, status="ok", error_type=None, word_calls=None, phoneme_calls=None):
+    return {
+        "utt_id": utt_id,
+        "phoneme_calls": phoneme_calls or [],
+        "word_calls": _WORDS_OK if word_calls is None else word_calls,
+        "outcome": _outcome(status, error_type),
+    }
+
+
+class TestBuild(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        for patcher in (
+            mock.patch.dict(os.environ, {"WWAI_BENCH_CACHE_DIR": self.tmp.name, "DEEPGRAM_KEY": "test-key"}),
+            mock.patch.object(SC, "_load_deepgram_key"),
+            mock.patch.object(SC, "write_meta"),
+            contextlib.redirect_stdout(io.StringIO()),
+        ):
+            patcher.__enter__()
+            self.addCleanup(patcher.__exit__, None, None, None)
+        self.directory = SC.cache_dir("dev", "baseline")
+        os.makedirs(self.directory)
+
+    def _cache(self, meta):
+        with open(os.path.join(self.directory, f"{meta['utt_id']}.json"), "w", encoding="utf-8") as fh:
+            json.dump(meta, fh)
+
+    def _build(self, clips, entries, **kwargs):
+        with (
+            mock.patch("tests.benchmark.dataset.load_clips", return_value=clips),
+            mock.patch.object(SC, "_record_all", return_value=(e for e in entries)) as record_all,
+        ):
+            summary = SC.build("dev", "baseline", {}, workers=2, **kwargs)
+        return summary, record_all
+
+    def test_summary_counts_error_types_and_lists_the_clips_to_retry(self):
+        entries = [
+            _entry("u0"),
+            _entry("u1", "rejected", "EmptyAudioError"),
+            _entry("u2", "rejected", "unexpected:Fail"),
+            _entry("u3", "rejected", "EmptyAudioError", word_calls=_OUTAGE),
+        ]
+        summary, _ = self._build([_clip(e["utt_id"]) for e in entries], entries)
+        self.assertEqual(summary["recorded"], 4)
+        self.assertEqual(summary["statuses"], {"ok": 1, "rejected": 3})
+        self.assertEqual(summary["error_types"], {"EmptyAudioError": 2, "unexpected:Fail": 1})
+        self.assertEqual(summary["needs_retry"], ["u2", "u3"])
+        self.assertEqual(summary["word_errors"], ["u3"])
+
+    def test_stops_when_deepgram_fails_for_each_of_the_first_20_clips(self):
+        consumed, closed = [], []
+
+        def entries():
+            try:
+                for i in range(25):
+                    consumed.append(i)
+                    yield _entry(f"u{i:02d}", "rejected", "ValueError", word_calls=_OUTAGE)
+            finally:
+                closed.append(True)
+
+        with (
+            mock.patch("tests.benchmark.dataset.load_clips", return_value=[_clip(f"u{i:02d}") for i in range(25)]),
+            mock.patch.object(SC, "_record_all", return_value=entries()),
+        ):
+            with self.assertRaises(SystemExit) as ctx:
+                SC.build("dev", "baseline", {}, workers=2)
+        self.assertEqual(str(ctx.exception),
+                         "Deepgram failed for every one of the first 20 clips; check the key and balance")
+        self.assertEqual(len(consumed), 20)
+        self.assertEqual(closed, [True])  # the pool is shut down, not left running
+
+    def test_keeps_going_when_one_of_the_first_20_clips_has_words(self):
+        entries = [_entry(f"u{i:02d}", word_calls=_WORDS_OK if i == 7 else _OUTAGE) for i in range(25)]
+        summary, _ = self._build([_clip(e["utt_id"]) for e in entries], entries)
+        self.assertEqual(summary["recorded"], 25)
+        self.assertEqual(len(summary["needs_retry"]), 24)
+
+    def test_cached_entries_that_need_a_retry_are_reported_without_retry_errors(self):
+        self._cache(_entry("u0", word_calls=_OUTAGE))
+        self._cache(_entry("u1"))
+        summary, record_all = self._build([_clip("u0"), _clip("u1"), _clip("u2")], [_entry("u2")])
+        todo = record_all.call_args.args[0]
+        self.assertEqual([task[0] for task in todo], ["u2"])
+        self.assertEqual(summary["needs_retry"], ["u0"])
+
+    def test_retry_errors_records_again_only_what_is_worth_retrying(self):
+        session_error = [{"input_sha": "x", "error_type": "Fail", "error": "oom", "is_value_error": False}]
+        session_value_error = [{"input_sha": "x", "error_type": "ValueError", "error": "bad", "is_value_error": True}]
+        self._cache(_entry("u0", "rejected", "unexpected:Fail", phoneme_calls=session_error))
+        self._cache(_entry("u1", "rejected", "ValueError", phoneme_calls=session_value_error))
+        self._cache(_entry("u2"))
+        summary, record_all = self._build([_clip("u0"), _clip("u1"), _clip("u2")], [_entry("u0")],
+                                          retry_errors=True)
+        todo = record_all.call_args.args[0]
+        self.assertEqual([task[0] for task in todo], ["u0"])
+        self.assertEqual(summary["needs_retry"], [])
+
+
+class TestMainExitCode(unittest.TestCase):
+    def _main(self, summary):
+        with (
+            mock.patch.object(SC.common, "dotenv_wwai_keys", return_value=[]),
+            mock.patch.object(SC, "build", return_value=summary),
+            contextlib.redirect_stdout(io.StringIO()),
+        ):
+            return SC.main(["--half", "dev"])
+
+    def test_returns_1_while_clips_need_a_retry(self):
+        self.assertEqual(self._main({"needs_retry": ["u1"], "word_errors": []}), 1)
+
+    def test_returns_0_when_nothing_needs_a_retry(self):
+        self.assertEqual(self._main({"needs_retry": [], "word_errors": []}), 0)
 
 
 class TestMainRefusesDotenvFlags(unittest.TestCase):
@@ -219,12 +388,16 @@ class TestRecordClip(unittest.TestCase):
         self.tmp.cleanup()
 
     def test_writes_entry(self):
-        utt, status, word_error = SC.record_clip(
+        entry = SC.record_clip(
             "000020022", self.wav, U.SAMPLE_TEXT, self.cache, U.fake_onnx_extractor(self.processor), U.FakeWords()
         )
-        self.assertEqual((utt, status, word_error), ("000020022", "ok", False))
         with open(os.path.join(self.cache, "000020022.json"), encoding="utf-8") as fh:
             meta = json.load(fh)
+        self.assertEqual(meta, entry)  # record_clip returns what it wrote
+        self.assertEqual(meta["utt_id"], "000020022")
+        self.assertEqual(meta["outcome"], {"status": "ok", "error_type": None, "error": None})
+        self.assertRegex(meta["git_sha"], r"^([0-9a-f]{40}(-dirty)?|unknown)$")
+        self.assertFalse(SC.entry_needs_retry(meta))
         self.assertEqual(len(meta["phoneme_calls"]), 1)
         self.assertEqual(meta["phoneme_calls"][0]["logits_key"], "logits_0")
         self.assertEqual(meta["word_calls"][0]["words"], U.SAMPLE_TEXT.split())
@@ -239,12 +412,13 @@ class TestRecordClip(unittest.TestCase):
         self.assertEqual(session.calls, 1)  # the recording session passed the call through
 
     def test_word_errors_are_recorded(self):
-        _utt, status, word_error = SC.record_clip(
+        SC.record_clip(
             "000020022", self.wav, U.SAMPLE_TEXT, self.cache, U.fake_onnx_extractor(self.processor), _FailingWords()
         )
-        self.assertEqual((status, word_error), ("rejected", True))
         with open(os.path.join(self.cache, "000020022.json"), encoding="utf-8") as fh:
             meta = json.load(fh)
+        self.assertEqual(meta["outcome"]["status"], "rejected")
+        self.assertEqual(meta["outcome"]["error_type"], "unexpected:TimeoutError")
         self.assertEqual(meta["word_calls"][0]["error_type"], "TimeoutError")
         self.assertIs(meta["word_calls"][0]["is_value_error"], False)
         self.assertTrue(SC.entry_has_word_error(meta))
@@ -259,34 +433,34 @@ class TestRecordClip(unittest.TestCase):
         self.assertIs(meta["word_calls"][0]["is_value_error"], True)
 
     def _record(self, words):
-        result = SC.record_clip(
+        SC.record_clip(
             "000020022", self.wav, U.SAMPLE_TEXT, self.cache, U.fake_onnx_extractor(self.processor), words
         )
         with open(os.path.join(self.cache, "000020022.json"), encoding="utf-8") as fh:
-            return result, json.load(fh)
+            return json.load(fh)
 
     def test_retryable_failure_is_recorded_and_the_entry_is_retried(self):
-        (_utt, _status, word_error), meta = self._record(_OutageWords())
+        meta = self._record(_OutageWords())
         call = meta["word_calls"][0]
         self.assertEqual(call["words"], [])
         self.assertEqual(call["asr_failure"], {"code": "upstream.timeout", "category": "upstream", "retryable": True})
         self.assertTrue(SC.entry_has_word_error(meta))
-        self.assertTrue(word_error)
+        self.assertTrue(SC.entry_needs_retry(meta))
 
     def test_non_retryable_empty_transcript_is_kept(self):
-        (_utt, _status, word_error), meta = self._record(_EmptyTranscriptWords())
+        meta = self._record(_EmptyTranscriptWords())
         call = meta["word_calls"][0]
         self.assertEqual(call["words"], [])
         self.assertIs(call["asr_failure"]["retryable"], False)
         self.assertFalse(SC.entry_has_word_error(meta))
-        self.assertFalse(word_error)
+        self.assertFalse(SC.entry_needs_retry(meta))
 
     def test_a_clean_call_records_no_asr_failure(self):
-        _result, meta = self._record(U.FakeWords())
+        meta = self._record(U.FakeWords())
         self.assertNotIn("asr_failure", meta["word_calls"][0])
 
     def test_the_last_final_failure_wins(self):
-        _result, meta = self._record(_TwoFailuresWords())
+        meta = self._record(_TwoFailuresWords())
         self.assertEqual(meta["word_calls"][0]["asr_failure"]["code"], "audio.empty")
         self.assertFalse(SC.entry_has_word_error(meta))
 
@@ -299,7 +473,7 @@ class TestRecordClip(unittest.TestCase):
     def test_the_log_handler_is_removed_when_the_extractor_raises(self):
         logger = logging.getLogger("core.word_extractor")
         before = list(logger.handlers)
-        _result, meta = self._record(_LoggingThenRaisingWords())
+        meta = self._record(_LoggingThenRaisingWords())
         self.assertEqual(logger.handlers, before)
         self.assertEqual(meta["word_calls"][0]["error_type"], "TimeoutError")
         self.assertTrue(SC.entry_has_word_error(meta))
@@ -308,10 +482,10 @@ class TestRecordClip(unittest.TestCase):
         from core import request_audio
 
         with mock.patch.object(request_audio, "gate_audio", side_effect=request_audio.AudioRejected("no")):
-            _utt, status, _ = SC.record_clip(
+            entry = SC.record_clip(
                 "000020022", self.wav, U.SAMPLE_TEXT, self.cache, U.fake_onnx_extractor(self.processor), U.FakeWords()
             )
-        self.assertEqual(status, "ok")  # a gate that would reject was never consulted
+        self.assertEqual(entry["outcome"]["status"], "ok")  # a gate that would reject was never consulted
 
 
 if __name__ == "__main__":

@@ -23,6 +23,13 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db_user = get_user(db, user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered.")
+    # Usernames are unique in the DB; without this check a taken one fails the
+    # insert and surfaces as a 500 instead of something the form can show.
+    if db.query(User).filter(User.username == user.username).first():
+        raise HTTPException(
+            status_code=400,
+            detail="That username is taken. Please choose another one.",
+        )
     hashed_password = get_password_hash(user.password)
     try:
         db_user = User(

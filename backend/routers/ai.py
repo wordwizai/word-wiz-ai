@@ -79,6 +79,26 @@ def validate_client_phonemes(client_phonemes: str) -> Optional[list[list[str]]]:
         return None
 
 
+def get_owned_session(db: Session, session_id: int, current_user: User) -> UserSession:
+    """
+    Load a session for audio analysis, enforcing the same ownership rule as
+    routers/session.py. Without it, anyone signed in could write feedback into
+    another child's session (and run billed GPT/TTS calls against it).
+    """
+    session = get_session(db, session_id)
+    if session is None or session.activity is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Session or activity not found",
+        )
+    if session.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to access this session",
+        )
+    return session
+
+
 def get_activity_object(session: UserSession):
     """
     Build the activity object based on the session's activity type.
@@ -117,7 +137,7 @@ async def process_audio_analysis(
     """
     Common logic for processing audio analysis with or without client phonemes.
     """
-    session = get_session(db, session_id)
+    session = get_owned_session(db, session_id, current_user)
     
     # Validate session and get activity object
     activity_object = get_activity_object(session)
@@ -317,7 +337,20 @@ async def websocket_audio_analysis(websocket: WebSocket):
             # Wait for messages from client
             print(f"⏳ [{time.time()}] Waiting for WebSocket message...")
             receive_start = time.time()
-            data = await websocket.receive_json()
+            raw_message = await websocket.receive_text()
+            # Parse here rather than with receive_json(): a malformed frame
+            # used to escape the loop and leave an open socket that never
+            # answered again, so the app looked connected but hung.
+            try:
+                data = json.loads(raw_message)
+            except json.JSONDecodeError:
+                data = None
+            if not isinstance(data, dict):
+                await websocket.send_json({
+                    "type": "error",
+                    "data": {"message": "Something went wrong sending your recording. Please try again."}
+                })
+                continue
             receive_time = time.time() - receive_start
             print(f"📨 [{time.time()}] Message received in {receive_time:.3f}s, size: {len(str(data))} bytes")
             
@@ -366,22 +399,25 @@ async def websocket_audio_analysis(websocket: WebSocket):
                 audio_bytes = base64.b64decode(audio_base64)
                 print(f"⏱️  Base64 decode took {time.time() - decode_start:.3f}s")
             except Exception as e:
+                # The raw decoder error means nothing to a parent; log it instead.
+                print(f"❌ Failed to decode audio: {e}")
                 await websocket.send_json({
                     "type": "error",
-                    "data": {"message": f"Failed to decode audio: {str(e)}"}
+                    "data": {"message": "We couldn't read that recording. Please try recording again."}
                 })
                 continue
-            
+
             # Get session and activity
             try:
                 session_start = time.time()
-                session = get_session(db, session_id)
+                session = get_owned_session(db, int(session_id), current_user)
                 activity_object = get_activity_object(session)
                 print(f"⏱️  Session/activity lookup took {time.time() - session_start:.3f}s")
             except Exception as e:
+                print(f"❌ Invalid session {session_id!r}: {e}")
                 await websocket.send_json({
                     "type": "error",
-                    "data": {"message": f"Invalid session: {str(e)}"}
+                    "data": {"message": "We couldn't find this practice session. Please go back to the dashboard and start it again."}
                 })
                 continue
             
@@ -414,9 +450,10 @@ async def websocket_audio_analysis(websocket: WebSocket):
                         await asyncio.sleep(0)
             
             except Exception as e:
+                print(f"❌ Audio processing failed: {e}")
                 await websocket.send_json({
                     "type": "error",
-                    "data": {"message": f"Processing failed: {str(e)}"}
+                    "data": {"message": "Something went wrong while checking your reading. Please try again."}
                 })
     
     except WebSocketDisconnect:

@@ -390,7 +390,8 @@ class TestHandlerGates(unittest.TestCase, FlagMixin):
             with self.assertRaises(self.HTTPException) as ctx:
                 self.run_handler(audio)
         self.assertEqual(ctx.exception.status_code, 400)
-        self.assertIn("SNR", ctx.exception.detail)
+        # The SNR gate's message (it no longer quotes the dB figure to families).
+        self.assertIn("too noisy", ctx.exception.detail)
         print(f"\n  flag OFF -> 400: {ctx.exception.detail[:60]}...")
 
     def test_flag_on_accepts_speech_starting_at_t0(self):

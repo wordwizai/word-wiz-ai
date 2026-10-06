@@ -6,7 +6,9 @@ import os
 from routers import ai, auth, google_auth, session, user, activities, feedback, health, classes
 from starlette.middleware.sessions import SessionMiddleware
 
-app = FastAPI(debug=True)
+# debug=True returns full tracebacks (SQL, parameters, file paths) in 500
+# responses, so it stays off unless explicitly enabled for local work.
+app = FastAPI(debug=os.getenv("FASTAPI_DEBUG") == "1")
 
 # Create the database tables
 Base.metadata.create_all(bind=engine)
@@ -16,6 +18,8 @@ origins = [
     "https://wordwizai.com",
     "https://www.wordwizai.com",
 ]
+# Comma-separated extras for local work (dev_server.py sets this); unset in prod.
+origins += [o for o in os.getenv("EXTRA_CORS_ORIGINS", "").split(",") if o]
 
 app.add_middleware(
     CORSMiddleware,

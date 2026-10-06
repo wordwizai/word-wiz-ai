@@ -12,6 +12,7 @@ else fails, including a stale cache entry and a mismatch between replay and the 
 
 import os
 import unittest
+from unittest import mock
 
 from tests.benchmark import common
 from tests.benchmark import pipeline as PL
@@ -97,6 +98,12 @@ class TestLiveParity(unittest.TestCase):
                 cls.processor = load_processor()
         except OSError as exc:
             raise unittest.SkipTest(f"ONNX model or processor not available: {exc}")
+
+        # The baseline cache was recorded with single preprocessing and soft quality gates off.
+        # Both are on by default now, so the live run has to switch them off to be comparable.
+        front_end = mock.patch.dict(os.environ, {"WWAI_SINGLE_PREPROCESS": "0", "WWAI_SOFT_QUALITY_GATES": "0"})
+        front_end.start()
+        cls.addClassCleanup(front_end.stop)
 
     def test_long_clips_take_the_chunked_path(self):
         from tests.benchmark.replay import CacheEntry

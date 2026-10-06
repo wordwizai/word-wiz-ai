@@ -29,7 +29,9 @@ def _quiet():
 
 class TestGates(unittest.TestCase):
     def setUp(self):
+        # Soft gates are the default, so the hard gates have to be asked for.
         self._saved = os.environ.pop("WWAI_SOFT_QUALITY_GATES", None)
+        os.environ["WWAI_SOFT_QUALITY_GATES"] = "0"
         self.speech, self.sr = sf.read(SAMPLE_WAV, dtype="float32")
 
     def tearDown(self):
@@ -47,7 +49,7 @@ class TestGates(unittest.TestCase):
     def test_hard_gates_reject_with_the_exact_message(self):
         # Mocked reports, because the legacy analyzer measures 60 dB SNR and 0% silence on
         # all-zero audio, so real silence never reaches the hard SNR or silence gates.
-        # setUp already unset WWAI_SOFT_QUALITY_GATES, so these are the default hard gates.
+        # setUp set WWAI_SOFT_QUALITY_GATES=0, so these are the hard gates.
         cases = [
             ("low SNR", 2.0, 0.0, 0.0,
              "It was too noisy to hear the words clearly. Try somewhere quieter, "
@@ -72,6 +74,17 @@ class TestGates(unittest.TestCase):
         os.environ["WWAI_SOFT_QUALITY_GATES"] = "1"
         with _quiet(), self.assertRaises(R.AudioRejected):
             R.gate_audio(np.zeros(32000, dtype=np.float32), 16000)
+
+    def test_soft_gates_are_the_default(self):
+        # A report the hard gates would refuse (2 dB SNR) only gets a warning when the flag is unset.
+        os.environ.pop("WWAI_SOFT_QUALITY_GATES", None)
+        report = {"quality_level": "poor", "quality_score": 10.0, "snr_db": 2.0,
+                  "clipping_percentage": 0.0, "silence_percentage": 0.0,
+                  "issues": [], "recommendations": []}
+        out = {}
+        with mock.patch.object(R.AudioQualityAnalyzer, "analyze_audio_quality", return_value=report), _quiet():
+            self.assertIs(R.gate_audio(self.speech, self.sr, quality_out=out), report)
+        self.assertIn("quality_warning", out)
 
     def test_rejection_is_a_value_error(self):
         self.assertTrue(issubclass(R.AudioRejected, ValueError))
@@ -100,7 +113,9 @@ class TestSpeechActivity(unittest.TestCase):
     MESSAGE = "We could barely hear you. Read the sentence out loud, close to the microphone."
 
     def setUp(self):
+        # Soft gates are the default, so the hard gates have to be asked for.
         self._saved = os.environ.pop("WWAI_SOFT_QUALITY_GATES", None)
+        os.environ["WWAI_SOFT_QUALITY_GATES"] = "0"
         self.audio = np.zeros(16000, dtype=np.float32)
 
     def tearDown(self):
@@ -139,13 +154,17 @@ class TestSpeechActivity(unittest.TestCase):
         with self._measured(20.0), _quiet():
             self.assertEqual(R.check_speech_activity(self.audio), 20.0)
 
+    def test_low_speech_only_warns_by_default(self):
+        os.environ.pop("WWAI_SOFT_QUALITY_GATES", None)
+        out = {}
+        with self._measured(20.0), _quiet():
+            self.assertEqual(R.check_speech_activity(self.audio, out), 20.0)
+        self.assertIn(self.HINT, out["quality_warning"]["hints"])
+
     def test_enough_speech_passes_in_both_modes_and_leaves_quality_out_alone(self):
         for soft in (False, True):
             with self.subTest(soft=soft):
-                if soft:
-                    os.environ["WWAI_SOFT_QUALITY_GATES"] = "1"
-                else:
-                    os.environ.pop("WWAI_SOFT_QUALITY_GATES", None)
+                os.environ["WWAI_SOFT_QUALITY_GATES"] = "1" if soft else "0"
                 out = {}
                 with self._measured(45.0), _quiet():
                     self.assertEqual(R.check_speech_activity(self.audio, out), 45.0)

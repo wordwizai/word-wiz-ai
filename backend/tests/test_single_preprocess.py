@@ -27,7 +27,9 @@ the numbers each test prints are the evidence:
 
 These tests quantify all of the above, verify the flag suppresses the redundant
 pass, verify the flag OFF path is bit-identical to the historical behavior, and
-verify a sample-rate mismatch is no longer silently mislabelled.
+verify a sample-rate mismatch is no longer silently mislabelled. The flag is ON
+by default (the speechocean762 benchmark accepted it together with
+WWAI_SOFT_QUALITY_GATES); "flag OFF" below means WWAI_SINGLE_PREPROCESS=0.
 
 No network, no models, no pytest. Run from the backend/ directory:
 
@@ -223,8 +225,8 @@ def one_pass(audio):
 
 
 def triple_pass(audio):
-    """Today's behavior with the flag unset: NR+norm twice."""
-    with flag(None):
+    """The historical behavior, with the flag set to 0: NR+norm twice."""
+    with flag("0"):
         reset_preprocessing_state()
         a = quiet(preprocess_audio, audio.copy(), sr=SR)
         a = quiet(preprocess_audio, a, sr=SR)
@@ -244,18 +246,26 @@ class TestSinglePreprocessFlag(unittest.TestCase):
     def tearDown(self):
         reset_preprocessing_state()
 
-    def test_flag_default_off(self):
+    def test_flag_default_on(self):
         with flag(None):
-            self.assertFalse(single_preprocess_enabled())
-        with flag("false"):
-            self.assertFalse(single_preprocess_enabled())
-        with flag("true"):
             self.assertTrue(single_preprocess_enabled())
-        with flag("1"):
-            self.assertTrue(single_preprocess_enabled())
+        for value in ("", "1", "true", "TRUE", "yes", "on", "anything else"):
+            with self.subTest(value=value), flag(value):
+                self.assertTrue(single_preprocess_enabled())
+        for value in ("0", "false", "False", "no", "off", " OFF "):
+            with self.subTest(value=value), flag(value):
+                self.assertFalse(single_preprocess_enabled())
+
+    def test_flag_unset_skips_the_redundant_pass(self):
+        with flag(None):
+            reset_preprocessing_state()
+            first = quiet(preprocess_audio, self.audio.copy(), sr=SR,
+                          already_preprocessed=False)
+            second = quiet(preprocess_audio, first, sr=SR, already_preprocessed=None)
+            self.assertIs(second, first, "single preprocessing is the default")
 
     def test_flag_off_runs_every_pass_identically_to_legacy(self):
-        """Flag OFF must reproduce today's double-preprocess output EXACTLY.
+        """Flag OFF must reproduce the historical double-preprocess output EXACTLY.
 
         The legacy reference below is written out independently (adaptive noise
         reduction + peak normalize, applied twice) rather than reusing the flag
@@ -291,7 +301,7 @@ class TestSinglePreprocessFlag(unittest.TestCase):
 
     def test_explicit_already_preprocessed_ignored_when_flag_off(self):
         """already_preprocessed=True must NOT short-circuit while the flag is off."""
-        with flag(None):
+        with flag("0"):
             reset_preprocessing_state()
             src = self.audio.copy()
             out = quiet(preprocess_audio, src, sr=SR, already_preprocessed=True)
@@ -391,13 +401,13 @@ class TestAsyncRequestShape(unittest.TestCase):
     def test_flag_off_always_runs_both_passes(self):
         import asyncio
 
-        with flag(None):
+        with flag("0"):
             reset_preprocessing_state()
             first, second = asyncio.run(self._request(self.audio.copy(), True))
             self.assertIsNot(second, first)
             self.assertLess(len(second), len(first),
-                            "flag OFF keeps today's double pass, including its "
-                            "50 ms of extra truncation")
+                            "flag OFF keeps the historical double pass, including "
+                            "its 50 ms of extra truncation")
 
 
 class TestDoublePreprocessDamage(unittest.TestCase):

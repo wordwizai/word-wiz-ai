@@ -659,7 +659,7 @@ async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=
     # already_preprocessed=None -> auto-detect. If the request handler already ran
     # the single preprocessing pass on this exact array, skip it here instead of
     # applying a second round of noise reduction + normalization
-    # (WWAI_SINGLE_PREPROCESS; unset = every pass runs, as before).
+    # (WWAI_SINGLE_PREPROCESS, default ON; set it to 0 and every pass runs, as before).
     audio_array = preprocess_audio(audio=audio_array, sr=sampling_rate, audio_length_seconds=audio_duration, already_preprocessed=None)
     
     # Check if audio should be chunked

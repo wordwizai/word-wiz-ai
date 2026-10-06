@@ -34,33 +34,105 @@ class TestFlags(unittest.TestCase):
         with self.assertRaises(ValueError):
             common.parse_flag_args(["WWAI_BENCH_DATA_DIR=x"])
 
+    # The code's default front end: single preprocessing and soft quality gates both on.
+    DEFAULTS = "WWAI_SINGLE_PREPROCESS=1+WWAI_SOFT_QUALITY_GATES=1"
+    BOTH_OFF = {"WWAI_SINGLE_PREPROCESS": "0", "WWAI_SOFT_QUALITY_GATES": "0"}
+
     def test_front_end_cache_name(self):
-        self.assertEqual(common.front_end_cache_name({}), "baseline")
-        self.assertEqual(common.front_end_cache_name({"WWAI_WEIGHTED_PER": "1"}), "baseline")
+        # The name follows the effective settings, so no flags means the code defaults.
+        self.assertEqual(common.front_end_cache_name({}), self.DEFAULTS)
+        self.assertEqual(common.front_end_cache_name({"WWAI_WEIGHTED_PER": "1"}), self.DEFAULTS)
         self.assertEqual(
             common.front_end_cache_name({"WWAI_SINGLE_PREPROCESS": "1", "WWAI_WEIGHTED_PER": "1"}),
-            "WWAI_SINGLE_PREPROCESS=1",
+            self.DEFAULTS,
         )
-        self.assertEqual(common.front_end_cache_name({"WWAI_SINGLE_PREPROCESS": ""}), "baseline")
+        self.assertEqual(common.front_end_cache_name({"WWAI_SINGLE_PREPROCESS": ""}), self.DEFAULTS)
+        self.assertEqual(
+            common.front_end_cache_name({"WWAI_SINGLE_PREPROCESS": "0"}), "WWAI_SOFT_QUALITY_GATES=1"
+        )
+        self.assertEqual(
+            common.front_end_cache_name({"WWAI_SOFT_QUALITY_GATES": "0"}), "WWAI_SINGLE_PREPROCESS=1"
+        )
+        self.assertEqual(common.front_end_cache_name(self.BOTH_OFF), "baseline")
 
     def test_soft_quality_gates_is_a_boolean_front_end_flag(self):
         # It also switches the SNR measurement that drives adaptive noise reduction, so it changes
         # the audio the models receive and the baseline cache goes stale under it.
         self.assertIn("WWAI_SOFT_QUALITY_GATES", common.FRONT_END_FLAGS)
+        self.assertEqual(common.front_end_cache_name({"WWAI_SOFT_QUALITY_GATES": "1"}), self.DEFAULTS)
         self.assertEqual(
-            common.front_end_cache_name({"WWAI_SOFT_QUALITY_GATES": "1"}), "WWAI_SOFT_QUALITY_GATES=1"
+            common.front_end_cache_name({"WWAI_SOFT_QUALITY_GATES": "0"}), "WWAI_SINGLE_PREPROCESS=1"
         )
-        self.assertEqual(common.front_end_cache_name({"WWAI_SOFT_QUALITY_GATES": "0"}), "baseline")
 
-    def test_front_end_cache_name_treats_falsy_booleans_as_unset(self):
-        for value in ("0", "false", "False", "no", "OFF"):
-            self.assertEqual(common.front_end_cache_name({"WWAI_SINGLE_PREPROCESS": value}), "baseline")
-            self.assertEqual(common.front_end_cache_name({"WWAI_CHUNK_PRESERVE_PAUSES": value}), "baseline")
-            self.assertEqual(common.front_end_cache_name({"WWAI_SOFT_QUALITY_GATES": value}), "baseline")
+    def test_front_end_cache_name_treats_falsy_booleans_as_off(self):
+        for value in ("0", "false", "False", "no", "OFF", " off "):
+            with self.subTest(value=value):
+                self.assertEqual(
+                    common.front_end_cache_name({"WWAI_SINGLE_PREPROCESS": value}), "WWAI_SOFT_QUALITY_GATES=1"
+                )
+                self.assertEqual(
+                    common.front_end_cache_name({"WWAI_SOFT_QUALITY_GATES": value}), "WWAI_SINGLE_PREPROCESS=1"
+                )
+                self.assertEqual(
+                    common.front_end_cache_name({"WWAI_CHUNK_PRESERVE_PAUSES": value}), self.DEFAULTS
+                )
         self.assertEqual(
             common.front_end_cache_name({"WWAI_CHUNK_OVERLAP_SECONDS": "0.5"}),
+            "WWAI_CHUNK_OVERLAP_SECONDS=0.5+" + self.DEFAULTS,
+        )
+        self.assertEqual(
+            common.front_end_cache_name({**self.BOTH_OFF, "WWAI_CHUNK_OVERLAP_SECONDS": "0.5"}),
             "WWAI_CHUNK_OVERLAP_SECONDS=0.5",
         )
+
+    def test_a_boolean_that_is_on_is_named_by_its_effect_not_its_spelling(self):
+        for value in ("1", "true", "YES", "on"):
+            with self.subTest(value=value):
+                self.assertEqual(common.front_end_cache_name({"WWAI_SINGLE_PREPROCESS": value}), self.DEFAULTS)
+                self.assertEqual(
+                    common.front_end_cache_name({**self.BOTH_OFF, "WWAI_CHUNK_PRESERVE_PAUSES": value}),
+                    "WWAI_CHUNK_PRESERVE_PAUSES=1",
+                )
+
+    def test_the_existing_caches_keep_their_names(self):
+        # Built before the defaults changed. Each name must still mean the same front end.
+        self.assertEqual(common.front_end_cache_name(self.BOTH_OFF), "baseline")
+        self.assertEqual(
+            common.front_end_cache_name({"WWAI_SINGLE_PREPROCESS": "1", "WWAI_SOFT_QUALITY_GATES": "1"}),
+            "WWAI_SINGLE_PREPROCESS=1+WWAI_SOFT_QUALITY_GATES=1",
+        )
+        self.assertEqual(
+            common.front_end_cache_name({"WWAI_SINGLE_PREPROCESS": "1", "WWAI_SOFT_QUALITY_GATES": "0"}),
+            "WWAI_SINGLE_PREPROCESS=1",
+        )
+        self.assertEqual(
+            common.front_end_cache_name({"WWAI_SINGLE_PREPROCESS": "0", "WWAI_SOFT_QUALITY_GATES": "1"}),
+            "WWAI_SOFT_QUALITY_GATES=1",
+        )
+
+    def test_front_end_defaults_match_the_code(self):
+        # common.py must not import core, so the defaults are written out there. Keep them honest.
+        self.assertEqual(
+            common.FRONT_END_DEFAULTS, {"WWAI_SINGLE_PREPROCESS": "1", "WWAI_SOFT_QUALITY_GATES": "1"}
+        )
+        self.assertLessEqual(set(common.FRONT_END_DEFAULTS), set(common._BOOLEAN_FRONT_END_FLAGS))
+        from core.audio_chunking import preserve_pauses_enabled
+        from core.audio_preprocessing import single_preprocess_enabled
+        from core.audio_quality_analyzer import soft_quality_gates_enabled
+
+        readers = {
+            "WWAI_SINGLE_PREPROCESS": single_preprocess_enabled,
+            "WWAI_SOFT_QUALITY_GATES": soft_quality_gates_enabled,
+            "WWAI_CHUNK_PRESERVE_PAUSES": preserve_pauses_enabled,
+        }
+        self.assertEqual(set(readers), set(common._BOOLEAN_FRONT_END_FLAGS))
+        with mock.patch.dict(os.environ):
+            for name in common.FRONT_END_FLAGS:
+                os.environ.pop(name, None)
+            for name, reader in readers.items():
+                with self.subTest(flag=name):
+                    default = common.FRONT_END_DEFAULTS.get(name, "")
+                    self.assertEqual(reader(), common.env_flag(name, {name: default}))
 
     def test_front_end_cache_name_rejects_unsafe_values(self):
         for bad in ("..\\x", "a:b", "a*b"):

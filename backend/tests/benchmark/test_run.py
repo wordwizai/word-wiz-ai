@@ -367,6 +367,9 @@ class TestEndToEnd(unittest.TestCase):
         self.real_ledger = common.TEST_RUNS_LOG
         self.ledger = os.path.join(self.tmp.name, "test_runs.log")
         env = {common.DATA_DIR_ENV: self.tmp.name, common.CACHE_DIR_ENV: self.cache_root}
+        # The old front end, so the fixture cache is still the one named "baseline". These tests
+        # are about run.py, not about which front end the code defaults to.
+        env.update({"WWAI_SINGLE_PREPROCESS": "0", "WWAI_SOFT_QUALITY_GATES": "0"})
         self.env = mock.patch.dict(os.environ, env)
         self.env.start()
         self.dotenv = mock.patch.object(common, "dotenv_wwai_keys", return_value=[])

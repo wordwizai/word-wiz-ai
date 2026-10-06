@@ -151,7 +151,7 @@ async def load_and_preprocess_audio_bytes(
     # This is THE preprocessing pass for this request. Record it here (not inside
     # the worker thread - asyncio.to_thread runs on a copied context, so a mark
     # set in there would be discarded) so later stages can skip redundant noise
-    # reduction / normalization when WWAI_SINGLE_PREPROCESS is enabled.
+    # reduction / normalization when WWAI_SINGLE_PREPROCESS is enabled (the default).
     from core.audio_preprocessing import mark_preprocessed
     mark_preprocessed(audio_array)
 

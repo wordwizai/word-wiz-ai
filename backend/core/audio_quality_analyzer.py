@@ -30,20 +30,23 @@ logger = logging.getLogger(__name__)
 #   2. whether audio_processing_handler treats quality problems as hard HTTP
 #      400 rejections or as soft warnings attached to the response.
 #
-# It defaults to OFF. With the flag unset every number this module produces and
-# every rejection the handler raises is identical to the pre-change behavior.
+# It defaults to ON: the speechocean762 benchmark accepted it together with
+# WWAI_SINGLE_PREPROCESS. Set it to a falsy value ("0", "false", "no", "off")
+# and every number this module produces and every rejection the handler raises
+# is identical to the pre-change behavior.
 # ---------------------------------------------------------------------------
 
-_TRUTHY = ("1", "true", "yes", "on")
+_FALSY = ("0", "false", "no", "off")
 
 
 def soft_quality_gates_enabled() -> bool:
-    """Return True when WWAI_SOFT_QUALITY_GATES is set to a truthy value.
+    """Return True unless WWAI_SOFT_QUALITY_GATES is set to a falsy value (default ON).
 
-    Read at call time (not import time) so tests and deployments can toggle it
-    without reimporting the module.
+    Only "0", "false", "no" or "off" (any case) turn it off; unset, empty or any
+    other value keeps the default. Read at call time (not import time) so tests
+    and deployments can toggle it without reimporting the module.
     """
-    return os.getenv("WWAI_SOFT_QUALITY_GATES", "0").strip().lower() in _TRUTHY
+    return os.getenv("WWAI_SOFT_QUALITY_GATES", "").strip().lower() not in _FALSY
 
 
 class AudioQualityAnalyzer:

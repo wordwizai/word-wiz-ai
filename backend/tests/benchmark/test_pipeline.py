@@ -41,11 +41,8 @@ class _Records:
 
 @contextlib.contextmanager
 def _gates(soft):
-    """Hard gates (the default) or soft gates, whatever the environment says."""
-    with mock.patch.dict(os.environ):
-        os.environ.pop("WWAI_SOFT_QUALITY_GATES", None)
-        if soft:
-            os.environ["WWAI_SOFT_QUALITY_GATES"] = "1"
+    """Soft gates (the default) or hard gates, whatever the environment says."""
+    with mock.patch.dict(os.environ, {"WWAI_SOFT_QUALITY_GATES": "1" if soft else "0"}):
         yield
 
 

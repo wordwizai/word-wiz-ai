@@ -53,6 +53,11 @@ _NOT_FLAGS = ("WWAI_HOST", "WWAI_USER", "WWAI_KEY")
 _TRUTHY = {"1", "true", "yes", "on"}
 _FALSY = {"", "0", "false", "no", "off"}
 _BOOLEAN_FRONT_END_FLAGS = ("WWAI_SINGLE_PREPROCESS", "WWAI_SOFT_QUALITY_GATES", "WWAI_CHUNK_PRESERVE_PAUSES")
+
+#: The code's defaults for boolean front-end flags that are ON unless set to "0", "false", "no"
+#: or "off". Every other boolean front-end flag defaults to OFF. This module cannot import core
+#: to ask, so test_common checks these against core.
+FRONT_END_DEFAULTS = {"WWAI_SINGLE_PREPROCESS": "1", "WWAI_SOFT_QUALITY_GATES": "1"}
 _CACHE_NAME_VALUE = re.compile(r"[\w.\-]+")
 _STATUS_EXCLUDES = (
     ":(exclude)backend/tests/benchmark/test_runs.log",
@@ -157,14 +162,30 @@ def dotenv_wwai_keys(path: str | None = None) -> list[str]:
     return sorted(k for k in dotenv_values(path) if is_experiment_flag(k))
 
 
+def _boolean_front_end_flag_on(key: str, flags: dict[str, str]) -> bool:
+    """The effective value of a boolean front-end flag: its value in ``flags`` when set and not
+    empty, else the code default."""
+    value = str(flags.get(key, "")).strip().lower() or FRONT_END_DEFAULTS.get(key, "")
+    return value not in _FALSY
+
+
 def front_end_cache_name(flags: dict[str, str]) -> str:
-    """Default cache for a flag set. 'baseline' unless a front-end flag is set."""
+    """Default cache for a flag set (normally the environment's WWAI_* flags).
+
+    The name follows the front end the code will actually run, not only the flags that are
+    set. It lists every boolean front-end flag that is effectively ON (set truthy, or unset
+    with a default of ON, see FRONT_END_DEFAULTS) as ``NAME=1``, plus every numeric front-end
+    flag that is set. It is 'baseline' when that list is empty, which now needs
+    WWAI_SINGLE_PREPROCESS=0 and WWAI_SOFT_QUALITY_GATES=0.
+    """
     parts = []
-    for key in sorted(flags):
-        if key not in FRONT_END_FLAGS:
+    for key in sorted(FRONT_END_FLAGS):
+        if key in _BOOLEAN_FRONT_END_FLAGS:
+            if _boolean_front_end_flag_on(key, flags):
+                parts.append(f"{key}=1")
             continue
-        value = str(flags[key])
-        if value == "" or (key in _BOOLEAN_FRONT_END_FLAGS and value.strip().lower() in _FALSY):
+        value = str(flags.get(key, ""))
+        if value == "":
             continue
         if not _CACHE_NAME_VALUE.fullmatch(value):
             raise ValueError(

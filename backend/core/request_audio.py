@@ -43,7 +43,7 @@ def gate_audio(audio_array: np.ndarray, sample_rate: int, quality_out: dict | No
         quality_out['quality_info'] = quality_info
 
     if soft_quality_gates_enabled():
-        # SOFT GATES (WWAI_SOFT_QUALITY_GATES=1)
+        # SOFT GATES (the default; WWAI_SOFT_QUALITY_GATES unset or truthy)
         #
         # Reject only audio we genuinely cannot process: nothing received, or
         # true digital silence. A noisy, clipped or pause-heavy recording is
@@ -61,7 +61,7 @@ def gate_audio(audio_array: np.ndarray, sample_rate: int, quality_out: dict | No
             if quality_out is not None:
                 quality_out['quality_warning'] = quality_warning
     else:
-        # HARD GATES (default). Unchanged behavior.
+        # HARD GATES (WWAI_SOFT_QUALITY_GATES=0). The pre-change behavior.
         if quality_info['snr_db'] < 5.0:
             raise AudioRejected(
                 "It was too noisy to hear the words clearly. Try somewhere quieter, "

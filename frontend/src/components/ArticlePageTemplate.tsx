@@ -24,6 +24,8 @@ import LandingPageNavbar from "@/components/LandingPageNavbar";
 import LandingPageFooter from "@/components/LandingPageFooter";
 import { DEFAULT_OG_IMAGE } from "@/components/SeoHead";
 import { trackSignupClick } from "@/utils/analytics";
+import { getPracticeLinksForArticle } from "@/data/articlePracticeLinks";
+import { phonicsPatterns } from "@/data/phonicsPatterns";
 
 // ===== TYPES & INTERFACES =====
 
@@ -363,6 +365,48 @@ const RelatedArticlesComponent: React.FC<{ articles: RelatedArticle[] }> = ({
   </Card>
 );
 
+const PracticeWordListsCard: React.FC<{ canonicalUrl: string }> = ({
+  canonicalUrl,
+}) => {
+  const path = new URL(canonicalUrl).pathname;
+  const patterns = getPracticeLinksForArticle(path);
+
+  return (
+    <Card className="mt-12">
+      <CardHeader>
+        <CardTitle className="text-xl">Practice Word Lists</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Free word lists with decodable sentences to practice out loud.
+        </p>
+      </CardHeader>
+      <CardContent>
+        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
+          {patterns.map((pattern) => (
+            <li key={pattern.slug}>
+              <Link
+                to={`/practice-words/${pattern.slug}`}
+                className="flex items-center justify-between gap-2 p-3 rounded-lg border hover:bg-muted transition-colors"
+              >
+                <span className="font-medium">{pattern.displayName}</span>
+                <span className="text-xs text-muted-foreground">
+                  {pattern.gradeLevel}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <Link
+          to="/practice-words"
+          className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+        >
+          Browse all {phonicsPatterns.length} phonics word lists
+          <ArrowRight className="w-4 h-4" />
+        </Link>
+      </CardContent>
+    </Card>
+  );
+};
+
 const ShareButtons: React.FC<{ url: string; title: string }> = ({
   url,
   title,
@@ -606,6 +650,8 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
                 <div className="prose prose-lg max-w-none">
                   {content.map((section, idx) => renderSection(section, idx))}
                 </div>
+
+                <PracticeWordListsCard canonicalUrl={canonicalUrl} />
 
                 {/* Final CTA */}
                 <Card className="mt-12 bg-primary text-primary-foreground">

@@ -131,6 +131,24 @@ const LandingPageFooter = () => {
               >
                 Worksheets vs Interactive
               </Link>
+              <Link
+                to="/comparisons/hooked-on-phonics-vs-word-wiz-ai"
+                className="hover:underline"
+              >
+                Hooked on Phonics vs Word Wiz
+              </Link>
+              <Link
+                to="/comparisons/ixl-vs-duolingo-abc-vs-word-wiz-ai"
+                className="hover:underline"
+              >
+                IXL vs Duolingo ABC
+              </Link>
+              <Link
+                to="/comparisons/teach-your-monster-vs-abcya-vs-word-wiz-ai"
+                className="hover:underline"
+              >
+                Teach Your Monster vs ABCya
+              </Link>
             </div>
           </div>
 
@@ -233,6 +251,30 @@ const LandingPageFooter = () => {
               Practice Activities
             </h4>
             <div className="flex flex-col gap-2 text-sm">
+              <Link to="/practice-words" className="hover:underline">
+                Phonics Word Lists
+              </Link>
+              <Link to="/practice-words/at-family" className="hover:underline">
+                -at Word Family
+              </Link>
+              <Link to="/practice-words/sh-digraph" className="hover:underline">
+                SH Digraph Words
+              </Link>
+              <Link to="/practice-words/bl-blend" className="hover:underline">
+                BL Blend Words
+              </Link>
+              <Link
+                to="/practice-words/ai-vowel-team"
+                className="hover:underline"
+              >
+                AI Vowel Team Words
+              </Link>
+              <Link
+                to="/practice-words/ar-r-controlled"
+                className="hover:underline"
+              >
+                AR Words (Bossy R)
+              </Link>
               <Link
                 to="/guides/five-minute-reading-practice-activities-kids"
                 className="hover:underline"

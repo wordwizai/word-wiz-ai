@@ -4,6 +4,23 @@
   },
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "redirects": [
+    { "source": "/lander", "destination": "/", "permanent": true },
+    { "source": "/guides/five-minute-reading-practice-activities", "destination": "/guides/five-minute-reading-practice-activities-kids", "permanent": true },
+    { "source": "/guides/5-minute-reading-practice-activities-for-kids", "destination": "/guides/five-minute-reading-practice-activities-kids", "permanent": true },
+    { "source": "/guides/decodable-sentences-beginning-readers-practice", "destination": "/guides/decodable-sentences-for-beginning-readers", "permanent": true },
+    { "source": "/guides/short-vowel-sounds-exercises-kindergarten", "destination": "/guides/short-vowel-sounds-exercises-beginning-readers", "permanent": true },
+    { "source": "/guides/daily-phonics-routine-struggling-readers", "destination": "/guides/daily-phonics-practice-routine-kindergarten-at-home", "permanent": true },
+    { "source": "/guides/phonics-without-worksheets", "destination": "/guides/phonics-practice-without-worksheets-kindergarten", "permanent": true },
+    { "source": "/comparisons/ai-reading-tutors-vs-traditional-apps", "destination": "/comparisons/ai-reading-app-vs-traditional-phonics-program", "permanent": true },
+    { "source": "/comparisons/free-phonics-programs-vs-paid", "destination": "/comparisons/free-phonics-apps-vs-paid-reading-programs", "permanent": true },
+    { "source": "/comparisons/homer-vs-khan-academy-kids", "destination": "/comparisons/homer-vs-khan-academy-kids-vs-word-wiz-ai", "permanent": true },
+    { "source": "/articles/why-does-child-hate-reading", "destination": "/articles/why-child-hates-reading", "permanent": true },
+    { "source": "/articles/child-cant-blend-sounds-together", "destination": "/articles/child-cant-blend-sounds-into-words", "permanent": true },
+    { "source": "/articles/hooked-on-phonics-vs-word-wiz-ai", "destination": "/comparisons/hooked-on-phonics-vs-word-wiz-ai", "permanent": true },
+    { "source": "/articles/why-does-child-guess-words-reading", "destination": "/articles/kindergartener-guesses-words-instead-sounding-out", "permanent": true },
+    { "source": "/articles/child-pronounces-words-wrong-reading", "destination": "/articles/child-pronounces-words-wrong", "permanent": true }
+  ],
   "rewrites": [{ "source": "/(.*)", "destination": "/" }],
   "headers": [
     {

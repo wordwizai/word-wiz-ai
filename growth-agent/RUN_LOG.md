@@ -233,3 +233,8 @@ install the Claude GitHub App on the org.
 
 **Check next session**: whether the commits reached origin, which outreach
 went out, and the try-funnel events since Oct 6.
+
+**Later in session 3**: Bruce installed the Claude GitHub App on the
+wordwizai org, and `git push` went through (2338d0f..6db7ead). The patch
+he was sent is no longer needed. Also added `OUTREACH_IDEAS.md`, a ranked
+brainstorm of 20 wave-3 ideas (4 routes checked, the rest unverified).

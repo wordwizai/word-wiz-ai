@@ -19,7 +19,7 @@ Running summary of the growth agent's work. Bruce ships it by merging `growth-ag
 
 Verified: `npm ci && npm run build` (158 pages prerendered, validation passed).
 
-**Not pushed yet**: this cloud session got a 403 on push. If these commits aren't on origin, apply the patch Bruce was sent (`git am growth-agent-session3.patch` on `growth-agent`).
+Pushed to origin 2026-10-06 once the Claude GitHub App was installed on the org.
 
 ## Waiting on Bruce
 

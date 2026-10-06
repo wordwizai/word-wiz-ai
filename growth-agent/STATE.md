@@ -49,12 +49,9 @@ backend work only when it directly blocks getting users, and keep it short.
 - Gmail connector = brucebpeters12@gmail.com. Bruce wants
   **contactwordwizai@gmail.com** on all outreach, so emails go out from that
   account by Bruce (or connect it). Forms: use contactwordwizai@gmail.com.
-- **Cloud session 3 couldn't push.** `git push` and the GitHub connector's writes
-  both returned 403 ("Claude doesn't have GitHub access to wordwizai/word-wiz-ai").
-  Reads work. Fix: reconnect GitHub at https://claude.ai/connect-github or install
-  the Claude GitHub App on the wordwizai org. Check `git log origin/growth-agent`
-  first thing; if session 3's commits (d819ec7..) aren't there, apply
-  `growth-agent-session3.patch` (sent to Bruce) with `git am`.
+- **Cloud pushes need the Claude GitHub App on the wordwizai org.** Session 3
+  got 403s until Bruce installed it (2026-10-06); after that `git push` worked.
+  Linking a personal GitHub account alone wasn't enough.
 - Contact forms with a CAPTCHA are Bruce's. Don't try to get past one.
 - **Bruce's posting checklist is ahead of the repo.** A local session after
   session 2 sent AQ-018 and filled AQ-019 but only recorded it on the
@@ -98,8 +95,8 @@ guides produced ~9 signup-click visitors in total; the homepage converts
 | 4 magic-e practice pages | 895cbdd | **Live 2026-10-06** (main 2e9d41a) | Indexing; "magic e words" pos 17.2 |
 | Guest route + try page + guide CTAs | 47c92d1, e4a6965, 46a50ce | **Live 2026-10-06** (backend 9583b5d; frontend main 2e9d41a). Session 3 rendered /try and /try/at-family in a browser | `try_link_click` / `try_attempt` / `try_completed` events; signup clicks per guide visit |
 | Digital-silence fix | 50e1a11 | **Live 2026-10-06** (backend) | Users with a scored reading (baseline 20/40) |
-| b/d article retitle ("Child Confuses B and D? When It's Normal and How to Fix It") | d819ec7 | On growth-agent, **not pushed** (see setup notes) | Page CTR, baseline 0.6%/90d at pos 6.9 (0.7% on 1,822 impr/28d to ~Oct 3). Judge 3-4 weeks after it's live |
-| Long-vowel guide retitle ("Long Vowel Sounds Practice: 200+ First Grade Words and Games") | 48f77d6 | On growth-agent, **not pushed** | Page CTR, baseline 0.7%/90d at pos 8.1 (0.6% on 1,708 impr/28d). Judge 3-4 weeks after it's live |
+| b/d article retitle ("Child Confuses B and D? When It's Normal and How to Fix It") | d819ec7 | On growth-agent (pushed), not on main | Page CTR, baseline 0.6%/90d at pos 6.9 (0.7% on 1,822 impr/28d to ~Oct 3). Judge 3-4 weeks after it's live |
+| Long-vowel guide retitle ("Long Vowel Sounds Practice: 200+ First Grade Words and Games") | 48f77d6 | On growth-agent (pushed), not on main | Page CTR, baseline 0.7%/90d at pos 8.1 (0.6% on 1,708 impr/28d). Judge 3-4 weeks after it's live |
 
 ## What's working
 
@@ -147,8 +144,7 @@ had a "When to Worry" section, so no new section), long-vowel guide title
 
 ## Next actions (session 4)
 
-1. Merge `origin/main`. Check that session 3's commits reached origin (see
-   setup notes); if not, ask Bruce whether he applied the patch.
+1. Merge `origin/main`.
 2. Read the queue and execute anything APPROVED (AQ-023 and AQ-025 are forms I
    can submit; the rest are Bruce's sends).
 3. Measure (local session): Vercel `try_link_click`, `try_attempt`,

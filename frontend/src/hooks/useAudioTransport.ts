@@ -104,6 +104,7 @@ export function useAudioTransport(options: UseAudioTransportOptions) {
     const transport = options.useWebSocket
       ? new WebSocketTransport()
       : new SSETransport();
+    let cancelled = false;
 
     transport
       .connect({
@@ -125,6 +126,10 @@ export function useAudioTransport(options: UseAudioTransportOptions) {
         },
       })
       .catch((err) => {
+        // Cleanup below closes a socket that may still be connecting (React
+        // StrictMode's double mount in dev, or a session/setting change).
+        // That rejection is expected and must not surface as a network error.
+        if (cancelled) return;
         console.error("Failed to initialize transport:", err);
         showNetworkError(err);
         optionsRef.current.onError?.("Failed to connect. Please try again.");
@@ -133,6 +138,7 @@ export function useAudioTransport(options: UseAudioTransportOptions) {
     transportRef.current = transport;
 
     return () => {
+      cancelled = true;
       transport.disconnect();
       transportRef.current = null;
     };

@@ -9,7 +9,12 @@ import dotenv
 dotenv.load_dotenv()
 URL_DATABASE = os.getenv("DATABASE_URL", "")
 
-engine = create_engine(URL_DATABASE)
+# SQLite (the local dev server, see dev_server.py) has to share connections
+# across FastAPI's threadpool; MySQL needs no extra arguments.
+connect_args = (
+    {"check_same_thread": False} if URL_DATABASE.startswith("sqlite") else {}
+)
+engine = create_engine(URL_DATABASE, connect_args=connect_args)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 metadata = MetaData()

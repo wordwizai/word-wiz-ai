@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { Volume2 } from "lucide-react";
 import Mascot, { type MascotMood } from "@/components/mascot/Mascot";
 import { FeedbackAnimatedText } from "@/components/FeedbackAnimatedText";
@@ -35,33 +35,37 @@ const PracticeCompanion = ({
     <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-card shadow-xs">
       <Mascot mood={mood} onCelebrateEnd={onCelebrateEnd} className="size-9" />
     </span>
-    <AnimatePresence mode="wait">
-      {feedback && (
-        <motion.div
-          key={feedback}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0 }}
-          className={cn("flex min-h-12 flex-1 items-start gap-3", quiet && "invisible")}
-        >
-          <FeedbackAnimatedText
-            feedback={feedback}
-            className="flex-1 self-center text-base text-foreground sm:text-lg"
-          />
-          {onReplay && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onReplay}
-              aria-label="Hear this again"
-              className="shrink-0 rounded-xl text-primary hover:bg-card"
-            >
-              <Volume2 className="size-5" />
-            </Button>
-          )}
-        </motion.div>
-      )}
-    </AnimatePresence>
+    {/* No exit animation: AnimatePresence's exit got stuck after a hidden
+        (quiet) feedback was cleared and then held back every later one.
+        Old feedback only leaves while it's already invisible or when the
+        sentence changes, so a fade-out isn't missed. */}
+    {feedback && (
+      <motion.div
+        key={feedback}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        className={cn(
+          "flex min-h-12 flex-1 items-start gap-3",
+          quiet && "invisible",
+        )}
+      >
+        <FeedbackAnimatedText
+          feedback={feedback}
+          className="flex-1 self-center text-base text-foreground sm:text-lg"
+        />
+        {onReplay && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onReplay}
+            aria-label="Hear this again"
+            className="shrink-0 rounded-xl text-primary hover:bg-card"
+          >
+            <Volume2 className="size-5" />
+          </Button>
+        )}
+      </motion.div>
+    )}
   </div>
 );
 

@@ -105,6 +105,49 @@ def fake_onnx_extractor(processor, transcription: str = SAMPLE_IPA, **session_kw
     return ext
 
 
+class InlineExecutor:
+    """Stands in for ProcessPoolExecutor: runs the initializer and every task in this process.
+
+    The last instance is kept on the class, with its constructor arguments, the value of
+    PYTHONIOENCODING when it was created, and the cancel_futures flag of each shutdown().
+    """
+
+    last = None
+
+    def __init__(self, max_workers=None, mp_context=None, initializer=None, initargs=()):
+        self.max_workers = max_workers
+        self.mp_context = mp_context
+        self.initializer = initializer
+        self.pythonioencoding = os.environ.get("PYTHONIOENCODING")
+        self.shutdowns: list[bool] = []
+        InlineExecutor.last = self
+        if initializer is not None:
+            initializer(*initargs)
+
+    def submit(self, fn, *args, **kwargs):
+        import concurrent.futures
+
+        future = concurrent.futures.Future()
+        try:
+            future.set_result(fn(*args, **kwargs))
+        except BaseException as exc:  # noqa: BLE001 - delivered through the future, as a real pool does
+            future.set_exception(exc)
+        return future
+
+    def map(self, fn, *iterables, timeout=None, chunksize=1):
+        return map(fn, *iterables)
+
+    def shutdown(self, wait=True, *, cancel_futures=False):
+        self.shutdowns.append(cancel_futures)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc_info):
+        self.shutdown(wait=True)
+        return False
+
+
 class FakeWords:
     def __init__(self, words=None):
         self.words = list(words if words is not None else SAMPLE_TEXT.split())

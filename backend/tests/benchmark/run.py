@@ -17,6 +17,7 @@ import json
 import os
 import sys
 import time
+from concurrent.futures import ProcessPoolExecutor
 from multiprocessing import get_context
 
 from . import common
@@ -24,6 +25,7 @@ from . import common
 EXIT_STALE = 3
 EXIT_UNEXPECTED = 4
 _worker: dict = {}
+_init_error: str | None = None
 
 
 def check_test_unlock(half: str, reason, env=None) -> None:
@@ -68,13 +70,25 @@ def check_cache(directory: str) -> dict:
 
 
 def _init_worker() -> None:
-    with common.quiet():
-        from .replay import load_processor
+    """Load the processor once per worker.
 
-        _worker["processor"] = load_processor()
+    An initializer that raises only breaks the pool with a generic BrokenProcessPool and loses
+    the cause. The failure is recorded here instead, and the first task raises it with its cause.
+    """
+    global _init_error
+    _init_error = None
+    try:
+        with common.quiet():
+            from .replay import load_processor
+
+            _worker["processor"] = load_processor()
+    except Exception as exc:  # noqa: BLE001 - reported by the first task, see the docstring
+        _init_error = f"{type(exc).__name__}: {exc}"
 
 
 def _score_task(task):
+    if _init_error is not None:
+        raise RuntimeError(f"benchmark worker could not load the wav2vec2 processor: {_init_error}")
     utt_id, wav_path, text, directory = task
     from .pipeline import analyze_clip, load_audio
     from .replay import CacheEntry, ReplayPhonemeExtractor, ReplayWordExtractor
@@ -96,8 +110,14 @@ def score_clips(clips, directory: str, workers: int) -> dict:
             utt_id, outcome = _score_task(task)
             outcomes[utt_id] = outcome
     else:
-        with get_context("spawn").Pool(processes=workers, initializer=_init_worker) as pool:
-            for utt_id, outcome in pool.imap_unordered(_score_task, tasks, chunksize=8):
+        # Workers inherit this. Under WWAI_BENCH_VERBOSE with redirected output, the pipeline's emoji
+        # prints would otherwise raise UnicodeEncodeError, a ValueError that counts as a rejection.
+        os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+        # A worker that dies hard raises BrokenProcessPool here instead of hanging. A task that
+        # raises (StaleCacheError, a failed initializer) stops the run, and map() cancels the rest.
+        with ProcessPoolExecutor(max_workers=workers, mp_context=get_context("spawn"),
+                                 initializer=_init_worker) as pool:
+            for utt_id, outcome in pool.map(_score_task, tasks, chunksize=8):
                 outcomes[utt_id] = outcome
     return dict(sorted(outcomes.items()))
 

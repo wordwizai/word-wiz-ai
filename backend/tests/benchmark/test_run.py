@@ -84,6 +84,7 @@ class TestEndToEnd(unittest.TestCase):
     def tearDown(self):
         self.env.stop()
         self.tmp.cleanup()
+        RUN._init_error = None
 
     def test_run_writes_results_and_summary(self):
         out = os.path.join(self.tmp.name, "r", "t_dev.json")
@@ -98,6 +99,44 @@ class TestEndToEnd(unittest.TestCase):
     def test_stale_cache_exit_code(self):
         self.assertEqual(RUN.main(["--name", "t", "--workers", "1", "--cache", "nope",
                                    "--out", os.path.join(self.tmp.name, "x.json")]), RUN.EXIT_STALE)
+
+    def _pooled(self, argv):
+        with (
+            mock.patch.object(RUN, "ProcessPoolExecutor", U.InlineExecutor),
+            mock.patch.dict(os.environ),
+            contextlib.redirect_stdout(io.StringIO()),
+            contextlib.redirect_stderr(io.StringIO()),
+        ):
+            os.environ.pop("PYTHONIOENCODING", None)
+            return RUN.main(argv)
+
+    def test_workers_run_in_a_spawn_process_pool(self):
+        out = os.path.join(self.tmp.name, "r", "t_dev.json")
+        self.assertEqual(self._pooled(["--name", "t", "--workers", "2", "--out", out]), 0)
+        pool = U.InlineExecutor.last
+        self.assertEqual(pool.max_workers, 2)
+        self.assertEqual(pool.mp_context.get_start_method(), "spawn")
+        self.assertIs(pool.initializer, RUN._init_worker)
+        self.assertEqual(pool.pythonioencoding, "utf-8")
+        with open(out, encoding="utf-8") as fh:
+            self.assertEqual(sorted(json.load(fh)["outcomes"]), ["000010011", "000020022"])
+
+    def test_a_stale_entry_in_a_worker_reaches_main(self):
+        os.remove(os.path.join(SC.cache_dir("dev", "baseline"), "000020022.json"))
+        out = os.path.join(self.tmp.name, "r", "t_dev.json")
+        self.assertEqual(self._pooled(["--name", "t", "--workers", "2", "--out", out]), RUN.EXIT_STALE)
+
+    def test_a_worker_that_cannot_load_the_processor_gives_a_clear_error(self):
+        out = os.path.join(self.tmp.name, "r", "t_dev.json")
+        with (
+            mock.patch("tests.benchmark.replay.load_processor", side_effect=OSError("processor not found")),
+            contextlib.redirect_stdout(io.StringIO()),
+        ):
+            with self.assertRaises(RuntimeError) as ctx:
+                RUN.main(["--name", "t", "--workers", "1", "--out", out])
+        self.assertNotIsInstance(ctx.exception, common.StaleCacheError)
+        self.assertIn("could not load", str(ctx.exception))
+        self.assertIn("OSError: processor not found", str(ctx.exception))
 
     def test_unexpected_failures_exit_code(self):
         # analyze_clip imports analyze_results from core.process_audio at call time, so patching

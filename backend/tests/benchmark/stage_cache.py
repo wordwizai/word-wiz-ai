@@ -28,6 +28,8 @@ import os
 import sys
 import time
 from collections import Counter
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures.process import BrokenProcessPool
 from multiprocessing import get_context
 
 import numpy as np
@@ -257,10 +259,11 @@ _init_error: str | None = None
 def _init_worker() -> None:
     """Load the models once per worker.
 
-    An initializer that raises makes multiprocessing.Pool respawn the worker forever, so
-    imap_unordered never returns. The failure is recorded here and raised by the first task.
+    An initializer that raises only breaks the pool with a generic BrokenProcessPool and loses
+    the cause. The failure is recorded here instead, and the first task raises it with its cause.
     """
     global _init_error
+    _init_error = None
     try:
         _load_deepgram_key()
         with common.quiet():
@@ -281,9 +284,23 @@ def _record_task(task):
 
 
 def _record_all(todo, workers):
-    """Record every task in worker processes and yield each entry as it completes."""
-    with get_context("spawn").Pool(processes=workers, initializer=_init_worker) as pool:
-        yield from pool.imap_unordered(_record_task, todo, chunksize=4)
+    """Record every task in worker processes and yield each entry as it completes.
+
+    A worker that dies hard (an access violation, an OOM kill) raises BrokenProcessPool here
+    instead of hanging the run. When the caller stops early, or a task fails, the tasks that
+    have not started are cancelled.
+    """
+    # Workers inherit this. Under WWAI_BENCH_VERBOSE with redirected output, the pipeline's emoji
+    # prints would otherwise raise UnicodeEncodeError, a ValueError that counts as a rejection.
+    os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+    with ProcessPoolExecutor(max_workers=workers, mp_context=get_context("spawn"),
+                             initializer=_init_worker) as pool:
+        futures = [pool.submit(_record_task, task) for task in todo]
+        try:
+            for future in as_completed(futures):
+                yield future.result()
+        finally:
+            pool.shutdown(wait=False, cancel_futures=True)
 
 
 def build(half, name, flags, workers, retry_errors=False, subset=None, limit=None) -> dict:
@@ -325,22 +342,29 @@ def build(half, name, flags, workers, retry_errors=False, subset=None, limit=Non
         _load_deepgram_key()  # fail fast here for the common case, before any worker starts
         if not os.getenv("DEEPGRAM_KEY"):
             raise SystemExit("DEEPGRAM_KEY is not set (environment or backend/.env)")
+        i = 0
         with closing(_record_all(todo, workers)) as entries:
-            for i, entry in enumerate(entries, 1):
-                outcome = entry["outcome"]
-                statuses[outcome["status"]] += 1
-                if outcome["error_type"]:
-                    error_types[outcome["error_type"]] += 1
-                if entry_has_word_error(entry):
-                    word_errors.append(entry["utt_id"])
-                if entry_needs_retry(entry):
-                    needs_retry.append(entry["utt_id"])
-                if i == EARLY_ABORT_CLIPS and len(word_errors) == i:
-                    raise SystemExit(
-                        f"Deepgram failed for every one of the first {i} clips; check the key and balance"
-                    )
-                if i % 50 == 0 or i == len(todo):
-                    print(f"  {i}/{len(todo)} recorded ({len(needs_retry)} need a retry)")
+            try:
+                for i, entry in enumerate(entries, 1):
+                    outcome = entry["outcome"]
+                    statuses[outcome["status"]] += 1
+                    if outcome["error_type"]:
+                        error_types[outcome["error_type"]] += 1
+                    if entry_has_word_error(entry):
+                        word_errors.append(entry["utt_id"])
+                    if entry_needs_retry(entry):
+                        needs_retry.append(entry["utt_id"])
+                    if i == EARLY_ABORT_CLIPS and len(word_errors) == i:
+                        raise SystemExit(
+                            f"Deepgram failed for every one of the first {i} clips; check the key and balance"
+                        )
+                    if i % 50 == 0 or i == len(todo):
+                        print(f"  {i}/{len(todo)} recorded ({len(needs_retry)} need a retry)")
+            except BrokenProcessPool as exc:
+                raise SystemExit(
+                    f"a worker process died ({exc}), probably out of memory; the {i} entries recorded "
+                    "in this run are kept, so run the same command again (with fewer --workers) to continue"
+                ) from exc
     return {
         "cache": directory,
         "recorded": len(todo),

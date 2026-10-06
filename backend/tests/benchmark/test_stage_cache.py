@@ -195,13 +195,23 @@ class TestWorkerStartup(unittest.TestCase):
         SC._init_error = None
         SC._models.clear()
 
+    def test_a_later_successful_load_clears_an_earlier_failure(self):
+        SC._init_error = "ValueError: no key"
+        with (
+            mock.patch.object(SC, "_load_deepgram_key"),
+            mock.patch("core.phoneme_extractor_onnx.PhonemeExtractorONNX", mock.MagicMock()),
+            mock.patch("core.word_extractor.WordExtractorOnline", mock.MagicMock()),
+        ):
+            SC._init_worker()
+        self.assertIsNone(SC._init_error)
+
     def test_failed_model_load_is_reported_by_the_task_instead_of_hanging_the_pool(self):
         with (
             mock.patch.object(SC, "_load_deepgram_key"),
             mock.patch("core.phoneme_extractor_onnx.PhonemeExtractorONNX", mock.MagicMock()),
             mock.patch("core.word_extractor.WordExtractorOnline", side_effect=ValueError("no key")),
         ):
-            SC._init_worker()  # must not raise, or Pool respawns the worker forever
+            SC._init_worker()  # must not raise: the error is reported by the task, with its cause
         with self.assertRaises(RuntimeError) as ctx:
             SC._record_task(("u", "w", "t", "d"))
         self.assertIn("no key", str(ctx.exception))
@@ -229,7 +239,7 @@ class TestBuildFailsFast(unittest.TestCase):
             mock.patch.dict(os.environ, {"WWAI_BENCH_CACHE_DIR": tmp}),
             mock.patch.object(SC, "_load_deepgram_key"),
             mock.patch.object(SC, "write_meta"),
-            mock.patch.object(SC, "get_context") as get_context,
+            mock.patch.object(SC, "ProcessPoolExecutor") as pool,
             mock.patch("tests.benchmark.dataset.load_clips", return_value=[clip]),
             contextlib.redirect_stdout(io.StringIO()),
         ):
@@ -237,7 +247,70 @@ class TestBuildFailsFast(unittest.TestCase):
             with self.assertRaises(SystemExit) as ctx:
                 SC.build("dev", "baseline", {}, workers=1)
         self.assertIn("DEEPGRAM_KEY", str(ctx.exception))
-        get_context.assert_not_called()
+        pool.assert_not_called()
+
+
+class TestRecordAll(unittest.TestCase):
+    """The pool is a spawn ProcessPoolExecutor: a worker that dies hard breaks it instead of hanging."""
+
+    def _run(self, record_task, todo):
+        with (
+            mock.patch.object(SC, "ProcessPoolExecutor", U.InlineExecutor),
+            mock.patch.object(SC, "_init_worker") as init_worker,
+            mock.patch.object(SC, "_record_task", side_effect=record_task),
+            mock.patch.dict(os.environ),
+        ):
+            os.environ.pop("PYTHONIOENCODING", None)
+            self.init_worker = init_worker
+            try:
+                return list(SC._record_all(todo, 3))
+            finally:
+                self.assertEqual(init_worker.call_count, 1)
+
+    def test_uses_a_spawn_process_pool_with_the_worker_initializer(self):
+        todo = [("u1", "w", "t", "d"), ("u2", "w", "t", "d")]
+        entries = self._run(lambda task: {"utt_id": task[0]}, todo)
+        self.assertEqual(sorted(e["utt_id"] for e in entries), ["u1", "u2"])
+        pool = U.InlineExecutor.last
+        self.assertEqual(pool.max_workers, 3)
+        self.assertEqual(pool.mp_context.get_start_method(), "spawn")
+        self.assertIs(pool.initializer, self.init_worker)  # looked up at call time, so the patched one
+        # Under WWAI_BENCH_VERBOSE with redirected output, an emoji print in a worker would raise
+        # UnicodeEncodeError, a ValueError that would be scored as a rejection.
+        self.assertEqual(pool.pythonioencoding, "utf-8")
+
+    def test_a_failed_task_stops_the_run_and_cancels_what_is_left(self):
+        def record_task(task):
+            if task[0] == "u2":
+                raise RuntimeError("benchmark worker could not load its models: OSError: x")
+            return {"utt_id": task[0]}
+
+        with self.assertRaises(RuntimeError):
+            self._run(record_task, [("u1", "w", "t", "d"), ("u2", "w", "t", "d"), ("u3", "w", "t", "d")])
+        self.assertIn(True, U.InlineExecutor.last.shutdowns)
+
+
+class TestWorkerDiesHard(unittest.TestCase):
+    def test_a_broken_pool_stops_the_build_with_a_clear_message(self):
+        from concurrent.futures.process import BrokenProcessPool
+
+        def entries():
+            yield _entry("u0")
+            raise BrokenProcessPool("A process in the process pool was terminated abruptly")
+
+        with (
+            tempfile.TemporaryDirectory() as tmp,
+            mock.patch.dict(os.environ, {"WWAI_BENCH_CACHE_DIR": tmp, "DEEPGRAM_KEY": "test-key"}),
+            mock.patch.object(SC, "_load_deepgram_key"),
+            mock.patch.object(SC, "write_meta"),
+            mock.patch("tests.benchmark.dataset.load_clips", return_value=[_clip("u0"), _clip("u1")]),
+            mock.patch.object(SC, "_record_all", return_value=entries()),
+            contextlib.redirect_stdout(io.StringIO()),
+        ):
+            with self.assertRaises(SystemExit) as ctx:
+                SC.build("dev", "baseline", {}, workers=2)
+        self.assertIn("worker process died", str(ctx.exception))
+        self.assertIn("run the same command again", str(ctx.exception))
 
 
 def _clip(utt_id):

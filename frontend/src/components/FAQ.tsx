@@ -73,7 +73,7 @@ const FAQ: React.FC = () => {
   };
 
   return (
-    <section className="px-6 py-20 bg-gradient-to-br from-background to-purple-50/50">
+    <section className="px-6 py-20 bg-gradient-to-br from-background to-purple-50/50 dark:to-primary/5">
       <div className="max-w-4xl mx-auto space-y-10">
         <div className="text-center space-y-4">
           <h2 className="text-3xl md:text-4xl font-bold">
@@ -88,11 +88,11 @@ const FAQ: React.FC = () => {
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className="bg-white border-2 border-purple-100/50 rounded-2xl shadow-sm overflow-hidden"
+              className="bg-card border-2 border-purple-100/50 dark:border-border rounded-2xl shadow-sm overflow-hidden"
             >
               <button
                 onClick={() => toggleFAQ(index)}
-                className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-purple-50/30 transition-colors"
+                className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-purple-50/30 dark:hover:bg-muted/40 transition-colors"
               >
                 <h3 className="text-lg font-semibold pr-4">{faq.question}</h3>
                 <motion.div

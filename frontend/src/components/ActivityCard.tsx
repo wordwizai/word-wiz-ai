@@ -34,7 +34,11 @@ const ActivityCard = ({
       aria-label={`Start ${activity.title}`}
       className={cn(
         "group flex h-full w-full flex-col rounded-2xl p-5 text-left",
-        "shadow-sm ring-1 ring-inset ring-black/5 dark:ring-white/10",
+        "shadow-sm ring-1 ring-inset ring-black/5",
+        // A 10% black shadow vanishes on the dark page and a white ring reads
+        // as a grey rim, so dark mode lifts the card with a deeper shadow and
+        // a top highlight. The ring stays untouched so focus still shows.
+        "dark:shadow-black/50 dark:inset-shadow-2xs dark:inset-shadow-white/10",
         "transition-all duration-200 outline-none",
         "hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-[0.99]",
         "focus-visible:ring-[3px] focus-visible:ring-ring/60",
@@ -44,7 +48,7 @@ const ActivityCard = ({
       style={{ backgroundColor: pastel.background }}
     >
       <span
-        className="flex size-10 items-center justify-center rounded-xl bg-white/60 dark:bg-black/20"
+        className="flex size-10 items-center justify-center rounded-xl bg-white/60 dark:bg-white/10"
         style={{ color: pastel.foreground }}
       >
         <DynamicIcon

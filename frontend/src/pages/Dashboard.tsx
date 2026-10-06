@@ -163,12 +163,12 @@ const ContinueCard = ({
   return (
     <section
       aria-labelledby="continue-heading"
-      className="flex flex-col gap-5 rounded-3xl p-5 shadow-sm ring-1 ring-inset ring-black/5 sm:flex-row sm:items-center sm:gap-6 sm:p-8 dark:ring-white/10"
+      className="flex flex-col gap-5 rounded-3xl p-5 shadow-sm ring-1 ring-inset ring-black/5 sm:flex-row sm:items-center sm:gap-6 sm:p-8 dark:shadow-black/50 dark:inset-shadow-2xs dark:inset-shadow-white/10"
       style={{ backgroundColor: pastel.background }}
     >
       <div className="flex min-w-0 flex-1 items-center gap-4 sm:gap-6">
         <span
-          className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-white/60 sm:size-20 dark:bg-black/20"
+          className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-white/60 sm:size-20 dark:bg-white/10"
           style={{ color: pastel.foreground }}
         >
           <DynamicIcon

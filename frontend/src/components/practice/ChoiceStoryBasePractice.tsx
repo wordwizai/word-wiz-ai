@@ -60,6 +60,9 @@ const ChoiceStoryBasePractice = ({
   } = useHybridAudioAnalysis({
     onProcessingStart: () => {
       setIsProcessing(true);
+      // The old feedback belongs to the last attempt. Clearing it here also
+      // stops PracticeStage pairing this attempt's analysis with that text.
+      setFeedback(null);
     },
     onProcessingEnd: () => {
       setIsProcessing(false);
@@ -157,6 +160,7 @@ const ChoiceStoryBasePractice = ({
     showHighlightedWords,
     isRecording,
     isProcessing,
+    isFeedbackPlaying: feedbackAudio.isPlaying,
     audioLevel: levelRef,
     isModelLoading,
     modelLoadProgress,

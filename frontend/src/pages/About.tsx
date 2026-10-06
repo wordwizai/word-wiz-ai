@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { wordWizIcon } from "@/assets";
+import Mascot from "@/components/mascot/Mascot";
 import React from "react";
 import {
   Users,
@@ -93,7 +93,7 @@ const About = () => {
             whileHover={{ scale: 1.05, rotate: 5 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <img src={wordWizIcon} alt="Word Wiz AI" className="w-14 h-14" />
+            <Mascot mood="idle" label="Word Wiz AI" className="size-14" />
           </motion.div>
           <motion.h1
             className="text-4xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent"

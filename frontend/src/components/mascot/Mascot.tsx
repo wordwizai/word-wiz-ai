@@ -1,5 +1,4 @@
 import { useEffect, useId, useRef, type CSSProperties } from "react";
-import { useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
   BRIM,
@@ -17,8 +16,9 @@ import "./mascot.css";
 
 // "still" is the plain logo. The others are tied to moments: listening while
 // the mic is on, talking while spoken feedback plays, celebrating a great
-// read. Idle is for places with no reading task, since steady motion next to
-// a sentence pulls a child's eyes off the words.
+// read. Idle is for places with no reading task, and for the short wait while
+// a reading is checked. Steady motion next to a sentence any longer than that
+// pulls a child's eyes off the words.
 export type MascotMood =
   | "still"
   | "idle"
@@ -44,7 +44,6 @@ const Mascot = ({
   className,
   onCelebrateEnd,
 }: MascotProps) => {
-  const reduceMotion = useReducedMotion();
   // Masks are found by id, so every mascot on a page needs its own.
   const uid = `mascot${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
 
@@ -53,10 +52,18 @@ const Mascot = ({
     onCelebrateEndRef.current = onCelebrateEnd;
   });
 
-  // With reduced motion the hop never runs, so it's over as soon as it starts.
+  // Under reduced motion the CSS skips the hop, so no animationend will come
+  // and it's over as soon as it starts. The media query is read here rather
+  // than through framer-motion's useReducedMotion, which only checks once at
+  // mount and could disagree with the CSS after the setting changes.
   useEffect(() => {
-    if (mood === "celebrating" && reduceMotion) onCelebrateEndRef.current?.();
-  }, [mood, reduceMotion]);
+    if (
+      mood === "celebrating" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      onCelebrateEndRef.current?.();
+    }
+  }, [mood]);
 
   return (
     <svg

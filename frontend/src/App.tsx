@@ -25,6 +25,7 @@ const NotFoundPage = lazy(() => import("./pages/NotFoundPage.tsx"));
 const About = lazy(() => import("./pages/About.tsx"));
 const Contact = lazy(() => import("./pages/Contact.tsx"));
 const Privacy = lazy(() => import("./pages/Privacy.tsx"));
+const TryPage = lazy(() => import("./pages/TryPage.tsx"));
 const ToastTestPage = lazy(() => import("./pages/ToastTestPage.tsx"));
 
 // Lazy load comparison pages
@@ -187,6 +188,9 @@ function App() {
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/signup" element={<SignUp />} />
+                  {/* Guest "try it" practice, no account (noindex, not prerendered) */}
+                  <Route path="/try" element={<TryPage />} />
+                  <Route path="/try/:slug" element={<TryPage />} />
 
                   {/* Comparison Pages */}
                   <Route

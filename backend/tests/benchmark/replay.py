@@ -13,7 +13,6 @@ This module imports core at load time. run.py imports it lazily, after apply_fla
 from __future__ import annotations
 
 import builtins
-import json
 import os
 import types
 
@@ -24,7 +23,7 @@ from core.audio_optimization import OptimizedAudioPreprocessor
 from core.phoneme_extractor_onnx import PhonemeExtractorONNX, default_model_output_processing
 
 from . import common
-from .stage_cache import audio_sha, model_input_sha
+from .stage_cache import audio_sha, model_input_sha, read_entry
 
 
 class CacheEntry:
@@ -34,8 +33,12 @@ class CacheEntry:
             raise common.StaleCacheError(
                 f"no cache entry for {utt_id} in {directory}; build it with tests.benchmark.stage_cache"
             )
-        with open(meta_path, encoding="utf-8") as fh:
-            self.meta = json.load(fh)
+        try:
+            self.meta = read_entry(meta_path)
+        except ValueError as exc:
+            raise common.StaleCacheError(
+                f"cache entry {meta_path} is unreadable ({exc}); rebuild it with tests.benchmark.stage_cache"
+            ) from exc
         self.utt_id = utt_id
         self._npz_path = os.path.join(directory, f"{utt_id}.npz")
         self._logits: dict | None = None
@@ -112,6 +115,10 @@ class _Replay:
             )
         call = self._calls[self._next]
         self._next += 1
+        if not isinstance(call, dict) or "input_sha" not in call:
+            raise common.StaleCacheError(
+                f"{self.entry.utt_id}: recorded {self.kind} call {self._next} has no input hash; rebuild the cache"
+            )
         if self.check_inputs and input_sha() != call["input_sha"]:
             raise common.StaleCacheError(
                 f"{self.entry.utt_id}: the input to the {self.kind} model differs from the cached run "

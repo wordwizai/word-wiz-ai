@@ -91,6 +91,32 @@ class TestReplay(unittest.TestCase):
         with self.assertRaises(common.StaleCacheError):
             R.CacheEntry(self.cache, "nope")
 
+    def test_malformed_entry_is_stale(self):
+        path = os.path.join(self.cache, "u1.json")
+        for text in ("{", json.dumps({"utt_id": "u1"}), json.dumps({"phoneme_calls": [], "word_calls": "x"}),
+                     json.dumps(["not", "a", "dict"])):
+            with self.subTest(text=text):
+                with open(path, "w", encoding="utf-8") as fh:
+                    fh.write(text)
+                with self.assertRaises(common.StaleCacheError):
+                    R.CacheEntry(self.cache, "u1")
+
+    def test_entry_takes_its_id_from_the_caller(self):
+        self._edit_meta(lambda meta: meta.pop("utt_id"))
+        self.assertEqual(R.CacheEntry(self.cache, "u1").utt_id, "u1")
+
+    def test_call_without_an_input_hash_is_stale(self):
+        def edit(meta):
+            del meta["word_calls"][0]["input_sha"]
+            del meta["phoneme_calls"][0]["input_sha"]
+
+        self._edit_meta(edit)
+        entry = R.CacheEntry(self.cache, "u1")
+        with self.assertRaises(common.StaleCacheError):
+            R.ReplayWordExtractor(entry, check_inputs=False).extract_words(self.audio)
+        with self.assertRaises(common.StaleCacheError):
+            R.ReplaySession(entry, check_inputs=False).run(None, {"input_values": np.zeros((1, 9), np.float32)})
+
     def test_recorded_errors_replay_with_their_type(self):
         path = os.path.join(self.cache, "u1.json")
         with open(path, encoding="utf-8") as fh:

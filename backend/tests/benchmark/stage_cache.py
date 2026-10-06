@@ -20,11 +20,13 @@ The exit code is 1 while any clip needs recording again (see entry_needs_retry).
 from __future__ import annotations
 
 import argparse
+import contextlib
 import copy
 import hashlib
 import json
 import logging
 import os
+import re
 import sys
 import time
 from collections import Counter
@@ -40,6 +42,9 @@ CACHE_META = "_cache_meta.json"
 #: If this many clips complete first and every one needs a word retry, Deepgram is down or
 #: the key is wrong, and recording the rest would only spend time.
 EARLY_ABORT_CLIPS = 20
+#: How core.word_extractor reads WWAI_ASR_FALLBACK.
+_ASR_FALLBACK_TRUTHY = {"1", "true", "t", "yes", "y", "on"}
+_COMMIT_SHA = re.compile(r"[0-9a-f]{40}")
 _models: dict = {}
 
 
@@ -52,6 +57,36 @@ def audio_sha(audio, sampling_rate) -> str:
 
 def cache_dir(half: str, name: str) -> str:
     return os.path.join(common.cache_root(), half, name)
+
+
+def _atomic_write(path: str, write, binary: bool = False) -> None:
+    """Write through a temporary file next to ``path`` and move it into place, so a crash or a
+    full disk never leaves a partial file under the real name, or a temporary file behind."""
+    tmp = path + ".tmp"
+    try:
+        with (open(tmp, "wb") if binary else open(tmp, "w", encoding="utf-8")) as fh:
+            write(fh)
+        os.replace(tmp, path)
+    except BaseException:
+        with contextlib.suppress(OSError):
+            os.remove(tmp)
+        raise
+
+
+def _remove(path: str) -> None:
+    with contextlib.suppress(FileNotFoundError):
+        os.remove(path)
+
+
+def read_entry(path: str) -> dict:
+    """Load a cache entry. Raises ValueError when it is not valid JSON or lacks its call lists."""
+    with open(path, encoding="utf-8") as fh:
+        meta = json.load(fh)  # JSONDecodeError and UnicodeDecodeError are ValueErrors
+    if not isinstance(meta, dict) or not all(
+        isinstance(meta.get(key), list) for key in ("phoneme_calls", "word_calls")
+    ):
+        raise ValueError("it has no phoneme_calls and word_calls lists")
+    return meta
 
 
 def model_input_sha(values) -> str:
@@ -179,9 +214,16 @@ def entry_needs_retry(meta: dict) -> bool:
 def write_entry(directory, utt_id, session: RecordingSession, words: RecordingWordExtractor,
                 outcome, seconds: float) -> dict:
     os.makedirs(directory, exist_ok=True)
+    json_path = os.path.join(directory, f"{utt_id}.json")
+    npz_path = os.path.join(directory, f"{utt_id}.npz")
+    # A clip recorded again loses its old .json first, so a crash part way through can never
+    # leave the old entry next to new logits. The clip then has no entry and is recorded next run.
+    _remove(json_path)
     if session.logits:
-        np.savez(os.path.join(directory, f"{utt_id}.npz"),
-                 **{f"logits_{i}": arr for i, arr in enumerate(session.logits)})
+        arrays = {f"logits_{i}": arr for i, arr in enumerate(session.logits)}
+        _atomic_write(npz_path, lambda fh: np.savez(fh, **arrays), binary=True)
+    else:
+        _remove(npz_path)
     meta = {
         "utt_id": utt_id,
         "phoneme_calls": session.calls,
@@ -190,10 +232,8 @@ def write_entry(directory, utt_id, session: RecordingSession, words: RecordingWo
         "git_sha": common.git_sha(),
         "seconds": round(seconds, 3),
     }
-    tmp = os.path.join(directory, f"{utt_id}.json.tmp")
-    with open(tmp, "w", encoding="utf-8") as fh:
-        json.dump(meta, fh, ensure_ascii=False)
-    os.replace(tmp, os.path.join(directory, f"{utt_id}.json"))  # the .json marks the entry complete
+    # Written last: the .json marks the entry complete.
+    _atomic_write(json_path, lambda fh: json.dump(meta, fh, ensure_ascii=False))
     return meta
 
 
@@ -215,30 +255,50 @@ def record_clip(utt_id, wav_path, text, directory, phoneme_extractor, word_inner
 
 
 def write_meta(directory: str, half: str, name: str, flags: dict) -> dict:
+    """Write the cache's _cache_meta.json, or check the existing one against this run.
+
+    A cache holds the outputs of one model revision under one set of flags. The revision must
+    be a commit SHA (not None from WWAI_IGNORE_MODEL_PINS, not a branch like "main"), or the
+    cache could not say which model made it.
+    """
     from core.model_registry import repo_id, resolve_revision
 
+    revision = resolve_revision("PHONEME_IPA_ONNX")
+    if not (isinstance(revision, str) and _COMMIT_SHA.fullmatch(revision)):
+        raise SystemExit(
+            f"the phoneme model revision is {revision!r}, not a 40-character commit SHA "
+            "(check WWAI_IGNORE_MODEL_PINS and WWAI_PIN_PHONEME_IPA_ONNX)"
+        )
     path = os.path.join(directory, CACHE_META)
     meta = {
         "half": half,
         "name": name,
         "model_repo": repo_id("PHONEME_IPA_ONNX"),
-        "model_revision": resolve_revision("PHONEME_IPA_ONNX"),
+        "model_revision": revision,
         "flags": flags,
         "git_sha": common.git_sha(),
         "created": time.strftime("%Y-%m-%dT%H:%M:%S"),
     }
     if os.path.isfile(path):
-        with open(path, encoding="utf-8") as fh:
-            existing = json.load(fh)
-        if existing.get("model_revision") != meta["model_revision"]:
+        try:
+            with open(path, encoding="utf-8") as fh:
+                existing = json.load(fh)
+        except ValueError as exc:
+            raise SystemExit(f"{path} is not valid JSON ({exc}). Use a new --name.") from exc
+        if existing.get("model_revision") != revision:
             raise SystemExit(
                 f"{directory} was built with model revision {existing.get('model_revision')}, "
-                f"current is {meta['model_revision']}. Use a new --name."
+                f"current is {revision}. Use a new --name."
+            )
+        cached_flags = existing.get("flags") or {}
+        differing = sorted(k for k in set(cached_flags) | set(flags) if cached_flags.get(k) != flags.get(k))
+        if differing:
+            raise SystemExit(
+                f"{directory} was built with different flags ({', '.join(differing)}). Use a new --name."
             )
         return existing
     os.makedirs(directory, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as fh:
-        json.dump(meta, fh, indent=2, sort_keys=True)
+    _atomic_write(path, lambda fh: json.dump(meta, fh, indent=2, sort_keys=True))
     return meta
 
 
@@ -323,13 +383,16 @@ def build(half, name, flags, workers, retry_errors=False, subset=None, limit=Non
     for clip in clips:
         meta_path = os.path.join(directory, f"{clip.utt_id}.json")
         if os.path.isfile(meta_path):
-            with open(meta_path, encoding="utf-8") as fh:
-                retry = entry_needs_retry(json.load(fh))
-            if not retry:
-                continue
-            if not retry_errors:
-                needs_retry.append(clip.utt_id)
-                continue
+            try:
+                cached = read_entry(meta_path)
+            except ValueError:
+                cached = None  # unreadable, so it is recorded again like a missing entry
+            if cached is not None:
+                if not entry_needs_retry(cached):
+                    continue
+                if not retry_errors:
+                    needs_retry.append(clip.utt_id)
+                    continue
         todo.append((clip.utt_id, clip.wav_path, clip.text, directory))
     print(f"{len(clips)} clips, {len(clips) - len(todo)} cached, {len(todo)} to record into {directory}")
     if needs_retry:
@@ -395,7 +458,16 @@ def main(argv=None) -> int:
         )
         return 2
 
-    common.apply_flags(common.parse_flag_args(args.flag))
+    flags = common.parse_flag_args(args.flag)
+    fallback = flags.get("WWAI_ASR_FALLBACK", os.environ.get("WWAI_ASR_FALLBACK", ""))
+    if fallback.strip().lower() in _ASR_FALLBACK_TRUTHY:
+        print(
+            "error: WWAI_ASR_FALLBACK is on. It loads a second 1.2 GB wav2vec2 model in every worker, "
+            "and it changes the recorded words without changing the cache name. Unset it.",
+            file=sys.stderr,
+        )
+        return 2
+    common.apply_flags(flags)
     active = common.active_wwai_flags()
     name = args.name or common.front_end_cache_name(active)
     summary = build(args.half, name, active, args.workers, args.retry_errors, args.subset, args.limit)

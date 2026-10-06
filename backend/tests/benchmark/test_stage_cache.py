@@ -403,6 +403,13 @@ class TestBuild(unittest.TestCase):
         self.assertEqual([task[0] for task in todo], ["u2"])
         self.assertEqual(summary["needs_retry"], ["u0"])
 
+    def test_an_unreadable_cached_entry_is_recorded_again(self):
+        with open(os.path.join(self.directory, "u0.json"), "w", encoding="utf-8") as fh:
+            fh.write("{")
+        self._cache(_entry("u1"))
+        _summary, record_all = self._build([_clip("u0"), _clip("u1")], [_entry("u0")])
+        self.assertEqual([task[0] for task in record_all.call_args.args[0]], ["u0"])
+
     def test_retry_errors_records_again_only_what_is_worth_retrying(self):
         session_error = [{"input_sha": "x", "error_type": "Fail", "error": "oom", "is_value_error": False}]
         session_value_error = [{"input_sha": "x", "error_type": "ValueError", "error": "bad", "is_value_error": True}]
@@ -430,6 +437,69 @@ class TestMainExitCode(unittest.TestCase):
 
     def test_returns_0_when_nothing_needs_a_retry(self):
         self.assertEqual(self._main({"needs_retry": [], "word_errors": []}), 0)
+
+
+class TestMainRefusesAsrFallback(unittest.TestCase):
+    def _main(self, argv, env):
+        err = io.StringIO()
+        with (
+            mock.patch.object(SC.common, "dotenv_wwai_keys", return_value=[]),
+            mock.patch.object(SC, "build", return_value={"needs_retry": []}) as build,
+            mock.patch.dict(os.environ, env),
+            contextlib.redirect_stderr(err),
+            contextlib.redirect_stdout(io.StringIO()),
+        ):
+            if "WWAI_ASR_FALLBACK" not in env:
+                os.environ.pop("WWAI_ASR_FALLBACK", None)
+            code = SC.main(["--half", "dev", *argv])
+        return code, build, err.getvalue()
+
+    def test_refuses_the_flag_and_the_environment_variable(self):
+        # It loads a second 1.2 GB model per worker and changes the recorded words
+        # without changing the cache name.
+        for argv, env in ((["--flag", "WWAI_ASR_FALLBACK=1"], {}), ([], {"WWAI_ASR_FALLBACK": "yes"})):
+            with self.subTest(argv=argv, env=env):
+                code, build, err = self._main(argv, env)
+                self.assertEqual(code, 2)
+                build.assert_not_called()
+                self.assertIn("WWAI_ASR_FALLBACK", err)
+
+    def test_an_explicit_off_is_allowed(self):
+        code, build, _err = self._main([], {"WWAI_ASR_FALLBACK": "0"})
+        self.assertEqual(code, 0)
+        build.assert_called_once()
+
+
+class TestWriteMeta(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.directory = os.path.join(self.tmp.name, "dev", "baseline")
+
+    def test_writes_once_and_returns_the_existing_meta_after(self):
+        first = SC.write_meta(self.directory, "dev", "baseline", {"WWAI_X": "1"})
+        self.assertRegex(first["model_revision"], r"^[0-9a-f]{40}$")
+        self.assertEqual(SC.write_meta(self.directory, "dev", "baseline", {"WWAI_X": "1"}), first)
+        self.assertEqual(os.listdir(self.directory), [SC.CACHE_META])  # no temporary file left
+
+    def test_refuses_different_flags_and_names_them(self):
+        SC.write_meta(self.directory, "dev", "baseline", {"WWAI_X": "1", "WWAI_Y": "1"})
+        with self.assertRaises(SystemExit) as ctx:
+            SC.write_meta(self.directory, "dev", "baseline", {"WWAI_X": "2", "WWAI_Z": "1"})
+        message = str(ctx.exception)
+        for key in ("WWAI_X", "WWAI_Y", "WWAI_Z"):
+            self.assertIn(key, message)
+        self.assertIn("--name", message)
+
+    def test_refuses_a_revision_that_is_not_a_commit_sha(self):
+        # WWAI_IGNORE_MODEL_PINS gives None, and an override like "main" can move.
+        for revision in (None, "main", "e3f5690e"):
+            with self.subTest(revision=revision):
+                with mock.patch("core.model_registry.resolve_revision", return_value=revision):
+                    with self.assertRaises(SystemExit) as ctx:
+                        SC.write_meta(self.directory, "dev", "baseline", {})
+                self.assertIn("40", str(ctx.exception))
+                self.assertFalse(os.path.exists(os.path.join(self.directory, SC.CACHE_META)))
 
 
 class TestMainRefusesDotenvFlags(unittest.TestCase):
@@ -476,6 +546,47 @@ class TestRecordClip(unittest.TestCase):
         self.assertEqual(meta["word_calls"][0]["words"], U.SAMPLE_TEXT.split())
         with np.load(os.path.join(self.cache, "000020022.npz")) as data:
             self.assertEqual(data["logits_0"].dtype, np.float32)
+
+    def _files(self):
+        return sorted(os.listdir(self.cache))
+
+    def test_leaves_no_temporary_files(self):
+        SC.record_clip("000020022", self.wav, U.SAMPLE_TEXT, self.cache, U.fake_onnx_extractor(self.processor), U.FakeWords())
+        self.assertEqual(self._files(), ["000020022.json", "000020022.npz"])
+
+    def test_a_failure_while_writing_logits_leaves_no_entry_behind(self):
+        # Recording again (with --retry-errors) must not leave the old entry next to new or
+        # partial logits, and a failed write must not leave a partial .npz or a temporary file.
+        SC.record_clip("000020022", self.wav, U.SAMPLE_TEXT, self.cache, U.fake_onnx_extractor(self.processor), U.FakeWords())
+
+        def broken_savez(file, **arrays):
+            if hasattr(file, "write"):
+                file.write(b"partial")
+            else:
+                with open(file, "wb") as fh:
+                    fh.write(b"partial")
+            raise OSError("disk full")
+
+        with mock.patch.object(SC.np, "savez", side_effect=broken_savez):
+            with self.assertRaises(OSError):
+                SC.record_clip("000020022", self.wav, U.SAMPLE_TEXT, self.cache,
+                               U.fake_onnx_extractor(self.processor), U.FakeWords())
+        self.assertNotIn("000020022.json", self._files())
+        self.assertFalse(any(name.endswith(".tmp") for name in self._files()))
+        if "000020022.npz" in self._files():
+            with np.load(os.path.join(self.cache, "000020022.npz")) as data:  # still the complete old file
+                self.assertIn("logits_0", data.files)
+
+    def test_recording_again_without_logits_removes_the_old_logits(self):
+        import soundfile as sf
+
+        SC.record_clip("000020022", self.wav, U.SAMPLE_TEXT, self.cache, U.fake_onnx_extractor(self.processor), U.FakeWords())
+        silent = os.path.join(self.tmp.name, "silent.wav")
+        sf.write(silent, np.zeros(32000, dtype=np.float32), 16000, subtype="FLOAT")
+        entry = SC.record_clip("000020022", silent, U.SAMPLE_TEXT, self.cache,
+                               U.fake_onnx_extractor(self.processor), U.FakeWords())
+        self.assertEqual(entry["phoneme_calls"], [])  # digital silence fails before the session
+        self.assertEqual(self._files(), ["000020022.json"])
 
     def test_the_shared_extractor_is_not_modified(self):
         extractor = U.fake_onnx_extractor(self.processor)

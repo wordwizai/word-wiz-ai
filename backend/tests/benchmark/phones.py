@@ -11,12 +11,16 @@ Mapping works on characters, so it holds for either tokenization. When strict mo
 characters from two canonical phones into one token (D R AO IH NG gives "ɔɪ"), both
 canonical phones map to that one system phone and share its error flag, which matches
 how production scores it.
+
+core is imported inside the functions that need it, not at module level. Several WWAI_*
+flags are read once when a core module is first imported, and run.py applies the flags it
+records after importing the harness, so dataset, scoring and compare must not load core
+just by being imported.
 """
 
 from __future__ import annotations
 
-from . import common  # noqa: F401  (puts backend/ on sys.path)
-from core.gt_alignment import align_sequences
+from . import common  # noqa: F401  (puts backend/ on sys.path for the lazy core imports below)
 
 # Matches eng_to_ipa's conventions, checked against eng_to_ipa.convert in the tests.
 # AH is ə in every stress position, ER is ər, CH and JH use the ʧ/ʤ ligatures, Y is j.
@@ -62,6 +66,8 @@ def g2p_agrees(canonical, system) -> bool:
 
 def map_canonical_to_system(canonical, system) -> list[list[int]]:
     """For each canonical phone, the indices of the system phones aligned to it."""
+    from core.gt_alignment import align_sequences  # lazy, see the module docstring
+
     c_chars, c_owner = _chars(canonical)
     s_chars, s_owner = _chars(system)
     mapping = [set() for _ in canonical]
@@ -85,6 +91,8 @@ def gt_error_flags(expected, actual) -> list[bool]:
     ``substituted`` lists (gt_alignment.align_sequences is behaviorally identical to
     process_audio.align_sequences), so positions agree with what production reported.
     """
+    from core.gt_alignment import align_sequences  # lazy, see the module docstring
+
     flags = []
     for op, _gt, _pred in align_sequences(list(expected), list(actual)):
         if op != "insertion":

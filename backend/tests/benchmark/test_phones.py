@@ -1,5 +1,9 @@
+import os
+import subprocess
+import sys
 import unittest
 
+from tests.benchmark import common
 from tests.benchmark import phones as P
 
 
@@ -61,6 +65,28 @@ class TestErrorFlags(unittest.TestCase):
 
     def test_insertions_are_not_expected_phones(self):
         self.assertEqual(P.gt_error_flags(["k", "æ", "t"], ["k", "æ", "æ", "t"]), [False, False, False])
+
+
+class TestNoCoreAtImport(unittest.TestCase):
+    """dataset, scoring and compare must import without loading core.
+
+    Several WWAI_* flags are read once when a core module is imported, and run.py applies the
+    flags it records only after importing the harness, so a module-level core import here would
+    make a recorded flag silently not apply.
+    """
+
+    def test_importing_the_scoring_side_loads_no_core_module(self):
+        code = (
+            "import sys\n"
+            "import tests.benchmark.dataset, tests.benchmark.scoring, tests.benchmark.compare\n"
+            "loaded = sorted(m for m in sys.modules if m == 'core' or m.startswith('core.'))\n"
+            "print(loaded)\n"
+            "sys.exit(1 if loaded else 0)\n"
+        )
+        env = dict(os.environ, PYTHONIOENCODING="utf-8")
+        done = subprocess.run([sys.executable, "-c", code], cwd=common.BACKEND_ROOT, env=env,
+                              capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(done.returncode, 0, f"core modules were imported: {done.stdout}{done.stderr}")
 
 
 if __name__ == "__main__":

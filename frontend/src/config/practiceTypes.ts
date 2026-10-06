@@ -7,10 +7,6 @@ export interface PracticeTypeConfig {
     hasSentenceOptions: boolean;
     customLayout?: string;
   };
-  styling?: {
-    headerStyle?: string;
-    containerStyle?: string;
-  };
 }
 
 export const practiceTypeConfigs: Record<string, PracticeTypeConfig> = {
@@ -21,10 +17,6 @@ export const practiceTypeConfigs: Record<string, PracticeTypeConfig> = {
       hasNextButton: true,
       hasSentenceOptions: false,
     },
-    styling: {
-      headerStyle: "text-center flex-1",
-      containerStyle: "min-h-screen px-4 py-4 flex flex-col items-center gap-6 bg-gradient-to-b from-primary/5 via-background to-background",
-    },
   },
   story: {
     title: "Story Practice",
@@ -33,10 +25,6 @@ export const practiceTypeConfigs: Record<string, PracticeTypeConfig> = {
       hasNextButton: true,
       hasSentenceOptions: false,
     },
-    styling: {
-      headerStyle: "text-center flex-1",
-      containerStyle: "min-h-screen px-4 py-4 flex flex-col items-center gap-6 bg-gradient-to-b from-primary/5 via-background to-background",
-    },
   },
   "choice-story": {
     title: "Choice Story Practice",
@@ -44,10 +32,6 @@ export const practiceTypeConfigs: Record<string, PracticeTypeConfig> = {
     features: {
       hasNextButton: false,
       hasSentenceOptions: true,
-    },
-    styling: {
-      headerStyle: "",
-      containerStyle: "min-h-screen px-4 py-4 flex flex-col items-center gap-6 bg-gradient-to-b from-primary/5 via-background to-background",
     },
   },
 };

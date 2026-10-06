@@ -1,352 +1,257 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowRight, ChevronRight, Flame } from "lucide-react";
 import { AuthContext } from "@/contexts/AuthContext";
+import { getSessions, getUserStatistics } from "@/api";
+import { AppPage, PageHeader, SectionHeader } from "@/components/AppPage";
 import ActivitiesList from "@/components/ActivitiesList";
-import {
-  Clock,
-  Target,
-  Flame,
-  BookOpen,
-  Trophy,
-  ArrowRight,
-  type LucideIcon,
-} from "lucide-react";
-import { getSessions, getUserStatistics, type UserStatistics } from "@/api";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import DynamicIcon from "@/components/DynamicIcon";
-import { useCountUp } from "@/hooks/useCountUp";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useActivities, useStartActivity } from "@/hooks/useActivities";
+import {
+  activityPastel,
+  activityTypeLabel,
+  friendlyDate,
+  pickDailyActivities,
+} from "@/lib/activities";
 
-interface Session {
-  id: string;
+interface DashboardSession {
+  id: number;
   created_at: string;
+  is_completed: boolean;
   activity: {
     id: number;
     title: string;
     activity_type: string;
     emoji_icon: string;
   };
-  is_completed: boolean;
 }
 
-const activityColors = [
-  "pastel-blue",
-  "pastel-mint",
-  "pastel-peach",
-  "pastel-purple",
-  "pastel-pink",
-  "pastel-lavender",
-  "pastel-yellow",
-  "pastel-coral",
-  "pastel-teal",
-];
+const RECENT_LIMIT = 4;
 
-interface AnimatedStatCardProps {
-  icon: LucideIcon;
-  label: string;
-  value: number;
-  suffix?: string;
-  color: string;
-  iconColor: string;
-  isLoading: boolean;
-}
-
-const AnimatedStatCard = ({
-  icon: Icon,
-  label,
-  value,
-  suffix = "",
-  color,
-  iconColor,
-  isLoading,
-}: AnimatedStatCardProps) => {
-  const animatedValue = useCountUp(isLoading ? 0 : value, 1200);
-  const displayValue = isLoading ? null : `${animatedValue}${suffix}`;
-
-  return (
-    <Card
-      className={`${color} rounded-2xl border-2 border-white/80 shadow-sm hover:shadow-md transition-all duration-200 relative overflow-hidden`}
-    >
-      <div className="p-4 relative z-10">
-        {isLoading ? (
-          <>
-            <Skeleton className="h-8 w-16 mb-1.5 bg-black/10 rounded-lg" />
-            <Skeleton className="h-3 w-20 bg-black/10 rounded" />
-          </>
-        ) : (
-          <>
-            <div className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
-              {displayValue}
-            </div>
-            <div className="text-xs text-muted-foreground font-medium mt-1">
-              {label}
-            </div>
-          </>
-        )}
-      </div>
-      <Icon
-        className={`absolute -right-2 -bottom-2 w-16 h-16 md:w-20 md:h-20 ${iconColor} opacity-15`}
-      />
-    </Card>
-  );
+const greeting = () => {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
 };
 
 const Dashboard = () => {
   const { user, token } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const { activities } = useActivities();
+  const { start, startingId } = useStartActivity();
 
-  const userName = user?.full_name || "Guest";
-  const motivationalQuotes = [
-    "Keep turning the page—every chapter brings you closer to your goals!",
-    "Every word you read is a step forward. Keep going!",
-    "Reading today, leading tomorrow. Stay inspired!",
-    "Feed your mind—read something new every day!",
-    "Each book is a new adventure. Dive in!",
-    "Consistency in reading leads to mastery. You've got this!",
-    "Grow your knowledge, one page at a time.",
-    "Ignite your passion for learning—read on!",
-    "Every page read is a victory. Celebrate your progress!",
-    "The more you read, the more you succeed. Keep it up!",
-  ];
-  const today = new Date();
-  const quoteIndex = today.getDate() % motivationalQuotes.length;
-  const motivational = motivationalQuotes[quoteIndex];
-
-  const [pastSessions, setPastSessions] = useState<Session[]>([]);
-  const [sessionsLoading, setSessionsLoading] = useState(true);
-  const [statistics, setStatistics] = useState<UserStatistics | null>(null);
-  const [statsLoading, setStatsLoading] = useState(true);
-  const router = useNavigate();
+  const [sessions, setSessions] = useState<DashboardSession[] | null>(null);
+  const [streak, setStreak] = useState(0);
 
   useEffect(() => {
-    const fetchPastSessions = async () => {
-      if (!token) return;
-      try {
-        setSessionsLoading(true);
-        const response = await getSessions(token);
-        setPastSessions(response);
-      } catch (error) {
-        console.error("Error fetching past sessions:", error);
-      } finally {
-        setSessionsLoading(false);
-      }
-    };
-    fetchPastSessions();
+    if (!token) return;
+    getSessions(token)
+      .then((data: DashboardSession[]) =>
+        setSessions(
+          [...data].sort(
+            (a, b) =>
+              new Date(b.created_at).getTime() -
+                new Date(a.created_at).getTime() || b.id - a.id
+          )
+        )
+      )
+      .catch((error: unknown) => {
+        console.error("Error fetching sessions:", error);
+        setSessions([]);
+      });
+    getUserStatistics(token)
+      .then((stats) => setStreak(stats.current_streak))
+      .catch((error: unknown) =>
+        console.error("Error fetching statistics:", error)
+      );
   }, [token]);
 
-  // Fetch user statistics
-  useEffect(() => {
-    const fetchStatistics = async () => {
-      if (!token) return;
+  const firstName = user?.full_name?.trim().split(/\s+/)[0];
+  const dailyPicks = useMemo(
+    () => (activities ? pickDailyActivities(activities) : null),
+    [activities]
+  );
 
-      try {
-        setStatsLoading(true);
-        const stats = await getUserStatistics(token);
-        setStatistics(stats);
-      } catch (error) {
-        console.error("Error fetching statistics:", error);
-      } finally {
-        setStatsLoading(false);
-      }
-    };
+  // The session to resume is the newest one that isn't finished. Finished
+  // sessions can't be reopened (PracticeRouter bounces them), so in the
+  // recent list they start a fresh session of the same activity instead.
+  const resumable = sessions?.find((s) => !s.is_completed) ?? null;
+  const recent = (sessions ?? [])
+    .filter((s) => s.id !== resumable?.id)
+    .slice(0, RECENT_LIMIT);
 
-    fetchStatistics();
-  }, [token]);
-
-  const formatActivityType = (type: string | undefined) => {
-    if (!type) return "Unknown";
-    
-    switch (type.toLowerCase()) {
-      case "unlimited":
-        return "Unlimited";
-      case "choice-story":
-        return "Choice Story";
-      default:
-        return type.charAt(0).toUpperCase() + type.slice(1);
-    }
-  };
-
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good Morning";
-    if (hour < 18) return "Good Afternoon";
-    return "Good Evening";
+  const openSession = (session: DashboardSession) => {
+    if (session.is_completed) start(session.activity.id);
+    else navigate(`/practice/${session.id}`);
   };
 
   return (
-    <main className="flex-1 p-4 sm:p-6 bg-background space-y-6 overflow-y-auto flex flex-col min-h-0 h-full">
-      {/* Main content */}
-      {/* Hero Header */}
-      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/15 p-6">
-        <div className="flex items-center gap-4">
-          {/* Icon badge */}
-          <div className="hidden sm:flex shrink-0 w-14 h-14 bg-gradient-to-br from-primary/20 to-purple-200/60 rounded-2xl items-center justify-center shadow-sm">
-            <BookOpen className="w-7 h-7 text-primary" />
-          </div>
-
-          {/* Text content */}
-          <div className="flex-1 min-w-0">
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest mb-1">
-              {getGreeting()}
+    <AppPage>
+      <PageHeader
+        title={firstName ? `${greeting()}, ${firstName}` : "Welcome back"}
+        actions={
+          streak > 0 && (
+            <p className="inline-flex items-center gap-2 rounded-full border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-xs">
+              <Flame className="size-4 text-pastel-coral-foreground" />
+              {streak}-day streak
             </p>
-            <h1 className="text-2xl md:text-3xl font-bold mb-1 bg-gradient-to-r from-primary via-primary/80 to-purple-600 bg-clip-text text-transparent truncate">
-              {userName}!
-            </h1>
-            <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">
-              {motivational}
-            </p>
-          </div>
-        </div>
-      </div>
+          )
+        }
+      />
 
-      {/* Quick Stats Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <AnimatedStatCard
-          icon={Target}
-          label="Total Sessions"
-          value={statistics?.total_sessions || 0}
-          color="bg-pastel-blue"
-          iconColor="text-blue-600"
-          isLoading={statsLoading}
-        />
-        <AnimatedStatCard
-          icon={Flame}
-          label="Current Streak"
-          value={statistics?.current_streak || 0}
-          suffix=" days"
-          color="bg-pastel-yellow"
-          iconColor="text-orange-600"
-          isLoading={statsLoading}
-        />
-        <AnimatedStatCard
-          icon={BookOpen}
-          label="Words Read"
-          value={statistics?.words_read || 0}
-          color="bg-pastel-mint"
-          iconColor="text-green-600"
-          isLoading={statsLoading}
-        />
-        <AnimatedStatCard
-          icon={Trophy}
-          label="Longest Streak"
-          value={statistics?.longest_streak || 0}
-          suffix=" days"
-          color="bg-pastel-coral"
-          iconColor="text-pink-600"
-          isLoading={statsLoading}
-        />
-      </div>
-
-      <div className="flex space-x-0 sm:space-x-4 space-y-4 flex-1 w-full min-w-0 min-h-0 flex-col md:flex-row md:space-y-0">
-        {/* Activities with enhanced styling */}
-        <div className="relative flex-1 flex flex-col">
-          <ActivitiesList
-            numberOfActivities={3}
-            className="w-full flex-1"
-            shuffleDaily={true}
+      {sessions === null ? (
+        <Skeleton className="h-40 rounded-3xl" />
+      ) : (
+        resumable && (
+          <ContinueCard
+            session={resumable}
+            onContinue={() => navigate(`/practice/${resumable.id}`)}
           />
-          <div className="flex justify-center mt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-foreground border-primary/30 hover:border-primary/60 hover:bg-primary/5 transition-colors px-6 py-2 min-h-[44px] gap-2"
-              onClick={() => router("/practice")}
+        )
+      )}
+
+      <section aria-labelledby="picks-heading">
+        <SectionHeader
+          id="picks-heading"
+          title="Today's picks"
+          action={
+            <Link
+              to="/practice"
+              className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-primary hover:underline underline-offset-4"
             >
-              View All Activities
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
+              All activities
+              <ChevronRight className="size-4" />
+            </Link>
+          }
+        />
+        <ActivitiesList activities={dailyPicks} />
+      </section>
 
-        {/* Recent Sessions panel */}
-        <div className="flex flex-col md:w-80">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-primary/10 rounded-xl">
-              <Clock className="w-5 h-5 text-primary" />
-            </div>
-            <h2 className="text-xl md:text-2xl font-bold text-foreground">
-              Recent Sessions
-            </h2>
-            {pastSessions.length > 0 && (
-              <span className="text-xs text-muted-foreground bg-muted rounded-full px-2 py-0.5 ml-auto">
-                {pastSessions.length}
-              </span>
-            )}
-          </div>
-          <Card className="flex flex-col flex-1 rounded-2xl bg-card border-2 border-border shadow-sm overflow-hidden">
-          <CardContent className="px-3 pb-3 pt-2 flex-1 flex flex-col overflow-hidden min-h-0">
-            {sessionsLoading ? (
-              <div className="flex flex-col gap-3">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-muted/40">
-                    <Skeleton className="w-7 h-7 rounded-lg shrink-0" />
-                    <div className="flex-1 space-y-1.5">
-                      <Skeleton className="h-3.5 w-3/4 rounded" />
-                      <Skeleton className="h-3 w-1/2 rounded" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : pastSessions.length > 0 ? (
-              <div className="flex-1 overflow-y-auto min-h-0">
-                <div className="flex flex-col gap-2 pr-1">
-                  {pastSessions.map((session) => {
-                    const colorIndex =
-                      Math.abs(session.activity.id) % activityColors.length;
-                    const cardColor = activityColors[colorIndex];
+      {recent.length > 0 && (
+        <section aria-labelledby="recent-heading">
+          <SectionHeader id="recent-heading" title="Recent" />
+          <ul className="divide-y overflow-hidden rounded-2xl border bg-card shadow-xs">
+            {recent.map((session) => (
+              <li key={session.id}>
+                <RecentRow
+                  session={session}
+                  isStarting={startingId === session.activity.id}
+                  disabled={startingId !== null}
+                  onOpen={() => openSession(session)}
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </AppPage>
+  );
+};
 
-                    return (
-                      <button
-                        key={session.id}
-                        className="group w-full text-left rounded-xl border-2 border-white/60 hover:border-white cursor-pointer p-3 transition-all duration-200 hover:shadow-sm"
-                        onClick={() => router(`/practice/${session.id}`)}
-                        style={{
-                          backgroundColor: `var(--${cardColor})`,
-                        }}
-                      >
-                        <div className="flex items-center gap-2">
-                          <DynamicIcon
-                            name={session.activity.emoji_icon}
-                            className="w-4 h-4 shrink-0 text-foreground/70"
-                            fallback="Star"
-                          />
-                          <span className="text-sm font-semibold text-foreground line-clamp-1 flex-1">
-                            {session.activity.title}
-                          </span>
-                        </div>
-                        <div className="text-xs text-foreground/60 mt-1 pl-6">
-                          {formatActivityType(session.activity.activity_type)} ·{" "}
-                          {new Date(session.created_at).toLocaleDateString()}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-36 text-center gap-2">
-                <div className="w-12 h-12 bg-muted rounded-2xl flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-muted-foreground" />
-                </div>
-                <p className="text-sm font-semibold text-foreground">No sessions yet</p>
-                <p className="text-xs text-muted-foreground">
-                  Start practicing to see your history here
-                </p>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="mt-1 text-xs h-8 px-3"
-                  onClick={() => router("/practice")}
-                >
-                  Start practicing
-                </Button>
-              </div>
-            )}
-          </CardContent>
-          </Card>
+const ContinueCard = ({
+  session,
+  onContinue,
+}: {
+  session: DashboardSession;
+  onContinue: () => void;
+}) => {
+  const pastel = activityPastel(session.activity.id);
+
+  return (
+    <section
+      aria-labelledby="continue-heading"
+      className="flex flex-col gap-5 rounded-3xl p-5 shadow-sm ring-1 ring-inset ring-black/5 sm:flex-row sm:items-center sm:gap-6 sm:p-8 dark:ring-white/10"
+      style={{ backgroundColor: pastel.background }}
+    >
+      <div className="flex min-w-0 flex-1 items-center gap-4 sm:gap-6">
+        <span
+          className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-white/60 sm:size-20 dark:bg-black/20"
+          style={{ color: pastel.foreground }}
+        >
+          <DynamicIcon
+            name={session.activity.emoji_icon}
+            className="size-7 sm:size-10"
+            fallback="BookOpen"
+          />
+        </span>
+
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-foreground/70">
+            Pick up where you left off
+          </p>
+          <h2
+            id="continue-heading"
+            className="mt-1 text-xl leading-tight font-bold tracking-tight sm:text-3xl"
+            style={{ color: pastel.foreground }}
+          >
+            {session.activity.title}
+          </h2>
+          <p className="mt-1 text-sm text-foreground/70">
+            {activityTypeLabel(session.activity.activity_type)} ·{" "}
+            {friendlyDate(session.created_at)}
+          </p>
         </div>
       </div>
-    </main>
+
+      <Button
+        size="lg"
+        onClick={onContinue}
+        className="h-14 w-full shrink-0 rounded-xl px-8 text-base font-semibold sm:w-auto active:scale-[0.98]"
+      >
+        Keep reading
+        <ArrowRight className="size-5" />
+      </Button>
+    </section>
+  );
+};
+
+const RecentRow = ({
+  session,
+  isStarting,
+  disabled,
+  onOpen,
+}: {
+  session: DashboardSession;
+  isStarting: boolean;
+  disabled: boolean;
+  onOpen: () => void;
+}) => {
+  const pastel = activityPastel(session.activity.id);
+
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      disabled={disabled}
+      className="flex min-h-16 w-full items-center gap-4 px-4 py-3 text-left transition-colors outline-none hover:bg-muted/60 focus-visible:bg-muted/60 disabled:cursor-default disabled:hover:bg-transparent sm:px-5"
+    >
+      <span
+        className="flex size-10 shrink-0 items-center justify-center rounded-xl"
+        style={{ backgroundColor: pastel.background, color: pastel.foreground }}
+      >
+        <DynamicIcon
+          name={session.activity.emoji_icon}
+          className="size-5"
+          fallback="BookOpen"
+        />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate font-medium text-foreground">
+          {session.activity.title}
+        </span>
+        <span className="block text-sm text-muted-foreground">
+          {activityTypeLabel(session.activity.activity_type)} ·{" "}
+          {friendlyDate(session.created_at)}
+        </span>
+      </span>
+      <span className="hidden text-sm font-medium text-muted-foreground sm:inline">
+        {isStarting ? "Starting…" : session.is_completed ? "Read again" : "Resume"}
+      </span>
+      <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+    </button>
   );
 };
 

@@ -1,8 +1,73 @@
-import { AnimatePresence, motion } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useMemo, type CSSProperties } from "react";
 import { useSpeechSynthesis } from "@/hooks/useSpeechSynthesis";
-import { useEffect, useState } from "react";
-import { Columns, Text } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const PHONICS_CHUNKS = [
+  // Vowel teams & diphthongs
+  "ai", "ay", "au", "aw", "ea", "ee", "ei", "ey", "ie", "oa", "oe", "oo",
+  "ou", "ow", "ue", "ui", "ew", "oy", "oi", "igh",
+  // R-controlled vowels (Bossy R)
+  "ar", "er", "ir", "or", "ur",
+  // Consonant digraphs
+  "ch", "ck", "gh", "gn", "kn", "ph", "sh", "th", "wh", "wr", "qu", "ng",
+  // Common consonant blends (initial and final)
+  "bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "sc",
+  "scr", "sk", "sl", "sm", "sn", "sp", "spl", "spr", "st", "str", "sw", "tr",
+  "tw",
+  // Word endings / suffixes
+  "ing", "ed", "es", "ly", "est", "y", "en", "ness", "ful", "less", "ment",
+  "tion", "sion", "ous", "able", "ible",
+  // Common word families (rimes)
+  "ack", "all", "ank", "ash", "ate", "eep", "ell", "ick", "ink", "ock", "op",
+  "uck", "ump",
+  // Silent letter patterns
+  "mb",
+];
+
+// Greedy longest-match split into phonics chunks ("sh" + "i" + "p").
+function chunkPhonics(word: string): string[] {
+  const lower = word.toLowerCase().replace(/[^a-z]/g, "");
+  const chunks: string[] = [];
+  let i = 0;
+  while (i < lower.length) {
+    let len = 3;
+    while (len > 1 && !PHONICS_CHUNKS.includes(lower.slice(i, i + len))) len--;
+    chunks.push(lower.slice(i, i + len));
+    i += len;
+  }
+  return chunks;
+}
+
+// Three clear bands instead of a continuous neon gradient. Each band also
+// changes the outline (none / dashed / solid) so it never relies on red
+// versus green alone.
+type Score = "good" | "close" | "practice";
+
+const scoreFor = (per: number): Score =>
+  per < 0.15 ? "good" : per < 0.5 ? "close" : "practice";
+
+const SCORE_STYLE: Record<Score, CSSProperties & { label: string }> = {
+  good: {
+    label: "read well",
+    backgroundColor: "var(--pastel-mint)",
+    color: "var(--pastel-mint-foreground)",
+    borderColor: "transparent",
+  },
+  close: {
+    label: "almost",
+    backgroundColor: "var(--pastel-yellow)",
+    color: "var(--pastel-yellow-foreground)",
+    borderColor: "var(--pastel-yellow-foreground)",
+    borderStyle: "dashed",
+  },
+  practice: {
+    label: "practice this one",
+    backgroundColor: "var(--pastel-pink)",
+    color: "var(--pastel-pink-foreground)",
+    borderColor: "var(--pastel-pink-foreground)",
+  },
+};
 
 interface WordBadgeProps {
   word: string;
@@ -11,6 +76,8 @@ interface WordBadgeProps {
   analysisPer?: number;
   isInsertion?: boolean;
   isDeletion?: boolean;
+  // Show the word as phonics chunks ("sound it out"); taps then read slowly.
+  splitIntoSounds?: boolean;
 }
 
 export const WordBadge = ({
@@ -20,322 +87,86 @@ export const WordBadge = ({
   analysisPer,
   isInsertion = false,
   isDeletion = false,
+  splitIntoSounds = false,
 }: WordBadgeProps) => {
-  const PHONICS_CHUNKS = [
-    // Vowel teams & diphthongs
-    "ai",
-    "ay",
-    "au",
-    "aw",
-    "ea",
-    "ee",
-    "ei",
-    "ey",
-    "ie",
-    "oa",
-    "oe",
-    "oo",
-    "ou",
-    "ow",
-    "ue",
-    "ui",
-    "ew",
-    "oy",
-    "oi",
-    "igh",
-
-    // R-controlled vowels (Bossy R)
-    "ar",
-    "er",
-    "ir",
-    "or",
-    "ur",
-
-    // Consonant digraphs
-    "ch",
-    "ck",
-    "gh",
-    "gn",
-    "kn",
-    "ph",
-    "sh",
-    "th",
-    "wh",
-    "wr",
-    "qu",
-    "ng",
-
-    // Common consonant blends (initial and final)
-    "bl",
-    "br",
-    "cl",
-    "cr",
-    "dr",
-    "fl",
-    "fr",
-    "gl",
-    "gr",
-    "pl",
-    "pr",
-    "sc",
-    "scr",
-    "sk",
-    "sl",
-    "sm",
-    "sn",
-    "sp",
-    "spl",
-    "spr",
-    "st",
-    "str",
-    "sw",
-    "tr",
-    "tw",
-
-    // Word endings / suffixes
-    "ing",
-    "ed",
-    "es",
-    "ly",
-    "er",
-    "est",
-    "y",
-    "en",
-    "ness",
-    "ful",
-    "less",
-    "ment",
-    "tion",
-    "sion",
-    "ous",
-    "able",
-    "ible",
-
-    // Common word families (rimes) – optional but useful
-    "ack",
-    "all",
-    "ank",
-    "ash",
-    "ate",
-    "eep",
-    "ell",
-    "est",
-    "ick",
-    "ing",
-    "ink",
-    "ock",
-    "op",
-    "uck",
-    "ump",
-
-    // Silent letter patterns
-    "mb",
-    "gn",
-    "kn",
-    "wr",
-  ];
-
-  const formatWord = (w: string) => {
-    // make everything lowercase and remove any non-alphabetic characters
-    return w.toLowerCase().replace(/[^a-z]/g, "");
-  };
-
-  function chunkPhonics(word: string): string[] {
-    const chunks: string[] = [];
-    let i = 0;
-
-    const lower = word.toLowerCase();
-
-    while (i < lower.length) {
-      let found = false;
-
-      // Try to match longest possible chunk (up to 3 letters)
-      for (let len = 3; len > 0; len--) {
-        const piece = lower.slice(i, i + len);
-        if (PHONICS_CHUNKS.includes(piece)) {
-          chunks.push(piece);
-          i += len;
-          found = true;
-          break;
-        }
-      }
-
-      if (!found) {
-        // Default to single letter
-        chunks.push(lower[i]);
-        i += 1;
-      }
-    }
-
-    return chunks;
-  }
-  const [phonicsChunks, setPhonicsChunks] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (word) {
-      const chunks = chunkPhonics(formatWord(word));
-      setPhonicsChunks(chunks);
-    }
-  }, [word]);
-
-  const [textClass, setTextClass] = useState("");
-  const [targetBg, setTargetBg] = useState("rgb(255,255,255)");
-
-  const baseBgClass = "bg-white dark:bg-zinc-900";
-
-  useEffect(() => {
-    const baseTextClass = "text-black dark:text-white";
-    let tempTextClass = `rounded-xl px-2 md:px-4 py-1 md:py-2 text-4xl font-medium ${baseTextClass}`;
-    if (typeof analysisPer === "number" && showHighlighted) {
-      const p = Math.max(0, Math.min(1, analysisPer));
-      let r, g;
-      const b = 100;
-      if (p < 0.5) {
-        r = Math.round(2 * 255 * p);
-        g = 255;
-      } else {
-        r = 255;
-        g = Math.round(255 * (1 - 2 * (p - 0.5)));
-      }
-      setTargetBg(`rgb(${r},${g},${b})`);
-      tempTextClass +=
-        p > 0.5 ? " text-white dark:text-white" : " text-black dark:text-black";
-    }
-    setTextClass(tempTextClass);
-  }, [analysisPer, showHighlighted]);
-
   const { speak } = useSpeechSynthesis();
-  const [isGraphemes, setIsGraphemes] = useState(false);
+  const reduceMotion = useReducedMotion();
+  const chunks = useMemo(() => chunkPhonics(word), [word]);
+
+  const score =
+    showHighlighted && typeof analysisPer === "number"
+      ? scoreFor(Math.max(0, Math.min(1, analysisPer)))
+      : null;
+  const { label: scoreLabel, ...scoreStyle } = score
+    ? SCORE_STYLE[score]
+    : { label: "" };
+
+  const status = isDeletion
+    ? "skipped"
+    : isInsertion
+      ? "extra word"
+      : scoreLabel;
 
   return (
-    <motion.div
-      initial={{
-        opacity: 0,
-        scale: 0.8,
-      }}
-      animate={
-        showHighlighted && typeof analysisPer === "number"
-          ? {
-              opacity: 1,
-              scale: 1,
-              backgroundColor: targetBg,
-              transition: {
-                backgroundColor: { delay: idx * 0.08, duration: 0.3 },
-                opacity: { delay: idx * 0.08, duration: 0.3 },
-                scale: { delay: idx * 0.08, duration: 0.3 },
-              },
-            }
-          : { opacity: isInsertion ? 0.4 : 1, scale: 1 }
-      }
-      exit={{ opacity: 0, scale: 0.8 }}
+    <motion.button
+      type="button"
+      layout={!reduceMotion}
+      initial={reduceMotion ? false : { opacity: 0, scale: 0.85 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.85 }}
+      transition={{ duration: 0.2 }}
+      onClick={() => speak(word, { rate: splitIntoSounds ? 0.3 : 1 })}
+      aria-label={`Hear "${word}"${status ? `, ${status}` : ""}`}
+      className={cn(
+        "relative inline-flex items-center rounded-2xl border-2 px-3 py-1.5 md:px-4 md:py-2",
+        "text-2xl leading-tight font-medium md:text-4xl",
+        "outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+        "transition-[background-color,color,border-color,translate] duration-300",
+        "hover:-translate-y-0.5 active:translate-y-0",
+        !score && !isDeletion && !isInsertion &&
+          "border-border bg-card text-foreground shadow-xs",
+        isDeletion &&
+          "border-dashed border-pastel-pink-foreground/60 bg-transparent text-pastel-pink-foreground/70 line-through",
+        isInsertion &&
+          "border-dashed border-border bg-transparent text-muted-foreground italic"
+      )}
       style={{
-        position: "relative",
-        ...(isInsertion && {
-          border: "2px dashed rgb(134, 239, 172)", // pastel mint green dashed border for ghosts
-          backgroundColor: "rgba(134, 239, 172, 0.1)", // subtle mint green background
-        }),
-        ...(isDeletion && {
-          backgroundColor: "rgba(248, 113, 113, 0.15)", // light red background for deletions
-        }),
+        ...scoreStyle,
+        // Feedback sweeps left to right, 80ms per word (design system).
+        transitionDelay: score ? `${idx * 80}ms` : undefined,
       }}
-      className="inline-block group bg-white dark:bg-zinc-900 rounded-xl"
     >
-      {/* Toggle Grapheme Button */}
-      <button
-        type="button"
-        aria-label="Toggle grapheme mode"
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsGraphemes((s) => !s);
-        }}
-        className="absolute top-[-8px] right-[-8px] z-10 p-1.5 rounded-full bg-white/80 hover:bg-muted shadow transition-opacity opacity-0 group-hover:opacity-100"
-        tabIndex={0}
-      >
-        {isGraphemes ? (
-          <Text className="h-5 w-5" />
-        ) : (
-          <Columns className="h-5 w-5" />
-        )}
-      </button>
-      <Badge
-        variant="outline"
-        className={`${textClass} ${baseBgClass} cursor-pointer transition-colors hover:bg-muted relative rounded-xl ${
-          isInsertion ? "italic text-green-600 dark:text-green-400" : ""
-        } ${
-          isDeletion
-            ? "line-through text-red-400 dark:text-red-400 opacity-60"
-            : ""
-        }`}
-        style={{ background: "transparent" }}
-        onClick={() => {
-          if (!isGraphemes) {
-            speak(word, { rate: 1 });
-          } else {
-            speak(word, { rate: 0.3 });
-          }
-        }}
-      >
-        {isGraphemes ? (
-          <span>
-            <AnimatePresence>
-              {phonicsChunks.map((g, i) => (
-                <motion.span
-                  key={i}
-                  initial={{
-                    opacity: 0,
-                    scale: 0.5,
-                    x: 0,
-                    y: 0,
-                    rotate: Math.random() * 20 - 10, // random slight rotation
-                  }}
-                  animate={{
-                    opacity: 1,
-                    scale: 1,
-                    x: (i - phonicsChunks.length / 2 + 0.5) * 12, // spread horizontally
-                    y: 0,
-                    rotate: 0,
-                    transition: {
-                      delay: i * 0.08,
-                      duration: 0.5,
-                      type: "spring",
-                      stiffness: 120,
-                      damping: 9,
-                    },
-                  }}
-                  exit={{
-                    opacity: 0,
-                    scale: 0.5,
-                    x: 0,
-                    y: 0,
-                    transition: {
-                      duration: 0.3,
-                      type: "spring",
-                    },
-                  }}
-                >
-                  <Badge
-                    key={i}
-                    variant="secondary"
-                    className="mx-0.5 text-2xl md:text-4xl font-medium px-3 rounded-xl"
-                  >
-                    {g}
-                  </Badge>
-                </motion.span>
-              ))}
-            </AnimatePresence>
-          </span>
-        ) : (
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            key="whole-word"
-            className="text-2xl md:text-4xl font-medium px-1 md:px-3"
-          >
-            {word}
-          </motion.span>
-        )}
-      </Badge>
-    </motion.div>
+      {splitIntoSounds ? (
+        <span className="flex items-center gap-1">
+          <AnimatePresence initial={!reduceMotion}>
+            {chunks.map((chunk, i) => (
+              <motion.span
+                key={`${chunk}-${i}`}
+                initial={{ opacity: 0, scale: 0.5, y: 6 }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                  y: 0,
+                  transition: {
+                    delay: i * 0.08,
+                    type: "spring",
+                    stiffness: 120,
+                    damping: 9,
+                  },
+                }}
+                className={cn(
+                  "rounded-lg px-1.5 md:px-2",
+                  score ? "bg-white/60 dark:bg-black/20" : "bg-secondary"
+                )}
+              >
+                {chunk}
+              </motion.span>
+            ))}
+          </AnimatePresence>
+        </span>
+      ) : (
+        word
+      )}
+    </motion.button>
   );
 };

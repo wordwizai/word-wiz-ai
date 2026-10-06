@@ -21,6 +21,8 @@ interface BasePracticeProps {
     modelLoadProgress: number;
     onStartRecording: () => void;
     onStopRecording: () => void;
+    /** Microphone or recording problem to show by the record button. */
+    recorderError: string | null;
     displayNextSentence: () => void;
     nextSentence: string | null;
     showNextButton: boolean;
@@ -108,9 +110,8 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
         showAudioPlaybackError(error);
       });
     },
-    onError: (err) => {
-      console.error("Stream error:", err);
-      showErrorToast(err);
+    onError: () => {
+      // useAudioTransport already showed the message; just reset the UI.
       setIsProcessing(false);
     },
     sessionId: session.id,
@@ -148,11 +149,10 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
     getCurrentSentence();
   }, [session.id, token]);
 
-  const { isRecording, startRecording, stopRecording } = useAudioRecorder(
-    (audioFile: File) => {
+  const { isRecording, startRecording, stopRecording, recorderError } =
+    useAudioRecorder((audioFile: File) => {
       processAudio(audioFile, currentSentence ?? "");
-    }
-  );
+    });
 
   const displayNextSentence = () => {
     setShowHighlightedWords(false);
@@ -181,6 +181,7 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
     modelLoadProgress,
     onStartRecording: startRecording,
     onStopRecording: stopRecording,
+    recorderError,
     displayNextSentence,
     nextSentence,
     showNextButton,

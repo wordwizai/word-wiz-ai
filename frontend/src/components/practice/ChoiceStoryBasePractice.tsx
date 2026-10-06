@@ -32,6 +32,8 @@ interface ChoiceStoryBasePracticeProps {
     modelLoadProgress: number;
     onStartRecording: () => void;
     onStopRecording: () => void;
+    /** Microphone or recording problem to show by the record button. */
+    recorderError: string | null;
     displayNextSentence: (nextSentence: string) => void;
     sentenceOptions: SentenceOptions | null;
     showSentenceOptions: boolean;
@@ -69,49 +71,40 @@ const ChoiceStoryBasePractice = ({
       setIsProcessing(false);
     },
     onAnalysis: (data) => {
-      console.log("Analysis:", data);
       setShowHighlightedWords(true);
       setAnalysisData(data);
     },
-    onGptResponse: (data) => {
-      console.log("GPT:", data);
-      
-      // Validate GPT response structure
-      if (!data || typeof data !== 'object') {
-        console.error("Invalid GPT response: not an object", data);
-        showErrorToast("Invalid response from server");
+    onFeedback: (data) => {
+      // Local feedback text, sent right after the analysis.
+      setFeedback(data.text || null);
+    },
+    onNextSentence: (data) => {
+      // For choice stories the backend's next_sentence carries the two story
+      // options ({option_1, option_2}) rather than a single sentence. This
+      // used to listen for a "gpt_response" event that is no longer sent, so
+      // the choices never appeared and the story stopped after one reading.
+      const options = data?.sentence;
+      const isValidOption = (o: unknown): o is SentenceOption =>
+        !!o &&
+        typeof (o as SentenceOption).sentence === "string" &&
+        typeof (o as SentenceOption).action === "string";
+
+      if (!isValidOption(options?.option_1) || !isValidOption(options?.option_2)) {
+        console.error("Invalid sentence options structure", options);
+        showErrorToast("We couldn't load the next part of the story. Please try reading again.");
         return;
       }
-
-      // Validate sentence options structure
-      if (data.sentence) {
-        const hasValidOption1 = data.sentence.option_1 && 
-          typeof data.sentence.option_1.sentence === 'string' &&
-          typeof data.sentence.option_1.action === 'string';
-        
-        const hasValidOption2 = data.sentence.option_2 && 
-          typeof data.sentence.option_2.sentence === 'string' &&
-          typeof data.sentence.option_2.action === 'string';
-
-        if (!hasValidOption1 || !hasValidOption2) {
-          console.error("Invalid sentence options structure", data.sentence);
-          showErrorToast("Invalid sentence options received");
-          return;
-        }
-        
-        setSentenceOptions(data.sentence);
-      }
-      
-      setFeedback(data.feedback || null);
-      setShowSentenceOptions(!!data.sentence);
+      setSentenceOptions(options);
+      setShowSentenceOptions(true);
     },
     onAudioFeedback: (url) => {
       const audio = new Audio(url);
-      audio.play();
+      audio.play().catch((error) => {
+        console.error("[AudioFeedback] Failed to play audio:", error);
+      });
     },
-    onError: (err) => {
-      console.error("Stream error:", err);
-      showErrorToast(err);
+    onError: () => {
+      // useAudioTransport already showed the message; just reset the UI.
       setIsProcessing(false);
     },
     sessionId: session.id,
@@ -160,11 +153,10 @@ const ChoiceStoryBasePractice = ({
     getCurrentSentence();
   }, [session.id, token]);
 
-  const { isRecording, startRecording, stopRecording } = useAudioRecorder(
-    (audioFile: File) => {
+  const { isRecording, startRecording, stopRecording, recorderError } =
+    useAudioRecorder((audioFile: File) => {
       processAudio(audioFile, currentSentence ?? "");
-    }
-  );
+    });
 
   const displayNextSentence = (nextSentence: string) => {
     if (!nextSentence) {
@@ -195,6 +187,7 @@ const ChoiceStoryBasePractice = ({
     modelLoadProgress,
     onStartRecording: startRecording,
     onStopRecording: stopRecording,
+    recorderError,
     displayNextSentence,
     sentenceOptions,
     showSentenceOptions,

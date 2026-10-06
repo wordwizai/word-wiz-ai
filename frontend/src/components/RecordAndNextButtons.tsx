@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Mic, Ellipsis, SkipForward, Loader2 } from "lucide-react";
+import { Mic, Ellipsis, SkipForward, Loader2, MicOff } from "lucide-react";
 
 interface RecordAndNextButtonsProps {
   isRecording: boolean;
@@ -8,6 +8,8 @@ interface RecordAndNextButtonsProps {
   onStopRecording: () => void;
   showNextButton?: boolean;
   onNext?: () => void;
+  /** Microphone/recording problem to show under the button. */
+  errorMessage?: string | null;
 }
 
 export const RecordAndNextButtons = ({
@@ -19,6 +21,7 @@ export const RecordAndNextButtons = ({
   onNext = () => {
     console.warn("Next button clicked, but no handler provided");
   },
+  errorMessage = null,
 }: RecordAndNextButtonsProps) => {
   const renderRecordButton = () => {
     if (isProcessing) {
@@ -28,6 +31,7 @@ export const RecordAndNextButtons = ({
           className="w-24 h-24 shadow-inner transition-colors rounded-full bg-gradient-to-br from-purple-200 to-fuchsia-200 hover:from-purple-300 hover:to-fuchsia-300 cursor-default"
           variant="secondary"
           disabled
+          aria-label="Checking your reading"
         >
           <Loader2 className="size-10 text-purple-700 animate-spin" />
         </Button>
@@ -41,6 +45,7 @@ export const RecordAndNextButtons = ({
           className="w-24 h-24 animate-pulse shadow-inner transition-colors rounded-full bg-fuchsia-200 hover:bg-fuchsia-300"
           variant="secondary"
           onClick={onStopRecording}
+          aria-label="Stop recording"
         >
           <Ellipsis className="size-10 text-purple-700" />
         </Button>
@@ -50,14 +55,22 @@ export const RecordAndNextButtons = ({
     // Idle state: show microphone icon with inviting ring
     return (
       <div className="relative flex items-center justify-center">
-        {/* Animated outer ring */}
-        <span className="absolute w-32 h-32 rounded-full bg-primary/10 animate-ping" style={{ animationDuration: "2s" }} />
+        {/* Animated outer ring (hidden while there's a problem to read) */}
+        {!errorMessage && (
+          <span className="absolute w-32 h-32 rounded-full bg-primary/10 animate-ping" style={{ animationDuration: "2s" }} />
+        )}
         <Button
           className="relative w-24 h-24 shadow-inner transition-all duration-300 rounded-full bg-gradient-to-br from-primary/10 to-purple-100 hover:from-primary/20 hover:to-fuchsia-200 hover:scale-105 hover:shadow-lg border-2 border-primary/20"
           variant="secondary"
           onClick={onStartRecording}
+          aria-label={errorMessage ? "Try recording again" : "Start recording"}
+          aria-describedby={errorMessage ? "recorder-error" : undefined}
         >
-          <Mic className="size-10 text-purple-700" />
+          {errorMessage ? (
+            <MicOff className="size-10 text-purple-700" />
+          ) : (
+            <Mic className="size-10 text-purple-700" />
+          )}
         </Button>
       </div>
     );
@@ -65,7 +78,8 @@ export const RecordAndNextButtons = ({
 
   const getLabel = () => {
     if (isProcessing) return "Analyzing...";
-    if (isRecording) return "Tap to stop";
+    if (isRecording) return "Listening... tap to stop";
+    if (errorMessage) return "Tap to try again";
     return "Tap to record";
   };
 
@@ -77,15 +91,28 @@ export const RecordAndNextButtons = ({
           <Button
             variant="outline"
             onClick={onNext}
+            aria-label="Next sentence"
             className="w-24 h-24 shadow-inner rounded-full hover:scale-105 transition-all duration-300"
           >
             <SkipForward className="size-10" />
           </Button>
         )}
       </div>
-      <span className="text-xs font-medium text-muted-foreground tracking-wide">
+      <span
+        className="text-xs font-medium text-muted-foreground tracking-wide"
+        aria-live="polite"
+      >
         {getLabel()}
       </span>
+      {errorMessage && !isRecording && !isProcessing && (
+        <p
+          id="recorder-error"
+          role="alert"
+          className="max-w-sm text-center text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-xl px-4 py-3"
+        >
+          {errorMessage}
+        </p>
+      )}
     </div>
   );
 };

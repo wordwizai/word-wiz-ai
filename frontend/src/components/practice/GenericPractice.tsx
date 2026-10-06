@@ -73,6 +73,7 @@ const GenericPractice = ({
               isProcessing={props.isProcessing}
               onStartRecording={props.onStartRecording}
               onStopRecording={props.onStopRecording}
+              errorMessage={props.recorderError}
               showNextButton={
                 config.features.hasNextButton ? props.showNextButton : false
               }
@@ -135,6 +136,7 @@ const GenericPractice = ({
             isProcessing={props.isProcessing}
             onStartRecording={props.onStartRecording}
             onStopRecording={props.onStopRecording}
+            errorMessage={props.recorderError}
           />
           {config.features.hasSentenceOptions && props.showSentenceOptions && (
             <Button

@@ -1,4 +1,40 @@
 import { toast } from "sonner";
+import axios from "axios";
+
+export const OFFLINE_MESSAGE =
+  "We couldn't reach Word Wiz. Check your internet connection and try again.";
+
+/**
+ * Turn an API error into a sentence a parent can act on. Axios's own
+ * message ("Request failed with status code 400") never reaches the screen.
+ */
+export function getApiErrorMessage(
+  error: unknown,
+  fallback = "Something went wrong. Please try again.",
+): string {
+  if (!axios.isAxiosError(error)) return fallback;
+  if (!error.response) return OFFLINE_MESSAGE;
+  if (error.response.status >= 500) {
+    return "Something went wrong on our end. Please try again in a moment.";
+  }
+  // FastAPI puts a readable string in `detail` for HTTPExceptions. A 422 has
+  // a list instead; our validators write their `msg` for people, but Pydantic
+  // prefixes it with "Value error, ".
+  const detail = (error.response.data as { detail?: unknown } | undefined)
+    ?.detail;
+  if (typeof detail === "string" && detail.trim()) return detail;
+  if (Array.isArray(detail)) {
+    const msg = (detail[0] as { msg?: unknown } | undefined)?.msg;
+    if (typeof msg === "string" && msg.startsWith("Value error, ")) {
+      return msg.slice("Value error, ".length);
+    }
+  }
+  return fallback;
+}
+
+export function getErrorStatus(error: unknown): number | undefined {
+  return axios.isAxiosError(error) ? error.response?.status : undefined;
+}
 
 export enum ErrorCategory {
   NETWORK = "network",
@@ -130,6 +166,14 @@ export function showModelError(error?: string | Error) {
 
 export function showAudioPlaybackError(error?: string | Error) {
   showErrorToast(error || "Audio playback error", ErrorCategory.AUDIO_PLAYBACK);
+}
+
+/**
+ * Show a message that was already written for the reader (e.g. by the
+ * backend's audio pipeline) without swapping it for a category template.
+ */
+export function showPracticeErrorToast(message: string) {
+  toast.error("Let's try that again", { description: message });
 }
 
 /**

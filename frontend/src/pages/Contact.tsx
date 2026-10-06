@@ -52,7 +52,7 @@ const Contact = () => {
       mainEntity: {
         "@type": "Organization",
         name: "Word Wiz AI",
-        email: "contact@wordwizai.com",
+        email: "contactwordwizai@gmail.com",
         url: "https://wordwizai.com",
       },
     };
@@ -264,8 +264,8 @@ const Contact = () => {
                   {
                     icon: <Mail className="w-6 h-6" />,
                     title: "Email",
-                    content: "contact@wordwizai.com",
-                    action: "mailto:contact@wordwizai.com",
+                    content: "contactwordwizai@gmail.com",
+                    action: "mailto:contactwordwizai@gmail.com",
                     color: "from-blue-400 to-cyan-600",
                   },
                 ].map((item, i) => (

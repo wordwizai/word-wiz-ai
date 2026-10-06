@@ -4,7 +4,14 @@ import { useActivities } from "@/hooks/useActivities";
 
 // Every activity is visible at once, grouped by kind. A carousel hid most
 // of them behind arrows, and there are few enough to show in a grid.
+// Free practice goes first. It's a single card, and below the ~40 story
+// cards nobody scrolled far enough to find it.
 const SECTIONS = [
+  {
+    type: "unlimited",
+    title: "Free practice",
+    description: "New sentences that keep coming, aimed at the sounds your child misses.",
+  },
   {
     type: "choice-story",
     title: "Choice stories",
@@ -14,11 +21,6 @@ const SECTIONS = [
     type: "story",
     title: "Stories",
     description: "Classic tales, read one sentence at a time.",
-  },
-  {
-    type: "unlimited",
-    title: "Free practice",
-    description: "New sentences that keep coming, aimed at the sounds your child misses.",
   },
 ];
 

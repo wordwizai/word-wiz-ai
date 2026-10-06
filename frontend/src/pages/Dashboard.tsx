@@ -79,8 +79,17 @@ const Dashboard = () => {
   // sessions can't be reopened (PracticeRouter bounces them), so in the
   // recent list they start a fresh session of the same activity instead.
   const resumable = sessions?.find((s) => !s.is_completed) ?? null;
+  // One row per activity. Every "Start" makes a new session, so without this
+  // the list filled up with identical "Unlimited Practice · Today" rows.
+  const seenActivities = new Set<number>(
+    resumable ? [resumable.activity.id] : []
+  );
   const recent = (sessions ?? [])
-    .filter((s) => s.id !== resumable?.id)
+    .filter((s) => {
+      if (seenActivities.has(s.activity.id)) return false;
+      seenActivities.add(s.activity.id);
+      return true;
+    })
     .slice(0, RECENT_LIMIT);
 
   const openSession = (session: DashboardSession) => {

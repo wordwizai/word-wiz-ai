@@ -3,6 +3,7 @@ import {
   AreaChart,
   CartesianGrid,
   XAxis,
+  YAxis,
 } from "recharts";
 import {
   Card,
@@ -23,14 +24,18 @@ import { parseServerDate } from "@/lib/activities";
 
 const AVG_COLOR = "oklch(0.6 0.118 184.704)";
 
+const percent = (value: number) => `${Math.round(value * 100)}%`;
+const dayLabel = (date: Date) =>
+  date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+
+type ChartPoint = { i: number; date: Date; per: number; avg5: number | null };
+
 const SentencePersChart = ({
   className = "",
 }: {
   className?: string; // additional class names for styling
 }) => {
-  const [chartData, setChartData] = useState<
-    { date: Date; per: number; avg5: number | null }[]
-  >([]);
+  const [chartData, setChartData] = useState<ChartPoint[]>([]);
   const [loaded, setLoaded] = useState(false);
   const { token } = useContext(AuthContext);
 
@@ -38,24 +43,24 @@ const SentencePersChart = ({
     const fetchChartData = async () => {
       if (!token) return;
       const response = await getSentencePers(token);
-      const processed = response.map((item: { date: string; per: number }) => ({
-        date: parseServerDate(item.date),
-        per: item.per,
-      }));
+      const processed = response.map(
+        (item: { date: string; per: number }, i: number) => ({
+          i,
+          date: parseServerDate(item.date),
+          per: item.per,
+        })
+      );
       // Calculate rolling average over groups of 5
-      const withAvg5 = processed.map(
+      const withAvg5: ChartPoint[] = processed.map(
         (
-          item: { date: Date; per: number },
+          item: Omit<ChartPoint, "avg5">,
           idx: number,
-          arr: { date: Date; per: number }[]
+          arr: Omit<ChartPoint, "avg5">[]
         ) => {
           const start = Math.max(0, idx - 4);
           const window = arr.slice(start, idx + 1);
           const avg =
-            window.reduce(
-              (sum: number, v: { date: Date; per: number }) => sum + v.per,
-              0
-            ) / window.length;
+            window.reduce((sum: number, v) => sum + v.per, 0) / window.length;
           return { ...item, avg5: avg };
         }
       );
@@ -77,6 +82,16 @@ const SentencePersChart = ({
     per: { label: "Error rate", color: "var(--primary)" },
     avg5: { label: "Average of last 5", color: AVG_COLOR },
   } satisfies ChartConfig;
+
+  // The x axis is reading order, with one tick on each day's first reading.
+  // A tick per reading printed the same date over and over on busy days.
+  const dayTicks = chartData
+    .filter(
+      (point, idx) =>
+        idx === 0 ||
+        point.date.toDateString() !== chartData[idx - 1].date.toDateString()
+    )
+    .map((point) => point.i);
 
   return (
     <Card
@@ -122,24 +137,66 @@ const SentencePersChart = ({
               </defs>
               <CartesianGrid vertical={false} stroke="var(--border)" />
               <XAxis
-                dataKey="date"
+                dataKey="i"
+                type="number"
+                domain={["dataMin", "dataMax"]}
+                ticks={dayTicks}
+                padding={{ left: 16, right: 24 }}
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
-                minTickGap={56}
+                minTickGap={40}
                 tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
-                tickFormatter={(date) =>
-                  date instanceof Date
-                    ? date.toLocaleDateString(undefined, {
-                        month: "short",
-                        day: "numeric",
-                      })
-                    : String(date)
+                tickFormatter={(i: number) =>
+                  chartData[i] ? dayLabel(chartData[i].date) : ""
                 }
+              />
+              <YAxis
+                width={44}
+                domain={[0, "auto"]}
+                tickCount={4}
+                tickLine={false}
+                axisLine={false}
+                tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
+                tickFormatter={percent}
               />
               <ChartTooltip
                 cursor={false}
-                content={<ChartTooltipContent indicator="line" />}
+                content={
+                  <ChartTooltipContent
+                    indicator="line"
+                    labelFormatter={(_, payload) => {
+                      const date = payload?.[0]?.payload?.date;
+                      return date instanceof Date
+                        ? date.toLocaleString(undefined, {
+                            month: "short",
+                            day: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })
+                        : null;
+                    }}
+                    // The default row hides a value of 0, which is a
+                    // perfect sentence, and prints fractions like 0.333.
+                    formatter={(value, name, item) => (
+                      <>
+                        <span
+                          className="w-1 shrink-0 self-stretch rounded-[2px]"
+                          style={{ backgroundColor: item.color }}
+                        />
+                        <span className="flex flex-1 items-center justify-between gap-4 leading-none">
+                          <span className="text-muted-foreground">
+                            {chartConfig[name as keyof typeof chartConfig]
+                              ?.label ?? name}
+                          </span>
+                          <span className="font-mono font-medium text-foreground tabular-nums">
+                            {percent(Number(value))}
+                          </span>
+                        </span>
+                      </>
+                    )}
+                  />
+                }
               />
               <Area
                 dataKey="per"

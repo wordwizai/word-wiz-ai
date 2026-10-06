@@ -24,7 +24,6 @@ import { useSettings } from "@/contexts/SettingsContext";
 import {
   Settings2,
   User,
-  Bell,
   Palette,
   Zap,
   CheckCircle2,
@@ -52,6 +51,8 @@ const initialSettings: Settings = {
   use_websocket: false,
 };
 
+const TABS = ["profile", "account", "appearance", "performance"];
+
 const Settings = () => {
   const [savedStatus, setSavedStatus] = useState("");
   const { user } = useContext(AuthContext);
@@ -64,7 +65,8 @@ const Settings = () => {
       typeof window !== "undefined"
         ? window.location.hash.replace("#", "")
         : "";
-    return hash || "profile";
+    // Old links can still point at tabs that are gone (#notifications).
+    return TABS.includes(hash) ? hash : "profile";
   });
 
   useEffect(() => {
@@ -73,7 +75,7 @@ const Settings = () => {
     }
   }, [settings]);
 
-  const handleChange = (field: keyof Settings, value: any) => {
+  const handleChange = (field: keyof Settings, value: Settings[keyof Settings]) => {
     setTempSettings((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -105,26 +107,22 @@ const Settings = () => {
         }}
         className="w-full"
       >
-        <TabsList className="flex flex-wrap h-auto gap-1 mb-6 bg-muted/60 p-1 rounded-xl">
+        <TabsList className="grid w-full grid-cols-2 sm:flex sm:w-fit sm:flex-wrap h-auto gap-1 mb-6 bg-muted/60 p-1 rounded-xl">
           <TabsTrigger value="profile" className="flex items-center gap-1.5 rounded-lg flex-1 min-w-fit data-[state=active]:shadow-sm">
             <User className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Profile</span>
+            <span>Profile</span>
           </TabsTrigger>
           <TabsTrigger value="account" className="flex items-center gap-1.5 rounded-lg flex-1 min-w-fit data-[state=active]:shadow-sm">
             <Settings2 className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Account</span>
+            <span>Account</span>
           </TabsTrigger>
           <TabsTrigger value="appearance" className="flex items-center gap-1.5 rounded-lg flex-1 min-w-fit data-[state=active]:shadow-sm">
             <Palette className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Appearance</span>
-          </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex items-center gap-1.5 rounded-lg flex-1 min-w-fit data-[state=active]:shadow-sm">
-            <Bell className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Notifications</span>
+            <span>Appearance</span>
           </TabsTrigger>
           <TabsTrigger value="performance" className="flex items-center gap-1.5 rounded-lg flex-1 min-w-fit data-[state=active]:shadow-sm">
             <Zap className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Performance</span>
+            <span>Performance</span>
           </TabsTrigger>
         </TabsList>
 
@@ -133,7 +131,7 @@ const Settings = () => {
             <CardHeader>
               <CardTitle>Profile Settings</CardTitle>
               <CardDescription>
-                Manage your personal profile information.
+                The name and email on your account.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -219,9 +217,9 @@ const Settings = () => {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label htmlFor="darkMode">Dark Mode</Label>
+                  <Label htmlFor="theme">Theme</Label>
                   <p className="text-sm text-muted-foreground">
-                    Toggle between light and dark mode.
+                    Light, dark, or match your device.
                   </p>
                 </div>
                 <Select
@@ -244,49 +242,6 @@ const Settings = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="notifications">
-          <Card className="rounded-2xl shadow-xs">
-            <CardHeader>
-              <CardTitle>Notification Settings</CardTitle>
-              <CardDescription>
-                Manage when and how you receive notifications.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="emailNotifs">Email Notifications</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Receive updates and information via email.
-                  </p>
-                </div>
-                <Switch
-                  id="emailNotifs"
-                  checked={!!tempSettings.email_notifications}
-                  onCheckedChange={(checked) =>
-                    handleChange("email_notifications", checked)
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="pushNotifs">Push Notifications</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Receive notifications on your device.
-                  </p>
-                </div>
-                <Switch
-                  id="pushNotifs"
-                  checked={!!tempSettings.notifications_enabled}
-                  onCheckedChange={(checked) =>
-                    handleChange("notifications_enabled", checked)
-                  }
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         <TabsContent value="performance">
           <Card className="rounded-2xl shadow-xs">
@@ -359,6 +314,8 @@ const Settings = () => {
         </TabsContent>
       </Tabs>
 
+      {/* Profile is read-only, so a save button there did nothing. */}
+      {tab !== "profile" && (
       <div className="mt-6 flex justify-between items-center gap-4 pt-4 border-t border-border">
         <div className="flex items-center gap-2 min-h-[20px]">
           {savedStatus && (
@@ -376,6 +333,7 @@ const Settings = () => {
           Save changes
         </Button>
       </div>
+      )}
       </div>
     </AppPage>
   );

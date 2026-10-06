@@ -61,7 +61,14 @@ def _raise_recorded(call: dict):
     error_type, message = call["error_type"], call.get("error", "")
     exc_cls = getattr(builtins, error_type, None)
     if isinstance(exc_cls, type) and issubclass(exc_cls, Exception):
-        raise exc_cls(message)  # builtins keep their type, so `except ValueError` still matches
+        try:
+            exc = exc_cls(message)
+        except TypeError:
+            # Some builtins cannot be built from one message (UnicodeDecodeError takes five
+            # arguments). They are replayed through the types below, which respect is_value_error.
+            pass
+        else:
+            raise exc  # builtins keep their type, so `except ValueError` still matches
     if call.get("is_value_error"):
         # process_audio_array's chunk loop swallows ValueError, so a recorded ValueError subclass
         # (for example a project exception type) must still be one when it is replayed.

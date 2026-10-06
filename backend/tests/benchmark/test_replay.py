@@ -1,3 +1,4 @@
+import builtins
 import json
 import os
 import tempfile
@@ -107,6 +108,38 @@ class TestReplay(unittest.TestCase):
         with self.assertRaises(common.ReplayedError) as ctx:
             replay.extract_phoneme(self.audio)
         self.assertNotIsInstance(ctx.exception, ValueError)
+
+    def test_builtin_needing_extra_constructor_arguments_replays_as_a_value_error(self):
+        # UnicodeDecodeError cannot be built from one message, so it must fall back to the
+        # replayed types instead of crashing the replay with a TypeError.
+        def edit(meta):
+            sha = meta["word_calls"][0]["input_sha"]
+            meta["word_calls"][0] = {
+                "input_sha": sha, "error_type": "UnicodeDecodeError", "error": "x", "is_value_error": True,
+            }
+
+        self._edit_meta(edit)
+        words = R.ReplayWordExtractor(R.CacheEntry(self.cache, "u1"), check_inputs=False)
+        with self.assertRaises(common.ReplayedValueError) as ctx:
+            words.extract_words(self.audio)
+        self.assertIsInstance(ctx.exception, ValueError)
+        self.assertEqual(ctx.exception.error_type, "UnicodeDecodeError")
+        self.assertEqual(ctx.exception.message, "x")
+
+    @unittest.skipUnless(hasattr(builtins, "ExceptionGroup"), "ExceptionGroup needs Python 3.11")
+    def test_builtin_needing_extra_arguments_stays_a_plain_error_when_not_a_value_error(self):
+        def edit(meta):
+            sha = meta["word_calls"][0]["input_sha"]
+            meta["word_calls"][0] = {
+                "input_sha": sha, "error_type": "ExceptionGroup", "error": "x", "is_value_error": False,
+            }
+
+        self._edit_meta(edit)
+        words = R.ReplayWordExtractor(R.CacheEntry(self.cache, "u1"), check_inputs=False)
+        with self.assertRaises(common.ReplayedError) as ctx:
+            words.extract_words(self.audio)
+        self.assertNotIsInstance(ctx.exception, ValueError)
+        self.assertEqual(ctx.exception.error_type, "ExceptionGroup")
 
     def test_missing_logits_file_is_stale_not_a_recorded_error(self):
         os.remove(os.path.join(self.cache, "u1.npz"))

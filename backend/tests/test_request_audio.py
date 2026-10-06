@@ -203,5 +203,76 @@ class TestHandlerMarksItsPass(unittest.TestCase):
             self.assertTrue(asyncio.run(run()))
 
 
+class TestHandlerErrorMessages(unittest.TestCase):
+    """What a child is told when analyze_audio_file_event_stream fails after preprocessing."""
+
+    FRIENDLY = "We couldn't hear the words clearly. Read the sentence out loud, close to the microphone."
+    GENERIC = "Something went wrong while checking your reading. Please try again."
+
+    @classmethod
+    def setUpClass(cls):
+        # Same import pattern as TestHandlerMarksItsPass above.
+        os.environ.setdefault("DATABASE_URL", "sqlite://")
+        try:
+            from routers.handlers import audio_processing_handler as handler
+        except ImportError as exc:
+            raise unittest.SkipTest(f"audio_processing_handler not importable ({exc})") from exc
+        cls.handler = handler
+
+    def _stream(self, error):
+        """Run the stream with the server analysis raising ``error``. Returns (events, stdout)."""
+        import json
+        from types import SimpleNamespace
+
+        class FakeAssistant:
+            word_extractor = None
+
+            async def process_audio(self, *_args, **_kwargs):
+                raise error
+
+        async def fake_load(*_args, **_kwargs):
+            return np.ones(16000, dtype=np.float32), "cache-id"
+
+        async def collect():
+            return [chunk async for chunk in self.handler.analyze_audio_file_event_stream(
+                phoneme_assistant=FakeAssistant(), activity_object=None,
+                audio_bytes=b"x", audio_filename="a.wav", audio_content_type="audio/wav",
+                attempted_sentence="the cat sat", db=None, current_user=SimpleNamespace(id=1),
+                session=SimpleNamespace(id=7),
+            )]
+
+        out = io.StringIO()
+        with mock.patch.object(self.handler, "load_and_preprocess_audio_bytes", fake_load),              mock.patch.object(self.handler, "check_speech_activity", return_value=80.0),              contextlib.redirect_stdout(out):
+            chunks = asyncio.run(collect())
+        events = [json.loads(c[len("data: "):]) for c in chunks if c.startswith("data: ")]
+        return events, out.getvalue()
+
+    def _error_message(self, events):
+        errors = [e for e in events if e["type"] == "error"]
+        self.assertEqual(len(errors), 1, events)
+        self.assertEqual(events[-1]["type"], "error")
+        return errors[0]["data"]["message"]
+
+    def test_no_speech_gets_a_kind_instruction(self):
+        for text in ("The audio provided has no speech inside", "No valid words extracted from audio"):
+            with self.subTest(error=text):
+                events, log = self._stream(ValueError(text))
+                self.assertEqual(self._error_message(events), self.FRIENDLY)
+                self.assertIn(text, log)  # the original still reaches the log
+
+    def test_other_errors_keep_the_generic_message(self):
+        for error in (ValueError("something else broke"), RuntimeError("The audio provided has no speech inside?")):
+            with self.subTest(error=repr(error)):
+                events, log = self._stream(error)
+                self.assertEqual(self._error_message(events), self.GENERIC)
+                self.assertIn(str(error), log)
+
+    def test_http_errors_keep_their_own_message(self):
+        from fastapi import HTTPException
+
+        events, _log = self._stream(HTTPException(status_code=400, detail="Try a shorter sentence."))
+        self.assertEqual(self._error_message(events), "Try a shorter sentence.")
+
+
 if __name__ == "__main__":
     unittest.main()

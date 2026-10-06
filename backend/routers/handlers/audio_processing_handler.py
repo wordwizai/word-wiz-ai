@@ -32,6 +32,26 @@ from routers.handlers.phoneme_processing_handler import (
 )
 
 
+# process_audio raises these when it found no speech to score. That is something
+# the child can act on, so they get an instruction instead of "Something went
+# wrong". The original error is still logged.
+_NO_SPEECH_ERRORS = frozenset({
+    "The audio provided has no speech inside",
+    "No valid words extracted from audio",
+})
+NO_SPEECH_MESSAGE = (
+    "We couldn't hear the words clearly. Read the sentence out loud, close to the microphone."
+)
+PIPELINE_ERROR_MESSAGE = "Something went wrong while checking your reading. Please try again."
+
+
+def _user_message_for_pipeline_error(exc: Exception) -> str:
+    """The message a child sees for an analysis failure that is not an HTTPException."""
+    if isinstance(exc, ValueError) and str(exc).strip() in _NO_SPEECH_ERRORS:
+        return NO_SPEECH_MESSAGE
+    return PIPELINE_ERROR_MESSAGE
+
+
 async def load_and_preprocess_audio_bytes(
     audio_bytes: bytes,
     filename: str,
@@ -518,7 +538,7 @@ async def analyze_audio_file_event_stream(
             message = e.detail
         else:
             print(f"❌ AI processing failed: {e}")
-            message = "Something went wrong while checking your reading. Please try again."
+            message = _user_message_for_pipeline_error(e)
         error_payload = {
             "type": "error",
             "data": {"message": message},

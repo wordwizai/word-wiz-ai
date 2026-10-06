@@ -26,6 +26,10 @@ const About = lazy(() => import("./pages/About.tsx"));
 const Contact = lazy(() => import("./pages/Contact.tsx"));
 const Privacy = lazy(() => import("./pages/Privacy.tsx"));
 const ToastTestPage = lazy(() => import("./pages/ToastTestPage.tsx"));
+// Playground for the mascot's animations. Production builds drop it.
+const MascotPreview = import.meta.env.DEV
+  ? lazy(() => import("./pages/MascotPreview.tsx"))
+  : null;
 
 // Lazy load comparison pages
 const ABCmouseHookedOnPhonicsComparison = lazy(
@@ -366,6 +370,9 @@ function App() {
                   />
 
                   <Route path="/toast-test" element={<ToastTestPage />} />
+                  {MascotPreview && (
+                    <Route path="/dev/mascot" element={<MascotPreview />} />
+                  )}
                   <Route path="/oauth-callback" element={<OAuthRedirect />} />
                   <Route
                     path="/practice/:sessionId"

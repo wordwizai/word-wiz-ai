@@ -93,6 +93,9 @@ const TrySession = ({ pattern }: { pattern: PhonicsPattern }) => {
     const controller = new AbortController();
     abortRef.current = controller;
     setIsProcessing(true);
+    // Old feedback belongs to the last attempt. PracticeStage pairs the next
+    // analysis with whatever feedback is set, so it has to go first.
+    setFeedback(null);
     trackTryEvent("try_attempt", pattern.slug, "try_page");
     try {
       await analyzeGuestAudio(file, sentence, handleEvent, controller.signal);
@@ -152,6 +155,7 @@ const TrySession = ({ pattern }: { pattern: PhonicsPattern }) => {
           showHighlightedWords={showHighlightedWords}
           isRecording={isRecording}
           isProcessing={isProcessing}
+          isFeedbackPlaying={feedbackAudio.isPlaying}
           audioLevel={levelRef}
           onStartRecording={startRecording}
           onStopRecording={stopRecording}

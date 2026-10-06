@@ -12,6 +12,7 @@
     "verify:live": "node scripts/verify-live.mjs",
     "indexnow": "node scripts/indexnow.mjs",
     "lint": "eslint .",
+    "test": "node --test \"src/**/*.test.ts\"",
     "preview": "vite preview --port 5173",
     "og:image": "node scripts/make-og-image.mjs"
   },

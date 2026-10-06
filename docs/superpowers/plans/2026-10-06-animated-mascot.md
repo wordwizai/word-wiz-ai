@@ -12,9 +12,24 @@ Spec: `docs/superpowers/specs/2026-10-06-animated-mascot-design.md`
 
 Preview of every mood: run the `wordwiz-dev` launch config and open `http://localhost:5174/dev/mascot`.
 
-**Working on `dev`:** other sessions commit to `dev` in the same checkout. Commit only the paths each task lists (`git commit -m ... -- <paths>`), never `git add -A` or `git commit -a`.
+**Working on `dev`:** other sessions commit to `dev` in the same checkout. Commit only the paths each task lists (`git commit -m ... -- <paths>`), never `git add -A` or `git commit -a`. (In the end the work was done on `feat/animated-mascot` in a worktree and merged into `dev`.)
 
 `npm run typecheck` already fails on 11 errors in files this plan doesn't touch (`api.ts`, `About.tsx` unused variables, `errorHandling.ts`, ...). Each task checks that no *new* errors mention the files it changed.
+
+## What changed during implementation
+
+The tasks below are the plan as written. Review and testing changed several things, and the code (and the spec) are the source of truth. The differences are listed here.
+
+- **Task 1.** A seventh test was added (talking beats the processing idle), so later steps expect `pass 7`. The `MascotMood` comment in `Mascot.tsx` now says idle also covers the short wait while a reading is checked.
+- **Task 2.** `play()` also calls `setIsPlaying(false)` right after pausing the old clip, so a clip the browser refuses to start never leaves the flag on, and there's a fifth listener, `waiting` → false.
+- **Task 3.** The comment on `setFeedback(null)` in `onProcessingStart` now says why it's load-bearing. `PracticeStage` pairs each new analysis with the feedback that follows it, so stale text must be gone first. The contract is also written on `PracticeStageState.feedback` in `types.ts`.
+- **Task 4.**
+  - The `attemptInFlight` ref was replaced. An `attemptOpen` state opens when recording starts, and an `analysisAtStart` ref remembers the analysis at that moment. The attempt closes on the first render, not recording, with a new analysis object and non-null feedback. This survives server events that land in one render and repeated "Great job!" text.
+  - The companion gets `feedback={attemptOpen && !isRecording ? null : feedback}` and `quiet={isRecording}`. `PracticeCompanion` keeps quiet text in place with `invisible`, and its background only shows when there's visible feedback. This stops the old feedback popping back during the upload and stops the layout jumping when the child starts reading.
+  - `AnimatePresence` was removed from `PracticeCompanion`. New feedback still fades in, keyed on its text, with no exit animation, and the fade-in is skipped under reduced motion.
+- **Task 5.** It was run in headless Chrome with a fake microphone instead of by hand, plus layout checks at desktop and phone width and reduced motion turned on after the page loaded (see the spec's Testing section).
+- **Reduced motion.** `Mascot.tsx` reads the media query live when celebrating instead of using framer-motion's `useReducedMotion`, which only checks at mount.
+- **Guest try page.** `dev` gained `frontend/src/pages/TryPage.tsx`, which renders `PracticeStage` directly. After merging `dev` it passes `isFeedbackPlaying` and clears `feedback` when it sends a recording.
 
 ---
 
@@ -734,7 +749,7 @@ Run (from `frontend/`):
 npm test
 npx eslint src/components/mascot src/components/practice src/hooks/useFeedbackAudio.ts src/pages/NotFoundPage.tsx src/pages/About.tsx src/pages/MascotPreview.tsx
 ```
-Expected: `ℹ pass 6`, `ℹ fail 0`, and no eslint errors.
+Expected: `ℹ pass 7`, `ℹ fail 0`, and no eslint errors.
 
 - [ ] **Step 2: Production build without the preview page**
 

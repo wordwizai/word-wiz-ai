@@ -6,6 +6,9 @@ import { showAudioPlaybackError } from "@/utils/errorHandling";
 export function useFeedbackAudio() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [hasAudio, setHasAudio] = useState(false);
+  // True while the feedback is coming out of the speakers, so the mascot
+  // can talk along with it.
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const start = (audio: HTMLAudioElement) =>
     audio.play().catch((error) => {
@@ -15,10 +18,24 @@ export function useFeedbackAudio() {
 
   const play = useCallback((url: string) => {
     audioRef.current?.pause();
+    // The old clip has stopped. The new one turns this back on once it is
+    // actually playing, so a clip the browser refuses to start never talks.
+    setIsPlaying(false);
     const audio = new Audio(url);
-    audio.addEventListener("error", () =>
-      console.error("[AudioFeedback] Playback error:", audio.error?.message)
-    );
+    // Only the current clip may change isPlaying. A replaced clip's late
+    // pause event would otherwise cut the new clip's talking short.
+    const track = (playing: boolean) => () => {
+      if (audioRef.current === audio) setIsPlaying(playing);
+    };
+    audio.addEventListener("playing", track(true));
+    audio.addEventListener("pause", track(false));
+    audio.addEventListener("ended", track(false));
+    // Silent while it buffers; `playing` fires again when it resumes.
+    audio.addEventListener("waiting", track(false));
+    audio.addEventListener("error", () => {
+      console.error("[AudioFeedback] Playback error:", audio.error?.message);
+      track(false)();
+    });
     audioRef.current = audio;
     setHasAudio(true);
     start(audio);
@@ -35,9 +52,11 @@ export function useFeedbackAudio() {
     audioRef.current?.pause();
     audioRef.current = null;
     setHasAudio(false);
+    // The pause above is ignored by `track` once the ref is cleared.
+    setIsPlaying(false);
   }, []);
 
   useEffect(() => () => audioRef.current?.pause(), []);
 
-  return { play, replay: hasAudio ? replay : null, reset };
+  return { play, replay: hasAudio ? replay : null, reset, isPlaying };
 }

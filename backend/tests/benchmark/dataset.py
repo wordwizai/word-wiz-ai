@@ -56,6 +56,10 @@ class Clip:
     wav_path: str
     sentence_accuracy: float
     words: list[Word] = field(default_factory=list)
+    #: The sentence exactly as scores.json spells it. ``text`` is built from the scored words
+    #: instead, because a few entries have typos (a missing space after a period, a stray
+    #: quote mark) that would make the raw text tokenize differently from the scored words.
+    raw_text: str = ""
 
     @property
     def is_child(self) -> bool:
@@ -134,8 +138,8 @@ def load_half(root: str, half: str, scores: dict | None = None) -> list[Clip]:
         ]
         clips.append(Clip(
             utt_id=utt_id, speaker=speaker, age=int(spk2age[speaker]), half=half,
-            text=entry["text"], wav_path=path, sentence_accuracy=float(entry["accuracy"]),
-            words=words,
+            text=" ".join(w.text for w in words), wav_path=path,
+            sentence_accuracy=float(entry["accuracy"]), words=words, raw_text=entry["text"],
         ))
     return clips
 
@@ -227,6 +231,7 @@ def check(root: str) -> dict:
     dev, test = load_half(root, "dev", scores), load_half(root, "test", scores)
     check_speaker_disjoint(dev, test)
     problems = _key_set_problems(root)
+    notes = []
     for clip in dev + test:
         if not os.path.isfile(clip.wav_path):
             problems.append(f"{clip.utt_id}: missing audio {clip.wav_path}")
@@ -234,8 +239,11 @@ def check(root: str) -> dict:
             problem = _audio_problem(clip.wav_path)
             if problem:
                 problems.append(f"{clip.utt_id}: {problem}")
-        if len(clip.text.split()) != len(clip.words):
-            problems.append(f"{clip.utt_id}: {len(clip.text.split())} text tokens but {len(clip.words)} scored words")
+        if len(clip.raw_text.split()) != len(clip.words):
+            notes.append(
+                f"{clip.utt_id}: raw text has {len(clip.raw_text.split())} tokens but "
+                f"{len(clip.words)} scored words (sentence built from scored words)"
+            )
         for w in clip.words:
             if len(w.phones) != len(w.phone_accuracy):
                 problems.append(f"{clip.utt_id}/{w.text}: {len(w.phones)} phones but {len(w.phone_accuracy)} scores")
@@ -252,6 +260,7 @@ def check(root: str) -> dict:
         "dev_children": sum(c.is_child for c in dev),
         "test_children": sum(c.is_child for c in test),
         "problems": problems,
+        "notes": notes,
     }
 
 
@@ -334,11 +343,13 @@ def main(argv=None) -> int:
             print(f"PROBLEM {exc}")
             return 1
         for key, value in report.items():
-            if key != "problems":
+            if key not in ("problems", "notes"):
                 print(f"{key:16s} {value}")
+        for line in report["notes"][:50]:
+            print("NOTE", line)
         for line in report["problems"][:50]:
             print("PROBLEM", line)
-        print(f"{len(report['problems'])} problem(s)")
+        print(f"{len(report['problems'])} problem(s), {len(report['notes'])} note(s)")
         return 1 if report["problems"] else 0
     dev = load_half(root, "dev")
     for name, n, seed in (SMOKE_SUBSET, SPEED_SUBSET):

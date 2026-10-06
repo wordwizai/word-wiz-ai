@@ -1,3 +1,5 @@
+import contextlib
+import io
 import json
 import os
 import shutil
@@ -5,7 +7,9 @@ import tarfile
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
+from tests.benchmark import common
 from tests.benchmark import dataset as D
 from tests.benchmark import testutil as U
 
@@ -21,6 +25,7 @@ class TestParse(unittest.TestCase):
         self.assertEqual((child.speaker, child.age, child.is_child), ("0001", 6, True))
         self.assertFalse(adult.is_child)
         self.assertEqual(child.text, "WE CALL IT BEAR")
+        self.assertEqual(child.raw_text, "WE CALL IT BEAR")
         self.assertTrue(os.path.isabs(child.wav_path))
         self.assertTrue(child.wav_path.endswith(os.path.join("SPEAKER0001", "000010011.WAV")))
         bear = child.words[3]
@@ -61,6 +66,7 @@ class TestRootAndChecks(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             report = D.check(U.make_temp_dataset(tmp))
         self.assertEqual(report["problems"], [])
+        self.assertEqual(report["notes"], [])
         self.assertEqual((report["dev_clips"], report["test_clips"]), (2, 1))
         self.assertEqual(report["dev_children"], 1)
 
@@ -79,6 +85,66 @@ class TestRootAndChecks(unittest.TestCase):
                 json.dump(scores, fh)
             report = D.check(root)
         self.assertTrue(any("unknown phone" in p for p in report["problems"]))
+
+
+def _set_raw_text(root, utt_id, text):
+    """Change only the sentence in scores.json, leaving the scored words alone."""
+    path = os.path.join(root, "scores.json")
+    with open(path, encoding="utf-8") as fh:
+        scores = json.load(fh)
+    scores[utt_id]["text"] = text
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(scores, fh)
+
+
+class TestSentenceFromScoredWords(unittest.TestCase):
+    """A few clips have typos in scores.json text (a missing space after a period, a stray
+    quote mark). The sentence the speaker read is the scored words, so the clip's text is
+    built from them and the raw text is kept for reference."""
+
+    def test_text_is_built_from_the_scored_words(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = U.make_temp_dataset(tmp)
+            _set_raw_text(root, "000010011", "WE CALL IT.BEAR")
+            child = D.load_half(root, "dev")[0]
+        self.assertEqual(child.utt_id, "000010011")
+        self.assertEqual(child.text, "WE CALL IT BEAR")
+        self.assertEqual(child.raw_text, "WE CALL IT.BEAR")
+
+    def test_a_token_count_difference_is_a_note_not_a_problem(self):
+        for raw in ("WE CALL IT.BEAR", 'WE " CALL IT BEAR'):
+            with self.subTest(raw=raw), tempfile.TemporaryDirectory() as tmp:
+                root = U.make_temp_dataset(tmp)
+                _set_raw_text(root, "000010011", raw)
+                report = D.check(root)
+                tokens = len(raw.split())
+                self.assertEqual(report["problems"], [])
+                self.assertEqual(
+                    report["notes"],
+                    [f"000010011: raw text has {tokens} tokens but 4 scored words (sentence built from scored words)"],
+                )
+
+    def test_cli_prints_notes_and_still_passes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = U.make_temp_dataset(tmp)
+            _set_raw_text(root, "000010011", "WE CALL IT.BEAR")
+            out = io.StringIO()
+            with mock.patch.dict(os.environ, {common.DATA_DIR_ENV: root}), contextlib.redirect_stdout(out):
+                code = D.main(["check"])
+        self.assertEqual(code, 0)
+        self.assertIn("NOTE 000010011: raw text has 3 tokens but 4 scored words", out.getvalue())
+        self.assertNotIn("PROBLEM", out.getvalue())
+        self.assertIn("0 problem(s), 1 note(s)", out.getvalue())
+
+    def test_cli_still_fails_on_a_problem(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = U.make_temp_dataset(tmp)
+            os.remove(_first_wav(root))
+            out = io.StringIO()
+            with mock.patch.dict(os.environ, {common.DATA_DIR_ENV: root}), contextlib.redirect_stdout(out):
+                code = D.main(["check"])
+        self.assertEqual(code, 1)
+        self.assertIn("PROBLEM 000010011: missing audio", out.getvalue())
 
 
 class TestSubsets(unittest.TestCase):

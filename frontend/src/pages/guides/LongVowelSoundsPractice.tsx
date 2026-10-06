@@ -524,8 +524,8 @@ const LongVowelSoundsPractice = () => {
 
   return (
     <ArticlePageTemplate
-      metaTitle="Long Vowel Sounds Practice for First Grade: Complete Guide"
-      metaDescription="Master long vowel sounds in first grade with proven activities, word lists, and practice schedules. Includes long A, E, I, O, U exercises for reading success."
+      metaTitle="Long Vowel Sounds Practice: 200+ First Grade Words and Games"
+      metaDescription="Long A, E, I, O and U practice for first grade. 200+ words sorted by spelling pattern (a_e, ai, ee, igh, oa and more), decodable sentences and 4 games."
       canonicalUrl="https://wordwizai.com/guides/long-vowel-sounds-practice-first-grade"
       heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
       heroImageAlt="Child practicing long vowel sounds with flashcards"

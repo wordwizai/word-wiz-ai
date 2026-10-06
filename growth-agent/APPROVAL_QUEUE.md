@@ -869,6 +869,13 @@ links. No fee is mentioned.
 **Graphic**: a draft 1000x1500 PNG is at `growth-agent/assets/fhd-graphic-1000x1500.png`
 (same look as the site's og-image). Swap in your own if you prefer.
 
+**Option (added later in session 3):** Free Homeschool Deals mostly posts printables, so once the free
+magic-e printable is live (it's on `growth-agent`, linked from the silent-e guide at
+`/printables/magic-e-sentences.pdf`), it might be worth sending the guide page as the link and
+attaching the PDF's first page as a preview. The post below still fits; I'd add one sentence
+after the first paragraph: "There's also a free two-page magic e printable with 20 decodable
+sentences and warm-up word lists."
+
 Send from contactwordwizai@gmail.com.
 
 **Subject:** Freebie submission
@@ -1082,6 +1089,151 @@ personal byline).
 Don't cite anything not in this table without checking it first, and say
 "in the 30 days to October 6" rather than "this month" so the numbers stay
 true when it runs.
+
+---
+
+## AQ-035 | Award nomination (your name) | AASL Best Digital Tools for Teaching & Learning, vendor Google Form (https://forms.gle/yHd2dtfuHVJg61n38) | A national list picked by school librarians, published on ala.org with a press release in May and a session at ALA Annual. Free K-2 reading tools have won before (WORD Force Reading Adventures 2023, Khan Academy Kids 2024), and AI tools have won (Parlay, Diffit, MegaMinds) | Low. No fee. Competitive, and the required "reviews" field is honest but thin. **Submit after AQ-036**, because field 19 asks whether the privacy statement covers AI, and today it doesn't | Status: PENDING
+
+Rules (https://www.ala.org/aasl/awards/best and the live form, read 2026-10-06):
+deadline Feb 1, 2027; decisions by Apr 1, 2027, notices by Apr 15. 18 of 19
+fields are required, none has a length limit, no CAPTCHA. For a free tool the
+committee doesn't need a special login, just clear access steps. Nomination is
+open to "developers, school librarians, or the general public".
+
+You fill the form yourself. Answers by field:
+
+| # | Field | Answer |
+|---|---|---|
+| 1 | Name of submitter | Bruce Peters |
+| 2 | Email of submitter | contactwordwizai@gmail.com |
+| 3 | Name of digital tool | Word Wiz AI |
+| 4 | Company/developer of tool | Word Wiz AI (built by Bruce Peters) |
+| 5 | Recognized in 2024, 2025 or 2026? | No |
+| 6 | Progress since recognition | Leave blank |
+| 7 | Website | https://wordwizai.com |
+| 8 | Platform availability | Other: "Web browser (Chromebooks, Windows and Mac laptops and desktops)". Only tick iOS or Android if you've checked recording works in mobile Safari and Chrome |
+| 9 | Grade Levels | K-2 |
+| 10 | Subject areas | Reading and English Language Arts (phonics, early literacy) |
+| 17 | Pricing Structure | "There is no part, service, or component of my digital tool that requires payment or fees." |
+| 15 | Committee access | "My digital tool is free to use. There are no features that require purchase." |
+| 18 | Privacy statement link | https://wordwizai.com/privacy |
+
+**11. How would a school librarian use your tool**
+
+> A school librarian can add Word Wiz to the library's list of free reading
+> resources and share it with K-2 teachers and families for practice at school
+> or at home. It runs in a browser, so it works on library computers and
+> Chromebooks with a headset microphone during library time. A librarian or
+> teacher can make a free class with a join code and see each student's
+> practice history and which sounds they miss most. For families, the try page
+> at wordwizai.com/try works without an account, which makes it easy to share
+> in a newsletter or on a library website.
+
+**12. How would a student use your tool**
+
+> A student reads a short sentence out loud. Word Wiz shows which sounds in
+> each word came out wrong (for example, "ship" read as "sip") and says what to
+> fix out loud. Then it writes the next sentence around the sounds the student
+> missed. Students can practice with unlimited sentences, read through a story,
+> or pick between two ways a story can go next in a choose-your-own-adventure
+> mode, where both options practice the sounds they need.
+
+**13. What features are you most proud of**
+
+> Most reading apps only mark a whole word right or wrong. Word Wiz checks each
+> sound inside the word, so a child who reads "cake" as "cack" hears that the
+> long a was the problem, not that the whole word was wrong. I'm also proud that
+> the next sentence is built around the sounds each child is missing, that a
+> teacher can see those sounds for every student in a class, and that anyone
+> can try it without an account. It's free with no ads.
+
+**14. List any reviews for the digital tool**
+
+> Word Wiz hasn't been formally reviewed yet. It placed 2nd in the
+> Congressional App Challenge for California's 15th district, and it's listed
+> on the ISTE+ASCD EdTech Index.
+
+**16. Details to share with committee members on how to access**
+
+> Go to wordwizai.com and sign up free with Google or an email address. Practice
+> needs a microphone, and a headset mic gives the most accurate feedback. To see
+> the student side without an account, wordwizai.com/try lets you read three
+> sentences. To see the teacher side, open Classes, create a class, and join it
+> from a second account with the join code to see student insights. Everything
+> is free, so there's nothing to unlock. Questions go to
+> contactwordwizai@gmail.com.
+
+**19. Does your privacy statement address the use of AI** (assumes AQ-036 is done first)
+
+> Yes. The privacy statement explains how AI is used. A speech model on Word
+> Wiz's own server turns a student's recording into individual sounds, and the
+> recording is also sent to Deepgram to find where each word starts and ends,
+> with Deepgram told not to keep it or use it for training. Word Wiz doesn't
+> save recordings. The written feedback and next sentence come from OpenAI's
+> API, which receives the practice sentence and the sounds that were off, never
+> the recording or the student's name or email. Spoken feedback is made with
+> Google Cloud Text-to-Speech from the feedback text. Student data is never sold
+> or used for advertising, and families or teachers can ask for an account and
+> its history to be deleted by emailing contactwordwizai@gmail.com.
+
+---
+
+## AQ-036 | Kids' audio + privacy page (touches kids' data and the privacy policy) | backend `core/word_extractor.py` and `/privacy` | Found while answering AASL's AI question. **Every recording, from signed-in practice and from /try, is sent to Deepgram for word timing without Deepgram's opt-out flag.** Deepgram's docs say it "stores fractional increments of data for the continued improvement of our voice AI models" unless a request sends `mip_opt_out=true`, in which case data "is retained only for the duration necessary to process the request". The privacy page also never mentions AI, Deepgram, OpenAI or deletion, although its meta description promises "how to request deletion". AASL (AQ-035), ISTE (AQ-031) and any careful parent will ask | Medium. Changes what the policy says about children's data, so it's yours. Opting out may cost more on some Deepgram plans (a third-party page says it drops a 50% discount; Deepgram's own pricing page didn't say, so check your plan) | Status: PENDING
+
+Sources: https://developers.deepgram.com/docs/the-deepgram-model-improvement-partnership-program
+(read 2026-10-06). What the code does, checked in this repo:
+
+| Data | Where it goes | Code |
+|---|---|---|
+| Recording (signed-in and /try) | Our server's speech model, plus Deepgram nova-2 for word timing | `core/word_extractor.py` (`WordExtractorOnline`, params at line ~610 have no `mip_opt_out`) |
+| Recording saved to disk | Only if `ENABLE_AUDIO_CACHE` is set; off by default; /try never saves | `core/temp_audio_cache.py` line 81, `routers/guest.py` |
+| Practice sentence + sounds that were off | OpenAI `gpt-4o-mini` (text only); no name or email found in the mode prompts | `core/phoneme_assistant.py` line 183, `core/modes/` |
+| Feedback text | Google Cloud Text-to-Speech (ElevenLabs is an alternative in the code) | `core/text_to_audio.py` |
+| Stored per account | Name, username, email, hashed password, sessions, each sentence, the sound-by-sound analysis and the feedback | `models/user.py`, `models/feedback_entry.py` |
+
+**Step 1. One-line backend change** (then redeploy the backend):
+
+```diff
+         params = {
+             "model": "nova-2",
+             "language": "en-US",
+             "punctuate": "true",
+             "smart_format": "true",
+             "encoding": "linear16",
+-            "sample_rate": sampling_rate
++            "sample_rate": sampling_rate,
++            "mip_opt_out": "true",
+         }
+```
+
+**Step 2. Add to /privacy**, after the try-page paragraph (written to match the
+page's current third-person style):
+
+> **What Word Wiz AI stores.** For an account, Word Wiz AI stores the name and
+> email address used to sign up (or the Google sign-in), and a password in
+> encrypted form. As a child practices, it stores each practice sentence, the
+> sound-by-sound results and the written feedback, so progress can be shown to
+> the child, their parent or their teacher. Recordings are used to give
+> feedback and are not saved.
+>
+> **How AI is used.** A speech model on Word Wiz AI's own server turns a
+> recording into individual sounds. To find where each word starts and ends,
+> the recording is also sent to Deepgram, a speech recognition service, and
+> Word Wiz AI asks Deepgram not to keep it or use it to train its models. The
+> written feedback and the next practice sentence are created by OpenAI's API
+> from the practice sentence and the list of sounds that were off. OpenAI
+> doesn't receive the recording or the child's name or email. Spoken feedback is
+> created by Google Cloud Text-to-Speech from the feedback text.
+>
+> **Deleting an account.** To delete an account and its practice history,
+> email contactwordwizai@gmail.com from the address on the account.
+
+Before this goes live, check three things I can't see from here. That
+`ENABLE_AUDIO_CACHE` isn't set on the server. That production really uses
+Google TTS (not ElevenLabs). And that you're willing to handle deletion
+requests by hand. One more thing, since it's about kids and not a quick fix.
+The policy doesn't say who should create an account for a child under 13. It
+might be worth asking someone who knows COPPA whether it should.
 
 ---
 

@@ -67,7 +67,7 @@ Ranked by expected real users for a K-2 reading tool.
 
 | Site | Route | Why not queued yet |
 |---|---|---|
-| AASL Best Digital Tools for Teaching & Learning (https://www.ala.org/aasl/awards/best) | vendor Google Form https://forms.gle/yHd2dtfuHVJg61n38, deadline Feb 1, 2027 | National school-librarian list, developers may submit. Award-style, uses Bruce's name, and the committee needs a test login through Apr 1, 2027. Worth drafting in Dec/Jan if Bruce wants it |
+| AASL Best Digital Tools for Teaching & Learning (https://www.ala.org/aasl/awards/best) | vendor Google Form https://forms.gle/yHd2dtfuHVJg61n38, deadline Feb 1, 2027 | **Queued as AQ-035** (Bruce said yes). A free tool only needs clear access steps, no reviewer login. Submit after AQ-036 (privacy page) |
 | Corona Public Library (CA), "Learning Games & Programs: Pre K through 3rd Grade" | Aska.Lib@CoronaCA.gov | General inbox, no invitation. Fit 3 |
 | Danbury Library (CT), "Elementary School Resources" | comments@danburylibrary.org | General inbox, no invitation. Fit 3 |
 | WKU Literacy Clinic, "Technological Tools for Literacy" | nancy.hulan@wku.edu (intake address) | Address is for clinic intake forms, not suggestions. List looks dated |
@@ -102,6 +102,8 @@ Ranked by expected real users for a K-2 reading tool.
 | The Organized Homeschooler | Contact page says they can't respond and won't do link insertions |
 | Understood.org | No route for app suggestions (media and partnership contacts only) |
 | Dyslexia On Demand | Orton-Gillingham therapy business; page argues for professional programs over tools |
+| Teachers Pay Teachers, Tes, Share My Lesson, Teach Simple | Sellers must be 18+ (TpT ToS 12/08/2025, Tes author code, SML ToS). TpT also charges a $29 seller fee even for free-only stores. Checked 2026-10-06 |
+| Teachers Notebook | Gone (domain now shows an OverDrive page) |
 
 ## Listing copy (checked against the code on 2026-10-05)
 

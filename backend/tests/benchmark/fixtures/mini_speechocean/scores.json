@@ -1,0 +1,34 @@
+{
+  "000010011": {
+    "text": "WE CALL IT BEAR", "accuracy": 8, "completeness": 10.0, "fluency": 9, "prosodic": 9, "total": 8,
+    "words": [
+      {"text": "WE", "accuracy": 10, "stress": 10, "total": 10, "phones": "W IY0", "phones-accuracy": [2.0, 2.0]},
+      {"text": "CALL", "accuracy": 10, "stress": 10, "total": 10, "phones": "K AO0 L", "phones-accuracy": [2.0, 2.0, 2.0]},
+      {"text": "IT", "accuracy": 10, "stress": 10, "total": 10, "phones": "IH0 T", "phones-accuracy": [2.0, 2.0]},
+      {"text": "BEAR", "accuracy": 6, "stress": 10, "total": 6, "phones": "B EH0 R", "phones-accuracy": [2.0, 1.6, 0.4]}
+    ]
+  },
+  "000020022": {
+    "text": "THE QUICK BROWN FOX JUMPED OVER THE LAZY DOG", "accuracy": 9, "completeness": 10.0, "fluency": 9, "prosodic": 9, "total": 9,
+    "words": [
+      {"text": "THE", "accuracy": 10, "stress": 10, "total": 10, "phones": "DH AH0", "phones-accuracy": [2.0, 2.0]},
+      {"text": "QUICK", "accuracy": 10, "stress": 10, "total": 10, "phones": "K W IH0 K", "phones-accuracy": [2.0, 2.0, 2.0, 2.0]},
+      {"text": "BROWN", "accuracy": 10, "stress": 10, "total": 10, "phones": "B R AW0 N", "phones-accuracy": [2.0, 2.0, 2.0, 2.0]},
+      {"text": "FOX", "accuracy": 10, "stress": 10, "total": 10, "phones": "F AA0 K S", "phones-accuracy": [2.0, 2.0, 2.0, 2.0]},
+      {"text": "JUMPED", "accuracy": 10, "stress": 10, "total": 10, "phones": "JH AH0 M P T", "phones-accuracy": [2.0, 2.0, 2.0, 2.0, 2.0]},
+      {"text": "OVER", "accuracy": 10, "stress": 10, "total": 10, "phones": "OW0 V ER0", "phones-accuracy": [2.0, 2.0, 2.0]},
+      {"text": "THE", "accuracy": 10, "stress": 10, "total": 10, "phones": "DH AH0", "phones-accuracy": [2.0, 2.0]},
+      {"text": "LAZY", "accuracy": 10, "stress": 10, "total": 10, "phones": "L EY0 Z IY0", "phones-accuracy": [2.0, 2.0, 2.0, 2.0]},
+      {"text": "DOG", "accuracy": 5, "stress": 10, "total": 5, "phones": "D AO0 G", "phones-accuracy": [2.0, 0.2, 2.0]}
+    ]
+  },
+  "000030033": {
+    "text": "IT IS A CAT", "accuracy": 7, "completeness": 10.0, "fluency": 8, "prosodic": 8, "total": 7,
+    "words": [
+      {"text": "IT", "accuracy": 10, "stress": 10, "total": 10, "phones": "IH0 T", "phones-accuracy": [2.0, 2.0]},
+      {"text": "IS", "accuracy": 10, "stress": 10, "total": 10, "phones": "IH0 Z", "phones-accuracy": [2.0, 2.0]},
+      {"text": "A", "accuracy": 10, "stress": 10, "total": 10, "phones": "AH0", "phones-accuracy": [2.0]},
+      {"text": "CAT", "accuracy": 7, "stress": 10, "total": 7, "phones": "K AE0 T", "phones-accuracy": [2.0, 2.0, 1.0]}
+    ]
+  }
+}

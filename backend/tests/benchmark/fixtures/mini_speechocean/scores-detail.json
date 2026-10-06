@@ -1,0 +1,34 @@
+{
+  "000010011": {
+    "text": "WE CALL IT BEAR", "accuracy": [7.0, 9.0, 8.0, 8.0, 9.0],
+    "words": [
+      {"text": "WE", "accuracy": [10.0, 10.0, 10.0, 10.0, 10.0], "ref-phones": "W IY0", "phones": ["W IY0", "W IY0", "W IY0", "W IY0", "W IY0"]},
+      {"text": "CALL", "accuracy": [10.0, 10.0, 9.0, 10.0, 10.0], "ref-phones": "K AO0 L", "phones": ["K AO0 L", "K AO0 L", "K AO0 L", "K AO0 L", "K AO0 L"]},
+      {"text": "IT", "accuracy": [10.0, 10.0, 10.0, 10.0, 10.0], "ref-phones": "IH0 T", "phones": ["IH0 T", "IH0 T", "IH0 T", "IH0 T", "IH0 T"]},
+      {"text": "BEAR", "accuracy": [6.0, 5.0, 6.0, 7.0, 6.0], "ref-phones": "B EH0 R", "phones": ["B EH0 R", "B EH0 R", "B EH0 R", "B EH0 R", "B EH0 R"]}
+    ]
+  },
+  "000020022": {
+    "text": "THE QUICK BROWN FOX JUMPED OVER THE LAZY DOG", "accuracy": [9.0, 9.0, 8.0, 9.0, 10.0],
+    "words": [
+      {"text": "THE", "accuracy": [10.0, 10.0, 10.0, 10.0, 10.0], "ref-phones": "DH AH0", "phones": ["DH AH0", "DH AH0", "DH AH0", "DH AH0", "DH AH0"]},
+      {"text": "QUICK", "accuracy": [10.0, 10.0, 10.0, 10.0, 10.0], "ref-phones": "K W IH0 K", "phones": ["K W IH0 K", "K W IH0 K", "K W IH0 K", "K W IH0 K", "K W IH0 K"]},
+      {"text": "BROWN", "accuracy": [10.0, 10.0, 10.0, 10.0, 10.0], "ref-phones": "B R AW0 N", "phones": ["B R AW0 N", "B R AW0 N", "B R AW0 N", "B R AW0 N", "B R AW0 N"]},
+      {"text": "FOX", "accuracy": [10.0, 10.0, 10.0, 10.0, 10.0], "ref-phones": "F AA0 K S", "phones": ["F AA0 K S", "F AA0 K S", "F AA0 K S", "F AA0 K S", "F AA0 K S"]},
+      {"text": "JUMPED", "accuracy": [10.0, 10.0, 10.0, 10.0, 10.0], "ref-phones": "JH AH0 M P T", "phones": ["JH AH0 M P T", "JH AH0 M P T", "JH AH0 M P T", "JH AH0 M P T", "JH AH0 M P T"]},
+      {"text": "OVER", "accuracy": [10.0, 10.0, 10.0, 10.0, 10.0], "ref-phones": "OW0 V ER0", "phones": ["OW0 V ER0", "OW0 V ER0", "OW0 V ER0", "OW0 V ER0", "OW0 V ER0"]},
+      {"text": "THE", "accuracy": [10.0, 10.0, 10.0, 10.0, 10.0], "ref-phones": "DH AH0", "phones": ["DH AH0", "DH AH0", "DH AH0", "DH AH0", "DH AH0"]},
+      {"text": "LAZY", "accuracy": [10.0, 10.0, 10.0, 10.0, 10.0], "ref-phones": "L EY0 Z IY0", "phones": ["L EY0 Z IY0", "L EY0 Z IY0", "L EY0 Z IY0", "L EY0 Z IY0", "L EY0 Z IY0"]},
+      {"text": "DOG", "accuracy": [5.0, 4.0, 5.0, 6.0, 9.0], "ref-phones": "D AO0 G", "phones": ["D AO0 G", "D AO0 G", "D AO0 G", "D AO0 G", "D AO0 G"]}
+    ]
+  },
+  "000030033": {
+    "text": "IT IS A CAT", "accuracy": [7.0, 7.0, 6.0, 8.0, 7.0],
+    "words": [
+      {"text": "IT", "accuracy": [10.0, 10.0, 10.0, 10.0, 10.0], "ref-phones": "IH0 T", "phones": ["IH0 T", "IH0 T", "IH0 T", "IH0 T", "IH0 T"]},
+      {"text": "IS", "accuracy": [10.0, 10.0, 10.0, 10.0, 10.0], "ref-phones": "IH0 Z", "phones": ["IH0 Z", "IH0 Z", "IH0 Z", "IH0 Z", "IH0 Z"]},
+      {"text": "A", "accuracy": [10.0, 10.0, 10.0, 10.0, 10.0], "ref-phones": "AH0", "phones": ["AH0", "AH0", "AH0", "AH0", "AH0"]},
+      {"text": "CAT", "accuracy": [7.0, 6.0, 7.0, 8.0, 7.0], "ref-phones": "K AE0 T", "phones": ["K AE0 T", "K AE0 T", "K AE0 T", "K AE0 T", "K AE0 T"]}
+    ]
+  }
+}

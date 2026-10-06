@@ -614,7 +614,7 @@ const AIvsTraditional = () => {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline: "AI Reading App vs Traditional Phonics Program: 2025 Comparison",
+    headline: "AI Reading App vs Traditional Phonics Program: Side-by-Side",
     description:
       "Comprehensive comparison of AI-powered reading apps and traditional phonics programs across 15 factors including cost, effectiveness, and engagement.",
     author: {
@@ -635,12 +635,12 @@ const AIvsTraditional = () => {
 
   return (
     <ArticlePageTemplate
-      metaTitle="AI Reading App vs Traditional Phonics Program: 2025 Comparison"
+      metaTitle="AI Reading App vs Traditional Phonics Program: Side-by-Side"
       metaDescription="Compare modern AI reading tools like Word Wiz AI with traditional phonics programs like Hooked on Phonics. Which approach works better for your child?"
       canonicalUrl="https://wordwizai.com/comparisons/ai-reading-app-vs-traditional-phonics-program"
       heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=630&fit=crop"
       heroImageAlt="Parent and child comparing reading practice methods at home"
-      headline="AI Reading App vs Traditional Phonics Program: 2025 Comparison"
+      headline="AI Reading App vs Traditional Phonics Program: Side-by-Side"
       subheadline="Compare modern AI tools with time-tested traditional programs across cost, effectiveness, and 13 other critical factors"
       author={{
         name: "Word Wiz AI Editorial Team",

@@ -304,7 +304,7 @@ const IXLDuolingoABCComparison = () => {
       product1Details={product1Details}
       product2Details={product2Details}
       wordWizDetails={wordWizDetails}
-      metaTitle="IXL vs Duolingo ABC vs Word Wiz AI: Which is Best? (2024)"
+      metaTitle="IXL vs Duolingo ABC vs Word Wiz AI: Which is Best?"
       metaDescription="Compare IXL Language Arts, Duolingo ABC, and Word Wiz AI for teaching reading. See pricing, features, and which is right for your child. Free speech recognition option included."
       canonicalUrl="https://wordwizai.com/comparisons/ixl-vs-duolingo-abc-vs-word-wiz-ai"
       h1Title="IXL Language Arts vs Duolingo ABC vs Word Wiz AI: Comprehensive Comparison"

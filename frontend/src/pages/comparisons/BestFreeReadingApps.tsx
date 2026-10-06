@@ -369,10 +369,10 @@ const BestFreeReadingAppsComparison = () => {
       product1Details={product1Details}
       product2Details={product2Details}
       wordWizDetails={wordWizDetails}
-      metaTitle="Best Free Reading Apps 2025: Starfall vs Khan Academy Kids vs Word Wiz AI"
+      metaTitle="Best Free Reading Apps: Starfall vs Khan Academy Kids vs Word Wiz AI"
       metaDescription="Compare the best free reading apps for kids. See Starfall, Khan Academy Kids, and Word Wiz AI features, speech recognition, and which is best for your child."
       canonicalUrl="https://wordwizai.com/comparisons/best-free-reading-apps"
-      h1Title="Best Free Reading Apps: Starfall vs Khan Academy Kids vs Word Wiz AI (2025)"
+      h1Title="Best Free Reading Apps: Starfall vs Khan Academy Kids vs Word Wiz AI"
       introText="Khan Academy Kids is entirely free with the broadest curriculum, Starfall is free with limits or $60/year for full access, and Word Wiz AI is free and the only one that gives spoken pronunciation feedback. For a genuinely free setup, Khan Academy Kids covers breadth while Word Wiz AI covers pronunciation accuracy."
       verdict={verdict}
       faqs={faqs}

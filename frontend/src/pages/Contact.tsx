@@ -95,7 +95,7 @@ ${name} (${email})`;
 
       {/* Hero Section */}
       <motion.section
-        className="px-6 py-20 bg-gradient-to-br from-background to-purple-50/50"
+        className="px-6 py-20 bg-gradient-to-br from-background to-purple-50/50 dark:to-primary/10"
         variants={fadeUpVariant}
         initial="hidden"
         animate="visible"
@@ -147,7 +147,7 @@ ${name} (${email})`;
               whileInView="visible"
               viewport={{ once: true }}
             >
-              <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl rounded-3xl">
+              <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 dark:from-card dark:to-card dark:border-border shadow-xl rounded-3xl">
                 <CardHeader>
                   <CardTitle className="text-2xl font-bold flex items-center gap-2">
                     <Send className="w-6 h-6 text-primary" />
@@ -282,7 +282,7 @@ ${name} (${email})`;
                   },
                 ].map((item, i) => (
                   <motion.div key={i} variants={childVariant}>
-                    <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-lg hover:shadow-xl transition-shadow rounded-2xl">
+                    <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 dark:from-card dark:to-card dark:border-border shadow-lg hover:shadow-xl transition-shadow rounded-2xl">
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
                           <div

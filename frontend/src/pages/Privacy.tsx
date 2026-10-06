@@ -46,7 +46,7 @@ const Privacy = () => {
 
       {/* Hero Section */}
       <motion.section
-        className="px-6 py-4 bg-gradient-to-br from-background to-purple-50/50"
+        className="px-6 py-4 bg-gradient-to-br from-background to-purple-50/50 dark:to-primary/10"
         variants={fadeUpVariant}
         initial="hidden"
         animate="visible"

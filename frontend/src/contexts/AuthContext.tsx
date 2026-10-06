@@ -43,6 +43,16 @@ const AuthContext = createContext<AuthContextType>({
   retryProfileLoad: () => {},
 });
 
+// Routes that only make sense signed in (the ProtectedRoute ones in App.tsx).
+// "/practice" must not match "/practice-words", hence the "/" suffix check.
+const SIGNED_IN_ONLY = ["/dashboard", "/practice", "/progress", "/settings", "/classes"];
+
+function isSignedInOnlyPath(pathname: string): boolean {
+  return SIGNED_IN_ONLY.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+}
+
 const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(
     localStorage.getItem("token"),
@@ -65,7 +75,14 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
           // Only a rejected token means "sign in again". A dropped
           // connection or a backend restart must not throw away the session.
           if (status === 401 || status === 403 || status === 404) {
-            logout();
+            // On a public page (a guide, the try-it page) an expired token
+            // shouldn't bounce the visitor to the login screen; just forget
+            // it. Signed-in pages still send them to log in again.
+            if (isSignedInOnlyPath(window.location.pathname)) {
+              logout();
+            } else {
+              clearSession();
+            }
           } else {
             setProfileLoadFailed(true);
           }
@@ -112,11 +129,15 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     await registerUser({ username, email, password, full_name });
   };
 
-  const logout = () => {
+  const clearSession = () => {
     setToken(null);
     setUser(null);
     setProfileLoadFailed(false);
     localStorage.removeItem("token");
+  };
+
+  const logout = () => {
+    clearSession();
     navigate("/login");
   };
 

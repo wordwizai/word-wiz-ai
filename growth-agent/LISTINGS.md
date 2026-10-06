@@ -6,6 +6,20 @@ not submitted), `queued` (draft in APPROVAL_QUEUE), `needs-bruce` (needs his
 account or his name in a new way), `submitted`, `live`, `rejected`,
 `excluded` (fails the rules: paid, reciprocal link, etc.).
 
+## Outreach log
+
+| Date | Who | Route | From / reply address | Status |
+|---|---|---|---|---|
+| 2026-10-06 | Phonics.org ("Best AI Reading Tutors for Kids" guide) | contact form | brucebpeters12@gmail.com | sent, form confirmed |
+| 2026-10-06 | Dr. Leah Bennett, Freddy the Frogcaster ("Best Reading Apps for Kids") | contact form | brucebpeters12@gmail.com | sent, form confirmed |
+| 2026-10-06 | U. Michigan Dyslexia Help apps list | email to dyslexiahelp@umich.edu | brucebpeters12@gmail.com | sent |
+| 2026-10-06 | Freedom Homeschooling | creator form | contactwordwizai@gmail.com | unconfirmed (see AQ-009) |
+
+| queued | KidvoKit, Karen Gage (dyslexia apps guide) | email info@kidvokit.com | contactwordwizai@gmail.com | AQ-017 |
+| queued | Lead in Literacy, Christina (7 best phonics apps) | contact form | contactwordwizai@gmail.com | AQ-018 |
+
+Follow-up rule: one polite follow-up at most, 10+ days after the first message, only with Bruce's approval.
+
 ## Already listed (found 2026-10-05)
 
 | Site | URL | Date submitted | Status | Live listing URL | Dofollow? | Notes |
@@ -20,17 +34,17 @@ Ranked by expected real users for a K-2 reading tool.
 
 | # | Site | Submit route | Account? | Status | Dofollow? | Fit (1-5) | Notes |
 |---|---|---|---|---|---|---|---|
-| 1 | Freedom Homeschooling | https://freedomhomeschooling.com/submit-free-resource/ ("created" form) | No | queued (AQ-009) | yes (checked HTML) | 5 | Phonics page ranks #1 for "free phonics curriculum online homeschool". Never accepts payment. Limits AI-generated resources, so be clear about how AI is used |
+| 1 | Freedom Homeschooling | https://freedomhomeschooling.com/submit-free-resource/ ("created" form) | No | submitted 2026-10-06, **unconfirmed** (503s, no confirmation shown) | yes (checked HTML) | 5 | Phonics page ranks #1 for "free phonics curriculum online homeschool". Never accepts payment. Limits AI-generated resources, so be clear about how AI is used |
 | 2 | ISTE+ASCD EdTech Index | https://ltd.iste.org ("Join Now") | Yes (company profile) | needs-bruce | unknown | 5 | Free. Needs a privacy policy (have one). Curated, uses Bruce's name. Main replacement for Common Sense reviews |
 | 3 | Free Homeschool Deals | https://freehomeschooldeals.com/submit | No | candidate | unknown | 4 | Needs a 150+ word third-person post and a 1000x1500 graphic. One-time email spike to a large list, not a lasting listing |
-| 4 | DyslexiaHelp (U. Michigan) | dyslexiahelp@umich.edu | No | queued (AQ-008) | unknown | 4 | Email, so it's outreach. An unrelated app called "Word Wizard" is already listed there |
+| 4 | DyslexiaHelp (U. Michigan) | dyslexiahelp@umich.edu | No | emailed 2026-10-06 (AQ-008) | unknown | 4 | Email, so it's outreach. An unrelated app called "Word Wizard" is already listed there |
 | 5 | Common Sense Privacy | privacy@commonsense.org | No | needs-bruce | n/a | 4 | Evaluation request by email. Public rating, so a privacy-policy review first might be worth it. Kids' data, needs Bruce |
-| 6 | TeachersFirst | https://www.teachersfirst.org/contact.cfm | No | candidate | unknown | 4 | Editorial, contact form only, so it's outreach. Draft next session |
+| 6 | TeachersFirst | https://www.teachersfirst.org/contact.cfm | No | queued (AQ-019) | unknown | 4 | Editorial, contact form only, so it's outreach. Draft next session |
 | 7 | Homeschooling with Dyslexia | contact form | No | candidate | unknown | 4 | Has an "Advertising Options" page, so features may be paid. Older draft in `growth/SUBMISSIONS.md` has unverified claims |
 | 8 | ALSC Notable Children's Digital Media | ALA Airtable form | No | needs-bruce | unknown | 3 | Award-style list. Eligibility window unclear |
 | 9 | Tech & Learning | editorial pitch | No | needs-bruce | n/a | 3 | Older draft in `growth/SUBMISSIONS.md` |
 | 10 | EdTech Insiders GenAI map | info@edtechinsiders.org | No | candidate | n/a | 3 | Audience is founders/investors, not parents |
-| 11 | Ontario Federation of Teaching Parents | website@ontariohomeschool.org | No | candidate | yes (checked HTML) | 3 | Canadian homeschool org, lists Reading Eggs and Khan Academy |
+| 11 | Ontario Federation of Teaching Parents | website@ontariohomeschool.org | No | queued (AQ-020) | yes (checked HTML) | 3 | Canadian homeschool org, lists Reading Eggs and Khan Academy |
 | 12 | EdTech Impact | https://edtechimpact.com/providers/ | Yes | candidate | appears yes | 2 | UK/EU schools |
 | 13 | Future Tools | https://www.futuretools.io/submit-a-tool | No | candidate | internal redirect | 2 | Over 75% rejected, no reply. AI-hobbyist audience, few parents |
 | 14 | Uneed | https://www.uneed.best/submit-a-tool | Yes | candidate | only at score 20+ | 1 | Maker audience |
@@ -58,7 +72,7 @@ Ranked by expected real users for a K-2 reading tool.
 
 ## Listing copy (checked against the code on 2026-10-05)
 
-Never say "no account needed" until AQ-003 is answered. Never quote a user or
+An account IS required to practice (Bruce, 2026-10-06). Say "needs a free account (Google or email)" where a form asks. Use contactwordwizai@gmail.com as the contact address on every listing and form. Never quote a user or
 visitor count that isn't in `STATE.md` with a date.
 
 **Tagline, 52 chars**

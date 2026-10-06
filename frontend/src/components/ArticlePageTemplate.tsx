@@ -23,7 +23,7 @@ import {
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import LandingPageFooter from "@/components/LandingPageFooter";
 import { DEFAULT_OG_IMAGE } from "@/components/SeoHead";
-import { trackSignupClick } from "@/utils/analytics";
+import { trackSignupClick, trackTryEvent } from "@/utils/analytics";
 import { getPracticeLinksForArticle } from "@/data/articlePracticeLinks";
 import { phonicsPatterns } from "@/data/phonicsPatterns";
 
@@ -365,6 +365,59 @@ const RelatedArticlesComponent: React.FC<{ articles: RelatedArticle[] }> = ({
   </Card>
 );
 
+// Leads with the no-account try page for the article's first practice
+// pattern, so a parent can hear what Word Wiz does before signing up.
+const FinalCta: React.FC<{ canonicalUrl: string; headline: string }> = ({
+  canonicalUrl,
+  headline,
+}) => {
+  const tryPattern = getPracticeLinksForArticle(
+    new URL(canonicalUrl).pathname
+  )[0];
+
+  return (
+    <Card className="mt-12 bg-primary text-primary-foreground">
+      <CardContent className="p-8 text-center">
+        <h3 className="text-2xl font-bold mb-4">
+          Ready to Help Your Child Read Better?
+        </h3>
+        <p className="mb-6 text-primary-foreground/90">
+          Have your child read a few sentences out loud and see which sounds
+          Word Wiz AI catches. Free, and no sign-up needed to try.
+        </p>
+        <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+          {tryPattern && (
+            <Button size="lg" variant="secondary" asChild>
+              <Link
+                to={`/try/${tryPattern.slug}`}
+                onClick={() =>
+                  trackTryEvent("try_link_click", tryPattern.slug, "article_final_cta")
+                }
+              >
+                Try it out loud
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Link>
+            </Button>
+          )}
+          <Button
+            size="lg"
+            variant="ghost"
+            asChild
+            className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
+          >
+            <Link
+              to="/signup"
+              onClick={() => trackSignupClick('article_final_cta', 'link', headline)}
+            >
+              Get Started Free
+            </Link>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 const PracticeWordListsCard: React.FC<{ canonicalUrl: string }> = ({
   canonicalUrl,
 }) => {
@@ -653,27 +706,7 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
 
                 <PracticeWordListsCard canonicalUrl={canonicalUrl} />
 
-                {/* Final CTA */}
-                <Card className="mt-12 bg-primary text-primary-foreground">
-                  <CardContent className="p-8 text-center">
-                    <h3 className="text-2xl font-bold mb-4">
-                      Ready to Help Your Child Read Better?
-                    </h3>
-                    <p className="mb-6 text-primary-foreground/90">
-                      Try Word Wiz AI's free pronunciation feedback and phonics
-                      practice
-                    </p>
-                    <Button size="lg" variant="secondary" asChild>
-                      <Link 
-                        to="/signup"
-                        onClick={() => trackSignupClick('article_final_cta', 'link', headline)}
-                      >
-                        Get Started Free
-                        <ArrowRight className="ml-2 w-4 h-4" />
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
+                <FinalCta canonicalUrl={canonicalUrl} headline={headline} />
               </div>
 
               {/* Sidebar */}

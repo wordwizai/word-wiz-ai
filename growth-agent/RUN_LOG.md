@@ -95,3 +95,57 @@ description is in `PR_BODY.md`; AQ-010 asks Bruce to open it.
 **Check next session**: whether the PR was merged. If it was, nothing will
 have moved yet (Google needs 2-4 weeks), so just confirm the pages re-crawled
 via URL Inspection and move on to backlog #1.
+
+---
+
+## 2026-10-06 - Session 2
+
+**Bruce's answers to the queue**: AQ-001 approved (signed in to Vercel),
+AQ-002 rejected, AQ-003 resolved (an account IS required), AQ-004 approved
+(build guest mode), AQ-005 approved with a BU-research addition, AQ-006 to
+AQ-009 approved, AQ-010 no answer. Mid-session: "use contactwordwizai@gmail.com
+for any emails sent out" and "you aren't a coding agent, you are an
+advertising agent". Both saved to memory.
+
+**Found**: Bruce merged dev (with session 1) into main on Oct 5, 11:20pm PT,
+so session 1's SEO changes went live 2026-10-06. `verify:live` passed; live
+pages have the new titles and no Product/AggregateRating markup.
+
+**Measured** (`data/2026-10-06-vercel-and-signups.md`): 774 visitors / 30d,
+339 from Google, 65 signup-click visitors (55 from the homepage, ~9 from all
+guides combined), 39 new users, 20 with a scored reading.
+
+**Outreach sent** (all approved):
+- AQ-008 email to U. Michigan Dyslexia Help (from brucebpeters12@gmail.com)
+- AQ-006 Phonics.org contact form (confirmed)
+- AQ-007 Freddy the Frogcaster contact form (confirmed)
+- AQ-009 Freedom Homeschooling: Bruce ticked the reCAPTCHA, I submitted.
+  Unconfirmed (503s from their server, no confirmation shown).
+The first three went out with the personal address before Bruce's
+contactwordwizai instruction.
+
+**Shipped to dev** (all on `growth-agent`, merged into dev):
+- `9c84b9a` About page "Who built this" section (AQ-005)
+- `895cbdd` four magic-e practice pages + silent-e guide practice card
+- `47c92d1`, `e4a6965` public `/guest/analyze-audio` route: allowlisted
+  sentences, no DB writes, no audio caching, per-IP and site-wide limits,
+  2 concurrent analyses. 16 tests.
+- `50e1a11` fix: recordings with digital silence failed the whole pipeline
+  (NaN from noisereduce, spread by normalization). Affects signed-in users
+  too. Reproduced end to end, test added.
+- `46a50ce` `/try/:slug` page, guide and practice-page CTAs point to it,
+  try-funnel analytics events, stale-token bounce fixed on public pages.
+Verified: backend suite passes (all 18 modules), real-model end-to-end run
+of the guest route (caught "made"->"mad", "cake"->"cack"), full frontend
+build with prerender.
+
+**Queued**: AQ-011 privacy line, AQ-012 production quality-gate flag
+(possible activation fix), AQ-013..AQ-020 outreach batch (2 Reddit posts,
+Show HN, LinkedIn, 4 emails/forms), all timed for after the try page is live.
+
+**Blocked / notes**: GSC indexing quota was used up; moved the two key pages
+to the front of the daily routine's queue instead. Reddit can't be read or
+posted from here.
+
+**Expect**: once backend + dev->main deploy, try-page events start; signup
+clicks per guide visitor should rise from ~9 per 30 days. Check in session 3.

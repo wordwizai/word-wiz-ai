@@ -19,7 +19,7 @@ from . import metrics as M
 from .scoring import build_items, summarize
 
 FAR_TOLERANCE = 0.005
-REJECTION_TOLERANCE = 0.01
+UNSCORED_TOLERANCE = 0.01
 N_RESAMPLES = 2000
 SEED = 0
 _EPS = 1e-12
@@ -34,8 +34,8 @@ def load_results(path: str) -> dict:
         return json.load(fh)
 
 
-def _word_counts(items, threshold):
-    words = items.words
+def _word_counts(items, threshold, children_only=False):
+    words = [w for w in items.words if w.is_child] if children_only else items.words
     return M.per_speaker_counts([w.speaker for w in words], [w.is_mistake for w in words],
                                 M.flags_at([w.per for w in words], threshold))
 
@@ -57,17 +57,33 @@ def compare_results(base: dict, cand: dict, clips, n_resamples: int = N_RESAMPLE
     lo, hi = M.percentile_interval(deltas)
 
     child_delta = cs["word"]["children"]["f05"] - bs["word"]["children"]["f05"]
+    base_children = _word_counts(base_items, base["threshold"], children_only=True)
+    cand_children = _word_counts(cand_items, cand["threshold"], children_only=True)
+    if base_children or cand_children:
+        child_lo, child_hi = M.percentile_interval(
+            M.bootstrap_fbeta_delta(base_children, cand_children, n_resamples, seed))
+        child_ci = [child_lo, child_hi]
+        child_check = {"value": f"{child_delta:+.4f} [{child_lo:+.4f}, {child_hi:+.4f}]",
+                       "passed": child_hi >= -_EPS}
+    else:
+        child_ci = None
+        child_check = {"value": "no child words", "passed": True}
     far_delta = cs["word"]["all"]["false_alarm_rate"] - bs["word"]["all"]["false_alarm_rate"]
     rej_delta = cs["rejection_rate"] - bs["rejection_rate"]
+    unscored_delta = cs["unscored_rate"] - bs["unscored_rate"]
     checks = [
         {"name": "real improvement", "rule": "95% CI of word F0.5 difference above 0",
          "value": f"[{lo:+.4f}, {hi:+.4f}]", "passed": lo > 0},
-        {"name": "children not worse", "rule": "children F0.5 difference >= 0",
-         "value": f"{child_delta:+.4f}", "passed": child_delta >= -_EPS},
+        # Children are a small slice (about 195 real mistakes in the dev half), so a point
+        # estimate would flip on noise. Only a significant drop fails.
+        {"name": "children not worse", "rule": "children F0.5 not significantly worse (95% CI upper bound >= 0)",
+         **child_check},
         {"name": "no more wrong corrections", "rule": f"false-alarm rate rises <= {FAR_TOLERANCE:.3f}",
          "value": f"{far_delta:+.4f}", "passed": far_delta <= FAR_TOLERANCE + _EPS},
-        {"name": "no hiding", "rule": f"rejection rate rises <= {REJECTION_TOLERANCE:.2f}",
-         "value": f"{rej_delta:+.4f}", "passed": rej_delta <= REJECTION_TOLERANCE + _EPS},
+        # Rejected and misaligned clips both drop out of every metric, so both count.
+        {"name": "no hiding",
+         "rule": f"unscored rate (rejected or misaligned clips) rises <= {UNSCORED_TOLERANCE:.2f}",
+         "value": f"{unscored_delta:+.4f}", "passed": unscored_delta <= UNSCORED_TOLERANCE + _EPS},
         {"name": "no new unexpected failures", "rule": "unexpected failures do not increase",
          "value": f"{cs['unexpected_failures'] - bs['unexpected_failures']:+d}",
          "passed": cs["unexpected_failures"] <= bs["unexpected_failures"]},
@@ -79,8 +95,10 @@ def compare_results(base: dict, cand: dict, clips, n_resamples: int = N_RESAMPLE
         "f05_delta": cs["word"]["all"]["f05"] - bs["word"]["all"]["f05"],
         "f05_ci": [lo, hi],
         "children_f05_delta": child_delta,
+        "children_f05_ci": child_ci,
         "false_alarm_delta": far_delta,
         "rejection_delta": rej_delta,
+        "unscored_delta": unscored_delta,
         "base_summary": bs,
         "candidate_summary": cs,
         "checks": checks,
@@ -97,12 +115,14 @@ def format_comparison(c: dict) -> str:
                     f"{k[name]['f05'] - b[name]['f05']:+8.4f}")
     for key, label in (("precision", "precision"), ("recall", "recall"), ("false_alarm_rate", "false-alarm rate")):
         rows.append(f"{label:24s} {b['all'][key]:8.4f} {k['all'][key]:8.4f} {k['all'][key] - b['all'][key]:+8.4f}")
-    rb, rk = c["base_summary"]["rejection_rate"], c["candidate_summary"]["rejection_rate"]
-    rows.append(f"{'rejection rate':24s} {rb:8.4f} {rk:8.4f} {rk - rb:+8.4f}")
+    for key, label in (("rejection_rate", "rejection rate"), ("unscored_rate", "unscored rate")):
+        rb, rk = c["base_summary"][key], c["candidate_summary"][key]
+        rows.append(f"{label:24s} {rb:8.4f} {rk:8.4f} {rk - rb:+8.4f}")
     rows.append(f"F0.5 difference, 95% CI [{c['f05_ci'][0]:+.4f}, {c['f05_ci'][1]:+.4f}] (speaker bootstrap)")
     rows.append("")
+    width = max([20] + [len(chk["value"]) for chk in c["checks"]])
     for chk in c["checks"]:
-        rows.append(f"{'PASS' if chk['passed'] else 'FAIL'}  {chk['name']:28s} {chk['value']:>20s}   ({chk['rule']})")
+        rows.append(f"{'PASS' if chk['passed'] else 'FAIL'}  {chk['name']:28s} {chk['value']:>{width}s}   ({chk['rule']})")
     rows.append(
         "ACCEPT on conditions 1-4 and no new unexpected failures (speed and tests are checked separately)"
         if c["passed"] else "REJECT"

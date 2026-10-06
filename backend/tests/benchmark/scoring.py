@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+import numbers
 from dataclasses import dataclass, field
 
 from . import metrics as M
@@ -53,20 +55,49 @@ class ItemSet:
     phones_unmapped: int = 0
 
 
+def _checked_per(clip, record) -> float:
+    per = record.get("per")
+    if isinstance(per, bool) or not isinstance(per, numbers.Real) or not math.isfinite(per):
+        raise ValueError(
+            f"clip {clip.utt_id}: word record for {record.get('ground_truth_word')!r} has per {per!r}, "
+            "which is not a finite number"
+        )
+    return float(per)
+
+
+def _lines_up(clip, records) -> bool:
+    """True when the records are, in order, one per scored word and about those words.
+
+    Insertions are not in `records`. The join is by position, so a record about another word
+    would score a child's reading against the wrong expert label. production cleans the
+    sentence before G2P (clean_sentence), and that is what ground_truth_word holds.
+    """
+    from core.grapheme_to_phoneme import clean_sentence  # lazy, so importing this module loads no core code
+
+    return len(records) == len(clip.words) and all(
+        record.get("ground_truth_word") == clean_sentence(word.text)
+        for word, record in zip(clip.words, records)
+    )
+
+
 def build_items(clips, outcomes: dict) -> ItemSet:
     items = ItemSet()
     for clip in clips:
         if clip.utt_id not in outcomes:
             raise KeyError(f"no outcome for clip {clip.utt_id}")
         outcome = outcomes[clip.utt_id]
+        status = outcome["status"]
+        if status not in ("ok", "rejected"):
+            raise ValueError(f"clip {clip.utt_id}: outcome status is {status!r}, expected 'ok' or 'rejected'")
         items.clips += 1
-        if outcome["status"] != "ok":
+        if status == "rejected":
             items.rejected += 1
             key = outcome.get("error_type") or "unknown"
             items.rejected_by_type[key] = items.rejected_by_type.get(key, 0) + 1
             continue
         records = [r for r in outcome["words"] if r.get("type") != "insertion"]
-        if len(records) != len(clip.words):
+        pers = [_checked_per(clip, r) for r in records]
+        if not _lines_up(clip, records):
             items.word_count_mismatch += 1
             continue
         total_phonemes = sum(r.get("total_phonemes") or 0 for r in outcome["words"])
@@ -75,10 +106,10 @@ def build_items(clips, outcomes: dict) -> ItemSet:
             clip.utt_id, clip.speaker, clip.is_child, clip.sentence_accuracy,
             total_errors / total_phonemes if total_phonemes else 0.0,
         ))
-        for word, record in zip(clip.words, records):
+        for word, record, per in zip(clip.words, records, pers):
             items.words.append(WordItem(
                 clip.utt_id, clip.speaker, clip.is_child, word.text, word.accuracy,
-                M.word_is_mistake(word.accuracy), float(record.get("per") or 0.0),
+                M.word_is_mistake(word.accuracy), per,
             ))
             expected = list(record.get("expected_phonemes") or [])
             canonical = canonical_ipa(word.phones)
@@ -134,9 +165,12 @@ def summarize(items: ItemSet, threshold: float) -> dict:
         "rejected": items.rejected,
         "unexpected_failures": sum(v for k, v in items.rejected_by_type.items() if k.startswith("unexpected:")),
         "rejection_rate": items.rejected / items.clips if items.clips else 0.0,
+        # Clips that drop out of every metric, rejected or misaligned. A candidate must not be
+        # able to hide hard clips behind either one.
+        "unscored_rate": (items.rejected + items.word_count_mismatch) / items.clips if items.clips else 0.0,
         "rejected_by_type": dict(sorted(items.rejected_by_type.items())),
         "word_count_mismatch": items.word_count_mismatch,
-        "g2p_disagreement_rate": 1 - items.g2p_agree / items.g2p_total if items.g2p_total else 0.0,
+        "g2p_disagreement_rate": 1 - items.g2p_agree / items.g2p_total if items.g2p_total else None,
         "phones_unmapped": items.phones_unmapped,
         "word": {},
         "phone": {},
@@ -152,6 +186,8 @@ def summarize(items: ItemSet, threshold: float) -> dict:
     scores = [w.per for w in items.words]
     best_t, best_f = M.best_threshold(labels, scores)
     out["best_threshold"] = {"threshold": best_t, "f05": best_f}
+    # The F0.5 of flagging every word, the reference point any threshold has to beat.
+    out["flag_all_f05"] = M.confusion(labels, [True] * len(labels)).f_beta()
     out["pr_curve"] = M.pr_curve(labels, scores)
     out["pearson"] = {
         "word": M.pearson([w.human_accuracy for w in items.words], [-w.per for w in items.words]),

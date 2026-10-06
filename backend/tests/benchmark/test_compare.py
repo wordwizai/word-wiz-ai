@@ -56,6 +56,37 @@ class TestCompareResults(unittest.TestCase):
         result = self._compare(self.base, hiding)
         self.assertFalse(result["checks"][3]["passed"])
 
+    def test_more_misaligned_clips_fail_even_without_more_rejections(self):
+        # u0 comes back with one word record for two scored words, so it drops out of every metric.
+        hiding = dict(self.cand)
+        hiding["u0"] = U.ok(self.cand["u0"]["words"][0])
+        result = self._compare(self.base, hiding)
+        self.assertEqual(result["rejection_delta"], 0.0)
+        self.assertAlmostEqual(result["unscored_delta"], 0.1)
+        self.assertFalse(result["checks"][3]["passed"])
+        self.assertEqual(result["checks"][3]["name"], "no hiding")
+        self.assertEqual(result["checks"][3]["rule"], "unscored rate (rejected or misaligned clips) rises <= 0.01")
+        self.assertFalse(result["passed"])
+
+    def test_a_record_about_the_wrong_word_counts_as_misaligned(self):
+        hiding = dict(self.cand)
+        hiding["u0"] = U.ok(self.cand["u0"]["words"][0], U.record("fox", ["f", "ɑ", "k", "s"], ["f", "ɑ", "k", "s"], 0.0))
+        result = self._compare(self.base, hiding)
+        self.assertFalse(result["checks"][3]["passed"])
+
+    def test_misaligned_clips_in_both_runs_are_not_a_new_loss(self):
+        base, cand = dict(self.base), dict(self.cand)
+        base["u0"] = U.ok(self.base["u0"]["words"][0])
+        cand["u0"] = U.ok(self.cand["u0"]["words"][0])
+        result = self._compare(base, cand)
+        self.assertEqual(result["unscored_delta"], 0.0)
+        self.assertTrue(result["checks"][3]["passed"])
+
+    def test_format_shows_the_unscored_rate(self):
+        text = C.format_comparison(self._compare(self.base, self.cand))
+        self.assertIn("unscored rate", text)
+        self.assertIn("unscored rate (rejected or misaligned clips) rises <= 0.01", text)
+
     def test_new_unexpected_failure_fails(self):
         crashing = dict(self.cand)
         crashing["u0"] = U.rejected("unexpected:KeyError")
@@ -81,6 +112,76 @@ class TestCompareResults(unittest.TestCase):
             C.compare_results(U.results_dict("a", self.base), U.results_dict("b", self.base, half="test"), self.clips)
         with self.assertRaises(C.NotComparable):
             C.compare_results(U.results_dict("a", self.base), U.results_dict("b", {"u0": self.base["u0"]}), self.clips)
+
+
+class TestChildrenCheck(unittest.TestCase):
+    """Check 2 passes unless the children F0.5 difference is significantly below zero."""
+
+    def setUp(self):
+        # 24 clips, so 12 child speakers (odd i) and 12 adults. The candidate of _population
+        # flags every wrong DOG, so it is the reference that a worse candidate is compared with.
+        self.clips, _unused, self.good = _population(24)
+        self.child_ids = [u for u in self.good if int(u[1:]) % 2]
+
+    def _compare(self, base, cand, clips=None):
+        return C.compare_results(U.results_dict("base", base), U.results_dict("cand", cand),
+                                 clips or self.clips, n_resamples=500)
+
+    def _unflag_dog(self, outcomes, utt_ids):
+        worse = dict(outcomes)
+        for utt in utt_ids:
+            cat, _dog = outcomes[utt]["words"]
+            worse[utt] = U.ok(cat, U.record("dog", ["d", "ɔ", "g"], ["d", "ɔ", "g"], 0.0))
+        return worse
+
+    def test_slightly_worse_within_noise_passes(self):
+        worse = self._unflag_dog(self.good, self.child_ids[:1])
+        result = self._compare(self.good, worse)
+        self.assertLess(result["children_f05_delta"], 0)  # the point estimate is below zero ...
+        low, high = result["children_f05_ci"]
+        self.assertGreaterEqual(high, 0)  # ... but the interval still reaches zero
+        check = result["checks"][1]
+        self.assertTrue(check["passed"], C.format_comparison(result))
+        self.assertEqual(check["rule"], "children F0.5 not significantly worse (95% CI upper bound >= 0)")
+        self.assertIn(f"{result['children_f05_delta']:+.4f}", check["value"])
+        self.assertIn(f"[{low:+.4f}, {high:+.4f}]", check["value"])
+
+    def test_clearly_worse_on_every_child_speaker_fails(self):
+        worse = self._unflag_dog(self.good, self.child_ids)
+        result = self._compare(self.good, worse)
+        self.assertLess(result["children_f05_ci"][1], 0)
+        self.assertFalse(result["checks"][1]["passed"])
+        self.assertFalse(result["passed"])
+
+    def test_better_on_children_passes(self):
+        result = self._compare(self._unflag_dog(self.good, self.child_ids), self.good)
+        self.assertGreater(result["children_f05_ci"][0], 0)
+        self.assertTrue(result["checks"][1]["passed"])
+
+    def test_identical_results_pass(self):
+        result = self._compare(self.good, self.good)
+        self.assertEqual(result["children_f05_ci"], [0.0, 0.0])
+        self.assertTrue(result["checks"][1]["passed"])
+
+    def test_losing_all_child_clips_fails(self):
+        # Every child clip is rejected by the candidate, so no child words are left to score.
+        lost = dict(self.good)
+        for utt in self.child_ids:
+            lost[utt] = U.rejected()
+        result = self._compare(self.good, lost)
+        self.assertFalse(result["checks"][1]["passed"])
+
+    def test_no_child_words_passes(self):
+        adults = [U.synthetic_clip(f"a{i}", f"adult{i}", 30, [
+            ("CAT", 10, "K AE1 T", [2, 2, 2]), ("DOG", 3, "D AO1 G", [2, 0, 2])]) for i in range(4)]
+        cat = U.record("cat", ["k", "æ", "t"], ["k", "æ", "t"], 0.0)
+        outcomes = {c.utt_id: U.ok(cat, U.record("dog", ["d", "ɔ", "g"], ["d", "ɔ", "g"], 0.0)) for c in adults}
+        result = self._compare(outcomes, outcomes, clips=adults)
+        self.assertEqual(result["checks"][1]["value"], "no child words")
+        self.assertTrue(result["checks"][1]["passed"])
+        self.assertIsNone(result["children_f05_ci"])
+        self.assertEqual(result["children_f05_delta"], 0.0)
+        C.format_comparison(result)  # must not choke on the missing interval
 
 
 class TestMain(unittest.TestCase):

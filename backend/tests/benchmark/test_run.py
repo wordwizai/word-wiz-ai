@@ -48,6 +48,26 @@ class TestLock(unittest.TestCase):
         self.assertIn("--flag", err.getvalue())
 
 
+class TestFormatSummary(unittest.TestCase):
+    def _summary(self, clips, outcomes):
+        from tests.benchmark import scoring as S
+
+        return S.summarize(S.build_items(clips, outcomes), 0.4)
+
+    def test_a_run_where_every_clip_is_rejected_still_formats(self):
+        clip = U.synthetic_clip("c1", "s1", 30, [("CAT", 10, "K AE1 T", [2, 2, 2])])
+        text = RUN.format_summary(self._summary([clip], {"c1": U.rejected()}))
+        self.assertIn("g2p disagreement n/a", text)
+        self.assertIn("unscored 100.0%", text)
+
+    def test_shows_the_flag_every_word_reference(self):
+        clip = U.synthetic_clip("c1", "s1", 30, [("CAT", 10, "K AE1 T", [2, 2, 2]), ("DOG", 3, "D AO1 G", [2, 0, 2])])
+        outcome = U.ok(U.record("cat", ["k", "æ", "t"], ["k", "æ", "t"], 0.0),
+                       U.record("dog", ["d", "ɔ", "g"], ["d", "ɑ", "g"], 0.3333))
+        text = RUN.format_summary(self._summary([clip], {"c1": outcome}))
+        self.assertIn("flagging every word 0.5556", text)
+
+
 class TestCacheChecks(unittest.TestCase):
     def test_missing_cache(self):
         with tempfile.TemporaryDirectory() as tmp:

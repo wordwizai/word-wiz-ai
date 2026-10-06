@@ -137,7 +137,8 @@ def write_results(results: dict, out_path: str) -> tuple[str, str]:
 def format_summary(summary: dict) -> str:
     lines = [
         f"clips {summary['clips']}   rejected {summary['rejected']} ({summary['rejection_rate']:.1%})   "
-        f"word-count mismatches {summary['word_count_mismatch']}   threshold {summary['threshold']}",
+        f"word-count mismatches {summary['word_count_mismatch']}   unscored {summary['unscored_rate']:.1%}   "
+        f"threshold {summary['threshold']}",
     ]
     if summary["unexpected_failures"] > 0:
         lines.append(f"unexpected failures {summary['unexpected_failures']}")
@@ -147,10 +148,13 @@ def format_summary(summary: dict) -> str:
         lines.append(f"{name:10s} {m['f05']:7.4f} {m['precision']:7.4f} {m['recall']:7.4f} "
                      f"{m['false_alarm_rate']:7.4f} {m['n']:7d}")
     best = summary["best_threshold"]
-    lines.append(f"best threshold on this half {best['threshold']} (F0.5 {best['f05']:.4f})")
+    lines.append(f"best threshold on this half {best['threshold']} (F0.5 {best['f05']:.4f}), "
+                 f"flagging every word {summary['flag_all_f05']:.4f}")
     lines.append("pearson  " + "  ".join(
         f"{k} {v:.3f}" if v is not None else f"{k} n/a" for k, v in summary["pearson"].items()))
-    lines.append(f"g2p disagreement {summary['g2p_disagreement_rate']:.1%}   rejected by type {summary['rejected_by_type']}")
+    g2p = summary["g2p_disagreement_rate"]
+    lines.append(f"g2p disagreement {'n/a' if g2p is None else format(g2p, '.1%')}   "
+                 f"rejected by type {summary['rejected_by_type']}")
     return "\n".join(lines)
 
 

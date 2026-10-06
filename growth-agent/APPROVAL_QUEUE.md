@@ -1445,6 +1445,194 @@ Verified by the research pass 2026-10-06: the form (Name, Email, Subject, Messag
 
 ---
 
+## AQ-044 | Podcast pitch (your name) | Homeschool Together Podcast, Arial and Matthew Buza (homeschooltogetherpodcast@gmail.com) | Secular homeschooling "with a focus on early learners", with recent episodes "Episode 472: Why Some Kids Struggle to Read", "Episode 473: Homeschooling a Struggling Reader" and "Episode 481: AI Wrap up and Custom GPTs". Latest episode Sep 28, 2026. Their contact page invites episode ideas | Low. Guests are occasional, so it's pitched as an episode idea | Status: PENDING
+
+Verified 2026-10-06: email and episode titles from the show's RSS feed (https://homeschooltogether.fireside.fm/rss) and https://www.homeschool-together.com/contact.
+
+Send from contactwordwizai@gmail.com.
+
+**Subject:** Episode idea, what an AI reading tutor can and can't hear
+
+> Dear Arial and Matthew,
+>
+> I saw your episodes on why some kids struggle to read and on homeschooling a
+> struggling reader, plus your AI wrap-up, so I wanted to pitch an idea that
+> sits between them. I'm a high school student, and I built Word Wiz AI, a free
+> reading tutor where a child reads a sentence out loud and it shows which
+> individual sounds were off, then writes the next sentence around those
+> sounds.
+>
+> Building it taught me a lot about what AI can actually hear when a young kid
+> reads and where it still gets things wrong, like muffled laptop mics or a
+> speech model that learned mostly from adult voices. I think parents deciding
+> whether to trust an AI reading app would find that useful, and I'd be honest
+> about the limits, including that it hasn't been formally studied.
+>
+> If you want to see it first, kids can try three sentences without an account
+> at wordwizai.com/try. I'd be glad to come on, or just answer questions if
+> you'd rather cover it yourselves.
+>
+> Best,
+> Bruce Peters
+
+---
+
+## AQ-045 | Podcast pitch (your name) | My EdTech Life, Dr. Fonz Mendoza (contact form https://www.myedtech.life/contact/) | Has hosted young founders building AI reading tools ("How Two 19-Year-Olds Are Fixing Reading & Writing with AI ft. Almar & Max | My EdTech Life 358") and just ran "Whose Problem Is EdTech Solving? | My EdTech Life 374". The contact page says "Would you like to be guest? Let us know as well." | Low. The host "challenges the hype", so expect hard questions on kids' data and accuracy. Easier to answer after AQ-036 | Status: PENDING
+
+Verified 2026-10-06: the contact page line and episode titles (RSS https://feeds.buzzsprout.com/2395968.rss). The form has Name, Email, Message and loads a reCAPTCHA script, so you submit it.
+
+> Dear Fonz,
+>
+> I saw your episode with Almar and Max on fixing reading and writing with AI,
+> and your recent one asking whose problem edtech is solving. I'm a high school
+> student who built a free AI reading tutor for K-2 called Word Wiz AI, and I'd
+> love to come on and talk about that question from the builder's side.
+>
+> A child reads a sentence out loud and Word Wiz shows which individual sounds
+> were off, then writes the next sentence around them. The honest part of the
+> story is that most of what went wrong wasn't the AI. It was cheap
+> microphones, recordings that started with silence, and asking parents to
+> sign up before they heard any feedback. I'd be glad to talk through all of
+> it, including what I still don't know, since it hasn't been formally
+> studied.
+>
+> You can try it without an account at wordwizai.com/try.
+>
+> Best,
+> Bruce Peters
+
+---
+
+## AQ-046 | Podcast pitch (your name) | AI for Kids, Amber Ivey (contact@aidigitales.com) | Made "for kids ages 4–12 (and curious teens too) and the adults who support them", and features teens who build with AI ("How a Teen Uses AI to Turn Lyrics Into Songs (Middle School and up)", Sep 29, 2026; "How a Teen is Making AI Education for Everyone (Middle+)"). Families with young kids are exactly the audience | Low. Their guest invite is worded for kids, so **if you're under 18, it might be best to have a parent send it or be cc'd** | Status: PENDING
+
+Verified 2026-10-06: email and titles from the show's RSS feed (https://feeds.buzzsprout.com/2345747.rss); latest episode Sep 29, 2026.
+
+Send from contactwordwizai@gmail.com.
+
+**Subject:** A teen guest idea, how a computer hears the sounds in words
+
+> Dear Amber,
+>
+> I saw your episodes with teens who build things with AI, like the one about
+> turning lyrics into songs, and I wanted to ask about being a guest. I'm a
+> high school student, and I built Word Wiz AI, a free reading tutor for kids
+> who are learning to read. A kid reads a sentence out loud and it figures out
+> which individual sounds came out wrong, like "ship" read as "sip".
+>
+> I think kids would like hearing how a computer can listen for single sounds
+> inside a word, and where it still messes up, like when a microphone is
+> muffled. Kids can try it with a grown-up at wordwizai.com/try, and no account
+> is needed.
+>
+> Best,
+> Bruce Peters
+
+---
+
+## Community posts (you post, from your own accounts)
+
+I couldn't read any Reddit rules from the cloud (Reddit blocks it), so **check
+each sub's rules page and sidebar before posting** (look for self-promotion,
+AI, or a weekly promo thread; send modmail if unclear). Post at most one a day,
+and don't paste the same text into several subs.
+
+---
+
+## AQ-047 | Forum post | Well-Trained Mind forums, PreK and K board (https://forums.welltrainedmind.com/forum/34-prek-and-k/) | A big, long-running homeschool forum with K-level threads like "Free phonics curriculums?". Its board rules (seen only through search excerpts; Cloudflare blocked the live page) say advertising is prohibited but "it is permissible to post invitations for people to join free or nonprofit programs or groups... post it once, and direct people to your own site" | Low-medium. **Open /guidelines in your browser and confirm that wording first.** New accounts need admin approval (usually within a day). Post once, and never pitch it in "what curriculum should I use?" threads | Status: PENDING
+
+**Title:** Free tool that listens to your child read and shows which sounds they missed (I built it)
+
+> Hi everyone, I'm a high school student, and I built a free reading tutor
+> called Word Wiz AI for kids in about K-2. Your child reads a sentence out
+> loud, it shows which sounds inside each word came out wrong (like "ship" read
+> as "sip"), and then it writes the next sentence around those sounds. There
+> are no ads and nothing to buy.
+>
+> You can try three sentences without an account at wordwizai.com/try, and
+> nothing from that page is saved. It works best with a decent microphone, and
+> it hasn't been formally studied, so I'd treat it as extra practice next to
+> whatever program you already use.
+>
+> I'm posting this once, as the board rules ask. If you try it, I'd really
+> appreciate hearing what works and what doesn't through the contact page on
+> the site.
+
+---
+
+## AQ-048 | Reddit post | r/kindergarten (57k members per GummySearch, Oct 3, 2026) | Both K parents and K teachers, the core audience | Medium. Rules unread; check them first | Status: PENDING
+
+**Title:** I made a free tool that listens to kids read and shows which sounds they missed. Would love feedback from K parents and teachers
+
+> Hi all, I'm a high school student and I built Word Wiz AI on my own.
+>
+> A kid reads a short sentence out loud, and it shows which sounds inside each
+> word came out wrong, like "cake" read as "cack," then writes the next sentence
+> around those sounds. It's free, there are no ads, and it runs in a browser.
+> You can try three sentences without an account at wordwizai.com/try
+>
+> It's built for roughly K-2 and works best with a decent mic (a muffled laptop
+> mic makes it less accurate). I'd really appreciate hearing whether the
+> feedback makes sense to a kindergartener, since that's the part I'm least sure
+> about.
+
+---
+
+## AQ-049 | Reddit post | r/edtech (42k members per GummySearch, Oct 1, 2026) | Educators and edtech people; maker "looking for educator feedback" posts do appear there | Medium. Rules unread; check them first | Status: PENDING
+
+**Title:** Built a free K-2 reading tutor that gives feedback on individual sounds, not just words. Looking for educator feedback
+
+> I'm a high school student, and Word Wiz AI is a reading tutor I built for
+> early readers. Most reading apps score a whole word right or wrong. Word Wiz
+> transcribes what the kid actually said into individual sounds, lines that up
+> with the expected pronunciation, and shows which sound was off (like the long
+> a in "cake" coming out short). The next sentence is generated around the
+> sounds the kid missed. Teachers can make a free class with a join code and see
+> which sounds each student misses most.
+>
+> It's free with no ads. You can try three sentences without an account at
+> wordwizai.com/try, and nothing from that page is saved.
+>
+> Two honest limits. It works best with a decent mic, which is a real problem on
+> some school devices, and it hasn't been formally studied. I'd love to hear
+> what would make something like this usable in a K-2 classroom.
+
+---
+
+## AQ-050 | Reddit post | r/Parenting (8.3M members per GummySearch, Oct 5, 2026) | Huge parent audience | Medium-high. Big subs are often strict about self-promotion; if the rules ban it, skip this one | Status: PENDING
+
+**Title:** For parents of early readers, I built a free tool that tells you which sounds your kid is missing
+
+> I'm a high school student, and when I watched little kids practice reading I
+> noticed parents can usually tell a word was wrong but not which sound inside
+> it was the problem. So I built Word Wiz AI. Your kid reads a sentence out loud,
+> it shows which sounds came out wrong (like "ship" read as "sip"), and it gives
+> them a new sentence built around those sounds.
+>
+> It's free with no ads, and you can try three sentences without making an
+> account at wordwizai.com/try. It's for roughly ages 5 to 8 and works best
+> with a decent mic. Happy to answer any questions, and honest feedback is
+> very welcome.
+
+---
+
+## AQ-051 | Reddit post | r/teachingresources (47k) or r/ElementaryTeachers (26k), per GummySearch | Teachers looking for free materials; the free magic-e printable gives them something useful even if they never try the app | Medium. Rules unread; check them first. **Post after the printable is live on main** | Status: PENDING
+
+**Title:** Free printable, 20 magic e sentences sorted by vowel (plus word lists)
+
+> I put together a free two-page printable with 20 decodable magic e sentences,
+> five each for a_e, i_e, o_e and u_e, plus warm-up word lists and a box to
+> check after each sentence. Apart from the magic e words, every word is a
+> short-vowel word or a common sight word.
+>
+> The PDF is at wordwizai.com/printables/magic-e-sentences.pdf
+>
+> Full disclosure, I'm a high school student and I made it for Word Wiz AI, a
+> free reading tool I built. The QR code at the bottom lets a kid read three
+> sentences out loud to it and see which sounds came out wrong, but the sheet
+> works fine on its own.
+
+---
+
 <!-- wave3-end -->
 
 ## Notes for Bruce (not approval items)

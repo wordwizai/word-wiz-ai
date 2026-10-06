@@ -5,6 +5,27 @@ import numpy as np
 from tests.benchmark import metrics as M
 
 
+def _naive_rows(labels, scores):
+    for t in sorted(set(scores), reverse=True):
+        yield t, M.confusion(labels, M.flags_at(scores, t))
+
+
+def _naive_best(labels, scores, beta=M.F_BETA):
+    best_t, best_f = None, 0.0
+    for t, c in _naive_rows(labels, scores):
+        f = c.f_beta(beta)
+        if f > best_f:
+            best_t, best_f = t, f
+    return best_t, best_f
+
+
+def _naive_curve(labels, scores):
+    return [
+        {"threshold": t, "precision": c.precision, "recall": c.recall, "false_alarm_rate": c.false_alarm_rate}
+        for t, c in reversed(list(_naive_rows(labels, scores)))
+    ]
+
+
 class TestMistakeDefinitions(unittest.TestCase):
     def test_rounded_is_half_up(self):
         self.assertEqual([M.rounded(x) for x in (1.8, 0.4, 0.5, 6.5, 6.4)], [2, 0, 1, 7, 6])
@@ -67,6 +88,41 @@ class TestThresholds(unittest.TestCase):
         self.assertEqual([p["threshold"] for p in curve], [0.2, 0.5])
         self.assertAlmostEqual(curve[1]["precision"], 0.5)
 
+    def test_best_threshold_tie_goes_to_higher(self):
+        labels = [True, True, True, True, False] + [False] * 10
+        scores = [0.9, 0.5, 0.1, 0.1, 0.5] + [0.1] * 10
+        self.assertEqual(M.best_threshold(labels, scores), (0.9, 0.625))
+
+    def test_matches_brute_force(self):
+        rng = np.random.default_rng(0)
+        for case in range(200):
+            n = int(rng.integers(1, 61))
+            labels = [bool(v) for v in rng.integers(0, 2, size=n)]
+            if case % 4 == 3:
+                scores = [float(v) for v in rng.random(n)]
+            else:
+                scores = [float(v) for v in rng.choice([0, 0.25, 0.3333, 0.5, 0.75, 1.0], size=n)]
+            exp_t, exp_f = _naive_best(labels, scores)
+            got_t, got_f = M.best_threshold(labels, scores)
+            self.assertEqual(got_t, exp_t)
+            self.assertAlmostEqual(got_f, exp_f)
+            exp_curve = _naive_curve(labels, scores)
+            got_curve = M.pr_curve(labels, scores, max_points=10**6)
+            self.assertEqual(len(got_curve), len(exp_curve))
+            for g, e in zip(got_curve, exp_curve):
+                self.assertEqual(g["threshold"], e["threshold"])
+                for k in ("precision", "recall", "false_alarm_rate"):
+                    self.assertAlmostEqual(g[k], e[k])
+
+    def test_pr_curve_caps_length(self):
+        rng = np.random.default_rng(1)
+        scores = [float(v) for v in rng.permutation(1000)]
+        labels = [bool(v) for v in rng.integers(0, 2, size=1000)]
+        curve = M.pr_curve(labels, scores, max_points=50)
+        self.assertLessEqual(len(curve), 50)
+        self.assertEqual(curve[0]["threshold"], min(scores))
+        self.assertEqual(curve[-1]["threshold"], max(scores))
+
 
 class TestPearson(unittest.TestCase):
     def test_perfect(self):
@@ -75,6 +131,8 @@ class TestPearson(unittest.TestCase):
     def test_undefined(self):
         self.assertIsNone(M.pearson([1, 1, 1], [1, 2, 3]))
         self.assertIsNone(M.pearson([1], [1]))
+        self.assertIsNone(M.pearson([0.1, 0.1, 0.1], [1, 2, 3]))
+        self.assertIsNone(M.pearson([1, float("nan"), 3], [1, 2, 3]))
 
 
 class TestBootstrap(unittest.TestCase):
@@ -82,6 +140,23 @@ class TestBootstrap(unittest.TestCase):
         counts = M.per_speaker_counts(["a", "a", "b"], [True, False, True], [True, True, False])
         self.assertEqual(counts["a"].tolist(), [1, 1, 0, 0])
         self.assertEqual(counts["b"].tolist(), [0, 0, 1, 0])
+
+    def test_per_speaker_counts_length_mismatch(self):
+        with self.assertRaises(ValueError):
+            M.per_speaker_counts(["a", "b"], [True], [True, False])
+
+    def test_speaker_in_one_system_only(self):
+        base = {"a": [1, 0, 0, 1], "b": [0, 0, 1, 1]}
+        cand = {"a": [1, 0, 0, 1]}
+        deltas = M.bootstrap_fbeta_delta(base, cand, n_resamples=50)
+        self.assertEqual(deltas.shape, (50,))
+        self.assertTrue(np.all(np.isfinite(deltas)))
+
+    def test_invalid_arguments(self):
+        with self.assertRaises(ValueError):
+            M.bootstrap_fbeta_delta({"a": [1, 0, 0, 1]}, {"a": [1, 0, 0, 1]}, n_resamples=0)
+        with self.assertRaises(ValueError):
+            M.percentile_interval([])
 
     def test_identical_systems_give_zero(self):
         counts = {"a": np.array([1, 1, 1, 5]), "b": np.array([2, 0, 1, 4])}

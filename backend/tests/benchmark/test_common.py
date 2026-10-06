@@ -43,10 +43,20 @@ class TestFlags(unittest.TestCase):
         )
         self.assertEqual(common.front_end_cache_name({"WWAI_SINGLE_PREPROCESS": ""}), "baseline")
 
+    def test_soft_quality_gates_is_a_boolean_front_end_flag(self):
+        # It also switches the SNR measurement that drives adaptive noise reduction, so it changes
+        # the audio the models receive and the baseline cache goes stale under it.
+        self.assertIn("WWAI_SOFT_QUALITY_GATES", common.FRONT_END_FLAGS)
+        self.assertEqual(
+            common.front_end_cache_name({"WWAI_SOFT_QUALITY_GATES": "1"}), "WWAI_SOFT_QUALITY_GATES=1"
+        )
+        self.assertEqual(common.front_end_cache_name({"WWAI_SOFT_QUALITY_GATES": "0"}), "baseline")
+
     def test_front_end_cache_name_treats_falsy_booleans_as_unset(self):
         for value in ("0", "false", "False", "no", "OFF"):
             self.assertEqual(common.front_end_cache_name({"WWAI_SINGLE_PREPROCESS": value}), "baseline")
             self.assertEqual(common.front_end_cache_name({"WWAI_CHUNK_PRESERVE_PAUSES": value}), "baseline")
+            self.assertEqual(common.front_end_cache_name({"WWAI_SOFT_QUALITY_GATES": value}), "baseline")
         self.assertEqual(
             common.front_end_cache_name({"WWAI_CHUNK_OVERLAP_SECONDS": "0.5"}),
             "WWAI_CHUNK_OVERLAP_SECONDS=0.5",

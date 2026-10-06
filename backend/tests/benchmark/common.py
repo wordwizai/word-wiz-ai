@@ -29,8 +29,11 @@ CACHE_DIR_ENV = "WWAI_BENCH_CACHE_DIR"
 
 #: Flags that change the audio the acoustic models receive. Each distinct setting of
 #: these needs its own cache (replay refuses a cache whose recorded inputs differ).
+#: WWAI_SOFT_QUALITY_GATES is here because it also switches the SNR measurement that drives
+#: adaptive noise reduction, so it changes the audio and not only the gates.
 FRONT_END_FLAGS = (
     "WWAI_SINGLE_PREPROCESS",
+    "WWAI_SOFT_QUALITY_GATES",
     "WWAI_CHUNK_PRESERVE_PAUSES",
     "WWAI_CHUNK_OVERLAP_SECONDS",
     "WWAI_CHUNK_THRESHOLD_SECONDS",
@@ -49,7 +52,7 @@ _NOT_FLAGS = ("WWAI_HOST", "WWAI_USER", "WWAI_KEY")
 
 _TRUTHY = {"1", "true", "yes", "on"}
 _FALSY = {"", "0", "false", "no", "off"}
-_BOOLEAN_FRONT_END_FLAGS = ("WWAI_SINGLE_PREPROCESS", "WWAI_CHUNK_PRESERVE_PAUSES")
+_BOOLEAN_FRONT_END_FLAGS = ("WWAI_SINGLE_PREPROCESS", "WWAI_SOFT_QUALITY_GATES", "WWAI_CHUNK_PRESERVE_PAUSES")
 _CACHE_NAME_VALUE = re.compile(r"[\w.\-]+")
 _STATUS_EXCLUDES = (
     ":(exclude)backend/tests/benchmark/test_runs.log",

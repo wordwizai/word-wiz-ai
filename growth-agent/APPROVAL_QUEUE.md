@@ -983,6 +983,110 @@ Rules (from help.producthunt.com, "Can I relaunch my product?", updated Jul 7, 2
 
 ---
 
+## Wave 3 outreach (session 3, 2026-10-06)
+
+From the wave 3 brainstorm in `OUTREACH_IDEAS.md`, the ideas Bruce said yes to.
+Each item says who sends it. Nothing goes out until it's marked APPROVED.
+
+---
+
+## AQ-034 | Essay pitch (uses your name in press) | EdSurge Voices (voices@edsurge.com) | EdSurge publishes essays by students, and "AI and human strengths", "technology in education" and "early childhood education" are its listed beats. A published essay reaches K-12 educators and is a strong editorial link. Bruce said yes to this on 2026-10-06 | Medium. Their guidelines say they decline pieces where "the writer has an affiliation with a company, product or service that creates a conflict of interest" or that read "like marketing material", so the pitch is about what went wrong, with Word Wiz disclosed as the example. They also require the essay to be **human-written** and any AI help disclosed in the pitch | Status: PENDING
+
+Rules read on https://www.edsurge.com/submission-guidelines (2026-10-06):
+
+- Pitch is two to three paragraphs with "a claim or essential question", what
+  you'd include, why your experience tells the story, and your current role.
+- Essay under 1,200 words, sources linked in the body, plus a short bio,
+  links to your work, and a photo of yourself.
+- "We ask external contributors to sign a publishing agreement affirming that
+  their work is human-written. If you use AI to assist with research,
+  reporting, or editing, this must be disclosed during your initial pitch or
+  submission."
+- "We prefer for each writer to submit their own pitch."
+- They reply only if interested.
+
+**How to use this.** Because of the human-written rule, treat the pitch below
+as a starting point and put it in your own words before sending. Keep the
+disclosure sentence in either case. If they say yes, write the essay yourself
+from the outline and fact sheet under the pitch. I can check facts and give
+notes on your draft, which is the kind of editing help you'd disclose.
+
+Send from contactwordwizai@gmail.com (or your own address, since it's a
+personal byline).
+
+**Subject:** Pitch: What building an AI reading tutor taught me about where these tools fail
+
+> Dear EdSurge Voices team,
+>
+> I'm a high school student in the Bay Area, and for over a year I've built
+> and run Word Wiz AI, a free reading tutor where a child reads a sentence out
+> loud and the app shows which individual sounds were off. I'd like to write
+> about what I learned from watching real families use it. My claim is that the
+> hardest problems in AI reading tools for young kids usually aren't the AI.
+> They're the ordinary parts around it, and those are exactly the parts a
+> parent or teacher can check before trusting a tool.
+>
+> The essay would be built on my own usage data from this fall. In the 30 days
+> before October 6, 40 people practiced, but only 20 of them ever got a reading
+> scored. Two of the reasons I found were recordings that started with a
+> moment of digital silence, which broke the whole analysis, and a noise check
+> that refused a perfectly clean recording as too noisy. Neither had anything
+> to do with how smart the model was. I also saw that parents reading my
+> phonics guides almost never signed up, and one likely reason was that they
+> had to make an account before hearing a single piece of feedback. I'd end
+> with a few questions anyone can ask of an AI reading tool, like what happens
+> with a cheap microphone, what voices the speech model learned from (mine
+> started from one trained on adult speech), and whether you can try it before
+> giving up an email address.
+>
+> To be upfront about my affiliation, I built Word Wiz myself. It's free with
+> no ads or paid tier, so I don't make money from it, and the essay would use
+> it as the example I know firsthand rather than promote it. I used an AI
+> assistant to help pull together my usage numbers and organize this pitch,
+> and I would write the essay myself. I placed 2nd in the Congressional App
+> Challenge for California's 15th district and do AI-in-education research at
+> Boston University. The tool is at wordwizai.com/try if you want to see it.
+>
+> Best,
+> Bruce Peters
+
+**Essay outline (for you to write, under 1,200 words)**
+
+1. Open on a specific moment, like the first time you saw a clean recording
+   of "Jake made a cake for the game" refused as "too noisy".
+2. The claim. AI reading tools get judged on the model, but kids mostly hit
+   the plumbing.
+3. Three things that went wrong, each with what you changed. Digital silence
+   at the start of recordings (fixed). A noise check that measured a clean
+   recording at 3 dB and refused it, while the newer check measured the same
+   file at 60 dB (switched). A sign-up wall in front of the first piece of
+   feedback (added /try, results not in yet, so say that).
+4. The concession. The model does matter, and say honestly where it still
+   struggles (kids' voices on a model built from adult speech, muffled mics).
+5. Questions a parent or teacher can ask of any AI reading tool.
+6. Close on what you'd want other builders, or the people buying these
+   tools, to take from it.
+
+**Fact sheet (all checked, with dates)**
+
+| Fact | Source |
+|---|---|
+| 40 people practiced in the 30 days to Oct 6, 2026; 20 got at least one reading scored (157 attempts) | Prod DB read, `growth-agent/data/2026-10-06-vercel-and-signups.md` |
+| 774 site visitors in that window, 339 from Google, most landing on guides; about 9 signup-click visitors came from all guides together | Same file (Vercel Web Analytics) |
+| Clean recording measured 3 dB and refused in "legacy" mode; 60 dB and scored in "robust" mode; production switched to robust on Oct 6 | AQ-012 in the approval queue |
+| Digital-silence fix shipped to production on Oct 6 (commit 50e1a11) | STATE.md |
+| /try (three sentences, no account, nothing saved) went live Oct 6 | Checked in session 3 |
+| Speech model is wav2vec2 fine-tuned on TIMIT (adult read speech) to output IPA phonemes | `CLAUDE.md` |
+| First practice sessions date to July 2025 | Prod DB read, same file |
+
+Don't cite anything not in this table without checking it first, and say
+"in the 30 days to October 6" rather than "this month" so the numbers stay
+true when it runs.
+
+---
+
+<!-- wave3-end -->
+
 ## Notes for Bruce (not approval items)
 
 - **AlternativeTo lists Word Wiz as "Open Source"**, but the repo has no

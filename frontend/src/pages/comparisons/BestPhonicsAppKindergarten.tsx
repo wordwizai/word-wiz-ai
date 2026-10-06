@@ -566,7 +566,7 @@ const BestPhonicsAppKindergarten = () => {
 
   return (
     <ArticlePageTemplate
-      metaTitle="Best Phonics App for Kindergarten Struggling Readers (2025)"
+      metaTitle="Best Phonics App for Kindergarten Struggling Readers"
       metaDescription="Comprehensive review of top 5 phonics apps for kindergarten struggling readers: Word Wiz AI, Hooked on Phonics, Reading Eggs, ABCmouse, and Starfall. Find the best fit for your child."
       canonicalUrl="https://wordwizai.com/comparisons/best-phonics-app-kindergarten-struggling-readers"
       heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"

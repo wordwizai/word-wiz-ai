@@ -451,7 +451,7 @@ const TeachConsonantBlends = () => {
 
   return (
     <ArticlePageTemplate
-      metaTitle="Teaching Consonant Blends to Kindergarten at Home (2025)"
+      metaTitle="Teaching Consonant Blends to Kindergarten at Home"
       metaDescription="Simple step-by-step guide for teaching consonant blends to kindergarten and first grade at home. Practical activities that work in just 10-15 minutes daily."
       canonicalUrl="https://wordwizai.com/guides/teaching-consonant-blends-kindergarten-at-home"
       heroImage="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1200&h=630&fit=crop"

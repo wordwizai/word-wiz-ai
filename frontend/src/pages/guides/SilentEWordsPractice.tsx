@@ -182,6 +182,84 @@ const SilentEWordsPractice = () => {
         "Start with simple sentences, gradually increase complexity. Have your child read aloud, then ask comprehension questions to ensure they're understanding, not just decoding.",
     },
     {
+      type: "paragraph",
+      content:
+        "The sets below each stick to one vowel, so your child only has one long sound to think about at a time. Apart from the magic e words, every word is a short-vowel word or a common sight word like the, a, to, is, I or we.",
+    },
+    {
+      type: "heading",
+      level: 3,
+      content: "Magic E Sentences with Long A (a_e)",
+      id: "a-e-sentences",
+    },
+    {
+      type: "list",
+      content: [
+        "Dave gave the cake to Jane.",
+        "We made a game with a red cape.",
+        "Kate can skate on the lake.",
+        "The snake hid in the cave.",
+        "Shane ate a grape on the plate.",
+      ],
+    },
+    {
+      type: "heading",
+      level: 3,
+      content: "Magic E Sentences with Long I (i_e)",
+      id: "i-e-sentences",
+    },
+    {
+      type: "list",
+      content: [
+        "Mike will ride his bike.",
+        "I like the white kite.",
+        "Nine kids hide in the vines.",
+        "Tim has a fine time on the slide.",
+        "Spike the dog can dive and swim.",
+      ],
+    },
+    {
+      type: "heading",
+      level: 3,
+      content: "Magic E Sentences with Long O (o_e)",
+      id: "o-e-sentences",
+    },
+    {
+      type: "list",
+      content: [
+        "The dog dug up a bone at home.",
+        "I hope the stone is in the hole.",
+        "Rose rode to the pond with Mom.",
+        "We drove home in the fog.",
+        "The mole dug a hole in the slope.",
+      ],
+    },
+    {
+      type: "heading",
+      level: 3,
+      content: "Magic E Sentences with Long U (u_e)",
+      id: "u-e-sentences",
+    },
+    {
+      type: "list",
+      content: [
+        "June has a cute pet mule.",
+        "Luke can hum a tune.",
+        "The cube is in the tube.",
+        "Duke dug up a huge rock.",
+        "We must use the rule.",
+      ],
+    },
+    {
+      type: "callout",
+      content: {
+        type: "tip",
+        title: "Mixing the Sets",
+        content:
+          "Once your child reads one vowel's set without stopping, mix it with a set they already know. Reading 'Mike will ride his bike' right after 'Dave gave the cake to Jane' makes them check the vowel in every word instead of running on one pattern.",
+      },
+    },
+    {
       type: "heading",
       level: 2,
       content: "Practice Activity 5: Silent E Spelling",
@@ -318,7 +396,7 @@ const SilentEWordsPractice = () => {
       type: "list",
       content: [
         "Read 20 mixed silent e words (a_e, i_e, o_e, u_e) with 90% accuracy",
-        "Distinguish between short and long vowel words (can/kane, kit/kite, hop/hope)",
+        "Distinguish between short and long vowel words (can/cane, kit/kite, hop/hope)",
         "Read sentences containing silent e words fluently",
         "Spell 15 common silent e words correctly",
         "Identify silent e words in connected text (books, signs)",
@@ -355,8 +433,8 @@ const SilentEWordsPractice = () => {
 
   return (
     <ArticlePageTemplate
-      metaTitle="Silent E Words Practice for Kids: Complete Magic E Guide"
-      metaDescription="Master silent e words (magic e) with proven practice activities for kids. Includes word lists, exercises, and a 4-6 week practice plan for reading success."
+      metaTitle="Silent E Words: 100+ Magic E Words and Sentences for Kids"
+      metaDescription="100+ silent e (magic e) words sorted by vowel, 28 decodable sentences, and simple activities to help kids read a_e, i_e, o_e and u_e words."
       canonicalUrl="https://wordwizai.com/guides/silent-e-words-practice-for-kids"
       heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
       heroImageAlt="Child practicing silent e words with cards"

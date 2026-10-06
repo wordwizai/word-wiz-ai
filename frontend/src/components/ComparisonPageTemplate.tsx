@@ -26,8 +26,6 @@ interface ComparisonProduct {
     paid?: string;
     trial?: string;
   };
-  rating: number;
-  reviewCount: number;
   website: string;
 }
 
@@ -77,7 +75,6 @@ interface ComparisonPageProps {
     overall: string;
   };
   faqs: FAQItem[];
-  structuredData: any;
 }
 
 const ComparisonPage: React.FC<ComparisonPageProps> = ({
@@ -95,8 +92,38 @@ const ComparisonPage: React.FC<ComparisonPageProps> = ({
   introText,
   verdict,
   faqs,
-  structuredData,
 }) => {
+  // Built here rather than passed in, so a page can't ship Product or
+  // AggregateRating markup. We have no first-hand reviews of these apps (or of
+  // Word Wiz), and Google treats invented ratings as spammy structured data.
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: h1Title,
+    description: metaDescription,
+    url: canonicalUrl,
+    mainEntityOfPage: canonicalUrl,
+    image: DEFAULT_OG_IMAGE,
+    author: {
+      "@type": "Organization",
+      name: "Word Wiz AI",
+      url: "https://wordwizai.com",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Word Wiz AI",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://wordwizai.com/wordwizIcon.svg",
+      },
+    },
+    about: [product1, product2, wordWiz].map((p) => ({
+      "@type": "Thing",
+      name: p.name,
+      url: p.website,
+    })),
+  };
+
   const renderValue = (value: boolean | string) => {
     if (typeof value === "boolean") {
       return value ? (

@@ -3,6 +3,7 @@ import json
 import os
 import tempfile
 import unittest
+from unittest import mock
 
 import numpy as np
 
@@ -23,7 +24,7 @@ class TestReplay(unittest.TestCase):
         root = U.make_temp_dataset(self.tmp.name)
         self.wav = os.path.join(root, "WAVE", "SPEAKER0002", "000020022.WAV")
         self.cache = os.path.join(self.tmp.name, "cache")
-        SC.record_clip("u1", self.wav, U.SAMPLE_TEXT, self.cache, U.FakeOnnx(self.processor), U.FakeWords())
+        SC.record_clip("u1", self.wav, U.SAMPLE_TEXT, self.cache, U.fake_onnx_extractor(self.processor), U.FakeWords())
         self.audio = PL.load_audio(self.wav)
 
     def tearDown(self):
@@ -34,7 +35,7 @@ class TestReplay(unittest.TestCase):
         return PL.analyze_clip(self.audio, U.SAMPLE_TEXT, R.ReplayPhonemeExtractor(entry, self.processor), R.ReplayWordExtractor(entry))
 
     def test_replay_matches_a_direct_run(self):
-        direct = PL.analyze_clip(self.audio, U.SAMPLE_TEXT, U.FakeOnnxExtractor(self.processor), U.FakeWords())
+        direct = PL.analyze_clip(self.audio, U.SAMPLE_TEXT, U.fake_onnx_extractor(self.processor), U.FakeWords())
         self.assertEqual(self._replay().to_dict(), direct.to_dict())
         self.assertEqual(direct.status, "ok")
 
@@ -43,8 +44,41 @@ class TestReplay(unittest.TestCase):
 
     def test_changed_input_is_stale(self):
         replay = R.ReplayPhonemeExtractor(R.CacheEntry(self.cache, "u1"), self.processor)
+        noise = np.random.default_rng(0).normal(0, 0.1, 16000).astype(np.float32)
         with self.assertRaises(common.StaleCacheError):
-            replay.extract_phoneme(np.ones(16000, dtype=np.float32), 16000)
+            replay.extract_phoneme(noise, 16000)
+
+    def test_changed_trimming_is_stale(self):
+        # The extractor trims the audio and runs the feature extractor before the ONNX session.
+        # The recorded hash is of the session's input, so a change in either is caught. A hash
+        # of what extract_phoneme receives would replay the old logits here without a word.
+        from core.audio_optimization import OptimizedAudioPreprocessor
+
+        original = OptimizedAudioPreprocessor.preprocess_audio
+
+        def drop_first_160(self, *args, **kwargs):
+            audio, sampling_rate = original(self, *args, **kwargs)
+            return audio[160:], sampling_rate
+
+        with mock.patch.object(OptimizedAudioPreprocessor, "preprocess_audio", drop_first_160):
+            with self.assertRaises(common.StaleCacheError):
+                self._replay()
+
+    def test_replay_runs_the_production_extractor(self):
+        from core.phoneme_extractor_onnx import PhonemeExtractorONNX
+
+        replay = R.ReplayPhonemeExtractor(R.CacheEntry(self.cache, "u1"), self.processor)
+        self.assertIsInstance(replay, PhonemeExtractorONNX)
+        self.assertIsInstance(replay.session, R.ReplaySession)
+        for name in ("extract_phoneme", "extract_logits"):
+            self.assertIs(getattr(type(replay), name), getattr(PhonemeExtractorONNX, name))
+
+    def test_extra_session_call_is_stale(self):
+        session = R.ReplaySession(R.CacheEntry(self.cache, "u1"), check_inputs=False)
+        feeds = {"input_values": np.zeros((1, 100), dtype=np.float32)}
+        session.run(None, feeds)
+        with self.assertRaises(common.StaleCacheError):
+            session.run(None, feeds)
 
     def test_extra_call_is_stale(self):
         entry = R.CacheEntry(self.cache, "u1")
@@ -166,6 +200,83 @@ class TestReplay(unittest.TestCase):
         words = R.ReplayWordExtractor(R.CacheEntry(self.cache, "u1"), check_inputs=False)
         with self.assertRaises(common.StaleCacheError):
             words.extract_words(self.audio)
+
+
+def _write_wav(path, audio):
+    import soundfile as sf
+
+    sf.write(path, audio, PL.SAMPLE_RATE, subtype="FLOAT")
+    return path
+
+
+class TestChunkedReplay(unittest.TestCase):
+    """A long clip takes the chunked path, where a ValueError from one chunk skips that chunk."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.processor = U.real_processor_or_skip()
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        a = PL.load_audio(U.SAMPLE_WAV)
+        pause = np.zeros(12800, dtype=np.float32)
+        audio = np.concatenate([a, pause, a, pause, a])  # about 19.8 s, two chunks
+        self.wav = _write_wav(os.path.join(self.tmp.name, "long.wav"), audio)
+        self.audio = PL.load_audio(self.wav)
+        self.cache = os.path.join(self.tmp.name, "cache")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _extractor(self):
+        return U.fake_onnx_extractor(self.processor, fail_on_call=1, exc=ValueError("chunk rejected"))
+
+    def test_a_failed_chunk_replays_like_a_direct_run(self):
+        SC.record_clip("long", self.wav, U.SAMPLE_TEXT, self.cache, self._extractor(), U.FakeWords())
+        entry = R.CacheEntry(self.cache, "long")
+        self.assertEqual(len(entry.phoneme_calls), 2)
+        self.assertNotIn("error_type", entry.phoneme_calls[0])
+        self.assertEqual(entry.phoneme_calls[1]["error_type"], "ValueError")
+        self.assertIs(entry.phoneme_calls[1]["is_value_error"], True)
+        self.assertEqual(len(entry.word_calls), 1)  # the failed chunk never reached Deepgram
+
+        direct_extractor = self._extractor()
+        direct = PL.analyze_clip(self.audio, U.SAMPLE_TEXT, direct_extractor, U.FakeWords())
+        self.assertEqual(direct_extractor.session.calls, 2)  # the gates let it through to both chunks
+        replay = PL.analyze_clip(
+            self.audio, U.SAMPLE_TEXT, R.ReplayPhonemeExtractor(entry, self.processor), R.ReplayWordExtractor(entry)
+        )
+        self.assertEqual(replay.to_dict(), direct.to_dict())
+
+
+class TestErrorsBeforeTheSession(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.processor = U.real_processor_or_skip()
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.wav = _write_wav(os.path.join(self.tmp.name, "silence.wav"), np.zeros(32000, dtype=np.float32))
+        self.audio = PL.load_audio(self.wav)
+        self.cache = os.path.join(self.tmp.name, "cache")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_an_extractor_error_before_the_model_is_not_a_call_and_recurs_at_replay(self):
+        # Digital silence fails inside extract_logits before session.run, so nothing is recorded
+        # for the phoneme model. Replay runs the same extractor code and fails the same way.
+        SC.record_clip("silence", self.wav, U.SAMPLE_TEXT, self.cache, U.fake_onnx_extractor(self.processor), U.FakeWords())
+        entry = R.CacheEntry(self.cache, "silence")
+        self.assertEqual(entry.phoneme_calls, [])
+        self.assertFalse(os.path.exists(os.path.join(self.cache, "silence.npz")))
+
+        direct = PL.analyze_clip(self.audio, U.SAMPLE_TEXT, U.fake_onnx_extractor(self.processor), U.FakeWords(),
+                                 apply_gates=False)
+        replay = PL.analyze_clip(self.audio, U.SAMPLE_TEXT, R.ReplayPhonemeExtractor(entry, self.processor),
+                                 R.ReplayWordExtractor(entry), apply_gates=False)
+        self.assertEqual(direct.status, "rejected")
+        self.assertEqual((replay.status, replay.error_type), (direct.status, direct.error_type))
 
 
 if __name__ == "__main__":

@@ -1,8 +1,13 @@
 """Feed cached model outputs back into the real pipeline.
 
-Each replayed call checks that the audio it receives hashes to what was recorded. Any
-front-end change (preprocessing code, chunking, a front-end flag) therefore stops the
-run with StaleCacheError instead of silently scoring outputs for different audio.
+Each replayed call checks that its input hashes to what was recorded. For the phoneme
+model the replay happens at the ONNX session: ReplayPhonemeExtractor is the production
+PhonemeExtractorONNX with a stub session, so its validation, trimming, feature extraction
+and decoding all run for real and the session input is what gets checked. Any front-end
+change (preprocessing code, chunking, trimming, a front-end flag) therefore stops the run
+with StaleCacheError instead of silently scoring outputs for different audio.
+
+This module imports core at load time. run.py imports it lazily, after apply_flags().
 """
 
 from __future__ import annotations
@@ -10,11 +15,15 @@ from __future__ import annotations
 import builtins
 import json
 import os
+import types
 
 import numpy as np
 
+from core.audio_optimization import OptimizedAudioPreprocessor
+from core.phoneme_extractor_onnx import PhonemeExtractorONNX, default_model_output_processing
+
 from . import common
-from .stage_cache import audio_sha
+from .stage_cache import audio_sha, model_input_sha
 
 
 class CacheEntry:
@@ -26,12 +35,9 @@ class CacheEntry:
             )
         with open(meta_path, encoding="utf-8") as fh:
             self.meta = json.load(fh)
+        self.utt_id = utt_id
         self._npz_path = os.path.join(directory, f"{utt_id}.npz")
         self._logits: dict | None = None
-
-    @property
-    def utt_id(self) -> str:
-        return self.meta.get("utt_id", "?")
 
     @property
     def phoneme_calls(self) -> list:
@@ -85,16 +91,18 @@ class _Replay:
         self._next = 0
         self.check_inputs = check_inputs
 
-    def _take(self, audio, sampling_rate) -> dict:
+    def _take(self, input_sha) -> dict:
+        """The next recorded call. ``input_sha`` is a zero-argument function that hashes what
+        the model received now; it is only evaluated when inputs are checked."""
         if self._next >= len(self._calls):
             raise common.StaleCacheError(
                 f"{self.entry.utt_id}: the pipeline made more {self.kind} calls than were recorded; rebuild the cache"
             )
         call = self._calls[self._next]
         self._next += 1
-        if self.check_inputs and audio_sha(audio, sampling_rate) != call["input_sha"]:
+        if self.check_inputs and input_sha() != call["input_sha"]:
             raise common.StaleCacheError(
-                f"{self.entry.utt_id}: audio sent to the {self.kind} model differs from the cached run "
+                f"{self.entry.utt_id}: the input to the {self.kind} model differs from the cached run "
                 "(front-end code or flags changed); build a new cache with tests.benchmark.stage_cache"
             )
         if "error_type" in call:
@@ -112,21 +120,43 @@ class _Replay:
         )
 
 
-class ReplayPhonemeExtractor(_Replay):
+class ReplaySession(_Replay):
+    """Stub ONNX session: returns cached logits and checks the exact model input."""
+
     kind = "phoneme"
 
-    def __init__(self, entry: CacheEntry, processor, check_inputs: bool = True):
+    def __init__(self, entry: CacheEntry, check_inputs: bool = True):
         super().__init__(entry, entry.phoneme_calls, check_inputs)
-        self.processor = processor
 
-    def extract_phoneme(self, audio, sampling_rate=16000, **_kwargs):
-        from core.phoneme_extractor_onnx import decode_logits
+    def get_inputs(self):
+        return [types.SimpleNamespace(name="input_values")]
 
-        call = self._take(audio, sampling_rate)  # recorded errors are raised here, unwrapped
+    def run(self, output_names, feeds):
+        values = next(iter(feeds.values()))
+        call = self._take(lambda: model_input_sha(values))  # recorded errors are raised here, unwrapped
         try:
-            return decode_logits(self.entry.logits(call["logits_key"]), self.processor)
+            logits = self.entry.logits(call["logits_key"])
         except Exception as exc:
             raise self._broken(exc) from exc
+        return [logits]
+
+
+class ReplayPhonemeExtractor(PhonemeExtractorONNX):
+    """The production extractor with its ONNX session replaced by a ReplaySession.
+
+    extract_phoneme, extract_logits and decode_logits are the production methods, so input
+    validation, trimming, feature extraction and decoding all run for real.
+    """
+
+    def __init__(self, entry: CacheEntry, processor, check_inputs: bool = True):
+        # Deliberately not super().__init__(), which loads the model. These are the attributes
+        # extract_phoneme and extract_logits read.
+        self.entry = entry
+        self.processor = processor
+        self.audio_preprocessor = OptimizedAudioPreprocessor(target_sr=16000, enable_logging=False)
+        self.model_output_processing = default_model_output_processing
+        self._performance_logging = False
+        self.session = ReplaySession(entry, check_inputs)
 
 
 class ReplayWordExtractor(_Replay):
@@ -136,7 +166,7 @@ class ReplayWordExtractor(_Replay):
         super().__init__(entry, entry.word_calls, check_inputs)
 
     def extract_words(self, audio, sampling_rate=16000, **_kwargs):
-        call = self._take(audio, sampling_rate)  # recorded errors are raised here, unwrapped
+        call = self._take(lambda: audio_sha(audio, sampling_rate))  # recorded errors are raised here, unwrapped
         try:
             words = call["words"]
             return None if words is None else list(words)

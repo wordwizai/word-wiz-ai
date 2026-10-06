@@ -1,9 +1,11 @@
 """Run the slow, deterministic stages once per clip and save what the models returned.
 
 For every model call the production pipeline makes on a clip, this records a hash of
-the exact audio passed in plus the model's output (raw ONNX logits for the phoneme
-model, the word list for Deepgram). replay.py feeds those back and raises
-StaleCacheError if the current code would pass the models different audio.
+the exact input plus the model's output. For the phoneme model that is the tensor fed to
+the ONNX session (after the extractor's own validation, trimming and feature extraction)
+and the raw logits. For Deepgram it is the audio passed to extract_words and the word
+list. replay.py feeds those back and raises StaleCacheError if the current code would
+pass either model a different input.
 
 Gates are not applied while recording, so every clip has model outputs. run.py applies
 the gates at scoring time, which lets gate flags change without a new cache.
@@ -16,6 +18,7 @@ the gates at scoring time, which lets gate flags change without a new cache.
 from __future__ import annotations
 
 import argparse
+import copy
 import hashlib
 import json
 import logging
@@ -43,27 +46,42 @@ def cache_dir(half: str, name: str) -> str:
     return os.path.join(common.cache_root(), half, name)
 
 
-class RecordingPhonemeExtractor:
-    """Wraps PhonemeExtractorONNX and records the logits of every call."""
+def model_input_sha(values) -> str:
+    """sha1 of the exact tensor fed to the ONNX session (dtype and shape included)."""
+    arr = np.ascontiguousarray(values)
+    digest = hashlib.sha1(arr.tobytes())
+    digest.update(f"{arr.dtype}|{arr.shape}".encode())
+    return digest.hexdigest()
+
+
+class RecordingSession:
+    """Stands in for PhonemeExtractorONNX.session for one clip and records every run().
+
+    Errors the extractor raises before it runs the model (audio too short or silent) are not
+    session calls and are not recorded. Replay runs the same extractor code, so they recur.
+    """
 
     def __init__(self, inner):
-        self.inner = inner
+        self._inner = inner
         self.calls: list[dict] = []
         self.logits: list[np.ndarray] = []
 
-    def extract_phoneme(self, audio, sampling_rate=16000, **_kwargs):
-        from core.phoneme_extractor_onnx import decode_logits
+    def get_inputs(self):
+        return self._inner.get_inputs()
 
-        call = {"input_sha": audio_sha(audio, sampling_rate)}
+    def run(self, output_names, feeds):
+        values = next(iter(feeds.values()))
+        call = {"input_sha": model_input_sha(values)}
         self.calls.append(call)
         try:
-            logits = self.inner.extract_logits(audio, sampling_rate=sampling_rate)
+            outputs = self._inner.run(output_names, feeds)
         except Exception as exc:
-            call.update(error_type=type(exc).__name__, error=str(exc), is_value_error=isinstance(exc, ValueError))
+            call.update(error_type=type(exc).__name__, error=str(exc),
+                        is_value_error=isinstance(exc, ValueError))
             raise
         call["logits_key"] = f"logits_{len(self.logits)}"
-        self.logits.append(np.asarray(logits, dtype=np.float32))
-        return decode_logits(logits, self.inner.processor, self.inner.model_output_processing)
+        self.logits.append(np.asarray(outputs[0], dtype=np.float32))
+        return outputs
 
 
 class _AsrFailureCapture(logging.Handler):
@@ -137,15 +155,15 @@ def entry_has_word_error(meta: dict) -> bool:
     return False
 
 
-def write_entry(directory, utt_id, phon: RecordingPhonemeExtractor, words: RecordingWordExtractor,
+def write_entry(directory, utt_id, session: RecordingSession, words: RecordingWordExtractor,
                 recorded_status: str, seconds: float) -> None:
     os.makedirs(directory, exist_ok=True)
-    if phon.logits:
+    if session.logits:
         np.savez(os.path.join(directory, f"{utt_id}.npz"),
-                 **{f"logits_{i}": arr for i, arr in enumerate(phon.logits)})
+                 **{f"logits_{i}": arr for i, arr in enumerate(session.logits)})
     meta = {
         "utt_id": utt_id,
-        "phoneme_calls": phon.calls,
+        "phoneme_calls": session.calls,
         "word_calls": words.calls,
         "recorded_status": recorded_status,
         "seconds": round(seconds, 3),
@@ -156,15 +174,21 @@ def write_entry(directory, utt_id, phon: RecordingPhonemeExtractor, words: Recor
     os.replace(tmp, os.path.join(directory, f"{utt_id}.json"))  # the .json marks the entry complete
 
 
-def record_clip(utt_id, wav_path, text, directory, phoneme_inner, word_inner):
-    """Record one clip with the given real (or fake) models. Returns (utt_id, status, word_error)."""
+def record_clip(utt_id, wav_path, text, directory, phoneme_extractor, word_inner):
+    """Record one clip with the given models. Returns (utt_id, status, word_error).
+
+    ``phoneme_extractor`` is a real PhonemeExtractorONNX (or a test double with the same
+    attributes). It is shared between clips and never modified: the clip runs on a shallow
+    copy whose session records every call.
+    """
     from .pipeline import analyze_clip, load_audio
 
-    phon = RecordingPhonemeExtractor(phoneme_inner)
+    view = copy.copy(phoneme_extractor)
+    view.session = session = RecordingSession(phoneme_extractor.session)
     words = RecordingWordExtractor(word_inner)
     start = time.perf_counter()
-    outcome = analyze_clip(load_audio(wav_path), text, phon, words, apply_gates=False)
-    write_entry(directory, utt_id, phon, words, outcome.status, time.perf_counter() - start)
+    outcome = analyze_clip(load_audio(wav_path), text, view, words, apply_gates=False)
+    write_entry(directory, utt_id, session, words, outcome.status, time.perf_counter() - start)
     return utt_id, outcome.status, entry_has_word_error({"word_calls": words.calls})
 
 

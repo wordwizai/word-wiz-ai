@@ -5,6 +5,7 @@ from __future__ import annotations
 import functools
 import os
 import shutil
+import types
 import unittest
 
 import numpy as np
@@ -52,21 +53,34 @@ def real_processor_or_skip():
         raise unittest.SkipTest(f"wav2vec2 processor not in the local HF cache: {exc}")
 
 
-class FakeOnnx:
-    """Stands in for PhonemeExtractorONNX. One-hot logits that decode to `transcription`."""
+class FakeSession:
+    """Stands in for an ONNX session: one-hot logits that decode to `transcription`, whatever the input.
 
-    def __init__(self, processor, transcription: str = SAMPLE_IPA):
-        from core.phoneme_extractor_onnx import default_model_output_processing
+    With ``fail_on_call`` set, the run() call with that index (0-based) raises ``exc`` instead.
+    """
 
+    def __init__(self, processor, transcription: str = SAMPLE_IPA, fail_on_call=None, exc=None):
         self.processor = processor
-        self.model_output_processing = default_model_output_processing
-        self._transcription = transcription
+        self.transcription = transcription
+        self.fail_on_call = fail_on_call
+        self.exc = exc
+        self.calls = 0
 
-    def extract_logits(self, audio, sampling_rate=16000, **_kwargs):
+    def get_inputs(self):
+        return [types.SimpleNamespace(name="input_values")]
+
+    def run(self, output_names, feeds):
+        index = self.calls
+        self.calls += 1
+        if self.fail_on_call is not None and index == self.fail_on_call:
+            raise self.exc if self.exc is not None else RuntimeError("fake session failure")
+        return [self._logits()]
+
+    def _logits(self) -> np.ndarray:
         vocab = self.processor.tokenizer.get_vocab()
         pad = vocab[self.processor.tokenizer.pad_token]
         ids = []
-        for ch in self._transcription:
+        for ch in self.transcription:
             token_id = vocab["|"] if ch == " " else vocab[ch]
             if ids and ids[-1] == token_id:
                 ids.append(pad)
@@ -77,17 +91,18 @@ class FakeOnnx:
         return logits
 
 
-class FakeOnnxExtractor:
-    """Has extract_phoneme like the real extractor, built on FakeOnnx logits."""
+def fake_onnx_extractor(processor, transcription: str = SAMPLE_IPA, **session_kwargs):
+    """A PhonemeExtractorONNX that runs all real extractor code except the model."""
+    from core.audio_optimization import OptimizedAudioPreprocessor
+    from core.phoneme_extractor_onnx import PhonemeExtractorONNX, default_model_output_processing
 
-    def __init__(self, processor, transcription: str = SAMPLE_IPA):
-        self.inner = FakeOnnx(processor, transcription)
-
-    def extract_phoneme(self, audio, sampling_rate=16000, **_kwargs):
-        from core.phoneme_extractor_onnx import decode_logits
-
-        logits = self.inner.extract_logits(audio, sampling_rate)
-        return decode_logits(logits, self.inner.processor, self.inner.model_output_processing)
+    ext = PhonemeExtractorONNX.__new__(PhonemeExtractorONNX)
+    ext.processor = processor
+    ext.audio_preprocessor = OptimizedAudioPreprocessor(target_sr=16000, enable_logging=False)
+    ext.model_output_processing = default_model_output_processing
+    ext._performance_logging = False
+    ext.session = FakeSession(processor, transcription, **session_kwargs)
+    return ext
 
 
 class FakeWords:

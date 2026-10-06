@@ -79,7 +79,7 @@ class TestEndToEnd(unittest.TestCase):
         from tests.benchmark.dataset import load_half
 
         for clip in load_half(self.root, "dev"):
-            SC.record_clip(clip.utt_id, clip.wav_path, clip.text, directory, U.FakeOnnx(self.processor), U.FakeWords())
+            SC.record_clip(clip.utt_id, clip.wav_path, clip.text, directory, U.fake_onnx_extractor(self.processor), U.FakeWords())
 
     def tearDown(self):
         self.env.stop()

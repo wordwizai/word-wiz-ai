@@ -22,6 +22,44 @@ class TestAudioSha(unittest.TestCase):
         self.assertNotEqual(SC.audio_sha(a, 16000), SC.audio_sha(a * 2, 16000))
 
 
+class TestModelInputSha(unittest.TestCase):
+    def test_deterministic_and_sensitive_to_values_dtype_and_shape(self):
+        a = np.arange(12, dtype=np.float32).reshape(1, 12)
+        self.assertEqual(SC.model_input_sha(a), SC.model_input_sha(a.copy()))
+        self.assertNotEqual(SC.model_input_sha(a), SC.model_input_sha(a * 2))
+        self.assertNotEqual(SC.model_input_sha(a), SC.model_input_sha(a.reshape(12, 1)))  # same bytes
+        self.assertNotEqual(SC.model_input_sha(a), SC.model_input_sha(a.astype(np.float64)))
+
+
+class TestRecordingSession(unittest.TestCase):
+    def test_records_the_input_hash_and_the_logits(self):
+        inner = mock.Mock()
+        inner.run.return_value = [np.ones((1, 3, 4), dtype=np.float64)]
+        session = SC.RecordingSession(inner)
+        values = np.zeros((1, 50), dtype=np.float32)
+        outputs = session.run(None, {"input_values": values})
+        self.assertIs(outputs, inner.run.return_value)
+        inner.run.assert_called_once_with(None, {"input_values": values})
+        self.assertEqual(session.calls, [{"input_sha": SC.model_input_sha(values), "logits_key": "logits_0"}])
+        self.assertEqual(session.logits[0].dtype, np.float32)
+
+    def test_records_and_reraises_a_session_error(self):
+        inner = mock.Mock()
+        inner.run.side_effect = MemoryError("out of memory")
+        session = SC.RecordingSession(inner)
+        with self.assertRaises(MemoryError):
+            session.run(None, {"input_values": np.zeros((1, 50), dtype=np.float32)})
+        call = session.calls[0]
+        self.assertEqual((call["error_type"], call["error"], call["is_value_error"]),
+                         ("MemoryError", "out of memory", False))
+        self.assertNotIn("logits_key", call)
+        self.assertEqual(session.logits, [])
+
+    def test_get_inputs_comes_from_the_real_session(self):
+        inner = mock.Mock()
+        self.assertIs(SC.RecordingSession(inner).get_inputs(), inner.get_inputs.return_value)
+
+
 class TestEntryHasWordError(unittest.TestCase):
     def test_error_type_counts(self):
         self.assertTrue(SC.entry_has_word_error({"word_calls": [{"input_sha": "x", "error_type": "TimeoutError"}]}))
@@ -182,7 +220,7 @@ class TestRecordClip(unittest.TestCase):
 
     def test_writes_entry(self):
         utt, status, word_error = SC.record_clip(
-            "000020022", self.wav, U.SAMPLE_TEXT, self.cache, U.FakeOnnx(self.processor), U.FakeWords()
+            "000020022", self.wav, U.SAMPLE_TEXT, self.cache, U.fake_onnx_extractor(self.processor), U.FakeWords()
         )
         self.assertEqual((utt, status, word_error), ("000020022", "ok", False))
         with open(os.path.join(self.cache, "000020022.json"), encoding="utf-8") as fh:
@@ -193,9 +231,16 @@ class TestRecordClip(unittest.TestCase):
         with np.load(os.path.join(self.cache, "000020022.npz")) as data:
             self.assertEqual(data["logits_0"].dtype, np.float32)
 
+    def test_the_shared_extractor_is_not_modified(self):
+        extractor = U.fake_onnx_extractor(self.processor)
+        session = extractor.session
+        SC.record_clip("000020022", self.wav, U.SAMPLE_TEXT, self.cache, extractor, U.FakeWords())
+        self.assertIs(extractor.session, session)
+        self.assertEqual(session.calls, 1)  # the recording session passed the call through
+
     def test_word_errors_are_recorded(self):
         _utt, status, word_error = SC.record_clip(
-            "000020022", self.wav, U.SAMPLE_TEXT, self.cache, U.FakeOnnx(self.processor), _FailingWords()
+            "000020022", self.wav, U.SAMPLE_TEXT, self.cache, U.fake_onnx_extractor(self.processor), _FailingWords()
         )
         self.assertEqual((status, word_error), ("rejected", True))
         with open(os.path.join(self.cache, "000020022.json"), encoding="utf-8") as fh:
@@ -206,7 +251,7 @@ class TestRecordClip(unittest.TestCase):
 
     def test_value_error_is_flagged_so_replay_can_rebuild_it(self):
         SC.record_clip(
-            "000020022", self.wav, U.SAMPLE_TEXT, self.cache, U.FakeOnnx(self.processor), _ValueErrorWords()
+            "000020022", self.wav, U.SAMPLE_TEXT, self.cache, U.fake_onnx_extractor(self.processor), _ValueErrorWords()
         )
         with open(os.path.join(self.cache, "000020022.json"), encoding="utf-8") as fh:
             meta = json.load(fh)
@@ -215,7 +260,7 @@ class TestRecordClip(unittest.TestCase):
 
     def _record(self, words):
         result = SC.record_clip(
-            "000020022", self.wav, U.SAMPLE_TEXT, self.cache, U.FakeOnnx(self.processor), words
+            "000020022", self.wav, U.SAMPLE_TEXT, self.cache, U.fake_onnx_extractor(self.processor), words
         )
         with open(os.path.join(self.cache, "000020022.json"), encoding="utf-8") as fh:
             return result, json.load(fh)
@@ -264,7 +309,7 @@ class TestRecordClip(unittest.TestCase):
 
         with mock.patch.object(request_audio, "gate_audio", side_effect=request_audio.AudioRejected("no")):
             _utt, status, _ = SC.record_clip(
-                "000020022", self.wav, U.SAMPLE_TEXT, self.cache, U.FakeOnnx(self.processor), U.FakeWords()
+                "000020022", self.wav, U.SAMPLE_TEXT, self.cache, U.fake_onnx_extractor(self.processor), U.FakeWords()
             )
         self.assertEqual(status, "ok")  # a gate that would reject was never consulted
 

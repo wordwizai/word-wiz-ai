@@ -93,6 +93,31 @@ def gate_audio(audio_array: np.ndarray, sample_rate: int, quality_out: dict | No
     return quality_info
 
 
+def check_speech_activity(audio_array, quality_out: dict | None = None) -> float:
+    """The speech-activity check the request path runs on the preprocessed recording.
+
+    Hard gates reject a recording with under 30% measured speech; soft gates only add a
+    warning hint to quality_out. Returns the measured percentage.
+    """
+    from .audio_chunking import estimate_speech_activity
+
+    speech_percentage = float(estimate_speech_activity(audio_array, sr=16000))
+    print(f"🎤 Speech activity: {speech_percentage:.1f}%")
+    if speech_percentage < 30:
+        if not soft_quality_gates_enabled():
+            raise AudioRejected("We could barely hear you. Read the sentence out loud, close to the microphone.")
+        # estimate_speech_activity thresholds relative to the LOUDEST frame, so one
+        # emphatic word can push several quieter ones below the bar. Warn, do not refuse.
+        print(f"⚠️  Soft quality gate: low measured speech activity ({speech_percentage:.1f}%) - continuing anyway")
+        if quality_out is not None:
+            warning = quality_out.get("quality_warning") or {"hints": []}
+            warning.setdefault("hints", [])
+            warning["hints"].append("We had trouble hearing all the words - try speaking a little louder.")
+            warning["speech_activity_percentage"] = speech_percentage
+            quality_out["quality_warning"] = warning
+    return speech_percentage
+
+
 def gate_and_preprocess(audio_array: np.ndarray, sample_rate: int, audio_duration: float | None = None,
                         quality_out: dict | None = None, apply_gates: bool = True) -> np.ndarray:
     """Gate the recording, then run THE preprocessing pass for this request.

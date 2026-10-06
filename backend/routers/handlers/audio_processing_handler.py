@@ -11,7 +11,7 @@ import soundfile as sf
 import base64 as _base64
 
 from core.audio_quality_analyzer import soft_quality_gates_enabled
-from core.request_audio import AudioRejected, gate_and_preprocess
+from core.request_audio import AudioRejected, check_speech_activity, gate_and_preprocess
 from core.modes.base_mode import BaseMode
 from core.phoneme_assistant import PhonemeAssistant
 from core.phoneme_feedback_formatter import generate_feedback as generate_phoneme_feedback
@@ -265,35 +265,11 @@ async def analyze_audio_file_event_stream(
                 )
             print("📭 Empty audio received - using full client extraction")
         else:
-            # Validate audio has speech content using VAD
-            from core.audio_chunking import estimate_speech_activity
-            speech_percentage = estimate_speech_activity(audio_array, sr=16000)
-            print(f"🎤 Speech activity: {speech_percentage:.1f}%")
-
-            if soft_quality_gates_enabled():
-                # estimate_speech_activity thresholds relative to the LOUDEST
-                # frame, so one emphatic word can push several quieter ones
-                # below the bar and drag the whole recording under 30%. Do not
-                # refuse the recording over it -- warn and analyze.
-                if speech_percentage < 30:
-                    print(
-                        f"⚠️  Soft quality gate: low measured speech activity "
-                        f"({speech_percentage:.1f}%) - continuing anyway"
-                    )
-                    warning = quality_out.get('quality_warning') or {'hints': []}
-                    warning.setdefault('hints', [])
-                    warning['hints'].append(
-                        "We had trouble hearing all the words - try speaking a little louder."
-                    )
-                    warning['speech_activity_percentage'] = float(speech_percentage)
-                    quality_out['quality_warning'] = warning
-            else:
-                # Require at least 30% speech activity
-                if speech_percentage < 30:
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="We could barely hear you. Read the sentence out loud, close to the microphone."
-                    )
+            # Validate the recording has enough speech (core/request_audio.py)
+            try:
+                check_speech_activity(audio_array, quality_out)
+            except AudioRejected as exc:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
         
         # Determine if we should use client phonemes/words or extract on server
         use_client_phonemes = False

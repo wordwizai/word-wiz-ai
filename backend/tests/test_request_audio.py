@@ -93,6 +93,65 @@ class TestGates(unittest.TestCase):
         gate.assert_not_called()
 
 
+class TestSpeechActivity(unittest.TestCase):
+    """check_speech_activity is the handler's second gate, on the preprocessed recording."""
+
+    HINT = "We had trouble hearing all the words - try speaking a little louder."
+    MESSAGE = "We could barely hear you. Read the sentence out loud, close to the microphone."
+
+    def setUp(self):
+        self._saved = os.environ.pop("WWAI_SOFT_QUALITY_GATES", None)
+        self.audio = np.zeros(16000, dtype=np.float32)
+
+    def tearDown(self):
+        os.environ.pop("WWAI_SOFT_QUALITY_GATES", None)
+        if self._saved is not None:
+            os.environ["WWAI_SOFT_QUALITY_GATES"] = self._saved
+
+    @staticmethod
+    def _measured(value):
+        # estimate_speech_activity is imported inside the function, so patch its home module.
+        return mock.patch("core.audio_chunking.estimate_speech_activity", return_value=value)
+
+    def test_hard_gates_reject_low_speech_with_the_exact_message(self):
+        with self._measured(20.0), _quiet(), self.assertRaises(R.AudioRejected) as ctx:
+            R.check_speech_activity(self.audio, {})
+        self.assertEqual(str(ctx.exception), self.MESSAGE)
+
+    def test_soft_gates_warn_instead_of_rejecting(self):
+        os.environ["WWAI_SOFT_QUALITY_GATES"] = "1"
+        out = {}
+        with self._measured(20.0), _quiet():
+            result = R.check_speech_activity(self.audio, out)
+        self.assertEqual(result, 20.0)
+        self.assertIn(self.HINT, out["quality_warning"]["hints"])
+        self.assertEqual(out["quality_warning"]["speech_activity_percentage"], 20.0)
+
+    def test_soft_gates_keep_an_existing_warning(self):
+        os.environ["WWAI_SOFT_QUALITY_GATES"] = "1"
+        out = {"quality_warning": {"hints": ["Try somewhere quieter."]}}
+        with self._measured(20.0), _quiet():
+            R.check_speech_activity(self.audio, out)
+        self.assertEqual(out["quality_warning"]["hints"], ["Try somewhere quieter.", self.HINT])
+
+    def test_soft_gates_work_without_quality_out(self):
+        os.environ["WWAI_SOFT_QUALITY_GATES"] = "1"
+        with self._measured(20.0), _quiet():
+            self.assertEqual(R.check_speech_activity(self.audio), 20.0)
+
+    def test_enough_speech_passes_in_both_modes_and_leaves_quality_out_alone(self):
+        for soft in (False, True):
+            with self.subTest(soft=soft):
+                if soft:
+                    os.environ["WWAI_SOFT_QUALITY_GATES"] = "1"
+                else:
+                    os.environ.pop("WWAI_SOFT_QUALITY_GATES", None)
+                out = {}
+                with self._measured(45.0), _quiet():
+                    self.assertEqual(R.check_speech_activity(self.audio, out), 45.0)
+                self.assertEqual(out, {})
+
+
 class TestHandlerMarksItsPass(unittest.TestCase):
     """The real handler must still mark its preprocessing pass on the event loop.
 

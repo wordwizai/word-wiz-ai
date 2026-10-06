@@ -15,6 +15,8 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { getClassStudents, type StudentWithStats } from "@/api";
+import { cn } from "@/lib/utils";
+import { ACCURACY_TONE, perAccuracyLabel, perTone } from "./accuracy";
 import {
   Table,
   TableBody,
@@ -183,7 +185,7 @@ const ClassDetailView = ({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <Card className="rounded-2xl bg-card border-2 border-border shadow-md">
+      <Card className="gap-0 rounded-2xl py-0 shadow-xs">
         <div className="p-6">
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
@@ -218,7 +220,7 @@ const ClassDetailView = ({
               className="shrink-0"
             >
               {copied ? (
-                <Check className="w-4 h-4 text-green-600" />
+                <Check className="w-4 h-4 text-primary" />
               ) : (
                 <Copy className="w-4 h-4" />
               )}
@@ -268,18 +270,18 @@ const ClassDetailView = ({
       </Card>
 
       {/* Student Roster */}
-      <Card className="rounded-2xl bg-card border-2 border-border shadow-md">
+      <Card className="gap-0 rounded-2xl py-0 shadow-xs">
         <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
             <h2 className="text-lg font-bold text-foreground">Student Roster</h2>
-            <div className="flex items-center gap-2">
-              <div className="relative">
+            <div className="flex w-full items-center gap-2 sm:w-auto">
+              <div className="relative w-full">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
                 <Input
                   placeholder="Search students..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 w-64"
+                  className="pl-9 w-full sm:w-64"
                 />
               </div>
             </div>
@@ -363,17 +365,12 @@ const ClassDetailView = ({
                       </TableCell>
                       <TableCell className="text-center">
                         <span
-                          className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                            student.statistics.average_per < 0.1
-                              ? "bg-green-100 text-green-800"
-                              : student.statistics.average_per < 0.2
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-orange-100 text-orange-800"
-                          }`}
+                          className={cn(
+                            "inline-block rounded-full px-2.5 py-0.5 text-xs font-medium tabular-nums",
+                            ACCURACY_TONE[perTone(student.statistics.average_per)]
+                          )}
                         >
-                          {student.statistics.average_per > 0
-                            ? `${((1 - student.statistics.average_per) * 100).toFixed(1)}%`
-                            : "N/A"}
+                          {perAccuracyLabel(student.statistics.average_per)}
                         </span>
                       </TableCell>
                       <TableCell className="text-center">

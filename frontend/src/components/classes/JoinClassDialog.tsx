@@ -81,7 +81,7 @@ const JoinClassDialog = ({
         />
         {error && <p className="text-sm text-destructive">{error}</p>}
         {success && (
-          <p className="text-sm text-green-600">
+          <p className="text-sm text-pastel-mint-foreground">
             Successfully joined class!
           </p>
         )}

@@ -130,7 +130,7 @@ const CreateClassDialog = ({
               <div className="grid gap-2">
                 <Label>Join Code</Label>
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 p-3 bg-pastel-lavender rounded-lg border-2 border-primary/20">
+                  <div className="flex-1 p-3 bg-muted rounded-xl">
                     <div className="text-2xl font-bold tracking-wider text-center font-mono">
                       {createdClass.join_code}
                     </div>
@@ -143,7 +143,7 @@ const CreateClassDialog = ({
                     className="shrink-0"
                   >
                     {copied ? (
-                      <Check className="w-4 h-4 text-green-600" />
+                      <Check className="w-4 h-4 text-primary" />
                     ) : (
                       <Copy className="w-4 h-4" />
                     )}

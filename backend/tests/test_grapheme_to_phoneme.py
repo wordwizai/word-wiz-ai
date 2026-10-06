@@ -34,6 +34,7 @@ from core.grapheme_to_phoneme import (  # noqa: E402
     grapheme_to_phoneme,
     grapheme_to_phoneme_detailed,
     oov_words,
+    pronunciation_variants,
 )
 
 
@@ -318,6 +319,76 @@ class TestMemoisation(unittest.TestCase):
         legacy = grapheme_to_phoneme("zyzzyva blorp", strict=False)
         strict = grapheme_to_phoneme("zyzzyva blorp", strict=True)
         self.assertNotEqual(legacy[0][1], strict[0][1])
+
+
+class TestPronunciationVariants(unittest.TestCase):
+    """Every CMUdict pronunciation of a word, tokenized like the ground truth."""
+
+    def setUp(self):
+        clear_cache()
+
+    def tearDown(self):
+        clear_cache()
+
+    def test_function_words_have_their_reduced_and_full_forms(self):
+        variants = pronunciation_variants("to", strict=False)
+        self.assertIn(["t", "u"], variants)
+        self.assertIn(["t", "ɪ"], variants)
+        self.assertIn(["ð", "i"], pronunciation_variants("the", strict=False))
+        self.assertIn(["ð", "ə"], pronunciation_variants("the", strict=False))
+
+    def test_strict_mode_tokenizes_like_strict_g2p(self):
+        self.assertIn(["t", "u"], pronunciation_variants("to", strict=True))
+        # Strict keeps the diphthong whole, exactly as grapheme_to_phoneme does.
+        self.assertIn(["eɪ"], pronunciation_variants("a", strict=True))
+        self.assertIn(["e", "ɪ"], pronunciation_variants("a", strict=False))
+
+    def test_primary_pronunciation_is_always_a_variant(self):
+        for strict in (False, True):
+            for word in ("to", "the", "and", "a", "that", "can", "cat", "record", "read"):
+                with self.subTest(word=word, strict=strict):
+                    primary = grapheme_to_phoneme(word, strict=strict)[0][1]
+                    self.assertIn(primary, pronunciation_variants(word, strict=strict))
+
+    def test_no_duplicates_and_no_stress_marks(self):
+        for strict in (False, True):
+            for word in ("record", "present", "the", "to"):
+                with self.subTest(word=word, strict=strict):
+                    variants = pronunciation_variants(word, strict=strict)
+                    self.assertEqual(len(variants), len({tuple(v) for v in variants}))
+                    for v in variants:
+                        self.assertFalse(set("ˈˌ*") & set("".join(v)))
+
+    def test_out_of_vocabulary_words_have_no_variants(self):
+        for strict in (False, True):
+            with self.subTest(strict=strict):
+                self.assertEqual(pronunciation_variants("wordwiz", strict=strict), [])
+                self.assertEqual(pronunciation_variants("3", strict=strict), [])
+                self.assertEqual(pronunciation_variants("", strict=strict), [])
+
+    def test_a_raising_eng_to_ipa_gives_no_variants(self):
+        from unittest import mock
+        import core.grapheme_to_phoneme as g2p_module
+
+        with mock.patch.object(g2p_module.G2p, "ipa_list", side_effect=RuntimeError("db gone")):
+            self.assertEqual(pronunciation_variants("to", strict=False), [])
+        clear_cache()
+        with mock.patch.object(g2p_module, "tokenize_ipa", side_effect=RuntimeError("bad symbol")):
+            self.assertEqual(pronunciation_variants("to", strict=True), [])
+
+    def test_strict_none_reads_the_environment(self):
+        from unittest import mock
+
+        with mock.patch.dict(os.environ, {"WWAI_G2P_STRICT": "true"}):
+            self.assertEqual(pronunciation_variants("a"), pronunciation_variants("a", strict=True))
+        with mock.patch.dict(os.environ, {"WWAI_G2P_STRICT": "false"}):
+            self.assertEqual(pronunciation_variants("a"), pronunciation_variants("a", strict=False))
+
+    def test_callers_get_fresh_lists(self):
+        first = pronunciation_variants("to", strict=False)
+        first[0].append("x")
+        first.append(["y"])
+        self.assertEqual(pronunciation_variants("to", strict=False), [["t", "u"], ["t", "ə"], ["t", "ɪ"]])
 
 
 if __name__ == "__main__":

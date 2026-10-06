@@ -390,11 +390,54 @@ def oov_words(grapheme, strict: bool | None = None) -> list[str]:
     return [w.word for w in grapheme_to_phoneme(grapheme, strict=strict) if w.oov]
 
 
+@lru_cache(maxsize=_CACHE_SIZE)
+def _variants_cached(word: str, strict: bool) -> tuple:
+    try:
+        if not _HAS_ALNUM.search(word) or not _isin_cmu(word):
+            return ()
+        variants = []
+        for raw in G2p.ipa_list(word)[0]:
+            if "*" in raw:  # eng_to_ipa's out-of-vocabulary marker
+                continue
+            if strict:
+                phonemes = tuple(tokenize_ipa(_strict_clean(raw)))
+            else:
+                phonemes = tuple(_legacy_clean(raw))
+            if phonemes and phonemes not in variants:
+                variants.append(phonemes)
+        return tuple(variants)
+    except Exception:  # never fail the request over an optional lookup
+        return ()
+
+
+def pronunciation_variants(word: str, strict: bool | None = None) -> list[list[str]]:
+    """Every CMUdict pronunciation of one already-cleaned word.
+
+    CMUdict lists more than one valid pronunciation for many words ("to" is
+    tu / tə / tɪ, "the" is ði / ðə), while :func:`grapheme_to_phoneme` keeps only
+    one.  Each variant is tokenized exactly the way ``grapheme_to_phoneme``
+    tokenizes the word in the same mode, so the primary pronunciation is always
+    one of them.  Order follows ``eng_to_ipa`` and duplicates are dropped.
+
+    Returns ``[]`` for out-of-vocabulary words and never raises.
+
+    Args:
+        word: one word, already cleaned the way the sentence is before G2P.
+        strict: override ``WWAI_G2P_STRICT``.  ``None`` (default) reads the
+            environment variable, like :func:`grapheme_to_phoneme`.
+    """
+    if strict is None:
+        strict = _strict_enabled()
+    # Fresh mutable copies every call -- callers must never see cached state.
+    return [list(v) for v in _variants_cached(str(word or ""), bool(strict))]
+
+
 def clear_cache() -> None:
     """Drop every memoised conversion (used by tests and after flag changes)."""
     _convert_cached.cache_clear()
     _convert_raw.cache_clear()
     _isin_cmu.cache_clear()
+    _variants_cached.cache_clear()
 
 
 def cache_info() -> dict:
@@ -403,6 +446,7 @@ def cache_info() -> dict:
         "sentences": _convert_cached.cache_info(),
         "words": _convert_raw.cache_info(),
         "cmudict_lookups": _isin_cmu.cache_info(),
+        "variants": _variants_cached.cache_info(),
         "ipa_tokenizer": "phoneme_inventory.tokenize_ipa"
         if _HAVE_IPA_TOKENIZER
         else "list() fallback",

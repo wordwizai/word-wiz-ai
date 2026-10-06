@@ -199,6 +199,308 @@ class TestWithinWordMispronunciation(unittest.TestCase):
         self.assertEqual(by_word(results, 'sat')[0]["per"], 0.0)
 
 
+# --------------------------------------------------------------------------- #
+# Word scoring v2: closest valid pronunciation, edge insertions not counted
+# --------------------------------------------------------------------------- #
+
+LEGACY_SCORING_FLAG = "WWAI_LEGACY_WORD_SCORING"
+
+
+def pre_v2_align_to_ground_truth(flat_phonemes, ground_truth_phonemes, predicted_words=None):
+    """
+    Frozen copy of ``align_to_ground_truth`` from before word scoring v2: every
+    word scored against its primary G2P phonemes, every inserted phoneme counted.
+    The kill switch must reproduce this exactly. Segmentation, ASR hints and the
+    deletion/insertion records did not change, so those are reused.
+    """
+    from core.gt_alignment import (
+        _deletion_record, _insertion_record, align_sequences,
+    )
+
+    gtp = [(word, list(phs or [])) for word, phs in (ground_truth_phonemes or [])]
+    if not gtp:
+        return []
+    gt_words = [word for word, _ in gtp]
+    asr_words = [str(w) for w in (predicted_words or []) if w]
+    skip_hints, pred_labels, insertions = derive_asr_hints(gt_words, asr_words)
+    segments = segment_phonemes_by_ground_truth(flat_phonemes, gtp, skip_hints)
+
+    results = []
+    for idx, (gt_word, gt_phs) in enumerate(gtp):
+        for extra in insertions.get(idx, ()):
+            results.append(_insertion_record(extra))
+        segment = segments[idx] if idx < len(segments) else []
+        if not segment:
+            results.append(_deletion_record(gt_word, gt_phs))
+            continue
+        missed, added, substituted = [], [], []
+        for pop, gph, pph in align_sequences(gt_phs, segment):
+            if pop == 'deletion':
+                missed.append(gph)
+            elif pop == 'insertion':
+                added.append(pph)
+            elif pop == 'substitution':
+                substituted.append((gph, pph))
+        total_errors = len(missed) + len(added) + len(substituted)
+        per = total_errors / max(len(gt_phs), 1)
+        results.append({
+            "type": "match" if total_errors == 0 else "substitution",
+            "predicted_word": pred_labels.get(idx, gt_word),
+            "ground_truth_word": gt_word,
+            "phonemes": list(segment),
+            "ground_truth_phonemes": list(gt_phs),
+            "expected_phonemes": list(gt_phs),
+            "actual_phonemes": list(segment),
+            "per": round(per, 4),
+            "missed": missed,
+            "added": added,
+            "substituted": substituted,
+            "total_phonemes": len(gt_phs),
+            "total_errors": total_errors,
+        })
+    for extra in insertions.get(len(gtp), ()):
+        results.append(_insertion_record(extra))
+    return results
+
+
+class _ScoringEnv(unittest.TestCase):
+    """Legacy G2P tokenization and v2 word scoring, whatever the shell says."""
+
+    def setUp(self):
+        from unittest import mock
+
+        patcher = mock.patch.dict(os.environ)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        os.environ.pop("WWAI_G2P_STRICT", None)
+        os.environ.pop(LEGACY_SCORING_FLAG, None)
+
+    def score_one(self, segment, word_tuple):
+        results = align_to_ground_truth(segment, [word_tuple])
+        self.assertEqual(len(results), 1)
+        return results[0]
+
+
+class TestClosestValidPronunciation(_ScoringEnv):
+    """A correct reading of another CMUdict pronunciation is not an error."""
+
+    def test_to_read_as_tu_is_correct_in_both_g2p_modes(self):
+        from core.grapheme_to_phoneme import grapheme_to_phoneme
+
+        for strict in (False, True):
+            with self.subTest(strict=strict):
+                os.environ["WWAI_G2P_STRICT"] = "true" if strict else "false"
+                gt = grapheme_to_phoneme("to", strict=strict)
+                self.assertEqual(gt[0][1], ['t', 'ɪ'], "primary G2P form of 'to'")
+
+                r = align_to_ground_truth(['t', 'u'], gt, ['to'])[0]
+                self.assertEqual(r["per"], 0.0)
+                self.assertEqual(r["type"], "match")
+                self.assertEqual(r["expected_phonemes"], ['t', 'u'])
+                self.assertEqual(r["ground_truth_phonemes"], ['t', 'u'])
+                self.assertEqual(r["total_phonemes"], 2)
+                self.assertEqual(r["total_errors"], 0)
+                self.assertEqual((r["missed"], r["added"], r["substituted"]), ([], [], []))
+
+    def test_the_primary_wins_a_tie(self):
+        # [ð ɪ] is one substitution away from both ðə (primary) and ði.
+        r = self.score_one(['ð', 'ɪ'], THE)
+        self.assertEqual(r["expected_phonemes"], ['ð', 'ə'])
+        self.assertEqual(r["substituted"], [('ə', 'ɪ')])
+        self.assertEqual(r["per"], 0.5)
+
+    def test_a_variant_only_wins_with_strictly_fewer_errors(self):
+        r = self.score_one(['ð', 'i'], THE)
+        self.assertEqual(r["expected_phonemes"], ['ð', 'i'])
+        self.assertEqual(r["per"], 0.0)
+
+    def test_segmentation_still_uses_the_primary_phonemes(self):
+        cases = [
+            (['ð', 'i', 'k', 'æ', 't', 's', 'æ', 't'], GT_SHORT),
+            (['ð', 'ə', 'ə', 'k', 'æ', 't', 'h', 's', 'æ', 't', 't'], GT_SHORT),
+            (flatten([THE, SAT, ON, THE, MAT]), GT_LONG),
+        ]
+        for flat, gt in cases:
+            with self.subTest(flat=flat):
+                v2 = align_to_ground_truth(flat, gt)
+                os.environ[LEGACY_SCORING_FLAG] = "1"
+                legacy = align_to_ground_truth(flat, gt)
+                os.environ.pop(LEGACY_SCORING_FLAG)
+                self.assertEqual([r["phonemes"] for r in v2], [r["phonemes"] for r in legacy])
+                self.assertEqual(
+                    [r["phonemes"] for r in v2],
+                    segment_phonemes_by_ground_truth(flat, gt),
+                )
+
+
+class TestEdgeInsertions(_ScoringEnv):
+    """Stray phonemes at a segment boundary are segmentation noise, not errors."""
+
+    def test_stray_phoneme_at_either_edge_does_not_count(self):
+        for segment in (
+            ['h', 'k', 'æ', 't'],        # before
+            ['k', 'æ', 't', 's'],        # after
+            ['h', 'k', 'æ', 't', 's'],   # both
+            ['ə', 'h', 'k', 'æ', 't'],   # a run of two
+            ['k', 'k', 'æ', 't'],        # doubled first phoneme
+            ['k', 'æ', 't', 't'],        # doubled last phoneme
+        ):
+            with self.subTest(segment=segment):
+                r = self.score_one(segment, CAT)
+                self.assertEqual(r["per"], 0.0)
+                self.assertEqual(r["added"], [])
+                self.assertEqual(r["total_errors"], 0)
+                self.assertEqual(r["type"], "match")
+                self.assertEqual(r["total_phonemes"], 3)
+                # Every acoustic phoneme is still reported on the record.
+                self.assertEqual(r["phonemes"], segment)
+                self.assertEqual(r["actual_phonemes"], segment)
+
+    def test_one_stray_phoneme_on_a_two_phoneme_word(self):
+        # The motivating false alarm. Each of these used to score PER 0.5 on "the".
+        for segment in (['ð', 'ə', 'n'], ['ð', 'ə', 'ə'], ['t', 'ð', 'ə']):
+            with self.subTest(segment=segment):
+                self.assertEqual(self.score_one(segment, THE)["per"], 0.0)
+
+    def test_stray_phonemes_between_words_do_not_count(self):
+        flat = ['ð', 'ə', 'ə', 'k', 'æ', 't', 'h', 's', 'æ', 't', 't']
+        results = align_to_ground_truth(flat, GT_SHORT, ['the', 'cat', 'sat'])
+        self.assertEqual([r["per"] for r in results], [0.0, 0.0, 0.0])
+        self.assertEqual([r["added"] for r in results], [[], [], []])
+        self.assertEqual([p for r in results for p in r["phonemes"]], flat)
+        self.assertEqual(sentence_per(results), 0.0)
+
+    def test_an_interior_insertion_still_counts(self):
+        for segment in (['k', 'æ', 's', 't'], ['h', 'k', 'æ', 's', 't', 's']):
+            with self.subTest(segment=segment):
+                r = self.score_one(segment, CAT)
+                self.assertEqual(r["added"], ['s'])
+                self.assertEqual(r["total_errors"], 1)
+                self.assertEqual(r["per"], round(1 / 3, 4))
+                self.assertEqual(r["type"], "substitution")
+
+    def test_a_genuine_substitution_still_counts(self):
+        r = self.score_one(['k', 'ɪ', 't'], CAT)
+        self.assertEqual(r["substituted"], [('æ', 'ɪ')])
+        self.assertEqual(r["per"], round(1 / 3, 4))
+        self.assertEqual(r["type"], "substitution")
+
+        # A wrong last phoneme stays a substitution; it is not re-read as a
+        # missed phoneme plus a free edge insertion.
+        r = self.score_one(['k', 'æ', 'd'], CAT)
+        self.assertEqual((r["missed"], r["added"], r["substituted"]), ([], [], [('t', 'd')]))
+        self.assertEqual(r["per"], round(1 / 3, 4))
+
+        r = self.score_one(['t', 'æ', 't', 's'], CAT)
+        self.assertEqual(r["substituted"], [('k', 't')])
+        self.assertEqual(r["added"], [])
+
+    def test_a_missed_phoneme_still_counts(self):
+        r = self.score_one(['h', 'k', 'æ'], CAT)
+        self.assertEqual(r["missed"], ['t'])
+        self.assertEqual(r["per"], round(1 / 3, 4))
+
+    def test_a_run_of_interior_insertions_counts_in_full(self):
+        # Ending the word early and calling the rest edge noise must not hide
+        # them behind one made-up substitution.
+        r = self.score_one(['k', 'æ', 's', 's', 't'], CAT)
+        self.assertEqual((r["missed"], r["added"], r["substituted"]), ([], ['s', 's'], []))
+        self.assertEqual(r["total_errors"], 2)
+        self.assertEqual(r["per"], round(2 / 3, 4))
+
+        r = self.score_one(['h', 'k', 'æ', 's', 's', 's', 's', 't', 'h'], CAT)
+        self.assertEqual(r["added"], ['s', 's', 's', 's'])
+        self.assertEqual(r["per"], round(4 / 3, 4))
+
+    def test_a_wholly_wrong_reading_scores_one(self):
+        r = self.score_one(['z', 'z', 'z', 'z', 'z'], CAT)
+        self.assertEqual(r["per"], 1.0)
+        self.assertEqual(r["total_errors"], 3)
+        self.assertEqual(r["added"], [])
+
+
+class TestLegacyWordScoringKillSwitch(_ScoringEnv):
+    """WWAI_LEGACY_WORD_SCORING brings back the pre-v2 numbers exactly."""
+
+    CASES = [
+        (['ð', 'ə', 'n'], [THE], None),
+        (['h', 'k', 'æ', 't', 's'], [CAT], ['cat']),
+        (['k', 'æ', 't', 't'], [CAT], ['cat']),
+        (['k', 'æ', 's', 't'], [CAT], ['cat']),
+        (['t', 'u'], [('to', ['t', 'ɪ'])], ['to']),
+        (['z', 'z', 'z', 'z', 'z'], [CAT], None),
+        (['ð', 'ə', 'ə', 'k', 'æ', 't', 'h', 's', 'æ', 't', 't'], GT_SHORT, ['the', 'cat', 'sat', 'now']),
+        (flatten([THE, SAT, ON, THE, MAT]), GT_LONG, ['the', 'cat', 'sat', 'on', 'the', 'mat']),
+        (['ð', 'ə', 't', 'æ', 't', 's', 'æ', 't', 'ɑ', 'n', 'ð', 'ə'], GT_LONG,
+         ['the', 'cat', 'sat', 'on', 'the', 'mat', 'now']),
+        ([], GT_SHORT, None),
+    ]
+
+    def test_kill_switch_matches_the_pre_v2_function(self):
+        for value in ("1", "true", " YES "):
+            os.environ[LEGACY_SCORING_FLAG] = value
+            for flat, gt, asr in self.CASES:
+                with self.subTest(value=value, flat=flat):
+                    self.assertEqual(
+                        align_to_ground_truth(list(flat), gt, asr),
+                        pre_v2_align_to_ground_truth(list(flat), gt, asr),
+                    )
+
+    def test_falsy_kill_switch_keeps_v2(self):
+        for value in ("", "0", "false", "off"):
+            os.environ[LEGACY_SCORING_FLAG] = value
+            with self.subTest(value=value):
+                self.assertEqual(self.score_one(['ð', 'ə', 'n'], THE)["per"], 0.0)
+
+    def test_the_comparison_is_not_vacuous(self):
+        changed = [
+            flat for flat, gt, asr in self.CASES
+            if align_to_ground_truth(list(flat), gt, asr)
+            != pre_v2_align_to_ground_truth(list(flat), gt, asr)
+        ]
+        self.assertGreaterEqual(len(changed), 6)
+        old = pre_v2_align_to_ground_truth(['ð', 'ə', 'n'], [THE])[0]
+        self.assertEqual((old["per"], old["added"]), (0.5, ['n']))
+
+
+class TestFeedbackFormatterOnV2Records(_ScoringEnv):
+    """The formatter consumes per / missed / added / substituted / expected_phonemes."""
+
+    def test_formatter_runs_and_ignores_forgiven_edge_noise(self):
+        from core.phoneme_feedback_formatter import build_phoneme_to_error_words, generate_feedback
+        from core.process_audio import analyze_results
+
+        # "the cat sat" with a stray [ə] after "the" (forgiven) and "cat" read as "tad".
+        flat = ['ð', 'ə', 'ə', 't', 'æ', 'd', 's', 'æ', 't']
+        records = align_to_ground_truth(flat, GT_SHORT, ['the', 'cat', 'sat'])
+        _df, _highest, problems, per_summary = analyze_results(records)
+
+        error_words = build_phoneme_to_error_words(records)
+        self.assertEqual(set(error_words), {'k', 't'})
+        self.assertNotIn('ə', error_words)
+        feedback = generate_feedback(problems, per_summary, records)
+        self.assertIn("cat", feedback.text)
+        self.assertIn('ph="kæt"', feedback.ssml)
+
+    def test_formatter_models_the_word_with_the_chosen_variant(self):
+        from core.phoneme_feedback_formatter import generate_feedback
+        from core.process_audio import analyze_results
+
+        # "to" read as [d u]: one substitution from "tu", two from the primary "tɪ".
+        # The record is scored against "tu", so the TTS models the word as "tu".
+        gt = [('go', ['g', 'o', 'ʊ']), ('to', ['t', 'ɪ'])]
+        records = align_to_ground_truth(['g', 'o', 'ʊ', 'd', 'u'], gt, ['go', 'to'])
+        to = by_word(records, 'to')[0]
+        self.assertEqual(to["expected_phonemes"], ['t', 'u'])
+        self.assertEqual(to["substituted"], [('t', 'd')])
+        self.assertEqual(to["per"], 0.5)
+
+        _df, _highest, problems, per_summary = analyze_results(records)
+        feedback = generate_feedback(problems, per_summary, records)
+        self.assertIn("'to'", feedback.text)
+        self.assertIn('ph="tu">to</phoneme>', feedback.ssml)
+
+
 class TestSkippedWords(unittest.TestCase):
 
     def test_trailing_word_skipped(self):

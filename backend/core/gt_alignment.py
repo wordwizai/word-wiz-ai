@@ -43,6 +43,16 @@ WHAT THIS MODULE DOES
 4. Is deterministic. All DP arithmetic is integer (costs are scaled by
    ``_COST_SCALE``) and every tie is broken by an explicit total ordering, so
    the same input always produces byte-identical output.
+5. Scores each word against its closest valid pronunciation (word scoring
+   v2). Segmentation uses the primary G2P phonemes, but a word is then scored
+   against whichever CMUdict pronunciation its segment matches best ("to" read
+   as tu is not an error just because G2P picked tɪ), and the leading and
+   trailing runs of inserted phonemes in its alignment do not count. The
+   segmenter has to hand every acoustic phoneme to some word, so stray
+   phonemes at a word boundary land on one side or the other and say nothing
+   about how that word was read. Interior insertions still count. Set
+   ``WWAI_LEGACY_WORD_SCORING`` to go back to primary-only scoring with every
+   insertion counted.
 
 The returned value matches the existing contract of
 ``process_audio._process_word_alignment`` exactly -- same keys, same types --
@@ -108,8 +118,8 @@ _WORD_NORM_RE = re.compile(r"[^a-z0-9']+")
 #
 # Copied from ``process_audio.align_sequences`` rather than imported: importing
 # ``process_audio`` from here would be circular, and ``process_audio`` drags in
-# torch via ``phoneme_extractor``. Keeping this module dependency-free (stdlib
-# only) also keeps its unit tests fast.
+# torch via ``phoneme_extractor``. Keeping this module light (stdlib, plus a
+# lazy G2P import for pronunciation variants) also keeps its unit tests fast.
 
 
 def align_sequences(gt: list, pred: list) -> list[tuple]:
@@ -413,6 +423,103 @@ def _phoneme_errors(gt_phonemes: list[str], pred_phonemes: list[str]):
     return missed, added, substituted
 
 
+# --------------------------------------------------------------------------- #
+# Word scoring v2: closest valid pronunciation, edge insertions not counted
+# --------------------------------------------------------------------------- #
+
+LEGACY_WORD_SCORING_FLAG = "WWAI_LEGACY_WORD_SCORING"
+
+
+def is_legacy_word_scoring() -> bool:
+    """
+    True when ``WWAI_LEGACY_WORD_SCORING`` is set to a truthy value.
+
+    Kill switch for word scoring v2. When on, every word is scored against its
+    primary G2P phonemes only and every inserted phoneme counts, exactly as
+    before. Read at call time, like ``is_gt_anchored_enabled``.
+    """
+    return os.environ.get(LEGACY_WORD_SCORING_FLAG, "").strip().lower() in _TRUTHY
+
+
+def _pronunciation_candidates(gt_word: str, gt_phonemes: list[str]) -> list[list[str]]:
+    """The primary G2P phonemes first, then every other CMUdict pronunciation."""
+    candidates = [list(gt_phonemes)]
+    try:
+        from .grapheme_to_phoneme import pronunciation_variants
+        variants = pronunciation_variants(gt_word)
+    except Exception:  # no variants is always a safe answer
+        variants = []
+    for variant in variants:
+        if variant not in candidates:
+            candidates.append(list(variant))
+    return candidates
+
+
+def _without_edge_insertions(ops: list[tuple]) -> list[tuple]:
+    """``ops`` minus its leading and trailing runs of ``insertion`` ops."""
+    lo, hi = 0, len(ops)
+    while lo < hi and ops[lo][0] == 'insertion':
+        lo += 1
+    while hi > lo and ops[hi - 1][0] == 'insertion':
+        hi -= 1
+    return ops[lo:hi]
+
+
+def _counted_ops(expected: list[str], segment: list[str]) -> tuple[int, list[tuple]]:
+    """
+    Align ``expected`` with ``segment`` and set the edge insertions aside.
+
+    Returns ``(counted_errors, ops)``, where ``ops`` is the alignment with its
+    leading and trailing runs of insertions removed and ``counted_errors`` is
+    the number of non-match ops left. Interior insertions, substitutions and
+    deletions all still count.
+
+    ``align_sequences`` backtracks from the end, so when an inserted phoneme
+    could sit on either side of an identical neighbour it always lands on the
+    side nearer the start. A doubled first phoneme ([k k æ t] for "cat") then
+    comes out as a leading insertion, but a doubled last one ([k æ t t]) comes
+    out as an interior insertion and counts. To treat both edges alike, the
+    mirrored alignment (both sequences reversed, ops reversed back) is also
+    tried. It is just as optimal, and it is used only when it leaves strictly
+    fewer counted errors.
+    """
+    forward = align_sequences(expected, segment)
+    mirrored = align_sequences(expected[::-1], segment[::-1])[::-1]
+
+    best = None
+    for ops in (forward, mirrored):
+        kept = _without_edge_insertions(ops)
+        errors = sum(1 for op, _gt, _pred in kept if op != 'match')
+        if best is None or errors < best[0]:
+            best = (errors, kept)
+    return best
+
+
+def _score_word(gt_word: str, gt_phonemes: list[str], segment: list[str], legacy: bool):
+    """
+    Return ``(expected, missed, added, substituted)`` for one non-empty segment.
+
+    v2: every candidate pronunciation is aligned with the segment, edge
+    insertions are set aside, and the candidate with the fewest counted errors
+    wins (the earliest on a tie, so the primary wins ties). The error lists
+    come from the winner's alignment, so edge insertions never reach ``added``.
+    """
+    if legacy:
+        return (list(gt_phonemes),) + _phoneme_errors(gt_phonemes, segment)
+
+    best = None
+    for candidate in _pronunciation_candidates(gt_word, gt_phonemes):
+        errors, ops = _counted_ops(candidate, segment)
+        if best is None or errors < best[0]:
+            best = (errors, candidate, ops)
+    _errors, expected, ops = best
+
+    missed = [gph for op, gph, _pph in ops if op == 'deletion']
+    added = [pph for op, _gph, pph in ops if op == 'insertion']
+    substituted = [(gph, pph) for op, gph, pph in ops if op == 'substitution']
+    return list(expected), missed, added, substituted
+
+
 def _insertion_record(pred_word: str) -> dict:
     """An ASR word with no counterpart in the sentence the child was asked to read."""
     return {
@@ -483,6 +590,13 @@ def align_to_ground_truth(
           ASR happened to emit the same spelling.
         * ``predicted_word`` is the ASR word matched to this slot when there is
           one, otherwise the expected word.
+        * Word scoring v2 (off under ``WWAI_LEGACY_WORD_SCORING``): a read word
+          is scored against its closest CMUdict pronunciation, which becomes
+          its ``ground_truth_phonemes`` / ``expected_phonemes`` and sets
+          ``total_phonemes``. Phonemes inserted at either edge of its segment
+          stay in ``phonemes`` / ``actual_phonemes`` but are left out of
+          ``added``, ``total_errors`` and ``per``. Interior insertions still
+          count, so ``per`` can still exceed 1.0.
     """
     gtp = [(word, list(phs or [])) for word, phs in (ground_truth_phonemes or [])]
     if not gtp:
@@ -490,6 +604,7 @@ def align_to_ground_truth(
 
     gt_words = [word for word, _ in gtp]
     asr_words = [str(w) for w in (predicted_words or []) if w]
+    legacy_scoring = is_legacy_word_scoring()
 
     skip_hints, pred_labels, insertions = derive_asr_hints(gt_words, asr_words)
     segments = segment_phonemes_by_ground_truth(flat_phonemes, gtp, skip_hints)
@@ -507,23 +622,25 @@ def align_to_ground_truth(
             results.append(_deletion_record(gt_word, gt_phs))
             continue
 
-        missed, added, substituted = _phoneme_errors(gt_phs, segment)
+        expected, missed, added, substituted = _score_word(
+            gt_word, gt_phs, segment, legacy_scoring,
+        )
         total_errors = len(missed) + len(added) + len(substituted)
-        per = total_errors / max(len(gt_phs), 1)
+        per = total_errors / max(len(expected), 1)
 
         results.append({
             "type": "match" if total_errors == 0 else "substitution",
             "predicted_word": pred_labels.get(idx, gt_word),
             "ground_truth_word": gt_word,
             "phonemes": list(segment),
-            "ground_truth_phonemes": list(gt_phs),
-            "expected_phonemes": list(gt_phs),
+            "ground_truth_phonemes": list(expected),
+            "expected_phonemes": list(expected),
             "actual_phonemes": list(segment),
             "per": round(per, 4),
             "missed": missed,
             "added": added,
             "substituted": substituted,
-            "total_phonemes": len(gt_phs),
+            "total_phonemes": len(expected),
             "total_errors": total_errors,
         })
 

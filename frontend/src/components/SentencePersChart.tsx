@@ -20,6 +20,8 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getSentencePers } from "@/api";
 import { Skeleton } from "./ui/skeleton";
+import { Button } from "./ui/button";
+import { Link } from "react-router-dom";
 import { parseServerDate } from "@/lib/activities";
 
 const AVG_COLOR = "oklch(0.6 0.118 184.704)";
@@ -125,6 +127,9 @@ const SentencePersChart = ({
             <p className="max-w-md text-sm text-balance text-muted-foreground">
               Read a few sentences in any activity and this chart fills in.
             </p>
+            <Button asChild size="sm" className="mt-3 rounded-xl">
+              <Link to="/practice">Start reading</Link>
+            </Button>
           </div>
         ) : (
           <ChartContainer config={chartConfig} className="h-56 w-full">

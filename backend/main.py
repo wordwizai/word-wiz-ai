@@ -16,6 +16,8 @@ origins = [
     "https://wordwizai.com",
     "https://www.wordwizai.com",
 ]
+# Comma-separated extras for local work (dev_server.py sets this); unset in prod.
+origins += [o for o in os.getenv("EXTRA_CORS_ORIGINS", "").split(",") if o]
 
 app.add_middleware(
     CORSMiddleware,

@@ -103,7 +103,10 @@ def format_comparison(c: dict) -> str:
     rows.append("")
     for chk in c["checks"]:
         rows.append(f"{'PASS' if chk['passed'] else 'FAIL'}  {chk['name']:28s} {chk['value']:>20s}   ({chk['rule']})")
-    rows.append("ACCEPT on conditions 1-4 (speed and tests are checked separately)" if c["passed"] else "REJECT")
+    rows.append(
+        "ACCEPT on conditions 1-4 and no new unexpected failures (speed and tests are checked separately)"
+        if c["passed"] else "REJECT"
+    )
     return "\n".join(rows)
 
 

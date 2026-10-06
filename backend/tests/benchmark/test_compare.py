@@ -64,6 +64,18 @@ class TestCompareResults(unittest.TestCase):
         self.assertEqual(result["checks"][4]["value"], "+1")
         self.assertFalse(result["passed"])
 
+    def test_accept_line_names_the_fifth_check(self):
+        text = C.format_comparison(self._compare(self.base, self.cand))
+        self.assertEqual(
+            text.splitlines()[-1],
+            "ACCEPT on conditions 1-4 and no new unexpected failures (speed and tests are checked separately)",
+        )
+
+    def test_reject_line_when_a_check_fails(self):
+        crashing = dict(self.cand)
+        crashing["u0"] = U.rejected("unexpected:KeyError")
+        self.assertEqual(C.format_comparison(self._compare(self.base, crashing)).splitlines()[-1], "REJECT")
+
     def test_not_comparable(self):
         with self.assertRaises(C.NotComparable):
             C.compare_results(U.results_dict("a", self.base), U.results_dict("b", self.base, half="test"), self.clips)

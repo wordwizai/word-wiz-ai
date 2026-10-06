@@ -99,6 +99,16 @@ const Privacy = () => {
 
                   <br />
                   <p className="text-foreground leading-relaxed">
+                    <strong>Practicing without an account.</strong> On
+                    wordwizai.com/try, a child can read a few practice
+                    sentences without creating an account. The recording is
+                    sent to our server, analyzed to give pronunciation
+                    feedback, and then discarded. Word Wiz AI doesn't save it
+                    or link it to anyone.
+                  </p>
+
+                  <br />
+                  <p className="text-foreground leading-relaxed">
                     Word Wiz AI does not sell user or student data and does not
                     use data for advertising purposes. Any data collected is
                     stored securely and accessed only as needed to operate the

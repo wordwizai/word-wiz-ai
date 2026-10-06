@@ -240,7 +240,9 @@ before submitting.
 
 ---
 
-## AQ-010 | Access | GitHub PR for `growth-agent` | Nothing goes live until the PR exists and you merge it. I pushed the branch but couldn't open the PR | None | Status: PENDING
+## AQ-010 | Access | GitHub PR for `growth-agent` | Nothing goes live until the PR exists and you merge it. I pushed the branch but couldn't open the PR | None | Status: CLOSED
+
+> **Outcome (2026-10-06):** Moot. Bruce ships by merging growth-agent into dev and dev into main.
 
 > **Outcome (2026-10-06):** Mostly moot: Bruce merged dev (which contains growth-agent) into main on 2026-10-05, so session 1 went live without a PR. Still true that the agent can't open or edit PRs (no gh, GitHub not signed in).
 
@@ -270,7 +272,9 @@ stands alone.
 
 ---
 
-## AQ-011 | Privacy policy | `/privacy` | The try page lets kids record without an account. The policy is very general and never mentions audio, even though its meta description promises to explain how children's audio is handled | Low. It touches the privacy policy, so it's yours to OK | Status: PENDING
+## AQ-011 | Privacy policy | `/privacy` | The try page lets kids record without an account. The policy is very general and never mentions audio, even though its meta description promises to explain how children's audio is handled | Low. It touches the privacy policy, so it's yours to OK | Status: APPROVED
+
+> **Outcome (2026-10-06):** Approved as written. Added to /privacy on growth-agent (goes live with the next dev -> main merge).
 
 Proposed addition, as its own short paragraph after the first one:
 
@@ -287,7 +291,9 @@ applies to the whole product, not just the try page.
 
 ---
 
-## AQ-012 | Production config | backend `.env` on the EC2 box | Possibly the biggest activation fix available. In the last 30 days 40 users started a session but only 20 ever got a reading scored | Medium. Changes which recordings are accepted for every user | Status: PENDING
+## AQ-012 | Production config | backend `.env` on the EC2 box | Possibly the biggest activation fix available. In the last 30 days 40 users started a session but only 20 ever got a reading scored | Medium. Changes which recordings are accepted for every user | Status: DONE BY BRUCE
+
+> **Outcome (2026-10-06):** Bruce: "I updated the env file". Confirm on the next deploy (quality report should say "Metrics mode: robust").
 
 While testing guest mode I found the quality checks run in "legacy" mode
 unless `WWAI_SOFT_QUALITY_GATES=1` is set, and your local `.env` doesn't
@@ -307,7 +313,9 @@ I can't see the production environment. Two steps, both yours:
 
 ---
 
-## AQ-013 | Reddit post | r/homeschool (or r/Homeschooling) | Homeschool parents teaching K-2 phonics are exactly the audience, and a post with a no-account link gets tried on the spot | Medium. Self-promotion rules vary; read the sidebar first and message the mods if promotion needs approval. Post from your own account, say you built it, answer replies | Status: PENDING
+## AQ-013 | Reddit post | r/homeschool (or r/Homeschooling) | Homeschool parents teaching K-2 phonics are exactly the audience, and a post with a no-account link gets tried on the spot | Medium. Self-promotion rules vary; read the sidebar first and message the mods if promotion needs approval. Post from your own account, say you built it, answer replies | Status: APPROVED
+
+> **Outcome (2026-10-06):** Bruce posts it himself (Reddit is blocked here), after the try page is live.
 
 Send after: the try page is live.
 
@@ -332,7 +340,9 @@ Send after: the try page is live.
 
 ---
 
-## AQ-014 | Reddit post | r/dyslexia | Parents here talk about b/d mix-ups and skipped sounds constantly, which is what sound-level feedback catches | Medium-high. Sensitive community. The post says plainly it isn't a dyslexia treatment and hasn't been studied. Check the rules first | Status: PENDING
+## AQ-014 | Reddit post | r/dyslexia | Parents here talk about b/d mix-ups and skipped sounds constantly, which is what sound-level feedback catches | Medium-high. Sensitive community. The post says plainly it isn't a dyslexia treatment and hasn't been studied. Check the rules first | Status: APPROVED
+
+> **Outcome (2026-10-06):** Bruce posts it himself, after the try page is live, a day apart from AQ-013.
 
 Send after: the try page is live. Post a day or more apart from AQ-013.
 
@@ -354,60 +364,9 @@ Send after: the try page is live. Post a day or more apart from AQ-013.
 
 ---
 
-## AQ-015 | Show HN | news.ycombinator.com | HN likes a technical build story from a student, and a no-signup demo is close to a requirement there. Mostly developers, but many are parents, and a front-page run brings links and press | Medium. One shot per project; post on a weekday morning US time and stay around to answer | Status: PENDING
+## AQ-017 | Email | KidvoKit, Karen Gage (info@kidvokit.com) | Her dyslexia-apps guide ranks for "dyslexia reading practice app" and has a "🚧 new or promising, still being studied" badge, which is the honest category for Word Wiz | Low | Status: APPROVED
 
-Send after: the try page is live AND the backend deploy with the silence fix
-(the post mentions it).
-
-**Title:** Show HN: Phoneme-level reading feedback for kids learning to read
-
-**URL:** https://wordwizai.com/try
-
-**Text:**
-
-> Hi HN, I'm a high school student, and Word Wiz AI is a reading tutor I
-> built for kids learning to read (roughly K-2).
->
-> Most reading apps score whole words. Word Wiz scores sounds. The child
-> reads a sentence, a wav2vec2 model fine-tuned on TIMIT to output IPA
-> phonemes (running on ONNX Runtime) transcribes what they actually said,
-> and a dynamic-programming alignment matches those phonemes against the
-> expected pronunciation word by word. Each word gets a phoneme error rate,
-> and the feedback names the specific sound, like the /eɪ/ in "cake" coming
-> out as /æ/. The next practice sentence is generated around the sounds the
-> child missed.
->
-> The hard parts have been kids' voices (TIMIT is adult speech), cheap laptop
-> and Chromebook mics, and recordings that start with digital silence, which
-> were failing the whole pipeline until this week.
->
-> You can try three sentences without an account at the link. I'd love
-> feedback on the approach, especially from anyone who has worked on
-> children's speech recognition.
-
----
-
-## AQ-016 | LinkedIn post | your LinkedIn | Your network includes teachers, BU people and CAC contacts, and one share from a teacher reaches a classroom of parents | Low | Status: PENDING
-
-Send after: the try page is live.
-
-> Word Wiz AI now has a page where any kid can try it without making an
-> account.
->
-> When I looked at the analytics this week the pattern was pretty clear.
-> Parents find Word Wiz through our phonics guides, but almost none of them
-> signed up from there, because you had to make an account before hearing a
-> single piece of feedback. Now you can open wordwizai.com/try, have your
-> child read three sentences, and see exactly which sounds they missed.
->
-> I'm also doing research on AI in education at Boston University, and a
-> tool like this only matters if it actually reaches kids. If you know a
-> parent, teacher or tutor working with an early reader, I'd really
-> appreciate you sending this their way.
-
----
-
-## AQ-017 | Email | KidvoKit, Karen Gage (info@kidvokit.com) | Her dyslexia-apps guide ranks for "dyslexia reading practice app" and has a "🚧 new or promising, still being studied" badge, which is the honest category for Word Wiz | Low | Status: PENDING
+> **Outcome (2026-10-06):** Bruce sends it himself from contactwordwizai@gmail.com (that account isn't connected here).
 
 Send after: the try page is live. From contactwordwizai@gmail.com.
 
@@ -435,7 +394,9 @@ Send after: the try page is live. From contactwordwizai@gmail.com.
 
 ---
 
-## AQ-018 | Contact form | Lead in Literacy, Christina / Mrs. Winter's Bliss (https://leadinliteracy.com/contact/) | Her "7 Best Phonics Apps" ranks for "free phonics app" and is built around Science of Reading practice | Low | Status: PENDING
+## AQ-018 | Contact form | Lead in Literacy, Christina / Mrs. Winter's Bliss (https://leadinliteracy.com/contact/) | Her "7 Best Phonics Apps" ranks for "free phonics app" and is built around Science of Reading practice | Low | Status: APPROVED
+
+> **Outcome (2026-10-06):** Agent submits the contact form once the try page is live.
 
 Send after: the try page is live. Reply address contactwordwizai@gmail.com.
 
@@ -461,7 +422,9 @@ Send after: the try page is live. Reply address contactwordwizai@gmail.com.
 
 ---
 
-## AQ-019 | Contact form | TeachersFirst (https://www.teachersfirst.org/contact.cfm) | Nonprofit, ad-free, 16,000+ educator-reviewed resources with weekly updates. A listing reaches K-2 teachers directly | Low | Status: PENDING
+## AQ-019 | Contact form | TeachersFirst (https://www.teachersfirst.org/contact.cfm) | Nonprofit, ad-free, 16,000+ educator-reviewed resources with weekly updates. A listing reaches K-2 teachers directly | Low | Status: APPROVED
+
+> **Outcome (2026-10-06):** Agent submits the contact form once the try page is live.
 
 Send after: the try page is live. Reply address contactwordwizai@gmail.com.
 
@@ -485,7 +448,9 @@ Send after: the try page is live. Reply address contactwordwizai@gmail.com.
 
 ---
 
-## AQ-020 | Email | Ontario Federation of Teaching Parents (website@ontariohomeschool.org) | Their online resources page lists Reading Eggs under Language Arts and they accept suggestions without charging. Canadian homeschool families | Low | Status: PENDING
+## AQ-020 | Email | Ontario Federation of Teaching Parents (website@ontariohomeschool.org) | Their online resources page lists Reading Eggs under Language Arts and they accept suggestions without charging. Canadian homeschool families | Low | Status: APPROVED
+
+> **Outcome (2026-10-06):** Bruce sends it himself from contactwordwizai@gmail.com.
 
 Send after: the try page is live. From contactwordwizai@gmail.com.
 
@@ -560,3 +525,56 @@ worth updating too. Until then I verify every change with a local
 `npm run build` (the same prerender gate Vercel runs).
 
 > **Rejected 2026-10-06.** Bruce: "don't do that". No preview deploys for growth-agent; keep verifying with a local `npm run build`. Don't re-propose.
+
+## AQ-015 | Show HN | news.ycombinator.com | HN likes a technical build story from a student, and a no-signup demo is close to a requirement there. Mostly developers, but many are parents, and a front-page run brings links and press | Medium. One shot per project; post on a weekday morning US time and stay around to answer | Status: REJECTED
+
+Send after: the try page is live AND the backend deploy with the silence fix
+(the post mentions it).
+
+**Title:** Show HN: Phoneme-level reading feedback for kids learning to read
+
+**URL:** https://wordwizai.com/try
+
+**Text:**
+
+> Hi HN, I'm a high school student, and Word Wiz AI is a reading tutor I
+> built for kids learning to read (roughly K-2).
+>
+> Most reading apps score whole words. Word Wiz scores sounds. The child
+> reads a sentence, a wav2vec2 model fine-tuned on TIMIT to output IPA
+> phonemes (running on ONNX Runtime) transcribes what they actually said,
+> and a dynamic-programming alignment matches those phonemes against the
+> expected pronunciation word by word. Each word gets a phoneme error rate,
+> and the feedback names the specific sound, like the /eɪ/ in "cake" coming
+> out as /æ/. The next practice sentence is generated around the sounds the
+> child missed.
+>
+> The hard parts have been kids' voices (TIMIT is adult speech), cheap laptop
+> and Chromebook mics, and recordings that start with digital silence, which
+> were failing the whole pipeline until this week.
+>
+> You can try three sentences without an account at the link. I'd love
+> feedback on the approach, especially from anyone who has worked on
+> children's speech recognition.
+
+> **Rejected 2026-10-06.** Bruce: "don't do hacker news or linked in". Don't re-propose.
+
+## AQ-016 | LinkedIn post | your LinkedIn | Your network includes teachers, BU people and CAC contacts, and one share from a teacher reaches a classroom of parents | Low | Status: REJECTED
+
+Send after: the try page is live.
+
+> Word Wiz AI now has a page where any kid can try it without making an
+> account.
+>
+> When I looked at the analytics this week the pattern was pretty clear.
+> Parents find Word Wiz through our phonics guides, but almost none of them
+> signed up from there, because you had to make an account before hearing a
+> single piece of feedback. Now you can open wordwizai.com/try, have your
+> child read three sentences, and see exactly which sounds they missed.
+>
+> I'm also doing research on AI in education at Boston University, and a
+> tool like this only matters if it actually reaches kids. If you know a
+> parent, teacher or tutor working with an early reader, I'd really
+> appreciate you sending this their way.
+
+> **Rejected 2026-10-06.** Bruce: "don't do hacker news or linked in". Don't re-propose.

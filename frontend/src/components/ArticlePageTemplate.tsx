@@ -286,10 +286,10 @@ const CalloutBoxComponent: React.FC<{ callout: CalloutBox }> = ({
   };
 
   const styles = {
-    info: "bg-blue-50 border-blue-200 text-blue-900",
-    tip: "bg-green-50 border-green-200 text-green-900",
-    warning: "bg-yellow-50 border-yellow-200 text-yellow-900",
-    success: "bg-emerald-50 border-emerald-200 text-emerald-900",
+    info: "bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-500/10 dark:border-blue-400/40 dark:text-blue-100",
+    tip: "bg-green-50 border-green-200 text-green-900 dark:bg-green-500/10 dark:border-green-400/40 dark:text-green-100",
+    warning: "bg-yellow-50 border-yellow-200 text-yellow-900 dark:bg-yellow-500/10 dark:border-yellow-400/40 dark:text-yellow-100",
+    success: "bg-emerald-50 border-emerald-200 text-emerald-900 dark:bg-emerald-500/10 dark:border-emerald-400/40 dark:text-emerald-100",
   };
 
   return (

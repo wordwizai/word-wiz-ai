@@ -151,7 +151,7 @@ const PracticePageTemplate = ({ pattern }: { pattern: PhonicsPattern }) => {
               {displayName}: Word List &amp; Practice
             </h1>
 
-            <div className="border-l-4 border-blue-200 bg-blue-50 text-blue-900 p-4 my-6 rounded">
+            <div className="border-l-4 border-blue-200 bg-blue-50 text-blue-900 p-4 my-6 rounded dark:border-blue-400/40 dark:bg-blue-500/10 dark:text-blue-100">
               <div className="flex gap-3">
                 <InfoIcon className="h-5 w-5 shrink-0 mt-0.5" />
                 <p className="text-sm leading-relaxed">{directAnswer}</p>

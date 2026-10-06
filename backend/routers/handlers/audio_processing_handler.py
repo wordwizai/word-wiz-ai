@@ -10,13 +10,8 @@ import pandas as pd
 import soundfile as sf
 import base64 as _base64
 
-from core.audio_preprocessing import preprocess_audio
-from core.audio_quality_analyzer import (
-    AudioQualityAnalyzer,
-    assess_processability,
-    build_quality_warning,
-    soft_quality_gates_enabled,
-)
+from core.audio_quality_analyzer import soft_quality_gates_enabled
+from core.request_audio import AudioRejected, gate_and_preprocess
 from core.modes.base_mode import BaseMode
 from core.phoneme_assistant import PhonemeAssistant
 from core.phoneme_feedback_formatter import generate_feedback as generate_phoneme_feedback
@@ -147,90 +142,13 @@ async def load_and_preprocess_audio_bytes(
     )
     print(f"⏱️  Cache save (pre-preprocessing) took {time.time() - cache_start:.3f}s")
     
-    # QUALITY VALIDATION: Analyze audio quality before preprocessing
-    print("🔍 Analyzing audio quality...")
-    quality_start = time.time()
-    analyzer = AudioQualityAnalyzer(sr=sample_rate)
-    quality_info = await asyncio.to_thread(
-        analyzer.analyze_audio_quality, audio_array
-    )
-    print(f"⏱️  Quality analysis took {time.time() - quality_start:.3f}s")
-
-    # Log quality metrics
-    print(f"📊 Audio Quality Report:")
-    print(f"   - Quality Level: {quality_info['quality_level'].upper()}")
-    print(f"   - Quality Score: {quality_info['quality_score']:.1f}/100")
-    print(f"   - SNR: {quality_info['snr_db']:.1f} dB")
-    print(f"   - Clipping: {quality_info['clipping_percentage']:.2f}%")
-    print(f"   - Silence: {quality_info['silence_percentage']:.1f}%")
-    print(f"   - Metrics mode: {quality_info.get('metrics_mode', 'legacy')}")
-
-    if quality_out is not None:
-        quality_out['quality_info'] = quality_info
-
-    if soft_quality_gates_enabled():
-        # SOFT GATES (WWAI_SOFT_QUALITY_GATES=1)
-        #
-        # Reject only audio we genuinely cannot process: nothing received, or
-        # true digital silence. A noisy, clipped or pause-heavy recording is
-        # still a child's honest attempt -- analyze it and pass a gentle hint
-        # back to the frontend instead of refusing it.
-        is_processable, reason = assess_processability(audio_array)
-        if not is_processable:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=reason,
-            )
-
-        quality_warning = build_quality_warning(quality_info)
-        if quality_warning is not None:
-            print("⚠️  Soft quality gate: proceeding with a quality warning attached")
-            for hint in quality_warning['hints']:
-                print(f"   - {hint}")
-            if quality_out is not None:
-                quality_out['quality_warning'] = quality_warning
-    else:
-        # HARD GATES (default). Unchanged behavior.
-        # Check for critical quality issues
-        if quality_info['snr_db'] < 5.0:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Audio quality too low (SNR: {quality_info['snr_db']:.1f} dB). "
-                       "Please record in a quieter environment or use a better microphone."
-            )
-
-        if quality_info['clipping_percentage'] > 10.0:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Audio is severely clipped ({quality_info['clipping_percentage']:.1f}% of samples). "
-                       "Please reduce microphone gain or speak further from the microphone."
-            )
-
-        if quality_info['silence_percentage'] > 85.0:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Audio is mostly silence ({quality_info['silence_percentage']:.1f}%). "
-                       "Please ensure you are speaking into the microphone."
-            )
-
-    # Warn about quality issues but continue processing
-    if quality_info['issues']:
-        print(f"⚠️  Quality issues detected:")
-        for issue in quality_info['issues']:
-            print(f"   - {issue}")
-    
-    if quality_info['recommendations']:
-        print(f"💡 Recommendations:")
-        for rec in quality_info['recommendations']:
-            print(f"   - {rec}")
-    
-    # Apply preprocessing with audio length for adaptive noise reduction
-    print("🔊 Starting audio preprocessing...")
-    # Run preprocessing in thread pool to avoid blocking event loop
-    audio_array = await asyncio.to_thread(
-        preprocess_audio, audio_array, sr=sample_rate, audio_length_seconds=audio_duration,
-        use_adaptive=True, already_preprocessed=False
-    )
+    # QUALITY GATES + THE preprocessing pass (core/request_audio.py), off the event loop.
+    try:
+        audio_array = await asyncio.to_thread(
+            gate_and_preprocess, audio_array, sample_rate, audio_duration, quality_out
+        )
+    except AudioRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
     # This is THE preprocessing pass for this request. Record it here (not inside
     # the worker thread - asyncio.to_thread runs on a copied context, so a mark
     # set in there would be discarded) so later stages can skip redundant noise

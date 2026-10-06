@@ -36,6 +36,13 @@ test("idles while the server checks the reading", () => {
   assert.equal(companionMood({ ...quiet, isProcessing: true }), "idle");
 });
 
+test("talking wins over the processing idle", () => {
+  assert.equal(
+    companionMood({ ...quiet, isProcessing: true, isFeedbackPlaying: true }),
+    "talking",
+  );
+});
+
 test("stays still the rest of the time", () => {
   assert.equal(companionMood(quiet), "still");
 });

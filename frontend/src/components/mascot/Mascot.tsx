@@ -17,8 +17,9 @@ import "./mascot.css";
 
 // "still" is the plain logo. The others are tied to moments: listening while
 // the mic is on, talking while spoken feedback plays, celebrating a great
-// read. Idle is for places with no reading task, since steady motion next to
-// a sentence pulls a child's eyes off the words.
+// read. Idle is for places with no reading task, and for the short wait while
+// a reading is checked. Steady motion next to a sentence any longer than that
+// pulls a child's eyes off the words.
 export type MascotMood =
   | "still"
   | "idle"

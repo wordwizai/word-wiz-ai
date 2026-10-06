@@ -56,11 +56,67 @@ alembic upgrade head                              # Apply migrations
 alembic downgrade -1                              # Rollback one migration
 ```
 
+## Deployment (Frontend → Vercel)
+
+Pushing to `main` deploys the frontend to production (wordwizai.com). Merging a
+branch into `main` and pushing it is the whole deploy. There is no need to also
+trigger one from the Vercel CLI, dashboard or MCP, which would just build the
+same commit twice. No other branch deploys, so there are no preview URLs.
+
+The Vercel project is `word-wiz-ai`, linked to the `wordwizai/word-wiz-ai` repo,
+with `frontend/` as its Root Directory. That makes `frontend/vercel.json` the
+live config. The root `vercel.json` is never read and only mirrors the `git`
+block so the two files agree. Branch filtering is this block:
+
+```json
+"git": { "deploymentEnabled": { "main": true, "**": false } }
+```
+
+- **Use `**`, not `*`.** Vercel matches branch names with minimatch, where `*`
+  does not cross `/`. With `*`, branches like `feat/...` and `seo/...` would
+  fall through to the default (deploy) and each get a preview build. When a
+  branch matches more than one rule, any `true` wins, which is why `main` still
+  deploys.
+- **A plain `"deploymentEnabled": false` turns off `main` too.** That was the
+  setting from Aug 2025 until Oct 2026, and production quietly stayed on
+  whatever had last been deployed by hand.
+- To get preview deploys for every branch, delete the `"**": false` line.
+
+The build runs `npm run build` (Vite, then `scripts/prerender.mjs`, which
+renders every route with `@sparticuz/chromium`) and takes about 3–4 minutes. A
+failed build never gets the production domains, so wordwizai.com keeps serving
+the last good deployment.
+
+### Verify after deploying
+
+```bash
+cd frontend && npm run verify:live
+```
+
+This checks that each page family is served as prerendered HTML rather than the
+SPA shell, and that `llms.txt`, `sitemap.xml` and `robots.txt` are real files.
+Build status and logs are on the project's Deployments tab in Vercel.
+
+### Rollback
+
+Use Instant Rollback on the Deployments tab, or `vercel rollback <deployment-url>`.
+**After a rollback, Vercel turns off auto-assignment of production domains.**
+Later pushes to `main` still build but do not go live. Once the fix is merged,
+promote its deployment by hand (Promote in the dashboard, or
+`vercel promote <deployment-url>`), which also turns auto-assignment back on.
+
+### Frontend and backend ship separately
+
+A merge to `main` puts the frontend live within minutes but does not touch the
+backend, which still needs the manual EC2 deploy below. If a change touches
+both, it might be worth deploying the backend first so the new frontend never
+calls a route that doesn't exist yet.
+
 ## Deployment (Backend → AWS EC2)
 
 The backend runs on an EC2 box behind nginx, as three Docker Compose services
-(`backend`, `nginx`, `certbot`). The frontend deploys separately via Vercel on
-push; only the backend needs manual steps.
+(`backend`, `nginx`, `certbot`). The frontend deploys itself from `main` (see
+above), so only the backend needs manual steps.
 
 **Connection details are deliberately not in this file — this repo is public.**
 Set them locally (e.g. in your shell profile or an untracked `.env.deploy`):
@@ -358,6 +414,7 @@ Test JSON format example:
 | DB models | `backend/models/` |
 | Pydantic schemas | `backend/schemas/` |
 | Style guidelines | `frontend/STYLE_GUIDELINES.md` |
+| Vercel config (deploys, redirects, headers) | `frontend/vercel.json` |
 
 ## Glossary
 

@@ -96,6 +96,7 @@ guides produced ~9 signup-click visitors in total; the homepage converts
 | Guest route + try page + guide CTAs | 47c92d1, e4a6965, 46a50ce | **Live 2026-10-06** (backend 9583b5d; frontend main 2e9d41a). Session 3 rendered /try and /try/at-family in a browser | `try_link_click` / `try_attempt` / `try_completed` events; signup clicks per guide visit |
 | Digital-silence fix | 50e1a11 | **Live 2026-10-06** (backend) | Users with a scored reading (baseline 20/40) |
 | b/d article retitle ("Child Confuses B and D? When It's Normal and How to Fix It") | d819ec7 | On growth-agent (pushed), not on main | Page CTR, baseline 0.6%/90d at pos 6.9 (0.7% on 1,822 impr/28d to ~Oct 3). Judge 3-4 weeks after it's live |
+| Free magic-e printable on the silent-e guide (`/printables/magic-e-sentences.pdf`, CTA after the u_e sentences) | f51d6ad | On growth-agent (pushed), not on main | `printable_download` events; silent-e guide signup and try clicks |
 | Long-vowel guide retitle ("Long Vowel Sounds Practice: 200+ First Grade Words and Games") | 48f77d6 | On growth-agent (pushed), not on main | Page CTR, baseline 0.7%/90d at pos 8.1 (0.6% on 1,708 impr/28d). Judge 3-4 weeks after it's live |
 
 ## What's working
@@ -114,6 +115,11 @@ guides produced ~9 signup-click visitors in total; the homepage converts
 
 ## Backlog (advertising first)
 
+0. **AQ-036 first (kids' audio).** Every recording goes to Deepgram without
+   `mip_opt_out=true`, and Deepgram's docs say it keeps "fractional
+   increments" for training unless a request opts out. One-line fix plus
+   privacy-page text are drafted. AASL (AQ-035), Oakland REACH (AQ-040) and
+   the ISTE edit (AQ-031) all read better after it.
 1. **Send the approved outreach now that the try page is live.** Bruce: AQ-013
    then AQ-014 a day apart (Reddit), AQ-017 and AQ-020 (emails), and tick the
    reCAPTCHA on AQ-019 (TeachersFirst). AQ-018 (Lead in Literacy) is already
@@ -135,8 +141,12 @@ guides produced ~9 signup-click visitors in total; the homepage converts
 9. Comparison pages are dead ends (no related links); HoP page shows Word
    Wiz twice; competitor prices unverified.
 10. Bylines "Word Wiz AI Editorial Team" -> "Word Wiz AI".
-11. Wave 3 outreach if wave 2 gets replies: NorCal IDA and Reading Rockets
-    (couldn't fetch from the cloud), Corona and Danbury libraries.
+11. Wave 3 is drafted (AQ-034 to AQ-056, from `OUTREACH_IDEAS.md`). Next
+    research ideas: Reading Rockets (blocked our fetcher), Corona and Danbury
+    libraries, Educators Technology, Homeschool Together's resource database.
+12. Free magic-e printable is on `growth-agent` (f51d6ad). Once it's on main,
+    AQ-051 (Reddit) and AQ-056 (Facebook group) can go, and AQ-032 can use it.
+    Watch the `printable_download` event in Vercel.
 
 Done from the old backlog: b/d article title (d819ec7; the article already
 had a "When to Worry" section, so no new section), long-vowel guide title

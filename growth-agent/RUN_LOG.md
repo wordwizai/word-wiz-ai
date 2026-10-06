@@ -238,3 +238,26 @@ went out, and the try-funnel events since Oct 6.
 wordwizai org, and `git push` went through (2338d0f..6db7ead). The patch
 he was sent is no longer needed. Also added `OUTREACH_IDEAS.md`, a ranked
 brainstorm of 20 wave-3 ideas (4 routes checked, the rest unverified).
+
+**Later in session 3 (wave 3, Bruce: "get started with everything... keep
+researching low hanging advertising fruit")**
+- Ran 8 research passes (edtech bloggers, Bay Area literacy orgs, community
+  rules, Teachers Pay Teachers rules, podcasts, AASL form, freebie sites,
+  library guides), checked the key routes myself, and queued AQ-034 to
+  AQ-056: EdSurge pitch, AASL answers, Bay Area orgs, educator bloggers,
+  podcasts, Well-Trained Mind and Reddit posts, library guides,
+  Internet4Classrooms, a Facebook group post.
+- Found and queued **AQ-036**: recordings go to Deepgram without its
+  model-improvement opt-out, and the privacy page never mentions AI or
+  deletion. Needs Bruce (kids' data, privacy policy).
+- Dropped with reasons: Teachers Pay Teachers (sellers 18+, $29 fee), Free
+  Technology for Teachers (Richard Byrne left edtech), Cool Cat Teacher and
+  Class Tech Tips (sponsored), Raising A Reader and Reading Partners (no
+  outside tools), nearly every homeschool freebie site (paid or dormant).
+- Site: free two-page magic-e printable built from the silent-e guide's
+  sentences, served at `/printables/magic-e-sentences.pdf` with a CTA on
+  the guide and a `printable_download` event (f51d6ad). Verified with a full
+  build (158 pages). *Expect:* downloads within days of going live; a
+  shareable asset for AQ-032, AQ-051, AQ-056.
+- Started round 2 research: city literacy coalitions, listicles about apps
+  that listen, big public library systems.

@@ -24,10 +24,12 @@ Two consequences, both real:
 
 SAFETY / DEFAULT BEHAVIOUR
 --------------------------
-Every revision below is currently ``UNPINNED``. ``from_pretrained_kwargs()`` returns
-an EMPTY dict when a model is unpinned, so wiring this module into a loader changes
-nothing at all until someone actually fills in a revision. There is deliberately no
-guessed or invented commit SHA in this file: a wrong SHA would break every model load.
+Only ``PHONEME_IPA_ONNX`` is pinned (2026-10-06, the snapshot the accuracy benchmark
+baseline is built on, verified against ``--resolve`` and the local cache). Every other
+revision below is still ``UNPINNED``. ``from_pretrained_kwargs()`` returns an EMPTY dict
+when a model is unpinned, so wiring this module into a loader changes nothing for that
+model until someone fills in a revision. There is deliberately no guessed or invented
+commit SHA in this file: a wrong SHA would break every model load.
 
 HOW TO PIN (one command, needs network — run it yourself, no agent ran it)
 -------------------------------------------------------------------------
@@ -97,7 +99,7 @@ _MODELS: dict[str, ModelPin] = {
     "PHONEME_IPA_ONNX": ModelPin(
         key="PHONEME_IPA_ONNX",
         repo_id="Bobcat9/wav2vec2-timit-ipa-onnx",
-        # Pinned 2026-10-05 to the snapshot the accuracy benchmark baseline was built on.
+        # Pinned 2026-10-06 to the snapshot the accuracy benchmark baseline is built on.
         revision="e3f5690ebe6cf47f514b34c6e27aec4a61e01569",
         purpose="wav2vec2-TIMIT-IPA, ONNX. Emits the IPA phonemes that PER is computed on.",
         consumers=(

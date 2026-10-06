@@ -838,14 +838,28 @@ class TestProcessAudioArrayHook(unittest.TestCase):
         if self._saved_flag is not None:
             os.environ[GT_ANCHORED_FLAG] = self._saved_flag
 
-    def _run(self):
+    class _ListPhonemeExtractor:
+        def __init__(self, groups):
+            self.groups = groups
+
+        def extract_phoneme(self, audio=None, sampling_rate=None):
+            return self.groups
+
+    class _ListWordExtractor:
+        def __init__(self, words):
+            self.words = words
+
+        def extract_words(self, audio=None, sampling_rate=None):
+            return self.words
+
+    def _run(self, phoneme_extractor=None, word_extractor=None):
         import asyncio
         return asyncio.run(self.pa.process_audio_array(
             GT_SHORT,
             self.np.zeros(16000, dtype=self.np.float32),
             16000,
-            self._FakePhonemeExtractor(),
-            self._FakeWordExtractor(),
+            phoneme_extractor or self._FakePhonemeExtractor(),
+            word_extractor or self._FakeWordExtractor(),
             use_chunking=False,
         ))
 
@@ -873,6 +887,42 @@ class TestProcessAudioArrayHook(unittest.TestCase):
     def test_flag_set_uses_the_anchored_path(self):
         os.environ[GT_ANCHORED_FLAG] = "true"
         self._assert_anchored(self._run())
+
+    # --- the ASR heard nothing, the phoneme model heard the reading ------- #
+
+    FLAT = ['ð', 'ə', 't', 'æ', 't', 's', 'æ', 't']
+
+    def test_anchored_path_scores_an_empty_transcript(self):
+        os.environ.pop(GT_ANCHORED_FLAG, None)
+        for words in ([], None):
+            with self.subTest(words=words):
+                results = self._run(word_extractor=self._ListWordExtractor(words))
+                self.assertEqual(results, align_to_ground_truth(self.FLAT, GT_SHORT, []))
+                self.assertEqual(
+                    [(r["ground_truth_word"], r["type"]) for r in results],
+                    [('the', 'match'), ('cat', 'substitution'), ('sat', 'match')],
+                )
+
+    def test_anchored_path_scores_a_one_word_transcript(self):
+        os.environ.pop(GT_ANCHORED_FLAG, None)
+        results = self._run(word_extractor=self._ListWordExtractor(['the']))
+        self.assertEqual(results, align_to_ground_truth(self.FLAT, GT_SHORT, ['the']))
+        self.assertEqual(len(results), 3)
+
+    def test_anchored_path_still_needs_phonemes(self):
+        os.environ.pop(GT_ANCHORED_FLAG, None)
+        for groups in (None, [], [['ð', 'ə']]):
+            with self.subTest(groups=groups):
+                with self.assertRaisesRegex(ValueError, "The audio provided has no speech inside"):
+                    self._run(phoneme_extractor=self._ListPhonemeExtractor(groups),
+                              word_extractor=self._ListWordExtractor([]))
+
+    def test_legacy_path_still_rejects_an_empty_transcript(self):
+        os.environ[GT_ANCHORED_FLAG] = "false"
+        for words in ([], None, ['the']):
+            with self.subTest(words=words):
+                with self.assertRaisesRegex(ValueError, "The audio provided has no speech inside"):
+                    self._run(word_extractor=self._ListWordExtractor(words))
 
 
 class TestRobustness(unittest.TestCase):

@@ -185,11 +185,12 @@ Rendered https://wordwizai.com/try and /try/at-family in headless Chromium.
 Both show the try intro ("No account needed... doesn't save recordings from
 this page"). The About page shows "Who built this".
 
-**Approved items**: AQ-018 (Lead in Literacy) and AQ-019 (TeachersFirst) were
-mine to submit once the try page was live. Both forms have a CAPTCHA, so I
-didn't submit them; they're marked for Bruce with final copy. The rest of the
-approved batch (AQ-013, AQ-014, AQ-017, AQ-020) were already Bruce's sends and
-can go now.
+**Approved items**: nothing for me to execute. Bruce's posting checklist page
+(updated by a local session after session 2, not in the repo) shows AQ-018
+(Lead in Literacy) already sent and confirmed, and AQ-019 (TeachersFirst)
+filled in and waiting on his reCAPTCHA tick. Both forms have CAPTCHAs anyway.
+AQ-013, AQ-014, AQ-017 and AQ-020 are Bruce's sends and can go now. Updated
+the queue and LISTINGS so AQ-018 isn't resent.
 
 **Research** (four parallel passes, nothing sent or submitted):
 - Listicle authors, teacher and homeschool resource lists, dyslexia and

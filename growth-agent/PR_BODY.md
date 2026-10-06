@@ -24,7 +24,7 @@ Verified: `npm ci && npm run build` (158 pages prerendered, validation passed).
 ## Waiting on Bruce
 
 See `growth-agent/APPROVAL_QUEUE.md`:
-- Approved and ready to send now that the try page is live: AQ-013/AQ-014 (Reddit, a day apart), AQ-017/AQ-020 (emails), AQ-018/AQ-019 (forms with CAPTCHAs).
+- Approved and ready to send now that the try page is live: AQ-013/AQ-014 (Reddit, a day apart), AQ-017/AQ-020 (emails), AQ-019 (TeachersFirst, waiting on the reCAPTCHA tick). AQ-018 is already sent.
 - Pending: AQ-021 to AQ-030 (outreach wave 2), AQ-031 (ISTE listing edit), AQ-032 (Free Homeschool Deals), AQ-033 (Product Hunt relaunch).
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)

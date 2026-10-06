@@ -15,8 +15,8 @@ account or his name in a new way), `submitted`, `live`, `rejected`,
 | 2026-10-06 | U. Michigan Dyslexia Help apps list | email to dyslexiahelp@umich.edu | brucebpeters12@gmail.com | sent |
 | 2026-10-06 | Freedom Homeschooling | creator form | contactwordwizai@gmail.com | unconfirmed (see AQ-009) |
 | approved | KidvoKit, Karen Gage (dyslexia apps guide) | email info@kidvokit.com | contactwordwizai@gmail.com | AQ-017, Bruce sends |
-| approved | Lead in Literacy, Christina (7 best phonics apps) | contact form (has CAPTCHA) | contactwordwizai@gmail.com | AQ-018, Bruce submits |
-| approved | TeachersFirst | contact form (reCAPTCHA) | contactwordwizai@gmail.com | AQ-019, Bruce submits |
+| 2026-10-06 | Lead in Literacy, Christina (7 best phonics apps) | contact form | contactwordwizai@gmail.com | sent, form confirmed (AQ-018, per Bruce's checklist) |
+| approved | TeachersFirst | contact form (reCAPTCHA) | contactwordwizai@gmail.com | AQ-019, filled in, waiting on Bruce's reCAPTCHA tick |
 | approved | Ontario Federation of Teaching Parents | email website@ontariohomeschool.org | contactwordwizai@gmail.com | AQ-020, Bruce sends |
 | queued | Proud to be Primary, Elyse Rycroft ("Online Reading for Kids") | email proudtobeprimary@gmail.com | contactwordwizai@gmail.com | AQ-021 |
 | queued | Simply Kinder ("Best Free Kindergarten Apps For Reading") | email hello@SimplyKinder.com | contactwordwizai@gmail.com | AQ-022 |
@@ -51,7 +51,7 @@ Ranked by expected real users for a K-2 reading tool.
 | 3 | Free Homeschool Deals | email contact@freehomeschooldeals.com, subject "Freebie submission" (rules at /submit) | No | queued (AQ-032) | unknown | 4 | 150+ word third-person post and a 1000x1500 graphic (draft in `assets/`). One-time spike to their list ("over 30,000+ families", their number) |
 | 4 | DyslexiaHelp (U. Michigan) | dyslexiahelp@umich.edu | No | emailed 2026-10-06 (AQ-008) | unknown | 4 | Email, so it's outreach. An unrelated app called "Word Wizard" is already listed there |
 | 5 | Common Sense Privacy | privacy@commonsense.org | No | needs-bruce | n/a | 4 | Evaluation request by email. Public rating, so a privacy-policy review first might be worth it. Kids' data, needs Bruce |
-| 6 | TeachersFirst | https://www.teachersfirst.org/contact.cfm | No | approved (AQ-019), Bruce submits (reCAPTCHA) | unknown | 4 | Editorial, contact form only, so it's outreach |
+| 6 | TeachersFirst | https://www.teachersfirst.org/contact.cfm | No | approved (AQ-019), filled in, waiting on Bruce's reCAPTCHA tick | unknown | 4 | Editorial, contact form only, so it's outreach |
 | 7 | Homeschooling with Dyslexia | contact form | No | candidate | unknown | 4 | Has an "Advertising Options" page, so features may be paid. Older draft in `growth/SUBMISSIONS.md` has unverified claims |
 | 8 | ALSC Notable Children's Digital Media | ALA Airtable form | No | needs-bruce | unknown | 3 | Award-style list. Eligibility window unclear |
 | 9 | Tech & Learning | editorial pitch | No | needs-bruce | n/a | 3 | Older draft in `growth/SUBMISSIONS.md` |

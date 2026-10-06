@@ -399,7 +399,7 @@ Send after: the try page is live. From contactwordwizai@gmail.com.
 
 > **Outcome (2026-10-06):** Agent submits the contact form once the try page is live.
 
-> **Session 3 (2026-10-06):** The try page is live (rendered /try and /try/at-family in a browser). The form turned out to have a CAPTCHA (Ninja Forms with reCAPTCHA/hCaptcha/Turnstile scripts), which I won't try to get past, so this one is yours to paste and submit. The copy below is final. Reply address contactwordwizai@gmail.com.
+> **Sent 2026-10-06, form confirmed.** Recorded on Bruce's posting checklist ("Lead in Literacy contact form (confirmed)") by a local session after session 2. **Don't resend.**
 
 Send after: the try page is live. Reply address contactwordwizai@gmail.com.
 
@@ -429,7 +429,7 @@ Send after: the try page is live. Reply address contactwordwizai@gmail.com.
 
 > **Outcome (2026-10-06):** Agent submits the contact form once the try page is live.
 
-> **Session 3 (2026-10-06):** The try page is live. The form has a reCAPTCHA checkbox, so it's yours to paste and submit (name, email contactwordwizai@gmail.com, subject, message). The copy below is final.
+> **Filled in, waiting on Bruce (2026-10-06).** Per Bruce's posting checklist, a local session filled the form in his built-in browser and it's waiting on the reCAPTCHA tick. If that tab is gone, paste the copy below at teachersfirst.org/contact.cfm (email contactwordwizai@gmail.com).
 
 Send after: the try page is live. Reply address contactwordwizai@gmail.com.
 

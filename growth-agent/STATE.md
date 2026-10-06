@@ -56,6 +56,9 @@ backend work only when it directly blocks getting users, and keep it short.
   first thing; if session 3's commits (d819ec7..) aren't there, apply
   `growth-agent-session3.patch` (sent to Bruce) with `git am`.
 - Contact forms with a CAPTCHA are Bruce's. Don't try to get past one.
+- **Bruce's posting checklist is ahead of the repo.** A local session after
+  session 2 sent AQ-018 and filled AQ-019 but only recorded it on the
+  checklist page. Read the checklist before acting on the queue.
 - Daily GSC indexing routine: `C:\Users\bruce\.claude\scheduled-tasks\gsc-request-indexing\`.
   Session 2 moved the silent-e guide and ABCmouse comparison to the front
   of its queue (quota was used up).
@@ -115,8 +118,9 @@ guides produced ~9 signup-click visitors in total; the homepage converts
 ## Backlog (advertising first)
 
 1. **Send the approved outreach now that the try page is live.** Bruce: AQ-013
-   then AQ-014 a day apart (Reddit), AQ-017 and AQ-020 (emails), AQ-018 and
-   AQ-019 (forms with CAPTCHAs). Then wave 2 (AQ-021 to AQ-030) as approved.
+   then AQ-014 a day apart (Reddit), AQ-017 and AQ-020 (emails), and tick the
+   reCAPTCHA on AQ-019 (TeachersFirst). AQ-018 (Lead in Literacy) is already
+   sent. Then wave 2 (AQ-021 to AQ-030) as approved.
    I can submit AQ-023 and AQ-025 myself (no CAPTCHA).
 2. **ISTE EdTech Index edit** (AQ-031). Already listed since Dec 2025; fix grades,
    OSes, and the "evidence-based" line.

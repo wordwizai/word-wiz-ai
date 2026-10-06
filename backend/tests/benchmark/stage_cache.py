@@ -19,6 +19,7 @@ import argparse
 import hashlib
 import json
 import os
+import sys
 import time
 from multiprocessing import get_context
 
@@ -162,17 +163,31 @@ def _load_deepgram_key() -> None:
         os.environ["DEEPGRAM_KEY"] = key
 
 
-def _init_worker() -> None:
-    _load_deepgram_key()
-    with common.quiet():
-        from core.phoneme_extractor_onnx import PhonemeExtractorONNX
-        from core.word_extractor import WordExtractorOnline
+_init_error: str | None = None
 
-        _models["phoneme"] = PhonemeExtractorONNX()
-        _models["words"] = WordExtractorOnline()
+
+def _init_worker() -> None:
+    """Load the models once per worker.
+
+    An initializer that raises makes multiprocessing.Pool respawn the worker forever, so
+    imap_unordered never returns. The failure is recorded here and raised by the first task.
+    """
+    global _init_error
+    try:
+        _load_deepgram_key()
+        with common.quiet():
+            from core.phoneme_extractor_onnx import PhonemeExtractorONNX
+            from core.word_extractor import WordExtractorOnline
+
+            _models["phoneme"] = PhonemeExtractorONNX()
+            _models["words"] = WordExtractorOnline()
+    except Exception as exc:  # noqa: BLE001 - reported by the first task instead of hanging the pool
+        _init_error = f"{type(exc).__name__}: {exc}"
 
 
 def _record_task(task):
+    if _init_error is not None:
+        raise RuntimeError(f"benchmark worker could not load its models: {_init_error}")
     utt_id, wav_path, text, directory = task
     return record_clip(utt_id, wav_path, text, directory, _models["phoneme"], _models["words"])
 
@@ -200,6 +215,9 @@ def build(half, name, flags, workers, retry_errors=False, subset=None, limit=Non
     statuses = {"ok": 0, "rejected": 0}
     word_errors = []
     if todo:
+        _load_deepgram_key()  # fail fast here for the common case, before any worker starts
+        if not os.getenv("DEEPGRAM_KEY"):
+            raise SystemExit("DEEPGRAM_KEY is not set (environment or backend/.env)")
         with get_context("spawn").Pool(processes=workers, initializer=_init_worker) as pool:
             for i, (utt_id, status, word_error) in enumerate(pool.imap_unordered(_record_task, todo, chunksize=4), 1):
                 statuses[status] += 1
@@ -220,6 +238,15 @@ def main(argv=None) -> int:
     parser.add_argument("--workers", type=int, default=6)
     parser.add_argument("--retry-errors", action="store_true")
     args = parser.parse_args(argv)
+
+    dotenv_keys = common.dotenv_wwai_keys()
+    if dotenv_keys:
+        print(
+            f"error: backend/.env sets {', '.join(dotenv_keys)}; "
+            "remove them and pass flags with --flag so they are recorded",
+            file=sys.stderr,
+        )
+        return 2
 
     common.apply_flags(common.parse_flag_args(args.flag))
     active = common.active_wwai_flags()

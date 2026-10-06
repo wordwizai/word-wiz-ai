@@ -4,6 +4,7 @@ import os
 import pickle
 import re
 import sys
+import tempfile
 import unittest
 from contextlib import redirect_stdout
 from unittest import mock
@@ -76,6 +77,19 @@ class TestFlags(unittest.TestCase):
         with mock.patch.object(common, "_core_imported", return_value=False), mock.patch.dict(os.environ):
             common.apply_flags({"WWAI_WEIGHTED_PER": "1"})
             self.assertEqual(os.environ["WWAI_WEIGHTED_PER"], "1")
+
+
+class TestDotenvWwaiKeys(unittest.TestCase):
+    def test_lists_experiment_flags_and_ignores_the_rest(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, ".env")
+            with open(path, "w", encoding="utf-8") as fh:
+                fh.write("WWAI_WEIGHTED_PER=1\nWWAI_BENCH_VERBOSE=1\nDEEPGRAM_KEY=x\n")
+            self.assertEqual(common.dotenv_wwai_keys(path), ["WWAI_WEIGHTED_PER"])
+
+    def test_missing_file_is_empty(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(common.dotenv_wwai_keys(os.path.join(tmp, "nope.env")), [])
 
 
 class TestDirs(unittest.TestCase):

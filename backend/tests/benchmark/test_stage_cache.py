@@ -1,6 +1,9 @@
+import contextlib
+import io
 import json
 import os
 import tempfile
+import types
 import unittest
 from unittest import mock
 
@@ -43,6 +46,70 @@ class _FailingWords:
 class _ValueErrorWords:
     def extract_words(self, audio, sampling_rate=16000, **_kwargs):
         raise ValueError("nope")
+
+
+class TestWorkerStartup(unittest.TestCase):
+    def tearDown(self):
+        SC._init_error = None
+        SC._models.clear()
+
+    def test_failed_model_load_is_reported_by_the_task_instead_of_hanging_the_pool(self):
+        with (
+            mock.patch.object(SC, "_load_deepgram_key"),
+            mock.patch("core.phoneme_extractor_onnx.PhonemeExtractorONNX", mock.MagicMock()),
+            mock.patch("core.word_extractor.WordExtractorOnline", side_effect=ValueError("no key")),
+        ):
+            SC._init_worker()  # must not raise, or Pool respawns the worker forever
+        with self.assertRaises(RuntimeError) as ctx:
+            SC._record_task(("u", "w", "t", "d"))
+        self.assertIn("no key", str(ctx.exception))
+        self.assertIn("ValueError", str(ctx.exception))
+
+    def test_successful_load_leaves_no_error_and_runs_the_clip(self):
+        phoneme, words = mock.MagicMock(), mock.MagicMock()
+        with (
+            mock.patch.object(SC, "_load_deepgram_key"),
+            mock.patch("core.phoneme_extractor_onnx.PhonemeExtractorONNX", return_value=phoneme),
+            mock.patch("core.word_extractor.WordExtractorOnline", return_value=words),
+        ):
+            SC._init_worker()
+        self.assertIsNone(SC._init_error)
+        with mock.patch.object(SC, "record_clip", return_value=("u", "ok", False)) as record:
+            self.assertEqual(SC._record_task(("u", "w", "t", "d")), ("u", "ok", False))
+        record.assert_called_once_with("u", "w", "t", "d", phoneme, words)
+
+
+class TestBuildFailsFast(unittest.TestCase):
+    def test_missing_deepgram_key_stops_before_the_pool_starts(self):
+        clip = types.SimpleNamespace(utt_id="u1", wav_path="u1.wav", text="hi")
+        with (
+            tempfile.TemporaryDirectory() as tmp,
+            mock.patch.dict(os.environ, {"WWAI_BENCH_CACHE_DIR": tmp}),
+            mock.patch.object(SC, "_load_deepgram_key"),
+            mock.patch.object(SC, "write_meta"),
+            mock.patch.object(SC, "get_context") as get_context,
+            mock.patch("tests.benchmark.dataset.load_clips", return_value=[clip]),
+            contextlib.redirect_stdout(io.StringIO()),
+        ):
+            os.environ.pop("DEEPGRAM_KEY", None)
+            with self.assertRaises(SystemExit) as ctx:
+                SC.build("dev", "baseline", {}, workers=1)
+        self.assertIn("DEEPGRAM_KEY", str(ctx.exception))
+        get_context.assert_not_called()
+
+
+class TestMainRefusesDotenvFlags(unittest.TestCase):
+    def test_returns_2_and_names_the_keys(self):
+        err = io.StringIO()
+        with (
+            mock.patch.object(SC.common, "dotenv_wwai_keys", return_value=["WWAI_X"]),
+            mock.patch.object(SC, "build") as build,
+            contextlib.redirect_stderr(err),
+        ):
+            self.assertEqual(SC.main(["--half", "dev"]), 2)
+        build.assert_not_called()
+        self.assertIn("WWAI_X", err.getvalue())
+        self.assertIn("--flag", err.getvalue())
 
 
 class TestRecordClip(unittest.TestCase):

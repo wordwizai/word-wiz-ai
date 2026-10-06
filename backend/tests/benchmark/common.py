@@ -127,6 +127,17 @@ def active_wwai_flags(env=None) -> dict[str, str]:
     }
 
 
+def dotenv_wwai_keys(path: str | None = None) -> list[str]:
+    """WWAI_* experiment flags set in backend/.env. core loads .env on import, so these
+    would apply without being recorded. Harness settings (WWAI_BENCH_*) are ignored."""
+    from dotenv import dotenv_values
+
+    path = path or os.path.join(BACKEND_ROOT, ".env")
+    if not os.path.isfile(path):
+        return []
+    return sorted(k for k in dotenv_values(path) if k.startswith("WWAI_") and not k.startswith("WWAI_BENCH_"))
+
+
 def front_end_cache_name(flags: dict[str, str]) -> str:
     """Default cache for a flag set. 'baseline' unless a front-end flag is set."""
     parts = []

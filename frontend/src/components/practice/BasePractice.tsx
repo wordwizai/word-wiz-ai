@@ -44,8 +44,8 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
   } = useHybridAudioAnalysis({
     onProcessingStart: () => {
       setIsProcessing(true);
-      // The old feedback is about the last attempt. Clearing it also lets
-      // the mascot celebrate two great reads in a row.
+      // The old feedback belongs to the last attempt. Clearing it here also
+      // stops PracticeStage pairing this attempt's analysis with that text.
       setFeedback(null);
     },
     onProcessingEnd: () => {

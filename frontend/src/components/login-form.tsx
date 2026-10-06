@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -166,9 +167,9 @@ export function LoginForm({
 
               <p className="text-center text-sm text-muted-foreground">
                 No account?{" "}
-                <a href="/signup" className="text-primary font-medium underline-offset-4 hover:underline">
+                <Link to="/signup" className="text-primary font-medium underline-offset-4 hover:underline">
                   Sign up free
-                </a>
+                </Link>
               </p>
             </div>
           </form>

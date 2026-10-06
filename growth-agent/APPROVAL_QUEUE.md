@@ -997,6 +997,21 @@ Each item says who sends it. Nothing goes out until it's marked APPROVED.
 Several notes say you read their page, so give it a quick look before sending
 (the link is in each item).
 
+**Order and who does what (AQ-034 to AQ-062)**
+
+| When | Items |
+|---|---|
+| First, before anything about privacy goes out | **AQ-036** (Deepgram opt-out + privacy page). Yours: code change, policy text, redeploy |
+| After AQ-036 | AQ-035 AASL form, AQ-040 Oakland REACH, AQ-045 My EdTech Life |
+| After the printable is on main | AQ-051 (Reddit printable post), AQ-056 (Facebook group) |
+| A week after AQ-025 | AQ-039 Oakland Literacy Coalition |
+| Anytime once approved, I submit (forms without a visible CAPTCHA) | AQ-043 Tony Vincent, AQ-052 Niagara, AQ-057 Learning Reading Hub (if a CAPTCHA appears, they come back to you) |
+| Anytime once approved, you send from contactwordwizai@gmail.com | AQ-034 EdSurge (rewrite in your words first), AQ-037, AQ-038, AQ-041, AQ-042, AQ-044, AQ-046, AQ-053, AQ-054, AQ-055, AQ-058, AQ-059, AQ-060, AQ-061, AQ-062 |
+| You post from your own accounts, one a day, rules checked first | AQ-047 Well-Trained Mind, AQ-048 to AQ-050 Reddit, AQ-056 Facebook |
+
+Batching the emails takes about two or three minutes each. A reasonable pace is
+5 to 8 a day so replies stay manageable.
+
 ---
 
 ## AQ-034 | Essay pitch (uses your name in press) | EdSurge Voices (voices@edsurge.com) | EdSurge publishes essays by students, and "AI and human strengths", "technology in education" and "early childhood education" are its listed beats. A published essay reaches K-12 educators and is a strong editorial link. Bruce said yes to this on 2026-10-06 | Medium. Their guidelines say they decline pieces where "the writer has an affiliation with a company, product or service that creates a conflict of interest" or that read "like marketing material", so the pitch is about what went wrong, with Word Wiz disclosed as the example. They also require the essay to be **human-written** and any AI help disclosed in the pitch | Status: PENDING

@@ -15,7 +15,8 @@ Running summary of the growth agent's work. Bruce ships it by merging `growth-ag
 | `d819ec7` | b/d article title and description: "Child Confuses B and D? When It's Normal and How to Fix It" |
 | `48f77d6` | Long-vowel guide title and description: "Long Vowel Sounds Practice: 200+ First Grade Words and Games" |
 | `d864a4c` | sitemap-lastmod.json hashes after the build |
-| `a05b4a0` and later | growth-agent/ files only (queue, listings, state, log, FHD graphic). Not served |
+| `f51d6ad` | Free magic-e printable at `/printables/magic-e-sentences.pdf`, a download CTA on the silent-e guide, and a `printable_download` event. The inline CTA now renders a plain link for PDFs |
+| `a05b4a0` and later | growth-agent/ files only (queue, listings, state, log, graphics). Not served |
 
 Verified: `npm ci && npm run build` (158 pages prerendered, validation passed).
 
@@ -25,7 +26,8 @@ Pushed to origin 2026-10-06 once the Claude GitHub App was installed on the org.
 
 See `growth-agent/APPROVAL_QUEUE.md`:
 - Approved and ready to send now that the try page is live: AQ-013/AQ-014 (Reddit, a day apart), AQ-017/AQ-020 (emails), AQ-019 (TeachersFirst, waiting on the reCAPTCHA tick). AQ-018 is already sent.
-- Pending: AQ-021 to AQ-030 (outreach wave 2), AQ-031 (ISTE listing edit), AQ-032 (Free Homeschool Deals), AQ-033 (Product Hunt relaunch).
+- Pending: AQ-021 to AQ-030 (outreach wave 2), AQ-031 (ISTE listing edit), AQ-032 (Free Homeschool Deals), AQ-033 (Product Hunt relaunch), AQ-034 to AQ-062 (wave 3).
+- **AQ-036 first**: recordings go to Deepgram without its training opt-out, and the privacy page doesn't cover AI or deletion.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 

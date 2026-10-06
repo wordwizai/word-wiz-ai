@@ -141,9 +141,13 @@ guides produced ~9 signup-click visitors in total; the homepage converts
 9. Comparison pages are dead ends (no related links); HoP page shows Word
    Wiz twice; competitor prices unverified.
 10. Bylines "Word Wiz AI Editorial Team" -> "Word Wiz AI".
-11. Wave 3 is drafted (AQ-034 to AQ-056, from `OUTREACH_IDEAS.md`). Next
-    research ideas: Reading Rockets (blocked our fetcher), Corona and Danbury
-    libraries, Educators Technology, Homeschool Together's resource database.
+11. Wave 3 is drafted (AQ-034 to AQ-062; send order at the top of the wave 3
+    section). Research is hitting diminishing returns: homeschool freebie
+    sites are paid or dead, big library systems list only databases, and the
+    listening-app SERPs are mostly competitor blogs. Untried angles: Reading
+    Rockets (blocked our fetcher), Homeschool Together's resource database,
+    St. Louis County Library (needs a non-card route), Hennepin Let's Read
+    Tutors, The Learning Agency (story angle), Sonoma County Library.
 12. Free magic-e printable is on `growth-agent` (f51d6ad). Once it's on main,
     AQ-051 (Reddit) and AQ-056 (Facebook group) can go, and AQ-032 can use it.
     Watch the `printable_download` event in Vercel.
@@ -154,7 +158,7 @@ had a "When to Worry" section, so no new section), long-vowel guide title
 
 ## Next actions (session 4)
 
-1. Merge `origin/main`.
+1. Merge `origin/main`. Ask Bruce about AQ-036 first (kids' audio).
 2. Read the queue and execute anything APPROVED (AQ-023 and AQ-025 are forms I
    can submit; the rest are Bruce's sends).
 3. Measure (local session): Vercel `try_link_click`, `try_attempt`,

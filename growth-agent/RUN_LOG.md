@@ -261,3 +261,16 @@ researching low hanging advertising fruit")**
   shareable asset for AQ-032, AQ-051, AQ-056.
 - Started round 2 research: city literacy coalitions, listicles about apps
   that listen, big public library systems.
+- Round 2 research (literacy coalitions, listening-app listicles, big
+  public libraries, freebie sites) added AQ-055 to AQ-062: Internet4Classrooms,
+  a Homeschool Quest Facebook post, Learning Reading Hub (its form is real,
+  unlike the earlier note), Read To Succeed Asheville, Easterseals
+  Crossroads, Literacy Mid-South, Read On Arizona, Santa Clara County
+  Library's Reading Program. AQ-041 now covers both of Larry Ferlazzo's
+  lists. Every dead end is in LISTINGS.md so it isn't researched again.
+- Yields are dropping: most homeschool freebie channels are paid or dormant,
+  most big library systems list only paid databases, and search results
+  for apps that listen are mostly competitor blogs. All agents shared one
+  200-search budget this turn and hit it.
+- Queue total: AQ-001 to AQ-062. Send order and who-does-what are at the top
+  of the wave 3 section.

@@ -27,12 +27,13 @@ logger = logging.getLogger(__name__)
 #   1. which measurement method this module uses (legacy head/tail SNR +
 #      relative-to-peak clipping vs. robust percentile SNR + absolute
 #      full-scale clipping), and
-#   2. whether audio_processing_handler treats quality problems as hard HTTP
-#      400 rejections or as soft warnings attached to the response.
+#   2. whether the request gates in core/request_audio.py treat quality
+#      problems as hard rejections (the handler turns them into HTTP 400s) or
+#      as soft warnings attached to the response.
 #
 # It defaults to ON: the speechocean762 benchmark accepted it together with
 # WWAI_SINGLE_PREPROCESS. Set it to a falsy value ("0", "false", "no", "off")
-# and every number this module produces and every rejection the handler raises
+# and every number this module produces and every rejection the gates raise
 # is identical to the pre-change behavior.
 # ---------------------------------------------------------------------------
 

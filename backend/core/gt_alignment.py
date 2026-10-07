@@ -39,23 +39,29 @@ WHAT THIS MODULE DOES
      * words the ASR heard that are not in the sentence are reported as
        ``insertion`` records,
      * the ASR word matched to each expected word is the ``predicted_word``
-       label, and when it differs from the expected word it switches off edge
-       forgiveness for that word (see 5). It can only take leniency away.
+       label, and when it differs from the expected word and fits the sounds
+       it switches off edge forgiveness for that word (see 5). It can only
+       take leniency away.
 4. Is deterministic. All DP arithmetic is integer (costs are scaled by
    ``_COST_SCALE``) and every tie is broken by an explicit total ordering, so
    the same input always produces byte-identical output.
 5. Scores each word against its closest valid pronunciation (word scoring
    v2). Segmentation uses the primary G2P phonemes, but a word is then scored
    against whichever CMUdict pronunciation its segment matches best ("to" read
-   as tu is not an error just because G2P picked tɪ), and one inserted
-   phoneme at each edge of its segment does not count. The segmenter has to
-   hand every acoustic phoneme to some word, so a stray phoneme at a word
-   boundary lands on one side or the other and says nothing about how that
-   word was read. Longer edge runs and interior insertions still count, and
-   nothing at the edges is forgiven when the ASR heard a different word in
-   that slot ("sit" for "it"), because then the extra sounds are probably a
-   reading miscue. Set ``WWAI_LEGACY_WORD_SCORING`` to go back to
-   primary-only scoring with every insertion counted.
+   as tu is not an error just because G2P picked tɪ), and up to
+   ``MAX_EDGE_INSERTIONS`` (3) inserted phonemes at each edge of its segment
+   do not count. The segmenter has to hand every acoustic phoneme to some
+   word, so stray phonemes at a word boundary land on one side or the other
+   and say nothing about how that word was read. Only exact trims are
+   forgiven. A trim must remove phonemes that were each costing one
+   insertion, so it never cuts into the word itself. Edge runs past the cap
+   and interior insertions still count, and nothing at the edges is forgiven
+   when the ASR heard a different word in that slot and that word fits the
+   sounds at least as well ("sit" for "it", see ``_asr_word_fits``), because
+   then the extra sounds are probably a reading miscue. An ASR word that does
+   not fit the sounds leaves the forgiveness in place. Set
+   ``WWAI_LEGACY_WORD_SCORING`` to go back to primary-only scoring with every
+   insertion counted.
 
 The returned value matches the existing contract of
 ``process_audio._process_word_alignment`` -- same keys, same types -- so
@@ -441,9 +447,10 @@ LEGACY_WORD_SCORING_FLAG = "WWAI_LEGACY_WORD_SCORING"
 #: Version of the word scoring code, stamped on ``analyze_results``'
 #: ``per_summary`` so stored stats can be told apart across scoring changes.
 #: 2 = word scoring v2 (closest CMUdict pronunciation, up to three forgiven
-#: edge phonemes per side, the miscue guard). It marks the code release, not the
-#: path one request took: the kill switches and the client-phoneme path still
-#: produce pre-v2 numbers under it.
+#: edge phonemes per side, the miscue guard). The server and client-phoneme paths
+#: both score this way. It marks the code release, not the path one request
+#: took, so the kill switches (``WWAI_GT_ANCHORED_ALIGNMENT`` off,
+#: ``WWAI_LEGACY_WORD_SCORING`` on) still produce pre-v2 numbers under it.
 SCORING_VERSION = 2
 
 

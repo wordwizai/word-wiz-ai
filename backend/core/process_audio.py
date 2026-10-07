@@ -803,7 +803,7 @@ def score_extracted_phonemes(ground_truth_phonemes, phoneme_predictions, predict
     The scoring half of process_audio_array, on what extract_phonemes_and_words returned:
     the no-speech checks, then phoneme-to-word alignment and word scoring.
     """
-    from .gt_alignment import is_gt_anchored_enabled, align_to_ground_truth
+    from .gt_alignment import is_gt_anchored_enabled
     if is_gt_anchored_enabled():  # WWAI_GT_ANCHORED_ALIGNMENT, default ON
         return _score_anchored(ground_truth_phonemes, phoneme_predictions, predicted_words)
 

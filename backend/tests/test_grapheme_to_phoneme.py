@@ -521,6 +521,16 @@ class TestCleanSentenceKeepsContractions(unittest.TestCase):
             with self.subTest(sentence=sentence):
                 self.assertEqual(clean_sentence(sentence), cleaned)
 
+    def test_the_kill_switch_strips_every_apostrophe_as_before(self):
+        from unittest import mock
+        from core.grapheme_to_phoneme import LEGACY_SENTENCE_CLEANING_FLAG, clean_sentence
+        for value in ("1", "true", " YES "):
+            with self.subTest(value=value), mock.patch.dict(os.environ, {LEGACY_SENTENCE_CLEANING_FLAG: value}):
+                self.assertEqual(clean_sentence("It's the dogs' ball, isn't it?"), "its the dogs ball isnt it")
+                self.assertEqual(clean_sentence("It\u2019s"), "it\u2019s")  # the old code left curly ones alone
+        with mock.patch.dict(os.environ, {LEGACY_SENTENCE_CLEANING_FLAG: "0"}):
+            self.assertEqual(clean_sentence("It's"), "it's")
+
     def test_contractions_get_real_pronunciations(self):
         from core.grapheme_to_phoneme import clean_sentence
         words = grapheme_to_phoneme(clean_sentence("He didn't see that it's here."), strict=False)

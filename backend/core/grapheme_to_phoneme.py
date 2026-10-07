@@ -333,6 +333,10 @@ def _convert_cached(grapheme: str, strict: bool) -> tuple:
 # ---------------------------------------------------------------------------
 
 
+#: Kill switch for keeping apostrophes inside words. When truthy, clean_sentence strips
+#: every straight apostrophe exactly as before ("it's" -> "its"). Read at call time.
+LEGACY_SENTENCE_CLEANING_FLAG = "WWAI_LEGACY_SENTENCE_CLEANING"
+
 _APOSTROPHES = str.maketrans({"\u2019": "'", "\u2018": "'", "\u02bc": "'"})
 # An apostrophe with a letter on both sides is part of a word ("it's", "don't",
 # "dog's"); any other one is a quote mark or a plural possessive ("dogs'").
@@ -348,8 +352,18 @@ def clean_sentence(sentence: str) -> str:
     spelling. Curly apostrophes become straight ones first.
 
     Shared with the accuracy benchmark (backend/tests/benchmark) so both score the
-    exact same ground truth.
+    exact same ground truth. WWAI_LEGACY_SENTENCE_CLEANING brings back the old
+    cleanup, which stripped every straight apostrophe.
     """
+    if os.environ.get(LEGACY_SENTENCE_CLEANING_FLAG, "").strip().lower() in ("1", "true", "yes", "on"):
+        return (
+            sentence.strip().lower()
+            .replace(".", "")
+            .replace(",", "")
+            .replace("?", "")
+            .replace("!", "")
+            .replace("'", "")
+        )
     cleaned = (
         sentence.strip().lower()
         .translate(_APOSTROPHES)

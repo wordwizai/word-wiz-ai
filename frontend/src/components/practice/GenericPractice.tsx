@@ -60,7 +60,11 @@ const GenericPractice = ({ session, activityType }: GenericPracticeProps) => {
                   : undefined
               }
               next={{
-                visible: config.features.hasNextButton && props.showNextButton,
+                // After the last line, re-reading it shouldn't race the finish screen.
+                visible:
+                  config.features.hasNextButton &&
+                  props.showNextButton &&
+                  !(props.sessionResult && (props.isRecording || props.isProcessing)),
                 onNext: props.displayNextSentence,
               }}
             />

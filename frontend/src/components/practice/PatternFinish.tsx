@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, RotateCcw, Star, Volume2 } from "lucide-react";
@@ -26,7 +26,12 @@ const PatternFinish = ({
 
   useEffect(() => {
     speak(spoken, { rate: 0.95 });
+    return () => window.speechSynthesis?.cancel();
   }, [speak, spoken]);
+
+  // The Next button that had focus is gone, so land on the heading.
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => headingRef.current?.focus(), []);
 
   return (
     <main className="flex min-h-dvh items-center justify-center bg-background p-6">
@@ -42,12 +47,16 @@ const PatternFinish = ({
         >
           <Star className="size-10" aria-hidden />
         </motion.span>
-        <p className="mt-6 text-sm font-medium text-muted-foreground">
-          {result.pattern_name}
-        </p>
+        {result.pattern_name && (
+          <p className="mt-6 text-sm font-medium text-muted-foreground">
+            {result.pattern_name}
+          </p>
+        )}
         <h1
           id="finish-heading"
-          className="mt-1 text-3xl font-bold tracking-tight text-foreground"
+          ref={headingRef}
+          tabIndex={-1}
+          className="mt-1 outline-none text-3xl font-bold tracking-tight text-foreground"
         >
           {title}
         </h1>

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, type ReactElement } from "react";
+import { useContext, useEffect, useRef, useState, type ReactElement } from "react";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useHybridAudioAnalysis } from "@/hooks/useHybridAudioAnalysis";
 import { useFeedbackAudio } from "@/hooks/useFeedbackAudio";
@@ -43,6 +43,8 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
   const [nextSentence, setNextSentence] = useState<string | null>(null);
   const [showNextButton, setShowNextButton] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  // A feedback clip that lands after the child taps Next belongs to a line they've left.
+  const acceptAudio = useRef(true);
   const [lineInfo, setLineInfo] = useState<LineInfo | null>(null);
   const [nextLineInfo, setNextLineInfo] = useState<LineInfo | null>(null);
   const [sessionResult, setSessionResult] = useState<SessionResult | null>(null);
@@ -58,6 +60,7 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
     isClientExtractionEnabled,
   } = useHybridAudioAnalysis({
     onProcessingStart: () => {
+      acceptAudio.current = true;
       setIsProcessing(true);
       // The old feedback belongs to the last attempt. Clearing it here also
       // stops PracticeStage pairing this attempt's analysis with that text.
@@ -95,7 +98,10 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
         setShowNextButton(true);
       }, 1000);
     },
-    onAudioFeedback: feedbackAudio.play,
+    onAudioFeedback: (url) => {
+      if (acceptAudio.current) feedbackAudio.play(url);
+      else URL.revokeObjectURL(url);
+    },
     onError: () => {
       // useAudioTransport already showed the message; just reset the UI.
       setIsProcessing(false);
@@ -143,6 +149,7 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
     });
 
   const displayNextSentence = () => {
+    acceptAudio.current = false;
     if (sessionResult) {
       feedbackAudio.reset();
       setFinished(true);

@@ -248,19 +248,20 @@ const Settings = () => {
             <CardHeader>
               <CardTitle>Performance Settings</CardTitle>
               <CardDescription>
-                Optimize how the application processes audio and AI features.
+                Choose how your child's reading gets checked.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex-1 pr-4">
                   <Label htmlFor="clientProcessing">
-                    Client-Side Phoneme Processing
+                    Check sounds on this device
                   </Label>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Process phonemes in your browser for 50-70% faster results.
-                    Requires ~100MB model download on first use. Disable on
-                    slower devices or poor connections.
+                    Works out the sounds in this browser instead of waiting
+                    on our server, which is usually 50 to 70% faster. The
+                    first time, it downloads about 100 MB. Turn it off on
+                    older devices or slow internet.
                   </p>
                 </div>
                 <Switch
@@ -277,13 +278,12 @@ const Settings = () => {
               <div className="flex items-center justify-between">
                 <div className="flex-1 pr-4">
                   <Label htmlFor="websocketConnection">
-                    WebSocket Connection (Experimental)
+                    Stay connected between recordings (experimental)
                   </Label>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Use persistent WebSocket connection instead of creating new
-                    connections for each request. Eliminates 5-second connection
-                    overhead on subsequent recordings. Recommended for faster
-                    experience.
+                    Keeps one connection to our server open instead of
+                    starting a new one for every sentence, so feedback after
+                    the first recording can come back up to 5 seconds sooner.
                   </p>
                 </div>
                 <Switch
@@ -303,10 +303,10 @@ const Settings = () => {
                   <h4 className="text-sm font-semibold text-foreground">Performance Tips</h4>
                 </div>
                 <ul className="text-sm text-muted-foreground space-y-1.5 list-disc list-inside">
-                  <li>Model downloads once and caches for future sessions</li>
-                  <li>Automatically disabled on low-memory devices</li>
-                  <li>Falls back to server processing if any issues occur</li>
-                  <li>Best results on desktop with good internet connection</li>
+                  <li>The download happens once and is saved for next time</li>
+                  <li>Turns itself off on devices without enough memory</li>
+                  <li>If anything goes wrong, our server checks the reading instead</li>
+                  <li>Works best on a computer with a good internet connection</li>
                 </ul>
               </div>
             </CardContent>

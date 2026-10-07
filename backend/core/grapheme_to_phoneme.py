@@ -338,6 +338,13 @@ def _convert_cached(grapheme: str, strict: bool) -> tuple:
 LEGACY_SENTENCE_CLEANING_FLAG = "WWAI_LEGACY_SENTENCE_CLEANING"
 
 _APOSTROPHES = str.maketrans({"\u2019": "'", "\u2018": "'", "\u02bc": "'"})
+# Double quotes, colons and semicolons go. A dash becomes a space, so "cat-dog" is two
+# words, and runs of whitespace are collapsed afterwards (the default G2P splits on
+# single spaces).
+_DROPPED_PUNCTUATION = str.maketrans({
+    '"': None, "\u201c": None, "\u201d": None, ":": None, ";": None,
+    "-": " ", "\u2013": " ", "\u2014": " ",
+})
 # An apostrophe with a letter on both sides is part of a word ("it's", "don't",
 # "dog's"); any other one is a quote mark or a plural possessive ("dogs'").
 _STRAY_APOSTROPHE_RE = re.compile(r"(?<![a-z])'|'(?![a-z])")
@@ -349,11 +356,15 @@ def clean_sentence(sentence: str) -> str:
     Lowercases and drops . , ? ! and quote marks, but keeps apostrophes inside
     words: CMUdict knows "it's" and "didn't", while "its"-style spellings like
     "dont" or "didnt" are unknown words that would be scored against their
-    spelling. Curly apostrophes become straight ones first.
+    spelling. Curly apostrophes become straight ones first. Straight and curly
+    double quotes, colons and semicolons are dropped too, dashes (- – —) become
+    spaces, so a hyphenated word is read as two words, and runs of whitespace
+    are collapsed to one space.
 
     Shared with the accuracy benchmark (backend/tests/benchmark) so both score the
     exact same ground truth. WWAI_LEGACY_SENTENCE_CLEANING brings back the old
-    cleanup, which stripped every straight apostrophe.
+    cleanup, which stripped every straight apostrophe and left double quotes,
+    colons, semicolons, dashes and runs of whitespace alone.
     """
     if os.environ.get(LEGACY_SENTENCE_CLEANING_FLAG, "").strip().lower() in ("1", "true", "yes", "on"):
         return (
@@ -371,8 +382,9 @@ def clean_sentence(sentence: str) -> str:
         .replace(",", "")
         .replace("?", "")
         .replace("!", "")
+        .translate(_DROPPED_PUNCTUATION)
     )
-    return _STRAY_APOSTROPHE_RE.sub("", cleaned)
+    return " ".join(_STRAY_APOSTROPHE_RE.sub("", cleaned).split())
 
 
 def grapheme_to_phoneme(grapheme, strict: bool | None = None) -> list[tuple]:

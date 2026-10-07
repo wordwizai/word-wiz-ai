@@ -2,7 +2,8 @@ from models import FeedbackEntry  # Adjust import if needed
 from schemas.feedback_entry import FeedbackEntryCreate
 from sqlalchemy.orm import Session
 from models.session import Session as SessionModel
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone, tzinfo
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 
 def create_feedback_entry(db: Session, feedback: FeedbackEntryCreate) -> FeedbackEntry:
@@ -65,7 +66,31 @@ def get_feedback_entries_by_user(
     return list(reversed(newest_first))
 
 
-def get_user_statistics(db: Session, user_id: int) -> dict:
+def resolve_timezone(name: str | None) -> tzinfo:
+    """The family's IANA timezone (e.g. "America/Los_Angeles"), or UTC if it
+    is missing or not a zone we know."""
+    if not name:
+        return timezone.utc
+    try:
+        return ZoneInfo(name)
+    except (ZoneInfoNotFoundError, ValueError):
+        return timezone.utc
+
+
+def local_date(created_at: datetime, tz: tzinfo) -> date:
+    """The calendar day a stored timestamp fell on for the family.
+
+    created_at is UTC but the database hands it back without a zone. Taking
+    .date() of it directly counted UTC days, so a family in California
+    reading at 4pm one day and 6pm the next looked like they had skipped a
+    day in between.
+    """
+    if created_at.tzinfo is None:
+        created_at = created_at.replace(tzinfo=timezone.utc)
+    return created_at.astimezone(tz).date()
+
+
+def get_user_statistics(db: Session, user_id: int, tz_name: str | None = None) -> dict:
     """
     Calculate comprehensive user statistics for dashboard.
     
@@ -74,7 +99,9 @@ def get_user_statistics(db: Session, user_id: int) -> dict:
     Args:
         db: Database session
         user_id: ID of the user
-        
+        tz_name: The family's IANA timezone, so streak days are their days.
+            UTC when missing or unknown.
+
     Returns:
         Dictionary with total_sessions, current_streak, longest_streak, words_read
     """
@@ -93,14 +120,11 @@ def get_user_statistics(db: Session, user_id: int) -> dict:
         .all()
     )
     
-    # Extract unique dates (convert datetime to date)
-    session_dates = sorted(
-        set(session.created_at.date() for session in all_sessions),
-        reverse=True
+    tz = resolve_timezone(tz_name)
+    session_dates = {local_date(session.created_at, tz) for session in all_sessions}
+    current_streak, longest_streak = calculate_streaks(
+        session_dates, today=datetime.now(tz).date()
     )
-    
-    # Calculate streaks
-    current_streak, longest_streak = calculate_streaks(session_dates)
     
     # 3. Calculate total words read — only fetch sentence column to avoid loading
     # the large phoneme_analysis JSON for every entry
@@ -120,59 +144,47 @@ def get_user_statistics(db: Session, user_id: int) -> dict:
     }
 
 
-def calculate_streaks(session_dates: list[date]) -> tuple[int, int]:
+def calculate_streaks(
+    session_dates, today: date | None = None
+) -> tuple[int, int]:
     """
-    Calculate current and longest streaks from a list of session dates.
-    
-    Algorithm (80/20 approach):
-    - Current streak: Count backwards from today while dates are consecutive
-    - Longest streak: Find maximum consecutive sequence in history
-    
+    Current and longest runs of consecutive days with reading.
+
+    The current streak counts back from today, or from yesterday when the
+    child hasn't read yet today: the day isn't over, so yesterday's streak is
+    still alive. Counting only from today showed every streak as 0 each
+    morning until the child read again.
+
     Args:
-        session_dates: List of dates (must be sorted descending)
-        
+        session_dates: Days with at least one session, in any order, repeats
+            allowed. Compute them with local_date() so they are the family's
+            days.
+        today: The family's today. Defaults to the server's.
+
     Returns:
         Tuple of (current_streak, longest_streak)
     """
-    if not session_dates:
+    dates = set(session_dates)
+    if not dates:
         return 0, 0
-    
-    today = date.today()
-    
-    # Calculate current streak
+    if today is None:
+        today = date.today()
+
     current_streak = 0
-    expected_date = today
-    
-    for session_date in session_dates:
-        if session_date == expected_date:
-            current_streak += 1
-            expected_date -= timedelta(days=1)
-        elif session_date < expected_date:
-            # Gap found, stop counting current streak
-            break
-    
-    # Calculate longest streak (iterate through all dates)
+    day = today if today in dates else today - timedelta(days=1)
+    while day in dates:
+        current_streak += 1
+        day -= timedelta(days=1)
+
     longest_streak = 0
-    temp_streak = 1
-    
-    # Sort ascending for easier consecutive checking
-    sorted_dates = sorted(set(session_dates))
-    
-    for i in range(len(sorted_dates) - 1):
-        days_diff = (sorted_dates[i + 1] - sorted_dates[i]).days
-        
-        if days_diff == 1:
-            # Consecutive day
-            temp_streak += 1
-            longest_streak = max(longest_streak, temp_streak)
-        else:
-            # Gap found, reset temporary streak
-            temp_streak = 1
-    
-    # Don't forget to check the final streak
-    longest_streak = max(longest_streak, temp_streak, current_streak)
-    
-    return current_streak, longest_streak
+    run = 0
+    previous = None
+    for day in sorted(dates):
+        run = run + 1 if previous is not None and (day - previous).days == 1 else 1
+        longest_streak = max(longest_streak, run)
+        previous = day
+
+    return current_streak, max(longest_streak, current_streak)
 
 
 def get_student_insights(

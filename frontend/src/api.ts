@@ -331,9 +331,20 @@ interface StudentInsights {
   calculation_window: string;
 }
 
+// The browser's IANA timezone ("America/Los_Angeles"). Streaks are counted
+// in the family's own days; the backend falls back to UTC without it.
+const browserTimeZone = () => {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || undefined;
+  } catch {
+    return undefined;
+  }
+};
+
 const getUserStatistics = async (token: string): Promise<UserStatistics> => {
   try {
     const response = await axios.get(`${API_URL}/feedback/statistics`, {
+      params: { tz: browserTimeZone() },
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -421,6 +432,7 @@ const getClassStudents = async (
 ): Promise<ClassStudentsResponse> => {
   try {
     const response = await axios.get(`${API_URL}/classes/${classId}/students`, {
+      params: { tz: browserTimeZone() },
       headers: {
         Authorization: `Bearer ${token}`,
       },

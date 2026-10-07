@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "@/contexts/AuthContext";
 import {
@@ -65,9 +65,13 @@ export function useStartPattern() {
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
   const [startingSlug, setStartingSlug] = useState<string | null>(null);
+  // State updates land on the next render, so a second tap in the same tick
+  // would still see null. The ref closes that window.
+  const inFlight = useRef(false);
 
   const start = async (slug: string) => {
-    if (startingSlug !== null) return;
+    if (inFlight.current) return;
+    inFlight.current = true;
     setStartingSlug(slug);
     try {
       const session = await startPatternSession(token ?? "", slug);
@@ -75,6 +79,8 @@ export function useStartPattern() {
     } catch (error) {
       console.error("Failed to start pattern:", error);
       showErrorToast("Couldn't start that practice. Please try again.");
+    } finally {
+      inFlight.current = false;
       setStartingSlug(null);
     }
   };

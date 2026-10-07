@@ -2,6 +2,8 @@ from auth.auth_handler import get_current_active_user
 from core.modes.story import StoryPractice
 from core.modes.unlimited import UnlimitedPractice
 from core.modes.choice_story import ChoiceStoryPractice
+from core.modes.phonics_pattern import phonics_mode_for
+from core.phonics_data import PHONICS_ACTIVITY_TYPE
 from core.phoneme_assistant import PhonemeAssistant
 from crud.session import get_session
 from database import get_db
@@ -118,6 +120,8 @@ def get_activity_object(session: UserSession):
     elif activity_type == "story":
         story_name = session.activity.activity_settings.get("story_name", "")
         return StoryPractice(story_name)
+    elif activity_type == PHONICS_ACTIVITY_TYPE:
+        return phonics_mode_for(session)
     else:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

@@ -563,6 +563,7 @@ const SkipsWords = () => {
           bio: "Reading specialists helping parents address common reading challenges.",
         }}
         publishDate="2025-01-02"
+        updatedDate="2026-09-07"
         readTime={13}
         category="Reading Problems"
         content={content}

@@ -619,6 +619,7 @@ const DecodableBooksVsLeveledReaders = () => {
         bio: "Passionate about Science of Reading instruction and early literacy.",
       }}
       publishDate="2024-12-29"
+      updatedDate="2026-09-07"
       readTime={9}
       category="Reading Strategies"
       content={content}

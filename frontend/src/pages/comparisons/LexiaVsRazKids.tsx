@@ -292,7 +292,7 @@ const LexiaRazKidsComparison = () => {
       "Complementing Lexia or Raz-Kids programs",
     ],
     description:
-      "Word Wiz AI is the only free option that listens to students read and provides specific pronunciation feedback. While it doesn't replace comprehensive intervention (Lexia) or reading practice (Raz-Kids), it fills a critical gap by addressing pronunciation—something neither competitor offers.",
+      "Of these three, Word Wiz AI is the free option that listens to students read and gives specific pronunciation feedback. While it doesn't replace comprehensive intervention (Lexia) or reading practice (Raz-Kids), it adds something neither competitor offers by addressing pronunciation.",
   };
 
   const verdict = {
@@ -325,7 +325,7 @@ const LexiaRazKidsComparison = () => {
     {
       question: "Which program is best for struggling readers?",
       answer:
-        "Lexia excels at identifying and supporting struggling readers with its comprehensive assessment system. However, if pronunciation is the main issue, Word Wiz AI is the only option with speech recognition to identify and correct specific pronunciation errors. Consider using both together.",
+        "Lexia excels at identifying and supporting struggling readers with its comprehensive assessment system. However, if pronunciation is the main issue, Word Wiz AI is the option here with speech recognition to identify and correct specific pronunciation errors. Consider using both together.",
     },
     {
       question: "Is Word Wiz AI really completely free?",

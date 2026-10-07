@@ -539,6 +539,7 @@ const TutorVsApp = () => {
         bio: "Educational technology experts helping parents make informed decisions about reading interventions.",
       }}
       publishDate="2025-01-02"
+      updatedDate="2026-09-07"
       readTime={14}
       category="App Comparisons"
       content={content}

@@ -724,6 +724,7 @@ const IsTeacherTeachingPhonics = () => {
         bio: "Passionate about Science of Reading instruction and literacy advocacy.",
       }}
       publishDate="2024-12-29"
+      updatedDate="2026-09-07"
       readTime={11}
       category="Education Advocacy"
       content={content}

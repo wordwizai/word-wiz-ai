@@ -60,7 +60,7 @@ const ChoosingReadingApp = () => {
     {
       type: "paragraph",
       content:
-        "Word Wiz AI is currently the only free app offering phoneme-level speech recognition, most apps with this feature cost $10-20/month.",
+        "Word Wiz AI is free and checks reading at the level of individual sounds. Google Read Along and Microsoft Reading Coach are also free and listen as children read.",
     },
     {
       type: "heading",
@@ -224,7 +224,7 @@ const ChoosingReadingApp = () => {
     {
       type: "paragraph",
       content:
-        "If pronunciation feedback matters to you, Word Wiz AI is the only free option that actually provides it.",
+        "If pronunciation feedback matters to you, Word Wiz AI, Google Read Along and Microsoft Reading Coach all provide it for free.",
     },
     {
       type: "heading",
@@ -356,7 +356,7 @@ const ChoosingReadingApp = () => {
         type: "info",
         title: "Speech Technology Is Rare",
         content:
-          "Only a handful of apps have real speech recognition. Word Wiz AI is the only free option offering this technology at the phoneme level.",
+          "Only a handful of apps have real speech recognition. Google Read Along and Microsoft Reading Coach are free and help with whole words, and Word Wiz AI is free and checks each sound inside the word.",
       },
     },
     {
@@ -569,7 +569,7 @@ const ChoosingReadingApp = () => {
     {
       type: "paragraph",
       content:
-        "Word Wiz AI (free) - The only free app with phoneme-level speech recognition. Identifies specific pronunciation errors and provides AI-powered feedback.",
+        "Word Wiz AI (free) - Speech recognition that checks each sound inside a word. Identifies specific pronunciation errors and writes the next sentence around them.",
     },
     {
       type: "heading",
@@ -815,6 +815,7 @@ const ChoosingReadingApp = () => {
         bio: "Passionate about reading apps and early literacy instruction.",
       }}
       publishDate="2024-12-29"
+      updatedDate="2026-10-06"
       readTime={13}
       category="App Selection"
       content={content}

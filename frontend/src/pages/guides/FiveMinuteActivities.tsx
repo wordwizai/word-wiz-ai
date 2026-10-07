@@ -366,6 +366,7 @@ const FiveMinuteActivities = () => {
         bio: "Education specialists creating practical, time-efficient reading practice strategies for busy families.",
       }}
       publishDate="2025-01-02"
+      updatedDate="2026-09-07"
       readTime={10}
       category="Phonics Guides"
       content={content}

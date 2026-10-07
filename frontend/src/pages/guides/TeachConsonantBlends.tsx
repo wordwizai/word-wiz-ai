@@ -463,6 +463,7 @@ const TeachConsonantBlends = () => {
         bio: "Expert educators specializing in early literacy and phonics instruction for young learners.",
       }}
       publishDate="2025-01-02"
+      updatedDate="2026-09-07"
       readTime={12}
       category="Phonics Guides"
       content={content}

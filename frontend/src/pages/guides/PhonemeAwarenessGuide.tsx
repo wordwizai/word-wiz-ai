@@ -806,6 +806,7 @@ const PhonemeAwarenessGuide = () => {
         bio: "Passionate about phoneme awareness, phonics instruction, and early literacy.",
       }}
       publishDate="2024-12-29"
+      updatedDate="2026-09-07"
       readTime={13}
       category="Phonics Foundation"
       content={content}

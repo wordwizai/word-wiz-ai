@@ -311,7 +311,7 @@ const ABCmouseHookedOnPhonicsComparison = () => {
     product2:
       "Choose Hooked on Phonics if you prefer a traditional, systematic phonics program with physical materials and don't mind a higher price point. It's effective but requires manual parent involvement for pronunciation assessment.",
     wordWiz:
-      "Choose Word Wiz AI if you want cutting-edge speech recognition technology that actually listens to your child read and provides phoneme-level feedback. It's the only free option offering AI-powered pronunciation coaching.",
+      "Choose Word Wiz AI if you want cutting-edge speech recognition technology that actually listens to your child read and provides phoneme-level feedback. Of the three, it's the one that coaches pronunciation, and it's free.",
     overall:
       "For families specifically concerned about pronunciation and phonics mastery, Word Wiz AI is the clear winner. While ABCmouse offers breadth and Hooked on Phonics offers tradition, only Word Wiz AI provides the precision of AI-powered speech analysis. Plus, it's free to use, making advanced technology accessible to all families.",
   };

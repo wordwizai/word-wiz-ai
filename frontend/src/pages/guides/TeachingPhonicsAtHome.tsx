@@ -664,6 +664,7 @@ const TeachingPhonicsAtHome = () => {
         bio: "Passionate about phonics instruction and early literacy based on the Science of Reading.",
       }}
       publishDate="2024-12-29"
+      updatedDate="2026-09-07"
       readTime={12}
       category="Phonics Education"
       content={content}

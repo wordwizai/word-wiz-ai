@@ -1303,7 +1303,7 @@ class TestClientPhonemesHook(unittest.TestCase):
             if value is not None:
                 os.environ[key] = value
 
-    def _run(self, groups, words, gt=GT_SHORT, **kwargs):
+    def _run(self, groups, words, gt=GT_SHORT, audio_array=None, **kwargs):
         import asyncio
         import contextlib
         import io
@@ -1311,7 +1311,7 @@ class TestClientPhonemesHook(unittest.TestCase):
 
         with contextlib.redirect_stdout(io.StringIO()):
             return asyncio.run(process_audio_with_client_phonemes(
-                client_phonemes=groups, ground_truth_phonemes=gt, audio_array=None,
+                client_phonemes=groups, ground_truth_phonemes=gt, audio_array=audio_array,
                 sampling_rate=16000, client_words=words, **kwargs,
             ))
 
@@ -1386,6 +1386,55 @@ class TestClientPhonemesHook(unittest.TestCase):
 
         def extract_words(self, audio=None, sampling_rate=None):
             return self.words
+
+    class _NoWords:
+        def extract_words(self, audio=None, sampling_rate=None):
+            raise AssertionError("words were extracted from an empty recording")
+
+    def _run_without_audio(self, groups, words, gt=GT_SHORT):
+        """The full client mode: the browser sent its phonemes and words with an empty recording."""
+        import numpy as np
+        from unittest import mock
+        import core.process_audio as pa
+
+        with mock.patch.object(pa, "preprocess_audio", side_effect=AssertionError("preprocessed")):
+            return self._run(groups, words, gt, audio_array=np.array([]), word_extraction_model=self._NoWords())
+
+    def test_a_full_client_reading_without_audio_is_scored(self):
+        # The browser's ASR heard nothing (client_words == []), so the frontend sent empty audio.
+        groups = self.CASES["asr_corrects_tat"][0]
+        flat = [p for g in groups for p in g]
+        for words in ([], None):
+            with self.subTest(words=words):
+                results = self._run_without_audio(groups, words)
+                self.assertEqual(results, align_to_ground_truth(flat, GT_SHORT, []))
+                self.assertEqual([r["type"] for r in results], ["match", "substitution", "match"])
+        # With words, the empty recording changes nothing.
+        self.assertEqual(self._run_without_audio(groups, self.WORDS),
+                         align_to_ground_truth(flat, GT_SHORT, self.WORDS))
+
+    def test_without_audio_the_coverage_rule_still_decides_no_speech(self):
+        for groups in ([], [[]], [['ð']], [['ð', 'ə']]):
+            with self.subTest(groups=groups):
+                with self.assertRaises(ValueError) as ctx:
+                    self._run_without_audio(groups, [])
+                self.assertEqual(str(ctx.exception), "The audio provided has no speech inside")
+        # The ground truth length is still checked first.
+        with self.assertRaises(ValueError) as ctx:
+            self._run_without_audio(self.CASES["exact"][0], [], gt=[THE])
+        self.assertIn("ground_truth_phonemes", str(ctx.exception))
+
+    def test_the_legacy_path_still_preprocesses_an_empty_recording(self):
+        import numpy as np
+        from unittest import mock
+        import core.process_audio as pa
+
+        os.environ[GT_ANCHORED_FLAG] = "false"
+        with mock.patch.object(pa, "preprocess_audio", side_effect=RuntimeError("preprocessed")) as pre:
+            with self.assertRaisesRegex(RuntimeError, "preprocessed"):
+                self._run(self.CASES["exact"][0], [], audio_array=np.array([]),
+                          word_extraction_model=self._Words([]))
+        pre.assert_called_once()
 
     def test_server_words_are_used_when_the_client_sends_none(self):
         # The hybrid mode: the server's ASR heard an extra word, which becomes an insertion record.

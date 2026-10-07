@@ -881,6 +881,14 @@ async def process_audio_with_client_phonemes(
     if len(ground_truth_phonemes) <= 1:
         raise ValueError("ground_truth_phonemes must have at least 2 elements")
     
+    from .gt_alignment import is_gt_anchored_enabled
+    if is_gt_anchored_enabled() and audio_array is not None and np.size(audio_array) == 0:
+        # The frontend sends an empty recording whenever it has both client phonemes and
+        # client words, including client_words == [] when the browser's ASR heard nothing.
+        # There is nothing to preprocess or transcribe, and the anchored scoring needs only
+        # the phonemes. Its coverage rule still decides whether this was "no speech".
+        return _score_anchored(ground_truth_phonemes, client_phonemes, client_words or [])
+
     # Only preprocess audio if we need to extract words from it
     # If client provided both phonemes and words, we don't need the audio at all
     if client_words is None or len(client_words) == 0:
@@ -906,7 +914,6 @@ async def process_audio_with_client_phonemes(
         )
         print(f"✓ Word extraction completed: {predicted_words}")
 
-    from .gt_alignment import is_gt_anchored_enabled
     if is_gt_anchored_enabled():  # WWAI_GT_ANCHORED_ALIGNMENT, default ON
         # Exactly as in process_audio_array (see _score_anchored). The client's own
         # word grouping does not matter, and the WWAI_CLIENT_REALIGN option, which

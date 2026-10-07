@@ -335,5 +335,73 @@ class TestHandlerClientGroundTruth(unittest.TestCase):
         self.assertEqual(truth, grapheme_to_phoneme(clean_sentence("The cat sat.")))
 
 
+class TestHandlerFullClientWithoutAudio(unittest.TestCase):
+    """The frontend sends an empty recording whenever it has client phonemes and client words.
+
+    That includes client_words == [] when the browser's ASR heard nothing. The real handler
+    and the real scoring must still score the reading instead of failing on the empty audio.
+    """
+
+    GROUPS = [["ð", "ə"], ["t", "æ", "t"], ["s", "æ", "t"]]   # "the cat sat" read as "the tat sat"
+
+    @classmethod
+    def setUpClass(cls):
+        # Same import pattern as TestHandlerMarksItsPass above.
+        os.environ.setdefault("DATABASE_URL", "sqlite://")
+        try:
+            from routers.handlers import audio_processing_handler as handler
+        except ImportError as exc:
+            raise unittest.SkipTest(f"audio_processing_handler not importable ({exc})") from exc
+        cls.handler = handler
+
+    def _events(self, client_phonemes, client_words):
+        import base64
+        import json
+        from types import SimpleNamespace
+
+        class FakeActivity:
+            async def get_next_sentence(self, **_kwargs):
+                return {"sentence": "The dog ran."}
+
+        assistant = SimpleNamespace(
+            word_extractor=None,
+            feedback_to_audio=lambda _text, _ssml=None: {
+                "data": base64.b64encode(b"mp3").decode(), "filename": "f.mp3", "mimetype": "audio/mpeg"},
+        )
+
+        async def collect():
+            return [chunk async for chunk in self.handler.analyze_audio_file_event_stream(
+                phoneme_assistant=assistant, activity_object=FakeActivity(),
+                audio_bytes=b"", audio_filename="empty.wav", audio_content_type="audio/wav",
+                attempted_sentence="The cat sat.", db=None, current_user=SimpleNamespace(id=1),
+                session=SimpleNamespace(id=7), client_phonemes=client_phonemes, client_words=client_words,
+            )]
+
+        with mock.patch.dict(os.environ), \
+                mock.patch.object(self.handler, "create_feedback_entry"), \
+                mock.patch.object(self.handler.audio_cache, "save_feedback_audio"), \
+                _quiet():
+            os.environ.pop("WWAI_GT_ANCHORED_ALIGNMENT", None)
+            chunks = asyncio.run(collect())
+        return [json.loads(c[len("data: "):]) for c in chunks if c.startswith("data: ")]
+
+    def test_an_empty_transcript_without_audio_is_scored(self):
+        events = self._events(self.GROUPS, [])
+        types = [e["type"] for e in events]
+        self.assertNotIn("error", types, events)
+        self.assertIn("analysis", types)
+        self.assertEqual(next(e for e in events if e["type"] == "processing_mode")["data"]["mode"], "client")
+        df = next(e for e in events if e["type"] == "analysis")["data"]["pronunciation_dataframe"]
+        words = [df["ground_truth_word"][k] for k in sorted(df["ground_truth_word"], key=int)]
+        self.assertEqual(words, ["the", "cat", "sat"])
+        errors = [df["total_errors"][k] for k in sorted(df["total_errors"], key=int)]
+        self.assertEqual(errors, [0, 1, 0])
+
+    def test_too_few_phonemes_without_audio_is_no_speech(self):
+        events = self._events([["ð"]], [])
+        self.assertEqual(events[-1]["type"], "error")
+        self.assertEqual(events[-1]["data"]["message"], self.handler.NO_SPEECH_MESSAGE)
+
+
 if __name__ == "__main__":
     unittest.main()

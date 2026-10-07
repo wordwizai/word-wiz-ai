@@ -10,12 +10,22 @@ tags. The tag wraps a demo syllable so TTS produces the target sound in isolatio
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from typing import Optional
 
 #: Words at or above this PER count as clearly mispronounced when picking the focus
 #: phoneme. Module level so the accuracy benchmark scores the same cutoff.
 HIGH_PER_THRESHOLD = 0.4
+
+#: Kill switch for the feedback changes the speechocean762 benchmark accepted. When truthy,
+#: the formatter picks and names words exactly as it did before them. Read at call time.
+LEGACY_FEEDBACK_FLAG = "WWAI_LEGACY_FEEDBACK"
+_TRUTHY = {"1", "true", "yes", "on"}
+
+
+def is_legacy_feedback() -> bool:
+    return os.environ.get(LEGACY_FEEDBACK_FLAG, "").strip().lower() in _TRUTHY
 
 
 @dataclass
@@ -334,8 +344,18 @@ def _focus_from_high_per_words(
     pronunciation_data: list[dict],
     phoneme_to_error_words: dict[str, list[dict]],
 ) -> Optional[str]:
+    """The focus phoneme alone (see ``_focus_and_source_word``)."""
+    return _focus_and_source_word(pronunciation_data, phoneme_to_error_words)[0]
+
+
+def _focus_and_source_word(
+    pronunciation_data: list[dict],
+    phoneme_to_error_words: dict[str, list[dict]],
+) -> tuple[Optional[str], Optional[str]]:
     """
-    Pick the best focus phoneme by walking words from worst PER to least-bad.
+    Pick the best focus phoneme by walking words from worst PER to least-bad,
+    and return it with the word it came from (``(None, None)`` when no word
+    qualifies).
 
     Iterates high-PER words (PER ≥ 0.4) from worst to best and returns the
     most-errored phoneme found in the first word that has phoneme errors.
@@ -353,7 +373,7 @@ def _focus_from_high_per_words(
         reverse=True,
     )
     if not high_per_words:
-        return None
+        return None, None
 
     # Walk worst → less-bad; return as soon as we find a word with phoneme errors
     for word_entry in high_per_words:
@@ -371,9 +391,10 @@ def _focus_from_high_per_words(
                 candidates[phoneme] = count
 
         if candidates:
-            return max(candidates, key=lambda p: candidates[p])
+            source = (word_entry.get("ground_truth_word") or "").strip()
+            return max(candidates, key=lambda p: candidates[p]), source
 
-    return None
+    return None, None
 
 
 def _ordered_phonemes(
@@ -477,7 +498,7 @@ def generate_feedback(
     # Priority: phonemes from clearly mispronounced words (PER ≥ 0.4) first.
     # This prevents a high-frequency consonant like 't' from dominating just
     # because it appears many times across the sentence with tiny errors.
-    focus_phoneme = _focus_from_high_per_words(pronunciation_data, phoneme_to_error_words)
+    focus_phoneme, source_word = _focus_and_source_word(pronunciation_data, phoneme_to_error_words)
 
     if not focus_phoneme:
         # No word was clearly wrong (nothing cleared the 0.4 PER threshold).
@@ -491,6 +512,11 @@ def generate_feedback(
             return FeedbackResult(text="Keep practicing!", ssml="Keep practicing!")
         focus_phoneme = ordered[0]
     words = _words_for_phoneme(focus_phoneme, phoneme_to_error_words, max_words=3)
+    # Name the word the focus sound came from first. The list above is in
+    # sentence order, so its first word is often a barely-wrong one that merely
+    # shares the sound with the word that was clearly wrong.
+    if source_word and not is_legacy_feedback():
+        words = ([source_word] + [w for w in words if w != source_word])[:3]
     if not words:
         return FeedbackResult(text="Keep practicing!", ssml="Keep practicing!")
 

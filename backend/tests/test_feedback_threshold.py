@@ -66,21 +66,30 @@ class TestFocusIsReturned(unittest.TestCase):
         self.assertEqual(result.focus_words, ["think"])
         self.assertIn(f"'{result.focus_words[0]}'", result.text)
 
-    def test_the_words_come_in_order_and_the_text_names_the_first(self):
-        # /k/ is wrong in three words. "kite" is the worst word, so /k/ is the focus sound,
-        # and the formatter's word list for /k/ is in sentence order.
-        data = [
-            _record("cat", 0.3333, 1, 3, ["k", "æ", "t"], substituted=[("k", "g")]),
-            _record("kite", 0.6667, 2, 3, ["k", "aɪ", "t"], substituted=[("k", "t"), ("aɪ", "a")]),
-            _record("cake", 0.3333, 1, 3, ["k", "eɪ", "k"], missed=["k"]),
-        ]
-        result = fmt.generate_feedback({}, {"sentence_per": 0.44}, data)
-        self.assertEqual(result.text, "In the word 'cat', the letters 'c' make the 'k' sound.")
+    # /k/ is wrong in three words. "kite" is the worst word, so /k/ is the focus sound.
+    K_WORDS = [
+        _record("cat", 0.3333, 1, 3, ["k", "æ", "t"], substituted=[("k", "g")]),
+        _record("kite", 0.6667, 2, 3, ["k", "aɪ", "t"], substituted=[("k", "t"), ("aɪ", "a")]),
+        _record("cake", 0.3333, 1, 3, ["k", "eɪ", "k"], missed=["k"]),
+    ]
+
+    def test_the_text_names_the_word_the_sound_came_from(self):
+        # The focus sound comes from the worst word, so that is the word to name. Naming the
+        # first word in the sentence with any /k/ error named a mildly wrong word instead (on
+        # the speechocean762 benchmark the named word was a real mistake far less often).
+        result = fmt.generate_feedback({}, {"sentence_per": 0.44}, self.K_WORDS)
+        self.assertEqual(result.text, "In the word 'kite', the letters 'k' make the 'k' sound.")
         self.assertEqual(result.focus_phoneme, "k")
+        self.assertEqual(result.focus_words, ["kite", "cat", "cake"])
+
+    def test_the_legacy_switch_names_the_first_word_in_sentence_order(self):
+        with mock.patch.dict(os.environ, {fmt.LEGACY_FEEDBACK_FLAG: "1"}):
+            result = fmt.generate_feedback({}, {"sentence_per": 0.44}, self.K_WORDS)
+        self.assertEqual(result.text, "In the word 'cat', the letters 'c' make the 'k' sound.")
         self.assertEqual(result.focus_words, ["cat", "kite", "cake"])
         self.assertEqual(
             result.focus_words,
-            fmt._words_for_phoneme("k", fmt.build_phoneme_to_error_words(data), max_words=3),
+            fmt._words_for_phoneme("k", fmt.build_phoneme_to_error_words(self.K_WORDS), max_words=3),
         )
 
     def test_praise_names_nothing(self):

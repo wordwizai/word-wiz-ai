@@ -215,11 +215,13 @@ session that already has `completed_at` and returns the stored result.
 
 `frontend/src/config/practiceTypes.ts` gets a `phonics-pattern` entry that uses
 `BasePractice` with the Next button. For pattern sessions the stage shows
-"Line 3 of 7". On `session_complete`, the Next arrow is replaced by a finish
-card ("You read 11 of 14 -at words!", with a stronger message when mastered)
-and two buttons, *Practice again*, which starts a fresh session for the same
-pattern, and *Back to practice*. The child never sees the words "Needs
-practice".
+"Line 3 of 7". After the last line the Next arrow still appears, so the child
+hears that line's feedback first, and tapping it opens a finish screen ("You
+read 11 of 14 words right.", with a stronger message when mastered). The
+screen reads its message aloud and has *Practice again*, which starts a fresh
+session for the same pattern, and *Back to practice*. The child never sees the
+words "Needs practice". A feedback clip that arrives after the child taps Next
+is dropped, so it can't play over the next line or the finish screen.
 
 ## Assignments
 
@@ -297,7 +299,7 @@ Teacher endpoints live in a new `routers/assignments.py`, mounted under
 
 | Method and path | Behavior |
 |---|---|
-| `POST /classes/{id}/assignments` | Body `{ "pattern_slugs": [...], "student_ids": [...] or null }`, where null means the whole class. 400 for unknown slugs (listing them) or for students who aren't members. Returns the created or merged assignments. |
+| `POST /classes/{id}/assignments` | Body `{ "pattern_slugs": [...], "student_ids": [...] or null }`, where null means the whole class. 400 for unknown slugs (listing them) or for students who aren't members. Returns the class's assignments, the same list as GET. |
 | `GET /classes/{id}/assignments` | Each assignment in curriculum order with its recipients' statuses, plus counts per status |
 | `DELETE /classes/{id}/assignments/{assignment_id}` | Removes the assignment. Students' sessions and scores are kept. |
 | `GET /classes/{id}/phonics-progress` | The units, plus each student's status for every pattern they have touched, for the class grid |
@@ -316,11 +318,15 @@ every session, so pattern sessions show up there with no change.
 - **Practice page.** The same "From your teacher" section at the top. Below
   it, a Phonics path section with a Continue card for the first pattern in
   the sequence that isn't Mastered, and a link to all 18 units.
-- **`/phonics` page.** The units in order, each a card with its patterns as
-  chips that show status (a check for Mastered, a dot for Needs practice or
-  In progress). Tapping a chip starts or resumes that pattern's session. The
-  unit holding the next pattern starts open and the rest show a summary such
-  as "3 of 7 mastered".
+- **`/practice/phonics` page.** The units in order, each a card with its
+  patterns as chips that show status (a check for Mastered, a "try again"
+  arrow for Needs practice, a dot for In progress), with a key above the list
+  so the colours never carry meaning alone. Tapping a chip starts or resumes
+  that pattern's session. The unit holding the next pattern starts open and
+  the rest show a summary such as "3 of 7 done". It sits under `/practice`
+  because the build prerenders every public route and the `/practice` family
+  is excluded, and it lights up the Practice nav item. That keeps `/phonics`
+  free for a public scope and sequence page.
 - **Recent list on the Dashboard.** Pattern sessions show the pattern's name
   instead of the activity title, are grouped per pattern instead of per
   activity, and a finished one restarts through `POST /phonics/sessions`.
@@ -333,17 +339,21 @@ All of this lives in the existing `ClassDetailView`.
 - **Assign practice dialog.** Units listed with pattern checkboxes, where
   ticking a unit ticks all its patterns. Below, Whole class (the default) or
   a list of students to tick. A summary line ("Assign 7 patterns to 22
-  students") sits above the Assign button. With no students in the class the
-  button is off and a hint says to share the join code.
+  students") sits above the Assign button. With no students yet only Whole
+  class can be picked, since whole-class work reaches students as they join.
+  A pattern the whole class already has stays whole-class when it's assigned
+  to chosen students, and the dialog says so. After assigning, the view
+  switches to the Assignments tab and a toast confirms it.
 - **Assignments tab.** One row per assignment in curriculum order with who
-  it is for and a bar of mastered, needs practice and not started. Expanding
+  it is for and a bar of mastered, needs practice, in progress and not
+  started, with a key above the list. Expanding
   a row shows each student's status, score and tries, and it has a delete
   action.
 - **Phonics path tab.** A grid of students by units. Each cell shows mastered
   patterns out of the unit's total, shaded by that fraction, and scrolls
   sideways on narrow screens.
 - **Student detail.** A read-only copy of the child's path, reusing the
-  `/phonics` page's unit component.
+  `/practice/phonics` page's unit component.
 
 ## Errors and edge cases
 

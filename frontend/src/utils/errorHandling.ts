@@ -173,7 +173,9 @@ export function showAudioPlaybackError(error?: string | Error) {
  * backend's audio pipeline) without swapping it for a category template.
  */
 export function showPracticeErrorToast(message: string) {
-  toast.error("Let's try that again", { description: message });
+  // These usually ask a grown-up to do something ("try somewhere quieter"),
+  // and the default 4 seconds is gone before they've finished reading it.
+  toast.error("Let's try that again", { description: message, duration: 10_000 });
 }
 
 /**

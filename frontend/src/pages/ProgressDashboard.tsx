@@ -34,7 +34,7 @@ const ProgressDashboard = () => {
   ];
 
   return (
-    <AppPage>
+    <AppPage title="Progress">
       <PageHeader
         title="Progress"
         description="How reading is going, and which sounds still need practice."
@@ -70,7 +70,7 @@ const ProgressDashboard = () => {
         <p className="-mt-2 mb-4 text-sm text-muted-foreground">
           The sounds missed most often in the last 10 readings.
         </p>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <SoundErrorsCard errorType="substitution" />
           <SoundErrorsCard errorType="deletion" />
           <SoundErrorsCard errorType="insertion" />

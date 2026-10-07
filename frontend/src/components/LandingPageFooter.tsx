@@ -1,356 +1,161 @@
 import { Link } from "react-router-dom";
 import { trackSignupClick } from "@/utils/analytics";
+import { wordWizIcon } from "@/assets";
+import { SUPPORT_EMAIL } from "@/config/contact";
+
+type FooterLink = { to: string; label: string };
+
+// Every guide, article and comparison stays linked from every page; the
+// footer is how search engines reach most of them.
+const READING_HELP: { title: string; links: FooterLink[] }[] = [
+  {
+    title: "Phonics Guides",
+    links: [
+      { to: "/guides/how-to-teach-phonics-at-home", label: "Teaching Phonics at Home" },
+      { to: "/guides/how-to-teach-cvc-words-to-struggling-readers", label: "How to Teach CVC Words" },
+      { to: "/guides/teaching-consonant-blends-kindergarten-at-home", label: "Teaching Consonant Blends" },
+      { to: "/guides/short-vowel-sounds-exercises-beginning-readers", label: "Short Vowel Sounds" },
+      { to: "/guides/r-controlled-vowels-teaching-strategies-parents", label: "R-Controlled Vowels" },
+      { to: "/guides/daily-phonics-practice-routine-kindergarten-at-home", label: "Daily Phonics Routine" },
+      { to: "/guides/decodable-sentences-for-beginning-readers", label: "Decodable Sentences" },
+      { to: "/guides/phonics-practice-without-worksheets-kindergarten", label: "Phonics Without Worksheets" },
+      { to: "/guides/silent-e-words-practice-for-kids", label: "Silent E Words Practice" },
+      { to: "/guides/long-vowel-sounds-practice-first-grade", label: "Long Vowel Sounds" },
+      { to: "/guides/vowel-digraphs-activities-first-graders", label: "Vowel Digraphs" },
+      { to: "/guides/phonics-activities-5-year-old-struggling-reader", label: "Phonics for 5-Year-Olds" },
+      { to: "/guides/first-grade-reading-practice-activities-home", label: "First Grade Activities" },
+      { to: "/guides/reading-practice-kids-hate-reading", label: "Kids Who Hate Reading" },
+    ],
+  },
+  {
+    title: "When Reading Is Hard",
+    links: [
+      { to: "/articles/child-cant-blend-sounds-into-words", label: "Can't Blend Sounds" },
+      { to: "/articles/kindergartener-guesses-words-instead-sounding-out", label: "Guesses Words" },
+      { to: "/articles/child-reads-slowly-struggles-with-fluency", label: "Reads Slowly" },
+      { to: "/articles/first-grader-skips-words-when-reading-aloud", label: "Skips Words" },
+      { to: "/articles/why-child-hates-reading", label: "Why Child Hates Reading" },
+      { to: "/articles/child-pronounces-words-wrong", label: "Pronunciation Errors" },
+      { to: "/articles/decodable-books-vs-leveled-readers", label: "Decodable vs Leveled Books" },
+      { to: "/articles/child-memorizes-books-instead-reading", label: "Memorizes vs Reads" },
+      { to: "/articles/child-confuses-b-d-letters", label: "Confuses B and D" },
+    ],
+  },
+  {
+    title: "Practice Activities",
+    links: [
+      { to: "/practice-words", label: "Phonics Word Lists" },
+      { to: "/practice-words/at-family", label: "-at Word Family" },
+      { to: "/practice-words/sh-digraph", label: "SH Digraph Words" },
+      { to: "/practice-words/bl-blend", label: "BL Blend Words" },
+      { to: "/practice-words/ai-vowel-team", label: "AI Vowel Team Words" },
+      { to: "/practice-words/ar-r-controlled", label: "AR Words (Bossy R)" },
+      { to: "/guides/five-minute-reading-practice-activities-kids", label: "5 Minute Reading Activities" },
+      { to: "/guides/is-teacher-teaching-enough-phonics", label: "Is Teacher Teaching Phonics?" },
+      { to: "/guides/phoneme-awareness-complete-guide", label: "Phoneme Awareness Guide" },
+      { to: "/guides/how-to-choose-reading-app", label: "Choosing Reading Apps" },
+    ],
+  },
+  {
+    title: "App Comparisons",
+    links: [
+      { to: "/comparisons/reading-tutor-vs-reading-app", label: "Tutor vs Reading App" },
+      { to: "/comparisons/ai-reading-app-vs-traditional-phonics-program", label: "AI vs Traditional Phonics" },
+      { to: "/comparisons/free-phonics-apps-vs-paid-reading-programs", label: "Free vs Paid Programs" },
+      { to: "/comparisons/abcmouse-vs-hooked-on-phonics-vs-word-wiz-ai", label: "ABCmouse vs HOP" },
+      { to: "/comparisons/reading-eggs-vs-starfall-vs-word-wiz-ai", label: "Reading Eggs vs Starfall" },
+      { to: "/comparisons/homer-vs-khan-academy-kids-vs-word-wiz-ai", label: "HOMER vs Khan Kids" },
+      { to: "/comparisons/lexia-vs-raz-kids-vs-word-wiz-ai", label: "Lexia vs Raz-Kids" },
+      { to: "/comparisons/best-free-reading-apps", label: "Best Free Apps" },
+      { to: "/comparisons/best-phonics-app-kindergarten-struggling-readers", label: "Best Kindergarten Phonics Apps" },
+      { to: "/comparisons/phonics-worksheets-vs-interactive-reading", label: "Worksheets vs Interactive" },
+      { to: "/comparisons/hooked-on-phonics-vs-word-wiz-ai", label: "Hooked on Phonics vs Word Wiz" },
+      { to: "/comparisons/ixl-vs-duolingo-abc-vs-word-wiz-ai", label: "IXL vs Duolingo ABC" },
+      { to: "/comparisons/teach-your-monster-vs-abcya-vs-word-wiz-ai", label: "Teach Your Monster vs ABCya" },
+    ],
+  },
+];
+
+const linkClass = "hover:underline underline-offset-4";
 
 const LandingPageFooter = () => {
   // Dark mode's primary is a light lavender, which made the footer a bright
   // slab under a dark page, so it drops to a purple tint there.
   return (
-    <footer className="bg-primary text-primary-foreground dark:bg-primary/15 dark:text-foreground py-12 px-6 mt-12">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-8 mb-8">
+    <footer className="bg-primary text-primary-foreground dark:bg-primary/15 dark:text-foreground pt-16 pb-8 px-4 sm:px-6 mt-12">
+      <div className="max-w-6xl mx-auto space-y-11">
+        <div className="flex flex-col gap-10 md:flex-row md:justify-between">
           {/* Brand */}
-          <div className="text-center md:text-left">
-            <h3 className="text-xl font-bold mb-2">Word Wiz AI</h3>
-            <p className="text-sm">Read smarter. Grow faster.</p>
+          <div className="max-w-sm space-y-3.5">
+            <div className="flex items-center gap-3">
+              <span className="flex size-11 items-center justify-center rounded-xl bg-white">
+                <img src={wordWizIcon} alt="" className="h-[26px] w-[30px] object-contain" />
+              </span>
+              <span className="text-xl font-semibold">Word Wiz AI</span>
+            </div>
+            <p className="text-[15px] leading-relaxed">
+              A free reading tutor for kids ages 5 to 8. Reach us at{" "}
+              <a
+                href={`mailto:${SUPPORT_EMAIL}`}
+                className="font-semibold underline underline-offset-4"
+              >
+                {SUPPORT_EMAIL}
+              </a>
+              .
+            </p>
           </div>
 
-          {/* Product Links */}
-          <div>
-            <h4 className="font-semibold mb-3 text-sm uppercase">Product</h4>
-            <div className="flex flex-col gap-2 text-sm">
-              <Link to="/about" className="hover:underline">
-                About
-              </Link>
-              <Link
-                to="/signup"
-                className="hover:underline"
-                onClick={() => trackSignupClick("footer", "link")}
-              >
-                Sign Up
-              </Link>
-              <Link to="/login" className="hover:underline">
-                Login
-              </Link>
-              <Link to="/contact" className="hover:underline">
-                Contact
-              </Link>
-            </div>
-          </div>
-
-          {/* Resources */}
-          <div>
-            <h4 className="font-semibold mb-3 text-sm uppercase">Resources</h4>
-            <div className="flex flex-col gap-2 text-sm">
-              <Link to="/privacy" className="hover:underline">
-                Privacy Policy
-              </Link>
-            </div>
-          </div>
-
-          {/* Comparisons */}
-          <div>
-            <h4 className="font-semibold mb-3 text-sm uppercase">
-              App Comparisons
-            </h4>
-            <div className="flex flex-col gap-2 text-sm">
-              <Link
-                to="/comparisons/reading-tutor-vs-reading-app"
-                className="hover:underline"
-              >
-                Tutor vs Reading App
-              </Link>
-              <Link
-                to="/comparisons/ai-reading-app-vs-traditional-phonics-program"
-                className="hover:underline"
-              >
-                AI vs Traditional Phonics
-              </Link>
-              <Link
-                to="/comparisons/free-phonics-apps-vs-paid-reading-programs"
-                className="hover:underline"
-              >
-                Free vs Paid Programs
-              </Link>
-              <Link
-                to="/comparisons/abcmouse-vs-hooked-on-phonics-vs-word-wiz-ai"
-                className="hover:underline"
-              >
-                ABCmouse vs HOP
-              </Link>
-              <Link
-                to="/comparisons/reading-eggs-vs-starfall-vs-word-wiz-ai"
-                className="hover:underline"
-              >
-                Reading Eggs vs Starfall
-              </Link>
-              <Link
-                to="/comparisons/homer-vs-khan-academy-kids-vs-word-wiz-ai"
-                className="hover:underline"
-              >
-                HOMER vs Khan Kids
-              </Link>
-              <Link
-                to="/comparisons/lexia-vs-raz-kids-vs-word-wiz-ai"
-                className="hover:underline"
-              >
-                Lexia vs Raz-Kids
-              </Link>
-              <Link
-                to="/comparisons/best-free-reading-apps"
-                className="hover:underline"
-              >
-                Best Free Apps
-              </Link>
-              <Link
-                to="/comparisons/best-phonics-app-kindergarten-struggling-readers"
-                className="hover:underline"
-              >
-                Best Kindergarten Phonics Apps
-              </Link>
-              <Link
-                to="/comparisons/phonics-worksheets-vs-interactive-reading"
-                className="hover:underline"
-              >
-                Worksheets vs Interactive
-              </Link>
-              <Link
-                to="/comparisons/hooked-on-phonics-vs-word-wiz-ai"
-                className="hover:underline"
-              >
-                Hooked on Phonics vs Word Wiz
-              </Link>
-              <Link
-                to="/comparisons/ixl-vs-duolingo-abc-vs-word-wiz-ai"
-                className="hover:underline"
-              >
-                IXL vs Duolingo ABC
-              </Link>
-              <Link
-                to="/comparisons/teach-your-monster-vs-abcya-vs-word-wiz-ai"
-                className="hover:underline"
-              >
-                Teach Your Monster vs ABCya
-              </Link>
-            </div>
-          </div>
-
-          {/* Guides */}
-          <div>
-            <h4 className="font-semibold mb-3 text-sm uppercase">
-              Phonics Guides
-            </h4>
-            <div className="flex flex-col gap-2 text-sm">
-              <Link
-                to="/guides/how-to-teach-phonics-at-home"
-                className="hover:underline"
-              >
-                Teaching Phonics at Home
-              </Link>
-              <Link
-                to="/guides/how-to-teach-cvc-words-to-struggling-readers"
-                className="hover:underline"
-              >
-                How to Teach CVC Words
-              </Link>
-              <Link
-                to="/guides/teaching-consonant-blends-kindergarten-at-home"
-                className="hover:underline"
-              >
-                Teaching Consonant Blends
-              </Link>
-              <Link
-                to="/guides/short-vowel-sounds-exercises-beginning-readers"
-                className="hover:underline"
-              >
-                Short Vowel Sounds
-              </Link>
-              <Link
-                to="/guides/r-controlled-vowels-teaching-strategies-parents"
-                className="hover:underline"
-              >
-                R-Controlled Vowels
-              </Link>
-              <Link
-                to="/guides/daily-phonics-practice-routine-kindergarten-at-home"
-                className="hover:underline"
-              >
-                Daily Phonics Routine
-              </Link>
-              <Link
-                to="/guides/decodable-sentences-for-beginning-readers"
-                className="hover:underline"
-              >
-                Decodable Sentences
-              </Link>
-              <Link
-                to="/guides/phonics-practice-without-worksheets-kindergarten"
-                className="hover:underline"
-              >
-                Phonics Without Worksheets
-              </Link>
-              <Link
-                to="/guides/silent-e-words-practice-for-kids"
-                className="hover:underline"
-              >
-                Silent E Words Practice
-              </Link>
-              <Link
-                to="/guides/long-vowel-sounds-practice-first-grade"
-                className="hover:underline"
-              >
-                Long Vowel Sounds
-              </Link>
-              <Link
-                to="/guides/vowel-digraphs-activities-first-graders"
-                className="hover:underline"
-              >
-                Vowel Digraphs
-              </Link>
-              <Link
-                to="/guides/phonics-activities-5-year-old-struggling-reader"
-                className="hover:underline"
-              >
-                Phonics for 5-Year-Olds
-              </Link>
-              <Link
-                to="/guides/first-grade-reading-practice-activities-home"
-                className="hover:underline"
-              >
-                First Grade Activities
-              </Link>
-              <Link
-                to="/guides/reading-practice-kids-hate-reading"
-                className="hover:underline"
-              >
-                Kids Who Hate Reading
-              </Link>
-            </div>
-          </div>
-
-          {/* Practice Activities */}
-          <div>
-            <h4 className="font-semibold mb-3 text-sm uppercase">
-              Practice Activities
-            </h4>
-            <div className="flex flex-col gap-2 text-sm">
-              <Link to="/practice-words" className="hover:underline">
-                Phonics Word Lists
-              </Link>
-              <Link to="/practice-words/at-family" className="hover:underline">
-                -at Word Family
-              </Link>
-              <Link to="/practice-words/sh-digraph" className="hover:underline">
-                SH Digraph Words
-              </Link>
-              <Link to="/practice-words/bl-blend" className="hover:underline">
-                BL Blend Words
-              </Link>
-              <Link
-                to="/practice-words/ai-vowel-team"
-                className="hover:underline"
-              >
-                AI Vowel Team Words
-              </Link>
-              <Link
-                to="/practice-words/ar-r-controlled"
-                className="hover:underline"
-              >
-                AR Words (Bossy R)
-              </Link>
-              <Link
-                to="/guides/five-minute-reading-practice-activities-kids"
-                className="hover:underline"
-              >
-                5 Minute Reading Activities
-              </Link>
-              <Link
-                to="/guides/is-teacher-teaching-enough-phonics"
-                className="hover:underline"
-              >
-                Is Teacher Teaching Phonics?
-              </Link>
-              <Link
-                to="/guides/phoneme-awareness-complete-guide"
-                className="hover:underline"
-              >
-                Phoneme Awareness Guide
-              </Link>
-              <Link
-                to="/guides/how-to-choose-reading-app"
-                className="hover:underline"
-              >
-                Choosing Reading Apps
-              </Link>
-            </div>
-          </div>
-
-          {/* Reading Problems */}
-          <div>
-            <h4 className="font-semibold mb-3 text-sm uppercase">
-              Reading Problems
-            </h4>
-            <div className="flex flex-col gap-2 text-sm">
-              <Link
-                to="/articles/child-cant-blend-sounds-into-words"
-                className="hover:underline"
-              >
-                Can't Blend Sounds
-              </Link>
-              <Link
-                to="/articles/kindergartener-guesses-words-instead-sounding-out"
-                className="hover:underline"
-              >
-                Guesses Words
-              </Link>
-              <Link
-                to="/articles/child-reads-slowly-struggles-with-fluency"
-                className="hover:underline"
-              >
-                Reads Slowly
-              </Link>
-              <Link
-                to="/articles/first-grader-skips-words-when-reading-aloud"
-                className="hover:underline"
-              >
-                Skips Words
-              </Link>
-              <Link
-                to="/articles/why-child-hates-reading"
-                className="hover:underline"
-              >
-                Why Child Hates Reading
-              </Link>
-              <Link
-                to="/articles/child-pronounces-words-wrong"
-                className="hover:underline"
-              >
-                Pronunciation Errors
-              </Link>
-              <Link
-                to="/articles/decodable-books-vs-leveled-readers"
-                className="hover:underline"
-              >
-                Decodable vs Leveled Books
-              </Link>
-              <Link
-                to="/articles/child-memorizes-books-instead-reading"
-                className="hover:underline"
-              >
-                Memorizes vs Reads
-              </Link>
-              <Link
-                to="/articles/child-confuses-b-d-letters"
-                className="hover:underline"
-              >
-                Confuses B and D
-              </Link>
-            </div>
-          </div>
+          {/* Site links */}
+          <nav aria-label="Word Wiz" className="flex flex-col gap-2.5 text-sm">
+            <span className="font-semibold">Word Wiz</span>
+            <Link to="/about" className={linkClass}>
+              About
+            </Link>
+            <Link to="/contact" className={linkClass}>
+              Contact
+            </Link>
+            <Link to="/privacy" className={linkClass}>
+              Privacy Policy
+            </Link>
+            <Link to="/login" className={linkClass}>
+              Log In
+            </Link>
+            <Link
+              to="/signup"
+              className={linkClass}
+              onClick={() => trackSignupClick("footer", "link")}
+            >
+              Sign Up
+            </Link>
+          </nav>
         </div>
 
+        {/* Reading help library */}
+        <nav
+          aria-label="Free reading help"
+          className="space-y-5 border-t border-primary-foreground/20 pt-8 dark:border-border"
+        >
+          <span className="block text-sm font-semibold">
+            Free reading help for parents and teachers
+          </span>
+          <div className="grid grid-cols-1 gap-x-8 gap-y-7 sm:grid-cols-2 lg:grid-cols-4">
+            {READING_HELP.map((group) => (
+              <div key={group.title} className="flex flex-col gap-2 text-sm">
+                <span className="opacity-80">{group.title}</span>
+                {group.links.map((link) => (
+                  <Link key={link.to} to={link.to} className={linkClass}>
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            ))}
+          </div>
+        </nav>
+
         {/* Copyright */}
-        <div className="border-t border-primary-foreground/20 dark:border-border pt-6 text-center text-sm">
-          <p>{new Date().getFullYear()} Word Wiz AI</p>
+        <div className="flex flex-wrap justify-between gap-x-6 gap-y-2 border-t border-primary-foreground/20 pt-6 text-sm dark:border-border">
+          <p>© {new Date().getFullYear()} Word Wiz AI</p>
+          <p>Free forever · No ads</p>
         </div>
       </div>
     </footer>

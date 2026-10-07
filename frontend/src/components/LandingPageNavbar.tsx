@@ -39,19 +39,25 @@ const LandingPageNavbar = () => {
           </Button>
         ) : (
           <>
-        <Link to="/login" className="hidden sm:block">
-          <Button variant="ghost" size="default">
-            Log In
-          </Button>
-        </Link>
-        <Link to="/signup">
-          <Button 
-            size="default"
-            onClick={() => trackSignupClick('navbar', 'link')}
-          >
-            <span>Sign Up</span>
-          </Button>
-        </Link>
+            {/* Shown on phones too: email users coming back had to scroll
+                to the footer to find a way in. Hidden only below 360px,
+                where it would push Sign Up off the edge. */}
+            <Button
+              asChild
+              variant="ghost"
+              size="default"
+              className="hidden px-3 min-[360px]:inline-flex sm:px-4"
+            >
+              <Link to="/login">Log In</Link>
+            </Button>
+            <Button asChild size="default">
+              <Link
+                to="/signup"
+                onClick={() => trackSignupClick("navbar", "link")}
+              >
+                Sign Up
+              </Link>
+            </Button>
           </>
         )}
       </div>

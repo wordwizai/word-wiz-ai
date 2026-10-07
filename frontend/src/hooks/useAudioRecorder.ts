@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import hark from "hark";
 import { toast } from "sonner";
+import { WarmMic } from "@/lib/warmMic";
 
 // Stop on our own if the reader never pauses (or the room never goes quiet
 // enough for hark to notice). Longer than any practice sentence takes.
@@ -12,6 +13,9 @@ const SILENCE_PEAK = 0.01;
 const SILENCE_DELAY_MS = 2000;
 // A grown-up usually has to act on these, so give them time to read it.
 const HELP_TOAST_MS = 10_000;
+// An open mic keeps the browser's recording indicator on, so let it go once
+// nobody has tapped for a while. The next tap then opens it from cold.
+const IDLE_RELEASE_MS = 2 * 60_000;
 
 /** Explain a getUserMedia failure in words a parent can act on. */
 function describeMicError(error: unknown): { title: string; description: string } {
@@ -77,23 +81,97 @@ function encodeWAV(samples: Float32Array, sampleRate: number) {
   return new Blob([view], { type: "audio/wav" });
 }
 
+// One open microphone and the audio graph reading it, kept open between
+// recordings (see WarmMic). `onChunk` is set only while a recording is
+// collecting samples; the rest of the time they're dropped.
+type Mic = {
+  stream: MediaStream;
+  audioContext: AudioContext;
+  source: MediaStreamAudioSourceNode;
+  processor: ScriptProcessorNode;
+  onChunk: ((samples: Float32Array) => void) | null;
+};
+
+async function openMic(onLost: () => void): Promise<Mic> {
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  stream.getAudioTracks()[0]?.addEventListener("ended", onLost);
+  const audioContext = new AudioContext();
+  const source = audioContext.createMediaStreamSource(stream);
+  const processor = audioContext.createScriptProcessor(4096, 1, 1);
+  const mic: Mic = { stream, audioContext, source, processor, onChunk: null };
+  processor.onaudioprocess = (event) =>
+    mic.onChunk?.(event.inputBuffer.getChannelData(0));
+  source.connect(processor);
+  processor.connect(audioContext.destination);
+  return mic;
+}
+
+function closeMic(mic: Mic) {
+  mic.processor.disconnect();
+  mic.source.disconnect();
+  mic.stream.getTracks().forEach((track) => track.stop());
+  mic.audioContext.close();
+}
+
+async function micAlreadyAllowed() {
+  try {
+    const status = await navigator.permissions.query({ name: "microphone" });
+    return status.state === "granted";
+  } catch {
+    // Older Safari and Firefox can't be asked. Wait for the tap.
+    return false;
+  }
+}
+
 export function useAudioRecorder(onFinish: (audioFile: File) => void) {
   const [isRecording, setIsRecording] = useState(false);
   const stopHandlerRef = useRef<(() => Promise<void>) | null>(null);
-  // Releases the mic, audio graph, hark and timers without sending anything.
+  // Ends the recording in progress (hark, timers, sample collection)
+  // without sending anything. The mic itself stays open.
   const teardownRef = useRef<(() => void) | null>(null);
-  // Guards the async gap in getUserMedia so a double tap can't open two mics.
+  // Guards the async gap in getUserMedia so a double tap can't start two
+  // recordings.
   const busyRef = useRef(false);
   // Live input loudness (RMS, roughly 0-0.3 for speech). A ref rather than
   // state: it changes ~12 times a second and only the level meter reads it.
   const levelRef = useRef(0);
+  const [mic] = useState(() => new WarmMic(openMic, closeMic, IDLE_RELEASE_MS));
 
   useEffect(() => {
+    let active = true;
+    // If the mic is already allowed, open it now so the first tap is
+    // instant too.
+    const warmIfAllowed = () =>
+      micAlreadyAllowed().then((allowed) => {
+        if (allowed && active && document.visibilityState === "visible") {
+          void mic.warm();
+        }
+      });
+    // Don't hold the mic for a background tab.
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") mic.closeWhenIdle();
+      else void warmIfAllowed();
+    };
+    // The open mic stays on the device it started with, so follow a
+    // headset plugged in mid-practice.
+    const onDeviceChange = () => {
+      if (mic.current && !busyRef.current) {
+        mic.close();
+        void mic.warm();
+      }
+    };
+    void warmIfAllowed();
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    navigator.mediaDevices?.addEventListener("devicechange", onDeviceChange);
     return () => {
+      active = false;
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      navigator.mediaDevices?.removeEventListener("devicechange", onDeviceChange);
       // Leaving the page mid-recording: release the mic, don't analyze.
       teardownRef.current?.();
+      mic.close();
     };
-  }, []);
+  }, [mic]);
 
   const startRecording = useCallback(async () => {
     if (busyRef.current) return;
@@ -109,9 +187,13 @@ export function useAudioRecorder(onFinish: (audioFile: File) => void) {
       return;
     }
 
-    let stream: MediaStream;
+    // Resume while still inside the tap. A mic opened on page load, before
+    // any tap, can have a suspended context, which delivers no samples.
+    void mic.current?.audioContext.resume().catch(() => {});
+
+    let opened: Mic | null;
     try {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      opened = await mic.startUsing();
     } catch (error) {
       console.error("Error starting audio recording:", error);
       // Usually a blocked or missing microphone. Without this the button
@@ -121,31 +203,28 @@ export function useAudioRecorder(onFinish: (audioFile: File) => void) {
       busyRef.current = false;
       return;
     }
-
-    const audioContext = new AudioContext();
-    // Created after an await, so some browsers (Safari especially) start it
-    // suspended; a suspended context delivers no samples and the recording
-    // comes out empty.
-    if (audioContext.state === "suspended") {
+    if (!opened) {
+      // Closed while it was opening: the page was left or hidden.
+      busyRef.current = false;
+      return;
+    }
+    const recordingMic = opened;
+    const { stream, audioContext } = recordingMic;
+    // A context first made by this tap was created after an await, so some
+    // browsers (Safari especially) start it suspended; a suspended context
+    // delivers no samples and the recording comes out empty.
+    if (audioContext.state !== "running") {
       await audioContext.resume().catch(() => {});
     }
-    const source = audioContext.createMediaStreamSource(stream);
-
-    const bufferSize = 4096;
-    const processor = audioContext.createScriptProcessor(bufferSize, 1, 1);
 
     const audioChunks: Float32Array[] = [];
 
-    processor.onaudioprocess = (event) => {
-      const inputData = event.inputBuffer.getChannelData(0);
+    recordingMic.onChunk = (inputData) => {
       audioChunks.push(new Float32Array(inputData));
       let sum = 0;
       for (let i = 0; i < inputData.length; i++) sum += inputData[i] ** 2;
       levelRef.current = Math.sqrt(sum / inputData.length);
     };
-
-    source.connect(processor);
-    processor.connect(audioContext.destination);
 
     setIsRecording(true);
 
@@ -154,6 +233,9 @@ export function useAudioRecorder(onFinish: (audioFile: File) => void) {
     const speechEvents = hark(stream, {
       threshold: -50,
       interval: 50,
+      // Otherwise hark makes its own context, which nothing resumes in
+      // Safari.
+      audioContext,
     });
     speechEvents.on("speaking", () => {
       heardSpeech = true;
@@ -167,16 +249,16 @@ export function useAudioRecorder(onFinish: (audioFile: File) => void) {
     let isStopping = false;
 
     const teardown = () => {
+      // hark polls on an interval until stopped; it used to keep running
+      // after every recording. Stop it before clearing silenceTimer, because
+      // stop() fires one last stopped_speaking, and the timer that sets
+      // would otherwise end the next recording 2 s in.
+      speechEvents.stop();
       if (silenceTimer) clearTimeout(silenceTimer);
       clearTimeout(maxTimer);
-      // hark polls on an interval until stopped; it used to keep running
-      // after every recording.
-      speechEvents.stop();
       levelRef.current = 0;
-      processor.disconnect();
-      source.disconnect();
-      stream.getTracks().forEach((track) => track.stop());
-      audioContext.close();
+      recordingMic.onChunk = null;
+      mic.stopUsing();
       stopHandlerRef.current = null;
       teardownRef.current = null;
       busyRef.current = false;
@@ -247,7 +329,7 @@ export function useAudioRecorder(onFinish: (audioFile: File) => void) {
 
     stopHandlerRef.current = stopHandler;
     teardownRef.current = teardown;
-  }, [onFinish]);
+  }, [onFinish, mic]);
 
   const stopRecording = useCallback(() => {
     stopHandlerRef.current?.();

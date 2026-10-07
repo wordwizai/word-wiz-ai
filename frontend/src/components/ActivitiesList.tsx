@@ -31,4 +31,17 @@ const ActivitiesList = ({ activities, skeletonCount = 3 }: ActivitiesListProps) 
   );
 };
 
+// Shown instead of an empty grid when the activities request fails, so the
+// page doesn't look like it has nothing to offer.
+export const ActivitiesLoadError = () => (
+  <div className="rounded-2xl border border-dashed px-6 py-10 text-center">
+    <p className="font-medium text-foreground">
+      Couldn't load the activities
+    </p>
+    <p className="mt-1 text-sm text-muted-foreground">
+      Check your connection and refresh the page.
+    </p>
+  </div>
+);
+
 export default ActivitiesList;

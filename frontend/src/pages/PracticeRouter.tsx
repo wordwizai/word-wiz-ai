@@ -1,4 +1,5 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { useContext, useEffect, useState } from "react";
 import { getSession } from "../api"; // your API call
 import { AuthContext } from "@/contexts/AuthContext";
@@ -85,11 +86,15 @@ export default function PracticeRouter() {
     );
   }
 
-  // Render the correct practice type based on session.type
   return (
-    <GenericPractice
-      session={session}
-      activityType={session.activity.activity_type}
-    />
-  ); // Adjust this line to match your practice component
+    <>
+      <Helmet>
+        <title>{`${session.activity.title} | Word Wiz AI`}</title>
+      </Helmet>
+      <GenericPractice
+        session={session}
+        activityType={session.activity.activity_type}
+      />
+    </>
+  );
 }

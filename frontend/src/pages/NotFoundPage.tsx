@@ -40,6 +40,17 @@ const NotFoundPage = () => {
             <Link to="/">Back to home</Link>
           </Button>
         </div>
+        {/* Most dead links come from search results for an old practice
+            page, so point at the index of the current ones. */}
+        <p className="text-sm text-muted-foreground">
+          Looking for practice words?{" "}
+          <Link
+            to="/practice-words"
+            className="font-medium text-primary underline-offset-4 hover:underline"
+          >
+            Browse the phonics word lists
+          </Link>
+        </p>
       </div>
     </main>
   );

@@ -81,7 +81,7 @@ const About = () => {
 
       {/* Hero Section */}
       <motion.section
-        className="px-6 py-20 bg-gradient-to-br from-background to-purple-50/50"
+        className="px-6 py-20 bg-gradient-to-br from-background to-purple-50/50 dark:to-primary/10"
         variants={fadeUpVariant}
         initial="hidden"
         animate="visible"
@@ -161,7 +161,7 @@ const About = () => {
               },
             ].map((mission, i) => (
               <div key={i}>
-                <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl text-center h-full hover:shadow-2xl transition-shadow rounded-3xl">
+                <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 dark:from-card dark:to-card dark:border-border shadow-xl text-center h-full hover:shadow-2xl transition-shadow rounded-3xl">
                   <CardHeader className="pb-4">
                     <div
                       className={`w-12 h-12 bg-gradient-to-r ${mission.iconBg} rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg`}
@@ -274,7 +274,7 @@ const About = () => {
               },
             ].map((member, i) => (
               <motion.div key={i} variants={childVariant}>
-                <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl text-center h-full hover:shadow-2xl transition-shadow rounded-3xl">
+                <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 dark:from-card dark:to-card dark:border-border shadow-xl text-center h-full hover:shadow-2xl transition-shadow rounded-3xl">
                   <CardHeader className="pb-4">
                     <div className={`w-16 h-16 bg-gradient-to-br ${member.gradient} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg`}>
                       <span className="text-white font-bold text-lg">

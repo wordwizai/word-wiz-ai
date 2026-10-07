@@ -78,7 +78,9 @@ export function CreateAccountForm({
     >
       <Card className="rounded-2xl border-2 border-border shadow-lg">
         <CardHeader className="text-center pb-2">
-          <CardTitle className="text-2xl font-bold">Create your account</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            <h1>Create your account</h1>
+          </CardTitle>
           <CardDescription className="text-sm">
             Start your reading journey today
           </CardDescription>
@@ -206,11 +208,18 @@ export function CreateAccountForm({
                   {loading ? "Creating account…" : "Create account"}
                 </Button>
 
+                <p className="text-center text-xs text-muted-foreground">
+                  Free, with no ads, and we never sell your data.{" "}
+                  <Link to="/privacy" className="underline underline-offset-4 hover:text-primary">
+                    Privacy policy
+                  </Link>
+                </p>
+
                 <p className="text-center text-sm text-muted-foreground">
                   Already have an account?{" "}
-                  <a href="/login" className="text-primary font-medium underline-offset-4 hover:underline">
+                  <Link to="/login" className="text-primary font-medium underline-offset-4 hover:underline">
                     Sign in
-                  </a>
+                  </Link>
                 </p>
               </div>
             </div>

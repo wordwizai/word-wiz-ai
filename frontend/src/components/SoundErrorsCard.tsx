@@ -32,6 +32,7 @@ const SoundErrorsCard = ({ errorType }: { errorType: ErrorType }) => {
   const [rows, setRows] = useState<{ phoneme: string; count: number }[] | null>(
     null
   );
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     if (!token) return;
@@ -46,7 +47,7 @@ const SoundErrorsCard = ({ errorType }: { errorType: ErrorType }) => {
       )
       .catch((error: unknown) => {
         console.error("Error fetching phoneme errors:", error);
-        setRows([]);
+        setFailed(true);
       });
   }, [errorType, token]);
 
@@ -59,7 +60,13 @@ const SoundErrorsCard = ({ errorType }: { errorType: ErrorType }) => {
       <p className="text-sm text-muted-foreground">{description}</p>
 
       <div className="mt-4 flex-1">
-        {rows === null ? (
+        {failed ? (
+          // Not "None in recent readings": that would tell a parent with
+          // weeks of history that it's all gone.
+          <p className="py-6 text-center text-sm text-muted-foreground">
+            Couldn't load this. Refresh to try again.
+          </p>
+        ) : rows === null ? (
           <div className="space-y-3">
             {Array.from({ length: 3 }, (_, i) => (
               <Skeleton key={i} className="h-7 w-full" />

@@ -9,6 +9,16 @@ backend work only when it directly blocks getting users, and keep it short.
 
 ## Setup notes for the next session
 
+- **Full instructions:** `growth-agent/AGENT_PROMPT.md` (original prompt + Bruce's amendments).
+- **Bruce's manual to-do list:** https://claude.ai/artifact/4RsbovZ7BiNaubUbpJ4qiT
+  (posting checklist with copy-ready text). When new approved items need his
+  hands, add them there (or tell him to).
+- **Cloud sessions** have none of Bruce's local access: no Search Console or
+  Vercel logins (built-in browser), no prod DB, no `.env.deploy`/SSH key, no
+  Reddit. Write "n/a (cloud session)" for metrics you can't read, never
+  estimates, and spend the session on research, drafts for the queue, and
+  on-page SEO verified with `npm run build`. Push `growth-agent` only.
+
 - Branch `growth-agent` (pushed to origin). Bruce wants finished work merged
   into `dev` and no worktree left behind. Pattern that works: add a worktree
   **outside the repo folder** (session 2 used the scratchpad), do the work,

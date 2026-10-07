@@ -168,19 +168,26 @@ const AnimatedPracticeDemo = () => {
         </motion.div>
 
         {/* Words display */}
-        <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4 min-h-[120px]">
+        <div className="min-h-[120px] flex items-center">
+          {/* "wait" needs a single child, so each sentence's words share one
+              keyed row. The badges' own exit animations still play. */}
           <AnimatePresence mode="wait">
-            {sentence.words.map((word, idx) => (
-              <WordBadge
-                key={`${currentSentence}-${idx}-${word}`}
-                word={word}
-                idx={idx}
-                showHighlighted={showHighlighting}
-                analysisPer={
-                  showHighlighting ? sentence.perScores[idx] : undefined
-                }
-              />
-            ))}
+            <motion.div
+              key={currentSentence}
+              className="flex w-full flex-wrap items-center justify-center gap-3 md:gap-4"
+            >
+              {sentence.words.map((word, idx) => (
+                <WordBadge
+                  key={`${idx}-${word}`}
+                  word={word}
+                  idx={idx}
+                  showHighlighted={showHighlighting}
+                  analysisPer={
+                    showHighlighting ? sentence.perScores[idx] : undefined
+                  }
+                />
+              ))}
+            </motion.div>
           </AnimatePresence>
         </div>
 

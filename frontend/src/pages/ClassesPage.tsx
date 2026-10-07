@@ -25,6 +25,7 @@ const ClassesPage = () => {
   const [myClasses, setMyClasses] = useState<Class[]>([]);
   const [studentClasses, setStudentClasses] = useState<ClassWithTeacher[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showJoinDialog, setShowJoinDialog] = useState(false);
 
@@ -58,8 +59,10 @@ const ClassesPage = () => {
       ]);
       setMyClasses(teacherClasses);
       setStudentClasses(enrolledClasses);
+      setLoadFailed(false);
     } catch (error) {
       console.error("Error fetching classes:", error);
+      setLoadFailed(true);
     } finally {
       setLoading(false);
     }
@@ -115,7 +118,7 @@ const ClassesPage = () => {
   // If viewing student details, show student detail view
   if (selectedStudent !== null && selectedClassId !== null) {
     return (
-      <AppPage>
+      <AppPage title="Classes">
         <StudentDetailView
           student={selectedStudent}
           classId={selectedClassId}
@@ -128,7 +131,7 @@ const ClassesPage = () => {
   // If viewing class details, show detail view
   if (selectedClassId !== null) {
     return (
-      <AppPage>
+      <AppPage title="Classes">
         <ClassDetailView
           classId={selectedClassId}
           className={selectedClassName}
@@ -141,7 +144,7 @@ const ClassesPage = () => {
   }
 
   return (
-    <AppPage>
+    <AppPage title="Classes">
       <PageHeader
         title="Classes"
         description={
@@ -184,6 +187,25 @@ const ClassesPage = () => {
             {Array.from({ length: 3 }, (_, i) => (
               <Skeleton key={i} className="h-28 rounded-2xl" />
             ))}
+          </div>
+        ) : loadFailed ? (
+          // Without this a failed request looked like "You haven't joined
+          // a class yet", which reads as if the classes were gone.
+          <div className="rounded-2xl border border-dashed px-6 py-10 text-center">
+            <p className="font-medium text-foreground">
+              Couldn't load your classes
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              They're still there. Check your connection and try again.
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-4 rounded-xl"
+              onClick={fetchClasses}
+            >
+              Try again
+            </Button>
           </div>
         ) : visibleClasses.length > 0 ? (
           <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3">

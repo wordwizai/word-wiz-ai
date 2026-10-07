@@ -4,7 +4,9 @@ import { ArrowRight, ChevronRight, Flame } from "lucide-react";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getSessions, getUserStatistics } from "@/api";
 import { AppPage, PageHeader, SectionHeader } from "@/components/AppPage";
-import ActivitiesList from "@/components/ActivitiesList";
+import ActivitiesList, {
+  ActivitiesLoadError,
+} from "@/components/ActivitiesList";
 import DynamicIcon from "@/components/DynamicIcon";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -40,7 +42,7 @@ const greeting = () => {
 const Dashboard = () => {
   const { user, token } = useContext(AuthContext);
   const navigate = useNavigate();
-  const { activities } = useActivities();
+  const { activities, failed: activitiesFailed } = useActivities();
   const { start, startingId } = useStartActivity();
 
   const [sessions, setSessions] = useState<DashboardSession[] | null>(null);
@@ -79,8 +81,17 @@ const Dashboard = () => {
   // sessions can't be reopened (PracticeRouter bounces them), so in the
   // recent list they start a fresh session of the same activity instead.
   const resumable = sessions?.find((s) => !s.is_completed) ?? null;
+  // One row per activity. Every "Start" makes a new session, so without this
+  // the list filled up with identical "Unlimited Practice · Today" rows.
+  const seenActivities = new Set<number>(
+    resumable ? [resumable.activity.id] : []
+  );
   const recent = (sessions ?? [])
-    .filter((s) => s.id !== resumable?.id)
+    .filter((s) => {
+      if (seenActivities.has(s.activity.id)) return false;
+      seenActivities.add(s.activity.id);
+      return true;
+    })
     .slice(0, RECENT_LIMIT);
 
   const openSession = (session: DashboardSession) => {
@@ -89,7 +100,7 @@ const Dashboard = () => {
   };
 
   return (
-    <AppPage>
+    <AppPage title="Dashboard">
       <PageHeader
         title={firstName ? `${greeting()}, ${firstName}` : "Welcome back"}
         actions={
@@ -127,7 +138,11 @@ const Dashboard = () => {
             </Link>
           }
         />
-        <ActivitiesList activities={dailyPicks} />
+        {activitiesFailed ? (
+          <ActivitiesLoadError />
+        ) : (
+          <ActivitiesList activities={dailyPicks} />
+        )}
       </section>
 
       {recent.length > 0 && (
@@ -161,11 +176,15 @@ const ContinueCard = ({
   const pastel = activityPastel(session.activity.id);
 
   return (
+    // Laid out by the card's own width, not the viewport's. On a tablet the
+    // sidebar leaves ~450px, and a viewport breakpoint put the button on top
+    // of the title.
     <section
       aria-labelledby="continue-heading"
-      className="flex flex-col gap-5 rounded-3xl p-5 shadow-sm ring-1 ring-inset ring-black/5 sm:flex-row sm:items-center sm:gap-6 sm:p-8 dark:shadow-black/50 dark:inset-shadow-2xs dark:inset-shadow-white/10"
+      className="@container rounded-3xl p-5 shadow-sm ring-1 ring-inset ring-black/5 sm:p-8 dark:shadow-black/50 dark:inset-shadow-2xs dark:inset-shadow-white/10"
       style={{ backgroundColor: pastel.background }}
     >
+      <div className="flex flex-col gap-5 @xl:flex-row @xl:items-center @xl:gap-6">
       <div className="flex min-w-0 flex-1 items-center gap-4 sm:gap-6">
         <span
           className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-white/60 sm:size-20 dark:bg-white/10"
@@ -199,11 +218,12 @@ const ContinueCard = ({
       <Button
         size="lg"
         onClick={onContinue}
-        className="h-14 w-full shrink-0 rounded-xl px-8 text-base font-semibold sm:w-auto active:scale-[0.98]"
+        className="h-14 w-full shrink-0 rounded-xl px-8 text-base font-semibold @xl:w-auto active:scale-[0.98]"
       >
         Keep reading
         <ArrowRight className="size-5" />
       </Button>
+      </div>
     </section>
   );
 };

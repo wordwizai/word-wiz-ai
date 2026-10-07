@@ -3,6 +3,7 @@
 Working files for the Word Wiz growth agent. These live on the `growth-agent`
 branch only and are not part of the site.
 
+- `AGENT_PROMPT.md` - the agent's full instructions (Bruce's prompt + amendments)
 - `STATE.md` - metrics history, what's working, ranked backlog, next actions
 - `APPROVAL_QUEUE.md` - drafts waiting on Bruce (emails, posts, anything public or hard to undo)
 - `RUN_LOG.md` - one entry per session

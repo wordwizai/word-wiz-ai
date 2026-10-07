@@ -39,58 +39,58 @@ const PhonicsPathView = ({
         ))}
       </div>
       <ol className="space-y-3">
-      {path.units.map((unit, i) => {
-        const complete = unit.mastered_count === unit.patterns.length;
-        return (
-          <li key={unit.id}>
-            <details
-              open={unit.id === nextUnit}
-              className="group rounded-2xl border bg-card shadow-xs"
-            >
-              <summary className="flex min-h-16 cursor-pointer list-none items-center gap-4 rounded-2xl px-4 py-3 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/60 sm:px-5 [&::-webkit-details-marker]:hidden">
-                <span
-                  aria-hidden
-                  className={cn(
-                    "flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold",
-                    complete
-                      ? "bg-pastel-mint text-pastel-mint-foreground"
-                      : "bg-muted text-muted-foreground"
-                  )}
-                >
-                  {complete ? <Check className="size-4" /> : i + 1}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block font-semibold text-foreground">
-                    <span className="sr-only">Unit {i + 1}, </span>
-                    {unit.title}
+        {path.units.map((unit, i) => {
+          const complete = unit.mastered_count === unit.patterns.length;
+          return (
+            <li key={unit.id}>
+              <details
+                open={unit.id === nextUnit}
+                className="group rounded-2xl border bg-card shadow-xs"
+              >
+                <summary className="flex min-h-16 cursor-pointer list-none items-center gap-4 rounded-2xl px-4 py-3 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/60 sm:px-5 [&::-webkit-details-marker]:hidden">
+                  <span
+                    aria-hidden
+                    className={cn(
+                      "flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold",
+                      complete
+                        ? "bg-pastel-mint text-pastel-mint-foreground"
+                        : "bg-muted text-muted-foreground"
+                    )}
+                  >
+                    {complete ? <Check className="size-4" /> : i + 1}
                   </span>
-                  <span className="block text-sm text-muted-foreground">
-                    {unit.grade} · {unit.mastered_count} of {unit.patterns.length} {doneWord}
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-semibold text-foreground">
+                      <span className="sr-only">Unit {i + 1}, </span>
+                      {unit.title}
+                    </span>
+                    <span className="block text-sm text-muted-foreground">
+                      {unit.grade} · {unit.mastered_count} of {unit.patterns.length} {doneWord}
+                    </span>
                   </span>
-                </span>
-                <ChevronDown
-                  className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
-                  aria-hidden
-                />
-              </summary>
-              <ul className="flex flex-wrap gap-2 px-4 pb-4 sm:px-5 sm:pb-5">
-                {unit.patterns.map((pattern) => (
-                  <li key={pattern.slug}>
-                    <PatternTile
-                      pattern={pattern}
-                      audience={audience}
-                      isNext={pattern.slug === path.next_slug}
-                      onStart={onStart}
-                      isStarting={startingSlug === pattern.slug}
-                      disabled={startingSlug !== null}
-                    />
-                  </li>
-                ))}
-              </ul>
-            </details>
-          </li>
-        );
-      })}
+                  <ChevronDown
+                    className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+                    aria-hidden
+                  />
+                </summary>
+                <ul className="flex flex-wrap gap-2 px-4 pb-4 sm:px-5 sm:pb-5">
+                  {unit.patterns.map((pattern) => (
+                    <li key={pattern.slug}>
+                      <PatternTile
+                        pattern={pattern}
+                        audience={audience}
+                        isNext={pattern.slug === path.next_slug}
+                        onStart={onStart}
+                        isStarting={startingSlug === pattern.slug}
+                        disabled={startingSlug !== null}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            </li>
+          );
+        })}
       </ol>
     </>
   );

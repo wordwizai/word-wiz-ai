@@ -1,0 +1,250 @@
+"""Paired comparison of two run.py results files, applying acceptance conditions 1 to 4.
+
+    python -m tests.benchmark.compare results/baseline_dev.json results/candidate_dev.json
+
+Conditions 5 (speed and memory, see speed.py) and 6 (tests pass) are checked separately
+at review time. A fifth check below the four conditions fails a candidate that adds
+"unexpected:" failures, which mean harness bugs or production crashes.
+The spoken-feedback rows (scoring.FEEDBACK_RATES) are reported only and never decide the result.
+Runs of different request paths (run.py --path) are refused unless --allow-path-mismatch is
+passed, and then a warning line says so. A results file without a path is a server-path run.
+Each side's word metrics score the flag rule of the code that wrote it (scoring.word_flags),
+and the line under the header names both rules.
+Exit codes: 0 all checks pass, 1 at least one fails, 2 inputs not comparable.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+
+from . import common
+from . import metrics as M
+from .scoring import (
+    build_items, feedback_rate_counts, results_flag_rule, summarize, uses_stored_flags, word_flags,
+)
+
+FAR_TOLERANCE = 0.005
+UNSCORED_TOLERANCE = 0.01
+N_RESAMPLES = 2000
+SEED = 0
+_EPS = 1e-12
+#: The feedback rates that get a paired interval. Reported only, not acceptance checks.
+FEEDBACK_CI_RATES = ("correction_precision", "wrong_correction_rate")
+
+
+class NotComparable(ValueError):
+    """The two results files cannot be compared (different half, subset, clips or path)."""
+
+
+def load_results(path: str) -> dict:
+    with open(path, encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def request_path(results: dict) -> str:
+    """The request path a run scored. Files written before run.py had --path are server runs."""
+    return results.get("path") or "server"
+
+
+def _word_counts(items, threshold, stored_flags, children_only=False):
+    words = [w for w in items.words if w.is_child] if children_only else items.words
+    return M.per_speaker_counts([w.speaker for w in words], [w.is_mistake for w in words],
+                                word_flags(words, threshold, stored_flags))
+
+
+def _feedback_comparison(base_items, cand_items, bs, cs, n_resamples, seed):
+    """Differences and paired speaker-bootstrap intervals for FEEDBACK_CI_RATES, or None when
+    either results file has no feedback. A rate that is undefined on either side gets None."""
+    if bs["feedback"] is None or cs["feedback"] is None:
+        return None
+    out = {}
+    for rate in FEEDBACK_CI_RATES:
+        b, k = bs["feedback"]["all"][rate], cs["feedback"]["all"][rate]
+        if b is None or k is None:
+            out[rate] = {"delta": None, "ci": None}
+            continue
+        deltas = M.bootstrap_ratio_delta(feedback_rate_counts(base_items, rate),
+                                         feedback_rate_counts(cand_items, rate), n_resamples, seed)
+        lo, hi = M.percentile_interval(deltas)
+        out[rate] = {"delta": k - b, "ci": [lo, hi]}
+    return out
+
+
+def compare_results(base: dict, cand: dict, clips, n_resamples: int = N_RESAMPLES, seed: int = SEED,
+                    allow_path_mismatch: bool = False) -> dict:
+    if base["half"] != cand["half"] or base.get("subset") != cand.get("subset"):
+        raise NotComparable(
+            f"base is {base['half']}/{base.get('subset')}, candidate is {cand['half']}/{cand.get('subset')}"
+        )
+    if set(base["outcomes"]) != set(cand["outcomes"]):
+        raise NotComparable("the two results cover different clips")
+    base_path, cand_path = request_path(base), request_path(cand)
+    path_warning = None
+    if base_path != cand_path:
+        mismatch = f"base is a {base_path} path run, candidate is a {cand_path} path run"
+        if not allow_path_mismatch:
+            raise NotComparable(f"{mismatch}; pass --allow-path-mismatch to compare them anyway")
+        path_warning = (f"{mismatch}, so the differences are between two request paths, "
+                        "not two versions of one")
+
+    base_items = build_items(clips, base["outcomes"])
+    cand_items = build_items(clips, cand["outcomes"])
+    base_stored, cand_stored = uses_stored_flags(base), uses_stored_flags(cand)
+    bs = summarize(base_items, base["threshold"], base_stored)
+    cs = summarize(cand_items, cand["threshold"], cand_stored)
+    deltas = M.bootstrap_fbeta_delta(_word_counts(base_items, base["threshold"], base_stored),
+                                     _word_counts(cand_items, cand["threshold"], cand_stored), n_resamples, seed)
+    lo, hi = M.percentile_interval(deltas)
+
+    child_delta = cs["word"]["children"]["f05"] - bs["word"]["children"]["f05"]
+    base_children = _word_counts(base_items, base["threshold"], base_stored, children_only=True)
+    cand_children = _word_counts(cand_items, cand["threshold"], cand_stored, children_only=True)
+    if base_children or cand_children:
+        child_lo, child_hi = M.percentile_interval(
+            M.bootstrap_fbeta_delta(base_children, cand_children, n_resamples, seed))
+        child_ci = [child_lo, child_hi]
+        child_check = {"value": f"{child_delta:+.4f} [{child_lo:+.4f}, {child_hi:+.4f}]",
+                       "passed": child_hi >= -_EPS}
+    else:
+        child_ci = None
+        child_check = {"value": "no child words", "passed": True}
+    far_delta = cs["word"]["all"]["false_alarm_rate"] - bs["word"]["all"]["false_alarm_rate"]
+    rej_delta = cs["rejection_rate"] - bs["rejection_rate"]
+    unscored_delta = cs["unscored_rate"] - bs["unscored_rate"]
+    checks = [
+        {"name": "real improvement", "rule": "95% CI of word F0.5 difference above 0",
+         "value": f"[{lo:+.4f}, {hi:+.4f}]", "passed": lo > 0},
+        # Children are a small slice (about 195 real mistakes in the dev half), so a point
+        # estimate would flip on noise. Only a significant drop fails.
+        {"name": "children not worse", "rule": "children F0.5 not significantly worse (95% CI upper bound >= 0)",
+         **child_check},
+        {"name": "no more wrong corrections", "rule": f"false-alarm rate rises <= {FAR_TOLERANCE:.3f}",
+         "value": f"{far_delta:+.4f}", "passed": far_delta <= FAR_TOLERANCE + _EPS},
+        # Rejected and misaligned clips both drop out of every metric, so both count.
+        {"name": "no hiding",
+         "rule": f"unscored rate (rejected or misaligned clips) rises <= {UNSCORED_TOLERANCE:.2f}",
+         "value": f"{unscored_delta:+.4f}", "passed": unscored_delta <= UNSCORED_TOLERANCE + _EPS},
+        {"name": "no new unexpected failures", "rule": "unexpected failures do not increase",
+         "value": f"{cs['unexpected_failures'] - bs['unexpected_failures']:+d}",
+         "passed": cs["unexpected_failures"] <= bs["unexpected_failures"]},
+    ]
+    return {
+        "base": base["name"],
+        "candidate": cand["name"],
+        "base_path": base_path,
+        "candidate_path": cand_path,
+        "base_flag_rule": results_flag_rule(base),
+        "candidate_flag_rule": results_flag_rule(cand),
+        "path_warning": path_warning,
+        "half": base["half"],
+        "f05_delta": cs["word"]["all"]["f05"] - bs["word"]["all"]["f05"],
+        "f05_ci": [lo, hi],
+        "children_f05_delta": child_delta,
+        "children_f05_ci": child_ci,
+        "false_alarm_delta": far_delta,
+        "rejection_delta": rej_delta,
+        "unscored_delta": unscored_delta,
+        "base_summary": bs,
+        "candidate_summary": cs,
+        # Reported only. Not part of the checks or of "passed".
+        "feedback": _feedback_comparison(base_items, cand_items, bs, cs, n_resamples, seed),
+        "checks": checks,
+        "passed": all(c["passed"] for c in checks),
+    }
+
+
+def _num(value) -> str:
+    return f"{value:8.4f}" if value is not None else f"{'n/a':>8s}"
+
+
+def _feedback_rows(c: dict) -> list[str]:
+    b, k = c["base_summary"].get("feedback"), c["candidate_summary"].get("feedback")
+    if b is None or k is None:
+        missing = " and ".join(name for name, s in (("base", b), ("candidate", k)) if s is None)
+        return [f"feedback not compared, the {missing} results have no feedback "
+                "(written before feedback was recorded)"]
+    rows = ["spoken feedback (reported only, not one of the checks)"]
+    lines = [("correction precision", "correction_precision", "all"),
+             ("  children", "correction_precision", "children"),
+             ("  adults", "correction_precision", "adults"),
+             ("wrong-correction rate", "wrong_correction_rate", "all"),
+             ("  children", "wrong_correction_rate", "children"),
+             ("  adults", "wrong_correction_rate", "adults"),
+             ("named-word precision", "named_word_precision", "all"),
+             ("clean praise rate", "clean_praise_rate", "all"),
+             ("false praise rate", "false_praise_rate", "all")]
+    for label, rate, name in lines:
+        vb, vk = b[name][rate], k[name][rate]
+        diff = f"{vk - vb:+8.4f}" if vb is not None and vk is not None else f"{'n/a':>8s}"
+        rows.append(f"{label:24s} {_num(vb)} {_num(vk)} {diff}")
+    for rate, label in (("correction_precision", "correction precision"),
+                        ("wrong_correction_rate", "wrong-correction rate")):
+        ci = (c.get("feedback") or {}).get(rate, {}).get("ci")
+        shown = f"[{ci[0]:+.4f}, {ci[1]:+.4f}]" if ci else "n/a"
+        rows.append(f"{label} difference, 95% CI {shown} (speaker bootstrap)")
+    return rows
+
+
+def format_comparison(c: dict) -> str:
+    b, k = c["base_summary"]["word"], c["candidate_summary"]["word"]
+    rows = [f"{c['base']} ({c.get('base_path', 'server')} path)  ->  "
+            f"{c['candidate']} ({c.get('candidate_path', 'server')} path)   ({c['half']} half)"]
+    if c.get("base_flag_rule") is not None:
+        rows.append(f"flag rule {c['base_flag_rule']}  ->  {c['candidate_flag_rule']}")
+    if c.get("path_warning"):
+        rows.append(f"WARNING: {c['path_warning']}")
+    rows.append(f"{'':24s} {'base':>8s} {'cand':>8s} {'diff':>8s}")
+    for name in ("all", "children", "adults"):
+        rows.append(f"{'F0.5 ' + name:24s} {b[name]['f05']:8.4f} {k[name]['f05']:8.4f} "
+                    f"{k[name]['f05'] - b[name]['f05']:+8.4f}")
+    for key, label in (("precision", "precision"), ("recall", "recall"), ("false_alarm_rate", "false-alarm rate")):
+        rows.append(f"{label:24s} {b['all'][key]:8.4f} {k['all'][key]:8.4f} {k['all'][key] - b['all'][key]:+8.4f}")
+    for key, label in (("rejection_rate", "rejection rate"), ("unscored_rate", "unscored rate")):
+        rb, rk = c["base_summary"][key], c["candidate_summary"][key]
+        rows.append(f"{label:24s} {rb:8.4f} {rk:8.4f} {rk - rb:+8.4f}")
+    rows.append(f"F0.5 difference, 95% CI [{c['f05_ci'][0]:+.4f}, {c['f05_ci'][1]:+.4f}] (speaker bootstrap)")
+    rows.extend(_feedback_rows(c))
+    rows.append("")
+    width = max([20] + [len(chk["value"]) for chk in c["checks"]])
+    for chk in c["checks"]:
+        rows.append(f"{'PASS' if chk['passed'] else 'FAIL'}  {chk['name']:28s} {chk['value']:>{width}s}   ({chk['rule']})")
+    rows.append(
+        "ACCEPT on conditions 1-4 and no new unexpected failures (speed and tests are checked separately)"
+        if c["passed"] else "REJECT"
+    )
+    return "\n".join(rows)
+
+
+def main(argv=None) -> int:
+    parser = argparse.ArgumentParser(prog="python -m tests.benchmark.compare")
+    parser.add_argument("base")
+    parser.add_argument("candidate")
+    parser.add_argument("--resamples", type=int, default=N_RESAMPLES)
+    parser.add_argument("--json", help="also write the full comparison here")
+    parser.add_argument("--allow-path-mismatch", action="store_true",
+                        help="compare a server-path run with a client-path run (prints a warning line)")
+    args = parser.parse_args(argv)
+
+    base, cand = load_results(args.base), load_results(args.candidate)
+    if "test" in (base["half"], cand["half"]) and not common.env_flag(common.UNLOCK_ENV):
+        print(f"error: comparing test-half results needs {common.UNLOCK_ENV}=1", file=sys.stderr)
+        return 2
+    try:
+        from .dataset import load_clips
+
+        result = compare_results(base, cand, load_clips(base["half"], base.get("subset")), args.resamples,
+                                 allow_path_mismatch=args.allow_path_mismatch)
+    except NotComparable as exc:
+        print(f"not comparable: {exc}", file=sys.stderr)
+        return 2
+    print(format_comparison(result))
+    if args.json:
+        with open(args.json, "w", encoding="utf-8") as fh:
+            json.dump(result, fh, ensure_ascii=False, indent=2, sort_keys=True)
+    return 0 if result["passed"] else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

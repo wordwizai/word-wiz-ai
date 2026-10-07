@@ -384,8 +384,9 @@ def _ground_truth(sentence: str):
 def run_client_path(case: RegressionCase) -> dict:
     """
     The path taken when the browser did the extraction:
-    client sends phonemes ALREADY GROUPED BY WORD, plus its own word list, and the server
-    aligns them as-is. No regrouping happens.
+    client sends phonemes ALREADY GROUPED BY WORD, plus its own word list. By default the
+    server flattens them and aligns them to the ground truth, as on the server path, so the
+    grouping no longer matters. With WWAI_GT_ANCHORED_ALIGNMENT off it aligns them as-is.
     """
     import asyncio
 

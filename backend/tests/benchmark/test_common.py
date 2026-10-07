@@ -1,0 +1,314 @@
+import io
+import logging
+import os
+import pickle
+import re
+import subprocess
+import sys
+import tempfile
+import unittest
+from contextlib import redirect_stdout
+from unittest import mock
+
+from tests.benchmark import common
+
+
+class _SubReplayedError(common.ReplayedError):
+    pass
+
+
+class TestFlags(unittest.TestCase):
+    def test_parse_flag_args(self):
+        self.assertEqual(
+            common.parse_flag_args(["WWAI_WEIGHTED_PER=1", "WWAI_G2P_STRICT=true"]),
+            {"WWAI_WEIGHTED_PER": "1", "WWAI_G2P_STRICT": "true"},
+        )
+
+    def test_parse_flag_args_rejects_non_wwai(self):
+        with self.assertRaises(ValueError):
+            common.parse_flag_args(["PATH=x"])
+        with self.assertRaises(ValueError):
+            common.parse_flag_args(["WWAI_NO_EQUALS"])
+
+    def test_parse_flag_args_rejects_bench_settings(self):
+        with self.assertRaises(ValueError):
+            common.parse_flag_args(["WWAI_BENCH_DATA_DIR=x"])
+
+    # The code's default front end: single preprocessing and soft quality gates both on.
+    DEFAULTS = "WWAI_SINGLE_PREPROCESS=1+WWAI_SOFT_QUALITY_GATES=1"
+    BOTH_OFF = {"WWAI_SINGLE_PREPROCESS": "0", "WWAI_SOFT_QUALITY_GATES": "0"}
+
+    def test_front_end_cache_name(self):
+        # The name follows the effective settings, so no flags means the code defaults.
+        self.assertEqual(common.front_end_cache_name({}), self.DEFAULTS)
+        self.assertEqual(common.front_end_cache_name({"WWAI_WEIGHTED_PER": "1"}), self.DEFAULTS)
+        self.assertEqual(
+            common.front_end_cache_name({"WWAI_SINGLE_PREPROCESS": "1", "WWAI_WEIGHTED_PER": "1"}),
+            self.DEFAULTS,
+        )
+        self.assertEqual(common.front_end_cache_name({"WWAI_SINGLE_PREPROCESS": ""}), self.DEFAULTS)
+        self.assertEqual(
+            common.front_end_cache_name({"WWAI_SINGLE_PREPROCESS": "0"}), "WWAI_SOFT_QUALITY_GATES=1"
+        )
+        self.assertEqual(
+            common.front_end_cache_name({"WWAI_SOFT_QUALITY_GATES": "0"}), "WWAI_SINGLE_PREPROCESS=1"
+        )
+        self.assertEqual(common.front_end_cache_name(self.BOTH_OFF), "baseline")
+
+    def test_soft_quality_gates_is_a_boolean_front_end_flag(self):
+        # It also switches the SNR measurement that drives adaptive noise reduction, so it changes
+        # the audio the models receive and the baseline cache goes stale under it.
+        self.assertIn("WWAI_SOFT_QUALITY_GATES", common.FRONT_END_FLAGS)
+        self.assertEqual(common.front_end_cache_name({"WWAI_SOFT_QUALITY_GATES": "1"}), self.DEFAULTS)
+        self.assertEqual(
+            common.front_end_cache_name({"WWAI_SOFT_QUALITY_GATES": "0"}), "WWAI_SINGLE_PREPROCESS=1"
+        )
+
+    def test_front_end_cache_name_treats_falsy_booleans_as_off(self):
+        for value in ("0", "false", "False", "no", "OFF", " off "):
+            with self.subTest(value=value):
+                self.assertEqual(
+                    common.front_end_cache_name({"WWAI_SINGLE_PREPROCESS": value}), "WWAI_SOFT_QUALITY_GATES=1"
+                )
+                self.assertEqual(
+                    common.front_end_cache_name({"WWAI_SOFT_QUALITY_GATES": value}), "WWAI_SINGLE_PREPROCESS=1"
+                )
+                self.assertEqual(
+                    common.front_end_cache_name({"WWAI_CHUNK_PRESERVE_PAUSES": value}), self.DEFAULTS
+                )
+        self.assertEqual(
+            common.front_end_cache_name({"WWAI_CHUNK_OVERLAP_SECONDS": "0.5"}),
+            "WWAI_CHUNK_OVERLAP_SECONDS=0.5+" + self.DEFAULTS,
+        )
+        self.assertEqual(
+            common.front_end_cache_name({**self.BOTH_OFF, "WWAI_CHUNK_OVERLAP_SECONDS": "0.5"}),
+            "WWAI_CHUNK_OVERLAP_SECONDS=0.5",
+        )
+
+    def test_a_boolean_that_is_on_is_named_by_its_effect_not_its_spelling(self):
+        for value in ("1", "true", "YES", "on"):
+            with self.subTest(value=value):
+                self.assertEqual(common.front_end_cache_name({"WWAI_SINGLE_PREPROCESS": value}), self.DEFAULTS)
+                self.assertEqual(
+                    common.front_end_cache_name({**self.BOTH_OFF, "WWAI_CHUNK_PRESERVE_PAUSES": value}),
+                    "WWAI_CHUNK_PRESERVE_PAUSES=1",
+                )
+
+    def test_the_existing_caches_keep_their_names(self):
+        # Built before the defaults changed. Each name must still mean the same front end.
+        self.assertEqual(common.front_end_cache_name(self.BOTH_OFF), "baseline")
+        self.assertEqual(
+            common.front_end_cache_name({"WWAI_SINGLE_PREPROCESS": "1", "WWAI_SOFT_QUALITY_GATES": "1"}),
+            "WWAI_SINGLE_PREPROCESS=1+WWAI_SOFT_QUALITY_GATES=1",
+        )
+        self.assertEqual(
+            common.front_end_cache_name({"WWAI_SINGLE_PREPROCESS": "1", "WWAI_SOFT_QUALITY_GATES": "0"}),
+            "WWAI_SINGLE_PREPROCESS=1",
+        )
+        self.assertEqual(
+            common.front_end_cache_name({"WWAI_SINGLE_PREPROCESS": "0", "WWAI_SOFT_QUALITY_GATES": "1"}),
+            "WWAI_SOFT_QUALITY_GATES=1",
+        )
+
+    def test_front_end_defaults_match_the_code(self):
+        # common.py must not import core, so the defaults are written out there. Keep them honest.
+        self.assertEqual(
+            common.FRONT_END_DEFAULTS, {"WWAI_SINGLE_PREPROCESS": "1", "WWAI_SOFT_QUALITY_GATES": "1"}
+        )
+        self.assertLessEqual(set(common.FRONT_END_DEFAULTS), set(common._BOOLEAN_FRONT_END_FLAGS))
+        from core.audio_chunking import preserve_pauses_enabled
+        from core.audio_preprocessing import single_preprocess_enabled
+        from core.audio_quality_analyzer import soft_quality_gates_enabled
+
+        readers = {
+            "WWAI_SINGLE_PREPROCESS": single_preprocess_enabled,
+            "WWAI_SOFT_QUALITY_GATES": soft_quality_gates_enabled,
+            "WWAI_CHUNK_PRESERVE_PAUSES": preserve_pauses_enabled,
+        }
+        self.assertEqual(set(readers), set(common._BOOLEAN_FRONT_END_FLAGS))
+        with mock.patch.dict(os.environ):
+            for name in common.FRONT_END_FLAGS:
+                os.environ.pop(name, None)
+            for name, reader in readers.items():
+                with self.subTest(flag=name):
+                    default = common.FRONT_END_DEFAULTS.get(name, "")
+                    self.assertEqual(reader(), common.env_flag(name, {name: default}))
+
+    def test_front_end_cache_name_rejects_unsafe_values(self):
+        for bad in ("..\\x", "a:b", "a*b"):
+            with self.assertRaises(ValueError):
+                common.front_end_cache_name({"WWAI_CHUNK_OVERLAP_SECONDS": bad})
+
+    def test_active_wwai_flags_skips_bench_and_other_vars(self):
+        env = {"WWAI_WEIGHTED_PER": "1", "WWAI_BENCH_VERBOSE": "1", "PATH": "x"}
+        self.assertEqual(common.active_wwai_flags(env), {"WWAI_WEIGHTED_PER": "1"})
+
+    def test_recording_flags_are_the_asr_mode_flags(self):
+        self.assertEqual(common.RECORDING_FLAGS, ("WWAI_ASR_FALLBACK", "WWAI_ASR_TYPED_ERRORS"))
+        # They change what the recorded models return, not what they are fed, so they do not
+        # belong in the cache name.
+        self.assertFalse(set(common.RECORDING_FLAGS) & set(common.FRONT_END_FLAGS))
+
+    def test_active_wwai_flags_skips_deploy_settings(self):
+        # CLAUDE.md's deploy section exports these. WWAI_KEY can hold a private key, and the flags
+        # are written into _cache_meta.json and the committed results files of a public repo.
+        env = {
+            "WWAI_HOST": "203.0.113.7", "WWAI_USER": "ubuntu", "WWAI_KEY": "/home/me/key.pem",
+            "WWAI_WEIGHTED_PER": "1", "WWAI_BENCH_VERBOSE": "1",
+        }
+        self.assertEqual(common.active_wwai_flags(env), {"WWAI_WEIGHTED_PER": "1"})
+
+    def test_the_deny_list_names_exactly_the_deploy_settings(self):
+        self.assertEqual(set(common._NOT_FLAGS), {"WWAI_HOST", "WWAI_USER", "WWAI_KEY"})
+
+    def test_active_wwai_flags_reads_the_real_environment_by_default(self):
+        with mock.patch.dict(os.environ, {"WWAI_KEY": "secret", "WWAI_WEIGHTED_PER": "1"}):
+            flags = common.active_wwai_flags()
+        self.assertNotIn("WWAI_KEY", flags)
+        self.assertEqual(flags["WWAI_WEIGHTED_PER"], "1")
+
+    def test_a_flag_that_only_starts_like_a_deploy_setting_is_still_a_flag(self):
+        env = {"WWAI_KEYBOARD": "1", "WWAI_USERNAME": "x", "WWAI_HOSTS": "y"}
+        self.assertEqual(common.active_wwai_flags(env), env)
+
+    def test_env_flag(self):
+        self.assertTrue(common.env_flag("X", {"X": "TRUE"}))
+        self.assertFalse(common.env_flag("X", {"X": "0"}))
+        self.assertFalse(common.env_flag("X", {}))
+
+    def test_apply_flags_refuses_after_core_import(self):
+        # Leaves core imported for the rest of the process.
+        import core.model_registry  # noqa: F401  (any core import counts)
+
+        with self.assertRaises(RuntimeError):
+            common.apply_flags({"WWAI_WEIGHTED_PER": "1"})
+        common.apply_flags({})  # nothing to apply is always fine
+
+    def test_apply_flags_sets_environment_before_core_import(self):
+        with mock.patch.object(common, "_core_imported", return_value=False), mock.patch.dict(os.environ):
+            common.apply_flags({"WWAI_WEIGHTED_PER": "1"})
+            self.assertEqual(os.environ["WWAI_WEIGHTED_PER"], "1")
+
+
+class TestDotenvWwaiKeys(unittest.TestCase):
+    def test_lists_experiment_flags_and_ignores_the_rest(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, ".env")
+            with open(path, "w", encoding="utf-8") as fh:
+                fh.write("WWAI_WEIGHTED_PER=1\nWWAI_BENCH_VERBOSE=1\nDEEPGRAM_KEY=x\n")
+            self.assertEqual(common.dotenv_wwai_keys(path), ["WWAI_WEIGHTED_PER"])
+
+    def test_deploy_settings_are_not_experiment_flags(self):
+        # backend/.env is not where the deploy settings live, but if they are there they must not
+        # make every benchmark command refuse to start.
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, ".env")
+            with open(path, "w", encoding="utf-8") as fh:
+                fh.write("WWAI_HOST=1.2.3.4\nWWAI_USER=ubuntu\nWWAI_KEY=/k.pem\nWWAI_WEIGHTED_PER=1\n")
+            self.assertEqual(common.dotenv_wwai_keys(path), ["WWAI_WEIGHTED_PER"])
+
+    def test_missing_file_is_empty(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(common.dotenv_wwai_keys(os.path.join(tmp, "nope.env")), [])
+
+
+class TestDirs(unittest.TestCase):
+    def test_env_overrides(self):
+        with mock.patch.dict(os.environ, {"WWAI_BENCH_DATA_DIR": "/tmp/d", "WWAI_BENCH_CACHE_DIR": "/tmp/c"}):
+            self.assertEqual(common.data_dir(), "/tmp/d")
+            self.assertEqual(common.cache_root(), "/tmp/c")
+        with mock.patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("WWAI_BENCH_DATA_DIR", None)
+            self.assertEqual(common.data_dir(), os.path.join(common.BENCH_ROOT, "data"))
+
+
+class TestQuiet(unittest.TestCase):
+    def test_quiet_swallows_print(self):
+        outer = io.StringIO()
+        with mock.patch.dict(os.environ, {common.VERBOSE_ENV: ""}):
+            with redirect_stdout(outer):
+                with common.quiet():
+                    print("noise")
+        self.assertEqual(outer.getvalue(), "")
+
+
+    def test_quiet_restores_state_after_exception(self):
+        disable, out, err = logging.root.manager.disable, sys.stdout, sys.stderr
+        with mock.patch.dict(os.environ, {common.VERBOSE_ENV: ""}):
+            with self.assertRaises(KeyError):
+                with common.quiet():
+                    raise KeyError("boom")
+        self.assertEqual(logging.root.manager.disable, disable)
+        self.assertIs(sys.stdout, out)
+        self.assertIs(sys.stderr, err)
+
+
+class TestExceptions(unittest.TestCase):
+    def test_replayed_error_pickles(self):
+        err = pickle.loads(pickle.dumps(common.ReplayedError("DeepgramTimeout", "slow")))
+        self.assertEqual(err.error_type, "DeepgramTimeout")
+        self.assertEqual(err.message, "slow")
+
+    def test_replayed_error_text_is_the_recorded_message(self):
+        # analyze_clip stores str(exc), so a replayed rejection reads the same as the live one.
+        self.assertEqual(str(common.ReplayedError("EmptyAudioError", "no audio")), "no audio")
+        self.assertEqual(str(common.ReplayedValueError("EmptyAudioError", "no audio")), "no audio")
+
+    def test_replayed_error_subclass_pickles_as_subclass(self):
+        err = pickle.loads(pickle.dumps(_SubReplayedError("T", "m")))
+        self.assertIs(type(err), _SubReplayedError)
+        self.assertEqual((err.error_type, err.message), ("T", "m"))
+
+    def test_replayed_value_error_is_both_kinds_and_pickles(self):
+        err = common.ReplayedValueError("EmptyAudioError", "no audio")
+        self.assertIsInstance(err, ValueError)
+        self.assertIsInstance(err, common.ReplayedError)
+        back = pickle.loads(pickle.dumps(err))
+        self.assertIs(type(back), common.ReplayedValueError)
+        self.assertEqual((back.error_type, back.message), ("EmptyAudioError", "no audio"))
+
+    def test_git_sha_format(self):
+        self.assertRegex(common.git_sha(), r"^([0-9a-f]{40}(-dirty)?|unknown)$")
+
+
+class TestGitSha(unittest.TestCase):
+    def _run(self, status_output=b""):
+        commands = []
+
+        def fake_run(command, **kwargs):
+            commands.append(command)
+            stdout = "0123456789abcdef0123456789abcdef01234567\n" if "rev-parse" in command else status_output
+            return subprocess.CompletedProcess(command, 0, stdout=stdout)
+
+        with mock.patch("subprocess.run", fake_run):
+            return common.git_sha(), commands
+
+    def test_status_does_not_take_the_index_lock(self):
+        # A plain `git status` refreshes the index and can hold index.lock while the person
+        # running the benchmark commits, which then fails with "Unable to create index.lock".
+        _sha, commands = self._run()
+        status = [c for c in commands if "status" in c]
+        self.assertEqual(len(status), 1)
+        self.assertEqual(status[0][:3], ["git", "--no-optional-locks", "status"])
+
+    def test_clean_and_dirty(self):
+        sha = "0123456789abcdef0123456789abcdef01234567"
+        self.assertEqual(self._run(b"")[0], sha)
+        self.assertEqual(self._run(b" M backend/core/x.py\n")[0], sha + "-dirty")
+
+    def test_no_git_is_unknown(self):
+        with mock.patch("subprocess.run", side_effect=FileNotFoundError("git")):
+            self.assertEqual(common.git_sha(), "unknown")
+
+
+class TestRealProcessor(unittest.TestCase):
+    def test_real_processor_has_vocab_and_is_memoized(self):
+        from tests.benchmark import testutil
+
+        first = testutil.real_processor_or_skip()
+        self.assertIn("|", first.tokenizer.get_vocab())
+        self.assertIs(testutil.real_processor_or_skip(), first)
+
+
+if __name__ == "__main__":
+    unittest.main()

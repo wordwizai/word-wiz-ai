@@ -1,7 +1,7 @@
 {
   "case_id": "case_synth_04_ligature_mismatch",
   "client_path": {
-    "highest_per_word": "church",
+    "highest_per_word": "judged",
     "problem_types": [
       "high_frequency_errors",
       "most_common_phoneme",
@@ -13,8 +13,8 @@
       "recommended_focus_phoneme",
       "word_error_counts"
     ],
-    "sentence_per": 0.666667,
-    "total_errors": 8,
+    "sentence_per": 0.416667,
+    "total_errors": 5,
     "total_phonemes": 12,
     "words": [
       {
@@ -37,10 +37,7 @@
         "type": "match"
       },
       {
-        "added": [
-          "t",
-          "t"
-        ],
+        "added": [],
         "ground_truth_phonemes": [
           "ʧ",
           "ə",
@@ -49,14 +46,15 @@
         ],
         "ground_truth_word": "church",
         "missed": [],
-        "per": 1.0,
+        "per": 0.5,
         "phonemes": [
           "t",
           "ʃ",
           "ə",
           "r",
           "t",
-          "ʃ"
+          "ʃ",
+          "d"
         ],
         "predicted_word": "church",
         "substituted": [
@@ -66,16 +64,15 @@
           ],
           [
             "ʧ",
-            "ʃ"
+            "t"
           ]
         ],
-        "total_errors": 4,
+        "total_errors": 2,
         "total_phonemes": 4,
-        "type": "match"
+        "type": "substitution"
       },
       {
         "added": [
-          "d",
           "d"
         ],
         "ground_truth_phonemes": [
@@ -86,9 +83,8 @@
         ],
         "ground_truth_word": "judged",
         "missed": [],
-        "per": 1.0,
+        "per": 0.75,
         "phonemes": [
-          "d",
           "ʒ",
           "ə",
           "d",
@@ -106,9 +102,9 @@
             "ʒ"
           ]
         ],
-        "total_errors": 4,
+        "total_errors": 3,
         "total_phonemes": 4,
-        "type": "match"
+        "type": "substitution"
       },
       {
         "added": [],
@@ -201,8 +197,8 @@
       "recommended_focus_phoneme",
       "word_error_counts"
     ],
-    "sentence_per": 0.666667,
-    "total_errors": 8,
+    "sentence_per": 0.416667,
+    "total_errors": 5,
     "total_phonemes": 12,
     "words": [
       {
@@ -225,9 +221,7 @@
         "type": "match"
       },
       {
-        "added": [
-          "t"
-        ],
+        "added": [],
         "ground_truth_phonemes": [
           "ʧ",
           "ə",
@@ -236,13 +230,15 @@
         ],
         "ground_truth_word": "church",
         "missed": [],
-        "per": 0.75,
+        "per": 0.5,
         "phonemes": [
           "t",
           "ʃ",
           "ə",
           "r",
-          "t"
+          "t",
+          "ʃ",
+          "d"
         ],
         "predicted_word": "church",
         "substituted": [
@@ -255,14 +251,12 @@
             "t"
           ]
         ],
-        "total_errors": 3,
+        "total_errors": 2,
         "total_phonemes": 4,
-        "type": "match"
+        "type": "substitution"
       },
       {
         "added": [
-          "ʃ",
-          "d",
           "d"
         ],
         "ground_truth_phonemes": [
@@ -273,10 +267,8 @@
         ],
         "ground_truth_word": "judged",
         "missed": [],
-        "per": 1.25,
+        "per": 0.75,
         "phonemes": [
-          "ʃ",
-          "d",
           "ʒ",
           "ə",
           "d",
@@ -294,9 +286,9 @@
             "ʒ"
           ]
         ],
-        "total_errors": 5,
+        "total_errors": 3,
         "total_phonemes": 4,
-        "type": "match"
+        "type": "substitution"
       },
       {
         "added": [],

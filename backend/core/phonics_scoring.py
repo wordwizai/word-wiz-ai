@@ -16,7 +16,8 @@ CORRECT_PER = 0.15
 # Share of the pattern's words read right that counts as mastered.
 MASTERY = 0.8
 
-# Letters only: the pipeline drops apostrophes before alignment ("don't" is stored as "dont").
+# Letters only, so a stored word matches whether or not the pipeline kept its apostrophe
+# ("don't" now, "dont" in readings saved before clean_sentence kept them).
 _NOT_WORD = re.compile(r"[^a-z]")
 
 

@@ -649,8 +649,6 @@ async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=
     Returns:
         List of dictionaries containing pronunciation analysis results
     """
-    from .audio_chunking import should_use_chunking, chunk_audio_at_silence, merge_chunk_results
-    
     if phoneme_extraction_model is None:
         phoneme_extraction_model = PhonemeExtractor()
     
@@ -660,6 +658,23 @@ async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=
     if len(ground_truth_phonemes) <= 1:
         raise ValueError("ground_truth_phonemes must have at least 2 elements)")
 
+    phoneme_predictions, predicted_words = await extract_phonemes_and_words(
+        audio_array, sampling_rate, phoneme_extraction_model, word_extraction_model, use_chunking,
+    )
+    return score_extracted_phonemes(ground_truth_phonemes, phoneme_predictions, predicted_words)
+
+
+async def extract_phonemes_and_words(audio_array, sampling_rate, phoneme_extraction_model, word_extraction_model, use_chunking=True):
+    """
+    The extraction half of process_audio_array: preprocessing, chunking and both models.
+
+    Returns (phoneme_predictions, predicted_words) as the models returned them, merged
+    across chunks when the audio was chunked. Nothing is checked or filtered here;
+    score_extracted_phonemes does that. The accuracy benchmark calls this to get the
+    server's phoneme groups for a clip when it simulates the client phoneme path.
+    """
+    from .audio_chunking import should_use_chunking, chunk_audio_at_silence, merge_chunk_results
+
     # Calculate audio duration for logging
     audio_duration = len(audio_array) / sampling_rate
     
@@ -667,7 +682,7 @@ async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=
     # already_preprocessed=None -> auto-detect. If the request handler already ran
     # the single preprocessing pass on this exact array, skip it here instead of
     # applying a second round of noise reduction + normalization
-    # (WWAI_SINGLE_PREPROCESS; unset = every pass runs, as before).
+    # (WWAI_SINGLE_PREPROCESS, default ON; set it to 0 and every pass runs, as before).
     audio_array = preprocess_audio(audio=audio_array, sr=sampling_rate, audio_length_seconds=audio_duration, already_preprocessed=None)
     
     # Check if audio should be chunked
@@ -760,6 +775,63 @@ async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=
 
         phoneme_predictions, predicted_words = await extract_data()
 
+    return phoneme_predictions, predicted_words
+
+
+#: On the anchored path a reading is "no speech" when the phoneme model heard fewer than
+#: this share of the sentence's expected phonemes (and always below two). On the
+#: speechocean762 dev half every scored reading heard at least 0.55 of them, while a clip
+#: where only "the" of "the cat sat on the mat" came back hears 0.14.
+MIN_PHONEME_COVERAGE = 0.3
+
+#: Kill switch for scoring anchored readings the ASR heard nothing in. When truthy,
+#: _score_anchored first requires at least two ASR words and at least two phoneme groups,
+#: as the anchored path did before, without turning off anchored alignment. Default off.
+#: Read at call time.
+REQUIRE_ASR_WORDS_FLAG = "WWAI_REQUIRE_ASR_WORDS"
+
+
+def _require_asr_words() -> bool:
+    return _os.environ.get(REQUIRE_ASR_WORDS_FLAG, "").strip().lower() in ("1", "true", "yes", "on")
+
+
+def _score_anchored(ground_truth_phonemes, phoneme_predictions, predicted_words) -> list[dict]:
+    """
+    Ground-truth-anchored scoring, shared by the server and client paths.
+
+    Anchored to the sentence, the ASR words are only hints and the model's word
+    grouping does not matter, so only the phonemes are required. Too few of them
+    (see MIN_PHONEME_COVERAGE) is "no speech". Deepgram returns an empty or one-word transcript for some
+    readings the phoneme model heard, mostly young children's (88 of 2,500
+    speechocean762 dev clips), and those children used to be told nothing was
+    heard. On that benchmark, scoring them kept the false-alarm rate within
+    0.2 points, and their feedback named a real mistake more often than average.
+    WWAI_REQUIRE_ASR_WORDS brings back the old requirement of two ASR words and
+    two phoneme groups, checked before the coverage rule.
+    """
+    from .gt_alignment import align_to_ground_truth
+    if _require_asr_words() and (
+        phoneme_predictions is None or predicted_words is None
+        or len(phoneme_predictions) <= 1 or len(predicted_words) <= 1
+    ):
+        raise ValueError("The audio provided has no speech inside")
+    flattened = [p for group in (phoneme_predictions or []) for p in (group or [])]
+    expected = sum(len(phonemes or []) for _, phonemes in ground_truth_phonemes)
+    if len(flattened) < max(2, MIN_PHONEME_COVERAGE * expected):
+        raise ValueError("The audio provided has no speech inside")
+    words = [str(word) for word in (predicted_words or []) if word]
+    return align_to_ground_truth(flattened, ground_truth_phonemes, words)
+
+
+def score_extracted_phonemes(ground_truth_phonemes, phoneme_predictions, predicted_words) -> list[dict]:
+    """
+    The scoring half of process_audio_array, on what extract_phonemes_and_words returned:
+    the no-speech checks, then phoneme-to-word alignment and word scoring.
+    """
+    from .gt_alignment import is_gt_anchored_enabled
+    if is_gt_anchored_enabled():  # WWAI_GT_ANCHORED_ALIGNMENT, default ON
+        return _score_anchored(ground_truth_phonemes, phoneme_predictions, predicted_words)
+
     if phoneme_predictions is None or predicted_words is None or len(phoneme_predictions) <= 1 or len(predicted_words) <= 1:
         raise ValueError("The audio provided has no speech inside")
 
@@ -778,9 +850,6 @@ async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=
     import time
     alignment_start = time.time()
     flattened_phoneme_predictions = [item for sublist in phoneme_predictions for item in sublist]
-    from .gt_alignment import is_gt_anchored_enabled, align_to_ground_truth
-    if is_gt_anchored_enabled():  # WWAI_GT_ANCHORED_ALIGNMENT, default OFF
-        return align_to_ground_truth(flattened_phoneme_predictions, ground_truth_phonemes, predicted_words)
     predicted_words_phonemes = g2p(" ".join(predicted_words)) # take the words our model thinks we said and get the phonemes for them
     alignment = align_phonemes_to_words(flattened_phoneme_predictions, predicted_words_phonemes)
     phoneme_predictions = [pred_phonemes for _, pred_phonemes,_ in alignment]
@@ -818,6 +887,10 @@ async def process_audio_with_client_phonemes(
     If client_words are provided, word extraction is skipped entirely, saving
     significant processing time (60-80% faster).
     
+    The phonemes are scored the way process_audio_array scores the server's. They are
+    flattened and aligned to the ground truth by gt_alignment.align_to_ground_truth, unless
+    WWAI_GT_ANCHORED_ALIGNMENT is off, which restores the legacy word-by-word scoring.
+
     Args:
         client_phonemes: List of words, where each word is a list of IPA phoneme strings
                         (already normalized from eSpeak format)
@@ -833,6 +906,14 @@ async def process_audio_with_client_phonemes(
     if len(ground_truth_phonemes) <= 1:
         raise ValueError("ground_truth_phonemes must have at least 2 elements")
     
+    from .gt_alignment import is_gt_anchored_enabled
+    if is_gt_anchored_enabled() and audio_array is not None and np.size(audio_array) == 0:
+        # The frontend sends an empty recording whenever it has both client phonemes and
+        # client words, including client_words == [] when the browser's ASR heard nothing.
+        # There is nothing to preprocess or transcribe, and the anchored scoring needs only
+        # the phonemes. Its coverage rule still decides whether this was "no speech".
+        return _score_anchored(ground_truth_phonemes, client_phonemes, client_words or [])
+
     # Only preprocess audio if we need to extract words from it
     # If client provided both phonemes and words, we don't need the audio at all
     if client_words is None or len(client_words) == 0:
@@ -857,14 +938,20 @@ async def process_audio_with_client_phonemes(
             sampling_rate=sampling_rate
         )
         print(f"✓ Word extraction completed: {predicted_words}")
-    
+
+    if is_gt_anchored_enabled():  # WWAI_GT_ANCHORED_ALIGNMENT, default ON
+        # Exactly as in process_audio_array (see _score_anchored). The client's own
+        # word grouping does not matter, and the WWAI_CLIENT_REALIGN option, which
+        # regroups the phonemes onto the ASR words, only applies to the legacy path.
+        return _score_anchored(ground_truth_phonemes, client_phonemes, predicted_words)
+
     if predicted_words is None or len(predicted_words) <= 1:
         raise ValueError("The audio provided has no speech inside")
     
     # Use client-provided phonemes directly (already normalized to IPA)
     phoneme_predictions = client_phonemes
     print(f"✓ Using client-provided phonemes ({len(phoneme_predictions)} words)")
-    
+
     # Validate that we have the same number of words in phonemes and word predictions
     # If not, we may need to adjust the alignment
     if len(phoneme_predictions) != len(predicted_words):
@@ -949,6 +1036,11 @@ def analyze_results(pronunciation_data: list[dict]) -> tuple[pd.DataFrame, dict,
         tuple[pd.DataFrame, pd.Series, dict, dict]: DataFrame of word-level results, highest phoneme error rate word, problems, and sentence per 
     """
     df = pd.DataFrame(pronunciation_data)
+    # Each word's clear-mistake decision, by the same rule the spoken feedback uses, so the
+    # frontend can colour words to match it. A new column only, and the records the caller
+    # passed in are not changed. Both the server and client paths go through here.
+    from .phoneme_feedback_formatter import is_clear_mistake
+    df["clear_mistake"] = [is_clear_mistake(word) for word in pronunciation_data]
 
     # get the highest PER word
     highest_per = df.sort_values("per", ascending=False).iloc[0].to_dict()
@@ -967,10 +1059,15 @@ def analyze_results(pronunciation_data: list[dict]) -> tuple[pd.DataFrame, dict,
     # Calculate sentence-level PER
     sentence_per = total_errors / total_phonemes if total_phonemes > 0 else 0.0
 
+    from .gt_alignment import active_scoring_version
+
     per_summary = {
         "total_phonemes": total_phonemes,
         "total_errors": total_errors,
         "sentence_per": sentence_per,
+        # Which word scoring produced these numbers: 2, or 1 under either kill
+        # switch (see gt_alignment.active_scoring_version).
+        "scoring_version": active_scoring_version(),
     }
 
     # Return sentence-level PER along with existing results

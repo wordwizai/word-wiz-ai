@@ -200,6 +200,691 @@ class TestWithinWordMispronunciation(unittest.TestCase):
         self.assertEqual(by_word(results, 'sat')[0]["per"], 0.0)
 
 
+# --------------------------------------------------------------------------- #
+# Word scoring v2: closest valid pronunciation, edge insertions not counted
+# --------------------------------------------------------------------------- #
+
+LEGACY_SCORING_FLAG = "WWAI_LEGACY_WORD_SCORING"
+REQUIRE_ASR_WORDS_FLAG = "WWAI_REQUIRE_ASR_WORDS"
+
+# Keys every ground-truth-anchored record carries on top of
+# _process_word_alignment's contract (scoring v2.1).
+V21_KEYS = {"canonical_phonemes", "edge_insertions"}
+# Keys added after the frozen pre-v2 copy below, which say nothing about the score:
+# v2.1's, and the per-phoneme tiles the frontend draws ("phoneme_alignment").
+ADDED_KEYS = V21_KEYS | {"phoneme_alignment"}
+
+
+def without_v21_keys(records):
+    return [{k: v for k, v in r.items() if k not in ADDED_KEYS} for r in records]
+
+
+def pre_v2_align_to_ground_truth(flat_phonemes, ground_truth_phonemes, predicted_words=None):
+    """
+    Frozen copy of ``align_to_ground_truth`` from before word scoring v2: every
+    word scored against its primary G2P phonemes, every inserted phoneme counted.
+    The kill switch must reproduce this exactly. Segmentation, ASR hints and the
+    deletion/insertion records did not change, so those are reused.
+    """
+    from core.gt_alignment import (
+        _deletion_record, _insertion_record, align_sequences,
+    )
+
+    gtp = [(word, list(phs or [])) for word, phs in (ground_truth_phonemes or [])]
+    if not gtp:
+        return []
+    gt_words = [word for word, _ in gtp]
+    asr_words = [str(w) for w in (predicted_words or []) if w]
+    skip_hints, pred_labels, insertions = derive_asr_hints(gt_words, asr_words)
+    segments = segment_phonemes_by_ground_truth(flat_phonemes, gtp, skip_hints)
+
+    results = []
+    for idx, (gt_word, gt_phs) in enumerate(gtp):
+        for extra in insertions.get(idx, ()):
+            results.append(_insertion_record(extra))
+        segment = segments[idx] if idx < len(segments) else []
+        if not segment:
+            results.append(_deletion_record(gt_word, gt_phs))
+            continue
+        missed, added, substituted = [], [], []
+        for pop, gph, pph in align_sequences(gt_phs, segment):
+            if pop == 'deletion':
+                missed.append(gph)
+            elif pop == 'insertion':
+                added.append(pph)
+            elif pop == 'substitution':
+                substituted.append((gph, pph))
+        total_errors = len(missed) + len(added) + len(substituted)
+        per = total_errors / max(len(gt_phs), 1)
+        results.append({
+            "type": "match" if total_errors == 0 else "substitution",
+            "predicted_word": pred_labels.get(idx, gt_word),
+            "ground_truth_word": gt_word,
+            "phonemes": list(segment),
+            "ground_truth_phonemes": list(gt_phs),
+            "expected_phonemes": list(gt_phs),
+            "actual_phonemes": list(segment),
+            "per": round(per, 4),
+            "missed": missed,
+            "added": added,
+            "substituted": substituted,
+            "total_phonemes": len(gt_phs),
+            "total_errors": total_errors,
+        })
+    for extra in insertions.get(len(gtp), ()):
+        results.append(_insertion_record(extra))
+    # The reused record helpers now add the v2.1 keys, which pre-v2 did not have.
+    return without_v21_keys(results)
+
+
+class _ScoringEnv(unittest.TestCase):
+    """Legacy G2P tokenization and v2 word scoring, whatever the shell says."""
+
+    def setUp(self):
+        from unittest import mock
+
+        patcher = mock.patch.dict(os.environ)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        os.environ.pop("WWAI_G2P_STRICT", None)
+        os.environ.pop(LEGACY_SCORING_FLAG, None)
+
+    def score_one(self, segment, word_tuple):
+        results = align_to_ground_truth(segment, [word_tuple])
+        self.assertEqual(len(results), 1)
+        return results[0]
+
+
+class TestClosestValidPronunciation(_ScoringEnv):
+    """A correct reading of another CMUdict pronunciation is not an error."""
+
+    def test_to_read_as_tu_is_correct_in_both_g2p_modes(self):
+        from core.grapheme_to_phoneme import grapheme_to_phoneme
+
+        for strict in (False, True):
+            with self.subTest(strict=strict):
+                os.environ["WWAI_G2P_STRICT"] = "true" if strict else "false"
+                gt = grapheme_to_phoneme("to", strict=strict)
+                self.assertEqual(gt[0][1], ['t', 'ɪ'], "primary G2P form of 'to'")
+
+                r = align_to_ground_truth(['t', 'u'], gt, ['to'])[0]
+                self.assertEqual(r["per"], 0.0)
+                self.assertEqual(r["type"], "match")
+                self.assertEqual(r["expected_phonemes"], ['t', 'u'])
+                self.assertEqual(r["ground_truth_phonemes"], ['t', 'u'])
+                self.assertEqual(r["total_phonemes"], 2)
+                self.assertEqual(r["total_errors"], 0)
+                self.assertEqual((r["missed"], r["added"], r["substituted"]), ([], [], []))
+
+    def test_the_primary_wins_a_tie(self):
+        # [ð ɪ] is one substitution away from both ðə (primary) and ði.
+        r = self.score_one(['ð', 'ɪ'], THE)
+        self.assertEqual(r["expected_phonemes"], ['ð', 'ə'])
+        self.assertEqual(r["substituted"], [('ə', 'ɪ')])
+        self.assertEqual(r["per"], 0.5)
+
+    def test_a_variant_only_wins_with_strictly_fewer_errors(self):
+        r = self.score_one(['ð', 'i'], THE)
+        self.assertEqual(r["expected_phonemes"], ['ð', 'i'])
+        self.assertEqual(r["per"], 0.0)
+
+    def test_variants_are_looked_up_once_per_sentence(self):
+        from unittest import mock
+        import eng_to_ipa
+        import core.grapheme_to_phoneme as g2p_module
+
+        g2p_module.clear_cache()
+        self.addCleanup(g2p_module.clear_cache)
+        with mock.patch.object(g2p_module.G2p, "ipa_list", wraps=eng_to_ipa.ipa_list) as spy:
+            align_to_ground_truth(flatten(GT_LONG), GT_LONG, ['the', 'cat', 'sat', 'on', 'the', 'mat'])
+            self.assertEqual(spy.call_count, 1)
+            self.assertEqual(sorted(spy.call_args.args[0].split()), ['cat', 'mat', 'on', 'sat', 'the'])
+
+            align_to_ground_truth(flatten(GT_SHORT), GT_SHORT)
+            self.assertEqual(spy.call_count, 1)
+
+            os.environ[LEGACY_SCORING_FLAG] = "1"
+            g2p_module.clear_cache()
+            align_to_ground_truth(flatten(GT_SHORT), GT_SHORT)
+            self.assertEqual(spy.call_count, 1)
+
+    def test_segmentation_still_uses_the_primary_phonemes(self):
+        cases = [
+            (['ð', 'i', 'k', 'æ', 't', 's', 'æ', 't'], GT_SHORT),
+            (['ð', 'ə', 'ə', 'k', 'æ', 't', 'h', 's', 'æ', 't', 't'], GT_SHORT),
+            (flatten([THE, SAT, ON, THE, MAT]), GT_LONG),
+        ]
+        for flat, gt in cases:
+            with self.subTest(flat=flat):
+                v2 = align_to_ground_truth(flat, gt)
+                os.environ[LEGACY_SCORING_FLAG] = "1"
+                legacy = align_to_ground_truth(flat, gt)
+                os.environ.pop(LEGACY_SCORING_FLAG)
+                self.assertEqual([r["phonemes"] for r in v2], [r["phonemes"] for r in legacy])
+                self.assertEqual(
+                    [r["phonemes"] for r in v2],
+                    segment_phonemes_by_ground_truth(flat, gt),
+                )
+
+
+class TestEdgeInsertions(_ScoringEnv):
+    """Stray phonemes at a segment boundary are segmentation noise, not errors."""
+
+    def test_stray_phoneme_at_either_edge_does_not_count(self):
+        for segment in (
+            ['h', 'k', 'æ', 't'],        # before
+            ['k', 'æ', 't', 's'],        # after
+            ['h', 'k', 'æ', 't', 's'],   # both
+            ['k', 'k', 'æ', 't'],        # doubled first phoneme
+            ['k', 'æ', 't', 't'],        # doubled last phoneme
+        ):
+            for asr in (None, ['cat']):
+                with self.subTest(segment=segment, asr=asr):
+                    r = align_to_ground_truth(segment, [CAT], asr)[0]
+                    self.assertEqual(r["per"], 0.0)
+                    self.assertEqual(r["added"], [])
+                    self.assertEqual(r["total_errors"], 0)
+                    self.assertEqual(r["type"], "match")
+                    self.assertEqual(r["total_phonemes"], 3)
+                    # Every acoustic phoneme is still reported on the record.
+                    self.assertEqual(r["phonemes"], segment)
+                    self.assertEqual(r["actual_phonemes"], segment)
+
+    def test_up_to_three_phonemes_are_forgiven_at_each_edge(self):
+        # Segment boundaries often spill two or three phonemes of the next word.
+        for segment in (
+            ['ə', 'h', 'k', 'æ', 't'],
+            ['ʌ', 'ə', 'h', 'k', 'æ', 't'],
+            ['k', 'æ', 't', 's', 'z'],
+            ['k', 'æ', 't', 's', 'z', 'ʃ'],
+            ['ʌ', 'ə', 'h', 'k', 'æ', 't', 's', 'z', 'ʃ'],
+        ):
+            with self.subTest(segment=segment):
+                r = self.score_one(segment, CAT)
+                self.assertEqual((r["added"], r["per"]), ([], 0.0))
+
+    def test_a_fourth_edge_phoneme_counts(self):
+        # The outer three are set aside, and the one next to the word counts.
+        r = self.score_one(['z', 'ʌ', 'ə', 'h', 'k', 'æ', 't'], CAT)
+        self.assertEqual((r["missed"], r["added"], r["substituted"]), ([], ['h'], []))
+        self.assertEqual(r["per"], round(1 / 3, 4))
+
+        r = self.score_one(['k', 'æ', 't', 's', 'z', 'ʃ', 'ʒ'], CAT)
+        self.assertEqual(r["added"], ['s'])
+        self.assertEqual(r["per"], round(1 / 3, 4))
+
+        r = self.score_one(['z', 'ʌ', 'ə', 'h', 'k', 'æ', 't', 's', 'z', 'ʃ', 'ʒ'], CAT)
+        self.assertEqual(r["added"], ['h', 's'])
+        self.assertEqual(r["per"], round(2 / 3, 4))
+
+    def test_one_stray_phoneme_on_a_two_phoneme_word(self):
+        # The motivating false alarm. Each of these used to score PER 0.5 on "the".
+        for segment in (['ð', 'ə', 'n'], ['ð', 'ə', 'ə'], ['t', 'ð', 'ə']):
+            for asr in (None, ['the']):
+                with self.subTest(segment=segment, asr=asr):
+                    self.assertEqual(align_to_ground_truth(segment, [THE], asr)[0]["per"], 0.0)
+
+    def test_stray_phonemes_between_words_do_not_count(self):
+        flat = ['ð', 'ə', 'ə', 'k', 'æ', 't', 'h', 's', 'æ', 't', 't']
+        results = align_to_ground_truth(flat, GT_SHORT, ['the', 'cat', 'sat'])
+        self.assertEqual([r["per"] for r in results], [0.0, 0.0, 0.0])
+        self.assertEqual([r["added"] for r in results], [[], [], []])
+        self.assertEqual([p for r in results for p in r["phonemes"]], flat)
+        self.assertEqual(sentence_per(results), 0.0)
+
+    def test_an_interior_insertion_still_counts(self):
+        for segment in (['k', 'æ', 's', 't'], ['h', 'k', 'æ', 's', 't', 's']):
+            with self.subTest(segment=segment):
+                r = self.score_one(segment, CAT)
+                self.assertEqual(r["added"], ['s'])
+                self.assertEqual(r["total_errors"], 1)
+                self.assertEqual(r["per"], round(1 / 3, 4))
+                self.assertEqual(r["type"], "substitution")
+
+    def test_a_genuine_substitution_still_counts(self):
+        r = self.score_one(['k', 'ɪ', 't'], CAT)
+        self.assertEqual(r["substituted"], [('æ', 'ɪ')])
+        self.assertEqual(r["per"], round(1 / 3, 4))
+        self.assertEqual(r["type"], "substitution")
+
+        # A wrong last phoneme stays a substitution; it is not re-read as a
+        # missed phoneme plus a free edge insertion.
+        r = self.score_one(['k', 'æ', 'd'], CAT)
+        self.assertEqual((r["missed"], r["added"], r["substituted"]), ([], [], [('t', 'd')]))
+        self.assertEqual(r["per"], round(1 / 3, 4))
+
+        r = self.score_one(['t', 'æ', 't', 's'], CAT)
+        self.assertEqual(r["substituted"], [('k', 't')])
+        self.assertEqual(r["added"], [])
+
+    def test_a_missed_phoneme_still_counts(self):
+        r = self.score_one(['h', 'k', 'æ'], CAT)
+        self.assertEqual(r["missed"], ['t'])
+        self.assertEqual(r["per"], round(1 / 3, 4))
+
+    def test_a_run_of_interior_insertions_counts_in_full(self):
+        # Ending the word early and calling the rest edge noise must not hide
+        # them behind one made-up substitution.
+        r = self.score_one(['k', 'æ', 's', 's', 't'], CAT)
+        self.assertEqual((r["missed"], r["added"], r["substituted"]), ([], ['s', 's'], []))
+        self.assertEqual(r["total_errors"], 2)
+        self.assertEqual(r["per"], round(2 / 3, 4))
+
+        r = self.score_one(['h', 'k', 'æ', 's', 's', 's', 's', 't', 'h'], CAT)
+        self.assertEqual(r["added"], ['s', 's', 's', 's'])
+        self.assertEqual(r["per"], round(4 / 3, 4))
+
+    def test_a_wholly_wrong_reading_scores_one(self):
+        r = self.score_one(['z', 'z', 'z', 'z', 'z'], CAT)
+        self.assertEqual(r["per"], 1.0)
+        self.assertEqual(r["total_errors"], 3)
+        self.assertEqual(r["added"], [])
+
+
+def g2p_flat(sentence):
+    """The flat phoneme stream of a perfect reading of ``sentence`` (real G2P)."""
+    from core.grapheme_to_phoneme import grapheme_to_phoneme
+    return [p for _, phs in grapheme_to_phoneme(sentence) for p in phs]
+
+
+class TestReadingMiscues(_ScoringEnv):
+    """
+    Reading a different word that adds sounds at an edge is a real mistake.
+
+    speechocean762 speakers always attempt the right word, so the benchmark
+    cannot show these. Forgiving edge runs scored every one of them 0.0 and the
+    child heard "Great job!". The miscue guard counts the edge sounds when the
+    ASR heard a different word AND that word fits the sounds at least as well as
+    the expected word does with its edges forgiven.
+    """
+
+    # (sentence to read, what the child read, the word that was misread)
+    MISCUES = [
+        ("it is big", "sit is big", "it"),
+        ("we run home", "we running home", "run"),
+        ("go to the top", "go to the stop", "top"),
+        ("an egg", "man egg", "an"),
+        ("i see it", "i seeing it", "see"),
+        ("put it on", "put it upon", "on"),
+        ("the dog ran", "the dogs ran", "dog"),
+        ("i can jump", "i can jumped", "jump"),
+        ("i can jump", "my can jump", "i"),
+    ]
+
+    def _score(self, sentence, flat, asr):
+        from core.grapheme_to_phoneme import grapheme_to_phoneme
+        return align_to_ground_truth(flat, grapheme_to_phoneme(sentence), asr)
+
+    def _legacy(self, sentence, flat, asr):
+        os.environ[LEGACY_SCORING_FLAG] = "1"
+        try:
+            return self._score(sentence, flat, asr)
+        finally:
+            os.environ.pop(LEGACY_SCORING_FLAG)
+
+    def test_no_forgiveness_when_the_asr_heard_another_word(self):
+        for target, read, word in self.MISCUES:
+            with self.subTest(target=target, read=read):
+                flat = g2p_flat(read)
+                v2 = by_word(self._score(target, flat, read.split()), word)[0]
+                old = by_word(self._legacy(target, flat, read.split()), word)[0]
+                self.assertNotEqual(v2["predicted_word"], word)
+                self.assertGreater(v2["per"], 0.0)
+                self.assertEqual(v2["type"], "substitution")
+                # The ASR can only take leniency away. It never adds errors
+                # beyond what the pre-v2 scoring counted.
+                self.assertLessEqual(v2["per"], old["per"])
+
+    def test_the_miscue_guard_only_touches_the_misheard_slot(self):
+        for target, read, word in self.MISCUES:
+            with self.subTest(target=target, read=read):
+                flat = g2p_flat(read)
+                heard = self._score(target, flat, read.split())
+                agreed = self._score(target, flat, target.split())
+                self.assertEqual(
+                    [r["per"] for r in heard if r["ground_truth_word"] != word],
+                    [r["per"] for r in agreed if r["ground_truth_word"] != word],
+                )
+
+    def test_the_best_variant_still_applies_under_the_guard(self):
+        # "an" read as "man": counted against æn (one insertion), not ən (two errors).
+        r = by_word(self._score("an egg", g2p_flat("man egg"), ["man", "egg"]), "an")[0]
+        self.assertEqual(r["expected_phonemes"], ['æ', 'n'])
+        self.assertEqual(r["added"], ['m'])
+        self.assertEqual(r["per"], 0.5)
+
+        # "to" read correctly as tu, with the ASR writing "two": no insertion to
+        # forgive, and tu is still a valid pronunciation of "to".
+        r = self._score("go to", g2p_flat("go") + ['t', 'u'], ["go", "two"])[1]
+        self.assertEqual((r["ground_truth_word"], r["predicted_word"]), ("to", "two"))
+        self.assertEqual(r["expected_phonemes"], ['t', 'u'])
+        self.assertEqual(r["per"], 0.0)
+
+    def test_the_guard_needs_the_asr_word_to_fit_the_sounds(self):
+        # An ASR that misheard a correct reading does not take the forgiveness
+        # away. "then" is [ð ɛ n], which fits [ð ə n] worse than "the" does with
+        # the stray [n] forgiven, so this still scores 0.
+        r = align_to_ground_truth(['ð', 'ə', 'n'], [THE], ['then'])[0]
+        self.assertEqual((r["predicted_word"], r["per"], r["edge_insertions"]), ("then", 0.0, ['n']))
+
+        # When the sounds really are "then", the [n] counts.
+        r = align_to_ground_truth(['ð', 'ɛ', 'n'], [THE], ['then'])[0]
+        self.assertEqual(r["edge_insertions"], [])
+        self.assertEqual(r["total_errors"], 2)
+        self.assertEqual(r["per"], 1.0)
+
+    def test_an_asr_word_with_no_pronunciation_leaves_the_forgiveness(self):
+        for asr in (['zzxqv'], ['42']):
+            with self.subTest(asr=asr):
+                r = align_to_ground_truth(['ð', 'ə', 'n'], [THE], asr)[0]
+                self.assertEqual(r["per"], 0.0)
+
+    def test_without_the_asr_a_short_miscue_is_forgiven(self):
+        # The guard's known limit. When the ASR is missing or wrote the expected
+        # word, up to three extra edge sounds are forgiven, so these score 0. A
+        # child who really says "running" is almost always heard as "running",
+        # which the guard catches (see above).
+        cases = [
+            ("we run home", g2p_flat("we running home"), "run"),
+            ("i see it", g2p_flat("i seeing it"), "see"),
+            ("the cat sat", g2p_flat("the") + g2p_flat("scatter") + g2p_flat("sat"), "cat"),
+        ]
+        for target, flat, word in cases:
+            for asr in (None, target.split()):
+                with self.subTest(target=target, asr=asr):
+                    self.assertEqual(by_word(self._score(target, flat, asr), word)[0]["per"], 0.0)
+
+    def test_a_long_garbled_run_around_the_word_counts(self):
+        # Four phonemes after the word: the outer three are forgiven, one counts.
+        flat = g2p_flat("the") + g2p_flat("cat") + list("ɹʌnɪ") + g2p_flat("sat")
+        for asr in (None, ["the", "cat", "sat"]):
+            with self.subTest(asr=asr):
+                r = by_word(self._score("the cat sat", flat, asr), "cat")[0]
+                self.assertGreater(r["per"], 0.0)
+
+
+class TestLegacyWordScoringKillSwitch(_ScoringEnv):
+    """WWAI_LEGACY_WORD_SCORING brings back the pre-v2 numbers exactly."""
+
+    CASES = [
+        (['ð', 'ə', 'n'], [THE], None),
+        (['h', 'k', 'æ', 't', 's'], [CAT], ['cat']),
+        (['k', 'æ', 't', 't'], [CAT], ['cat']),
+        (['k', 'æ', 's', 't'], [CAT], ['cat']),
+        (['t', 'u'], [('to', ['t', 'ɪ'])], ['to']),
+        (['z', 'z', 'z', 'z', 'z'], [CAT], None),
+        (['ð', 'ə', 'ə', 'k', 'æ', 't', 'h', 's', 'æ', 't', 't'], GT_SHORT, ['the', 'cat', 'sat', 'now']),
+        (flatten([THE, SAT, ON, THE, MAT]), GT_LONG, ['the', 'cat', 'sat', 'on', 'the', 'mat']),
+        (['ð', 'ə', 't', 'æ', 't', 's', 'æ', 't', 'ɑ', 'n', 'ð', 'ə'], GT_LONG,
+         ['the', 'cat', 'sat', 'on', 'the', 'mat', 'now']),
+        ([], GT_SHORT, None),
+        # Reading miscues, with and without the ASR hearing the other word.
+        (['s', 'ɪ', 't'], [('it', ['ɪ', 't'])], ['sit']),
+        (['ð', 'ə', 's', 'k', 'æ', 't', 'ə', 'r', 's', 'æ', 't'], GT_SHORT, ['the', 'scatter', 'sat']),
+        (['ð', 'ə', 's', 'k', 'æ', 't', 'ə', 'r', 's', 'æ', 't'], GT_SHORT, None),
+        (['ə', 'h', 'k', 'æ', 't'], [CAT], ['cat']),
+    ]
+
+    def test_kill_switch_matches_the_pre_v2_function(self):
+        for value in ("1", "true", " YES "):
+            os.environ[LEGACY_SCORING_FLAG] = value
+            for flat, gt, asr in self.CASES:
+                with self.subTest(value=value, flat=flat):
+                    records = align_to_ground_truth(list(flat), gt, asr)
+                    self.assertEqual(
+                        without_v21_keys(records),
+                        pre_v2_align_to_ground_truth(list(flat), gt, asr),
+                    )
+                    # The added keys say nothing new: nothing is forgiven, and
+                    # the canonical pronunciation is the one scored against.
+                    for r in records:
+                        self.assertEqual(r["edge_insertions"], [])
+                        if r["type"] != "insertion":
+                            self.assertEqual(r["canonical_phonemes"], r["expected_phonemes"])
+
+    def test_falsy_kill_switch_keeps_v2(self):
+        for value in ("", "0", "false", "off"):
+            os.environ[LEGACY_SCORING_FLAG] = value
+            with self.subTest(value=value):
+                self.assertEqual(self.score_one(['ð', 'ə', 'n'], THE)["per"], 0.0)
+
+    def test_the_comparison_is_not_vacuous(self):
+        changed = [
+            flat for flat, gt, asr in self.CASES
+            if without_v21_keys(align_to_ground_truth(list(flat), gt, asr))
+            != pre_v2_align_to_ground_truth(list(flat), gt, asr)
+        ]
+        self.assertGreaterEqual(len(changed), 6)
+        old = pre_v2_align_to_ground_truth(['ð', 'ə', 'n'], [THE])[0]
+        self.assertEqual((old["per"], old["added"]), (0.5, ['n']))
+
+
+class TestFeedbackFormatterOnV2Records(_ScoringEnv):
+    """The formatter consumes per / missed / added / substituted / expected_phonemes."""
+
+    def setUp(self):
+        super().setUp()
+        os.environ.pop("WWAI_LEGACY_FEEDBACK", None)  # the current feedback rules, whatever the shell says
+
+    def test_formatter_runs_and_ignores_forgiven_edge_noise(self):
+        from core.phoneme_feedback_formatter import build_phoneme_to_error_words, generate_feedback
+        from core.process_audio import analyze_results
+
+        # "the cat sat" with a stray [ə] after "the" (forgiven) and "cat" read as "deb", three
+        # wrong sounds, so it is clearly wrong and gets corrected.
+        flat = ['ð', 'ə', 'ə', 'd', 'ɛ', 'b', 's', 'æ', 't']
+        records = align_to_ground_truth(flat, GT_SHORT, ['the', 'cat', 'sat'])
+        _df, _highest, problems, per_summary = analyze_results(records)
+
+        error_words = build_phoneme_to_error_words(records)
+        self.assertEqual(set(error_words), {'k', 'æ', 't'})
+        self.assertNotIn('ə', error_words)
+        feedback = generate_feedback(problems, per_summary, records)
+        self.assertIn("cat", feedback.text)
+        self.assertIn('ph="kæt"', feedback.ssml)
+
+    def test_formatter_models_the_word_with_its_canonical_pronunciation(self):
+        from core.phoneme_feedback_formatter import generate_feedback
+        from core.process_audio import analyze_results
+
+        # "to" read as [d u]: one substitution from "tu", two from the primary "tɪ".
+        # The record is scored against "tu", but the spoken feedback models the
+        # word with its canonical (primary G2P) pronunciation, "tɪ".
+        gt = [('go', ['g', 'o', 'ʊ']), ('to', ['t', 'ɪ'])]
+        records = align_to_ground_truth(['g', 'o', 'ʊ', 'd', 'u'], gt, ['go', 'to'])
+        to = by_word(records, 'to')[0]
+        self.assertEqual(to["expected_phonemes"], ['t', 'u'])
+        self.assertEqual(to["canonical_phonemes"], ['t', 'ɪ'])
+        self.assertEqual(to["substituted"], [('t', 'd')])
+        self.assertEqual(to["per"], 0.5)
+
+        _df, _highest, problems, per_summary = analyze_results(records)
+        # One wrong sound is not a clear mistake, so the current rules praise this reading.
+        # Only the old rule (the kill switch) corrects "to", and how a named word is modelled
+        # does not depend on the rule.
+        self.assertEqual(generate_feedback(problems, per_summary, records).text, "Great job!")
+        os.environ["WWAI_LEGACY_FEEDBACK"] = "1"  # restored by _ScoringEnv
+        feedback = generate_feedback(problems, per_summary, records)
+        self.assertIn("'to'", feedback.text)
+        self.assertIn('ph="tɪ">to</phoneme>', feedback.ssml)
+
+        # The same records through a DataFrame round trip, as the handler does.
+        df, _highest, problems, per_summary = analyze_results(records)
+        feedback = generate_feedback(problems, per_summary, df.to_dict('records'))
+        self.assertIn('ph="tɪ">to</phoneme>', feedback.ssml)
+
+    def test_a_repeated_word_is_modelled_from_its_worst_occurrence(self):
+        from core.phoneme_feedback_formatter import generate_feedback
+
+        def record(per, errors, substituted, expected, canonical=None, added=()):
+            r = {
+                "type": "substitution", "ground_truth_word": "the", "predicted_word": "the",
+                "per": per, "total_errors": errors, "total_phonemes": 2,
+                "missed": [], "added": list(added), "substituted": substituted,
+                "expected_phonemes": expected, "ground_truth_phonemes": expected,
+            }
+            if canonical is not None:
+                r["canonical_phonemes"] = canonical
+            return r
+
+        # Records without canonical_phonemes (the legacy path): the IPA comes from
+        # the occurrence with the highest per, not from the first one. That one has
+        # three errors, so it is clearly wrong and gets corrected.
+        records = [
+            record(0.5, 1, [('ə', 'ɪ')], ['ð', 'i']),
+            record(1.5, 3, [('ð', 'd'), ('ə', 'ɪ')], ['ð', 'ə'], added=['n']),
+        ]
+        feedback = generate_feedback({}, {"sentence_per": 0.75}, records)
+        self.assertIn('ph="ðə">the</phoneme>', feedback.ssml)
+        self.assertNotIn('ph="ði"', feedback.ssml)
+
+        # canonical_phonemes, when present, wins over expected_phonemes.
+        records = [
+            record(0.5, 1, [('ə', 'ɪ')], ['ð', 'i'], canonical=['ð', 'ə']),
+            record(1.5, 3, [('ð', 'd'), ('i', 'ɪ')], ['ð', 'i'], canonical=['ð', 'ə'], added=['n']),
+        ]
+        feedback = generate_feedback({}, {"sentence_per": 0.75}, records)
+        self.assertIn('ph="ðə">the</phoneme>', feedback.ssml)
+
+
+class TestCanonicalPhonemesAndEdgeInsertions(_ScoringEnv):
+    """What a record was scored against, and what was forgiven, stay visible."""
+
+    def test_records_carry_the_canonical_phonemes_and_forgiven_edges(self):
+        r = self.score_one(['h', 'k', 'æ', 't', 's'], CAT)
+        self.assertEqual(r["canonical_phonemes"], ['k', 'æ', 't'])
+        self.assertEqual(r["edge_insertions"], ['h', 's'])
+        self.assertEqual(r["added"], [])
+
+        r = self.score_one(['z', 'ʌ', 'ə', 'h', 'k', 'æ', 't'], CAT)
+        self.assertEqual(r["edge_insertions"], ['z', 'ʌ', 'ə'])
+        self.assertEqual(r["added"], ['h'])
+
+        r = self.score_one(['k', 'æ', 't'], CAT)
+        self.assertEqual(r["edge_insertions"], [])
+
+    def test_canonical_is_the_primary_even_when_a_variant_is_scored(self):
+        r = align_to_ground_truth(['t', 'u', 'n'], [('to', ['t', 'ɪ'])], ['to'])[0]
+        self.assertEqual(r["expected_phonemes"], ['t', 'u'])
+        self.assertEqual(r["canonical_phonemes"], ['t', 'ɪ'])
+        self.assertEqual(r["edge_insertions"], ['n'])
+        self.assertEqual(r["per"], 0.0)
+
+    def test_nothing_is_forgiven_under_the_miscue_guard(self):
+        r = align_to_ground_truth(['s', 'ɪ', 't'], [('it', ['ɪ', 't'])], ['sit'])[0]
+        self.assertEqual(r["edge_insertions"], [])
+        self.assertEqual(r["added"], ['s'])
+        self.assertEqual(r["canonical_phonemes"], ['ɪ', 't'])
+
+    def test_the_phoneme_tiles_agree_with_the_score(self):
+        # The tiles come from the same alignment as the error lists, so forgiven edge
+        # noise never shows as an added sound.
+        from core.gt_alignment import align_sequences, phoneme_alignment_records
+        r = self.score_one(['h', 'k', 'æ', 't', 's'], CAT)
+        self.assertEqual([t["type"] for t in r["phoneme_alignment"]], ["match"] * 3)
+        self.assertEqual(r["edge_insertions"], ['h', 's'])
+        for segment in (['k', 'ɪ', 't'], ['k', 'æ', 's', 's', 't'], ['h', 'k', 'æ'], ['z', 'ʌ', 'ə', 'h', 'k', 'æ', 't']):
+            with self.subTest(segment=segment):
+                r = self.score_one(segment, CAT)
+                kinds = [t["type"] for t in r["phoneme_alignment"]]
+                self.assertEqual(kinds.count("deletion"), len(r["missed"]))
+                self.assertEqual(kinds.count("insertion"), len(r["added"]))
+                self.assertEqual(kinds.count("substitution"), len(r["substituted"]))
+        # Under the kill switch the tiles are the plain alignment, as before v2.
+        os.environ[LEGACY_SCORING_FLAG] = "1"
+        r = self.score_one(['h', 'k', 'æ', 't', 's'], CAT)
+        self.assertEqual(r["phoneme_alignment"],
+                         phoneme_alignment_records(align_sequences(['k', 'æ', 't'], ['h', 'k', 'æ', 't', 's'])))
+
+    def test_every_record_type_carries_the_keys(self):
+        flat = ['ð', 'ə', 't', 'æ', 't', 's', 'æ', 't', 'ɑ', 'n', 'ð', 'ə']
+        results = align_to_ground_truth(flat, GT_LONG, ['the', 'cat', 'sat', 'on', 'the', 'mat', 'now'])
+        self.assertEqual({r["type"] for r in results}, {"match", "substitution", "deletion", "insertion"})
+        for r in results:
+            with self.subTest(record=r["type"], word=r["ground_truth_word"]):
+                self.assertTrue(V21_KEYS.issubset(r.keys()))
+                self.assertIsInstance(r["canonical_phonemes"], list)
+                self.assertIsInstance(r["edge_insertions"], list)
+        deletion = [r for r in results if r["type"] == "deletion"][0]
+        self.assertEqual((deletion["canonical_phonemes"], deletion["edge_insertions"]), (['m', 'æ', 't'], []))
+        insertion = [r for r in results if r["type"] == "insertion"][0]
+        self.assertEqual((insertion["canonical_phonemes"], insertion["edge_insertions"]), ([], []))
+
+    def test_records_do_not_share_lists(self):
+        r = self.score_one(['h', 'k', 'æ', 't'], CAT)
+        r["canonical_phonemes"].append('x')
+        r["edge_insertions"].append('y')
+        self.assertEqual(CAT[1], ['k', 'æ', 't'])
+        again = self.score_one(['h', 'k', 'æ', 't'], CAT)
+        self.assertEqual((again["canonical_phonemes"], again["edge_insertions"]), (['k', 'æ', 't'], ['h']))
+
+
+class TestContractions(_ScoringEnv):
+    """An ASR contraction matches the expected contraction, curly apostrophe or not."""
+
+    def test_normalize_word_keeps_one_apostrophe_form(self):
+        from core.gt_alignment import _normalize_word
+        for word in ("it's", "It's", "it\u2019s", "IT\u2018S"):
+            with self.subTest(word=word):
+                self.assertEqual(_normalize_word(word), "it's")
+
+    def test_a_contraction_read_right_is_not_a_misheard_slot(self):
+        from core.grapheme_to_phoneme import clean_sentence, grapheme_to_phoneme
+        gt = grapheme_to_phoneme(clean_sentence("It's a dog."))
+        flat = ['ɪ', 't', 's', 'z'] + ['ə'] + ['d', 'ɔ', 'g']
+        for asr in (["it's", "a", "dog"], ["It\u2019s", "a", "dog"]):
+            with self.subTest(asr=asr):
+                r = align_to_ground_truth(flat, gt, asr)[0]
+                self.assertEqual(r["ground_truth_word"], "it's")
+                self.assertEqual(r["per"], 0.0)
+
+
+class TestScoringVersion(unittest.TestCase):
+
+    def setUp(self):
+        from unittest import mock
+
+        patcher = mock.patch.dict(os.environ)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        os.environ.pop(GT_ANCHORED_FLAG, None)
+        os.environ.pop(LEGACY_SCORING_FLAG, None)
+
+    def _stamped_version(self):
+        from core.process_audio import analyze_results
+
+        records = align_to_ground_truth(flatten(GT_SHORT), GT_SHORT, ['the', 'cat', 'sat'])
+        _df, _highest, _problems, per_summary = analyze_results(records)
+        self.assertEqual(per_summary["sentence_per"], 0.0)
+        return per_summary["scoring_version"]
+
+    def test_per_summary_carries_the_scoring_version(self):
+        from core.gt_alignment import SCORING_VERSION
+
+        self.assertEqual(SCORING_VERSION, 2)
+        self.assertEqual(self._stamped_version(), 2)
+
+    def test_the_legacy_path_is_stamped_version_1(self):
+        os.environ[GT_ANCHORED_FLAG] = "0"
+        self.assertEqual(self._stamped_version(), 1)
+
+    def test_legacy_word_scoring_is_stamped_version_1(self):
+        os.environ[LEGACY_SCORING_FLAG] = "1"
+        self.assertEqual(self._stamped_version(), 1)
+
+    def test_both_kill_switches_are_stamped_version_1(self):
+        os.environ[GT_ANCHORED_FLAG] = "false"
+        os.environ[LEGACY_SCORING_FLAG] = "true"
+        self.assertEqual(self._stamped_version(), 1)
+
+    def test_the_flags_are_read_at_call_time(self):
+        for anchored, legacy, version in (("1", "0", 2), ("", "", 2), ("off", "", 1), ("on", "yes", 1)):
+            with self.subTest(anchored=anchored, legacy=legacy):
+                os.environ[GT_ANCHORED_FLAG] = anchored
+                os.environ[LEGACY_SCORING_FLAG] = legacy
+                self.assertEqual(self._stamped_version(), version)
+
+
 class TestSkippedWords(unittest.TestCase):
 
     def test_trailing_word_skipped(self):
@@ -444,8 +1129,9 @@ class TestOutputContract(unittest.TestCase):
             # "match" and "substitution" share one record shape in the legacy code.
             legacy_type = 'match' if r["type"] == 'substitution' else r["type"]
             if legacy_type in legacy_keys:
+                # The anchored records add exactly the scoring v2.1 keys.
                 self.assertEqual(
-                    set(r.keys()), legacy_keys[legacy_type],
+                    set(r.keys()), legacy_keys[legacy_type] | V21_KEYS,
                     f"key drift for record type {r['type']!r}",
                 )
 
@@ -473,18 +1159,24 @@ class TestFeatureFlag(unittest.TestCase):
         if self._saved is not None:
             os.environ[GT_ANCHORED_FLAG] = self._saved
 
-    def test_defaults_off(self):
+    def test_defaults_on(self):
         self.assertEqual(GT_ANCHORED_FLAG, "WWAI_GT_ANCHORED_ALIGNMENT")
-        self.assertFalse(is_gt_anchored_enabled())
+        self.assertTrue(is_gt_anchored_enabled())
 
-    def test_falsy_values_stay_off(self):
-        for value in ("", "0", "false", "no", "off", "  ", "maybe"):
+    def test_falsy_values_turn_it_off(self):
+        for value in ("0", "false", "FALSE", " False ", "no", "off", "n", "f"):
             with self.subTest(value=value):
                 os.environ[GT_ANCHORED_FLAG] = value
                 self.assertFalse(is_gt_anchored_enabled())
 
-    def test_truthy_values_turn_it_on(self):
+    def test_truthy_values_keep_it_on(self):
         for value in ("1", "true", "TRUE", " True ", "yes", "on"):
+            with self.subTest(value=value):
+                os.environ[GT_ANCHORED_FLAG] = value
+                self.assertTrue(is_gt_anchored_enabled())
+
+    def test_empty_or_unknown_values_keep_the_default(self):
+        for value in ("", "  ", "maybe"):
             with self.subTest(value=value):
                 os.environ[GT_ANCHORED_FLAG] = value
                 self.assertTrue(is_gt_anchored_enabled())
@@ -492,7 +1184,7 @@ class TestFeatureFlag(unittest.TestCase):
 
 class TestProcessAudioArrayHook(unittest.TestCase):
     """
-    The hook in ``process_audio_array`` must be inert unless the flag is set.
+    The hook in ``process_audio_array`` is on by default and the flag turns it off.
 
     Everything expensive is stubbed: no model, no audio preprocessing, no g2p,
     no network.
@@ -531,27 +1223,128 @@ class TestProcessAudioArrayHook(unittest.TestCase):
         if self._saved_flag is not None:
             os.environ[GT_ANCHORED_FLAG] = self._saved_flag
 
-    def _run(self):
+    class _ListPhonemeExtractor:
+        def __init__(self, groups):
+            self.groups = groups
+
+        def extract_phoneme(self, audio=None, sampling_rate=None):
+            return self.groups
+
+    class _ListWordExtractor:
+        def __init__(self, words):
+            self.words = words
+
+        def extract_words(self, audio=None, sampling_rate=None):
+            return self.words
+
+    def _run(self, phoneme_extractor=None, word_extractor=None):
         import asyncio
         return asyncio.run(self.pa.process_audio_array(
             GT_SHORT,
             self.np.zeros(16000, dtype=self.np.float32),
             16000,
-            self._FakePhonemeExtractor(),
-            self._FakeWordExtractor(),
+            phoneme_extractor or self._FakePhonemeExtractor(),
+            word_extractor or self._FakeWordExtractor(),
             use_chunking=False,
         ))
 
-    def test_flag_unset_uses_the_legacy_path(self):
+    # --- the ASR heard nothing, the phoneme model heard the reading ------- #
+
+    FLAT = ['ð', 'ə', 't', 'æ', 't', 's', 'æ', 't']
+
+    def test_anchored_path_scores_an_empty_transcript(self):
         os.environ.pop(GT_ANCHORED_FLAG, None)
+        for words in ([], None, ['the']):
+            with self.subTest(words=words):
+                results = self._run(word_extractor=self._ListWordExtractor(words))
+                self.assertEqual(results, align_to_ground_truth(self.FLAT, GT_SHORT, words or []))
+                self.assertEqual(
+                    [(r["ground_truth_word"], r["type"]) for r in results],
+                    [('the', 'match'), ('cat', 'substitution'), ('sat', 'match')],
+                )
+
+    def test_anchored_path_scores_a_single_phoneme_group(self):
+        # The model's word grouping does not matter once the phonemes are anchored.
+        os.environ.pop(GT_ANCHORED_FLAG, None)
+        results = self._run(phoneme_extractor=self._ListPhonemeExtractor([list(self.FLAT)]),
+                            word_extractor=self._ListWordExtractor([]))
+        self.assertEqual(results, align_to_ground_truth(self.FLAT, GT_SHORT, []))
+
+    def test_anchored_path_still_needs_enough_phonemes(self):
+        # "the cat sat" expects 8 phonemes, so fewer than 3 (30%, at least 2) is no speech.
+        os.environ.pop(GT_ANCHORED_FLAG, None)
+        for groups in (None, [], [[]], [['ð']], [['ð'], []], [['ð', 'ə']]):
+            with self.subTest(groups=groups):
+                with self.assertRaisesRegex(ValueError, "The audio provided has no speech inside"):
+                    self._run(phoneme_extractor=self._ListPhonemeExtractor(groups),
+                              word_extractor=self._ListWordExtractor(['the', 'cat', 'sat']))
+
+    def test_almost_nothing_heard_of_a_long_sentence_is_no_speech(self):
+        # Only "the" of "the cat sat on the mat" (15 phonemes) came back: 2 < 4.5.
+        import asyncio
+        os.environ.pop(GT_ANCHORED_FLAG, None)
+        run = lambda groups, words: asyncio.run(self.pa.process_audio_array(
+            GT_LONG, self.np.zeros(16000, dtype=self.np.float32), 16000,
+            self._ListPhonemeExtractor(groups), self._ListWordExtractor(words), use_chunking=False))
+        with self.assertRaisesRegex(ValueError, "The audio provided has no speech inside"):
+            run([['ð', 'ə']], ['the'])
+        flat = ['ð', 'ə', 'k', 'æ', 't']
+        self.assertEqual(run([flat], ['the', 'cat']), align_to_ground_truth(flat, GT_LONG, ['the', 'cat']))
+
+    def test_the_require_asr_words_switch_brings_back_the_old_guard(self):
+        from unittest import mock
+
+        os.environ.pop(GT_ANCHORED_FLAG, None)
+        with mock.patch.dict(os.environ, {REQUIRE_ASR_WORDS_FLAG: "1"}):
+            for words in ([], None, ['the']):
+                with self.subTest(words=words):
+                    with self.assertRaisesRegex(ValueError, "The audio provided has no speech inside"):
+                        self._run(word_extractor=self._ListWordExtractor(words))
+            # Fewer than two phoneme groups is no speech too, however many words were heard.
+            with self.assertRaisesRegex(ValueError, "The audio provided has no speech inside"):
+                self._run(phoneme_extractor=self._ListPhonemeExtractor([list(self.FLAT)]))
+            # Enough of both is still scored on the anchored path, not the legacy one.
+            self._assert_anchored(self._run())
+
+    def test_the_require_asr_words_switch_is_off_by_default(self):
+        from unittest import mock
+
+        os.environ.pop(GT_ANCHORED_FLAG, None)
+        for value in (None, "", "0", "false", "off"):
+            env = {} if value is None else {REQUIRE_ASR_WORDS_FLAG: value}
+            with self.subTest(value=value), mock.patch.dict(os.environ, env):
+                if value is None:
+                    os.environ.pop(REQUIRE_ASR_WORDS_FLAG, None)
+                results = self._run(word_extractor=self._ListWordExtractor([]))
+                self.assertEqual(results, align_to_ground_truth(self.FLAT, GT_SHORT, []))
+
+    def test_the_require_asr_words_switch_keeps_the_coverage_rule(self):
+        # Two words and two groups, but too few phonemes, is still no speech.
+        from unittest import mock
+
+        os.environ.pop(GT_ANCHORED_FLAG, None)
+        with mock.patch.dict(os.environ, {REQUIRE_ASR_WORDS_FLAG: "true"}):
+            with self.assertRaisesRegex(ValueError, "The audio provided has no speech inside"):
+                self._run(phoneme_extractor=self._ListPhonemeExtractor([['ð'], ['ə']]),
+                          word_extractor=self._ListWordExtractor(['the', 'cat']))
+
+    def test_legacy_path_keeps_the_old_guard(self):
+        os.environ[GT_ANCHORED_FLAG] = "false"
+        for words in ([], None, ['the']):
+            with self.subTest(words=words):
+                with self.assertRaisesRegex(ValueError, "The audio provided has no speech inside"):
+                    self._run(word_extractor=self._ListWordExtractor(words))
+        with self.assertRaisesRegex(ValueError, "The audio provided has no speech inside"):
+            self._run(phoneme_extractor=self._ListPhonemeExtractor([list(self.FLAT)]))
+
+    def test_flag_off_uses_the_legacy_path(self):
+        os.environ[GT_ANCHORED_FLAG] = "false"
         results = self._run()
         # Legacy types come from the ASR word list, so the mispronounced word
         # is still labelled "match" because the ASR spelled it "cat".
         self.assertEqual([r["type"] for r in results], ["match", "match", "match"])
 
-    def test_flag_set_uses_the_anchored_path(self):
-        os.environ[GT_ANCHORED_FLAG] = "true"
-        results = self._run()
+    def _assert_anchored(self, results):
         self.assertEqual([r["type"] for r in results],
                          ["match", "substitution", "match"])
         self.assertEqual(
@@ -560,6 +1353,225 @@ class TestProcessAudioArrayHook(unittest.TestCase):
                 ['the', 'cat', 'sat'],
             ),
         )
+
+    def test_flag_unset_uses_the_anchored_path(self):
+        os.environ.pop(GT_ANCHORED_FLAG, None)
+        self._assert_anchored(self._run())
+
+    def test_flag_set_uses_the_anchored_path(self):
+        os.environ[GT_ANCHORED_FLAG] = "true"
+        self._assert_anchored(self._run())
+
+
+class TestClientPhonemesHook(unittest.TestCase):
+    """
+    ``process_audio_with_client_phonemes`` (phonemes sent by the browser) scores
+    them exactly like ``process_audio_array`` does: flattened, then
+    ``align_to_ground_truth``. The flag turns it off, and the legacy client path
+    is pinned against the pre-change function in
+    tests/test_client_realign_and_index_safety.py.
+    """
+
+    REALIGN_FLAG = "WWAI_CLIENT_REALIGN"
+    WORDS = ['the', 'cat', 'sat']
+    # (client groups, client words, ground truth)
+    CASES = {
+        "exact": ([['ð', 'ə'], ['k', 'æ', 't'], ['s', 'æ', 't']], WORDS, GT_SHORT),
+        "asr_corrects_tat": ([['ð', 'ə'], ['t', 'æ', 't'], ['s', 'æ', 't']], WORDS, GT_SHORT),
+        "split_group": ([['ð', 'ə'], ['k', 'æ'], ['t'], ['s', 'æ', 't']], WORDS, GT_SHORT),
+        "merged_group": ([['ð', 'ə', 'k', 'æ', 't', 's', 'æ', 't']], WORDS, GT_SHORT),
+        "skipped_word": ([['ð', 'ə'], ['s', 'æ', 't']], ['the', 'sat'], GT_SHORT),
+        "extra_word": ([['ð', 'ə'], ['k', 'æ', 't'], ['s', 'æ', 't'], ['d', 'a', 'ʊ', 'n']],
+                       ['the', 'cat', 'sat', 'down'], GT_SHORT),
+        "long": ([['ð', 'ə'], ['k', 'æ', 't', 's', 'æ'], ['t'], ['ɑ', 'n', 'ð', 'ə'], ['m', 'æ', 't']],
+                 ['the', 'cat', 'sat', 'on', 'the', 'mat'], GT_LONG),
+    }
+
+    def setUp(self):
+        self._saved = {k: os.environ.get(k) for k in (GT_ANCHORED_FLAG, self.REALIGN_FLAG)}
+        for key in self._saved:
+            os.environ.pop(key, None)
+
+    def tearDown(self):
+        for key, value in self._saved.items():
+            os.environ.pop(key, None)
+            if value is not None:
+                os.environ[key] = value
+
+    def _run(self, groups, words, gt=GT_SHORT, audio_array=None, **kwargs):
+        import asyncio
+        import contextlib
+        import io
+        from core.process_audio import process_audio_with_client_phonemes
+
+        with contextlib.redirect_stdout(io.StringIO()):
+            return asyncio.run(process_audio_with_client_phonemes(
+                client_phonemes=groups, ground_truth_phonemes=gt, audio_array=audio_array,
+                sampling_rate=16000, client_words=words, **kwargs,
+            ))
+
+    def _assert_anchored_for_every_case(self):
+        for name, (groups, words, gt) in self.CASES.items():
+            with self.subTest(case=name):
+                flat = [p for group in groups for p in group]
+                self.assertEqual(self._run(groups, words, gt), align_to_ground_truth(flat, gt, words))
+
+    def test_flag_unset_scores_like_align_to_ground_truth(self):
+        self._assert_anchored_for_every_case()
+
+    def test_flag_set_scores_like_align_to_ground_truth(self):
+        os.environ[GT_ANCHORED_FLAG] = "true"
+        self._assert_anchored_for_every_case()
+
+    def test_the_client_grouping_no_longer_matters(self):
+        # The same phonemes, grouped three ways by the client, score the same.
+        outputs = [self._run(self.CASES[name][0], self.WORDS) for name in ("exact", "split_group", "merged_group")]
+        self.assertEqual(outputs[0], outputs[1])
+        self.assertEqual(outputs[0], outputs[2])
+        self.assertTrue(all(r["per"] == 0 for r in outputs[0]))
+
+    def test_the_mispronunciation_the_asr_corrected_is_found(self):
+        groups, words, gt = self.CASES["asr_corrects_tat"]
+        self.assertEqual([r["type"] for r in self._run(groups, words, gt)], ["match", "substitution", "match"])
+        os.environ[GT_ANCHORED_FLAG] = "false"
+        self.assertEqual([r["type"] for r in self._run(groups, words, gt)], ["match", "match", "match"])
+
+    def test_realignment_is_skipped_under_gt_anchoring(self):
+        from unittest import mock
+        import core.process_audio as pa
+
+        os.environ[self.REALIGN_FLAG] = "true"
+        groups, words, gt = self.CASES["split_group"]
+        with mock.patch.object(pa, "align_phonemes_to_words", side_effect=AssertionError("realigned")):
+            results = self._run(groups, words, gt)
+        self.assertEqual(results, align_to_ground_truth([p for g in groups for p in g], gt, words))
+
+    def test_the_guards_come_first_and_in_order(self):
+        # Ground truth length first, even with nothing to score.
+        with self.assertRaises(ValueError) as ctx:
+            self._run([], None, gt=[THE], word_extraction_model=self._Words(None))
+        self.assertIn("ground_truth_phonemes", str(ctx.exception))
+        # Then no speech. Anchored, that means fewer than two phonemes, whatever the words.
+        for groups, words in (([['ð']], ['the', 'cat']), ([], ['the', 'cat']), ([[]], ['the', 'cat'])):
+            with self.subTest(groups=groups, words=words):
+                with self.assertRaises(ValueError) as ctx:
+                    self._run(groups, words, word_extraction_model=self._Words(words))
+                self.assertEqual(str(ctx.exception), "The audio provided has no speech inside")
+        # On the legacy path, at most one word is still no speech.
+        os.environ[GT_ANCHORED_FLAG] = "false"
+        with self.assertRaises(ValueError) as ctx:
+            self._run([['ð', 'ə']], ['the'])
+        self.assertEqual(str(ctx.exception), "The audio provided has no speech inside")
+
+    def test_an_empty_or_one_word_transcript_is_scored_when_anchored(self):
+        from unittest import mock
+        import core.process_audio as pa
+
+        groups = self.CASES["exact"][0]
+        flat = [p for g in groups for p in g]
+        self.assertEqual(self._run(groups, ['the']), align_to_ground_truth(flat, GT_SHORT, ['the']))
+        # The hybrid mode, where the server's ASR heard nothing.
+        with mock.patch.object(pa, "preprocess_audio", side_effect=lambda audio=None, **_kw: audio):
+            results = self._run(groups, None, word_extraction_model=self._Words([]))
+        self.assertEqual(results, align_to_ground_truth(flat, GT_SHORT, []))
+
+    class _Words:
+        def __init__(self, words):
+            self.words = words
+
+        def extract_words(self, audio=None, sampling_rate=None):
+            return self.words
+
+    class _NoWords:
+        def extract_words(self, audio=None, sampling_rate=None):
+            raise AssertionError("words were extracted from an empty recording")
+
+    def _run_without_audio(self, groups, words, gt=GT_SHORT):
+        """The full client mode: the browser sent its phonemes and words with an empty recording."""
+        import numpy as np
+        from unittest import mock
+        import core.process_audio as pa
+
+        with mock.patch.object(pa, "preprocess_audio", side_effect=AssertionError("preprocessed")):
+            return self._run(groups, words, gt, audio_array=np.array([]), word_extraction_model=self._NoWords())
+
+    def test_a_full_client_reading_without_audio_is_scored(self):
+        # The browser's ASR heard nothing (client_words == []), so the frontend sent empty audio.
+        groups = self.CASES["asr_corrects_tat"][0]
+        flat = [p for g in groups for p in g]
+        for words in ([], None):
+            with self.subTest(words=words):
+                results = self._run_without_audio(groups, words)
+                self.assertEqual(results, align_to_ground_truth(flat, GT_SHORT, []))
+                self.assertEqual([r["type"] for r in results], ["match", "substitution", "match"])
+        # With words, the empty recording changes nothing.
+        self.assertEqual(self._run_without_audio(groups, self.WORDS),
+                         align_to_ground_truth(flat, GT_SHORT, self.WORDS))
+
+    def test_without_audio_the_coverage_rule_still_decides_no_speech(self):
+        for groups in ([], [[]], [['ð']], [['ð', 'ə']]):
+            with self.subTest(groups=groups):
+                with self.assertRaises(ValueError) as ctx:
+                    self._run_without_audio(groups, [])
+                self.assertEqual(str(ctx.exception), "The audio provided has no speech inside")
+        # The ground truth length is still checked first.
+        with self.assertRaises(ValueError) as ctx:
+            self._run_without_audio(self.CASES["exact"][0], [], gt=[THE])
+        self.assertIn("ground_truth_phonemes", str(ctx.exception))
+
+    def test_the_require_asr_words_switch_applies_to_the_client_path(self):
+        from unittest import mock
+        import core.process_audio as pa
+
+        self.assertEqual(pa.REQUIRE_ASR_WORDS_FLAG, REQUIRE_ASR_WORDS_FLAG)
+        groups = self.CASES["asr_corrects_tat"][0]
+        flat = [p for g in groups for p in g]
+        with mock.patch.dict(os.environ, {REQUIRE_ASR_WORDS_FLAG: "yes"}):
+            # A one-word transcript from the browser.
+            with self.assertRaises(ValueError) as ctx:
+                self._run(groups, ['the'])
+            self.assertEqual(str(ctx.exception), "The audio provided has no speech inside")
+            # The full client mode without audio, where the browser's ASR heard nothing.
+            with self.assertRaises(ValueError) as ctx:
+                self._run_without_audio(groups, [])
+            self.assertEqual(str(ctx.exception), "The audio provided has no speech inside")
+            # The hybrid mode, where the server's ASR heard nothing.
+            with mock.patch.object(pa, "preprocess_audio", side_effect=lambda audio=None, **_kw: audio):
+                with self.assertRaises(ValueError) as ctx:
+                    self._run(groups, None, word_extraction_model=self._Words([]))
+            self.assertEqual(str(ctx.exception), "The audio provided has no speech inside")
+            # A merged group is fewer than two groups.
+            with self.assertRaises(ValueError) as ctx:
+                self._run(self.CASES["merged_group"][0], self.WORDS)
+            self.assertEqual(str(ctx.exception), "The audio provided has no speech inside")
+            # Enough words and groups are still scored on the anchored path.
+            self.assertEqual(self._run(groups, self.WORDS), align_to_ground_truth(flat, GT_SHORT, self.WORDS))
+            self.assertEqual(self._run_without_audio(groups, self.WORDS),
+                             align_to_ground_truth(flat, GT_SHORT, self.WORDS))
+
+    def test_the_legacy_path_still_preprocesses_an_empty_recording(self):
+        import numpy as np
+        from unittest import mock
+        import core.process_audio as pa
+
+        os.environ[GT_ANCHORED_FLAG] = "false"
+        with mock.patch.object(pa, "preprocess_audio", side_effect=RuntimeError("preprocessed")) as pre:
+            with self.assertRaisesRegex(RuntimeError, "preprocessed"):
+                self._run(self.CASES["exact"][0], [], audio_array=np.array([]),
+                          word_extraction_model=self._Words([]))
+        pre.assert_called_once()
+
+    def test_server_words_are_used_when_the_client_sends_none(self):
+        # The hybrid mode: the server's ASR heard an extra word, which becomes an insertion record.
+        from unittest import mock
+        import core.process_audio as pa
+
+        groups = self.CASES["exact"][0]
+        with mock.patch.object(pa, "preprocess_audio", side_effect=lambda audio=None, **_kw: audio):
+            results = self._run(groups, None, word_extraction_model=self._Words(['the', 'cat', 'sat', 'down']))
+        self.assertEqual(results, align_to_ground_truth(
+            [p for g in groups for p in g], GT_SHORT, ['the', 'cat', 'sat', 'down']))
+        self.assertEqual([r["type"] for r in results][-1], "insertion")
 
 
 class TestRobustness(unittest.TestCase):

@@ -10,14 +10,65 @@ tags. The tag wraps a demo syllable so TTS produces the target sound in isolatio
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+import os
+from dataclasses import dataclass, field
 from typing import Optional
+
+#: The old test for a clearly mispronounced word was a PER at or above this. Only the kill switch
+#: below still uses it to pick words. The accuracy benchmark uses it for its PER curve.
+HIGH_PER_THRESHOLD = 0.4
+
+#: A word counts as clearly mispronounced, and so may be corrected, when at least this many
+#: of its sounds were wrong (substituted, missed or added). The phoneme recognizer marks
+#: about half of correctly read words with at least one error, so one or two errors are
+#: mostly noise. On the speechocean762 dev half this rule beat every PER cutoff on both
+#: recall and false alarms. The known cost is that short words (one or two phonemes) are
+#: almost never corrected, and neither is a single wrong sound in a three-phoneme word
+#: ("cat" read as "cut"). Those corrections were mostly wrong on that data, but beginning
+#: readers make such mistakes more often, which is what the kill switch is for.
+MIN_FOCUS_ERRORS = 3
+
+#: Kill switch for the feedback changes the speechocean762 benchmark accepted. When truthy,
+#: the formatter picks and names words exactly as it did before them. Read at call time.
+LEGACY_FEEDBACK_FLAG = "WWAI_LEGACY_FEEDBACK"
+_TRUTHY = {"1", "true", "yes", "on"}
+
+
+def is_legacy_feedback() -> bool:
+    return os.environ.get(LEGACY_FEEDBACK_FLAG, "").strip().lower() in _TRUTHY
+
+
+def is_clear_mistake(record: dict) -> bool:
+    """True when a word record is clearly mispronounced, so the feedback may correct it.
+
+    That means at least MIN_FOCUS_ERRORS errors. Under the kill switch it is the old test,
+    PER at least HIGH_PER_THRESHOLD. An inserted word (an ASR word that is not in the
+    sentence) never is one. The accuracy benchmark calls this to score the same decision.
+    """
+    if is_legacy_feedback():
+        return bool((record.get("per") or 0) >= HIGH_PER_THRESHOLD)
+    if record.get("type") == "insertion":
+        return False
+    return bool((record.get("total_errors") or 0) >= MIN_FOCUS_ERRORS)
+
+
+def flag_rule() -> str:
+    """The rule is_clear_mistake applies right now, as text for the accuracy benchmark to record."""
+    if is_legacy_feedback():
+        return f"per >= {HIGH_PER_THRESHOLD}"
+    return f"total_errors >= {MIN_FOCUS_ERRORS}"
 
 
 @dataclass
 class FeedbackResult:
     text: str   # Plain-text feedback for display
     ssml: str   # SSML-enhanced feedback for Google Cloud TTS
+    # What a correction is about, for callers that score the feedback (the accuracy
+    # benchmark). The handler does not read these. focus_words are the words picked
+    # for the focus sound, in order, and the text names the first one. Praise and
+    # "Keep practicing!" leave both empty.
+    focus_phoneme: Optional[str] = None
+    focus_words: list[str] = field(default_factory=list)
 
 
 # ── Display names ──────────────────────────────────────────────────────────────
@@ -324,31 +375,40 @@ def _focus_from_high_per_words(
     pronunciation_data: list[dict],
     phoneme_to_error_words: dict[str, list[dict]],
 ) -> Optional[str]:
-    """
-    Pick the best focus phoneme by walking words from worst PER to least-bad.
+    """The focus phoneme alone (see ``_focus_and_source_word``)."""
+    return _focus_and_source_word(pronunciation_data, phoneme_to_error_words)[0]
 
-    Iterates high-PER words (PER ≥ 0.4) from worst to best and returns the
-    most-errored phoneme found in the first word that has phoneme errors.
-    This ensures the single worst word always wins rather than a common phoneme
-    that happens to appear in multiple mildly-wrong words (e.g. schwa in 'the').
-    """
-    HIGH_PER_THRESHOLD = 0.4
 
+def _focus_and_source_word(
+    pronunciation_data: list[dict],
+    phoneme_to_error_words: dict[str, list[dict]],
+) -> tuple[Optional[str], Optional[str]]:
+    """
+    Pick the best focus phoneme by walking the clearly mispronounced words from
+    worst to least-bad, and return it with the word it came from (``(None, None)``
+    when no word qualifies).
+
+    Iterates the words is_clear_mistake accepts (at least MIN_FOCUS_ERRORS errors)
+    from worst to best and returns the most-errored phoneme found in the first word
+    that has phoneme errors. This ensures the single worst word always wins rather
+    than a common phoneme that happens to appear in multiple mildly-wrong words
+    (e.g. schwa in 'the').
+    """
     # Sort clearly mispronounced words worst-first.
     # Use total_errors (absolute count) as the primary key so a short word like
     # "the" (2 phonemes → 100% PER from 1 mistake) doesn't beat a longer word
     # with more actual errors (e.g. "dog"→"doge" = 2-3 errors).
     # PER is the tiebreaker for words with the same error count.
-    high_per_words = sorted(
-        [w for w in pronunciation_data if (w.get("per") or 0) >= HIGH_PER_THRESHOLD],
+    clear_mistakes = sorted(
+        [w for w in pronunciation_data if is_clear_mistake(w)],
         key=lambda w: ((w.get("total_errors") or 0), (w.get("per") or 0)),
         reverse=True,
     )
-    if not high_per_words:
-        return None
+    if not clear_mistakes:
+        return None, None
 
     # Walk worst → less-bad; return as soon as we find a word with phoneme errors
-    for word_entry in high_per_words:
+    for word_entry in clear_mistakes:
         word_name = (word_entry.get("ground_truth_word") or "").strip().lower()
         if not word_name:
             continue
@@ -363,9 +423,10 @@ def _focus_from_high_per_words(
                 candidates[phoneme] = count
 
         if candidates:
-            return max(candidates, key=lambda p: candidates[p])
+            source = (word_entry.get("ground_truth_word") or "").strip()
+            return max(candidates, key=lambda p: candidates[p]), source
 
-    return None
+    return None, None
 
 
 def _ordered_phonemes(
@@ -453,7 +514,8 @@ def generate_feedback(
                             (pronunciation_dataframe.to_dict('records')).
 
     Returns:
-        FeedbackResult with .text (plain) and .ssml (Google Cloud TTS SSML).
+        FeedbackResult with .text (plain) and .ssml (Google Cloud TTS SSML). A
+        correction also sets .focus_phoneme and .focus_words.
     """
     phoneme_to_error_words: dict = (
         problem_summary.get("phoneme_to_error_words")
@@ -465,23 +527,34 @@ def generate_feedback(
     if not phoneme_to_error_words and sentence_per <= 0.2:
         return FeedbackResult(text="Great job!", ssml="Great job!")
 
-    # Priority: phonemes from clearly mispronounced words (PER ≥ 0.4) first.
+    # Only clearly mispronounced words (see is_clear_mistake) can be corrected.
     # This prevents a high-frequency consonant like 't' from dominating just
     # because it appears many times across the sentence with tiny errors.
-    focus_phoneme = _focus_from_high_per_words(pronunciation_data, phoneme_to_error_words)
+    focus_phoneme, source_word = _focus_and_source_word(pronunciation_data, phoneme_to_error_words)
 
     if not focus_phoneme:
-        # No word was clearly wrong (nothing cleared the 0.4 PER threshold).
-        # If the overall sentence is also low-error, all mistakes are minor —
-        # praise the child rather than nitpicking a barely-wrong word.
+        # No word was clearly wrong. If the overall sentence is also low-error,
+        # all mistakes are minor — praise the child rather than nitpicking a
+        # barely-wrong word.
         if sentence_per <= 0.2:
             return FeedbackResult(text="Great job!", ssml="Great job!")
+        if not is_legacy_feedback():
+            # Something was off, but no word was wrong clearly enough to name. Falling back
+            # to a mildly wrong word here mostly named a word the child had read
+            # correctly on the speechocean762 benchmark, and praising instead praised
+            # too many readings that had a real mistake, so encourage without a word.
+            return FeedbackResult(text="Keep practicing!", ssml="Keep practicing!")
 
         ordered = _ordered_phonemes(phoneme_to_error_words, problem_summary)
         if not ordered:
             return FeedbackResult(text="Keep practicing!", ssml="Keep practicing!")
         focus_phoneme = ordered[0]
     words = _words_for_phoneme(focus_phoneme, phoneme_to_error_words, max_words=3)
+    # Name the word the focus sound came from first. The list above is in
+    # sentence order, so its first word is often a barely-wrong one that merely
+    # shares the sound with the word that was clearly wrong.
+    if source_word and not is_legacy_feedback():
+        words = ([source_word] + [w for w in words if w != source_word])[:3]
     if not words:
         return FeedbackResult(text="Keep practicing!", ssml="Keep practicing!")
 
@@ -496,17 +569,27 @@ def generate_feedback(
 
     tip = (GRAPHEME_TIPS.get(grapheme) if grapheme else None) or PRONUNCIATION_TIPS.get(focus_phoneme)
 
-    # Build full-word IPA from expected_phonemes in pronunciation_data so we can
-    # wrap the focus word in a <phoneme> tag — this gives Google TTS the correct
-    # pronunciation of the whole word, not just the isolated sound.
+    # Build full-word IPA from pronunciation_data so we can wrap the focus word
+    # in a <phoneme> tag — this gives Google TTS the correct pronunciation of
+    # the whole word, not just the isolated sound. Prefer canonical_phonemes
+    # (the primary G2P pronunciation): with word scoring v2, expected_phonemes
+    # is whichever variant the child's attempt came closest to, which is not
+    # necessarily the one to model. When the word appears more than once, use
+    # the occurrence with the highest PER, the one the feedback is about.
     word_ipa: Optional[str] = None
+    word_ipa_per: Optional[float] = None
     for entry in pronunciation_data:
         w = (entry.get("ground_truth_word") or "").strip().lower()
-        if w == focus_word.lower():
+        if w != focus_word.lower():
+            continue
+        phonemes = entry.get("canonical_phonemes")
+        if not (isinstance(phonemes, list) and phonemes):
             phonemes = entry.get("expected_phonemes")
-            if isinstance(phonemes, list) and phonemes:
-                word_ipa = "".join(phonemes)
-            break
+        if not (isinstance(phonemes, list) and phonemes):
+            continue
+        per = entry.get("per") or 0
+        if word_ipa_per is None or per > word_ipa_per:
+            word_ipa, word_ipa_per = "".join(phonemes), per
 
     def _word_ssml(word: str, ipa: Optional[str]) -> str:
         if ipa:
@@ -536,4 +619,4 @@ def generate_feedback(
     text = f"{intro_text} {tip}" if tip else intro_text
     ssml = f"{intro_ssml} {tip}" if tip else intro_ssml
 
-    return FeedbackResult(text=text, ssml=ssml)
+    return FeedbackResult(text=text, ssml=ssml, focus_phoneme=focus_phoneme, focus_words=list(words))

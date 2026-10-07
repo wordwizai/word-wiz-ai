@@ -292,7 +292,7 @@ class TestModelRegistry(unittest.TestCase):
     def test_unpinned_models_are_visible(self):
         """
         Reports which models still float with upstream ``main``. Informational by default
-        (they all do today); set ``WWAI_REQUIRE_MODEL_PINS=1`` once pinned to lock it in.
+        (all but PHONEME_IPA_ONNX do today); set ``WWAI_REQUIRE_MODEL_PINS=1`` once pinned to lock it in.
         """
         unpinned = self.registry.unpinned_keys()
         if REQUIRE_PINS:

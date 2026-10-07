@@ -59,6 +59,8 @@ def extract_patterns(source_text: str) -> dict[str, dict]:
             if not values:
                 raise ValueError(f"{slug} has no {key}")
             fields[key] = values
+        if slug in patterns:
+            raise ValueError(f"{slug} appears twice in {PATTERNS_SOURCE.name}")
         patterns[slug] = fields
     if not patterns:
         raise ValueError(f"No patterns found in {PATTERNS_SOURCE}")
@@ -86,8 +88,14 @@ def word_lines(words: list[str], per_line: int = MAX_WORDS_PER_LINE) -> list[str
 def build_units(curriculum: dict, patterns: dict) -> list[dict]:
     """Check the curriculum places every pattern exactly once and copy it."""
     placed: dict[str, str] = {}
+    unit_ids: set[str] = set()
     units = []
     for unit in curriculum["units"]:
+        if unit["id"] in unit_ids:
+            raise ValueError(f"Unit id {unit['id']} is used twice")
+        unit_ids.add(unit["id"])
+        if not unit["patterns"]:
+            raise ValueError(f"Unit {unit['id']} has no patterns")
         for slug in unit["patterns"]:
             if slug not in patterns:
                 raise ValueError(f"Unit {unit['id']} lists unknown pattern {slug}")

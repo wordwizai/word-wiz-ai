@@ -41,6 +41,7 @@ GUEST_CONCURRENCY = 2
 QUEUE_WAIT_SECONDS = 20
 _guest_slots = asyncio.Semaphore(GUEST_CONCURRENCY)
 
+
 def _load_allowed_sentences() -> set[str]:
     return {
         normalize_sentence(sentence)

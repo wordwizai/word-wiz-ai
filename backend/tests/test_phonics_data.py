@@ -58,6 +58,34 @@ class UnitsTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "in no unit: an-family"):
             export.build_units(self.curriculum(["at-family"]), self.PATTERNS)
 
+    def test_unit_id_used_twice_is_refused(self):
+        curriculum = {
+            "units": [
+                {"id": "u0", "title": "A", "grade": "K", "patterns": ["at-family"]},
+                {"id": "u0", "title": "B", "grade": "K", "patterns": ["an-family"]},
+            ]
+        }
+        with self.assertRaisesRegex(ValueError, "Unit id u0 is used twice"):
+            export.build_units(curriculum, self.PATTERNS)
+
+    def test_empty_unit_is_refused(self):
+        with self.assertRaisesRegex(ValueError, "Unit u1 has no patterns"):
+            export.build_units(self.curriculum(["at-family", "an-family"], []), self.PATTERNS)
+
+
+class ExtractTest(unittest.TestCase):
+    def test_repeated_slug_is_refused(self):
+        entry = "\n".join([
+            'slug: "x",',
+            'displayName: "X",',
+            'words: ["a"],',
+            'sampleSentences: ["A."],',
+            'relatedSlugs: [],',
+            "",
+        ])
+        with self.assertRaisesRegex(ValueError, "appears twice"):
+            export.extract_patterns(entry + entry)
+
 
 class BuildTest(unittest.TestCase):
     @classmethod

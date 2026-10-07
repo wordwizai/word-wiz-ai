@@ -607,6 +607,7 @@ const PhonicsWithoutWorksheets = () => {
           bio: "Educational technology experts helping parents teach reading through engaging, developmentally-appropriate methods.",
         }}
         publishDate="2025-01-02"
+        updatedDate="2026-09-07"
         readTime={14}
         category="Reading Guides"
         content={content}

@@ -619,6 +619,7 @@ const ChildReadsSlowly = () => {
           bio: "Reading specialists helping parents build reading fluency through evidence-based strategies.",
         }}
         publishDate="2025-01-02"
+        updatedDate="2026-09-07"
         readTime={15}
         category="Reading Problems"
         content={content}

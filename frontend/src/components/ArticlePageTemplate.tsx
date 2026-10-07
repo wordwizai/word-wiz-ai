@@ -90,6 +90,9 @@ interface ArticlePageProps {
   // Author & metadata
   author: Author;
   publishDate: string; // ISO format
+  // ISO format. The last real content change, shown in the byline and sent as
+  // dateModified. Leave it out for title or schema-only edits.
+  updatedDate?: string;
   readTime: number; // minutes
 
   // Content
@@ -139,6 +142,7 @@ const ArticleHero: React.FC<{
   category: string;
   author: Author;
   publishDate: string;
+  updatedDate?: string;
   readTime: number;
 }> = ({
   heroImage,
@@ -148,13 +152,15 @@ const ArticleHero: React.FC<{
   category,
   author,
   publishDate,
+  updatedDate,
   readTime,
 }) => {
-  const formattedDate = new Date(publishDate).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  // ISO dates parse as UTC midnight, so format in UTC too. Otherwise US
+  // visitors see the day before the prerendered date.
+  const formattedDate = new Date(updatedDate ?? publishDate).toLocaleDateString(
+    "en-US",
+    { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" }
+  );
 
   return (
     <div className="mb-12">
@@ -201,7 +207,15 @@ const ArticleHero: React.FC<{
           </div>
           <div className="flex items-center gap-1">
             <Calendar className="w-4 h-4" />
-            <span>{formattedDate}</span>
+            <span>
+              {updatedDate ? (
+                <>
+                  Updated <time dateTime={updatedDate}>{formattedDate}</time>
+                </>
+              ) : (
+                <time dateTime={publishDate}>{formattedDate}</time>
+              )}
+            </span>
           </div>
           <div className="flex items-center gap-1">
             <Clock className="w-4 h-4" />
@@ -562,6 +576,7 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
   subheadline,
   author,
   publishDate,
+  updatedDate,
   readTime,
   category,
   content,
@@ -570,6 +585,13 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
   breadcrumbs,
   inlineCTAs = [],
 }) => {
+  // Pages hardcode dateModified in their own JSON-LD. updatedDate wins so the
+  // schema and the visible byline can't disagree.
+  const jsonLd =
+    updatedDate && structuredData && !Array.isArray(structuredData)
+      ? { ...structuredData, dateModified: updatedDate }
+      : structuredData;
+
   const renderSection = (section: ArticleSection, idx: number) => {
     // Check if there's a CTA to insert after this section
     const ctaAfterSection = inlineCTAs.find((cta) => cta.afterSection === idx);
@@ -675,7 +697,7 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
         <meta name="twitter:description" content={metaDescription} />
         {ogImage && <meta name="twitter:image" content={ogImage} />}
         <script type="application/ld+json">
-          {JSON.stringify(structuredData)}
+          {JSON.stringify(jsonLd)}
         </script>
       </Helmet>
 
@@ -696,6 +718,7 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
               category={category}
               author={author}
               publishDate={publishDate}
+              updatedDate={updatedDate}
               readTime={readTime}
             />
 

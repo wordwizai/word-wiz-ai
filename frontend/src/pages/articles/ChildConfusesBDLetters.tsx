@@ -488,6 +488,7 @@ const ChildConfusesBDLetters = () => {
         bio: "Passionate about phonics instruction and early literacy development.",
       }}
       publishDate="2025-01-24"
+      updatedDate="2026-09-07"
       readTime={11}
       category="Reading Challenges"
       content={content}

@@ -505,6 +505,7 @@ const PhonicsActivitiesFiveYearOld = () => {
         bio: "Passionate about phonics instruction and early literacy development.",
       }}
       publishDate="2025-01-24"
+      updatedDate="2026-09-07"
       readTime={13}
       category="Early Reading"
       content={content}

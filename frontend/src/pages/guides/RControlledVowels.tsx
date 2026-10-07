@@ -575,6 +575,7 @@ const RControlledVowels = () => {
           bio: "Educational technology experts helping parents teach foundational reading skills.",
         }}
         publishDate="2025-01-02"
+        updatedDate="2026-09-07"
         readTime={12}
         category="Reading Guides"
         content={content}

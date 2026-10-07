@@ -740,6 +740,7 @@ const WhyChildHatesReading = () => {
         bio: "Passionate about early literacy and reading instruction based on the Science of Reading.",
       }}
       publishDate="2024-12-29"
+      updatedDate="2026-09-07"
       readTime={14}
       category="Reading Help"
       content={content}

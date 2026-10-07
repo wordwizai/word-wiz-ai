@@ -622,6 +622,7 @@ const ChildPronounceWordsWrong = () => {
         bio: "Passionate about pronunciation feedback and phonics instruction.",
       }}
       publishDate="2024-12-29"
+      updatedDate="2026-09-07"
       readTime={10}
       category="Reading Help"
       content={content}

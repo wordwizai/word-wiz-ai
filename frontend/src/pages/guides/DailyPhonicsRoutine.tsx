@@ -414,6 +414,7 @@ const DailyPhonicsRoutine = () => {
         bio: "Expert educators specializing in creating sustainable, parent-friendly phonics practice routines.",
       }}
       publishDate="2025-01-02"
+      updatedDate="2026-09-07"
       readTime={11}
       category="Phonics Guides"
       content={content}

@@ -432,6 +432,7 @@ const GuessesWords = () => {
         bio: "Reading specialists focused on evidence-based phonics instruction and combating ineffective reading strategies.",
       }}
       publishDate="2025-01-02"
+      updatedDate="2026-09-07"
       readTime={11}
       category="Reading Problems"
       content={content}

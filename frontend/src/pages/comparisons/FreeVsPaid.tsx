@@ -533,6 +533,7 @@ const FreeVsPaid = () => {
         bio: "Education experts helping families make smart, budget-conscious choices for reading instruction.",
       }}
       publishDate="2025-01-02"
+      updatedDate="2026-09-07"
       readTime={13}
       category="App Comparisons"
       content={content}

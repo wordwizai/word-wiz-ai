@@ -445,6 +445,7 @@ const SilentEWordsPractice = () => {
         bio: "Passionate about phonics instruction and early literacy development.",
       }}
       publishDate="2025-01-24"
+      updatedDate="2026-10-05"
       readTime={12}
       category="Phonics Practice"
       content={content}

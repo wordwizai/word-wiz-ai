@@ -16,6 +16,7 @@ import SeoHead from "@/components/SeoHead";
 import LandingPageFooter from "@/components/LandingPageFooter";
 import LandingPageCTA from "@/components/LandingPageCTA";
 import React from "react";
+import { SUPPORT_EMAIL, supportMailto } from "@/config/contact";
 
 const fadeUpVariant = {
   hidden: { opacity: 0, y: 30 },
@@ -35,8 +36,6 @@ const childVariant = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 },
 };
-
-const CONTACT_EMAIL = "contactwordwizai@gmail.com";
 
 const Contact = () => {
   const [name, setName] = React.useState("");
@@ -73,12 +72,12 @@ const Contact = () => {
   // the form wasn't built yet and throw the typed message away.
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const body = `${message}
+    window.location.href = supportMailto(
+      subject,
+      `${message}
 
-${name} (${email})`;
-    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
-      subject
-    )}&body=${encodeURIComponent(body)}`;
+${name} (${email})`
+    );
     setSubmitted(true);
   };
 
@@ -172,10 +171,10 @@ ${name} (${email})`;
                         filled in. Press send there and it comes straight to
                         us. If nothing opened, write to{" "}
                         <a
-                          href={`mailto:${CONTACT_EMAIL}`}
+                          href={`mailto:${SUPPORT_EMAIL}`}
                           className="font-medium text-primary underline-offset-4 hover:underline"
                         >
-                          {CONTACT_EMAIL}
+                          {SUPPORT_EMAIL}
                         </a>
                         .
                       </p>

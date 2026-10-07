@@ -208,6 +208,8 @@ cd backend && docker compose up -d --build backend
   - `activities.py` - Activity management
   - `session.py` - Session management
   - `google_auth.py` - Google OAuth integration
+  - `phonics.py` - The phonics path, a child's assignments, starting pattern sessions
+  - `assignments.py` - Teachers assigning phonics patterns to a class (mounted under `/classes`)
 
 - **`core/`**: Main processing logic
   - `phoneme_assistant.py` - Orchestrates the entire pipeline
@@ -223,6 +225,7 @@ cd backend && docker compose up -d --build backend
   - `unlimited.py` - Unlimited practice mode
   - `story.py` - Story-based practice
   - `choice_story.py` - Interactive choice stories
+  - `phonics_pattern.py` - One phonics pattern, word lines then sentences, no GPT
 
 - **`core/gpt_prompts/`**: Versioned `.txt` files for GPT prompts
   - Auto-appends `ssml_instruction.txt` for TTS formatting
@@ -277,6 +280,8 @@ self.phoneme_extractor = PhonemeExtractorONNX()
 {"type": "processing_started"}
 {"type": "analysis", "data": {...}}
 {"type": "gpt_response", "data": {...}}
+{"type": "next_sentence", "data": {"sentence": "...", "line_index": 2, "line_count": 7}} // next line to read; line_* for pattern sessions
+{"type": "session_complete", "data": {...}} // pattern sessions only: the score after the last line
 {"type": "audio_feedback_file", "audio_base64": "..."}
 {"type": "complete"}
 {"type": "error", "message": "..."} // on failure
@@ -303,6 +308,14 @@ self.phoneme_extractor = PhonemeExtractorONNX()
 - **Activity**: Template with `activity_type` + `activity_settings` JSON
 - **Session**: User instance of an activity, tracks progress via `FeedbackEntry` records
 - `activity_settings` stores mode-specific config (e.g., `first_sentence`, `story_name`)
+
+### Phonics curriculum
+- The 113 practice-word patterns (`frontend/src/data/phonicsPatterns.ts`) are ordered into 18 units in `frontend/src/data/phonicsCurriculum.json`.
+- The backend can't see the frontend, so `python scripts/export_phonics_data.py` (from `/backend`) copies both into `backend/data/phonics_patterns.json`. Run it after editing either file and redeploy the backend. `tests/test_guest_router.py` fails while the copy is stale.
+- A pattern session reads the word list in lines of up to five words, then the sentences. Its score (pattern words read right) lives in `pattern_sessions`, beside `sessions`. All pattern sessions share one hidden `phonics-pattern` activity.
+- Teachers assign patterns with `assignments` and `assignment_students`. Status (not started, in progress, mastered at 80%, needs practice) is always computed from sessions in `crud/phonics_progress.py`, never stored.
+- Children see the path at `/practice/phonics`. It sits under `/practice` so the prerender step skips it, which leaves `/phonics` free for a public page.
+- Backend tests for all of this run from `/backend` with `PYTHONUTF8=1 python -m unittest tests.test_phonics_data tests.test_phonics_models tests.test_phonics_scoring tests.test_phonics_sessions tests.test_phonics_mode tests.test_phonics_progress tests.test_assignments_api tests.test_phonics_api tests.test_guest_router`. They use in-memory SQLite.
 
 ## Database Schema
 

@@ -8,9 +8,11 @@ import ActivitiesList, {
   ActivitiesLoadError,
 } from "@/components/ActivitiesList";
 import DynamicIcon from "@/components/DynamicIcon";
+import TeacherAssignments from "@/components/phonics/TeacherAssignments";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActivities, useStartActivity } from "@/hooks/useActivities";
+import { useMyAssignments, useStartPattern } from "@/hooks/usePhonics";
 import {
   activityPastel,
   activityTypeLabel,
@@ -22,6 +24,8 @@ interface DashboardSession {
   id: number;
   created_at: string;
   is_completed: boolean;
+  pattern_slug?: string | null;
+  pattern_name?: string | null;
   activity: {
     id: number;
     title: string;
@@ -31,6 +35,10 @@ interface DashboardSession {
 }
 
 const RECENT_LIMIT = 4;
+
+// Phonics sessions all share one activity, so they're told apart by pattern.
+const recentKey = (s: DashboardSession) =>
+  s.pattern_slug ? `pattern:${s.pattern_slug}` : `activity:${s.activity.id}`;
 
 const greeting = () => {
   const hour = new Date().getHours();
@@ -44,6 +52,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { activities, failed: activitiesFailed } = useActivities();
   const { start, startingId } = useStartActivity();
+  const { start: startPattern, startingSlug } = useStartPattern();
+  const { assignments } = useMyAssignments();
 
   const [sessions, setSessions] = useState<DashboardSession[] | null>(null);
   const [streak, setStreak] = useState(0);
@@ -81,22 +91,22 @@ const Dashboard = () => {
   // sessions can't be reopened (PracticeRouter bounces them), so in the
   // recent list they start a fresh session of the same activity instead.
   const resumable = sessions?.find((s) => !s.is_completed) ?? null;
-  // One row per activity. Every "Start" makes a new session, so without this
-  // the list filled up with identical "Unlimited Practice · Today" rows.
-  const seenActivities = new Set<number>(
-    resumable ? [resumable.activity.id] : []
-  );
+  // One row per activity (per pattern for phonics). Every "Start" makes a new
+  // session, so without this the list filled up with identical "Unlimited
+  // Practice · Today" rows.
+  const seen = new Set<string>(resumable ? [recentKey(resumable)] : []);
   const recent = (sessions ?? [])
     .filter((s) => {
-      if (seenActivities.has(s.activity.id)) return false;
-      seenActivities.add(s.activity.id);
+      if (seen.has(recentKey(s))) return false;
+      seen.add(recentKey(s));
       return true;
     })
     .slice(0, RECENT_LIMIT);
 
   const openSession = (session: DashboardSession) => {
-    if (session.is_completed) start(session.activity.id);
-    else navigate(`/practice/${session.id}`);
+    if (!session.is_completed) navigate(`/practice/${session.id}`);
+    else if (session.pattern_slug) startPattern(session.pattern_slug);
+    else start(session.activity.id);
   };
 
   return (
@@ -123,6 +133,8 @@ const Dashboard = () => {
           />
         )
       )}
+
+      <TeacherAssignments assignments={assignments} onlyOpen limit={3} />
 
       <section aria-labelledby="picks-heading">
         <SectionHeader
@@ -153,8 +165,12 @@ const Dashboard = () => {
               <li key={session.id}>
                 <RecentRow
                   session={session}
-                  isStarting={startingId === session.activity.id}
-                  disabled={startingId !== null}
+                  isStarting={
+                    session.pattern_slug
+                      ? startingSlug === session.pattern_slug
+                      : startingId === session.activity.id
+                  }
+                  disabled={startingId !== null || startingSlug !== null}
                   onOpen={() => openSession(session)}
                 />
               </li>
@@ -206,7 +222,7 @@ const ContinueCard = ({
             className="mt-1 text-xl leading-tight font-bold tracking-tight sm:text-3xl"
             style={{ color: pastel.foreground }}
           >
-            {session.activity.title}
+            {session.pattern_name ?? session.activity.title}
           </h2>
           <p className="mt-1 text-sm text-foreground/70">
             {activityTypeLabel(session.activity.activity_type)} ·{" "}
@@ -260,7 +276,7 @@ const RecentRow = ({
       </span>
       <span className="min-w-0 flex-1">
         <span className="block truncate font-medium text-foreground">
-          {session.activity.title}
+          {session.pattern_name ?? session.activity.title}
         </span>
         <span className="block text-sm text-muted-foreground">
           {activityTypeLabel(session.activity.activity_type)} ·{" "}

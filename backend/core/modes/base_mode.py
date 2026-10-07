@@ -21,6 +21,6 @@ class BaseMode:
         Feedback text is now generated locally by phoneme_feedback_formatter —
         this method only handles sentence generation.
 
-        Returns a dict with at minimum a "sentence" key.
+        Returns a dict with at minimum a "sentence" key. Phonics pattern sessions also return "line_index" and "line_count", and "session_complete": True after their last line.
         """
         raise NotImplementedError("Subclasses should implement this method.")

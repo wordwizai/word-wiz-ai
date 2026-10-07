@@ -34,6 +34,14 @@ export const practiceTypeConfigs: Record<string, PracticeTypeConfig> = {
       hasSentenceOptions: true,
     },
   },
+  "phonics-pattern": {
+    title: "Phonics path",
+    basePracticeComponent: "BasePractice",
+    features: {
+      hasNextButton: true,
+      hasSentenceOptions: false,
+    },
+  },
 };
 
 export const getPracticeConfig = (activityType: string): PracticeTypeConfig => {

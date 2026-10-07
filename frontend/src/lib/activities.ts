@@ -26,6 +26,7 @@ const TYPE_LABELS: Record<string, string> = {
   unlimited: "Free practice",
   story: "Story",
   "choice-story": "Choice story",
+  "phonics-pattern": "Phonics path",
 };
 
 export function activityTypeLabel(type: string | undefined) {

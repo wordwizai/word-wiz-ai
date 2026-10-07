@@ -89,9 +89,11 @@ export default function PracticeRouter() {
   return (
     <>
       <Helmet>
-        <title>{`${session.activity.title} | Word Wiz AI`}</title>
+        <title>{`${session.pattern_name ?? session.activity.title} | Word Wiz AI`}</title>
       </Helmet>
+      {/* Keyed so "Practice again" (a new session id) starts with fresh state. */}
       <GenericPractice
+        key={session.id}
         session={session}
         activityType={session.activity.activity_type}
       />

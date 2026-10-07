@@ -33,6 +33,7 @@ interface BasePracticeProps {
 }
 
 const FALLBACK_SENTENCE = "The quick brown fox jumped over the lazy dog";
+const NEXT_AUDIO_WAIT_MS = 5000;
 
 const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
   const [currentSentence, setCurrentSentence] = useState<string | null>(null);
@@ -45,12 +46,29 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
   // A feedback clip that lands after the child taps Next belongs to a line they've left.
   const acceptAudio = useRef(true);
+  const audioArrived = useRef(false);
   const [lineInfo, setLineInfo] = useState<LineInfo | null>(null);
   const [nextLineInfo, setNextLineInfo] = useState<LineInfo | null>(null);
   const [sessionResult, setSessionResult] = useState<SessionResult | null>(null);
   const [finished, setFinished] = useState(false);
   const { token } = useContext(AuthContext);
   const feedbackAudio = useFeedbackAudio();
+
+  // Offer Next once this reading's spoken feedback has arrived, so a quick
+  // tap can't skip it. Pattern sessions make no GPT call, so their next line
+  // usually lands before the clip. Give up waiting after a few seconds in
+  // case TTS failed.
+  const revealNextWhenHeard = () => {
+    const started = Date.now();
+    const check = () => {
+      if (audioArrived.current || Date.now() - started >= NEXT_AUDIO_WAIT_MS) {
+        setShowNextButton(true);
+      } else {
+        setTimeout(check, 200);
+      }
+    };
+    setTimeout(check, 1000);
+  };
 
   const {
     processAudio,
@@ -61,6 +79,7 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
   } = useHybridAudioAnalysis({
     onProcessingStart: () => {
       acceptAudio.current = true;
+      audioArrived.current = false;
       setIsProcessing(true);
       // The old feedback belongs to the last attempt. Clearing it here also
       // stops PracticeStage pairing this attempt's analysis with that text.
@@ -86,21 +105,19 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
           ? { index: data.line_index, count: data.line_count }
           : null
       );
-      setTimeout(() => {
-        setShowNextButton(true);
-      }, 1000);
+      revealNextWhenHeard();
     },
     onSessionComplete: (result) => {
       // The last line of a pattern session. The arrow now leads to the
       // finish screen instead of another sentence.
       setSessionResult(result);
-      setTimeout(() => {
-        setShowNextButton(true);
-      }, 1000);
+      revealNextWhenHeard();
     },
     onAudioFeedback: (url) => {
-      if (acceptAudio.current) feedbackAudio.play(url);
-      else URL.revokeObjectURL(url);
+      if (acceptAudio.current) {
+        audioArrived.current = true;
+        feedbackAudio.play(url);
+      } else URL.revokeObjectURL(url);
     },
     onError: () => {
       // useAudioTransport already showed the message; just reset the UI.

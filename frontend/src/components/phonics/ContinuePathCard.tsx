@@ -1,5 +1,4 @@
-import { Link } from "react-router-dom";
-import { ArrowRight, Blocks, ChevronRight, PartyPopper } from "lucide-react";
+import { ArrowRight, Blocks, Loader2, PartyPopper } from "lucide-react";
 import type { PhonicsPath } from "@/api";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -48,20 +47,18 @@ const ContinuePathCard = ({ path }: { path: PhonicsPath | null }) => {
             size="lg"
             onClick={() => start(pattern.slug)}
             disabled={startingSlug !== null}
+            aria-busy={startingSlug !== null}
             className="h-14 w-full shrink-0 rounded-xl px-8 text-base font-semibold @xl:w-auto active:scale-[0.98]"
           >
             {startingSlug ? "Starting…" : "Start"}
-            <ArrowRight className="size-5" />
+            {startingSlug ? (
+              <Loader2 className="size-5 animate-spin" />
+            ) : (
+              <ArrowRight className="size-5" />
+            )}
           </Button>
         )}
       </div>
-      <Link
-        to="/phonics"
-        className="mt-4 inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-pastel-mint-foreground hover:underline underline-offset-4"
-      >
-        See all {path.units.length} units
-        <ChevronRight className="size-4" />
-      </Link>
     </div>
   );
 };

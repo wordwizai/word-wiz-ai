@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { Check, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   STATUS_LABEL,
@@ -26,6 +26,7 @@ const PatternStatusChip = ({
     )}
   >
     {status === "mastered" && <Check className="size-3" aria-hidden />}
+    {status === "needs_practice" && <RotateCcw className="size-3" aria-hidden />}
     {(audience === "student" ? STUDENT_LABEL : STATUS_LABEL)[status]}
   </span>
 );

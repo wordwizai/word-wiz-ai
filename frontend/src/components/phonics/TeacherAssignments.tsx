@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 const ACTION: Record<PatternStatus, string> = {
   not_started: "Start",
-  in_progress: "Keep going",
+  in_progress: "Continue",
   needs_practice: "Practice again",
   mastered: "Read again",
 };
@@ -45,7 +45,7 @@ const TeacherAssignments = ({
               to="/practice"
               className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-primary hover:underline underline-offset-4"
             >
-              See all {ordered.length}
+              See all
               <ChevronRight className="size-4" />
             </Link>
           )
@@ -78,7 +78,11 @@ const TeacherAssignments = ({
                   <span className="truncate text-xs font-medium text-foreground/70">
                     {assignment.class_name}
                   </span>
-                  <PatternStatusChip status={assignment.status} audience="student" />
+                  <PatternStatusChip
+                    status={assignment.status}
+                    audience="student"
+                    className="ring-1 ring-inset ring-black/5"
+                  />
                 </span>
                 <span
                   className="mt-3 text-lg font-semibold leading-snug"

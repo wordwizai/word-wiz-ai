@@ -52,7 +52,7 @@ const PracticeDashboard = () => {
             title="Phonics path"
             action={
               <Link
-                to="/phonics"
+                to="/practice/phonics"
                 className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-primary hover:underline underline-offset-4"
               >
                 All units

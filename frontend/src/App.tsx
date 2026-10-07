@@ -400,7 +400,7 @@ function App() {
                     <Route path="/progress" element={<ProgressDashboard />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/practice" element={<PracticeDashboard />} />
-                    <Route path="/phonics" element={<PhonicsPathPage />} />
+                    <Route path="/practice/phonics" element={<PhonicsPathPage />} />
                     <Route path="/classes" element={<ClassesPage />} />
                   </Route>
                   <Route path="*" element={<NotFoundPage />} />

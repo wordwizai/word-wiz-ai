@@ -1,5 +1,6 @@
-import { Check, ChevronDown, Loader2 } from "lucide-react";
+import { Check, ChevronDown, Loader2, RotateCcw } from "lucide-react";
 import type { PatternProgress, PhonicsPath } from "@/api";
+import PatternStatusChip from "@/components/phonics/PatternStatusChip";
 import {
   STATUS_LABEL,
   STATUS_TONE,
@@ -8,6 +9,8 @@ import {
 import { cn } from "@/lib/utils";
 
 type Audience = "student" | "teacher";
+
+const KEY_ORDER = ["mastered", "needs_practice", "in_progress", "not_started"] as const;
 
 // The units in order. The unit holding the next pattern starts open; the
 // rest show how far along they are and open on tap. Without onStart it is
@@ -29,7 +32,13 @@ const PhonicsPathView = ({
   const doneWord = audience === "student" ? "done" : "mastered";
 
   return (
-    <ol className="space-y-3">
+    <>
+      <div className="mb-4 flex flex-wrap gap-2" aria-hidden>
+        {KEY_ORDER.map((status) => (
+          <PatternStatusChip key={status} status={status} audience={audience} />
+        ))}
+      </div>
+      <ol className="space-y-3">
       {path.units.map((unit, i) => {
         const complete = unit.mastered_count === unit.patterns.length;
         return (
@@ -38,8 +47,9 @@ const PhonicsPathView = ({
               open={unit.id === nextUnit}
               className="group rounded-2xl border bg-card shadow-xs"
             >
-              <summary className="flex min-h-16 cursor-pointer list-none items-center gap-4 px-4 py-3 sm:px-5 [&::-webkit-details-marker]:hidden">
+              <summary className="flex min-h-16 cursor-pointer list-none items-center gap-4 rounded-2xl px-4 py-3 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/60 sm:px-5 [&::-webkit-details-marker]:hidden">
                 <span
+                  aria-hidden
                   className={cn(
                     "flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold",
                     complete
@@ -47,10 +57,13 @@ const PhonicsPathView = ({
                       : "bg-muted text-muted-foreground"
                   )}
                 >
-                  {complete ? <Check className="size-4" aria-label="Done" /> : i + 1}
+                  {complete ? <Check className="size-4" /> : i + 1}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block font-semibold text-foreground">{unit.title}</span>
+                  <span className="block font-semibold text-foreground">
+                    <span className="sr-only">Unit {i + 1}, </span>
+                    {unit.title}
+                  </span>
                   <span className="block text-sm text-muted-foreground">
                     {unit.grade} · {unit.mastered_count} of {unit.patterns.length} {doneWord}
                   </span>
@@ -78,7 +91,8 @@ const PhonicsPathView = ({
           </li>
         );
       })}
-    </ol>
+      </ol>
+    </>
   );
 };
 
@@ -104,11 +118,14 @@ const PatternTile = ({
         <Loader2 className="size-3.5 animate-spin" aria-hidden />
       ) : pattern.status === "mastered" ? (
         <Check className="size-3.5" aria-hidden />
+      ) : pattern.status === "needs_practice" ? (
+        <RotateCcw className="size-3.5" aria-hidden />
       ) : pattern.status !== "not_started" ? (
         <span className="size-2 rounded-full bg-current" aria-hidden />
       ) : null}
       {pattern.name}
       <span className="sr-only">, {label}</span>
+      {isNext && <span className="sr-only">, next up</span>}
     </>
   );
   const className = cn(

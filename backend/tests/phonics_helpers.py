@@ -131,3 +131,25 @@ def make_client(SessionLocal, *routes):
         return client
 
     return as_user
+
+
+def make_pattern_session(db, user, slug, correct=None, total=None, completed_at=None):
+    """A pattern session, finished with the given score when completed_at is set."""
+    from crud.phonics_sessions import get_phonics_activity
+    from models import PatternSession, Session
+
+    session = Session(
+        user_id=user.id,
+        activity_id=get_phonics_activity(db).id,
+        is_completed=int(completed_at is not None),
+    )
+    session.pattern = PatternSession(
+        pattern_slug=slug,
+        words_correct=correct,
+        words_total=total,
+        completed_at=completed_at,
+    )
+    db.add(session)
+    db.commit()
+    db.refresh(session)
+    return session

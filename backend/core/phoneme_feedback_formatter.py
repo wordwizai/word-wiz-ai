@@ -10,7 +10,7 @@ tags. The tag wraps a demo syllable so TTS produces the target sound in isolatio
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
 
 #: Words at or above this PER count as clearly mispronounced when picking the focus
@@ -22,6 +22,12 @@ HIGH_PER_THRESHOLD = 0.4
 class FeedbackResult:
     text: str   # Plain-text feedback for display
     ssml: str   # SSML-enhanced feedback for Google Cloud TTS
+    # What a correction is about, for callers that score the feedback (the accuracy
+    # benchmark). The handler does not read these. focus_words are the words picked
+    # for the focus sound, in order, and the text names the first one. Praise and
+    # "Keep practicing!" leave both empty.
+    focus_phoneme: Optional[str] = None
+    focus_words: list[str] = field(default_factory=list)
 
 
 # ── Display names ──────────────────────────────────────────────────────────────
@@ -455,7 +461,8 @@ def generate_feedback(
                             (pronunciation_dataframe.to_dict('records')).
 
     Returns:
-        FeedbackResult with .text (plain) and .ssml (Google Cloud TTS SSML).
+        FeedbackResult with .text (plain) and .ssml (Google Cloud TTS SSML). A
+        correction also sets .focus_phoneme and .focus_words.
     """
     phoneme_to_error_words: dict = (
         problem_summary.get("phoneme_to_error_words")
@@ -548,4 +555,4 @@ def generate_feedback(
     text = f"{intro_text} {tip}" if tip else intro_text
     ssml = f"{intro_ssml} {tip}" if tip else intro_ssml
 
-    return FeedbackResult(text=text, ssml=ssml)
+    return FeedbackResult(text=text, ssml=ssml, focus_phoneme=focus_phoneme, focus_words=list(words))

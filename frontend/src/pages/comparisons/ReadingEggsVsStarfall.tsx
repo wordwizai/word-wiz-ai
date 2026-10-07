@@ -292,7 +292,7 @@ const ReadingEggsStarfallComparison = () => {
     product2:
       "Choose Starfall if you need a free, nonprofit option designed specifically for dyslexia and learning differences. It's accessible and trusted but lacks modern AI features.",
     wordWiz:
-      "Choose Word Wiz AI if you want the only free platform with speech recognition and phoneme-level feedback. It combines the accessibility of Starfall with cutting-edge AI technology neither competitor offers.",
+      "Choose Word Wiz AI if you want free speech recognition with feedback on each sound. It combines the accessibility of Starfall with cutting-edge AI technology neither competitor offers.",
     overall:
       "For pronunciation mastery and speech feedback, Word Wiz AI is unmatched. While Reading Eggs offers curriculum breadth and Starfall offers accessibility, only Word Wiz AI provides AI-powered pronunciation coaching—and it's free. For families on a budget who need more than passive games, Word Wiz AI delivers professional-grade speech technology at no cost.",
   };

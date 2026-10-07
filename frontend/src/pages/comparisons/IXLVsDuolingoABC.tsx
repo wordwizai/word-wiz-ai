@@ -248,7 +248,7 @@ const IXLDuolingoABCComparison = () => {
       "Kids who can decode but mispronounce words",
     ],
     description:
-      "Word Wiz AI is the specialist among these options—it does one thing excellently: pronunciation feedback through speech recognition. While not as comprehensive as IXL or as game-like as Duolingo ABC, it's the only free tool that actually listens and corrects pronunciation at the phoneme level.",
+      "Word Wiz AI is the specialist among these options—it does one thing excellently: pronunciation feedback through speech recognition. While not as comprehensive as IXL or as game-like as Duolingo ABC, it's the one of the three that actually listens and gives feedback on each sound.",
   };
 
   const verdict = {
@@ -257,7 +257,7 @@ const IXLDuolingoABCComparison = () => {
     product2:
       "Best for early literacy fun (ages 3-7) on a $0 budget. Kids love Duolingo's style, and it's completely free. Perfect for preschool through first grade, but limited to iOS devices and doesn't provide pronunciation feedback.",
     wordWiz:
-      "Best for pronunciation feedback and speech technology. It's the only free option with actual speech recognition among these three. While narrower in scope than IXL, it's the most advanced technologically (GPT-4, phoneme-level analysis) and works on all devices.",
+      "Best for pronunciation feedback and speech technology. It's the only free option with actual speech recognition among these three. While narrower in scope than IXL, it checks reading at the level of individual sounds and works in any browser.",
     overall:
       "These three serve different needs: IXL is comprehensive but expensive, Duolingo ABC is fun and free for early readers, and Word Wiz AI provides unique pronunciation feedback. The best free combination is Duolingo ABC (ages 3-7) + Word Wiz AI for pronunciation practice. If budget allows, add IXL for comprehensive coverage, using Word Wiz AI to fill IXL's pronunciation gap.",
   };
@@ -276,7 +276,7 @@ const IXLDuolingoABCComparison = () => {
     {
       question: "Which has the best technology?",
       answer:
-        "Word Wiz AI has the most advanced technology with GPT-4 AI and speech recognition for pronunciation feedback. Neither IXL nor Duolingo ABC can listen to your child read or provide pronunciation corrections—Word Wiz AI is the only option with this capability.",
+        "Word Wiz AI uses speech recognition for pronunciation feedback. Neither IXL nor Duolingo ABC can listen to your child read or provide pronunciation corrections—Word Wiz AI is the one of these three with this capability.",
     },
     {
       question: "Can I use these together?",

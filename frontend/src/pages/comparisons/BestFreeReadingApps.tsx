@@ -123,7 +123,7 @@ const BestFreeReadingAppsComparison = () => {
           name: "AI-Powered Personalization",
           product1: false,
           product2: "Adaptive",
-          wordWiz: "GPT-4",
+          wordWiz: "Yes",
         },
         {
           name: "Real-Time Speech Analysis",
@@ -287,9 +287,9 @@ const BestFreeReadingAppsComparison = () => {
 
   const wordWizDetails = {
     pros: [
-      { text: "Only free app with speech recognition" },
+      { text: "Listens as your child reads aloud" },
       { text: "Phoneme-level pronunciation analysis" },
-      { text: "GPT-4 powered personalized feedback" },
+      { text: "Next sentence written around the sounds your child missed" },
       { text: "Web-based (no download needed)" },
       { text: "Specialized for phonics mastery" },
       { text: "Teacher dashboard included" },
@@ -308,7 +308,7 @@ const BestFreeReadingAppsComparison = () => {
       "Families wanting AI without paying",
     ],
     description:
-      "Word Wiz AI is the only free platform combining advanced speech recognition with AI-powered feedback. It provides phoneme-level pronunciation coaching that no other free app offers.",
+      "Word Wiz AI is a free reading tutor that listens as your child reads and checks each sound inside each word. The next sentence is written around the sounds your child missed.",
   };
 
   const verdict = {
@@ -317,21 +317,21 @@ const BestFreeReadingAppsComparison = () => {
     product2:
       "Choose Khan Academy Kids if you want 100% free multi-subject learning from a trusted nonprofit. It's comprehensive and completely free but doesn't focus on phonics or pronunciation.",
     wordWiz:
-      "Choose Word Wiz AI if you want the only free app with speech recognition technology. While Starfall and Khan Kids offer general activities, only Word Wiz AI provides AI-powered pronunciation coaching at no cost.",
+      "Choose Word Wiz AI if you want an app that listens to your child read. Of these three, it's the one that checks each sound your child says, at no cost.",
     overall:
-      "For families needing speech recognition without paying $10-20/month for premium apps, Word Wiz AI is revolutionary. Khan Academy Kids offers breadth across subjects, Starfall offers dyslexia support, but only Word Wiz AI combines free access with professional-grade speech technology. If your child needs more than games—if they need actual pronunciation feedback—Word Wiz AI is the only free option that delivers.",
+      "Khan Academy Kids offers breadth across subjects and Starfall offers multisensory phonics, but neither listens to your child read aloud. Word Wiz AI does, for free. If you want to compare it with other free apps that listen, such as Google Read Along and Microsoft Reading Coach, see our comparison of reading apps that listen to your child read.",
   };
 
   const faqs = [
     {
       question: "Which app is truly 100% free with no limitations?",
       answer:
-        "Khan Academy Kids is 100% free forever with all features included. Starfall has a free tier but best features require $60/year. Word Wiz AI offers core features including speech recognition free, with optional premium add-ons.",
+        "Khan Academy Kids is 100% free forever with all features included. Starfall has a free tier but best features require $60/year. Word Wiz AI is free, including speech recognition, with no paid tier.",
     },
     {
       question: "Do any free reading apps have speech recognition?",
       answer:
-        "Only Word Wiz AI offers speech recognition in its free tier. Neither Starfall nor Khan Academy Kids include this technology at any price point—they focus on clicking, typing, and multiple choice activities.",
+        "Yes. Of these three, Word Wiz AI is the one that listens as your child reads. Starfall and Khan Academy Kids focus on tapping, listening and multiple choice activities. Google Read Along and Microsoft Reading Coach are also free and listen to children read, and we compare them in a separate guide.",
     },
     {
       question: "Which free app is best for pronunciation problems?",
@@ -346,7 +346,7 @@ const BestFreeReadingAppsComparison = () => {
     {
       question: "Which is best for homeschooling on a budget?",
       answer:
-        "Khan Academy Kids is best for comprehensive free multi-subject homeschool curriculum. Starfall works well for phonics focus. Word Wiz AI fills a crucial gap—pronunciation coaching that parents may struggle to provide themselves.",
+        "Khan Academy Kids is best for comprehensive free multi-subject homeschool curriculum. Starfall works well for phonics focus. Word Wiz AI adds pronunciation coaching that parents may struggle to provide themselves.",
     },
     {
       question: "Can I use multiple apps together?",

@@ -209,7 +209,7 @@ const TeachMonsterABCyaComparison = () => {
       "Adding assessment component to entertaining games",
     ],
     description:
-      "Word Wiz AI fills the gap left by games: it actually listens to children read and provides specific pronunciation feedback. While less game-like than competitors, it's the only free tool that assesses pronunciation accuracy and helps correct errors.",
+      "Word Wiz AI does what the games don't. It actually listens to children read and provides specific pronunciation feedback. While less game-like than competitors, it's the one of these three that assesses pronunciation accuracy and helps correct errors.",
   };
 
   const verdict = {
@@ -218,7 +218,7 @@ const TeachMonsterABCyaComparison = () => {
     product2:
       "Best for variety and multi-subject entertainment. With 400+ games, kids won't get bored. But it's not systematic phonics instruction, and the free version has ads. At $99/year for ad-free, it's not the most budget-friendly option.",
     wordWiz:
-      "Best for pronunciation feedback and assessment. It's the only free tool that actually listens to kids read and provides specific corrections. Less entertaining than games, but more educational and informative for parents.",
+      "Best for pronunciation feedback and assessment. Of these three, it's the one that actually listens to kids read and provides specific corrections. Less entertaining than games, but more educational and informative for parents.",
     overall:
       "The ideal combination is Teach Your Monster + Word Wiz AI (both free!). Use Teach Monster to make phonics fun and engaging, then use Word Wiz AI to practice pronunciation and ensure accuracy. Together, they provide entertainment plus feedback without spending anything.",
   };

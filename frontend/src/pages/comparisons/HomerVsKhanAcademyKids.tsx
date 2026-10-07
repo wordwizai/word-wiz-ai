@@ -290,7 +290,7 @@ const HomerKhanAcademyKidsComparison = () => {
       "Budget-conscious families wanting AI features",
     ],
     description:
-      "Word Wiz AI is the only free platform combining speech recognition with AI-powered feedback. Unlike HOMER and Khan Academy Kids, it actually listens to children read and provides phoneme-level coaching.",
+      "Unlike HOMER and Khan Academy Kids, Word Wiz AI actually listens to children read and gives feedback on each sound, for free.",
   };
 
   const verdict = {
@@ -299,7 +299,7 @@ const HomerKhanAcademyKidsComparison = () => {
     product2:
       "Choose Khan Academy Kids if you want a completely free, high-quality multi-subject learning app from a trusted nonprofit. It's excellent for general education but lacks speech technology.",
     wordWiz:
-      "Choose Word Wiz AI if you want the only free platform with speech recognition and phoneme-level feedback. While HOMER and Khan Kids offer breadth, only Word Wiz AI provides speech analysis depth.",
+      "Choose Word Wiz AI if you want free speech recognition with feedback on each sound. HOMER and Khan Kids offer breadth, while Word Wiz AI is the one of the three that listens to your child read.",
     overall:
       "For pronunciation and phonics mastery, Word Wiz AI is the clear choice among free options. Khan Academy Kids offers broad free learning, HOMER offers personalized paid learning, but only Word Wiz AI combines free access with advanced speech recognition technology. If your child needs more than games and videos—if they need actual pronunciation coaching—Word Wiz AI is unmatched.",
   };

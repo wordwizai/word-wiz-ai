@@ -448,10 +448,14 @@ LEGACY_WORD_SCORING_FLAG = "WWAI_LEGACY_WORD_SCORING"
 #: ``per_summary`` so stored stats can be told apart across scoring changes.
 #: 2 = word scoring v2 (closest CMUdict pronunciation, up to three forgiven
 #: edge phonemes per side, the miscue guard). The server and client-phoneme paths
-#: both score this way. It marks the code release, not the path one request
-#: took, so the kill switches (``WWAI_GT_ANCHORED_ALIGNMENT`` off,
-#: ``WWAI_LEGACY_WORD_SCORING`` on) still produce pre-v2 numbers under it.
+#: both score this way. ``analyze_results`` stamps the version a request actually
+#: used (see ``active_scoring_version``), so under either kill switch
+#: (``WWAI_GT_ANCHORED_ALIGNMENT`` off, ``WWAI_LEGACY_WORD_SCORING`` on) it stamps
+#: ``LEGACY_SCORING_VERSION`` instead.
 SCORING_VERSION = 2
+
+#: The pre-v2 word scoring, which either kill switch brings back.
+LEGACY_SCORING_VERSION = 1
 
 
 def is_legacy_word_scoring() -> bool:
@@ -463,6 +467,20 @@ def is_legacy_word_scoring() -> bool:
     before. Read at call time, like ``is_gt_anchored_enabled``.
     """
     return os.environ.get(LEGACY_WORD_SCORING_FLAG, "").strip().lower() in _TRUTHY
+
+
+def active_scoring_version() -> int:
+    """
+    The scoring version a request scored right now uses.
+
+    ``SCORING_VERSION`` on the anchored path with word scoring v2, and
+    ``LEGACY_SCORING_VERSION`` when ``WWAI_GT_ANCHORED_ALIGNMENT`` is off (the
+    legacy ASR-driven path) or ``WWAI_LEGACY_WORD_SCORING`` is on. Reads the
+    flags at call time through the same functions the scoring uses.
+    """
+    if is_gt_anchored_enabled() and not is_legacy_word_scoring():
+        return SCORING_VERSION
+    return LEGACY_SCORING_VERSION
 
 
 def _sentence_variants(gt_words: list[str]) -> dict[str, list[list[str]]]:

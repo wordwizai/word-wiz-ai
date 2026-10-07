@@ -816,15 +816,48 @@ class TestContractions(_ScoringEnv):
 
 class TestScoringVersion(unittest.TestCase):
 
-    def test_per_summary_carries_the_scoring_version(self):
-        from core.gt_alignment import SCORING_VERSION
+    def setUp(self):
+        from unittest import mock
+
+        patcher = mock.patch.dict(os.environ)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        os.environ.pop(GT_ANCHORED_FLAG, None)
+        os.environ.pop(LEGACY_SCORING_FLAG, None)
+
+    def _stamped_version(self):
         from core.process_audio import analyze_results
 
-        self.assertEqual(SCORING_VERSION, 2)
         records = align_to_ground_truth(flatten(GT_SHORT), GT_SHORT, ['the', 'cat', 'sat'])
         _df, _highest, _problems, per_summary = analyze_results(records)
-        self.assertEqual(per_summary["scoring_version"], 2)
         self.assertEqual(per_summary["sentence_per"], 0.0)
+        return per_summary["scoring_version"]
+
+    def test_per_summary_carries_the_scoring_version(self):
+        from core.gt_alignment import SCORING_VERSION
+
+        self.assertEqual(SCORING_VERSION, 2)
+        self.assertEqual(self._stamped_version(), 2)
+
+    def test_the_legacy_path_is_stamped_version_1(self):
+        os.environ[GT_ANCHORED_FLAG] = "0"
+        self.assertEqual(self._stamped_version(), 1)
+
+    def test_legacy_word_scoring_is_stamped_version_1(self):
+        os.environ[LEGACY_SCORING_FLAG] = "1"
+        self.assertEqual(self._stamped_version(), 1)
+
+    def test_both_kill_switches_are_stamped_version_1(self):
+        os.environ[GT_ANCHORED_FLAG] = "false"
+        os.environ[LEGACY_SCORING_FLAG] = "true"
+        self.assertEqual(self._stamped_version(), 1)
+
+    def test_the_flags_are_read_at_call_time(self):
+        for anchored, legacy, version in (("1", "0", 2), ("", "", 2), ("off", "", 1), ("on", "yes", 1)):
+            with self.subTest(anchored=anchored, legacy=legacy):
+                os.environ[GT_ANCHORED_FLAG] = anchored
+                os.environ[LEGACY_SCORING_FLAG] = legacy
+                self.assertEqual(self._stamped_version(), version)
 
 
 class TestSkippedWords(unittest.TestCase):

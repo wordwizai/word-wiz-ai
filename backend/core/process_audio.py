@@ -1029,14 +1029,15 @@ def analyze_results(pronunciation_data: list[dict]) -> tuple[pd.DataFrame, dict,
     # Calculate sentence-level PER
     sentence_per = total_errors / total_phonemes if total_phonemes > 0 else 0.0
 
-    from .gt_alignment import SCORING_VERSION
+    from .gt_alignment import active_scoring_version
 
     per_summary = {
         "total_phonemes": total_phonemes,
         "total_errors": total_errors,
         "sentence_per": sentence_per,
-        # Which word scoring code produced these numbers (see gt_alignment).
-        "scoring_version": SCORING_VERSION,
+        # Which word scoring produced these numbers: 2, or 1 under either kill
+        # switch (see gt_alignment.active_scoring_version).
+        "scoring_version": active_scoring_version(),
     }
 
     # Return sentence-level PER along with existing results

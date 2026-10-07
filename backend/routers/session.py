@@ -2,6 +2,7 @@ from auth.auth_handler import get_current_active_user
 from core.phonics_data import PHONICS_ACTIVITY_TYPE, get_pattern
 from core.phonics_scoring import line_index
 from crud import session as session_crud
+from crud.phonics_sessions import finish_pattern_session
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
 from models import Activity
@@ -99,8 +100,12 @@ def deactivate_session(
         raise HTTPException(
             status_code=403, detail="Not authorized to deactivate this session"
         )
-    db_session.is_completed = 1  # Mark session as completed
-    db.commit()
+    if db_session.pattern is not None:
+        # Score the readings so far, so the path doesn't show it as in progress forever.
+        finish_pattern_session(db, db_session)
+    else:
+        db_session.is_completed = 1  # Mark session as completed
+        db.commit()
     db.refresh(db_session)
     return SessionOut.model_validate(db_session)
 

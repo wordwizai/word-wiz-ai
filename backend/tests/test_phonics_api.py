@@ -120,6 +120,16 @@ class PhonicsApiTest(unittest.TestCase):
         state = self.client.get(f"/session/{session_id}/current-data").json()
         self.assertEqual(state["line_index"], 1)
 
+    def test_deactivating_a_pattern_session_scores_it(self):
+        session_id = self.start().json()["id"]
+        session = self.db.get(Session, session_id)
+        add_reading(self.db, session, AT["lines"][0], next_sentence=AT["lines"][1])
+        r = self.client.post(f"/session/{session_id}/deactivate")
+        self.assertEqual(r.status_code, 200, r.text)
+        self.assertTrue(r.json()["is_completed"])
+        path = self.client.get("/phonics/path").json()
+        self.assertEqual(path["units"][0]["patterns"][0]["status"], "mastered")
+
 
 if __name__ == "__main__":
     unittest.main()

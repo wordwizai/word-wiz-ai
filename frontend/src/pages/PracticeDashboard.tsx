@@ -1,5 +1,7 @@
 import { AppPage, PageHeader, SectionHeader } from "@/components/AppPage";
-import ActivitiesList from "@/components/ActivitiesList";
+import ActivitiesList, {
+  ActivitiesLoadError,
+} from "@/components/ActivitiesList";
 import { useActivities } from "@/hooks/useActivities";
 
 // Every activity is visible at once, grouped by kind. A carousel hid most
@@ -25,7 +27,7 @@ const SECTIONS = [
 ];
 
 const PracticeDashboard = () => {
-  const { activities } = useActivities();
+  const { activities, failed } = useActivities();
 
   return (
     <AppPage title="Practice">
@@ -33,6 +35,8 @@ const PracticeDashboard = () => {
         title="Practice"
         description="Pick a story or free practice. Every activity listens to your child read and points out the sounds to work on."
       />
+
+      {failed && <ActivitiesLoadError />}
 
       {SECTIONS.map((section) => {
         const items = activities?.filter(

@@ -4,7 +4,9 @@ import { ArrowRight, ChevronRight, Flame } from "lucide-react";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getSessions, getUserStatistics } from "@/api";
 import { AppPage, PageHeader, SectionHeader } from "@/components/AppPage";
-import ActivitiesList from "@/components/ActivitiesList";
+import ActivitiesList, {
+  ActivitiesLoadError,
+} from "@/components/ActivitiesList";
 import DynamicIcon from "@/components/DynamicIcon";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -40,7 +42,7 @@ const greeting = () => {
 const Dashboard = () => {
   const { user, token } = useContext(AuthContext);
   const navigate = useNavigate();
-  const { activities } = useActivities();
+  const { activities, failed: activitiesFailed } = useActivities();
   const { start, startingId } = useStartActivity();
 
   const [sessions, setSessions] = useState<DashboardSession[] | null>(null);
@@ -136,7 +138,11 @@ const Dashboard = () => {
             </Link>
           }
         />
-        <ActivitiesList activities={dailyPicks} />
+        {activitiesFailed ? (
+          <ActivitiesLoadError />
+        ) : (
+          <ActivitiesList activities={dailyPicks} />
+        )}
       </section>
 
       {recent.length > 0 && (

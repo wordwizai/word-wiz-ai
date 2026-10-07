@@ -21,6 +21,7 @@ const ClassesPage = lazy(() => import("./pages/ClassesPage.tsx"));
 const OAuthRedirect = lazy(() => import("./components/OAuthRedirect.tsx"));
 const PracticeRouter = lazy(() => import("./pages/PracticeRouter.tsx"));
 const PracticeDashboard = lazy(() => import("./pages/PracticeDashboard.tsx"));
+const PhonicsPathPage = lazy(() => import("./pages/PhonicsPathPage.tsx"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage.tsx"));
 const About = lazy(() => import("./pages/About.tsx"));
 const Contact = lazy(() => import("./pages/Contact.tsx"));
@@ -399,6 +400,7 @@ function App() {
                     <Route path="/progress" element={<ProgressDashboard />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/practice" element={<PracticeDashboard />} />
+                    <Route path="/phonics" element={<PhonicsPathPage />} />
                     <Route path="/classes" element={<ClassesPage />} />
                   </Route>
                   <Route path="*" element={<NotFoundPage />} />

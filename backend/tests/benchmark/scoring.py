@@ -6,6 +6,8 @@ import math
 import numbers
 from dataclasses import dataclass, field
 
+import numpy as np
+
 from . import metrics as M
 from .phones import canonical_ipa, g2p_agrees, gt_error_flags, map_canonical_to_system
 
@@ -42,10 +44,28 @@ class SentenceItem:
 
 
 @dataclass
+class FeedbackItem:
+    """The spoken feedback of one ok clip, checked against the experts' word labels.
+
+    A word status is "mistake" (the experts scored it 0 to 6), "correct" (7 to 10) or
+    "unmatched" (no scored word in the clip has that text).
+    """
+
+    utt_id: str
+    speaker: str
+    is_child: bool
+    kind: str  # "correction", "praise" or "generic"
+    has_mistake: bool  # at least one scored word in the clip is a real mistake
+    first_word: str | None  # status of the first focus word, the one the text names. None unless a correction
+    named: list = field(default_factory=list)  # status of each focus word, deduplicated by normalized text
+
+
+@dataclass
 class ItemSet:
     words: list = field(default_factory=list)
     phones: list = field(default_factory=list)
     sentences: list = field(default_factory=list)
+    feedback: list = field(default_factory=list)
     clips: int = 0
     rejected: int = 0
     rejected_by_type: dict = field(default_factory=dict)
@@ -80,6 +100,47 @@ def _lines_up(clip, records) -> bool:
     )
 
 
+FEEDBACK_KINDS = ("correction", "generic", "praise")
+
+
+def normalize_word(text) -> str:
+    """Lowercase with punctuation and spaces removed, so "Dog." and "DOG" are the same word."""
+    return "".join(ch for ch in str(text).lower() if ch.isalnum())
+
+
+def _feedback_item(clip, feedback: dict) -> FeedbackItem:
+    kind = feedback.get("kind")
+    if kind not in FEEDBACK_KINDS:
+        raise ValueError(f"clip {clip.utt_id}: feedback kind is {kind!r}, expected one of {FEEDBACK_KINDS}")
+    # A named word counts as a real mistake when ANY occurrence of that text in the clip is one.
+    # The feedback names a word, not a position, and a repeated word in one sentence is rare
+    # (a second "the", say), so this reading gives the feedback the benefit of the doubt.
+    mistakes: dict[str, bool] = {}
+    for word in clip.words:
+        key = normalize_word(word.text)
+        mistakes[key] = mistakes.get(key, False) or M.word_is_mistake(word.accuracy)
+
+    def status(text) -> str:
+        key = normalize_word(text)
+        if key not in mistakes:
+            return "unmatched"
+        return "mistake" if mistakes[key] else "correct"
+
+    focus = list(feedback.get("focus_words") or []) if kind == "correction" else []
+    if kind == "correction" and not focus:
+        raise ValueError(f"clip {clip.utt_id}: feedback is a correction but names no words")
+    named, seen = [], set()
+    for text in focus:
+        key = normalize_word(text)
+        if key not in seen:
+            seen.add(key)
+            named.append(status(text))
+    return FeedbackItem(
+        clip.utt_id, clip.speaker, clip.is_child, kind,
+        any(mistakes.values()), status(focus[0]) if focus else None, named,
+    )
+
+
 def build_items(clips, outcomes: dict) -> ItemSet:
     items = ItemSet()
     for clip in clips:
@@ -97,6 +158,10 @@ def build_items(clips, outcomes: dict) -> ItemSet:
             continue
         records = [r for r in outcome["words"] if r.get("type") != "insertion"]
         pers = [_checked_per(clip, r) for r in records]
+        # Results written before feedback was recorded have no "feedback" key. A misaligned clip
+        # keeps its feedback, since the words are matched by text and not by position.
+        if isinstance(outcome.get("feedback"), dict):
+            items.feedback.append(_feedback_item(clip, outcome["feedback"]))
         if not _lines_up(clip, records):
             items.word_count_mismatch += 1
             continue
@@ -158,6 +223,64 @@ def phone_slice_metrics(phones, strict: bool) -> dict:
     return _metrics(labels, [p.system_error for p in phones])
 
 
+#: Every feedback rate is a sum of per-clip (numerator, denominator) parts, so the same
+#: definitions give the point estimates and the per-speaker counts compare bootstraps.
+FEEDBACK_RATES = {
+    # Of the corrections, how many name a word the experts marked as a mistake.
+    "correction_precision": lambda f: (f.first_word == "mistake", f.kind == "correction"),
+    # Of all the words corrections pick for their focus sound, how many are real mistakes.
+    "named_word_precision": lambda f: (sum(s == "mistake" for s in f.named), len(f.named)),
+    # Of all readings, how often the child is told to fix a word they read correctly.
+    "wrong_correction_rate": lambda f: (f.first_word == "correct", 1),
+    # Of the readings without a mistake, how many are praised.
+    "clean_praise_rate": lambda f: (f.kind == "praise" and not f.has_mistake, not f.has_mistake),
+    # Of the readings with at least one mistake, how many are praised anyway.
+    "false_praise_rate": lambda f: (f.kind == "praise" and f.has_mistake, f.has_mistake),
+}
+
+
+def _rate_parts(items, rate):
+    num = den = 0
+    for f in items:
+        n, d = FEEDBACK_RATES[rate](f)
+        num, den = num + int(n), den + int(d)
+    return num, den
+
+
+def feedback_slice_metrics(items) -> dict:
+    """The feedback rates over these clips. A rate with nothing to divide by is None."""
+    n = len(items)
+    kinds = {kind: sum(f.kind == kind for f in items) for kind in FEEDBACK_KINDS}
+    out = {"n_clips": n, "kind_share": {kind: kinds[kind] / n if n else 0.0 for kind in FEEDBACK_KINDS}}
+    parts = {rate: _rate_parts(items, rate) for rate in FEEDBACK_RATES}
+    for rate, (num, den) in parts.items():
+        out[rate] = num / den if den else None
+    out["counts"] = {
+        **kinds,
+        "first_word_mistake": parts["correction_precision"][0],
+        "first_word_correct": parts["wrong_correction_rate"][0],
+        "first_word_unmatched": sum(f.first_word == "unmatched" for f in items),
+        "named_words": parts["named_word_precision"][1],
+        "named_mistakes": parts["named_word_precision"][0],
+        "named_unmatched": sum(s == "unmatched" for f in items for s in f.named),
+        "clean_clips": parts["clean_praise_rate"][1],
+        "clean_praised": parts["clean_praise_rate"][0],
+        "mistake_clips": parts["false_praise_rate"][1],
+        "mistake_praised": parts["false_praise_rate"][0],
+    }
+    return out
+
+
+def feedback_rate_counts(items: ItemSet, rate: str) -> dict:
+    """Per-speaker (numerator, denominator) of one feedback rate, for metrics.bootstrap_ratio_delta."""
+    out: dict[str, np.ndarray] = {}
+    for f in items.feedback:
+        n, d = FEEDBACK_RATES[rate](f)
+        out.setdefault(f.speaker, np.zeros(2, dtype=np.int64))
+        out[f.speaker] += (int(n), int(d))
+    return out
+
+
 def summarize(items: ItemSet, threshold: float) -> dict:
     out = {
         "threshold": threshold,
@@ -196,4 +319,10 @@ def summarize(items: ItemSet, threshold: float) -> dict:
         "sentence": M.pearson([s.human_accuracy for s in items.sentences],
                               [-s.sentence_per for s in items.sentences]),
     }
+    # The spoken feedback, scored over ok clips that recorded it. None for results files
+    # written before it was recorded.
+    out["feedback"] = (
+        {name: feedback_slice_metrics([f for f in items.feedback if keep(f)]) for name, keep in SLICES.items()}
+        if items.feedback else None
+    )
     return out

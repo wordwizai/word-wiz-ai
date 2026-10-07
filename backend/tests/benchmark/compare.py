@@ -5,6 +5,7 @@
 Conditions 5 (speed and memory, see speed.py) and 6 (tests pass) are checked separately
 at review time. A fifth check below the four conditions fails a candidate that adds
 "unexpected:" failures, which mean harness bugs or production crashes.
+The spoken-feedback rows (scoring.FEEDBACK_RATES) are reported only and never decide the result.
 Exit codes: 0 all checks pass, 1 at least one fails, 2 inputs not comparable.
 """
 
@@ -16,13 +17,15 @@ import sys
 
 from . import common
 from . import metrics as M
-from .scoring import build_items, summarize
+from .scoring import build_items, feedback_rate_counts, summarize
 
 FAR_TOLERANCE = 0.005
 UNSCORED_TOLERANCE = 0.01
 N_RESAMPLES = 2000
 SEED = 0
 _EPS = 1e-12
+#: The feedback rates that get a paired interval. Reported only, not acceptance checks.
+FEEDBACK_CI_RATES = ("correction_precision", "wrong_correction_rate")
 
 
 class NotComparable(ValueError):
@@ -38,6 +41,24 @@ def _word_counts(items, threshold, children_only=False):
     words = [w for w in items.words if w.is_child] if children_only else items.words
     return M.per_speaker_counts([w.speaker for w in words], [w.is_mistake for w in words],
                                 M.flags_at([w.per for w in words], threshold))
+
+
+def _feedback_comparison(base_items, cand_items, bs, cs, n_resamples, seed):
+    """Differences and paired speaker-bootstrap intervals for FEEDBACK_CI_RATES, or None when
+    either results file has no feedback. A rate that is undefined on either side gets None."""
+    if bs["feedback"] is None or cs["feedback"] is None:
+        return None
+    out = {}
+    for rate in FEEDBACK_CI_RATES:
+        b, k = bs["feedback"]["all"][rate], cs["feedback"]["all"][rate]
+        if b is None or k is None:
+            out[rate] = {"delta": None, "ci": None}
+            continue
+        deltas = M.bootstrap_ratio_delta(feedback_rate_counts(base_items, rate),
+                                         feedback_rate_counts(cand_items, rate), n_resamples, seed)
+        lo, hi = M.percentile_interval(deltas)
+        out[rate] = {"delta": k - b, "ci": [lo, hi]}
+    return out
 
 
 def compare_results(base: dict, cand: dict, clips, n_resamples: int = N_RESAMPLES, seed: int = SEED) -> dict:
@@ -101,9 +122,43 @@ def compare_results(base: dict, cand: dict, clips, n_resamples: int = N_RESAMPLE
         "unscored_delta": unscored_delta,
         "base_summary": bs,
         "candidate_summary": cs,
+        # Reported only. Not part of the checks or of "passed".
+        "feedback": _feedback_comparison(base_items, cand_items, bs, cs, n_resamples, seed),
         "checks": checks,
         "passed": all(c["passed"] for c in checks),
     }
+
+
+def _num(value) -> str:
+    return f"{value:8.4f}" if value is not None else f"{'n/a':>8s}"
+
+
+def _feedback_rows(c: dict) -> list[str]:
+    b, k = c["base_summary"].get("feedback"), c["candidate_summary"].get("feedback")
+    if b is None or k is None:
+        missing = " and ".join(name for name, s in (("base", b), ("candidate", k)) if s is None)
+        return [f"feedback not compared, the {missing} results have no feedback "
+                "(written before feedback was recorded)"]
+    rows = ["spoken feedback (reported only, not one of the checks)"]
+    lines = [("correction precision", "correction_precision", "all"),
+             ("  children", "correction_precision", "children"),
+             ("  adults", "correction_precision", "adults"),
+             ("wrong-correction rate", "wrong_correction_rate", "all"),
+             ("  children", "wrong_correction_rate", "children"),
+             ("  adults", "wrong_correction_rate", "adults"),
+             ("named-word precision", "named_word_precision", "all"),
+             ("clean praise rate", "clean_praise_rate", "all"),
+             ("false praise rate", "false_praise_rate", "all")]
+    for label, rate, name in lines:
+        vb, vk = b[name][rate], k[name][rate]
+        diff = f"{vk - vb:+8.4f}" if vb is not None and vk is not None else f"{'n/a':>8s}"
+        rows.append(f"{label:24s} {_num(vb)} {_num(vk)} {diff}")
+    for rate, label in (("correction_precision", "correction precision"),
+                        ("wrong_correction_rate", "wrong-correction rate")):
+        ci = (c.get("feedback") or {}).get(rate, {}).get("ci")
+        shown = f"[{ci[0]:+.4f}, {ci[1]:+.4f}]" if ci else "n/a"
+        rows.append(f"{label} difference, 95% CI {shown} (speaker bootstrap)")
+    return rows
 
 
 def format_comparison(c: dict) -> str:
@@ -119,6 +174,7 @@ def format_comparison(c: dict) -> str:
         rb, rk = c["base_summary"][key], c["candidate_summary"][key]
         rows.append(f"{label:24s} {rb:8.4f} {rk:8.4f} {rk - rb:+8.4f}")
     rows.append(f"F0.5 difference, 95% CI [{c['f05_ci'][0]:+.4f}, {c['f05_ci'][1]:+.4f}] (speaker bootstrap)")
+    rows.extend(_feedback_rows(c))
     rows.append("")
     width = max([20] + [len(chk["value"]) for chk in c["checks"]])
     for chk in c["checks"]:

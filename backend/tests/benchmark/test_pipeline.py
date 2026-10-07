@@ -166,6 +166,82 @@ class TestAnalyzeClip(unittest.TestCase):
             outcome = PL.analyze_clip(self.audio, U.SAMPLE_TEXT, _ListPhonemes(self.perfect), U.FakeWords())
         self.assertEqual((outcome.status, outcome.error_type), ("rejected", "unexpected:KeyError"))
 
+    def test_feedback_is_generated_the_way_the_router_does(self):
+        # The router passes analyze_results' outputs to generate_feedback by keyword, with the
+        # DataFrame's records as pronunciation_data. Its text is what TTS says to the child.
+        import core.phoneme_feedback_formatter as formatter
+        import core.process_audio as process_audio
+
+        seen = {}
+        real_analyze, real_feedback = process_audio.analyze_results, formatter.generate_feedback
+
+        def analyze(words):
+            seen["analysis"] = real_analyze(words)
+            return seen["analysis"]
+
+        def feedback(**kwargs):
+            seen["kwargs"] = kwargs
+            seen["result"] = real_feedback(**kwargs)
+            return seen["result"]
+
+        with mock.patch.object(process_audio, "analyze_results", side_effect=analyze), \
+                mock.patch.object(formatter, "generate_feedback", side_effect=feedback) as spy:
+            outcome = PL.analyze_clip(self.audio, U.SAMPLE_TEXT, _ListPhonemes(self.perfect), U.FakeWords())
+        self.assertEqual(outcome.status, "ok")
+        spy.assert_called_once()
+        self.assertEqual(spy.call_args.args, ())
+        df, _highest, problem_summary, per_summary = seen["analysis"]
+        self.assertEqual(set(seen["kwargs"]), {"problem_summary", "per_summary", "pronunciation_data"})
+        self.assertIs(seen["kwargs"]["problem_summary"], problem_summary)
+        self.assertIs(seen["kwargs"]["per_summary"], per_summary)
+        self.assertEqual(seen["kwargs"]["pronunciation_data"], df.to_dict("records"))
+        self.assertEqual(outcome.feedback, PL.describe_feedback(seen["result"]))
+
+    def test_a_perfect_reading_is_praised(self):
+        outcome = PL.analyze_clip(self.audio, U.SAMPLE_TEXT, _ListPhonemes(self.perfect), U.FakeWords())
+        self.assertEqual(outcome.feedback, {"kind": "praise", "focus_phoneme": None, "focus_words": []})
+
+    def test_a_misread_word_gets_a_correction_that_names_it(self):
+        misread = [list(p) for p in self.perfect]
+        misread[3] = ["m", "i", "n", "t"]  # "fox"
+        outcome = PL.analyze_clip(self.audio, U.SAMPLE_TEXT, _ListPhonemes(misread), U.FakeWords())
+        self.assertEqual(outcome.feedback["kind"], "correction")
+        self.assertEqual(outcome.feedback["focus_words"], ["fox"])
+        self.assertIn(outcome.feedback["focus_phoneme"], ["f", "ɑ", "k", "s"])
+
+    def test_a_rejected_clip_has_no_feedback(self):
+        silence = np.zeros(32000, dtype=np.float32)
+        with _gates(soft=True):
+            outcome = PL.analyze_clip(silence, U.SAMPLE_TEXT, _ListPhonemes(self.perfect), U.FakeWords())
+        self.assertEqual(outcome.status, "rejected")
+        self.assertIsNone(outcome.feedback)
+        self.assertIsNone(outcome.to_dict()["feedback"])
+        failed = PL.analyze_clip(self.audio, U.SAMPLE_TEXT, _Raises(AttributeError("boom")), U.FakeWords())
+        self.assertIsNone(failed.to_dict()["feedback"])
+
+    def test_to_dict_stores_the_feedback_and_survives_json(self):
+        import json
+
+        misread = [list(p) for p in self.perfect]
+        misread[3] = ["m", "i", "n", "t"]
+        outcome = PL.analyze_clip(self.audio, U.SAMPLE_TEXT, _ListPhonemes(misread), U.FakeWords())
+        stored = outcome.to_dict()
+        self.assertEqual(set(stored["feedback"]), {"kind", "focus_phoneme", "focus_words"})
+        self.assertEqual(stored["feedback"], outcome.feedback)
+        self.assertIsNot(stored["feedback"]["focus_words"], outcome.feedback["focus_words"])
+        self.assertEqual(json.loads(json.dumps(stored, ensure_ascii=False)), stored)
+
+    def test_describe_feedback_kinds(self):
+        from core.phoneme_feedback_formatter import FeedbackResult
+
+        self.assertEqual(PL.describe_feedback(FeedbackResult("Great job!", "Great job!")),
+                         {"kind": "praise", "focus_phoneme": None, "focus_words": []})
+        self.assertEqual(PL.describe_feedback(FeedbackResult("Keep practicing!", "Keep practicing!")),
+                         {"kind": "generic", "focus_phoneme": None, "focus_words": []})
+        correction = FeedbackResult("Watch the 'k' sound in 'cat'.", "...", focus_phoneme="k", focus_words=["cat", "kite"])
+        self.assertEqual(PL.describe_feedback(correction),
+                         {"kind": "correction", "focus_phoneme": "k", "focus_words": ["cat", "kite"]})
+
     def test_compact_record_fails_loudly_on_a_missing_field(self):
         full = U.record("fox", ["f", "ɑ", "k", "s"], ["f", "ɑ", "k", "s"], 0)
         self.assertEqual(set(PL.compact_record(full)), set(PL.RECORD_FIELDS))

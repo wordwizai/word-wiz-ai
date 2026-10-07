@@ -186,5 +186,131 @@ class TestSummarize(unittest.TestCase):
         self.assertEqual(summary["rejected"], 2)
 
 
+def _fb_clip(utt_id, speaker, age, words):
+    """A clip from (TEXT, word accuracy) pairs, with an ok outcome whose records line up."""
+    clip = U.synthetic_clip(utt_id, speaker, age, [(t, a, "AH0", [2]) for t, a in words])
+    records = [U.record(t.lower(), ["ə"], ["ə"], 0.0) for t, _a in words]
+    return clip, U.ok(*records)
+
+
+def _feedback_population():
+    """Five clips with feedback and one rejected clip. Accuracy 6 or less is a real mistake."""
+    specs = [
+        # child. THE appears twice and only the second one is a mistake. Both named words are mistakes.
+        ("f1", "s1", 8, [("THE", 10), ("CAT", 3), ("THE", 4)], ("correction", ["the", "cat"])),
+        # child, no mistakes. "Dog." and "dog" are one named word after normalizing, read correctly.
+        ("f2", "s2", 9, [("DOG", 10), ("SAT", 9)], ("correction", ["Dog.", "dog"])),
+        # adult, no mistakes, praised
+        ("f3", "s3", 30, [("A", 10), ("B", 10)], ("praise", [])),
+        # adult with a mistake, praised anyway
+        ("f4", "s4", 40, [("RUN", 2), ("HOME", 10)], ("praise", [])),
+        # adult with a mistake, told to keep practicing
+        ("f5", "s5", 50, [("SIT", 5), ("UP", 10)], ("generic", [])),
+    ]
+    clips, outcomes = [], {}
+    for utt, spk, age, words, (kind, focus) in specs:
+        clip, outcome = _fb_clip(utt, spk, age, words)
+        clips.append(clip)
+        outcomes[utt] = U.with_feedback(outcome, kind, focus, "k" if focus else None)
+    clips.append(U.synthetic_clip("f6", "s6", 30, [("A", 10, "AH0", [2])]))
+    outcomes["f6"] = U.rejected()
+    return clips, outcomes
+
+
+class TestFeedbackScoring(unittest.TestCase):
+    """Hand-computed feedback metrics. See _feedback_population for the clips."""
+
+    def setUp(self):
+        clips, outcomes = _feedback_population()
+        self.feedback = S.summarize(S.build_items(clips, outcomes), threshold=0.4)["feedback"]
+
+    def test_all(self):
+        m = self.feedback["all"]
+        self.assertEqual(m["n_clips"], 5)  # the rejected clip has no feedback
+        self.assertEqual(m["kind_share"], {"correction": 0.4, "generic": 0.2, "praise": 0.4})
+        self.assertAlmostEqual(m["correction_precision"], 1 / 2)   # f1 yes (THE, via its second occurrence), f2 no
+        self.assertAlmostEqual(m["named_word_precision"], 2 / 3)   # the, cat yes; dog no (counted once)
+        self.assertAlmostEqual(m["wrong_correction_rate"], 1 / 5)  # f2, out of five clips with feedback
+        self.assertAlmostEqual(m["clean_praise_rate"], 1 / 2)      # clean clips f2, f3; f3 praised
+        self.assertAlmostEqual(m["false_praise_rate"], 1 / 3)      # clips with a mistake f1, f4, f5; f4 praised
+        self.assertEqual(m["counts"]["named_words"], 3)
+        self.assertEqual(m["counts"]["first_word_unmatched"], 0)
+
+    def test_children(self):
+        m = self.feedback["children"]
+        self.assertEqual(m["n_clips"], 2)
+        self.assertEqual(m["kind_share"], {"correction": 1.0, "generic": 0.0, "praise": 0.0})
+        self.assertAlmostEqual(m["correction_precision"], 1 / 2)
+        self.assertAlmostEqual(m["named_word_precision"], 2 / 3)
+        self.assertAlmostEqual(m["wrong_correction_rate"], 1 / 2)
+        self.assertEqual(m["clean_praise_rate"], 0.0)
+        self.assertEqual(m["false_praise_rate"], 0.0)
+
+    def test_adults_with_no_corrections_have_undefined_precision(self):
+        m = self.feedback["adults"]
+        self.assertEqual(m["n_clips"], 3)
+        self.assertEqual(m["kind_share"], {"correction": 0.0, "generic": 1 / 3, "praise": 2 / 3})
+        self.assertIsNone(m["correction_precision"])
+        self.assertIsNone(m["named_word_precision"])
+        self.assertEqual(m["wrong_correction_rate"], 0.0)
+        self.assertEqual(m["clean_praise_rate"], 1.0)
+        self.assertAlmostEqual(m["false_praise_rate"], 1 / 2)
+
+    def test_results_without_feedback_give_none(self):
+        # Results files written before feedback was recorded have no "feedback" key at all.
+        summary = S.summarize(S.build_items(_clips(), _outcomes()), threshold=0.3)
+        self.assertIn("feedback", summary)
+        self.assertIsNone(summary["feedback"])
+        self.assertEqual(summary["word"]["all"]["counts"], [1, 0, 0, 1])  # the rest still scores
+
+    def test_feedback_does_not_change_the_word_metrics(self):
+        clips, outcomes = _feedback_population()
+        bare = {u: {k: v for k, v in o.items() if k != "feedback"} for u, o in outcomes.items()}
+        with_fb = S.summarize(S.build_items(clips, outcomes), threshold=0.4)
+        without = S.summarize(S.build_items(clips, bare), threshold=0.4)
+        self.assertIsNone(without.pop("feedback"))
+        with_fb.pop("feedback")
+        self.assertEqual(with_fb, without)
+
+    def test_a_named_word_not_in_the_clip_is_neither_a_mistake_nor_correct(self):
+        clip, outcome = _fb_clip("g1", "t1", 30, [("CAT", 3), ("DOG", 10)])
+        outcome = U.with_feedback(outcome, "correction", ["fish", "cat"], "f")
+        m = S.summarize(S.build_items([clip], {"g1": outcome}), 0.4)["feedback"]["all"]
+        self.assertEqual(m["correction_precision"], 0.0)
+        self.assertEqual(m["wrong_correction_rate"], 0.0)
+        self.assertAlmostEqual(m["named_word_precision"], 1 / 2)
+        self.assertEqual(m["counts"]["first_word_unmatched"], 1)
+
+    def test_a_misaligned_clip_still_has_its_feedback_scored(self):
+        # The words are matched by text, so the feedback is scored even when the word records
+        # do not line up with the scored words (and the clip drops out of the word metrics).
+        clip, _outcome = _fb_clip("g2", "t2", 30, [("CAT", 3), ("DOG", 10)])
+        outcome = U.with_feedback(U.ok(U.record("cat", ["ə"], ["ə"], 0.5)), "correction", ["cat"], "k")
+        summary = S.summarize(S.build_items([clip], {"g2": outcome}), 0.4)
+        self.assertEqual(summary["word_count_mismatch"], 1)
+        self.assertEqual(summary["feedback"]["all"]["n_clips"], 1)
+        self.assertEqual(summary["feedback"]["all"]["correction_precision"], 1.0)
+
+    def test_an_unknown_feedback_kind_raises_and_names_the_clip(self):
+        clip, outcome = _fb_clip("g3", "t3", 30, [("CAT", 3), ("DOG", 10)])
+        with self.assertRaises(ValueError) as ctx:
+            S.build_items([clip], {"g3": U.with_feedback(outcome, "Praise")})
+        self.assertIn("g3", str(ctx.exception))
+
+    def test_speaker_counts_add_up_to_the_rates(self):
+        clips, outcomes = _feedback_population()
+        items = S.build_items(clips, outcomes)
+        for rate in ("correction_precision", "wrong_correction_rate"):
+            counts = S.feedback_rate_counts(items, rate)
+            self.assertEqual(sorted(counts), ["s1", "s2", "s3", "s4", "s5"])
+            num, den = sum(c[0] for c in counts.values()), sum(c[1] for c in counts.values())
+            self.assertAlmostEqual(num / den, self.feedback["all"][rate])
+
+    def test_normalize_word(self):
+        self.assertEqual(S.normalize_word("Dog."), "dog")
+        self.assertEqual(S.normalize_word("DON'T"), "dont")
+        self.assertEqual(S.normalize_word(" the "), "the")
+
+
 if __name__ == "__main__":
     unittest.main()

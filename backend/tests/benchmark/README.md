@@ -62,6 +62,51 @@ gates and preprocessing through G2P, decoding, alignment and scoring. Only the w
 pass and the Deepgram request are replaced with recorded outputs (see "How the cache stays
 honest").
 
+### The spoken feedback
+
+The word-level numbers are a stand-in for what a child actually hears. After a reading, the
+router passes the analysis to `generate_feedback` in `core/phoneme_feedback_formatter.py`, and
+TTS reads its text aloud. No GPT is involved in that text. The threshold only reaches it through
+the focus sound. When no word clears the threshold, the child is praised if the sentence's PER is
+0.2 or less, and otherwise the feedback falls back to the sound with the most errors over all the
+words, mild ones included. So `run` also calls `generate_feedback` the way the router does and
+records, for every clip that is not rejected, the kind of feedback and the sound and words it is
+about. The summary scores that under `feedback`, for all speakers, children and adults.
+
+There are three kinds of feedback.
+
+- **Correction** names a word and a sound, such as "In the word 'cat', the letters 'c' make the
+  'k' sound."
+- **Praise** is "Great job!".
+- **Generic** is anything else, which today means "Keep practicing!".
+
+| Number | What it means |
+|---|---|
+| `correction_precision` | Of the corrections, the share where the word the child is told about is one the experts scored as a mistake (0 to 6). |
+| `wrong_correction_rate` | Of all readings with feedback, the share where the child is told to fix a word they read correctly. Out of every 100 readings, this is how often that happens. |
+| `named_word_precision` | Of all the words corrections pick for their focus sound (up to three per clip, each counted once), the share that are real mistakes. Only the first of them is spoken today, so this says more about the formatter's word list than about what the child hears. |
+| `clean_praise_rate` | Of the readings with no expert mistake, the share that got "Great job!". |
+| `false_praise_rate` | Of the readings with at least one expert mistake, the share that got "Great job!" anyway. |
+| `n_clips`, `kind_share` | How many clips have feedback, and the share of each kind. |
+
+- Words are matched by their text, lowercased and without punctuation, against the clip's
+  scored words. When a word appears twice in a sentence and only one of the two is a mistake,
+  naming it counts as naming a mistake, since the feedback names a word and not a position.
+  That case is rare.
+- A misaligned clip still has its feedback scored, because the matching is by text. A rejected
+  clip has no feedback and is left out.
+- A named word that matches no scored word is neither a mistake nor correct. The summary counts
+  these in `counts` (`first_word_unmatched` and `named_unmatched`), and both should be 0.
+- A rate with nothing to divide by, such as correction precision for a slice with no
+  corrections, is null in the summary and shown as n/a.
+- The feedback always uses production's `HIGH_PER_THRESHOLD`. `--threshold` moves the word-level
+  numbers but not the feedback.
+- Results files written before the feedback was recorded have none, and their `feedback` block
+  is null. `compare` then says so in one line and skips the feedback rows.
+- These numbers are reported only. `compare` prints them for both runs with the difference, and
+  a paired speaker-bootstrap 95% interval for the differences in `correction_precision` and
+  `wrong_correction_rate`, but they play no part in the checks or the exit code.
+
 ## Layout
 
 | Module | What it does |
@@ -69,7 +114,7 @@ honest").
 | `dataset.py` | Downloads and parses speechocean762, checks it, and writes the fixed clip subsets |
 | `stage_cache.py` | Runs the two slow models once per clip and records what they returned |
 | `replay.py` | Feeds the recorded outputs back into the real production code |
-| `pipeline.py` | One clip through the production request path (gates, preprocessing, G2P, `process_audio_array`, `analyze_results`) |
+| `pipeline.py` | One clip through the production request path (gates, preprocessing, G2P, `process_audio_array`, `analyze_results`, `generate_feedback`) |
 | `run.py` | Scores a whole half and writes a results file |
 | `scoring.py`, `metrics.py`, `phones.py` | Join outcomes with the labels, the pure metric functions, and ARPAbet-to-IPA phone mapping |
 | `compare.py` | Paired comparison of two results files with the acceptance checks |
@@ -178,6 +223,10 @@ should carry the re-pinned baseline and a written reason.
 
 `compare` also takes `--resamples N` and `--json PATH`. Both results must cover the same half,
 subset and clips, otherwise it exits with code 2.
+
+After the word rows, `compare` prints the spoken-feedback rows (see "The spoken feedback" above)
+with paired intervals for correction precision and the wrong-correction rate. They are there to
+read alongside the checks and never change the result.
 
 ### Speed and memory
 

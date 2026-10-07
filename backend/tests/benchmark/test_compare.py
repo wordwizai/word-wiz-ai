@@ -1,3 +1,4 @@
+import io
 import json
 import os
 import tempfile
@@ -184,6 +185,77 @@ class TestChildrenCheck(unittest.TestCase):
         C.format_comparison(result)  # must not choke on the missing interval
 
 
+class TestFeedbackRows(unittest.TestCase):
+    """Feedback metrics are printed with paired intervals but never decide the outcome."""
+
+    def setUp(self):
+        self.clips, self.base, self.cand = _population()
+
+    def _compare(self, base, cand):
+        return C.compare_results(U.results_dict("base", base), U.results_dict("cand", cand), self.clips, n_resamples=300)
+
+    def _with(self, outcomes, word):
+        # Every clip gets a correction that names `word`. CAT is read correctly, DOG is a mistake.
+        return {u: U.with_feedback(o, "correction", [word], "k") for u, o in outcomes.items()}
+
+    def test_rows_and_intervals(self):
+        result = self._compare(self._with(self.base, "cat"), self._with(self.cand, "dog"))
+        fb = result["feedback"]
+        self.assertAlmostEqual(fb["correction_precision"]["delta"], 1.0)
+        self.assertEqual(fb["correction_precision"]["ci"], [1.0, 1.0])
+        self.assertAlmostEqual(fb["wrong_correction_rate"]["delta"], -1.0)
+        self.assertEqual(fb["wrong_correction_rate"]["ci"], [-1.0, -1.0])
+        text = C.format_comparison(result)
+        lines = text.splitlines()
+        word_row = next(i for i, line in enumerate(lines) if line.startswith("false-alarm rate"))
+        precision_row = next(i for i, line in enumerate(lines) if line.startswith("correction precision "))
+        self.assertGreater(precision_row, word_row)  # after the existing word rows
+        self.assertRegex(lines[precision_row], r"0\.0000\s+1\.0000\s+\+1\.0000$")
+        self.assertIn("wrong-correction rate", text)
+        self.assertIn("correction precision difference, 95% CI [+1.0000, +1.0000]", text)
+        self.assertIn("wrong-correction rate difference, 95% CI [-1.0000, -1.0000]", text)
+
+    def test_identical_feedback_gives_a_zero_interval(self):
+        same = self._with(self.base, "dog")
+        fb = self._compare(same, same)["feedback"]
+        self.assertEqual(fb["correction_precision"]["ci"], [0.0, 0.0])
+        self.assertEqual(fb["wrong_correction_rate"]["ci"], [0.0, 0.0])
+
+    def test_feedback_never_changes_the_checks(self):
+        plain = self._compare(self.base, self.cand)
+        # The candidate's feedback is much worse, and the result must not move.
+        worse = self._compare(self._with(self.base, "dog"), self._with(self.cand, "cat"))
+        self.assertEqual(worse["checks"], plain["checks"])
+        self.assertEqual(worse["passed"], plain["passed"])
+        self.assertTrue(worse["passed"])
+        self.assertEqual(len(worse["checks"]), 5)
+
+    def test_a_file_without_feedback_skips_the_rows(self):
+        for base, cand, missing in ((self.base, self._with(self.cand, "dog"), "base"),
+                                    (self._with(self.base, "dog"), self.cand, "candidate"),
+                                    (self.base, self.cand, "base and candidate")):
+            with self.subTest(missing=missing):
+                result = self._compare(base, cand)
+                self.assertIsNone(result["feedback"])
+                text = C.format_comparison(result)
+                self.assertNotIn("correction precision", text)
+                skipped = [line for line in text.splitlines() if "feedback" in line]
+                self.assertEqual(len(skipped), 1)
+                self.assertIn(f"the {missing} results", skipped[0])
+                self.assertEqual(result["checks"], self._compare(self.base, self.cand)["checks"])
+
+    def test_undefined_precision_prints_as_n_a(self):
+        praised = {u: U.with_feedback(o, "praise") for u, o in self.base.items()}
+        result = self._compare(praised, self._with(self.cand, "dog"))
+        self.assertIsNone(result["base_summary"]["feedback"]["all"]["correction_precision"])
+        self.assertIsNone(result["feedback"]["correction_precision"]["delta"])
+        self.assertIsNone(result["feedback"]["correction_precision"]["ci"])
+        text = C.format_comparison(result)
+        row = next(line for line in text.splitlines() if line.startswith("correction precision "))
+        self.assertRegex(row, r"n/a\s+1\.0000\s+n/a$")
+        self.assertIn("correction precision difference, 95% CI n/a", text)
+
+
 class TestMain(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -222,6 +294,26 @@ class TestMain(unittest.TestCase):
         self.assertEqual(C.main([base, good, "--resamples", "200"]), 0)
         self.assertEqual(C.main([base, base, "--resamples", "200"]), 1)
         self.assertEqual(C.main([base, other]), 2)
+
+    def test_exit_codes_ignore_feedback_and_survive_a_file_without_it(self):
+        def corrections(outcomes, word_index):
+            # A correction naming one scored word of each clip (the first or the last).
+            from tests.benchmark.dataset import load_half
+
+            clips = {c.utt_id: c for c in load_half(os.path.join(self.tmp.name, "speechocean762"), "dev")}
+            return {u: U.with_feedback(o, "correction", [clips[u].words[word_index].text], "k")
+                    for u, o in outcomes.items()}
+
+        old_base = self._write("old_base", U.results_dict("base", self._outcomes(False)))
+        new_base = self._write("new_base", U.results_dict("base", corrections(self._outcomes(False), 0)))
+        good = self._write("good", U.results_dict("good", corrections(self._outcomes(True), -1)))
+        with mock.patch("sys.stdout", new_callable=io.StringIO) as out:
+            self.assertEqual(C.main([old_base, good, "--resamples", "200"]), 0)
+        self.assertIn("the base results", out.getvalue())
+        with mock.patch("sys.stdout", new_callable=io.StringIO) as out:
+            self.assertEqual(C.main([new_base, good, "--resamples", "200"]), 0)
+        self.assertIn("correction precision difference", out.getvalue())
+        self.assertEqual(C.main([new_base, new_base, "--resamples", "200"]), 1)
 
 
 if __name__ == "__main__":

@@ -172,8 +172,8 @@ def per_speaker_counts(speakers, labels, flags) -> dict[str, np.ndarray]:
     return out
 
 
-def bootstrap_fbeta_delta(base_counts, cand_counts, n_resamples=2000, seed=0, beta=F_BETA):
-    """Paired speaker bootstrap of F-beta(candidate) minus F-beta(base).
+def _paired_speaker_resamples(base_counts, cand_counts, n_resamples, seed, width):
+    """Summed per-speaker counts of both systems for each resample, shaped [n_resamples, width].
 
     Speakers are resampled with replacement and the same resample is applied to both
     systems. Clips from one speaker are correlated, so resampling clips instead would
@@ -184,12 +184,37 @@ def bootstrap_fbeta_delta(base_counts, cand_counts, n_resamples=2000, seed=0, be
     speakers = sorted(set(base_counts) | set(cand_counts))
     if not speakers:
         raise ValueError("no speakers to resample")
-    zero = np.zeros(4, dtype=np.int64)
+    zero = np.zeros(width, dtype=np.int64)
     base = np.stack([base_counts.get(s, zero) for s in speakers])
     cand = np.stack([cand_counts.get(s, zero) for s in speakers])
     rng = np.random.default_rng(seed)
     picks = rng.integers(0, len(speakers), size=(n_resamples, len(speakers)))
-    return f_beta_from_counts(cand[picks].sum(axis=1), beta) - f_beta_from_counts(base[picks].sum(axis=1), beta)
+    return base[picks].sum(axis=1), cand[picks].sum(axis=1)
+
+
+def bootstrap_fbeta_delta(base_counts, cand_counts, n_resamples=2000, seed=0, beta=F_BETA):
+    """Paired speaker bootstrap of F-beta(candidate) minus F-beta(base), from (tp, fp, fn, tn) per speaker."""
+    base, cand = _paired_speaker_resamples(base_counts, cand_counts, n_resamples, seed, 4)
+    return f_beta_from_counts(cand, beta) - f_beta_from_counts(base, beta)
+
+
+def ratio_from_counts(counts):
+    """numerator / denominator from arrays shaped [..., 2]. 0 where the denominator is 0."""
+    counts = np.asarray(counts, dtype=np.float64)
+    num, den = counts[..., 0], counts[..., 1]
+    return np.where(den > 0, num / np.where(den > 0, den, 1), 0.0)
+
+
+def bootstrap_ratio_delta(base_counts, cand_counts, n_resamples=2000, seed=0):
+    """Paired speaker bootstrap of a pooled rate, candidate minus base.
+
+    The counts are (numerator, denominator) per speaker, and each resample pools them before
+    dividing, so the rate is over clips and not an average of speakers' rates. The resampling
+    is the one bootstrap_fbeta_delta uses, with the same seed giving the same draws. A resample
+    whose denominator is 0 counts as rate 0, as f_beta_from_counts does for undefined F-beta.
+    """
+    base, cand = _paired_speaker_resamples(base_counts, cand_counts, n_resamples, seed, 2)
+    return ratio_from_counts(cand) - ratio_from_counts(base)
 
 
 def percentile_interval(values, level: float = 0.95) -> tuple[float, float]:

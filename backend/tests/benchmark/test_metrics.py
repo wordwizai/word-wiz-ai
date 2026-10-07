@@ -182,6 +182,55 @@ class TestBootstrap(unittest.TestCase):
         self.assertAlmostEqual(lo, 5.0)
         self.assertAlmostEqual(hi, 95.0)
 
+    def test_fbeta_draws_are_pinned(self):
+        # Values from before the resampling was shared with bootstrap_ratio_delta, so the
+        # F0.5 intervals in compare stay exactly what they were.
+        base = {"a": np.array([1, 2, 1, 5]), "b": np.array([0, 1, 2, 6]), "c": np.array([2, 0, 0, 3])}
+        cand = {"a": np.array([2, 1, 0, 6]), "b": np.array([1, 1, 1, 6]), "c": np.array([1, 1, 1, 2])}
+        deltas = M.bootstrap_fbeta_delta(base, cand, n_resamples=5, seed=7)
+        self.assertEqual(deltas.round(6).tolist(), [-0.269231, -0.269231, 0.131579, 0.131579, 0.088235])
+
+
+class TestRatioBootstrap(unittest.TestCase):
+    """Counts are (numerator, denominator) per speaker, as for the feedback rates."""
+
+    def test_ratio_from_counts(self):
+        self.assertEqual(M.ratio_from_counts([[1, 4], [0, 0], [3, 3]]).tolist(), [0.25, 0.0, 1.0])
+
+    def test_identical_systems_give_zero(self):
+        counts = {"a": np.array([1, 3]), "b": np.array([2, 2])}
+        self.assertTrue(np.all(M.bootstrap_ratio_delta(counts, counts, n_resamples=200) == 0))
+
+    def test_clear_win(self):
+        base = {s: np.array([0, 4]) for s in "abcd"}
+        cand = {s: np.array([4, 4]) for s in "abcd"}
+        lo, hi = M.percentile_interval(M.bootstrap_ratio_delta(base, cand, n_resamples=200))
+        self.assertEqual((lo, hi), (1.0, 1.0))
+
+    def test_pools_counts_rather_than_averaging_speaker_ratios(self):
+        # One resample that picks a and b once each: (1 + 0) / (1 + 3) = 0.25, not (1 + 0) / 2.
+        base = {"a": np.array([0, 1]), "b": np.array([0, 3])}
+        cand = {"a": np.array([1, 1]), "b": np.array([0, 3])}
+        values = set(np.round(M.bootstrap_ratio_delta(base, cand, n_resamples=500, seed=1), 6).tolist())
+        self.assertEqual(values, {0.0, 0.25, 1.0})  # averaging the speakers' ratios would give 0.5
+
+    def test_same_draws_as_the_fbeta_bootstrap(self):
+        # Speaker a holds every positive. Both bootstraps resample speakers the same way, so a
+        # resample without a has delta 0 in both.
+        f_base = {"a": np.array([0, 0, 2, 2]), "b": np.array([0, 0, 0, 4]), "c": np.array([0, 0, 0, 4])}
+        f_cand = {"a": np.array([2, 0, 0, 2]), "b": np.array([0, 0, 0, 4]), "c": np.array([0, 0, 0, 4])}
+        r_base = {"a": np.array([0, 2]), "b": np.array([0, 0]), "c": np.array([0, 0])}
+        r_cand = {"a": np.array([2, 2]), "b": np.array([0, 0]), "c": np.array([0, 0])}
+        f = M.bootstrap_fbeta_delta(f_base, f_cand, n_resamples=100, seed=3)
+        r = M.bootstrap_ratio_delta(r_base, r_cand, n_resamples=100, seed=3)
+        self.assertTrue(np.array_equal(f == 0, r == 0))
+
+    def test_invalid_arguments(self):
+        with self.assertRaises(ValueError):
+            M.bootstrap_ratio_delta({"a": [1, 1]}, {"a": [1, 1]}, n_resamples=0)
+        with self.assertRaises(ValueError):
+            M.bootstrap_ratio_delta({}, {})
+
 
 if __name__ == "__main__":
     unittest.main()

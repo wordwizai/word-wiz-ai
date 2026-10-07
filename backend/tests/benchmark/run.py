@@ -206,6 +206,14 @@ def format_summary(summary: dict) -> str:
                  f"flagging every word {summary['flag_all_f05']:.4f}")
     lines.append("pearson  " + "  ".join(
         f"{k} {v:.3f}" if v is not None else f"{k} n/a" for k, v in summary["pearson"].items()))
+    feedback = (summary.get("feedback") or {}).get("all")
+    if feedback is None:
+        lines.append("feedback n/a")
+    else:
+        shown = {k: "n/a" if feedback[k] is None else format(feedback[k], ".4f")
+                 for k in ("correction_precision", "wrong_correction_rate")}
+        lines.append(f"feedback correction precision {shown['correction_precision']}   "
+                     f"wrong-correction rate {shown['wrong_correction_rate']}   ({feedback['n_clips']} clips)")
     g2p = summary["g2p_disagreement_rate"]
     lines.append(f"g2p disagreement {'n/a' if g2p is None else format(g2p, '.1%')}   "
                  f"rejected by type {summary['rejected_by_type']}")

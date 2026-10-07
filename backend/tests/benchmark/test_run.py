@@ -141,6 +141,24 @@ class TestFormatSummary(unittest.TestCase):
         text = RUN.format_summary(self._summary([clip], {"c1": outcome}))
         self.assertIn("flagging every word 0.5556", text)
 
+    def test_shows_one_feedback_line(self):
+        clip = U.synthetic_clip("c1", "s1", 30, [("CAT", 10, "K AE1 T", [2, 2, 2]), ("DOG", 3, "D AO1 G", [2, 0, 2])])
+        clip2 = U.synthetic_clip("c2", "s2", 30, [("CAT", 10, "K AE1 T", [2, 2, 2]), ("DOG", 3, "D AO1 G", [2, 0, 2])])
+        records = (U.record("cat", ["k", "æ", "t"], ["k", "æ", "t"], 0.0),
+                   U.record("dog", ["d", "ɔ", "g"], ["d", "ɑ", "g"], 0.3333))
+        outcomes = {"c1": U.with_feedback(U.ok(*records), "correction", ["dog"], "ɔ"),
+                    "c2": U.with_feedback(U.ok(*records), "correction", ["cat"], "k")}
+        text = RUN.format_summary(self._summary([clip, clip2], outcomes))
+        lines = [line for line in text.splitlines() if line.startswith("feedback")]
+        self.assertEqual(len(lines), 1)
+        self.assertIn("correction precision 0.5000", lines[0])
+        self.assertIn("wrong-correction rate 0.5000", lines[0])
+
+    def test_a_summary_without_feedback_still_formats(self):
+        clip = U.synthetic_clip("c1", "s1", 30, [("CAT", 10, "K AE1 T", [2, 2, 2])])
+        text = RUN.format_summary(self._summary([clip], {"c1": U.ok(U.record("cat", ["k", "æ", "t"], ["k", "æ", "t"], 0.0))}))
+        self.assertIn("feedback n/a", text)
+
 
 def _write_cache_meta(directory, half, flags=None):
     """A _cache_meta.json for the current model pin, with or without a flags entry."""

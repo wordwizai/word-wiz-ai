@@ -185,6 +185,13 @@ def ok(*records):
     return {"status": "ok", "words": list(records), "error_type": None, "error": None}
 
 
+def with_feedback(outcome, kind, focus_words=(), focus_phoneme=None):
+    """The outcome with a feedback entry, as pipeline.ClipOutcome.to_dict stores it."""
+    outcome = dict(outcome)
+    outcome["feedback"] = {"kind": kind, "focus_phoneme": focus_phoneme, "focus_words": list(focus_words)}
+    return outcome
+
+
 def rejected(error_type="AudioRejected"):
     return {"status": "rejected", "words": [], "error_type": error_type, "error": "rejected"}
 

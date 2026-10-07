@@ -29,7 +29,7 @@ class ScoreReadingsTest(unittest.TestCase):
         self.assertEqual(score_readings(PATTERN, [reading]), (2, 3))
 
     def test_sentence_lines_count_only_the_pattern_words(self):
-        words = [("that", 0.0), ("cat", 0.2), ("has", 0.9), ("a", 0.9), ("hat.", 0.0)]
+        words = [("that", 0.0), ("cat", 0.2), ("has", 0.9), ("a", 0.9), ("hat", 0.0)]
         reading = ("That cat has a hat.", analysis(words))
         self.assertEqual(score_readings(PATTERN, [reading]), (2, 3))
 
@@ -46,6 +46,11 @@ class ScoreReadingsTest(unittest.TestCase):
         reading = ("cat hat that", analysis([("cat", 0.149), ("hat", 0.15), ("that", None)]))
         self.assertEqual(score_readings(PATTERN, [reading]), (1, 3))
 
+    def test_apostrophes_match_the_way_the_pipeline_stores_words(self):
+        pattern = {"words": ["don't", "cat"], "word_line_count": 0, "lines": ["Don't pat the cat."]}
+        reading = ("Don't pat the cat.", analysis([("dont", 0.0), ("pat", 0.0), ("the", 0.0), ("cat", 0.9)]))
+        self.assertEqual(score_readings(pattern, [reading]), (1, 2))
+
 
 class MasteryTest(unittest.TestCase):
     def test_eighty_percent_is_mastered(self):
@@ -53,6 +58,7 @@ class MasteryTest(unittest.TestCase):
         self.assertFalse(is_mastered(7, 10))
         self.assertFalse(is_mastered(0, 0))
         self.assertFalse(is_mastered(None, None))
+        self.assertFalse(is_mastered(None, 10))
 
 
 if __name__ == "__main__":

@@ -16,11 +16,12 @@ CORRECT_PER = 0.15
 # Share of the pattern's words read right that counts as mastered.
 MASTERY = 0.8
 
-_NOT_WORD = re.compile(r"[^a-z']")
+# Letters only: the pipeline drops apostrophes before alignment ("don't" is stored as "dont").
+_NOT_WORD = re.compile(r"[^a-z]")
 
 
 def normalize_word(word: str) -> str:
-    return _NOT_WORD.sub("", word.lower().replace("’", "'"))
+    return _NOT_WORD.sub("", word.lower())
 
 
 def line_index(pattern: dict, sentence: str) -> int | None:
@@ -67,4 +68,4 @@ def score_readings(pattern: dict, readings: list[tuple[str, dict]]) -> tuple[int
 
 
 def is_mastered(words_correct: int | None, words_total: int | None) -> bool:
-    return bool(words_total) and words_correct / words_total >= MASTERY
+    return bool(words_total) and (words_correct or 0) / words_total >= MASTERY

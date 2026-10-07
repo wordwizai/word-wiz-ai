@@ -3,10 +3,10 @@ import ComparisonPage from "@/components/ComparisonPageTemplate";
 const ReadingEggsStarfallComparison = () => {
   const product1 = {
     name: "Reading Eggs",
-    tagline: "Online reading program with 220+ lessons",
+    tagline: "Online reading program with 690+ lessons",
     pricing: {
       free: "$0 (30-day trial)",
-      paid: "$12.99/mo or $79.99/yr",
+      paid: "$9.99/mo or $69.99/yr",
       trial: "30 days free",
     },
     website: "https://readingeggs.com",
@@ -17,7 +17,7 @@ const ReadingEggsStarfallComparison = () => {
     tagline: "Free nonprofit educational platform",
     pricing: {
       free: "Free (limited)",
-      paid: "$60/yr for full access",
+      paid: "$35/yr for full access",
       trial: "Free tier available",
     },
     website: "https://www.starfall.com",
@@ -52,7 +52,7 @@ const ReadingEggsStarfallComparison = () => {
           name: "AI-Powered Personalization",
           product1: "Algorithmic",
           product2: false,
-          wordWiz: "GPT-4",
+          wordWiz: "Yes",
         },
         {
           name: "Real-Time Pronunciation Feedback",
@@ -79,8 +79,8 @@ const ReadingEggsStarfallComparison = () => {
       features: [
         {
           name: "Structured Lessons",
-          product1: "220+",
-          product2: "850+",
+          product1: "690+",
+          product2: "700+ activities",
           wordWiz: "Unlimited",
         },
         {
@@ -91,7 +91,7 @@ const ReadingEggsStarfallComparison = () => {
         },
         {
           name: "Digital Book Library",
-          product1: "2,500+",
+          product1: "3,000+",
           product2: "Included",
           wordWiz: "AI-generated",
         },
@@ -156,7 +156,7 @@ const ReadingEggsStarfallComparison = () => {
         {
           name: "Dyslexia-Friendly",
           product1: "Partial",
-          product2: "Designed for",
+          product2: "Yes",
           wordWiz: true,
         },
         {
@@ -185,7 +185,7 @@ const ReadingEggsStarfallComparison = () => {
         {
           name: "Parent Dashboard",
           product1: true,
-          product2: "Paid tier",
+          product2: false,
           wordWiz: true,
         },
         {
@@ -203,7 +203,7 @@ const ReadingEggsStarfallComparison = () => {
         {
           name: "Progress Reports",
           product1: "Detailed",
-          product2: "Basic",
+          product2: false,
           wordWiz: "Detailed",
         },
       ],
@@ -212,8 +212,8 @@ const ReadingEggsStarfallComparison = () => {
 
   const product1Details = {
     pros: [
-      { text: "220 structured lessons with clear progression" },
-      { text: "2,500+ digital books in library" },
+      { text: "690+ structured lessons with clear progression" },
+      { text: "3,000+ digital books in library" },
       { text: "Used globally in schools and homes" },
       { text: "Affordable mid-range pricing" },
       { text: "Age range 2-13 (Reading Eggs + Express)" },
@@ -232,14 +232,14 @@ const ReadingEggsStarfallComparison = () => {
       "Families with multiple children",
     ],
     description:
-      "Reading Eggs is a comprehensive online reading program with 220+ lessons, 2,500+ books, and a wide age range. It offers solid phonics instruction but lacks speech recognition technology.",
+      "Reading Eggs is a comprehensive online reading program with 690+ lessons, 3,000+ books, and a wide age range. It offers solid phonics instruction but lacks speech recognition technology.",
   };
 
   const product2Details = {
     pros: [
       { text: "Free tier available (no cost barrier)" },
       { text: "Nonprofit mission (education for all)" },
-      { text: "Specifically designed for dyslexia" },
+      { text: "Founded by someone who had dyslexia" },
       { text: "Multisensory, untimed activities" },
       { text: "Trusted by educators nationwide" },
       { text: "No ads or data collection (COPPA compliant)" },
@@ -249,7 +249,7 @@ const ReadingEggsStarfallComparison = () => {
       { text: "Interface feels dated compared to modern apps" },
       { text: "Limited personalization (no AI)" },
       { text: "Best features require paid membership" },
-      { text: "No progress tracking in free tier" },
+      { text: "No progress tracking for children" },
     ],
     bestFor: [
       "Budget-conscious families seeking free options",
@@ -262,9 +262,9 @@ const ReadingEggsStarfallComparison = () => {
 
   const wordWizDetails = {
     pros: [
-      { text: "Only platform with phoneme-level speech analysis" },
-      { text: "Free core features including speech recognition" },
-      { text: "GPT-4 powered personalized feedback" },
+      { text: "Only one of these three with phoneme-level speech analysis" },
+      { text: "Completely free, including speech recognition" },
+      { text: "Next sentence written around the sounds your child missed" },
       { text: "Real-time pronunciation coaching" },
       { text: "Works in any web browser" },
       { text: "Teacher dashboard with class management" },
@@ -283,25 +283,25 @@ const ReadingEggsStarfallComparison = () => {
       "Teachers tracking student phoneme mastery",
     ],
     description:
-      "Word Wiz AI is the only free reading platform offering advanced speech recognition and phoneme-level analysis. Powered by wav2vec2-TIMIT-IPA and GPT-4, it provides precision coaching that passive programs cannot match.",
+      "Unlike Reading Eggs and Starfall, Word Wiz AI offers speech recognition and phoneme-level analysis, and it's free. Powered by a wav2vec2-TIMIT-IPA speech model, it provides precision coaching that passive programs cannot match.",
   };
 
   const verdict = {
     product1:
       "Choose Reading Eggs if you want a comprehensive, structured online curriculum with thousands of activities and books. It's solid for general reading instruction but won't analyze pronunciation.",
     product2:
-      "Choose Starfall if you need a free, nonprofit option designed specifically for dyslexia and learning differences. It's accessible and trusted but lacks modern AI features.",
+      "Choose Starfall if you need a free, nonprofit option with untimed, multisensory activities from a founder who had dyslexia. It's accessible and trusted but lacks modern AI features.",
     wordWiz:
-      "Choose Word Wiz AI if you want the only free platform with speech recognition and phoneme-level feedback. It combines the accessibility of Starfall with cutting-edge AI technology neither competitor offers.",
+      "Choose Word Wiz AI if you want free speech recognition with feedback on each sound. It combines the accessibility of Starfall with cutting-edge AI technology neither competitor offers.",
     overall:
-      "For pronunciation mastery and speech feedback, Word Wiz AI is unmatched. While Reading Eggs offers curriculum breadth and Starfall offers accessibility, only Word Wiz AI provides AI-powered pronunciation coaching—and it's free. For families on a budget who need more than passive games, Word Wiz AI delivers professional-grade speech technology at no cost.",
+      "For pronunciation mastery and speech feedback, Word Wiz AI stands out among these three. While Reading Eggs offers curriculum breadth and Starfall offers accessibility, only Word Wiz AI provides AI-powered pronunciation coaching—and it's free. For families on a budget who need more than passive games, Word Wiz AI delivers professional-grade speech technology at no cost.",
   };
 
   const faqs = [
     {
       question: "Which program is completely free?",
       answer:
-        "Starfall has a limited free tier, but best features require $60/year. Word Wiz AI offers core features including speech recognition completely free forever. Reading Eggs only offers a 30-day trial before requiring paid subscription.",
+        "Starfall has a limited free tier, but best features require $35/year. Word Wiz AI is completely free forever, including speech recognition. Reading Eggs only offers a 30-day trial before requiring paid subscription.",
     },
     {
       question: "Do any of these programs have speech recognition?",
@@ -311,7 +311,7 @@ const ReadingEggsStarfallComparison = () => {
     {
       question: "Which is best for a child with dyslexia?",
       answer:
-        "Starfall was specifically designed for dyslexia with multisensory, untimed activities. However, Word Wiz AI's phoneme-level feedback can be extremely valuable for dyslexic learners who struggle with specific sounds. Many families use both: Starfall for general activities and Word Wiz AI for targeted pronunciation practice.",
+        "Starfall was founded by someone who had dyslexia, and its activities are multisensory and untimed. Word Wiz AI's phoneme-level feedback may also help children who struggle with specific sounds. You could use both, with Starfall for general activities and Word Wiz AI for targeted pronunciation practice.",
     },
     {
       question: "Can teachers use these in classrooms?",
@@ -321,7 +321,7 @@ const ReadingEggsStarfallComparison = () => {
     {
       question: "Which has the most content?",
       answer:
-        "Reading Eggs has 2,500+ books and 220+ lessons. Starfall has 850+ activities. Word Wiz AI has unlimited AI-generated content—GPT-4 creates personalized practice sentences on demand, so you never run out of material.",
+        "Reading Eggs has 3,000+ books and 690+ lessons. Starfall has 700+ activities, games and books. Word Wiz AI has unlimited AI-generated content, writing new practice sentences around the sounds your child missed, so you never run out of material.",
     },
     {
       question: "Are these programs web-based or app-based?",
@@ -343,7 +343,7 @@ const ReadingEggsStarfallComparison = () => {
       metaDescription="Compare Reading Eggs, Starfall, and Word Wiz AI. See features, pricing, speech recognition, and which online reading program offers the best value for your child."
       canonicalUrl="https://wordwizai.com/comparisons/reading-eggs-vs-starfall-vs-word-wiz-ai"
       h1Title="Reading Eggs vs Starfall vs Word Wiz AI: Complete Comparison"
-      introText="Reading Eggs costs $12.99/month or $79.99/year for a structured curriculum, Starfall is free with limits or $60/year in full, and Word Wiz AI is free and the only one that listens to a child read and flags mispronounced sounds. Use Reading Eggs for sequence, Starfall for accessibility, and Word Wiz AI for pronunciation."
+      introText="Reading Eggs costs $9.99/month or $69.99/year for a structured curriculum, Starfall is free with limits or $35/year in full, and Word Wiz AI is free and the only one that listens to a child read and flags mispronounced sounds. Use Reading Eggs for sequence, Starfall for accessibility, and Word Wiz AI for pronunciation."
       verdict={verdict}
       faqs={faqs}
     />

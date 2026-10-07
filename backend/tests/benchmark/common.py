@@ -1,0 +1,228 @@
+"""Shared paths, flags and helpers for the speechocean762 accuracy benchmark.
+
+Importing this module puts ``backend/`` on ``sys.path`` so ``core`` imports work from
+any entry point. It deliberately imports nothing from ``core``. Several WWAI_* flags are
+read once when a ``core`` module is imported, so flags must be applied before that.
+"""
+
+from __future__ import annotations
+
+import contextlib
+import io
+import logging
+import os
+import re
+import subprocess
+import sys
+
+BENCH_ROOT = os.path.dirname(os.path.abspath(__file__))
+BACKEND_ROOT = os.path.abspath(os.path.join(BENCH_ROOT, "..", ".."))
+REPO_ROOT = os.path.abspath(os.path.join(BACKEND_ROOT, ".."))
+SUBSETS_DIR = os.path.join(BENCH_ROOT, "subsets")
+FIXTURES_DIR = os.path.join(BENCH_ROOT, "fixtures")
+TEST_RUNS_LOG = os.path.join(BENCH_ROOT, "test_runs.log")
+
+UNLOCK_ENV = "WWAI_BENCH_UNLOCK_TEST"
+VERBOSE_ENV = "WWAI_BENCH_VERBOSE"
+DATA_DIR_ENV = "WWAI_BENCH_DATA_DIR"
+CACHE_DIR_ENV = "WWAI_BENCH_CACHE_DIR"
+
+#: Flags that change the audio the acoustic models receive. Each distinct setting of
+#: these needs its own cache (replay refuses a cache whose recorded inputs differ).
+#: WWAI_SOFT_QUALITY_GATES is here because it also switches the SNR measurement that drives
+#: adaptive noise reduction, so it changes the audio and not only the gates.
+FRONT_END_FLAGS = (
+    "WWAI_SINGLE_PREPROCESS",
+    "WWAI_SOFT_QUALITY_GATES",
+    "WWAI_CHUNK_PRESERVE_PAUSES",
+    "WWAI_CHUNK_OVERLAP_SECONDS",
+    "WWAI_CHUNK_THRESHOLD_SECONDS",
+    "WWAI_CHUNK_MAX_DURATION",
+    "WWAI_CHUNK_MIN_DURATION",
+)
+
+#: Flags that change what the recorded models returned, not what they are fed. The input hashes
+#: cannot see them, so replay compares them with the cache's recorded flags (run.check_cache).
+RECORDING_FLAGS = ("WWAI_ASR_FALLBACK", "WWAI_ASR_TYPED_ERRORS")
+
+#: WWAI_* variables that are not experiment flags. CLAUDE.md's backend deploy section has people
+#: export these (WWAI_KEY can hold the path to, or the text of, a private key), and flags are
+#: written into _cache_meta.json and the committed results files of a public repo.
+_NOT_FLAGS = ("WWAI_HOST", "WWAI_USER", "WWAI_KEY")
+
+_TRUTHY = {"1", "true", "yes", "on"}
+_FALSY = {"", "0", "false", "no", "off"}
+_BOOLEAN_FRONT_END_FLAGS = ("WWAI_SINGLE_PREPROCESS", "WWAI_SOFT_QUALITY_GATES", "WWAI_CHUNK_PRESERVE_PAUSES")
+
+#: The code's defaults for boolean front-end flags that are ON unless set to "0", "false", "no"
+#: or "off". Every other boolean front-end flag defaults to OFF. This module cannot import core
+#: to ask, so test_common checks these against core.
+FRONT_END_DEFAULTS = {"WWAI_SINGLE_PREPROCESS": "1", "WWAI_SOFT_QUALITY_GATES": "1"}
+_CACHE_NAME_VALUE = re.compile(r"[\w.\-]+")
+_STATUS_EXCLUDES = (
+    ":(exclude)backend/tests/benchmark/test_runs.log",
+    ":(exclude)backend/tests/benchmark/results",
+)
+
+if BACKEND_ROOT not in sys.path:
+    sys.path.insert(0, BACKEND_ROOT)
+
+
+class StaleCacheError(RuntimeError):
+    """The cache does not match what the current code feeds the models. Rebuild it."""
+
+
+class ReplayedError(Exception):
+    """An exception recorded while building the cache, raised again during replay."""
+
+    def __init__(self, error_type: str, message: str):
+        super().__init__(f"{error_type}: {message}")
+        self.error_type = error_type
+        self.message = message
+
+    def __str__(self) -> str:
+        # analyze_clip stores str(exc), so the replayed outcome reads the same as the live one.
+        return self.message
+
+    def __reduce__(self):
+        return (type(self), (self.error_type, self.message))
+
+
+class ReplayedValueError(ReplayedError, ValueError):
+    """A recorded exception that was a ValueError, replayed so `except ValueError` still matches."""
+
+
+def data_dir() -> str:
+    return os.getenv(DATA_DIR_ENV) or os.path.join(BENCH_ROOT, "data")
+
+
+def cache_root() -> str:
+    return os.getenv(CACHE_DIR_ENV) or os.path.join(BENCH_ROOT, "cache")
+
+
+def results_dir() -> str:
+    return os.path.join(BENCH_ROOT, "results")
+
+
+def env_flag(name: str, env=None) -> bool:
+    source = os.environ if env is None else env
+    return str(source.get(name, "")).strip().lower() in _TRUTHY
+
+
+def parse_flag_args(pairs) -> dict[str, str]:
+    """Turn repeated ``--flag WWAI_NAME=VALUE`` arguments into a dict."""
+    flags: dict[str, str] = {}
+    for pair in pairs or []:
+        key, sep, value = pair.partition("=")
+        key = key.strip()
+        if not sep or not key.startswith("WWAI_"):
+            raise ValueError(f"--flag expects WWAI_NAME=VALUE, got {pair!r}")
+        if key.startswith("WWAI_BENCH_"):
+            raise ValueError(
+                f"{key} is a harness setting and must be set as an environment variable, not with --flag"
+            )
+        flags[key] = value.strip()
+    return flags
+
+
+def _core_imported() -> bool:
+    return any(name == "core" or name.startswith("core.") for name in sys.modules)
+
+
+def apply_flags(flags: dict[str, str]) -> None:
+    """Set WWAI_* flags for this process and any child process it spawns."""
+    if flags and _core_imported():
+        raise RuntimeError(
+            "apply_flags() must run before the first core import, "
+            "because some WWAI_* flags are read at import time"
+        )
+    os.environ.update(flags)
+
+
+def is_experiment_flag(name: str) -> bool:
+    """True for a WWAI_* variable that selects a pipeline behaviour. Harness settings
+    (WWAI_BENCH_*) and the deploy settings in _NOT_FLAGS are not experiment flags."""
+    return name.startswith("WWAI_") and not name.startswith("WWAI_BENCH_") and name not in _NOT_FLAGS
+
+
+def active_wwai_flags(env=None) -> dict[str, str]:
+    source = os.environ if env is None else env
+    return {k: v for k, v in sorted(source.items()) if is_experiment_flag(k)}
+
+
+def dotenv_wwai_keys(path: str | None = None) -> list[str]:
+    """WWAI_* experiment flags set in backend/.env. core loads .env on import, so these
+    would apply without being recorded. Harness settings (WWAI_BENCH_*) and deploy settings
+    (_NOT_FLAGS) are ignored."""
+    from dotenv import dotenv_values
+
+    path = path or os.path.join(BACKEND_ROOT, ".env")
+    if not os.path.isfile(path):
+        return []
+    return sorted(k for k in dotenv_values(path) if is_experiment_flag(k))
+
+
+def _boolean_front_end_flag_on(key: str, flags: dict[str, str]) -> bool:
+    """The effective value of a boolean front-end flag: its value in ``flags`` when set and not
+    empty, else the code default."""
+    value = str(flags.get(key, "")).strip().lower() or FRONT_END_DEFAULTS.get(key, "")
+    return value not in _FALSY
+
+
+def front_end_cache_name(flags: dict[str, str]) -> str:
+    """Default cache for a flag set (normally the environment's WWAI_* flags).
+
+    The name follows the front end the code will actually run, not only the flags that are
+    set. It lists every boolean front-end flag that is effectively ON (set truthy, or unset
+    with a default of ON, see FRONT_END_DEFAULTS) as ``NAME=1``, plus every numeric front-end
+    flag that is set. It is 'baseline' when that list is empty, which now needs
+    WWAI_SINGLE_PREPROCESS=0 and WWAI_SOFT_QUALITY_GATES=0.
+    """
+    parts = []
+    for key in sorted(FRONT_END_FLAGS):
+        if key in _BOOLEAN_FRONT_END_FLAGS:
+            if _boolean_front_end_flag_on(key, flags):
+                parts.append(f"{key}=1")
+            continue
+        value = str(flags.get(key, ""))
+        if value == "":
+            continue
+        if not _CACHE_NAME_VALUE.fullmatch(value):
+            raise ValueError(
+                f"{key}={value!r} cannot be part of a cache directory name (allowed characters are letters, digits, _ . -)"
+            )
+        parts.append(f"{key}={value}")
+    return "+".join(parts) if parts else "baseline"
+
+
+@contextlib.contextmanager
+def quiet():
+    """Swallow the pipeline's print() and logging noise unless WWAI_BENCH_VERBOSE is set."""
+    if env_flag(VERBOSE_ENV):
+        yield
+        return
+    previous = logging.root.manager.disable
+    logging.disable(logging.WARNING)
+    try:
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            yield
+    finally:
+        logging.disable(previous)
+
+
+def git_sha(cwd: str = REPO_ROOT) -> str:
+    """HEAD commit, with '-dirty' when tracked files have uncommitted changes."""
+    try:
+        sha = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=cwd, capture_output=True, text=True, encoding="utf-8", check=True
+        ).stdout.strip()
+        dirty = subprocess.run(
+            # --no-optional-locks: a plain status refreshes the index and can hold index.lock,
+            # which makes a commit made at the same moment fail.
+            ["git", "--no-optional-locks", "status", "--porcelain", "--untracked-files=no", "--", ".",
+             *_STATUS_EXCLUDES],
+            cwd=cwd, capture_output=True, check=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return "unknown"
+    return f"{sha}-dirty" if dirty else sha

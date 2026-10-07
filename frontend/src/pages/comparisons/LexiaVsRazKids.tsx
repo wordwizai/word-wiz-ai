@@ -3,21 +3,21 @@ import ComparisonPage from "@/components/ComparisonPageTemplate";
 const LexiaRazKidsComparison = () => {
   const product1 = {
     name: "Lexia Core5",
-    tagline: "Adaptive reading intervention for K-5",
+    tagline: "Adaptive reading intervention for Pre-K-5",
     pricing: {
-      free: "School trial only",
-      paid: "$50-80/student/year",
-      trial: "School/district trials available",
+      free: "No free tier",
+      paid: "School quote, or $175/yr for home",
+      trial: "No free tier",
     },
     website: "https://www.lexialearning.com",
   };
 
   const product2 = {
     name: "Raz-Kids",
-    tagline: "Leveled reading library with 400+ eBooks",
+    tagline: "Leveled reading library with hundreds of eBooks",
     pricing: {
       free: "14-day trial",
-      paid: "$120/classroom/year (36 students)",
+      paid: "About $125/classroom/year",
       trial: "14 days free",
     },
     website: "https://www.raz-kids.com",
@@ -75,7 +75,7 @@ const LexiaRazKidsComparison = () => {
         {
           name: "Reading Library",
           product1: false,
-          product2: "400+ books",
+          product2: "Hundreds of books",
           wordWiz: "Decodable sentences",
         },
         {
@@ -117,7 +117,7 @@ const LexiaRazKidsComparison = () => {
           name: "AI-Powered Feedback",
           product1: false,
           product2: false,
-          wordWiz: "GPT-4",
+          wordWiz: "Yes",
         },
         {
           name: "Adaptive Learning",
@@ -128,7 +128,7 @@ const LexiaRazKidsComparison = () => {
         {
           name: "Recording Feature",
           product1: false,
-          product2: "Yes (no analysis)",
+          product2: "Yes (teacher scores)",
           wordWiz: "With feedback",
         },
       ],
@@ -150,14 +150,14 @@ const LexiaRazKidsComparison = () => {
         },
         {
           name: "Individual Access",
-          product1: false,
-          product2: false,
+          product1: "Via reseller",
+          product2: "Parent license",
           wordWiz: true,
         },
         {
           name: "Home Use Friendly",
-          product1: false,
-          product2: false,
+          product1: "With home license",
+          product2: true,
           wordWiz: true,
         },
         {
@@ -173,8 +173,8 @@ const LexiaRazKidsComparison = () => {
       features: [
         {
           name: "Per-Student Cost",
-          product1: "$50-80/year",
-          product2: "$3.33/year",
+          product1: "School quote",
+          product2: "Per-classroom license",
           wordWiz: "$0",
         },
         {
@@ -185,14 +185,14 @@ const LexiaRazKidsComparison = () => {
         },
         {
           name: "School Purchase Required",
-          product1: true,
-          product2: true,
+          product1: "No (home via reseller)",
+          product2: false,
           wordWiz: false,
         },
         {
           name: "Unlimited Students",
           product1: false,
-          product2: "Up to 36",
+          product2: "Per classroom",
           wordWiz: "Unlimited",
         },
       ],
@@ -202,7 +202,7 @@ const LexiaRazKidsComparison = () => {
   const product1Details = {
     pros: [
       { text: "Comprehensive assessment system identifies struggling readers" },
-      { text: "Research-backed with proven efficacy in schools" },
+      { text: "Rated \"Strong\" by Evidence for ESSA" },
       {
         text: "Covers all six areas of reading (phonological awareness, phonics, structural analysis, fluency, vocabulary, comprehension)",
       },
@@ -210,12 +210,12 @@ const LexiaRazKidsComparison = () => {
         text: "Detailed teacher reports show exactly where students need help",
       },
       { text: "Adaptive learning adjusts to student performance" },
-      { text: "Used in 20,000+ schools nationwide" },
+      { text: "Used by millions of U.S. students" },
     ],
     cons: [
-      { text: "Expensive: $50-80 per student per year" },
+      { text: "Paid per-student licenses (school pricing by quote)" },
       {
-        text: "School/district purchase only (not available for individual parents)",
+        text: "Built for schools, and families buy home licenses through a reseller ($175/year)",
       },
       { text: "No speech recognition or pronunciation feedback" },
       { text: "Can feel drill-based and repetitive for some students" },
@@ -234,8 +234,8 @@ const LexiaRazKidsComparison = () => {
 
   const product2Details = {
     pros: [
-      { text: "Affordable for classrooms: $120/year for up to 36 students" },
-      { text: "Huge library of 400+ leveled eBooks keeps kids engaged" },
+      { text: "Affordable for classrooms, about $125/year per classroom license" },
+      { text: "Huge library of leveled eBooks keeps kids engaged" },
       { text: "Students love the gamification (robots, stars, rewards)" },
       { text: "Recording feature lets students practice reading aloud" },
       { text: "Easy to use for both teachers and students" },
@@ -243,17 +243,17 @@ const LexiaRazKidsComparison = () => {
     ],
     cons: [
       { text: "No phonics instruction (assumes students can already decode)" },
-      { text: "No pronunciation feedback on recordings" },
+      { text: "No automatic pronunciation feedback (teachers listen to recordings)" },
       { text: "Uses leveled readers (not decodable texts)" },
       { text: "Can encourage guessing from pictures/context" },
-      { text: "Classroom license only (not for individual home purchase)" },
+      { text: "Sold as a classroom license, even to parents" },
       { text: "Limited for students with decoding difficulties" },
     ],
     bestFor: [
       "Classroom independent reading practice",
       "Students who can already decode basic words",
       "Building reading fluency and stamina",
-      "Budget-conscious schools ($3.33/student is affordable)",
+      "Budget-conscious schools (one license covers a classroom)",
       "Homework/home reading practice",
       "English Language Learners with basic decoding skills",
     ],
@@ -264,12 +264,12 @@ const LexiaRazKidsComparison = () => {
   const wordWizDetails = {
     pros: [
       { text: "100% free (no per-student costs, no subscription)" },
-      { text: "Only option with real-time speech recognition" },
+      { text: "The one of these three with real-time speech recognition" },
       {
         text: "Phoneme-level pronunciation analysis identifies specific errors",
       },
-      { text: "AI-powered feedback from GPT-4 (personalized and encouraging)" },
-      { text: "Teacher dashboard included free for educators" },
+      { text: "AI-written feedback, with the next sentence built around the sounds a student missed" },
+      { text: "Free classes for teachers, with phonics patterns to assign" },
       { text: "Individual access (no school purchase required)" },
       { text: "Science of Reading aligned with systematic phonics" },
     ],
@@ -292,30 +292,30 @@ const LexiaRazKidsComparison = () => {
       "Complementing Lexia or Raz-Kids programs",
     ],
     description:
-      "Word Wiz AI is the only free option that listens to students read and provides specific pronunciation feedback. While it doesn't replace comprehensive intervention (Lexia) or reading practice (Raz-Kids), it fills a critical gap by addressing pronunciation—something neither competitor offers.",
+      "Of these three, Word Wiz AI is the free option that listens to students read and gives specific pronunciation feedback. While it doesn't replace comprehensive intervention (Lexia) or reading practice (Raz-Kids), it adds something neither competitor offers by addressing pronunciation.",
   };
 
   const verdict = {
     product1:
       "Best for comprehensive reading intervention and assessment. Schools with budget for per-student licensing get detailed diagnostics and systematic instruction across all reading skills. Worth the investment if you need data-driven intervention.",
     product2:
-      "Best for affordable reading practice with a large book library. At $3.33/student/year, it's perfect for building fluency and engagement. However, it doesn't teach phonics or provide pronunciation feedback.",
+      "Best for affordable reading practice with a large book library. At about $125 a year for a classroom license, it's perfect for building fluency and engagement. However, it doesn't teach phonics or provide pronunciation feedback.",
     wordWiz:
       "Best for pronunciation feedback and speech technology. It's the only completely free option and the ONLY tool among these three that actually listens to students read. Perfect as a supplement to either Lexia or Raz-Kids, or as a standalone tool for budget-conscious educators.",
     overall:
-      "These three programs serve different but complementary purposes. Lexia provides comprehensive assessment and intervention, Raz-Kids offers affordable reading practice, and Word Wiz AI delivers pronunciation feedback. Many schools successfully use combinations: Lexia + Word Wiz AI for intervention with pronunciation support, or Raz-Kids + Word Wiz AI for an affordable, complete solution. If budget allows, all three together create a comprehensive literacy program.",
+      "These three programs serve different but complementary purposes. Lexia provides comprehensive assessment and intervention, Raz-Kids offers affordable reading practice, and Word Wiz AI delivers pronunciation feedback. Schools can combine them, using Lexia + Word Wiz AI for intervention with pronunciation support, or Raz-Kids + Word Wiz AI for an affordable, complete solution. If budget allows, all three together create a comprehensive literacy program.",
   };
 
   const faqs = [
     {
       question: "Is Lexia better than Raz-Kids?",
       answer:
-        "They serve different purposes. Lexia excels at intervention and assessment with comprehensive diagnostic data. Raz-Kids excels at providing reading practice with a large book library. Word Wiz AI excels at pronunciation feedback with speech recognition. Most schools use multiple programs together rather than choosing just one.",
+        "They serve different purposes. Lexia excels at intervention and assessment with comprehensive diagnostic data. Raz-Kids excels at providing reading practice with a large book library. Word Wiz AI excels at pronunciation feedback with speech recognition. Schools can use more than one program together rather than choosing just one.",
     },
     {
       question: "Can I buy Lexia for home use?",
       answer:
-        "No, Lexia Core5 is only available for schools and districts. For home use, consider Word Wiz AI (100% free with speech recognition) or other parent-friendly programs like Reading Eggs or Hooked on Phonics.",
+        "Not from Lexia directly. Lexia sells Core5 to schools and districts, but families can buy a home license through its partner reseller, Family Literacy Centers (lexiaforhome.com), for $175 a year for the first student. For home use, you could also consider Word Wiz AI (100% free with speech recognition) or other parent-friendly programs like Reading Eggs or Hooked on Phonics.",
     },
     {
       question: "Does Raz-Kids teach phonics?",
@@ -325,17 +325,17 @@ const LexiaRazKidsComparison = () => {
     {
       question: "Which program is best for struggling readers?",
       answer:
-        "Lexia excels at identifying and supporting struggling readers with its comprehensive assessment system. However, if pronunciation is the main issue, Word Wiz AI is the only option with speech recognition to identify and correct specific pronunciation errors. Consider using both together.",
+        "Lexia excels at identifying and supporting struggling readers with its comprehensive assessment system. However, if pronunciation is the main issue, Word Wiz AI is the option here with speech recognition to identify and correct specific pronunciation errors. Consider using both together.",
     },
     {
       question: "Is Word Wiz AI really completely free?",
       answer:
-        "Yes, all core features including speech recognition, pronunciation feedback, unlimited practice, and teacher dashboard are 100% free with no per-student costs, subscriptions, or hidden fees. This makes it accessible for any school or family regardless of budget.",
+        "Yes. Speech recognition, pronunciation feedback, unlimited practice, and teacher classes are all 100% free, with no paid tier, per-student costs, subscriptions, or hidden fees. This makes it accessible for any school or family regardless of budget.",
     },
     {
       question: "Can I use these programs together?",
       answer:
-        "Absolutely! Many schools use combinations: Lexia for assessment and intervention + Word Wiz AI for pronunciation feedback, or Raz-Kids for reading practice + Word Wiz AI for pronunciation correction. These tools complement rather than compete with each other.",
+        "Absolutely! Schools can combine them, using Lexia for assessment and intervention + Word Wiz AI for pronunciation feedback, or Raz-Kids for reading practice + Word Wiz AI for pronunciation correction. These tools complement rather than compete with each other.",
     },
   ];
 
@@ -352,7 +352,7 @@ const LexiaRazKidsComparison = () => {
       metaDescription="Compare Lexia Core5, Raz-Kids, and Word Wiz AI for schools. See pricing, features, pros/cons, and which is best for your students. Free speech recognition option included."
       canonicalUrl="https://wordwizai.com/comparisons/lexia-vs-raz-kids-vs-word-wiz-ai"
       h1Title="Lexia vs Raz-Kids vs Word Wiz AI: Comprehensive Comparison for Schools"
-      introText="For classrooms, Lexia Core5 runs $50-80 per student per year for assessment-driven intervention, Raz-Kids costs $120 per classroom of 36 for a leveled reading library, and Word Wiz AI is free and adds the pronunciation feedback neither provides. Many schools pair one paid tool with Word Wiz AI rather than choosing between them."
+      introText="For classrooms, Lexia Core5 is a per-student license priced by quote for assessment-driven intervention, Raz-Kids costs about $125 a year per classroom for a leveled reading library, and Word Wiz AI is free and adds the automatic pronunciation feedback neither provides. A school can pair one paid tool with Word Wiz AI rather than choosing between them."
       verdict={verdict}
       faqs={faqs}
     />

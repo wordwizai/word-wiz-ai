@@ -67,6 +67,7 @@ const READING_HELP: { title: string; links: FooterLink[] }[] = [
       { to: "/comparisons/homer-vs-khan-academy-kids-vs-word-wiz-ai", label: "HOMER vs Khan Kids" },
       { to: "/comparisons/lexia-vs-raz-kids-vs-word-wiz-ai", label: "Lexia vs Raz-Kids" },
       { to: "/comparisons/best-free-reading-apps", label: "Best Free Apps" },
+      { to: "/comparisons/reading-apps-that-listen-to-your-child-read", label: "Apps That Listen" },
       { to: "/comparisons/best-phonics-app-kindergarten-struggling-readers", label: "Best Kindergarten Phonics Apps" },
       { to: "/comparisons/phonics-worksheets-vs-interactive-reading", label: "Worksheets vs Interactive" },
       { to: "/comparisons/hooked-on-phonics-vs-word-wiz-ai", label: "Hooked on Phonics vs Word Wiz" },

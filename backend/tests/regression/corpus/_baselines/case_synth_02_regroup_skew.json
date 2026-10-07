@@ -1,7 +1,7 @@
 {
   "case_id": "case_synth_02_regroup_skew",
   "client_path": {
-    "highest_per_word": "big",
+    "highest_per_word": "the",
     "problem_types": [
       "high_frequency_errors",
       "most_common_phoneme",
@@ -13,8 +13,8 @@
       "recommended_focus_phoneme",
       "word_error_counts"
     ],
-    "sentence_per": 0.142857,
-    "total_errors": 2,
+    "sentence_per": 0.0,
+    "total_errors": 0,
     "total_phonemes": 14,
     "words": [
       {
@@ -44,24 +44,21 @@
           "g"
         ],
         "ground_truth_word": "big",
-        "missed": [
-          "g"
-        ],
-        "per": 0.3333,
+        "missed": [],
+        "per": 0.0,
         "phonemes": [
           "b",
-          "ɪ"
+          "ɪ",
+          "g"
         ],
         "predicted_word": "big",
         "substituted": [],
-        "total_errors": 1,
+        "total_errors": 0,
         "total_phonemes": 3,
         "type": "match"
       },
       {
-        "added": [
-          "g"
-        ],
+        "added": [],
         "ground_truth_phonemes": [
           "r",
           "ɛ",
@@ -69,16 +66,15 @@
         ],
         "ground_truth_word": "red",
         "missed": [],
-        "per": 0.3333,
+        "per": 0.0,
         "phonemes": [
-          "g",
           "r",
           "ɛ",
           "d"
         ],
         "predicted_word": "red",
         "substituted": [],
-        "total_errors": 1,
+        "total_errors": 0,
         "total_phonemes": 3,
         "type": "match"
       },
@@ -180,7 +176,7 @@
   },
   "format_version": 1,
   "path_comparison_structural_count": 0,
-  "path_divergence": 0.142857,
+  "path_divergence": 0.0,
   "sentence": "the big red dog ran",
   "server_path": {
     "highest_per_word": "the",

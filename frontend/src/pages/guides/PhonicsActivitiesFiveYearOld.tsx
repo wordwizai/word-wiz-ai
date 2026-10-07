@@ -9,13 +9,13 @@ const PhonicsActivitiesFiveYearOld = () => {
       content: {
         type: "info",
         title: "What phonics activities work for a 5-year-old struggling reader?",
-        content: "Five-year-olds learn phonics best through short multisensory play rather than worksheets: sound treasure hunts, play-dough letters, sorting games, and building CVC words with toys. Work in phases, spending two to four weeks on foundational phonological awareness, four to six weeks on letter sounds at two or three new sounds a week, then four to six weeks on blending. Expect progress in 8-12 weeks.",
+        content: "Five-year-olds usually do better with short multisensory play than with worksheets. Try sound treasure hunts, play-dough letters, sorting games, and building CVC words with toys. Work in phases, spending two to four weeks on foundational phonological awareness, four to six weeks on letter sounds at two or three new sounds a week, then four to six weeks on blending. Expect steady progress rather than quick results.",
       },
     },
     {
       type: "paragraph",
       content:
-        "Your 5-year-old is struggling with reading while peers are sounding out words and recognizing letters with ease. You want to help, but you're worried about pushing too hard or using inappropriate methods. Five is a unique age—some children are reading fluently while others haven't quite developed the prerequisite skills yet. Both are normal. What struggling 5-year-olds need is playful, age-appropriate phonics practice that builds foundational skills without the pressure and worksheets typically used with older children. The activities in this guide are specifically designed for 5-year-olds who need extra support: multisensory, game-based, and developmentally appropriate. With 15-20 minutes of daily play-based practice, most 5-year-olds develop the phonics skills they need within 8-12 weeks.",
+        "Your 5-year-old is struggling with reading while peers are sounding out words and recognizing letters with ease. You want to help, but you're worried about pushing too hard or using inappropriate methods. Five is a unique age—some children are reading fluently while others haven't quite developed the prerequisite skills yet. Both are normal. What struggling 5-year-olds need is playful, age-appropriate phonics practice that builds foundational skills without the pressure and worksheets typically used with older children. The activities in this guide are specifically designed for 5-year-olds who need extra support: multisensory, game-based, and developmentally appropriate. With 15-20 minutes of daily play-based practice, your 5-year-old can build these skills step by step, at their own pace.",
     },
     {
       type: "heading",
@@ -95,7 +95,7 @@ const PhonicsActivitiesFiveYearOld = () => {
     {
       type: "paragraph",
       content:
-        "Visually recognizing and naming letters. Most 5-year-olds should recognize letters in their name plus 10-15 additional letters. Build recognition through alphabet books, letter puzzles, magnetic letters on the fridge, and alphabet songs.",
+        "Visually recognizing and naming letters. Many 5-year-olds recognize the letters in their name plus 10-15 additional letters. Build recognition through alphabet books, letter puzzles, magnetic letters on the fridge, and alphabet songs.",
     },
     {
       type: "paragraph",
@@ -148,7 +148,7 @@ const PhonicsActivitiesFiveYearOld = () => {
     {
       type: "paragraph",
       content:
-        "The tactile sensation of building letters with play-dough creates strong sensory memories. This activity is especially beneficial for kinesthetic learners and children who will develop dyslexia. Practice 2-3 letters per session, focusing on letters your child confuses or hasn't mastered.",
+        "Building letters with play-dough adds a hands-on element that many young children enjoy. Practice 2-3 letters per session, focusing on letters your child confuses or hasn't mastered.",
     },
     {
       type: "heading",
@@ -232,7 +232,7 @@ const PhonicsActivitiesFiveYearOld = () => {
     {
       type: "paragraph",
       content:
-        "Rhyming is a critical phonological awareness skill that predicts reading success. Play simple rhyming games:",
+        "Rhyming is an early phonological awareness skill that helps children tune in to the sounds in words. Play simple rhyming games:",
     },
     {
       type: "list",
@@ -376,7 +376,7 @@ const PhonicsActivitiesFiveYearOld = () => {
     {
       type: "paragraph",
       content:
-        "Early evaluation is valuable—if there is a learning difference, intervention at age 5-6 is more effective than waiting until age 8-9 when the gap has widened significantly.",
+        "Early evaluation is valuable. If there is a learning difference, it is usually easier to help at age 5-6 than to wait until age 8-9, when a child may have fallen further behind.",
     },
     {
       type: "heading",
@@ -438,7 +438,7 @@ const PhonicsActivitiesFiveYearOld = () => {
     {
       type: "paragraph",
       content:
-        "If practice sessions consistently end in tears, frustration, or conflict, something needs to change—shorten sessions, increase playfulness, reduce difficulty, or take a break. A 5-year-old who loves learning but reads a bit late will far outpace a 5-year-old who reads early but hates it.",
+        "If practice sessions consistently end in tears, frustration, or conflict, something needs to change—shorten sessions, increase playfulness, reduce difficulty, or take a break. A 5-year-old who loves learning but reads a bit late is often better off in the long run than a 5-year-old who reads early but hates it.",
     },
     {
       type: "heading",
@@ -466,7 +466,7 @@ const PhonicsActivitiesFiveYearOld = () => {
     {
       type: "paragraph",
       content:
-        "If your child meets most of these criteria by age 6, they're on track for reading success—even if they're not reading fluently yet. These foundational skills predict future reading achievement more reliably than early reading ability. Focus on building strong foundations rather than rushing to reading.",
+        "If your child meets most of these criteria by age 6, they're on track for reading success—even if they're not reading fluently yet. These foundational skills are what later reading is built on. Focus on building strong foundations rather than rushing to reading.",
     },
   ];
 
@@ -505,6 +505,7 @@ const PhonicsActivitiesFiveYearOld = () => {
         bio: "Passionate about phonics instruction and early literacy development.",
       }}
       publishDate="2025-01-24"
+      updatedDate="2026-09-07"
       readTime={13}
       category="Early Reading"
       content={content}

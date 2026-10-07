@@ -9,7 +9,7 @@ const TeachingPhonicsAtHome = () => {
       content: {
         type: "info",
         title: "How do you teach phonics at home?",
-        content: "Teaching phonics at home takes about 15 minutes a day and no teaching degree: three minutes of warm-up review, five of new letter-sound or pattern instruction, five applying it to real words and decodable text, and two on a game. Follow a fixed progression, weight instruction roughly 80 percent phonics to 20 percent sight words, and require 90 percent accuracy before advancing.",
+        content: "Teaching phonics at home takes about 15 minutes a day and no teaching degree: three minutes of warm-up review, five of new letter-sound or pattern instruction, five applying it to real words and decodable text, and two on a game. Follow a fixed progression, spend most of the time on phonics with sight words only for truly irregular words, and require 90 percent accuracy before advancing.",
       },
     },
     {
@@ -31,7 +31,7 @@ const TeachingPhonicsAtHome = () => {
     {
       type: "paragraph",
       content:
-        "Phonemes are the smallest individual units of sound in spoken language that change the meaning of words. Understanding phonemes is fundamental to phonics instruction because reading is essentially the process of matching written letters and letter combinations to these sounds. English has 44 distinct phonemes despite having only 26 letters in the alphabet. This mismatch between sounds and letters is one reason English can be challenging to learn to read. Some phonemes are represented by single letters, while others require combinations of letters. For example, consider these words and their phoneme breakdown:",
+        "Phonemes are the smallest individual units of sound in spoken language that change the meaning of words. Understanding phonemes is fundamental to phonics instruction because reading is essentially the process of matching written letters and letter combinations to these sounds. English has about 44 distinct phonemes (the exact count depends on accent) despite having only 26 letters in the alphabet. This mismatch between sounds and letters is one reason English can be challenging to learn to read. Some phonemes are represented by single letters, while others require combinations of letters. For example, consider these words and their phoneme breakdown:",
     },
     {
       type: "list",
@@ -49,15 +49,15 @@ const TeachingPhonicsAtHome = () => {
     {
       type: "paragraph",
       content:
-        "Phonics instruction teaches children to decode words by applying letter-sound relationships systematically. This approach gives children a reliable strategy for figuring out unfamiliar words. Sight words, on the other hand, are words that children memorize and recognize instantly without sounding out. Common sight words include function words like 'the,' 'was,' 'said,' and 'could.' These words are often phonetically irregular or appear so frequently that instant recognition is beneficial for reading fluency. However, research in the Science of Reading strongly shows that phonics should be the primary approach, with sight words taught as needed for genuinely irregular words. Many words traditionally taught as sight words are actually decodable once children learn the relevant patterns. Teach the systematic phonics rules first, then introduce the genuine exceptions. This approach builds strong decoding skills rather than encouraging guessing.",
+        "Phonics instruction teaches children to decode words by applying letter-sound relationships systematically. This approach gives children a reliable strategy for figuring out unfamiliar words. Sight words, on the other hand, are words that children memorize and recognize instantly without sounding out. Common sight words include function words like 'the,' 'was,' 'said,' and 'could.' These words are often phonetically irregular or appear so frequently that instant recognition is beneficial for reading fluency. However, the National Reading Panel's 2000 report found that systematic phonics instruction does more for children's reading growth than programs with unsystematic or no phonics. That is a good reason to make phonics the primary approach, with sight words taught as needed for genuinely irregular words. Many words traditionally taught as sight words are actually decodable once children learn the relevant patterns. Teach the systematic phonics rules first, then introduce the genuine exceptions. This approach builds strong decoding skills rather than encouraging guessing.",
     },
     {
       type: "callout",
       content: {
         type: "tip",
-        title: "The 80/20 Rule",
+        title: "Phonics First",
         content:
-          "Focus 80% on systematic phonics, 20% on sight words. This ratio produces the best reading outcomes according to Science of Reading research.",
+          "Spend most of your time on systematic phonics. Save sight word practice for the truly irregular words your child needs right away.",
       },
     },
     {
@@ -460,7 +460,7 @@ const TeachingPhonicsAtHome = () => {
     {
       type: "paragraph",
       content:
-        "Speech recognition technology has transformed home phonics instruction:",
+        "Speech recognition technology can make home phonics practice easier:",
     },
     {
       type: "heading",
@@ -491,7 +491,7 @@ const TeachingPhonicsAtHome = () => {
     {
       type: "paragraph",
       content:
-        "This means consistent, objective feedback on every practice session, something impossible for busy parents to provide alone.",
+        "This means consistent, objective feedback on every practice session, something that's hard for busy parents to provide alone.",
     },
     {
       type: "heading",
@@ -664,6 +664,7 @@ const TeachingPhonicsAtHome = () => {
         bio: "Passionate about phonics instruction and early literacy based on the Science of Reading.",
       }}
       publishDate="2024-12-29"
+      updatedDate="2026-09-07"
       readTime={12}
       category="Phonics Education"
       content={content}

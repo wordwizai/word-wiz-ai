@@ -3,10 +3,10 @@ import ComparisonPage from "@/components/ComparisonPageTemplate";
 const BestFreeReadingAppsComparison = () => {
   const product1 = {
     name: "Starfall",
-    tagline: "Nonprofit educational platform since 2002",
+    tagline: "Nonprofit educational platform, online since 2002",
     pricing: {
       free: "Limited free",
-      paid: "$60/yr for full access",
+      paid: "$35/yr for full access",
       trial: "Free tier available",
     },
     website: "https://www.starfall.com",
@@ -40,7 +40,7 @@ const BestFreeReadingAppsComparison = () => {
           name: "Completely Free",
           product1: "Limited",
           product2: true,
-          wordWiz: "Core features",
+          wordWiz: true,
         },
         {
           name: "No Trial Period Limits",
@@ -123,7 +123,7 @@ const BestFreeReadingAppsComparison = () => {
           name: "AI-Powered Personalization",
           product1: false,
           product2: "Adaptive",
-          wordWiz: "GPT-4",
+          wordWiz: "Yes",
         },
         {
           name: "Real-Time Speech Analysis",
@@ -198,8 +198,8 @@ const BestFreeReadingAppsComparison = () => {
         },
         {
           name: "Multiple Child Profiles",
-          product1: "Paid",
-          product2: "Unlimited",
+          product1: false,
+          product2: true,
           wordWiz: true,
         },
       ],
@@ -209,7 +209,7 @@ const BestFreeReadingAppsComparison = () => {
       features: [
         {
           name: "Parent Dashboard",
-          product1: "Paid tier",
+          product1: false,
           product2: true,
           wordWiz: true,
         },
@@ -221,7 +221,7 @@ const BestFreeReadingAppsComparison = () => {
         },
         {
           name: "Detailed Progress Reports",
-          product1: "Paid",
+          product1: false,
           product2: "Basic",
           wordWiz: "Detailed",
         },
@@ -239,16 +239,16 @@ const BestFreeReadingAppsComparison = () => {
     pros: [
       { text: "Free tier available (no cost to start)" },
       { text: "Nonprofit mission focused on education" },
-      { text: "Specifically designed for dyslexia" },
+      { text: "Founded by someone who had dyslexia" },
       { text: "Multisensory, untimed activities" },
       { text: "Trusted by teachers nationwide" },
-      { text: "No advertising or data collection" },
+      { text: "No advertising, and no personal data collected from children" },
     ],
     cons: [
-      { text: "Best features require $60/year" },
+      { text: "Best features require $35/year" },
       { text: "No speech recognition technology" },
       { text: "Interface feels dated" },
-      { text: "No progress tracking in free tier" },
+      { text: "No progress tracking for children" },
       { text: "Limited personalization" },
     ],
     bestFor: [
@@ -257,7 +257,7 @@ const BestFreeReadingAppsComparison = () => {
       "Multi-subject learning on a budget",
     ],
     description:
-      "Starfall is a nonprofit platform founded specifically to help children with dyslexia learn to read. It offers multisensory activities with a free tier, though best features require annual membership.",
+      "Starfall is a nonprofit platform whose founder had dyslexia and built it to help children learn to read. It offers multisensory activities with a free tier, though best features require annual membership.",
   };
 
   const product2Details = {
@@ -266,7 +266,7 @@ const BestFreeReadingAppsComparison = () => {
       { text: "No ads ever (nonprofit)" },
       { text: "Khan Academy brand trust" },
       { text: "Adaptive learning technology" },
-      { text: "Unlimited child profiles" },
+      { text: "Multiple child profiles" },
       { text: "Comprehensive multi-subject curriculum" },
     ],
     cons: [
@@ -287,9 +287,9 @@ const BestFreeReadingAppsComparison = () => {
 
   const wordWizDetails = {
     pros: [
-      { text: "Only free app with speech recognition" },
+      { text: "Listens as your child reads aloud" },
       { text: "Phoneme-level pronunciation analysis" },
-      { text: "GPT-4 powered personalized feedback" },
+      { text: "Next sentence written around the sounds your child missed" },
       { text: "Web-based (no download needed)" },
       { text: "Specialized for phonics mastery" },
       { text: "Teacher dashboard included" },
@@ -308,30 +308,30 @@ const BestFreeReadingAppsComparison = () => {
       "Families wanting AI without paying",
     ],
     description:
-      "Word Wiz AI is the only free platform combining advanced speech recognition with AI-powered feedback. It provides phoneme-level pronunciation coaching that no other free app offers.",
+      "Word Wiz AI is a free reading tutor that listens as your child reads and checks each sound inside each word. The next sentence is written around the sounds your child missed.",
   };
 
   const verdict = {
     product1:
-      "Choose Starfall if you want a free dyslexia-friendly platform with multisensory activities. It's trusted by educators but requires $60/year for full features and lacks speech recognition.",
+      "Choose Starfall if you want a free dyslexia-friendly platform with multisensory activities. It's trusted by educators but requires $35/year for full features and lacks speech recognition.",
     product2:
       "Choose Khan Academy Kids if you want 100% free multi-subject learning from a trusted nonprofit. It's comprehensive and completely free but doesn't focus on phonics or pronunciation.",
     wordWiz:
-      "Choose Word Wiz AI if you want the only free app with speech recognition technology. While Starfall and Khan Kids offer general activities, only Word Wiz AI provides AI-powered pronunciation coaching at no cost.",
+      "Choose Word Wiz AI if you want an app that listens to your child read. Of these three, it's the one that checks each sound your child says, at no cost.",
     overall:
-      "For families needing speech recognition without paying $10-20/month for premium apps, Word Wiz AI is revolutionary. Khan Academy Kids offers breadth across subjects, Starfall offers dyslexia support, but only Word Wiz AI combines free access with professional-grade speech technology. If your child needs more than games—if they need actual pronunciation feedback—Word Wiz AI is the only free option that delivers.",
+      "Khan Academy Kids offers breadth across subjects and Starfall offers multisensory phonics, but neither listens to your child read aloud. Word Wiz AI does, for free. If you want to compare it with other free apps that listen, such as Google Read Along and Microsoft Reading Coach, see our comparison of reading apps that listen to your child read.",
   };
 
   const faqs = [
     {
       question: "Which app is truly 100% free with no limitations?",
       answer:
-        "Khan Academy Kids is 100% free forever with all features included. Starfall has a free tier but best features require $60/year. Word Wiz AI offers core features including speech recognition free, with optional premium add-ons.",
+        "Khan Academy Kids is 100% free forever with all features included. Starfall has a free tier but best features require $35/year. Word Wiz AI is free, including speech recognition, with no paid tier.",
     },
     {
       question: "Do any free reading apps have speech recognition?",
       answer:
-        "Only Word Wiz AI offers speech recognition in its free tier. Neither Starfall nor Khan Academy Kids include this technology at any price point—they focus on clicking, typing, and multiple choice activities.",
+        "Yes. Of these three, Word Wiz AI is the one that listens as your child reads. Starfall and Khan Academy Kids focus on tapping, listening and multiple choice activities. Google Read Along and Microsoft Reading Coach are also free and listen to children read, and we compare them in a separate guide.",
     },
     {
       question: "Which free app is best for pronunciation problems?",
@@ -346,12 +346,12 @@ const BestFreeReadingAppsComparison = () => {
     {
       question: "Which is best for homeschooling on a budget?",
       answer:
-        "Khan Academy Kids is best for comprehensive free multi-subject homeschool curriculum. Starfall works well for phonics focus. Word Wiz AI fills a crucial gap—pronunciation coaching that parents may struggle to provide themselves.",
+        "Khan Academy Kids is best for comprehensive free multi-subject homeschool curriculum. Starfall works well for phonics focus. Word Wiz AI adds pronunciation coaching that parents may struggle to provide themselves.",
     },
     {
       question: "Can I use multiple apps together?",
       answer:
-        "Absolutely! Many families use Khan Academy Kids for broad learning, Starfall for dyslexia-friendly activities, and Word Wiz AI for pronunciation practice. Since all have free options, you can combine them based on your child's needs.",
+        "Absolutely! You could use Khan Academy Kids for broad learning, Starfall for dyslexia-friendly activities, and Word Wiz AI for pronunciation practice. Since all have free options, you can combine them based on your child's needs.",
     },
     {
       question: "Which requires an app download vs works in browser?",
@@ -373,7 +373,7 @@ const BestFreeReadingAppsComparison = () => {
       metaDescription="Compare the best free reading apps for kids. See Starfall, Khan Academy Kids, and Word Wiz AI features, speech recognition, and which is best for your child."
       canonicalUrl="https://wordwizai.com/comparisons/best-free-reading-apps"
       h1Title="Best Free Reading Apps: Starfall vs Khan Academy Kids vs Word Wiz AI"
-      introText="Khan Academy Kids is entirely free with the broadest curriculum, Starfall is free with limits or $60/year for full access, and Word Wiz AI is free and the only one that gives spoken pronunciation feedback. For a genuinely free setup, Khan Academy Kids covers breadth while Word Wiz AI covers pronunciation accuracy."
+      introText="Khan Academy Kids is entirely free with the broadest curriculum, Starfall is free with limits or $35/year for full access, and Word Wiz AI is free and the only one that gives spoken pronunciation feedback. For a genuinely free setup, Khan Academy Kids covers breadth while Word Wiz AI covers pronunciation accuracy."
       verdict={verdict}
       faqs={faqs}
     />

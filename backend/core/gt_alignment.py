@@ -38,21 +38,43 @@ WHAT THIS MODULE DOES
        single phoneme of real acoustic evidence,
      * words the ASR heard that are not in the sentence are reported as
        ``insertion`` records,
-     * the ASR word matched to each expected word is used only as the
-       ``predicted_word`` label.
+     * the ASR word matched to each expected word is the ``predicted_word``
+       label, and when it differs from the expected word and fits the sounds
+       it switches off edge forgiveness for that word (see 5). It can only
+       take leniency away.
 4. Is deterministic. All DP arithmetic is integer (costs are scaled by
    ``_COST_SCALE``) and every tie is broken by an explicit total ordering, so
    the same input always produces byte-identical output.
+5. Scores each word against its closest valid pronunciation (word scoring
+   v2). Segmentation uses the primary G2P phonemes, but a word is then scored
+   against whichever CMUdict pronunciation its segment matches best ("to" read
+   as tu is not an error just because G2P picked tɪ), and up to
+   ``MAX_EDGE_INSERTIONS`` (3) inserted phonemes at each edge of its segment
+   do not count. The segmenter has to hand every acoustic phoneme to some
+   word, so stray phonemes at a word boundary land on one side or the other
+   and say nothing about how that word was read. Only exact trims are
+   forgiven. A trim must remove phonemes that were each costing one
+   insertion, so it never cuts into the word itself. Edge runs past the cap
+   and interior insertions still count, and nothing at the edges is forgiven
+   when the ASR heard a different word in that slot and that word fits the
+   sounds at least as well ("sit" for "it", see ``_asr_word_fits``), because
+   then the extra sounds are probably a reading miscue. An ASR word that does
+   not fit the sounds leaves the forgiveness in place. Set
+   ``WWAI_LEGACY_WORD_SCORING`` to go back to primary-only scoring with every
+   insertion counted.
 
 The returned value matches the existing contract of
-``process_audio._process_word_alignment`` exactly -- same keys, same types --
-so ``analyze_results``, ``SpeechProblemClassifier``,
-``phoneme_feedback_formatter`` and the frontend need no changes.
+``process_audio._process_word_alignment`` -- same keys, same types -- so
+``analyze_results``, ``SpeechProblemClassifier``,
+``phoneme_feedback_formatter`` and the frontend need no changes. Every record
+also carries two extra keys: ``canonical_phonemes`` (the primary G2P
+phonemes, which spoken feedback uses to model the word) and
+``edge_insertions`` (the edge phonemes that were forgiven).
 
 FEATURE FLAG
 ------------
-``WWAI_GT_ANCHORED_ALIGNMENT`` -- defaults to OFF. Nothing in this module runs
-unless it is explicitly enabled.
+``WWAI_GT_ANCHORED_ALIGNMENT`` -- defaults to ON. Set it to a falsy value
+("0", "false", "no", "off") to go back to the legacy ASR-driven alignment.
 """
 
 from __future__ import annotations
@@ -67,16 +89,21 @@ import re
 GT_ANCHORED_FLAG = "WWAI_GT_ANCHORED_ALIGNMENT"
 
 _TRUTHY = frozenset({"1", "true", "t", "yes", "y", "on"})
+_FALSY = frozenset({"0", "false", "f", "no", "n", "off"})
 
 
 def is_gt_anchored_enabled() -> bool:
     """
-    True when ``WWAI_GT_ANCHORED_ALIGNMENT`` is set to a truthy value.
+    True unless ``WWAI_GT_ANCHORED_ALIGNMENT`` is set to a falsy value.
+
+    ON by default: the speechocean762 benchmark accepted it over the legacy
+    ASR-driven alignment. An unset, empty or unrecognised value keeps the
+    default; only an explicit "0" / "false" / "no" / "off" turns it off.
 
     Read at call time (not import time) so that it can be toggled in tests and
     so a deploy-time env change does not require a code reload.
     """
-    return os.environ.get(GT_ANCHORED_FLAG, "").strip().lower() in _TRUTHY
+    return os.environ.get(GT_ANCHORED_FLAG, "").strip().lower() not in _FALSY
 
 
 # --------------------------------------------------------------------------- #
@@ -103,8 +130,8 @@ _WORD_NORM_RE = re.compile(r"[^a-z0-9']+")
 #
 # Copied from ``process_audio.align_sequences`` rather than imported: importing
 # ``process_audio`` from here would be circular, and ``process_audio`` drags in
-# torch via ``phoneme_extractor``. Keeping this module dependency-free (stdlib
-# only) also keeps its unit tests fast.
+# torch via ``phoneme_extractor``. Keeping this module light (stdlib, plus a
+# lazy G2P import for pronunciation variants) also keeps its unit tests fast.
 
 
 def align_sequences(gt: list, pred: list) -> list[tuple]:
@@ -176,8 +203,11 @@ def phoneme_alignment_records(ops: list[tuple]) -> list[dict]:
 
 
 def _normalize_word(word) -> str:
-    """Lowercase and strip punctuation, for comparing ASR words to expected words."""
-    return _WORD_NORM_RE.sub("", str(word).lower())
+    """Lowercase and strip punctuation, for comparing ASR words to expected words.
+
+    Curly apostrophes count as straight ones, so "it\u2019s" matches "it's".
+    """
+    return _WORD_NORM_RE.sub("", str(word).lower().replace("\u2019", "'").replace("\u2018", "'"))
 
 
 def derive_asr_hints(
@@ -427,6 +457,194 @@ def _phoneme_errors(gt_phonemes: list[str], pred_phonemes: list[str]):
     return missed, added, substituted, phoneme_alignment_records(ops)
 
 
+# --------------------------------------------------------------------------- #
+# Word scoring v2: closest valid pronunciation, edge insertions not counted
+# --------------------------------------------------------------------------- #
+
+LEGACY_WORD_SCORING_FLAG = "WWAI_LEGACY_WORD_SCORING"
+
+#: Version of the word scoring code, stamped on ``analyze_results``'
+#: ``per_summary`` so stored stats can be told apart across scoring changes.
+#: 2 = word scoring v2 (closest CMUdict pronunciation, up to three forgiven
+#: edge phonemes per side, the miscue guard). The server and client-phoneme paths
+#: both score this way. ``analyze_results`` stamps the version a request actually
+#: used (see ``active_scoring_version``), so under either kill switch
+#: (``WWAI_GT_ANCHORED_ALIGNMENT`` off, ``WWAI_LEGACY_WORD_SCORING`` on) it stamps
+#: ``LEGACY_SCORING_VERSION`` instead.
+SCORING_VERSION = 2
+
+#: The pre-v2 word scoring, which either kill switch brings back.
+LEGACY_SCORING_VERSION = 1
+
+
+def is_legacy_word_scoring() -> bool:
+    """
+    True when ``WWAI_LEGACY_WORD_SCORING`` is set to a truthy value.
+
+    Kill switch for word scoring v2. When on, every word is scored against its
+    primary G2P phonemes only and every inserted phoneme counts, exactly as
+    before. Read at call time, like ``is_gt_anchored_enabled``.
+    """
+    return os.environ.get(LEGACY_WORD_SCORING_FLAG, "").strip().lower() in _TRUTHY
+
+
+def active_scoring_version() -> int:
+    """
+    The scoring version a request scored right now uses.
+
+    ``SCORING_VERSION`` on the anchored path with word scoring v2, and
+    ``LEGACY_SCORING_VERSION`` when ``WWAI_GT_ANCHORED_ALIGNMENT`` is off (the
+    legacy ASR-driven path) or ``WWAI_LEGACY_WORD_SCORING`` is on. Reads the
+    flags at call time through the same functions the scoring uses.
+    """
+    if is_gt_anchored_enabled() and not is_legacy_word_scoring():
+        return SCORING_VERSION
+    return LEGACY_SCORING_VERSION
+
+
+def _sentence_variants(gt_words: list[str]) -> dict[str, list[list[str]]]:
+    """Every CMUdict pronunciation of each word, fetched in one lookup per sentence."""
+    try:
+        from .grapheme_to_phoneme import sentence_pronunciation_variants
+        return sentence_pronunciation_variants(gt_words)
+    except Exception:  # no variants is always a safe answer
+        return {}
+
+
+def _pronunciation_candidates(gt_phonemes: list[str], variants) -> list[list[str]]:
+    """The primary G2P phonemes first, then every other CMUdict pronunciation."""
+    candidates = [list(gt_phonemes)]
+    for variant in variants or ():
+        if list(variant) not in candidates:
+            candidates.append(list(variant))
+    return candidates
+
+
+#: At most this many inserted phonemes are forgiven at each edge of a word's
+#: segment. Segment boundaries often spill two or three phonemes of the
+#: neighbouring word. On the speechocean762 benchmark a cap of one raised the
+#: false-alarm rate by 2.2 points over an uncapped run, a cap of two by 0.5 and a
+#: cap of three by nothing, so three is the strictest cap that costs nothing. A
+#: longer run (a garbled stretch around the word) still counts from the fourth
+#: phoneme on.
+MAX_EDGE_INSERTIONS = 3
+
+# (leading, trailing) phonemes to set aside, fewest first, the leading trim
+# first on a tie.
+_EDGE_TRIMS = tuple(sorted(
+    ((lead, trail)
+     for lead in range(MAX_EDGE_INSERTIONS + 1)
+     for trail in range(MAX_EDGE_INSERTIONS + 1)),
+    key=lambda trim: (trim[0] + trim[1], -trim[0]),
+))
+
+
+def _counted_ops(
+    expected: list[str], segment: list[str], forgive_edges: bool = True,
+) -> tuple[int, list[tuple], list[str]]:
+    """
+    Align ``expected`` with ``segment``, forgiving up to
+    ``MAX_EDGE_INSERTIONS`` inserted phonemes at each edge.
+
+    Returns ``(counted_errors, ops, edge_insertions)``. ``ops`` aligns
+    ``expected`` with the segment minus the forgiven edge phonemes,
+    ``counted_errors`` is the number of non-match ops in it, and
+    ``edge_insertions`` lists the forgiven phonemes in segment order.
+    Interior insertions, substitutions and deletions all still count.
+
+    Forgiving the first phoneme is the same as aligning the rest of the
+    segment, so each trim in ``_EDGE_TRIMS`` is aligned and the one with the
+    fewest counted errors wins. A trim is used only when every phoneme it sets
+    aside was costing exactly one insertion, that is, when it lowers the count
+    by as many phonemes as it removes. So a wrong last phoneme stays a
+    substitution instead of turning into a missed phoneme plus a free edge
+    insertion, and a trim cannot cut into the word itself ("cat" read as
+    [k æ s s t] keeps its two inserted [s], instead of becoming [k æ s] with
+    one made-up substitution and a forgiven [s t]). Trimming the segment,
+    rather than the ops of one alignment, also treats a doubled first phoneme
+    and a doubled last one alike.
+
+    With ``forgive_edges`` False nothing is set aside, and the count is the
+    plain edit distance the pre-v2 scoring used.
+    """
+    trims = _EDGE_TRIMS if forgive_edges else _EDGE_TRIMS[:1]
+    n = len(segment)
+
+    best = None
+    untrimmed = None
+    for lead, trail in trims:
+        if lead + trail > n:
+            continue
+        ops = align_sequences(expected, segment[lead:n - trail])
+        errors = sum(1 for op, _gt, _pred in ops if op != 'match')
+        if untrimmed is None:  # (0, 0) comes first
+            untrimmed = errors
+        elif errors != untrimmed - (lead + trail):
+            continue  # it set aside something other than pure insertions
+        if best is None or errors < best[0]:
+            best = (errors, ops, list(segment[:lead]) + list(segment[n - trail:]))
+    return best
+
+
+def _score_word(
+    gt_phonemes: list[str], segment: list[str], legacy: bool,
+    variants=(), forgive_edges: bool = True,
+):
+    """
+    Return ``(expected, missed, added, substituted, phoneme_alignment,
+    edge_insertions)`` for one non-empty segment.
+
+    v2: the primary phonemes and every pronunciation in ``variants`` are
+    candidates. Each candidate is aligned with the segment, up to
+    ``MAX_EDGE_INSERTIONS`` edge insertions per side are set aside (none when
+    ``forgive_edges`` is False), and the candidate with the fewest counted errors wins (the earliest
+    on a tie, so the primary wins ties). The error lists come from the
+    winner's alignment, so forgiven edge phonemes never reach ``added``; they
+    are returned as ``edge_insertions`` instead. ``phoneme_alignment`` (the
+    per-phoneme tiles the frontend draws) is read off the same alignment, so the
+    tiles always agree with the score and never show forgiven edge noise.
+    """
+    if legacy:
+        missed, added, substituted, alignment = _phoneme_errors(gt_phonemes, segment)
+        return list(gt_phonemes), missed, added, substituted, alignment, []
+
+    best = None
+    for candidate in _pronunciation_candidates(gt_phonemes, variants):
+        errors, ops, edges = _counted_ops(candidate, segment, forgive_edges)
+        if best is None or errors < best[0]:
+            best = (errors, candidate, ops, edges)
+    _errors, expected, ops, edges = best
+
+    missed = [gph for op, gph, _pph in ops if op == 'deletion']
+    added = [pph for op, _gph, pph in ops if op == 'insertion']
+    substituted = [(gph, pph) for op, gph, pph in ops if op == 'substitution']
+    return list(expected), missed, added, substituted, phoneme_alignment_records(ops), list(edges)
+
+
+def _asr_word_fits(asr_word, segment: list[str], forgiven_errors: int) -> bool:
+    """
+    True when the word the ASR heard fits ``segment``, with nothing forgiven,
+    at least as well as the expected word does with its edges forgiven.
+
+    This is the miscue guard's evidence that the child read the other word:
+    "sit" for "it" is [s ɪ t], which is exactly "sit". An ASR that misheard a
+    correct reading (common with young or accented speakers) fails it, because
+    its word does not match the phonemes, so the forgiveness stays. Never
+    raises. A word with no pronunciation gives False.
+    """
+    try:
+        from .grapheme_to_phoneme import clean_sentence, grapheme_to_phoneme, pronunciation_variants
+        words = grapheme_to_phoneme(clean_sentence(str(asr_word)))
+        if len(words) != 1 or getattr(words[0], "oov", False) or not words[0][1]:
+            return False
+        word, phonemes = words[0]
+        candidates = _pronunciation_candidates(phonemes, pronunciation_variants(word))
+        best = min(_counted_ops(candidate, segment, False)[0] for candidate in candidates)
+    except Exception:  # no evidence is always a safe answer
+        return False
+    return best <= forgiven_errors
+
+
 def _insertion_record(pred_word: str) -> dict:
     """An ASR word with no counterpart in the sentence the child was asked to read."""
     return {
@@ -444,6 +662,8 @@ def _insertion_record(pred_word: str) -> dict:
         "phoneme_alignment": [],
         "total_phonemes": 0,
         "total_errors": 0,
+        "canonical_phonemes": [],
+        "edge_insertions": [],
         "error": "Extra word predicted.",
     }
 
@@ -466,6 +686,8 @@ def _deletion_record(gt_word: str, gt_phonemes: list[str]) -> dict:
         "phoneme_alignment": phoneme_alignment_records(align_sequences(gt_phonemes, [])),
         "total_phonemes": len(gt_phonemes),
         "total_errors": len(gt_phonemes),
+        "canonical_phonemes": list(gt_phonemes),
+        "edge_insertions": [],
         "error": "Word missing in prediction.",
     }
 
@@ -499,6 +721,20 @@ def align_to_ground_truth(
           ASR happened to emit the same spelling.
         * ``predicted_word`` is the ASR word matched to this slot when there is
           one, otherwise the expected word.
+        * Word scoring v2 (off under ``WWAI_LEGACY_WORD_SCORING``): a read word
+          is scored against its closest CMUdict pronunciation, which becomes
+          its ``ground_truth_phonemes`` / ``expected_phonemes`` and sets
+          ``total_phonemes``. Up to three phonemes inserted at each edge of its
+          segment stay in ``phonemes`` / ``actual_phonemes`` but are left out of
+          ``added``, ``total_errors`` and ``per``. Further edge insertions and
+          interior insertions still count, so ``per`` can still exceed 1.0.
+          When the ASR heard a different word in the slot and that word fits
+          the phonemes at least as well, no edge phoneme is forgiven (the
+          miscue guard).
+        * Every record also has ``canonical_phonemes`` (the primary G2P
+          phonemes, ``[]`` on an insertion record) and ``edge_insertions``
+          (the forgiven edge phonemes, in segment order; always ``[]`` on
+          deletion and insertion records and under the kill switch).
     """
     gtp = [(word, list(phs or [])) for word, phs in (ground_truth_phonemes or [])]
     if not gtp:
@@ -506,9 +742,12 @@ def align_to_ground_truth(
 
     gt_words = [word for word, _ in gtp]
     asr_words = [str(w) for w in (predicted_words or []) if w]
+    legacy_scoring = is_legacy_word_scoring()
 
     skip_hints, pred_labels, insertions = derive_asr_hints(gt_words, asr_words)
     segments = segment_phonemes_by_ground_truth(flat_phonemes, gtp, skip_hints)
+    # One dictionary lookup for the whole sentence, before the scoring loop.
+    variants = {} if legacy_scoring else _sentence_variants(gt_words)
 
     results: list[dict] = []
     for idx, (gt_word, gt_phs) in enumerate(gtp):
@@ -523,25 +762,44 @@ def align_to_ground_truth(
             results.append(_deletion_record(gt_word, gt_phs))
             continue
 
-        missed, added, substituted, phoneme_alignment = _phoneme_errors(gt_phs, segment)
+        word_variants = variants.get(gt_word, ())
+        expected, missed, added, substituted, phoneme_alignment, edge_insertions = _score_word(
+            gt_phs, segment, legacy_scoring, variants=word_variants,
+        )
+        # Miscue guard. When the ASR heard a different word in this slot
+        # ("sit" for "it", "running" for "run") and that word fits the sounds
+        # at least as well, the extra sounds at the word's edge are that other
+        # word, not segmentation noise, so none are forgiven. This only takes
+        # leniency away: the count is never higher than the pre-v2 scoring's.
+        if (
+            edge_insertions
+            and idx in pred_labels
+            and _normalize_word(pred_labels[idx]) != _normalize_word(gt_word)
+            and _asr_word_fits(pred_labels[idx], segment, len(missed) + len(added) + len(substituted))
+        ):
+            expected, missed, added, substituted, phoneme_alignment, edge_insertions = _score_word(
+                gt_phs, segment, legacy_scoring, variants=word_variants, forgive_edges=False,
+            )
         total_errors = len(missed) + len(added) + len(substituted)
-        per = total_errors / max(len(gt_phs), 1)
+        per = total_errors / max(len(expected), 1)
 
         results.append({
             "type": "match" if total_errors == 0 else "substitution",
             "predicted_word": pred_labels.get(idx, gt_word),
             "ground_truth_word": gt_word,
             "phonemes": list(segment),
-            "ground_truth_phonemes": list(gt_phs),
-            "expected_phonemes": list(gt_phs),
+            "ground_truth_phonemes": list(expected),
+            "expected_phonemes": list(expected),
             "actual_phonemes": list(segment),
             "per": round(per, 4),
             "missed": missed,
             "added": added,
             "substituted": substituted,
             "phoneme_alignment": phoneme_alignment,
-            "total_phonemes": len(gt_phs),
+            "total_phonemes": len(expected),
             "total_errors": total_errors,
+            "canonical_phonemes": list(gt_phs),
+            "edge_insertions": edge_insertions,
         })
 
     for extra in insertions.get(len(gtp), ()):

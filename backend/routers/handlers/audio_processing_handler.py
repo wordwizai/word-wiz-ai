@@ -10,19 +10,14 @@ import pandas as pd
 import soundfile as sf
 import base64 as _base64
 
-from core.audio_preprocessing import preprocess_audio
-from core.audio_quality_analyzer import (
-    AudioQualityAnalyzer,
-    assess_processability,
-    build_quality_warning,
-    soft_quality_gates_enabled,
-)
+from core.request_audio import AudioRejected, gate_and_preprocess
+from core.request_audio import check_speech_activity as _core_check_speech_activity
 from core.modes.base_mode import BaseMode
 from core.phoneme_assistant import PhonemeAssistant
 from core.phoneme_feedback_formatter import generate_feedback as generate_phoneme_feedback
 from core.temp_audio_cache import audio_cache
 from core.process_audio import process_audio_with_client_phonemes, analyze_results
-from core.grapheme_to_phoneme import grapheme_to_phoneme as g2p
+from core.grapheme_to_phoneme import clean_sentence, grapheme_to_phoneme as g2p
 from crud.feedback_entry import create_feedback_entry, get_feedback_entries_by_session
 from crud.phonics_sessions import finish_pattern_session
 from crud.session import get_session
@@ -37,6 +32,35 @@ from routers.handlers.phoneme_processing_handler import (
     normalize_espeak_to_ipa,
     format_phonemes_for_logging,
 )
+
+
+# process_audio raises these when it found no speech to score. That is something
+# the child can act on, so they get an instruction instead of "Something went
+# wrong". The original error is still logged.
+_NO_SPEECH_ERRORS = frozenset({
+    "The audio provided has no speech inside",
+    "No valid words extracted from audio",
+})
+# The phoneme extractors (core/phoneme_extractor_onnx.py, core/phoneme_extractor.py)
+# raise these for a silent or too-short recording. Their text goes on with measured
+# numbers, so they are matched by how they start, after the leading "❌".
+_NO_SPEECH_ERROR_PREFIXES = (
+    "Audio appears to be silent",
+    "Audio too short",
+)
+NO_SPEECH_MESSAGE = (
+    "We couldn't hear the words clearly. Read the sentence out loud, close to the microphone."
+)
+PIPELINE_ERROR_MESSAGE = "Something went wrong while checking your reading. Please try again."
+
+
+def _user_message_for_pipeline_error(exc: Exception) -> str:
+    """The message a child sees for an analysis failure that is not an HTTPException."""
+    if isinstance(exc, ValueError):
+        text = str(exc).strip()
+        if text in _NO_SPEECH_ERRORS or text.lstrip("❌ ").startswith(_NO_SPEECH_ERROR_PREFIXES):
+            return NO_SPEECH_MESSAGE
+    return PIPELINE_ERROR_MESSAGE
 
 
 async def load_and_preprocess_audio_bytes(
@@ -163,93 +187,17 @@ async def load_and_preprocess_audio_bytes(
         )
         print(f"⏱️  Cache save (pre-preprocessing) took {time.time() - cache_start:.3f}s")
     
-    # QUALITY VALIDATION: Analyze audio quality before preprocessing
-    print("🔍 Analyzing audio quality...")
-    quality_start = time.time()
-    analyzer = AudioQualityAnalyzer(sr=sample_rate)
-    quality_info = await asyncio.to_thread(
-        analyzer.analyze_audio_quality, audio_array
-    )
-    print(f"⏱️  Quality analysis took {time.time() - quality_start:.3f}s")
-
-    # Log quality metrics
-    print(f"📊 Audio Quality Report:")
-    print(f"   - Quality Level: {quality_info['quality_level'].upper()}")
-    print(f"   - Quality Score: {quality_info['quality_score']:.1f}/100")
-    print(f"   - SNR: {quality_info['snr_db']:.1f} dB")
-    print(f"   - Clipping: {quality_info['clipping_percentage']:.2f}%")
-    print(f"   - Silence: {quality_info['silence_percentage']:.1f}%")
-    print(f"   - Metrics mode: {quality_info.get('metrics_mode', 'legacy')}")
-
-    if quality_out is not None:
-        quality_out['quality_info'] = quality_info
-
-    if soft_quality_gates_enabled():
-        # SOFT GATES (WWAI_SOFT_QUALITY_GATES=1)
-        #
-        # Reject only audio we genuinely cannot process: nothing received, or
-        # true digital silence. A noisy, clipped or pause-heavy recording is
-        # still a child's honest attempt -- analyze it and pass a gentle hint
-        # back to the frontend instead of refusing it.
-        is_processable, reason = assess_processability(audio_array)
-        if not is_processable:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=reason,
-            )
-
-        quality_warning = build_quality_warning(quality_info)
-        if quality_warning is not None:
-            print("⚠️  Soft quality gate: proceeding with a quality warning attached")
-            for hint in quality_warning['hints']:
-                print(f"   - {hint}")
-            if quality_out is not None:
-                quality_out['quality_warning'] = quality_warning
-    else:
-        # HARD GATES (default). Unchanged behavior.
-        # Check for critical quality issues
-        if quality_info['snr_db'] < 5.0:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="It was too noisy to hear the words clearly. Try somewhere quieter, "
-                       "or hold the device a little closer."
-            )
-
-        if quality_info['clipping_percentage'] > 10.0:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="That recording came out too loud and fuzzy. Try reading a little softer, "
-                       "or hold the device a bit farther away."
-            )
-
-        if quality_info['silence_percentage'] > 85.0:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="We could barely hear you. Read the sentence out loud, close to the microphone."
-            )
-
-    # Warn about quality issues but continue processing
-    if quality_info['issues']:
-        print(f"⚠️  Quality issues detected:")
-        for issue in quality_info['issues']:
-            print(f"   - {issue}")
-    
-    if quality_info['recommendations']:
-        print(f"💡 Recommendations:")
-        for rec in quality_info['recommendations']:
-            print(f"   - {rec}")
-    
-    # Apply preprocessing with audio length for adaptive noise reduction
-    print("🔊 Starting audio preprocessing...")
-    # Run preprocessing in thread pool to avoid blocking event loop
-    audio_array = await asyncio.to_thread(
-        preprocess_audio, audio_array, sr=sample_rate, audio_length_seconds=audio_duration,
-        use_adaptive=True, already_preprocessed=False
-    )
+    # QUALITY GATES + THE preprocessing pass (core/request_audio.py), off the event loop.
+    try:
+        audio_array = await asyncio.to_thread(
+            gate_and_preprocess, audio_array, sample_rate, audio_duration, quality_out
+        )
+    except AudioRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
     # This is THE preprocessing pass for this request. Record it here (not inside
     # the worker thread - asyncio.to_thread runs on a copied context, so a mark
     # set in there would be discarded) so later stages can skip redundant noise
-    # reduction / normalization when WWAI_SINGLE_PREPROCESS is enabled.
+    # reduction / normalization when WWAI_SINGLE_PREPROCESS is enabled (the default).
     from core.audio_preprocessing import mark_preprocessed
     mark_preprocessed(audio_array)
 
@@ -294,36 +242,13 @@ def check_speech_activity(audio_array: np.ndarray, quality_out: dict) -> None:
     """Refuse (hard gates) or flag (soft gates) recordings with little speech.
 
     Shared by the signed-in and guest analysis streams so both apply the same
-    rule. Raises HTTPException when the recording should be refused.
+    rule. The rule itself is core.request_audio.check_speech_activity, which the
+    accuracy benchmark runs too; this only turns its refusal into an HTTP 400.
     """
-    from core.audio_chunking import estimate_speech_activity
-    speech_percentage = estimate_speech_activity(audio_array, sr=16000)
-    print(f"🎤 Speech activity: {speech_percentage:.1f}%")
-
-    if soft_quality_gates_enabled():
-        # estimate_speech_activity thresholds relative to the LOUDEST
-        # frame, so one emphatic word can push several quieter ones
-        # below the bar and drag the whole recording under 30%. Do not
-        # refuse the recording over it -- warn and analyze.
-        if speech_percentage < 30:
-            print(
-                f"⚠️  Soft quality gate: low measured speech activity "
-                f"({speech_percentage:.1f}%) - continuing anyway"
-            )
-            warning = quality_out.get('quality_warning') or {'hints': []}
-            warning.setdefault('hints', [])
-            warning['hints'].append(
-                "We had trouble hearing all the words - try speaking a little louder."
-            )
-            warning['speech_activity_percentage'] = float(speech_percentage)
-            quality_out['quality_warning'] = warning
-    else:
-        # Require at least 30% speech activity
-        if speech_percentage < 30:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="We could barely hear you. Read the sentence out loud, close to the microphone."
-            )
+    try:
+        _core_check_speech_activity(audio_array, quality_out)
+    except AudioRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
 
 
 def build_analysis_payload(
@@ -493,8 +418,9 @@ async def analyze_audio_file_event_stream(
         processing_start = time.time()
         
         if use_client_phonemes and client_phonemes is not None:
-            # Get ground truth phonemes for the sentence
-            ground_truth_phonemes = g2p(attempted_sentence)
+            # Get ground truth phonemes for the sentence, cleaned first as on the server
+            # path (PhonemeAssistant.process_audio), so punctuation and casing match.
+            ground_truth_phonemes = g2p(clean_sentence(attempted_sentence))
             
             # Process audio with client phonemes (and optionally client words)
             pronunciation_data = await process_audio_with_client_phonemes(
@@ -681,7 +607,7 @@ async def analyze_audio_file_event_stream(
             message = e.detail
         else:
             print(f"❌ AI processing failed: {e}")
-            message = "Something went wrong while checking your reading. Please try again."
+            message = _user_message_for_pipeline_error(e)
         error_payload = {
             "type": "error",
             "data": {"message": message},

@@ -6,7 +6,8 @@ Covers:
   * genuinely noisy audio still measuring as low quality
   * a clean, quiet recording measuring ~0% clipping
   * true digital silence still being rejected
-  * flag OFF reproducing today's measurements and rejections exactly
+  * flag OFF (WWAI_SOFT_QUALITY_GATES=0) reproducing the old measurements and
+    rejections exactly. The flag is ON by default.
 
 Run from the `backend/` directory:
 
@@ -126,7 +127,7 @@ def wav_bytes(audio: np.ndarray, sr: int = SR) -> bytes:
 
 
 class FlagMixin:
-    """Helpers for running a block with the feature flag forced on/off."""
+    """Helpers for running a block with the feature flag forced on/off, or unset."""
 
     @staticmethod
     def flag_on():
@@ -134,6 +135,11 @@ class FlagMixin:
 
     @staticmethod
     def flag_off():
+        # The flag defaults to ON, so OFF has to be asked for explicitly.
+        return mock.patch.dict(os.environ, {FLAG: "0"})
+
+    @staticmethod
+    def flag_unset():
         env = dict(os.environ)
         env.pop(FLAG, None)
         return mock.patch.dict(os.environ, env, clear=True)
@@ -310,17 +316,19 @@ class TestProcessability(unittest.TestCase):
 
 class TestFlagDefaults(unittest.TestCase, FlagMixin):
 
-    def test_flag_defaults_off(self):
-        with self.flag_off():
-            self.assertFalse(soft_quality_gates_enabled())
+    def test_flag_defaults_on(self):
+        with self.flag_unset():
+            self.assertTrue(soft_quality_gates_enabled())
+            self.assertTrue(AudioQualityAnalyzer(sr=SR).robust_metrics)
 
-    def test_flag_reads_truthy_values(self):
-        for value in ("1", "true", "TRUE", "yes", "on"):
+    def test_only_falsy_values_turn_it_off(self):
+        for value in ("1", "true", "TRUE", "yes", "on", "", "anything else"):
             with mock.patch.dict(os.environ, {FLAG: value}):
                 self.assertTrue(soft_quality_gates_enabled(), value)
-        for value in ("0", "false", "no", "off", ""):
+        for value in ("0", "false", "FALSE", "no", "off", " Off "):
             with mock.patch.dict(os.environ, {FLAG: value}):
                 self.assertFalse(soft_quality_gates_enabled(), value)
+                self.assertFalse(AudioQualityAnalyzer(sr=SR).robust_metrics, value)
 
     def test_flag_off_reproduces_legacy_measurements_exactly(self):
         analyzer = AudioQualityAnalyzer(sr=SR)
@@ -404,6 +412,15 @@ class TestHandlerGates(unittest.TestCase, FlagMixin):
         self.assertEqual(quality_out['quality_info']['metrics_mode'], 'robust')
         self.assertIsNone(quality_out.get('quality_warning'))
         print(f"\n  flag ON  -> accepted, SNR={quality_out['quality_info']['snr_db']:.1f} dB")
+
+    def test_flag_unset_accepts_speech_starting_at_t0(self):
+        # Soft gates are the default: the child who starts at t=0 is no longer refused.
+        audio = make_speech_like(lead_silence_s=0.0, noise_level=0.002)
+        quality_out = {}
+        with self.flag_unset():
+            processed, _session_id = self.run_handler(audio, quality_out)
+        self.assertGreater(len(processed), 0)
+        self.assertEqual(quality_out['quality_info']['metrics_mode'], 'robust')
 
     def test_flag_on_accepts_noisy_audio_with_a_warning(self):
         audio = make_speech_like(lead_silence_s=0.0, level=0.3, noise_level=0.35)

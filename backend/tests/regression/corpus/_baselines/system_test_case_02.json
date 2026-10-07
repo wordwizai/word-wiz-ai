@@ -13,8 +13,8 @@
       "recommended_focus_phoneme",
       "word_error_counts"
     ],
-    "sentence_per": 0.114286,
-    "total_errors": 4,
+    "sentence_per": 0.085714,
+    "total_errors": 3,
     "total_phonemes": 35,
     "words": [
       {
@@ -35,7 +35,7 @@
         "substituted": [],
         "total_errors": 1,
         "total_phonemes": 2,
-        "type": "match"
+        "type": "substitution"
       },
       {
         "added": [],
@@ -61,9 +61,7 @@
         "type": "match"
       },
       {
-        "added": [
-          "d"
-        ],
+        "added": [],
         "ground_truth_phonemes": [
           "b",
           "r",
@@ -75,7 +73,7 @@
         "missed": [
           "b"
         ],
-        "per": 0.4,
+        "per": 0.2,
         "phonemes": [
           "r",
           "a",
@@ -85,9 +83,9 @@
         ],
         "predicted_word": "brown",
         "substituted": [],
-        "total_errors": 2,
+        "total_errors": 1,
         "total_phonemes": 5,
-        "type": "match"
+        "type": "substitution"
       },
       {
         "added": [],
@@ -226,7 +224,7 @@
         "substituted": [],
         "total_errors": 1,
         "total_phonemes": 3,
-        "type": "match"
+        "type": "substitution"
       }
     ]
   },
@@ -349,8 +347,8 @@
       "recommended_focus_phoneme",
       "word_error_counts"
     ],
-    "sentence_per": 0.114286,
-    "total_errors": 4,
+    "sentence_per": 0.085714,
+    "total_errors": 3,
     "total_phonemes": 35,
     "words": [
       {
@@ -371,7 +369,7 @@
         "substituted": [],
         "total_errors": 1,
         "total_phonemes": 2,
-        "type": "match"
+        "type": "substitution"
       },
       {
         "added": [],
@@ -397,9 +395,7 @@
         "type": "match"
       },
       {
-        "added": [
-          "d"
-        ],
+        "added": [],
         "ground_truth_phonemes": [
           "b",
           "r",
@@ -411,7 +407,7 @@
         "missed": [
           "b"
         ],
-        "per": 0.4,
+        "per": 0.2,
         "phonemes": [
           "r",
           "a",
@@ -421,9 +417,9 @@
         ],
         "predicted_word": "brown",
         "substituted": [],
-        "total_errors": 2,
+        "total_errors": 1,
         "total_phonemes": 5,
-        "type": "match"
+        "type": "substitution"
       },
       {
         "added": [],
@@ -562,7 +558,7 @@
         "substituted": [],
         "total_errors": 1,
         "total_phonemes": 3,
-        "type": "match"
+        "type": "substitution"
       }
     ]
   }

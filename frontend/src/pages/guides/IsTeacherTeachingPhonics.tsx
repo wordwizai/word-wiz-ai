@@ -15,7 +15,7 @@ const IsTeacherTeachingPhonics = () => {
     {
       type: "paragraph",
       content:
-        "You have a nagging feeling your child's reading instruction is not quite right. Maybe they are guessing at words based on pictures, relying heavily on context clues rather than actually reading, or struggling with basic decoding despite being in school all year. Your concern is valid, important, and deserves investigation. You have the right and responsibility to ask questions about the quality of phonics instruction your child is receiving. This guide will empower you to evaluate your child's reading instruction objectively, identify red flags that indicate inadequate phonics teaching, and take appropriate action to ensure your child receives the systematic, explicit phonics instruction that research shows is essential for reading success. You will learn exactly what to look for, what questions to ask, and how to have productive conversations with teachers and administrators about your child's reading education.",
+        "You have a nagging feeling your child's reading instruction is not quite right. Maybe they are guessing at words based on pictures, relying heavily on context clues rather than actually reading, or struggling with basic decoding despite being in school all year. Your concern is valid, important, and deserves investigation. You have the right and responsibility to ask questions about the quality of phonics instruction your child is receiving. This guide will empower you to evaluate your child's reading instruction objectively, identify red flags that indicate inadequate phonics teaching, and take appropriate action to ensure your child receives the systematic, explicit phonics instruction that the National Reading Panel (2000) found helps children learn to read. You will learn exactly what to look for, what questions to ask, and how to have productive conversations with teachers and administrators about your child's reading education.",
     },
     {
       type: "heading",
@@ -85,7 +85,7 @@ const IsTeacherTeachingPhonics = () => {
     {
       type: "paragraph",
       content:
-        "Teachers do NOT say: 'Look at the picture,' 'Think about what would make sense,' or 'Skip words you don't know.' These are three-cueing strategies, now proven ineffective by research.",
+        "Teachers do NOT say: 'Look at the picture,' 'Think about what would make sense,' or 'Skip words you don't know.' These are three-cueing strategies, which many reading researchers now criticize because they encourage guessing.",
     },
     {
       type: "callout",
@@ -93,7 +93,7 @@ const IsTeacherTeachingPhonics = () => {
         type: "info",
         title: "Science of Reading",
         content:
-          "Decades of research show systematic, explicit phonics instruction produces better reading outcomes than balanced literacy or whole language approaches.",
+          "The National Reading Panel (2000) found that systematic phonics instruction is significantly more effective than instruction that teaches little or no phonics.",
       },
     },
     {
@@ -125,7 +125,7 @@ const IsTeacherTeachingPhonics = () => {
     {
       type: "paragraph",
       content:
-        "Leveled readers (A-Z books) rely on memorization and picture support. They should come AFTER solid decoding foundation, not instead of it.",
+        "Leveled readers (A-Z books) often rely on memorization and picture support. They should come AFTER solid decoding foundation, not instead of it.",
     },
     {
       type: "heading",
@@ -252,7 +252,7 @@ const IsTeacherTeachingPhonics = () => {
     {
       type: "paragraph",
       content:
-        "If your 2nd grader can't decode simple CVC words, phonics instruction has been inadequate.",
+        "If your 2nd grader can't decode simple CVC words, that's a strong sign they need more phonics support.",
     },
     {
       type: "heading",
@@ -362,7 +362,7 @@ const IsTeacherTeachingPhonics = () => {
         type: "tip",
         title: "Home Support Is Crucial",
         content:
-          "You can't control what happens at school, but 15 minutes daily at home with systematic phonics can bridge significant gaps.",
+          "You can't control what happens at school, but 15 minutes daily at home with systematic phonics can make a real difference.",
       },
     },
     {
@@ -391,7 +391,7 @@ const IsTeacherTeachingPhonics = () => {
     {
       type: "paragraph",
       content:
-        "Consistency matters more than duration. Daily beats sporadic longer sessions.",
+        "Consistency matters more than duration. Daily practice usually beats sporadic longer sessions.",
     },
     {
       type: "heading",
@@ -566,7 +566,7 @@ const IsTeacherTeachingPhonics = () => {
       type: "list",
       content: [
         "The Reading League (thereadingleague.org)",
-        "American Federation of Teachers: Seven Mighty Moves",
+        "7 Mighty Moves by Lindsay Kemeny (Scholastic)",
         "Sold a Story podcast (Emily Hanford)",
         "State literacy laws (many now require phonics)",
       ],
@@ -624,7 +624,7 @@ const IsTeacherTeachingPhonics = () => {
     {
       type: "paragraph",
       content:
-        "Remember: You have the right to ask questions about your child's education. You're not being 'difficult', you're being a good parent. And while you advocate for systemic change, Word Wiz AI and home phonics practice can fill gaps immediately.",
+        "Remember: You have the right to ask questions about your child's education. You're not being 'difficult', you're being a good parent. And while you advocate for systemic change, Word Wiz AI and home phonics practice can start helping right away.",
     },
   ];
 
@@ -655,7 +655,7 @@ const IsTeacherTeachingPhonics = () => {
       afterSection: 13,
       title: "Assess Your Child's Pronunciation",
       description:
-        "Word Wiz AI provides objective pronunciation assessment, helping you understand exactly what skills need work",
+        "Word Wiz AI gives sound-by-sound pronunciation feedback, helping you see which sounds need work",
       buttonText: "Try Free",
       buttonHref: "/signup",
     },
@@ -724,6 +724,7 @@ const IsTeacherTeachingPhonics = () => {
         bio: "Passionate about Science of Reading instruction and literacy advocacy.",
       }}
       publishDate="2024-12-29"
+      updatedDate="2026-09-07"
       readTime={11}
       category="Education Advocacy"
       content={content}

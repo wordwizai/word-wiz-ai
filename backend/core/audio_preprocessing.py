@@ -29,13 +29,15 @@ from .adaptive_noise_reduction import AdaptiveNoiseReducer
 # array object produced by a previous pass is remembered (by weak reference,
 # per-request via a ContextVar) and recognised on the way back in.
 #
-# Gated behind WWAI_SINGLE_PREPROCESS. With the flag unset every historical pass
-# still runs, byte-for-byte as before.
+# Gated behind WWAI_SINGLE_PREPROCESS, which defaults to ON: the speechocean762
+# benchmark accepted it together with WWAI_SOFT_QUALITY_GATES. Set it to a falsy
+# value ("0", "false", "no", "off") and every historical pass runs again,
+# byte-for-byte as before.
 # ---------------------------------------------------------------------------
 
 SINGLE_PREPROCESS_ENV_VAR = "WWAI_SINGLE_PREPROCESS"
 
-_TRUTHY = {"1", "true", "yes", "on"}
+_FALSY = {"0", "false", "no", "off"}
 
 # Holds a weakref to the most recent array this module produced, scoped to the
 # current asyncio task / thread context. Weak so it never keeps audio alive.
@@ -43,11 +45,13 @@ _last_preprocessed: ContextVar = ContextVar("wwai_last_preprocessed_audio", defa
 
 
 def single_preprocess_enabled() -> bool:
-    """True when WWAI_SINGLE_PREPROCESS is set to a truthy value.
+    """True unless WWAI_SINGLE_PREPROCESS is set to a falsy value (default ON).
 
-    Read at call time (not import time) so tests and operators can toggle it.
+    Only "0", "false", "no" or "off" (any case) turn it off; unset, empty or any
+    other value keeps the default. Read at call time (not import time) so tests
+    and operators can toggle it.
     """
-    return os.getenv(SINGLE_PREPROCESS_ENV_VAR, "").strip().lower() in _TRUTHY
+    return os.getenv(SINGLE_PREPROCESS_ENV_VAR, "").strip().lower() not in _FALSY
 
 
 def mark_preprocessed(audio) -> None:
@@ -97,8 +101,8 @@ def preprocess_audio(audio, sr=16000, audio_length_seconds=None, use_adaptive=Tr
                      preprocessing pass, skip noise reduction and normalization.
                      False -> force a pass. None (default) -> auto-detect by object
                      identity against the previous pass. Only honoured when
-                     WWAI_SINGLE_PREPROCESS is enabled; otherwise ignored and every
-                     pass runs exactly as it always has.
+                     WWAI_SINGLE_PREPROCESS is enabled (the default); with it set to
+                     0 this is ignored and every pass runs exactly as it always has.
 
     Returns:
         Preprocessed audio array
@@ -112,7 +116,7 @@ def preprocess_audio(audio, sr=16000, audio_length_seconds=None, use_adaptive=Tr
     """
     preprocess_start = time.time()
 
-    # Suppress redundant passes (flag-gated; no-op when the flag is unset).
+    # Suppress redundant passes (flag-gated, default ON; no-op when the flag is off).
     if single_preprocess_enabled():
         skip = (
             is_marked_preprocessed(audio)

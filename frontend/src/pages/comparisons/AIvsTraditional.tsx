@@ -7,12 +7,12 @@ const AIvsTraditional = () => {
       content: {
         type: "info",
         title: "Is an AI reading app better than a traditional phonics program?",
-        content: "Neither replaces the other. Traditional phonics programs supply a proven scope and sequence plus physical, screen-free materials for $100-300 upfront or $10-20 monthly. AI reading apps add what a parent cannot reliably do, detecting pronunciation errors at the phoneme level with roughly 95 percent accuracy, for free to $15 a month, but require full screen time. Most families do best combining both.",
+        content: "Neither replaces the other. Traditional phonics programs supply a proven scope and sequence plus physical, screen-free materials, for roughly $100-300 upfront for a full kit or about $24-32 a month for a Hooked on Phonics subscription. AI reading apps add something most parents can't do reliably, checking each sound as a child reads aloud and flagging pronunciation errors at the phoneme level. They cost from free (Word Wiz AI) to about $15 a month, but they mean screen time. Many families combine both.",
       },
     },
     {
       type: "paragraph",
-      content: "Reading instruction is undergoing a revolution. For decades, parents relied on workbooks, flashcards, and phonics programs with DVD lessons. Now, AI-powered apps can listen to your child read, identify pronunciation errors at the phoneme level, and provide instant feedback with superhuman accuracy. But does newer mean better? This comprehensive comparison will help you decide whether to stick with time-tested traditional phonics programs or embrace AI-powered reading tools."
+      content: "Reading instruction is undergoing a revolution. For decades, parents relied on workbooks, flashcards, and phonics programs with DVD lessons. Now, AI-powered apps can listen to your child read, identify pronunciation errors at the phoneme level, and provide instant feedback on each sound. But does newer mean better? This comprehensive comparison will help you decide whether to stick with time-tested traditional phonics programs or embrace AI-powered reading tools."
     },
     {
       type: "heading",
@@ -59,23 +59,23 @@ const AIvsTraditional = () => {
         "**Phoneme-level pronunciation analysis** - Identifies which specific sounds are mispronounced",
         "**Adaptive progression** - Adjusts difficulty based on individual performance",
         "**Instant feedback** - Provides immediate correction and guidance",
-        "**GPT-powered personalized coaching** - AI generates custom feedback for each child's errors"
+        "**Personalized coaching** - AI writes custom feedback for each child's errors"
       ]
     },
     {
       type: "paragraph",
-      content: "**Leading examples:** Word Wiz AI, Ello, Amira Learning, Lexia Core5"
+      content: "**Leading examples:** Word Wiz AI, Ello, Amira Learning"
     },
     {
       type: "paragraph",
-      content: "These tools leverage technology that didn't exist 10 years ago. Speech recognition has become accurate enough to reliably assess children's reading."
+      content: "These tools build on speech recognition that has improved a great deal in the past decade, though children's voices are still harder for it than adults'."
     },
     {
       type: "callout",
       content: {
         type: "info",
         title: "The Technology Breakthrough",
-        content: "Until recently, speech recognition struggled with children's voices. Modern AI models trained specifically on children's speech can now detect pronunciation with 95%+ accuracy—often more precise than human listeners."
+        content: "Until recently, speech recognition struggled with children's voices. Newer models that listen for individual speech sounds (phonemes), not just whole words, can now give useful sound-by-sound feedback, though they still make mistakes."
       }
     },
     {
@@ -91,11 +91,11 @@ const AIvsTraditional = () => {
     },
     {
       type: "paragraph",
-      content: "**Traditional:** $100-300 upfront for complete program, or $10-20/month for subscriptions. Physical materials included."
+      content: "**Traditional:** About $100-300 upfront for a full kit (one level of All About Reading lists at $159.95), or $23.96-31.99/month for a Hooked on Phonics subscription (prices checked October 2026). Physical materials included."
     },
     {
       type: "paragraph",
-      content: "**AI:** Free to $15/month. Word Wiz AI offers robust free tier; premium features $10/month. No physical materials needed."
+      content: "**AI:** Free to about $15/month. Word Wiz AI is completely free, with no ads, no subscription, and no premium tier. No physical materials needed."
     },
     {
       type: "paragraph",
@@ -112,7 +112,7 @@ const AIvsTraditional = () => {
     },
     {
       type: "paragraph",
-      content: "**AI:** Emerging research very promising but limited long-term studies. Technology too new for comprehensive longitudinal data."
+      content: "**AI:** Early research is limited, with few long-term studies. Technology too new for comprehensive longitudinal data."
     },
     {
       type: "paragraph",
@@ -129,11 +129,11 @@ const AIvsTraditional = () => {
     },
     {
       type: "paragraph",
-      content: "**AI:** Phoneme-level accuracy. Catches errors like slight vowel distortions, R-colored vowel issues, consonant substitutions that humans miss."
+      content: "**AI:** Phoneme-level feedback. Checks every sound, so it can catch vowel mix-ups, R-sound issues, and consonant substitutions that are easy to miss by ear."
     },
     {
       type: "paragraph",
-      content: "**Winner:** AI apps (superhuman pronunciation accuracy)"
+      content: "**Winner:** AI apps (consistent, sound-by-sound feedback)"
     },
     {
       type: "heading",
@@ -375,7 +375,7 @@ const AIvsTraditional = () => {
     {
       type: "list",
       content: [
-        "**Superhuman pronunciation accuracy** - Catches errors humans miss",
+        "**Sound-by-sound pronunciation feedback** - Catches errors that are easy to miss by ear",
         "**Instant feedback** - Real-time correction prevents error reinforcement",
         "**Highly engaging** - Game-like interface motivates practice",
         "**Adaptive progression** - Adjusts to each child's pace automatically",
@@ -394,24 +394,15 @@ const AIvsTraditional = () => {
     },
     {
       type: "paragraph",
-      content: "**Traditional Phonics Programs:** Systematic phonics instruction is the most researched area in reading education. The National Reading Panel (2000) conclusively established that explicit, systematic phonics instruction is more effective than other approaches. Traditional programs implementing these principles show consistent positive results."
+      content: "**Traditional Phonics Programs:** Systematic phonics instruction is one of the most researched areas in reading education. The National Reading Panel's 2000 report found that systematic phonics instruction is significantly more effective than instruction that teaches little or no phonics, with benefits for students in kindergarten through 6th grade and for children having difficulty learning to read. Traditional programs built on these principles draw on that research base."
     },
     {
       type: "paragraph",
-      content: "**AI Reading Apps:** Emerging research is very promising but limited. Studies on AI speech recognition for reading show:"
-    },
-    {
-      type: "list",
-      content: [
-        "95%+ accuracy in phoneme identification for children ages 5-12",
-        "Students using AI reading tutors show gains comparable to human tutors in small studies",
-        "Real-time feedback improves pronunciation accuracy faster than delayed feedback",
-        "Higher engagement rates than traditional digital reading programs"
-      ]
+      content: "**AI Reading Apps:** Research is still limited. The best-known early evidence comes from Carnegie Mellon's Project LISTEN, a computer reading tutor that used speech recognition to listen to children read aloud. In a year-long study of 131 second and third graders (Mostow and colleagues, 2003), children who received one-on-one tutoring from certified teachers significantly outgained the Reading Tutor group only in word attack (sounding out unfamiliar words)."
     },
     {
       type: "paragraph",
-      content: "However, long-term longitudinal studies are still pending. The technology is too new for 10+ year outcome data."
+      content: "However, long-term longitudinal studies are still pending. Today's AI reading apps are too new for 10+ year outcome data."
     },
     {
       type: "callout",
@@ -424,32 +415,36 @@ const AIvsTraditional = () => {
     {
       type: "heading",
       level: 2,
-      content: "Real Parent Experiences",
+      content: "What Each Approach Can Look Like",
       id: "parent-experiences"
     },
     {
       type: "paragraph",
-      content: "**Traditional Program Success - Sarah's Story:**"
+      content: "These are illustrative examples, not real customer stories."
     },
     {
       type: "paragraph",
-      content: "\"We used All About Reading with our daughter. She loved the letter tiles and manipulatives. Working through the program together became our special bonding time. It took consistency—30 minutes daily for 18 months—but she became a confident reader. The physical books and systematic approach gave me confidence I was covering everything.\""
+      content: "**Traditional Program Example:**"
     },
     {
       type: "paragraph",
-      content: "**AI App Success - Marcus's Story:**"
+      content: "A family uses All About Reading with their daughter, who loves the letter tiles and manipulatives. Working through the program together becomes their bonding time. It takes consistency, about 30 minutes a day over many months, and the physical books and systematic approach give the parent confidence that nothing is skipped."
     },
     {
       type: "paragraph",
-      content: "\"My son resisted reading practice with me. Every session ended in tears. Word Wiz AI changed everything. He'd practice independently for 20 minutes daily—no battles. The AI caught pronunciation errors I never heard. In 4 months, his reading jumped a full grade level. Best $40 I ever spent.\""
+      content: "**AI App Example:**"
     },
     {
       type: "paragraph",
-      content: "**Combination Success - The Johnson Family:**"
+      content: "A boy resists reading practice with his parent, and sessions often end in tears. With Word Wiz AI he practices on his own for about 20 minutes a day, without battles, and the app points out sound-level mistakes his parent hadn't noticed."
     },
     {
       type: "paragraph",
-      content: "\"We started with Hooked on Phonics but our daughter struggled with pronunciation. We added Word Wiz AI for daily practice between our workbook sessions. The combination was perfect—systematic curriculum from Hooked on Phonics, precision feedback from AI. She's now reading two years above grade level.\""
+      content: "**Combination Example:**"
+    },
+    {
+      type: "paragraph",
+      content: "A family starts with Hooked on Phonics, but their daughter struggles with pronunciation. They add Word Wiz AI for daily practice between workbook sessions, so she gets a systematic curriculum from Hooked on Phonics and sound-by-sound feedback from the app."
     },
     {
       type: "heading",
@@ -459,7 +454,7 @@ const AIvsTraditional = () => {
     },
     {
       type: "paragraph",
-      content: "Let's compare real costs for a family with 2 children:"
+      content: "Here's how costs compare for a family with 2 children, using prices listed in October 2026."
     },
     {
       type: "paragraph",
@@ -468,10 +463,10 @@ const AIvsTraditional = () => {
     {
       type: "list",
       content: [
-        "3 months: $60 (subscription)",
-        "1 year: $240",
-        "2 years: $480",
-        "Additional child: +$240/year (new workbooks needed)"
+        "3 months: about $72 (Complete Phonics plan, $23.96/month)",
+        "1 year: about $288",
+        "2 years: about $575",
+        "Additional child: app access covers up to 3 learners, but a second child needs their own workbooks at extra cost"
       ]
     },
     {
@@ -481,10 +476,10 @@ const AIvsTraditional = () => {
     {
       type: "list",
       content: [
-        "3 months: $0-30 (free or premium)",
-        "1 year: $0-120",
-        "2 years: $0-240",
-        "Additional children: $0 (covered by same subscription)"
+        "3 months: $0",
+        "1 year: $0",
+        "2 years: $0",
+        "Additional children: $0 (Word Wiz AI is free)"
       ]
     },
     {
@@ -494,9 +489,9 @@ const AIvsTraditional = () => {
     {
       type: "list",
       content: [
-        "Traditional program: $720-960",
-        "AI app: $0-240",
-        "Savings with AI: $480-960"
+        "Hooked on Phonics: about $575, plus extra workbooks for the second child",
+        "Word Wiz AI: $0",
+        "Savings with Word Wiz AI: about $575 or more"
       ]
     },
     {
@@ -565,7 +560,7 @@ const AIvsTraditional = () => {
       type: "list",
       content: [
         "Systematic curriculum coverage (traditional)",
-        "Superhuman pronunciation accuracy (AI)",
+        "Sound-by-sound pronunciation feedback (AI)",
         "Parent-child bonding time (traditional)",
         "Independent daily practice (AI)",
         "Proven methodology (traditional)",
@@ -577,7 +572,7 @@ const AIvsTraditional = () => {
       content: {
         type: "success",
         title: "Recommended Combination",
-        content: "All About Reading or Hooked on Phonics for curriculum + Word Wiz AI for daily pronunciation practice = comprehensive coverage with precision feedback. Total cost: $150-300/year for exceptional reading instruction."
+        content: "All About Reading or Hooked on Phonics for curriculum + Word Wiz AI for daily pronunciation practice = comprehensive coverage with sound-by-sound feedback. Total cost: about $160-290 for a year (one All About Reading level lists at $159.95, and Hooked on Phonics at $23.96 a month), since Word Wiz AI is free."
       }
     },
     {
@@ -647,6 +642,7 @@ const AIvsTraditional = () => {
         bio: "Expert educators specializing in early literacy and phonics instruction.",
       }}
       publishDate="2025-01-02"
+      updatedDate="2026-09-07"
       readTime={16}
       category="Comparisons"
       content={content}

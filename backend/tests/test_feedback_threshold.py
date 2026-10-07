@@ -36,8 +36,9 @@ class _CurrentRules(unittest.TestCase):
 
 
 class TestThreshold(_CurrentRules):
-    DATA = [{"ground_truth_word": "cat", "per": 0.5, "total_errors": 1}]
-    ERRORS = {"k": [{"word": "cat"}]}
+    DATA = [{"ground_truth_word": "cat", "per": 0.5, "total_errors": 1,
+             "expected_phonemes": ["k", "æ", "t"], "substituted": [("k", "g")], "missed": [], "added": []}]
+    ERRORS = {"k": [{"word": "cat", "error_type": "substituted"}]}
 
     def test_value(self):
         self.assertEqual(fmt.HIGH_PER_THRESHOLD, 0.4)
@@ -243,8 +244,116 @@ class TestOnlyClearMistakesAreCorrected(_CurrentRules):
         for per, text in ((0.44, "Keep practicing!"), (0.21, "Keep practicing!"),
                           (0.2, "Great job!"), (0.1, "Great job!")):
             with self.subTest(sentence_per=per):
-                self._assert_names_nothing(fmt.generate_feedback(summary, {"sentence_per": per}, K_WORDS_2), text)
+                self._assert_names_nothing(fmt.generate_feedback(summary, {"sentence_per": per}, K_WORDS_2[:2]), text)
         self._assert_names_nothing(fmt.generate_feedback({}, {"sentence_per": 0.25}, MILD), "Keep practicing!")
+
+
+def _added(word, expected, added, errors=None):
+    """A word whose only errors are sounds added after it (nothing wrong with its own sounds)."""
+    rec = _record(word, round(len(added) / len(expected), 4), errors if errors is not None else len(added),
+                  len(expected), expected)
+    rec["added"] = list(added)
+    return rec
+
+
+class TestNamingUsesTheWordsOwnSounds(_CurrentRules):
+    """The feedback only names a sound the word contains, counted on that word alone."""
+
+    def test_an_extra_sound_is_never_named_as_the_words_sound(self):
+        # The live bug: an extra word's sounds [k w a] landed on "the", and the feedback said
+        # "Watch the 'w' sound in 'the'". "park" lost three of its own sounds.
+        data = [_added("the", ["ð", "ə"], ["k", "w", "a"]),
+                _record("park", 0.75, 3, 4, ["p", "ɑ", "r", "k"], missed=["ɑ", "r", "k"])]
+        result = fmt.generate_feedback({}, {"sentence_per": 0.5}, data)
+        self.assertEqual(result.focus_phoneme, "ɑ")
+        self.assertEqual(result.focus_words[0], "park")
+        self.assertNotIn("'the'", result.text)
+
+    def test_a_word_with_only_extra_sounds_is_passed_over(self):
+        data = [_added("the", ["ð", "ə"], ["k", "w", "a"]), _record("cat", 0.0, 0, 3, ["k", "æ", "t"])]
+        result = fmt.generate_feedback({}, {"sentence_per": 0.6}, data)
+        self.assertEqual((result.text, result.focus_phoneme, result.focus_words), ("Keep practicing!", None, []))
+
+    def test_other_occurrences_of_the_word_do_not_vote(self):
+        # Counting by word text pooled both "cat"s, so the first one's /t/ outvoted the
+        # second's own errors. Only the clearly wrong "cat" counts, and its first wrong
+        # sound in word order is the focus.
+        data = [_record("cat", 0.3333, 1, 3, ["k", "æ", "t"], substituted=[("t", "d")]),
+                _record("cat", 1.0, 3, 3, ["k", "æ", "t"], substituted=[("k", "g"), ("æ", "ɛ"), ("t", "d")])]
+        result = fmt.generate_feedback({}, {"sentence_per": 0.67}, data)
+        self.assertEqual((result.focus_phoneme, result.focus_words[0]), ("k", "cat"))
+
+    def test_the_named_words_had_that_sound_wrong(self):
+        # /k/ was only added after "the"; it must not appear among the words named for /k/.
+        data = [_added("the", ["ð", "ə"], ["k"], errors=1),
+                _record("kite", 1.0, 3, 3, ["k", "aɪ", "t"], substituted=[("k", "t"), ("aɪ", "a")], missed=["t"])]
+        result = fmt.generate_feedback({}, {"sentence_per": 0.8}, data)
+        self.assertEqual(result.focus_words, ["kite"])
+
+
+class TestRepeatedSounds(_CurrentRules):
+    """A sound that is wrong in at least three different words is named, as a pattern."""
+
+    # The screenshot: the short a was wrong in "cat", "chat" and "bat", one sound each.
+    CAT_CHAT_BAT = [
+        _record("the", 0.0, 0, 2, ["ð", "ə"]),
+        _record("cat", 0.3333, 1, 3, ["k", "æ", "t"], substituted=[("æ", "a")]),
+        _record("can", 0.0, 0, 3, ["k", "æ", "n"]),
+        _record("chat", 0.6667, 2, 3, ["ʧ", "æ", "t"], substituted=[("æ", "a"), ("t", "d")]),
+        _record("with", 0.0, 0, 3, ["w", "ɪ", "θ"]),
+        _record("a", 0.0, 0, 1, ["ə"]),
+        _record("bat", 0.3333, 1, 3, ["b", "æ", "t"], substituted=[("æ", "a")]),
+    ]
+
+    def test_a_sound_wrong_in_three_words_is_named_with_those_words(self):
+        result = fmt.generate_feedback({}, {"sentence_per": 0.22}, self.CAT_CHAT_BAT)
+        self.assertEqual(result.focus_phoneme, "æ")
+        self.assertEqual(result.focus_words, ["cat", "chat", "bat"])
+        display = fmt._display_name("æ")
+        self.assertTrue(result.text.startswith(f"Watch the '{display}' sound in 'cat', 'chat', and 'bat'."), result.text)
+        for word in ("cat", "chat", "bat"):
+            self.assertIn(f">{word}</phoneme>", result.ssml)
+
+    def test_k_wrong_in_three_words(self):
+        result = fmt.generate_feedback({}, {"sentence_per": 0.44}, K_WORDS_2)
+        self.assertEqual((result.focus_phoneme, result.focus_words), ("k", ["cat", "kite", "cake"]))
+
+    def test_a_pattern_is_named_even_when_the_sentence_is_mostly_right(self):
+        data = self.CAT_CHAT_BAT + [_record(w, 0.0, 0, 3, ["a", "b", "c"]) for w in "defghijk"]
+        result = fmt.generate_feedback({}, {"sentence_per": 0.09}, data)
+        self.assertEqual(result.focus_phoneme, "æ")
+
+    def test_two_words_are_not_a_pattern(self):
+        result = fmt.generate_feedback({}, {"sentence_per": 0.4}, K_WORDS_2[:2])
+        self.assertEqual((result.text, result.focus_phoneme), ("Keep practicing!", None))
+
+    def test_the_same_word_three_times_is_not_a_pattern(self):
+        thes = [_record("the", 0.5, 1, 2, ["ð", "ə"], substituted=[("ð", "d")]) for _ in range(3)]
+        result = fmt.generate_feedback({}, {"sentence_per": 0.5}, thes)
+        self.assertEqual((result.text, result.focus_phoneme), ("Keep practicing!", None))
+
+    def test_extra_sounds_and_skipped_words_do_not_count(self):
+        # A skipped two-sound word: not clearly wrong (two errors), and skipping is not a wrong sound.
+        skipped = {**_record("key", 1.0, 2, 2, ["k", "i"], missed=["k", "i"]), "type": "deletion"}
+        data = [_added("the", ["ð", "ə"], ["k"], errors=1), skipped,
+                _record("cat", 0.3333, 1, 3, ["k", "æ", "t"], substituted=[("k", "g")]),
+                _record("cake", 0.3333, 1, 3, ["k", "eɪ", "k"], missed=["k"])]
+        result = fmt.generate_feedback({}, {"sentence_per": 0.5}, data)
+        self.assertEqual((result.text, result.focus_phoneme), ("Keep practicing!", None))
+
+    def test_a_clearly_wrong_word_still_comes_first(self):
+        result = fmt.generate_feedback({}, {"sentence_per": 0.5}, self.CAT_CHAT_BAT + TestFocusIsReturned.THINK)
+        self.assertEqual((result.focus_phoneme, result.focus_words[0]), ("θ", "think"))
+
+    def test_the_legacy_switch_ignores_patterns(self):
+        # One wrong sound in each word: the old rule sees no word at PER 0.4 or more and,
+        # with a low sentence PER, praises.
+        one_each = [_record(w, 0.3333, 1, 3, [c, "æ", "t"], substituted=[("æ", "a")])
+                    for w, c in (("cat", "k"), ("hat", "h"), ("bat", "b"))]
+        one_each += [_record(w, 0.0, 0, 3, ["a", "b", "c"]) for w in "defghijk"]
+        with _legacy():
+            self.assertEqual(fmt.generate_feedback({}, {"sentence_per": 0.09}, one_each).text, "Great job!")
+        self.assertEqual(fmt.generate_feedback({}, {"sentence_per": 0.09}, one_each).focus_phoneme, "æ")
 
 
 class TestLegacySwitch(_CurrentRules):

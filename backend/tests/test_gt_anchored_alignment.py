@@ -385,17 +385,30 @@ class TestEdgeInsertions(_ScoringEnv):
                     self.assertEqual(r["phonemes"], segment)
                     self.assertEqual(r["actual_phonemes"], segment)
 
-    def test_only_one_phoneme_is_forgiven_at_each_edge(self):
-        # A run of two before the word: the outer one is forgiven, the next counts.
-        r = self.score_one(['ə', 'h', 'k', 'æ', 't'], CAT)
+    def test_up_to_three_phonemes_are_forgiven_at_each_edge(self):
+        # Segment boundaries often spill two or three phonemes of the next word.
+        for segment in (
+            ['ə', 'h', 'k', 'æ', 't'],
+            ['ʌ', 'ə', 'h', 'k', 'æ', 't'],
+            ['k', 'æ', 't', 's', 'z'],
+            ['k', 'æ', 't', 's', 'z', 'ʃ'],
+            ['ʌ', 'ə', 'h', 'k', 'æ', 't', 's', 'z', 'ʃ'],
+        ):
+            with self.subTest(segment=segment):
+                r = self.score_one(segment, CAT)
+                self.assertEqual((r["added"], r["per"]), ([], 0.0))
+
+    def test_a_fourth_edge_phoneme_counts(self):
+        # The outer three are set aside, and the one next to the word counts.
+        r = self.score_one(['z', 'ʌ', 'ə', 'h', 'k', 'æ', 't'], CAT)
         self.assertEqual((r["missed"], r["added"], r["substituted"]), ([], ['h'], []))
         self.assertEqual(r["per"], round(1 / 3, 4))
 
-        r = self.score_one(['k', 'æ', 't', 's', 'z'], CAT)
+        r = self.score_one(['k', 'æ', 't', 's', 'z', 'ʃ', 'ʒ'], CAT)
         self.assertEqual(r["added"], ['s'])
         self.assertEqual(r["per"], round(1 / 3, 4))
 
-        r = self.score_one(['ə', 'h', 'k', 'æ', 't', 's', 'z'], CAT)
+        r = self.score_one(['z', 'ʌ', 'ə', 'h', 'k', 'æ', 't', 's', 'z', 'ʃ', 'ʒ'], CAT)
         self.assertEqual(r["added"], ['h', 's'])
         self.assertEqual(r["per"], round(2 / 3, 4))
 
@@ -474,8 +487,10 @@ class TestReadingMiscues(_ScoringEnv):
     Reading a different word that adds sounds at an edge is a real mistake.
 
     speechocean762 speakers always attempt the right word, so the benchmark
-    cannot show these. Forgiving whole edge runs scored every one of them 0.0
-    and the child heard "Great job!".
+    cannot show these. Forgiving edge runs scored every one of them 0.0 and the
+    child heard "Great job!". The miscue guard counts the edge sounds when the
+    ASR heard a different word AND that word fits the sounds at least as well as
+    the expected word does with its edges forgiven.
     """
 
     # (sentence to read, what the child read, the word that was misread)
@@ -540,28 +555,47 @@ class TestReadingMiscues(_ScoringEnv):
         self.assertEqual(r["expected_phonemes"], ['t', 'u'])
         self.assertEqual(r["per"], 0.0)
 
-    def test_long_edge_runs_count_without_the_asr(self):
-        # Only one phoneme is forgiven at each edge, so a longer miscue still
-        # registers when the ASR is missing or wrote the expected word.
-        cases = [
-            ("we run home", g2p_flat("we running home"), "run", round(1 / 3, 4)),
-            ("i see it", g2p_flat("i seeing it"), "see", 0.5),
-            ("a big dog", ['ə'] + list("mɪbɪgəl") + g2p_flat("dog"), "big", round(2 / 3, 4)),
-            ("the cat sat", g2p_flat("the") + g2p_flat("scatter") + g2p_flat("sat"),
-             "cat", round(1 / 3, 4)),
-        ]
-        for target, flat, word, per in cases:
-            for asr in (None, target.split()):
-                with self.subTest(target=target, flat=flat, asr=asr):
-                    r = by_word(self._score(target, flat, asr), word)[0]
-                    self.assertEqual(r["per"], per)
+    def test_the_guard_needs_the_asr_word_to_fit_the_sounds(self):
+        # An ASR that misheard a correct reading does not take the forgiveness
+        # away. "then" is [ð ɛ n], which fits [ð ə n] worse than "the" does with
+        # the stray [n] forgiven, so this still scores 0.
+        r = align_to_ground_truth(['ð', 'ə', 'n'], [THE], ['then'])[0]
+        self.assertEqual((r["predicted_word"], r["per"], r["edge_insertions"]), ("then", 0.0, ['n']))
 
-    def test_a_garbled_segment_containing_the_word_counts(self):
-        flat = g2p_flat("the") + list("spɪ") + g2p_flat("cat") + list("ɹʌnɪ") + g2p_flat("sat")
+        # When the sounds really are "then", the [n] counts.
+        r = align_to_ground_truth(['ð', 'ɛ', 'n'], [THE], ['then'])[0]
+        self.assertEqual(r["edge_insertions"], [])
+        self.assertEqual(r["total_errors"], 2)
+        self.assertEqual(r["per"], 1.0)
+
+    def test_an_asr_word_with_no_pronunciation_leaves_the_forgiveness(self):
+        for asr in (['zzxqv'], ['42']):
+            with self.subTest(asr=asr):
+                r = align_to_ground_truth(['ð', 'ə', 'n'], [THE], asr)[0]
+                self.assertEqual(r["per"], 0.0)
+
+    def test_without_the_asr_a_short_miscue_is_forgiven(self):
+        # The guard's known limit. When the ASR is missing or wrote the expected
+        # word, up to three extra edge sounds are forgiven, so these score 0. A
+        # child who really says "running" is almost always heard as "running",
+        # which the guard catches (see above).
+        cases = [
+            ("we run home", g2p_flat("we running home"), "run"),
+            ("i see it", g2p_flat("i seeing it"), "see"),
+            ("the cat sat", g2p_flat("the") + g2p_flat("scatter") + g2p_flat("sat"), "cat"),
+        ]
+        for target, flat, word in cases:
+            for asr in (None, target.split()):
+                with self.subTest(target=target, asr=asr):
+                    self.assertEqual(by_word(self._score(target, flat, asr), word)[0]["per"], 0.0)
+
+    def test_a_long_garbled_run_around_the_word_counts(self):
+        # Four phonemes after the word: the outer three are forgiven, one counts.
+        flat = g2p_flat("the") + g2p_flat("cat") + list("ɹʌnɪ") + g2p_flat("sat")
         for asr in (None, ["the", "cat", "sat"]):
             with self.subTest(asr=asr):
                 r = by_word(self._score("the cat sat", flat, asr), "cat")[0]
-                self.assertGreaterEqual(r["per"], 1.0)
+                self.assertGreater(r["per"], 0.0)
 
 
 class TestLegacyWordScoringKillSwitch(_ScoringEnv):
@@ -706,8 +740,8 @@ class TestCanonicalPhonemesAndEdgeInsertions(_ScoringEnv):
         self.assertEqual(r["edge_insertions"], ['h', 's'])
         self.assertEqual(r["added"], [])
 
-        r = self.score_one(['ə', 'h', 'k', 'æ', 't'], CAT)
-        self.assertEqual(r["edge_insertions"], ['ə'])
+        r = self.score_one(['z', 'ʌ', 'ə', 'h', 'k', 'æ', 't'], CAT)
+        self.assertEqual(r["edge_insertions"], ['z', 'ʌ', 'ə'])
         self.assertEqual(r["added"], ['h'])
 
         r = self.score_one(['k', 'æ', 't'], CAT)

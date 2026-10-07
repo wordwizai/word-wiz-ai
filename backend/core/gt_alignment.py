@@ -437,8 +437,8 @@ LEGACY_WORD_SCORING_FLAG = "WWAI_LEGACY_WORD_SCORING"
 
 #: Version of the word scoring code, stamped on ``analyze_results``'
 #: ``per_summary`` so stored stats can be told apart across scoring changes.
-#: 2 = word scoring v2 (closest CMUdict pronunciation, one forgiven edge
-#: phoneme per side, the miscue guard). It marks the code release, not the
+#: 2 = word scoring v2 (closest CMUdict pronunciation, up to three forgiven
+#: edge phonemes per side, the miscue guard). It marks the code release, not the
 #: path one request took: the kill switches and the client-phoneme path still
 #: produce pre-v2 numbers under it.
 SCORING_VERSION = 2
@@ -473,19 +473,31 @@ def _pronunciation_candidates(gt_phonemes: list[str], variants) -> list[list[str
     return candidates
 
 
-# (leading, trailing) phonemes to set aside, cheapest first. At most ONE phoneme
-# is forgiven at each edge: that covers the stray boundary phoneme the
-# segmenter has to hand to some word, while a longer run ("run" read as
-# "running", a garbled segment containing the word) still counts.
-_EDGE_TRIMS = ((0, 0), (1, 0), (0, 1), (1, 1))
+#: At most this many inserted phonemes are forgiven at each edge of a word's
+#: segment. Segment boundaries often spill two or three phonemes of the
+#: neighbouring word. On the speechocean762 benchmark a cap of one raised the
+#: false-alarm rate by 2.2 points over an uncapped run, a cap of two by 0.5 and a
+#: cap of three by nothing, so three is the strictest cap that costs nothing. A
+#: longer run (a garbled stretch around the word) still counts from the fourth
+#: phoneme on.
+MAX_EDGE_INSERTIONS = 3
+
+# (leading, trailing) phonemes to set aside, fewest first, the leading trim
+# first on a tie.
+_EDGE_TRIMS = tuple(sorted(
+    ((lead, trail)
+     for lead in range(MAX_EDGE_INSERTIONS + 1)
+     for trail in range(MAX_EDGE_INSERTIONS + 1)),
+    key=lambda trim: (trim[0] + trim[1], -trim[0]),
+))
 
 
 def _counted_ops(
     expected: list[str], segment: list[str], forgive_edges: bool = True,
 ) -> tuple[int, list[tuple], list[str]]:
     """
-    Align ``expected`` with ``segment``, forgiving at most one inserted
-    phoneme at each edge.
+    Align ``expected`` with ``segment``, forgiving up to
+    ``MAX_EDGE_INSERTIONS`` inserted phonemes at each edge.
 
     Returns ``(counted_errors, ops, edge_insertions)``. ``ops`` aligns
     ``expected`` with the segment minus the forgiven edge phonemes,
@@ -494,12 +506,16 @@ def _counted_ops(
     Interior insertions, substitutions and deletions all still count.
 
     Forgiving the first phoneme is the same as aligning the rest of the
-    segment, so each of the four trims in ``_EDGE_TRIMS`` is aligned and the
-    one with the fewest counted errors wins. A trim is used only when it
-    strictly lowers the count, so a wrong last phoneme stays a substitution
-    instead of turning into a missed phoneme plus a free edge insertion.
-    Trimming the segment, rather than the ops of one alignment, also treats a
-    doubled first phoneme and a doubled last one alike.
+    segment, so each trim in ``_EDGE_TRIMS`` is aligned and the one with the
+    fewest counted errors wins. A trim is used only when every phoneme it sets
+    aside was costing exactly one insertion, that is, when it lowers the count
+    by as many phonemes as it removes. So a wrong last phoneme stays a
+    substitution instead of turning into a missed phoneme plus a free edge
+    insertion, and a trim cannot cut into the word itself ("cat" read as
+    [k æ s s t] keeps its two inserted [s], instead of becoming [k æ s] with
+    one made-up substitution and a forgiven [s t]). Trimming the segment,
+    rather than the ops of one alignment, also treats a doubled first phoneme
+    and a doubled last one alike.
 
     With ``forgive_edges`` False nothing is set aside, and the count is the
     plain edit distance the pre-v2 scoring used.
@@ -508,11 +524,16 @@ def _counted_ops(
     n = len(segment)
 
     best = None
+    untrimmed = None
     for lead, trail in trims:
         if lead + trail > n:
             continue
         ops = align_sequences(expected, segment[lead:n - trail])
         errors = sum(1 for op, _gt, _pred in ops if op != 'match')
+        if untrimmed is None:  # (0, 0) comes first
+            untrimmed = errors
+        elif errors != untrimmed - (lead + trail):
+            continue  # it set aside something other than pure insertions
         if best is None or errors < best[0]:
             best = (errors, ops, list(segment[:lead]) + list(segment[n - trail:]))
     return best
@@ -527,9 +548,9 @@ def _score_word(
     non-empty segment.
 
     v2: the primary phonemes and every pronunciation in ``variants`` are
-    candidates. Each candidate is aligned with the segment, at most one
-    edge insertion per side is set aside (none when ``forgive_edges`` is
-    False), and the candidate with the fewest counted errors wins (the earliest
+    candidates. Each candidate is aligned with the segment, up to
+    ``MAX_EDGE_INSERTIONS`` edge insertions per side are set aside (none when
+    ``forgive_edges`` is False), and the candidate with the fewest counted errors wins (the earliest
     on a tie, so the primary wins ties). The error lists come from the
     winner's alignment, so forgiven edge phonemes never reach ``added``; they
     are returned as ``edge_insertions`` instead.
@@ -548,6 +569,30 @@ def _score_word(
     added = [pph for op, _gph, pph in ops if op == 'insertion']
     substituted = [(gph, pph) for op, gph, pph in ops if op == 'substitution']
     return list(expected), missed, added, substituted, list(edges)
+
+
+def _asr_word_fits(asr_word, segment: list[str], forgiven_errors: int) -> bool:
+    """
+    True when the word the ASR heard fits ``segment``, with nothing forgiven,
+    at least as well as the expected word does with its edges forgiven.
+
+    This is the miscue guard's evidence that the child read the other word:
+    "sit" for "it" is [s ɪ t], which is exactly "sit". An ASR that misheard a
+    correct reading (common with young or accented speakers) fails it, because
+    its word does not match the phonemes, so the forgiveness stays. Never
+    raises. A word with no pronunciation gives False.
+    """
+    try:
+        from .grapheme_to_phoneme import clean_sentence, grapheme_to_phoneme, pronunciation_variants
+        words = grapheme_to_phoneme(clean_sentence(str(asr_word)))
+        if len(words) != 1 or getattr(words[0], "oov", False) or not words[0][1]:
+            return False
+        word, phonemes = words[0]
+        candidates = _pronunciation_candidates(phonemes, pronunciation_variants(word))
+        best = min(_counted_ops(candidate, segment, False)[0] for candidate in candidates)
+    except Exception:  # no evidence is always a safe answer
+        return False
+    return best <= forgiven_errors
 
 
 def _insertion_record(pred_word: str) -> dict:
@@ -627,12 +672,13 @@ def align_to_ground_truth(
         * Word scoring v2 (off under ``WWAI_LEGACY_WORD_SCORING``): a read word
           is scored against its closest CMUdict pronunciation, which becomes
           its ``ground_truth_phonemes`` / ``expected_phonemes`` and sets
-          ``total_phonemes``. One phoneme inserted at each edge of its segment
-          stays in ``phonemes`` / ``actual_phonemes`` but is left out of
+          ``total_phonemes``. Up to three phonemes inserted at each edge of its
+          segment stay in ``phonemes`` / ``actual_phonemes`` but are left out of
           ``added``, ``total_errors`` and ``per``. Further edge insertions and
           interior insertions still count, so ``per`` can still exceed 1.0.
-          When the ASR heard a different word in the slot, no edge phoneme is
-          forgiven (the miscue guard).
+          When the ASR heard a different word in the slot and that word fits
+          the phonemes at least as well, no edge phoneme is forgiven (the
+          miscue guard).
         * Every record also has ``canonical_phonemes`` (the primary G2P
           phonemes, ``[]`` on an insertion record) and ``edge_insertions``
           (the forgiven edge phonemes, in segment order; always ``[]`` on
@@ -664,20 +710,24 @@ def align_to_ground_truth(
             results.append(_deletion_record(gt_word, gt_phs))
             continue
 
-        # Miscue guard. When the ASR heard a different word in this slot
-        # ("sit" for "it", "running" for "run"), extra sounds at the word's
-        # edge are probably that other word, not segmentation noise, so none
-        # are forgiven. This only takes leniency away: the count is never
-        # higher than the pre-v2 scoring's.
-        asr_heard_other_word = (
-            idx in pred_labels
-            and _normalize_word(pred_labels[idx]) != _normalize_word(gt_word)
-        )
+        word_variants = variants.get(gt_word, ())
         expected, missed, added, substituted, edge_insertions = _score_word(
-            gt_phs, segment, legacy_scoring,
-            variants=variants.get(gt_word, ()),
-            forgive_edges=not asr_heard_other_word,
+            gt_phs, segment, legacy_scoring, variants=word_variants,
         )
+        # Miscue guard. When the ASR heard a different word in this slot
+        # ("sit" for "it", "running" for "run") and that word fits the sounds
+        # at least as well, the extra sounds at the word's edge are that other
+        # word, not segmentation noise, so none are forgiven. This only takes
+        # leniency away: the count is never higher than the pre-v2 scoring's.
+        if (
+            edge_insertions
+            and idx in pred_labels
+            and _normalize_word(pred_labels[idx]) != _normalize_word(gt_word)
+            and _asr_word_fits(pred_labels[idx], segment, len(missed) + len(added) + len(substituted))
+        ):
+            expected, missed, added, substituted, edge_insertions = _score_word(
+                gt_phs, segment, legacy_scoring, variants=word_variants, forgive_edges=False,
+            )
         total_errors = len(missed) + len(added) + len(substituted)
         per = total_errors / max(len(expected), 1)
 

@@ -186,10 +186,10 @@
   },
   "format_version": 1,
   "path_comparison_structural_count": 0,
-  "path_divergence": 0.166667,
+  "path_divergence": 0.25,
   "sentence": "the church judged him",
   "server_path": {
-    "highest_per_word": "church",
+    "highest_per_word": "judged",
     "problem_types": [
       "high_frequency_errors",
       "most_common_phoneme",
@@ -201,8 +201,8 @@
       "recommended_focus_phoneme",
       "word_error_counts"
     ],
-    "sentence_per": 0.5,
-    "total_errors": 6,
+    "sentence_per": 0.416667,
+    "total_errors": 5,
     "total_phonemes": 12,
     "words": [
       {
@@ -225,9 +225,7 @@
         "type": "match"
       },
       {
-        "added": [
-          "ʃ"
-        ],
+        "added": [],
         "ground_truth_phonemes": [
           "ʧ",
           "ə",
@@ -236,7 +234,7 @@
         ],
         "ground_truth_word": "church",
         "missed": [],
-        "per": 0.75,
+        "per": 0.5,
         "phonemes": [
           "t",
           "ʃ",
@@ -250,14 +248,14 @@
         "substituted": [
           [
             "ʧ",
-            "t"
+            "ʃ"
           ],
           [
             "ʧ",
             "t"
           ]
         ],
-        "total_errors": 3,
+        "total_errors": 2,
         "total_phonemes": 4,
         "type": "substitution"
       },

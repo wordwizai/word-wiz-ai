@@ -49,6 +49,9 @@ const HookedOnPhonicsComparison = lazy(
 const BestFreeReadingAppsComparison = lazy(
   () => import("./pages/comparisons/BestFreeReadingApps.tsx")
 );
+const AppsThatListenComparison = lazy(
+  () => import("./pages/comparisons/AppsThatListen.tsx")
+);
 const LexiaRazKidsComparison = lazy(
   () => import("./pages/comparisons/LexiaVsRazKids.tsx")
 );
@@ -217,6 +220,10 @@ function App() {
                   <Route
                     path="/comparisons/best-free-reading-apps"
                     element={<BestFreeReadingAppsComparison />}
+                  />
+                  <Route
+                    path="/comparisons/reading-apps-that-listen-to-your-child-read"
+                    element={<AppsThatListenComparison />}
                   />
                   <Route
                     path="/comparisons/lexia-vs-raz-kids-vs-word-wiz-ai"

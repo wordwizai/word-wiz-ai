@@ -50,6 +50,19 @@ class StatusTest(unittest.TestCase):
         status = self.status(self.maya)
         self.assertEqual((status.status, status.tries), (MASTERED, 1))
 
+    def test_insertion_order_does_not_matter(self):
+        make_pattern_session(self.db, self.maya, "at-family", 5, 10, DAY + timedelta(days=1))
+        make_pattern_session(self.db, self.maya, "at-family", 9, 10, DAY)
+        make_pattern_session(self.db, self.maya, "at-family")
+        status = self.status(self.maya)
+        self.assertEqual((status.status, status.words_correct, status.tries), (NEEDS_PRACTICE, 5, 2))
+
+    def test_a_tie_goes_to_the_newer_session(self):
+        make_pattern_session(self.db, self.maya, "at-family", 9, 10, DAY)
+        make_pattern_session(self.db, self.maya, "at-family", 5, 10, DAY)
+        status = self.status(self.maya)
+        self.assertEqual((status.status, status.words_correct), (NEEDS_PRACTICE, 5))
+
     def test_statuses_are_kept_per_child(self):
         make_pattern_session(self.db, self.maya, "at-family", 8, 10, DAY)
         both = pattern_statuses(self.db, [self.maya.id, self.leo.id])

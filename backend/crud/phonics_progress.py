@@ -43,6 +43,7 @@ def pattern_statuses(db: DBSession, user_ids: list[int]) -> dict[int, dict[str, 
     """user id -> pattern slug -> status, for every pattern the user has a session for.
 
     Untouched patterns are left out; callers treat them as Not started.
+    Slugs no longer in the curriculum are included; phonics_path ignores them.
     """
     result: dict[int, dict[str, PatternStatus]] = {user_id: {} for user_id in user_ids}
     if not user_ids:
@@ -51,6 +52,7 @@ def pattern_statuses(db: DBSession, user_ids: list[int]) -> dict[int, dict[str, 
         db.query(Session.user_id, PatternSession)
         .join(PatternSession, PatternSession.session_id == Session.id)
         .filter(Session.user_id.in_(user_ids))
+        .order_by(PatternSession.completed_at, PatternSession.session_id)
         .all()
     )
     for user_id, row in rows:
@@ -61,6 +63,7 @@ def pattern_statuses(db: DBSession, user_ids: list[int]) -> dict[int, dict[str, 
                 status.status = IN_PROGRESS
             continue
         status.tries += 1
+        # Rows come oldest first (ties by session id), so the latest finished session wins.
         if status.last_completed_at is None or row.completed_at >= status.last_completed_at:
             status.last_completed_at = row.completed_at
             status.words_correct = row.words_correct

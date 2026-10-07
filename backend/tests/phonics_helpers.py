@@ -21,6 +21,10 @@ from sqlalchemy.pool import StaticPool  # noqa: E402
 
 import models  # noqa: E402,F401  (registers every table on Base)
 from database import Base  # noqa: E402
+import database  # noqa: E402
+
+# The env var above only works if nothing imported database.py first.
+assert database.engine.url.get_backend_name() == "sqlite", "tests must not reach the real database"
 from models import Class, ClassMembership, FeedbackEntry, User  # noqa: E402
 
 _join_codes = itertools.count(1)
@@ -72,10 +76,9 @@ def analysis(words, inserted: int = 0) -> dict:
     """A saved phoneme_analysis with (expected word, per) rows.
 
     Same shape the audio stream stores: pandas' to_dict() of the
-    pronunciation dataframe, keyed by row number. Inserted sounds have no
-    expected word.
+    pronunciation dataframe, keyed by row number. Inserted sounds have an empty expected word.
     """
-    rows = list(words) + [(None, 0.0)] * inserted
+    rows = list(words) + [("", 0.0)] * inserted
     return {
         "pronunciation_dataframe": {
             "ground_truth_word": {str(i): word for i, (word, _) in enumerate(rows)},

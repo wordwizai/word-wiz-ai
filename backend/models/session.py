@@ -17,11 +17,11 @@ class Session(Base):
     activity = relationship("Activity", back_populates="sessions")
     feedback_entries = relationship("FeedbackEntry", back_populates="session")
     # Only phonics pattern sessions have one (models/pattern_session.py).
+    # Lazy, so ordinary session loads don't pay for it; list routes selectinload it.
     pattern = relationship(
         "PatternSession",
         back_populates="session",
         uselist=False,
-        lazy="selectin",
         cascade="all, delete-orphan",
     )
 

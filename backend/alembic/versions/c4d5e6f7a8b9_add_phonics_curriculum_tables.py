@@ -19,6 +19,8 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def _has_table(name: str) -> bool:
+    if op.get_context().as_sql:  # offline (--sql) mode
+        return False  # no database to inspect; emit the full DDL
     # main.py runs create_all at startup, so a deployed backend may already
     # have made these tables by the time this migration runs.
     return sa.inspect(op.get_bind()).has_table(name)

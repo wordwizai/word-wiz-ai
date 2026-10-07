@@ -40,7 +40,7 @@ def get_active_sessions(
 ):
     sessions = (
         db.query(UserSession)
-        .options(selectinload(UserSession.activity))
+        .options(selectinload(UserSession.activity), selectinload(UserSession.pattern))
         .filter(UserSession.user_id == current_user.id)
         .filter(UserSession.is_completed == 0)
         .order_by(UserSession.created_at.desc())
@@ -56,7 +56,7 @@ def get_all_sessions(
 ):
     sessions = (
         db.query(UserSession)
-        .options(selectinload(UserSession.activity))
+        .options(selectinload(UserSession.activity), selectinload(UserSession.pattern))
         .filter(UserSession.user_id == current_user.id)
         .order_by(UserSession.created_at.desc())
         .all()

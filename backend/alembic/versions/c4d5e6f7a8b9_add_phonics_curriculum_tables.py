@@ -72,10 +72,6 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     """Drop the phonics curriculum tables."""
-    op.drop_index(op.f('ix_assignment_students_student_id'), table_name='assignment_students')
-    op.drop_index(op.f('ix_assignment_students_assignment_id'), table_name='assignment_students')
     op.drop_table('assignment_students')
-    op.drop_index(op.f('ix_assignments_class_id'), table_name='assignments')
     op.drop_table('assignments')
-    op.drop_index(op.f('ix_pattern_sessions_pattern_slug'), table_name='pattern_sessions')
     op.drop_table('pattern_sessions')

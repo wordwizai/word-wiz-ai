@@ -1,5 +1,10 @@
-"""The focus-word PER cutoff is a module constant the benchmark can read, and the spoken
-feedback says which sound and words it is about, so the benchmark can score it.
+"""The feedback corrects a word only when it is clearly wrong, and the rule is in module
+constants the benchmark can read. The spoken feedback says which sound and words it is
+about, so the benchmark can score it.
+
+A word is clearly wrong when at least MIN_FOCUS_ERRORS (3) of its sounds were wrong.
+WWAI_LEGACY_FEEDBACK=1 brings back the old rule (PER at least HIGH_PER_THRESHOLD) and the
+old fallback.
 
 Run from backend/:  PYTHONIOENCODING=utf-8 venv/Scripts/python.exe -m unittest tests.test_feedback_threshold -v
 """
@@ -16,17 +21,86 @@ if BACKEND_ROOT not in sys.path:
 from core import phoneme_feedback_formatter as fmt  # noqa: E402
 
 
-class TestThreshold(unittest.TestCase):
+def _legacy(on=True):
+    """The kill switch on (or off), whatever the shell says."""
+    return mock.patch.dict(os.environ, {fmt.LEGACY_FEEDBACK_FLAG: "1" if on else ""})
+
+
+class _CurrentRules(unittest.TestCase):
+    """The current feedback rules, whatever the shell says."""
+
+    def setUp(self):
+        patcher = _legacy(False)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+
+class TestThreshold(_CurrentRules):
     DATA = [{"ground_truth_word": "cat", "per": 0.5, "total_errors": 1}]
     ERRORS = {"k": [{"word": "cat"}]}
 
     def test_value(self):
         self.assertEqual(fmt.HIGH_PER_THRESHOLD, 0.4)
+        self.assertEqual(fmt.MIN_FOCUS_ERRORS, 3)
 
     def test_focus_reads_the_module_constant(self):
-        self.assertEqual(fmt._focus_from_high_per_words(self.DATA, self.ERRORS), "k")
-        with mock.patch.object(fmt, "HIGH_PER_THRESHOLD", 0.6):
-            self.assertIsNone(fmt._focus_from_high_per_words(self.DATA, self.ERRORS))
+        # One error is not a clear mistake, however high the word's PER, unless the constant says so.
+        self.assertIsNone(fmt._focus_from_high_per_words(self.DATA, self.ERRORS))
+        with mock.patch.object(fmt, "MIN_FOCUS_ERRORS", 1):
+            self.assertEqual(fmt._focus_from_high_per_words(self.DATA, self.ERRORS), "k")
+
+    def test_the_legacy_switch_reads_the_per_constant(self):
+        with _legacy():
+            self.assertEqual(fmt._focus_from_high_per_words(self.DATA, self.ERRORS), "k")
+            with mock.patch.object(fmt, "HIGH_PER_THRESHOLD", 0.6):
+                self.assertIsNone(fmt._focus_from_high_per_words(self.DATA, self.ERRORS))
+
+
+class TestIsClearMistake(_CurrentRules):
+    """is_clear_mistake is the one test of whether a word may be corrected."""
+
+    def test_three_errors_are_a_clear_mistake_and_two_are_not(self):
+        for errors, expected in ((0, False), (1, False), (2, False), (3, True), (4, True)):
+            with self.subTest(errors=errors):
+                # PER 1.0 throughout, since it no longer decides.
+                self.assertIs(fmt.is_clear_mistake({"per": 1.0, "total_errors": errors}), expected)
+
+    def test_a_record_without_a_count_is_not(self):
+        for record in ({}, {"per": 1.0}, {"per": 1.0, "total_errors": None}):
+            with self.subTest(record=record):
+                self.assertIs(fmt.is_clear_mistake(record), False)
+
+    def test_an_inserted_word_never_is(self):
+        # An ASR word that is not in the sentence. Its count is 0 anyway, but the type decides.
+        self.assertIs(fmt.is_clear_mistake({"type": "insertion", "per": 0.0, "total_errors": 5}), False)
+        with _legacy():
+            self.assertIs(fmt.is_clear_mistake({"type": "insertion", "per": 0.0, "total_errors": 0}), False)
+
+    def test_the_legacy_switch_brings_back_the_per_rule(self):
+        with _legacy():
+            self.assertIs(fmt.is_clear_mistake({"per": 0.4, "total_errors": 1}), True)
+            self.assertIs(fmt.is_clear_mistake({"per": 0.3999, "total_errors": 5}), False)
+            self.assertIs(fmt.is_clear_mistake({"total_errors": 5}), False)
+
+    def test_dataframe_records_give_a_plain_bool(self):
+        # The router passes DataFrame records, whose numbers are numpy scalars.
+        import pandas as pd
+
+        records = pd.DataFrame([{"per": 1.0, "total_errors": 3}, {"per": 0.5, "total_errors": 2}]).to_dict("records")
+        for legacy, expected in ((False, [True, False]), (True, [True, True])):
+            with self.subTest(legacy=legacy), _legacy(legacy):
+                flags = [fmt.is_clear_mistake(r) for r in records]
+                self.assertEqual(flags, expected)
+                self.assertTrue(all(type(flag) is bool for flag in flags))
+
+    def test_flag_rule_describes_the_rule_in_use(self):
+        self.assertEqual(fmt.flag_rule(), "total_errors >= 3")
+        with _legacy():
+            self.assertEqual(fmt.flag_rule(), "per >= 0.4")
+        with mock.patch.object(fmt, "MIN_FOCUS_ERRORS", 4), mock.patch.object(fmt, "HIGH_PER_THRESHOLD", 0.5):
+            self.assertEqual(fmt.flag_rule(), "total_errors >= 4")
+            with _legacy():
+                self.assertEqual(fmt.flag_rule(), "per >= 0.5")
 
 
 def _record(word, per, errors, total, expected, substituted=(), missed=()):
@@ -37,14 +111,15 @@ def _record(word, per, errors, total, expected, substituted=(), missed=()):
     }
 
 
-class TestFocusIsReturned(unittest.TestCase):
+class TestFocusIsReturned(_CurrentRules):
     """generate_feedback reports the sound and words a correction is about. The text is unchanged."""
 
-    # "think" read as [f i ŋ k]. The text and SSML below are what the formatter produced
-    # before the focus fields existed, so they also pin that the wording did not move.
+    # "think" read as [f i ŋ g], three wrong sounds. The text and SSML below are what the
+    # formatter produced before the focus fields existed, so they also pin that the wording
+    # did not move.
     THINK = [
         _record("i", 0.0, 0, 1, ["aɪ"]),
-        _record("think", 0.5, 2, 4, ["θ", "ɪ", "ŋ", "k"], substituted=[("θ", "f"), ("ɪ", "i")]),
+        _record("think", 0.75, 3, 4, ["θ", "ɪ", "ŋ", "k"], substituted=[("θ", "f"), ("ɪ", "i"), ("k", "g")]),
     ]
     THINK_TEXT = (
         "In the word 'think', the letters 'th' make the 'th' sound. When you see 'th', put your "
@@ -69,7 +144,7 @@ class TestFocusIsReturned(unittest.TestCase):
     # /k/ is wrong in three words. "kite" is the worst word, so /k/ is the focus sound.
     K_WORDS = [
         _record("cat", 0.3333, 1, 3, ["k", "æ", "t"], substituted=[("k", "g")]),
-        _record("kite", 0.6667, 2, 3, ["k", "aɪ", "t"], substituted=[("k", "t"), ("aɪ", "a")]),
+        _record("kite", 1.0, 3, 3, ["k", "aɪ", "t"], substituted=[("k", "t"), ("aɪ", "a"), ("t", "d")]),
         _record("cake", 0.3333, 1, 3, ["k", "eɪ", "k"], missed=["k"]),
     ]
 
@@ -94,7 +169,7 @@ class TestFocusIsReturned(unittest.TestCase):
 
     def test_praise_names_nothing(self):
         perfect = [_record("cat", 0.0, 0, 3, ["k", "æ", "t"])]
-        # One mild error in a low-error sentence is praised too, since no word cleared the cutoff.
+        # One mild error in a low-error sentence is praised too, since no word is clearly wrong.
         mild = [_record("cat", 0.3333, 1, 3, ["k", "æ", "t"], substituted=[("k", "g")])] + [
             _record(w, 0.0, 0, 3, ["a", "b", "c"]) for w in ("a", "b", "c")
         ]
@@ -117,6 +192,92 @@ class TestFocusIsReturned(unittest.TestCase):
         self.assertEqual(a.focus_words, [])
         a.focus_words.append("cat")
         self.assertEqual(b.focus_words, [])  # not one shared list
+
+
+# The data the tests above used before the clear-mistake rule: "think" read as [f i ŋ k]
+# (two wrong sounds), and "kite" with two wrong sounds as the worst /k/ word.
+THINK_2 = [
+    _record("i", 0.0, 0, 1, ["aɪ"]),
+    _record("think", 0.5, 2, 4, ["θ", "ɪ", "ŋ", "k"], substituted=[("θ", "f"), ("ɪ", "i")]),
+]
+K_WORDS_2 = [
+    _record("cat", 0.3333, 1, 3, ["k", "æ", "t"], substituted=[("k", "g")]),
+    _record("kite", 0.6667, 2, 3, ["k", "aɪ", "t"], substituted=[("k", "t"), ("aɪ", "a")]),
+    _record("cake", 0.3333, 1, 3, ["k", "eɪ", "k"], missed=["k"]),
+]
+# One mild error (/k/ in "cat") in a sentence of twelve phonemes.
+MILD = [_record("cat", 0.3333, 1, 3, ["k", "æ", "t"], substituted=[("k", "g")])] + [
+    _record(w, 0.0, 0, 3, ["a", "b", "c"]) for w in ("a", "b", "c")
+]
+PERFECT = [_record("cat", 0.0, 0, 3, ["k", "æ", "t"])]
+
+
+class TestOnlyClearMistakesAreCorrected(_CurrentRules):
+    """One or two wrong sounds are mostly recognizer noise, so they are not corrected."""
+
+    def _assert_names_nothing(self, result, text):
+        self.assertEqual((result.text, result.ssml), (text, text))
+        self.assertIsNone(result.focus_phoneme)
+        self.assertEqual(result.focus_words, [])
+
+    def test_a_word_with_two_errors_is_not_corrected_and_one_with_three_is(self):
+        self._assert_names_nothing(fmt.generate_feedback({}, {"sentence_per": 0.4}, THINK_2), "Keep practicing!")
+        result = fmt.generate_feedback({}, {"sentence_per": 0.4}, TestFocusIsReturned.THINK)
+        self.assertEqual((result.focus_phoneme, result.focus_words), ("θ", ["think"]))
+
+    def test_a_short_word_wrong_in_every_sound_is_not_corrected(self):
+        # "the" read as [d ɪ]: PER 1.0, far above the old cutoff, but only two errors.
+        the = [_record("the", 1.0, 2, 2, ["ð", "ə"], substituted=[("ð", "d"), ("ə", "ɪ")]),
+               _record("cat", 0.0, 0, 3, ["k", "æ", "t"])]
+        self._assert_names_nothing(fmt.generate_feedback({}, {"sentence_per": 0.4}, the), "Keep practicing!")
+
+    def test_three_errors_beat_a_short_word_with_a_higher_per(self):
+        data = [_record("the", 1.0, 2, 2, ["ð", "ə"], substituted=[("ð", "d"), ("ə", "ɪ")])] + TestFocusIsReturned.THINK
+        result = fmt.generate_feedback({}, {"sentence_per": 0.71}, data)
+        self.assertEqual((result.focus_phoneme, result.focus_words), ("θ", ["think"]))
+
+    def test_only_mild_errors_get_keep_practicing_or_praise_and_name_nothing(self):
+        # The classifier's focus sound is not used. Falling back to it named a mildly wrong
+        # word, which on the speechocean762 benchmark was usually one read correctly.
+        summary = {"recommended_focus_phoneme": ("k", "most errors"), "phoneme_error_counts": {"k": 3}}
+        for per, text in ((0.44, "Keep practicing!"), (0.21, "Keep practicing!"),
+                          (0.2, "Great job!"), (0.1, "Great job!")):
+            with self.subTest(sentence_per=per):
+                self._assert_names_nothing(fmt.generate_feedback(summary, {"sentence_per": per}, K_WORDS_2), text)
+        self._assert_names_nothing(fmt.generate_feedback({}, {"sentence_per": 0.25}, MILD), "Keep practicing!")
+
+
+class TestLegacySwitch(_CurrentRules):
+    """WWAI_LEGACY_FEEDBACK=1 gives the earlier feedback on the data the earlier tests used."""
+
+    def test_a_two_error_word_is_corrected_word_for_word_as_before(self):
+        with _legacy():
+            result = fmt.generate_feedback({}, {"sentence_per": 0.4}, THINK_2)
+        self.assertEqual((result.text, result.ssml),
+                         (TestFocusIsReturned.THINK_TEXT, TestFocusIsReturned.THINK_SSML))
+        self.assertEqual((result.focus_phoneme, result.focus_words), ("θ", ["think"]))
+
+    def test_the_worst_word_by_the_per_rule_and_the_first_word_named(self):
+        with _legacy():
+            result = fmt.generate_feedback({}, {"sentence_per": 0.44}, K_WORDS_2)
+        self.assertEqual(result.text, "In the word 'cat', the letters 'c' make the 'k' sound.")
+        self.assertEqual((result.focus_phoneme, result.focus_words), ("k", ["cat", "kite", "cake"]))
+
+    def test_the_old_fallback_still_corrects_a_mild_word(self):
+        # No word reaches PER 0.4 and the sentence PER is above 0.2, so the old fallback picks
+        # the sound with the most errors and names the first word that has it.
+        with _legacy():
+            result = fmt.generate_feedback({}, {"sentence_per": 0.25}, MILD)
+        self.assertEqual(result.text, "In the word 'cat', the letters 'c' make the 'k' sound.")
+        self.assertEqual((result.focus_phoneme, result.focus_words), ("k", ["cat"]))
+
+    def test_praise_and_keep_practicing_are_unchanged(self):
+        with _legacy():
+            for data, per, text in ((PERFECT, 0.0, "Great job!"), (MILD, 1 / 12, "Great job!"),
+                                    (PERFECT, 0.5, "Keep practicing!")):
+                with self.subTest(text=text, sentence_per=per):
+                    result = fmt.generate_feedback({}, {"sentence_per": per}, data)
+                    self.assertEqual((result.text, result.ssml, result.focus_words), (text, text, []))
 
 
 if __name__ == "__main__":

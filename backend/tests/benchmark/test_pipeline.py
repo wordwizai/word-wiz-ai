@@ -337,9 +337,11 @@ class TestClientPath(unittest.TestCase):
 
     def test_the_client_path_now_scores_like_the_server_path(self):
         # The same phonemes, words and ground truth, so ground-truth-anchored scoring gives the
-        # same records whichever path they came by. "the" misread and "fox" split by the client.
+        # same records whichever path they came by. "the" misread mildly, "quick" clearly (three
+        # wrong sounds, so the feedback corrects it), and "fox" split by the client.
         groups = [list(p) for p in self.perfect]
         groups[0] = ["d", "ə"]
+        groups[1] = ["g", "w", "ɛ", "p"]
         groups[3:4] = [["f", "ɑ"], ["k", "s"]]
         text = U.SAMPLE_TEXT.upper()
         server = PL.analyze_clip(self.audio, text, _ListPhonemes(groups), U.FakeWords())
@@ -347,7 +349,7 @@ class TestClientPath(unittest.TestCase):
         self.assertEqual(client.status, "ok", client.error)
         self.assertEqual(client.to_dict()["words"], server.to_dict()["words"])
         self.assertEqual(client.feedback, server.feedback)
-        self.assertEqual(client.feedback["focus_words"][:1], ["the"])
+        self.assertEqual(client.feedback["focus_words"][:1], ["quick"])
 
     def test_a_validation_failure_falls_back_to_the_server_path_and_is_counted(self):
         import core.process_audio as process_audio

@@ -657,17 +657,22 @@ class TestLegacyWordScoringKillSwitch(_ScoringEnv):
 class TestFeedbackFormatterOnV2Records(_ScoringEnv):
     """The formatter consumes per / missed / added / substituted / expected_phonemes."""
 
+    def setUp(self):
+        super().setUp()
+        os.environ.pop("WWAI_LEGACY_FEEDBACK", None)  # the current feedback rules, whatever the shell says
+
     def test_formatter_runs_and_ignores_forgiven_edge_noise(self):
         from core.phoneme_feedback_formatter import build_phoneme_to_error_words, generate_feedback
         from core.process_audio import analyze_results
 
-        # "the cat sat" with a stray [ə] after "the" (forgiven) and "cat" read as "tad".
-        flat = ['ð', 'ə', 'ə', 't', 'æ', 'd', 's', 'æ', 't']
+        # "the cat sat" with a stray [ə] after "the" (forgiven) and "cat" read as "deb", three
+        # wrong sounds, so it is clearly wrong and gets corrected.
+        flat = ['ð', 'ə', 'ə', 'd', 'ɛ', 'b', 's', 'æ', 't']
         records = align_to_ground_truth(flat, GT_SHORT, ['the', 'cat', 'sat'])
         _df, _highest, problems, per_summary = analyze_results(records)
 
         error_words = build_phoneme_to_error_words(records)
-        self.assertEqual(set(error_words), {'k', 't'})
+        self.assertEqual(set(error_words), {'k', 'æ', 't'})
         self.assertNotIn('ə', error_words)
         feedback = generate_feedback(problems, per_summary, records)
         self.assertIn("cat", feedback.text)
@@ -689,6 +694,11 @@ class TestFeedbackFormatterOnV2Records(_ScoringEnv):
         self.assertEqual(to["per"], 0.5)
 
         _df, _highest, problems, per_summary = analyze_results(records)
+        # One wrong sound is not a clear mistake, so the current rules praise this reading.
+        # Only the old rule (the kill switch) corrects "to", and how a named word is modelled
+        # does not depend on the rule.
+        self.assertEqual(generate_feedback(problems, per_summary, records).text, "Great job!")
+        os.environ["WWAI_LEGACY_FEEDBACK"] = "1"  # restored by _ScoringEnv
         feedback = generate_feedback(problems, per_summary, records)
         self.assertIn("'to'", feedback.text)
         self.assertIn('ph="tɪ">to</phoneme>', feedback.ssml)
@@ -701,11 +711,11 @@ class TestFeedbackFormatterOnV2Records(_ScoringEnv):
     def test_a_repeated_word_is_modelled_from_its_worst_occurrence(self):
         from core.phoneme_feedback_formatter import generate_feedback
 
-        def record(per, errors, substituted, expected, canonical=None):
+        def record(per, errors, substituted, expected, canonical=None, added=()):
             r = {
                 "type": "substitution", "ground_truth_word": "the", "predicted_word": "the",
                 "per": per, "total_errors": errors, "total_phonemes": 2,
-                "missed": [], "added": [], "substituted": substituted,
+                "missed": [], "added": list(added), "substituted": substituted,
                 "expected_phonemes": expected, "ground_truth_phonemes": expected,
             }
             if canonical is not None:
@@ -713,10 +723,11 @@ class TestFeedbackFormatterOnV2Records(_ScoringEnv):
             return r
 
         # Records without canonical_phonemes (the legacy path): the IPA comes from
-        # the occurrence with the highest per, not from the first one.
+        # the occurrence with the highest per, not from the first one. That one has
+        # three errors, so it is clearly wrong and gets corrected.
         records = [
             record(0.5, 1, [('ə', 'ɪ')], ['ð', 'i']),
-            record(1.0, 2, [('ð', 'd'), ('ə', 'ɪ')], ['ð', 'ə']),
+            record(1.5, 3, [('ð', 'd'), ('ə', 'ɪ')], ['ð', 'ə'], added=['n']),
         ]
         feedback = generate_feedback({}, {"sentence_per": 0.75}, records)
         self.assertIn('ph="ðə">the</phoneme>', feedback.ssml)
@@ -725,7 +736,7 @@ class TestFeedbackFormatterOnV2Records(_ScoringEnv):
         # canonical_phonemes, when present, wins over expected_phonemes.
         records = [
             record(0.5, 1, [('ə', 'ɪ')], ['ð', 'i'], canonical=['ð', 'ə']),
-            record(1.0, 2, [('ð', 'd'), ('i', 'ɪ')], ['ð', 'i'], canonical=['ð', 'ə']),
+            record(1.5, 3, [('ð', 'd'), ('i', 'ɪ')], ['ð', 'i'], canonical=['ð', 'ə'], added=['n']),
         ]
         feedback = generate_feedback({}, {"sentence_per": 0.75}, records)
         self.assertIn('ph="ðə">the</phoneme>', feedback.ssml)

@@ -14,9 +14,19 @@ import os
 from dataclasses import dataclass, field
 from typing import Optional
 
-#: Words at or above this PER count as clearly mispronounced when picking the focus
-#: phoneme. Module level so the accuracy benchmark scores the same cutoff.
+#: The old test for a clearly mispronounced word was a PER at or above this. Only the kill switch
+#: below still uses it to pick words. The accuracy benchmark uses it for its PER curve.
 HIGH_PER_THRESHOLD = 0.4
+
+#: A word counts as clearly mispronounced, and so may be corrected, when at least this many
+#: of its sounds were wrong (substituted, missed or added). The phoneme recognizer marks
+#: about half of correctly read words with at least one error, so one or two errors are
+#: mostly noise. On the speechocean762 dev half this rule beat every PER cutoff on both
+#: recall and false alarms. The known cost is that short words (one or two phonemes) are
+#: almost never corrected, and neither is a single wrong sound in a three-phoneme word
+#: ("cat" read as "cut"). Those corrections were mostly wrong on that data, but beginning
+#: readers make such mistakes more often, which is what the kill switch is for.
+MIN_FOCUS_ERRORS = 3
 
 #: Kill switch for the feedback changes the speechocean762 benchmark accepted. When truthy,
 #: the formatter picks and names words exactly as it did before them. Read at call time.
@@ -26,6 +36,27 @@ _TRUTHY = {"1", "true", "yes", "on"}
 
 def is_legacy_feedback() -> bool:
     return os.environ.get(LEGACY_FEEDBACK_FLAG, "").strip().lower() in _TRUTHY
+
+
+def is_clear_mistake(record: dict) -> bool:
+    """True when a word record is clearly mispronounced, so the feedback may correct it.
+
+    That means at least MIN_FOCUS_ERRORS errors. Under the kill switch it is the old test,
+    PER at least HIGH_PER_THRESHOLD. An inserted word (an ASR word that is not in the
+    sentence) never is one. The accuracy benchmark calls this to score the same decision.
+    """
+    if is_legacy_feedback():
+        return bool((record.get("per") or 0) >= HIGH_PER_THRESHOLD)
+    if record.get("type") == "insertion":
+        return False
+    return bool((record.get("total_errors") or 0) >= MIN_FOCUS_ERRORS)
+
+
+def flag_rule() -> str:
+    """The rule is_clear_mistake applies right now, as text for the accuracy benchmark to record."""
+    if is_legacy_feedback():
+        return f"per >= {HIGH_PER_THRESHOLD}"
+    return f"total_errors >= {MIN_FOCUS_ERRORS}"
 
 
 @dataclass
@@ -353,30 +384,31 @@ def _focus_and_source_word(
     phoneme_to_error_words: dict[str, list[dict]],
 ) -> tuple[Optional[str], Optional[str]]:
     """
-    Pick the best focus phoneme by walking words from worst PER to least-bad,
-    and return it with the word it came from (``(None, None)`` when no word
-    qualifies).
+    Pick the best focus phoneme by walking the clearly mispronounced words from
+    worst to least-bad, and return it with the word it came from (``(None, None)``
+    when no word qualifies).
 
-    Iterates high-PER words (PER ≥ 0.4) from worst to best and returns the
-    most-errored phoneme found in the first word that has phoneme errors.
-    This ensures the single worst word always wins rather than a common phoneme
-    that happens to appear in multiple mildly-wrong words (e.g. schwa in 'the').
+    Iterates the words is_clear_mistake accepts (at least MIN_FOCUS_ERRORS errors)
+    from worst to best and returns the most-errored phoneme found in the first word
+    that has phoneme errors. This ensures the single worst word always wins rather
+    than a common phoneme that happens to appear in multiple mildly-wrong words
+    (e.g. schwa in 'the').
     """
     # Sort clearly mispronounced words worst-first.
     # Use total_errors (absolute count) as the primary key so a short word like
     # "the" (2 phonemes → 100% PER from 1 mistake) doesn't beat a longer word
     # with more actual errors (e.g. "dog"→"doge" = 2-3 errors).
     # PER is the tiebreaker for words with the same error count.
-    high_per_words = sorted(
-        [w for w in pronunciation_data if (w.get("per") or 0) >= HIGH_PER_THRESHOLD],
+    clear_mistakes = sorted(
+        [w for w in pronunciation_data if is_clear_mistake(w)],
         key=lambda w: ((w.get("total_errors") or 0), (w.get("per") or 0)),
         reverse=True,
     )
-    if not high_per_words:
+    if not clear_mistakes:
         return None, None
 
     # Walk worst → less-bad; return as soon as we find a word with phoneme errors
-    for word_entry in high_per_words:
+    for word_entry in clear_mistakes:
         word_name = (word_entry.get("ground_truth_word") or "").strip().lower()
         if not word_name:
             continue
@@ -495,17 +527,23 @@ def generate_feedback(
     if not phoneme_to_error_words and sentence_per <= 0.2:
         return FeedbackResult(text="Great job!", ssml="Great job!")
 
-    # Priority: phonemes from clearly mispronounced words (PER ≥ 0.4) first.
+    # Only clearly mispronounced words (see is_clear_mistake) can be corrected.
     # This prevents a high-frequency consonant like 't' from dominating just
     # because it appears many times across the sentence with tiny errors.
     focus_phoneme, source_word = _focus_and_source_word(pronunciation_data, phoneme_to_error_words)
 
     if not focus_phoneme:
-        # No word was clearly wrong (nothing cleared the 0.4 PER threshold).
-        # If the overall sentence is also low-error, all mistakes are minor —
-        # praise the child rather than nitpicking a barely-wrong word.
+        # No word was clearly wrong. If the overall sentence is also low-error,
+        # all mistakes are minor — praise the child rather than nitpicking a
+        # barely-wrong word.
         if sentence_per <= 0.2:
             return FeedbackResult(text="Great job!", ssml="Great job!")
+        if not is_legacy_feedback():
+            # Something was off, but no word was wrong clearly enough to name. Falling back
+            # to a mildly wrong word here mostly named a word the child had read
+            # correctly on the speechocean762 benchmark, and praising instead praised
+            # too many readings that had a real mistake, so encourage without a word.
+            return FeedbackResult(text="Keep practicing!", ssml="Keep practicing!")
 
         ordered = _ordered_phonemes(phoneme_to_error_words, problem_summary)
         if not ordered:

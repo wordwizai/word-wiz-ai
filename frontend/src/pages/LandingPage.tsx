@@ -11,7 +11,7 @@ import AnimatedPracticeDemo from "@/components/AnimatedPracticeDemo";
 import TrustBadgeCarousel from "@/components/TrustBadgeCarousel";
 import { googleLogin } from "@/api";
 import { GoogleIcon } from "@/components/GoogleIcon";
-import { trackSignupClick } from "@/utils/analytics";
+import { trackSignupClick, trackTryEvent } from "@/utils/analytics";
 import { AuthContext } from "@/contexts/AuthContext";
 import LandingSection from "@/components/landing/LandingSection";
 import ScrollCue from "@/components/landing/ScrollCue";
@@ -184,6 +184,23 @@ const LandingPage = () => {
                     </>
                   )}
                 </div>
+
+                {/* The no-account demo, for parents who want to see it work
+                    before signing up. Nothing on the home page linked to it. */}
+                {!signedIn && (
+                  <p className="text-sm text-muted-foreground">
+                    Not ready to sign up?{" "}
+                    <Link
+                      to="/try"
+                      onClick={() =>
+                        trackTryEvent("try_link_click", "at-family", "home_hero")
+                      }
+                      className="font-semibold text-primary underline-offset-4 hover:underline"
+                    >
+                      Try three sentences first, no account needed
+                    </Link>
+                  </p>
+                )}
 
                 {/* Social proof */}
                 <p className="text-sm text-muted-foreground">

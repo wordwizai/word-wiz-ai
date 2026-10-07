@@ -56,7 +56,8 @@ const PhonicsGrid = ({
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto">
+            {/* relative: keeps the absolutely positioned sr-only labels inside the scroll area */}
+            <div className="relative overflow-x-auto">
               <table className="border-separate border-spacing-1 text-sm">
                 <thead>
                   <tr>

@@ -49,7 +49,12 @@ can read it without parsing TypeScript.
 ```
 
 Every pattern in `phonicsPatterns.ts` appears in exactly one unit, and every
-slug in the file exists. A frontend test checks both.
+slug in the file exists. The export script below refuses to run otherwise,
+and a backend test runs it.
+
+The app pages never import this file or `phonicsPatterns.ts`. The patterns
+file is over 3,000 lines of teaching text, so the backend serves pattern
+names and unit order to the signed-in pages instead.
 
 The draft order follows the usual systematic phonics progression. It is a
 first draft for review.
@@ -95,6 +100,7 @@ The backend container never sees the frontend source, so
       "position": 0,
       "words": ["cat", "hat", "..."],
       "sentences": ["The cat sat on the mat.", "..."],
+      "word_line_count": 3,
       "lines": ["cat hat bat mat rat", "sat fat pat vat that", "flat chat brat scat spat", "The cat sat on the mat.", "..."]
     }
   }
@@ -102,6 +108,8 @@ The backend container never sees the frontend source, so
 ```
 
 `position` is the pattern's index in the whole sequence, used to sort.
+`word_line_count` says how many of the `lines` come from the word list, so
+the scorer knows which lines are word lines.
 `guest_sentences.json` is deleted and `routers/guest.py` reads its allowed
 sentences from the new file. The existing `--check` mode and the test in
 `tests/test_guest_router.py` that runs it move over unchanged in purpose, so a
@@ -152,8 +160,9 @@ without a pattern.
 `POST /phonics/sessions` with `{ "pattern_slug": "at-family" }` returns the
 child's newest unfinished session for that pattern if there is one, and
 otherwise creates a session and its `pattern_sessions` row. An unknown slug
-returns 404. The response is the usual `SessionOut`, which gains a nullable
-`pattern_slug`.
+returns 404. The response is the usual `SessionOut`, which gains nullable
+`pattern_slug` and `pattern_name` fields, so the Dashboard and practice
+screen can show "-at Word Family" without loading the pattern data.
 
 `GET /session/{id}/current-data` learns about pattern sessions. With no
 readings yet it returns the first line, and in both states it includes
@@ -166,10 +175,14 @@ instead of from the activity settings, which are empty for this activity.
 `get_activity_object` in `routers/ai.py` returns it for `phonics-pattern`
 sessions, looking the slug up through the session's `pattern` row.
 
-`get_next_sentence` runs before the current reading's feedback entry is saved,
-so the line just read is `lines[len(session.feedback_entries)]`. It returns
-the following line, with `line_index` and `line_count`, and makes no GPT
-call. On the last line it returns `{"session_complete": true}` instead.
+`get_next_sentence` finds the line just read by matching the attempted
+sentence against the pattern's lines, ignoring case and spacing. It can't
+count readings instead, because the mic stays available after each reading
+and a child may read a line again before tapping Next. It returns the
+following line, with `line_index` and `line_count`, and makes no GPT call.
+On the last line it returns `{"session_complete": true}` instead. If the
+sentence matches no line (which shouldn't happen) it falls back to counting
+readings.
 
 ### Finishing and scoring
 
@@ -183,8 +196,8 @@ That function scores the session, fills in the `pattern_sessions` row, sets
 ```
 
 The score reads each saved reading's `phoneme_analysis.pronunciation_dataframe`
-(the `ground_truth_word` and `per` columns) for the first `line_count`
-entries only.
+(the `ground_truth_word` and `per` columns). Only the first reading of each
+line counts, so reading a line again can't raise or lower the score.
 
 - Rows with no `ground_truth_word` are inserted sounds and are skipped.
 - On a word line, every word counts.
@@ -195,9 +208,8 @@ entries only.
   counts as wrong.
 - Mastered means `words_correct / words_total` is 0.8 or more.
 
-If the final reading somehow arrives twice, the extra entry falls outside the
-first `line_count` and `finish_pattern_session` does nothing for a session
-that already has `completed_at`.
+If the final line is read twice, `finish_pattern_session` does nothing for a
+session that already has `completed_at` and returns the stored result.
 
 ### Practice screen
 
@@ -231,6 +243,7 @@ assigning it to the whole class turns `whole_class` on.
 
 | Column | Type | Notes |
 |---|---|---|
+| id | int, PK | same shape as `class_memberships` |
 | assignment_id | int, FK assignments.id, cascade delete | |
 | student_id | int, FK users.id, cascade delete | |
 
@@ -274,7 +287,8 @@ Student endpoints live in a new `routers/phonics.py`, mounted at `/phonics`.
 | Method and path | Returns |
 |---|---|
 | `POST /phonics/sessions` | Start or resume a pattern session (above) |
-| `GET /phonics/progress` | The current user's status for every pattern they have a session for |
+| `GET /phonics/path` | Every unit in order, each pattern's name and the current user's status on it, and `next_slug`, the first pattern that isn't Mastered |
+| `GET /phonics/curriculum` | The units in order with pattern names and no status, for the assign dialog |
 | `GET /phonics/assignments` | Every assignment the current user has across their classes, with class name, pattern name, unit and status, in curriculum order |
 
 Teacher endpoints live in a new `routers/assignments.py`, mounted under
@@ -286,7 +300,8 @@ Teacher endpoints live in a new `routers/assignments.py`, mounted under
 | `POST /classes/{id}/assignments` | Body `{ "pattern_slugs": [...], "student_ids": [...] or null }`, where null means the whole class. 400 for unknown slugs (listing them) or for students who aren't members. Returns the created or merged assignments. |
 | `GET /classes/{id}/assignments` | Each assignment in curriculum order with its recipients' statuses, plus counts per status |
 | `DELETE /classes/{id}/assignments/{assignment_id}` | Removes the assignment. Students' sessions and scores are kept. |
-| `GET /classes/{id}/phonics-progress` | Each student's status for every pattern, for the class grid |
+| `GET /classes/{id}/phonics-progress` | The units, plus each student's status for every pattern they have touched, for the class grid |
+| `GET /classes/{id}/students/{sid}/phonics-path` | The same payload as `GET /phonics/path`, for one student in the class |
 
 The existing student stats and insights in `routers/classes.py` already count
 every session, so pattern sessions show up there with no change.
@@ -366,13 +381,18 @@ model and an in-memory SQLite database)
 - `POST /phonics/sessions` resumes an unfinished session.
 - `export_phonics_data.py --check` passes on the committed file.
 
+- Every pattern is in exactly one unit, and every unit slug exists (the
+  export script's own check), and `next_slug` is the first pattern that
+  isn't Mastered.
+
 **Frontend** (`node --test`)
 
-- Every pattern is in exactly one unit, and every unit slug exists.
-- The next-pattern picker returns the first pattern that isn't Mastered.
+- The pure helpers in `src/lib/phonics.ts`, which pick the finish message,
+  order a student's assignments and shade the grid cells.
 
 **End to end** on `backend/dev_server.py` (seeded SQLite, never `main.py`)
-with the fake-mic setup. A teacher account creates a class and assigns unit 1
-to the whole class. A student joins, sees the assignment on the Dashboard,
-reads through -at and sees the finish card. The teacher then sees the status
-on the Assignments tab and the grid. Screenshots of each step.
+with the fake-mic setup. `dev_server.py` seeds a teacher account and a class
+with the demo child in it, so no accounts need making by hand. The teacher
+assigns unit 1 to the whole class. The child sees the assignment on the
+Dashboard, reads through -at and sees the finish card. The teacher then sees
+the status on the Assignments tab and the grid. Screenshots of each step.

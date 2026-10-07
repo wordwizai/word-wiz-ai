@@ -45,7 +45,7 @@ class ModeTest(unittest.TestCase):
     def test_the_last_line_ends_the_session(self):
         self.assertEqual(
             next_for(AT["lines"][-1], readings_so_far=6),
-            {"session_complete": True, "line_index": 6, "line_count": 7},
+            {"session_complete": True, "sentence": AT["lines"][-1], "line_index": 6, "line_count": 7},
         )
 
     def test_an_unknown_sentence_falls_back_to_counting(self):
@@ -96,10 +96,10 @@ class StreamTest(unittest.TestCase):
         self.child = make_user(self.db, "Maya")
         self.session = start_pattern_session(self.db, self.child.id, "at-family")
 
-    def read(self, line):
+    def read(self, line, per=0.0):
         async def go():
             return [chunk async for chunk in handler.analyze_audio_file_event_stream(
-                phoneme_assistant=FakeAssistant(),
+                phoneme_assistant=FakeAssistant(per),
                 activity_object=PhonicsPatternPractice(AT),
                 audio_bytes=b"x",
                 audio_filename="r.wav",
@@ -131,6 +131,14 @@ class StreamTest(unittest.TestCase):
         self.assertGreater(result["words_total"], len(AT["words"]))
         self.db.refresh(self.session)
         self.assertEqual(self.session.is_completed, 1)
+
+    def test_reading_the_last_line_again_repeats_the_stored_result(self):
+        for line in AT["lines"][:-1]:
+            self.read(line)
+        first = self.read(AT["lines"][-1])["session_complete"]["data"]
+        again = self.read(AT["lines"][-1], per=0.9)
+        self.assertNotIn("next_sentence", again)
+        self.assertEqual(again["session_complete"]["data"], first)
 
 
 if __name__ == "__main__":

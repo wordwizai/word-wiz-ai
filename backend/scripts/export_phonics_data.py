@@ -124,6 +124,9 @@ def build() -> dict:
         for slug in unit["patterns"]:
             pattern = patterns[slug]
             lines = word_lines(pattern["words"])
+            all_lines = lines + pattern["sentences"]
+            if len(set(all_lines)) != len(all_lines):
+                raise ValueError(f"{slug} has the same line twice")
             ordered[slug] = {
                 "display_name": pattern["display_name"],
                 "unit": unit["id"],
@@ -131,7 +134,7 @@ def build() -> dict:
                 "words": pattern["words"],
                 "sentences": pattern["sentences"],
                 "word_line_count": len(lines),
-                "lines": lines + pattern["sentences"],
+                "lines": all_lines,
             }
     return {
         "source": "frontend/src/data/phonicsPatterns.ts and phonicsCurriculum.json",

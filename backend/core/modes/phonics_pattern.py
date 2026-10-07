@@ -26,7 +26,8 @@ class PhonicsPatternPractice(BaseMode):
             # Carry on by counting readings instead of failing the reading.
             index = min(len(session.feedback_entries), len(lines) - 1)
         if index >= len(lines) - 1:
-            return {"session_complete": True, "line_index": index, "line_count": len(lines)}
+            # Keep the last line as the sentence so a resumed session (if finishing failed) shows it again.
+            return {"session_complete": True, "sentence": lines[index], "line_index": index, "line_count": len(lines)}
         return {"sentence": lines[index + 1], "line_index": index + 1, "line_count": len(lines)}
 
 

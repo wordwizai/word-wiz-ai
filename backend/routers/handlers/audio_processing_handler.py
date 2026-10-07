@@ -609,7 +609,7 @@ async def analyze_audio_file_event_stream(
                     sentence_result = result
                     # Pattern sessions end after their last line instead of
                     # getting another sentence (core/modes/phonics_pattern.py).
-                    session_complete = bool(sentence_result.get("session_complete"))
+                    session_complete = bool(sentence_result.get("session_complete")) and session.pattern is not None
 
                     if not session_complete:
                         next_sentence_data = {"sentence": sentence_result.get("sentence", "")}

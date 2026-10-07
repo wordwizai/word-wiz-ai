@@ -950,6 +950,70 @@ class TestInsertedWords(unittest.TestCase):
                          ['the', 'cat', 'sat'])
 
 
+class TestExtraWordsKeepTheirSounds(_ScoringEnv):
+    """
+    A word the child said that is not in the sentence keeps its own sounds.
+
+    The live bug: the child added "quiet" ("watching the quiet playful squirrels" for
+    "watching the playful squirrels"). Its sounds landed on "the" as six trailing
+    phonemes, three were forgiven as edge noise and three counted, so "the" looked
+    clearly wrong.
+    """
+
+    def _gt(self, sentence):
+        from core.grapheme_to_phoneme import clean_sentence, grapheme_to_phoneme
+        return grapheme_to_phoneme(clean_sentence(sentence))
+
+    def test_an_extra_word_the_asr_heard_takes_its_own_sounds(self):
+        gt = self._gt("watching the playful squirrels")
+        flat = g2p_flat("watching the quiet playful squirrels")
+        results = align_to_ground_truth(flat, gt, ["watching", "the", "quiet", "playful", "squirrels"])
+        the = by_word(results, "the")[0]
+        self.assertEqual((the["per"], the["added"], the["edge_insertions"]), (0.0, [], []))
+        self.assertEqual(the["phonemes"], ['ð', 'ə'])
+        extra = [r for r in results if r["type"] == "insertion"]
+        self.assertEqual([r["predicted_word"] for r in extra], ["quiet"])
+        self.assertEqual(extra[0]["phonemes"], g2p_flat("quiet"))
+        self.assertEqual(extra[0]["per"], 0.0)
+        self.assertEqual(extra[0]["phoneme_alignment"], [])
+        self.assertTrue(all(r["per"] == 0.0 for r in results))
+
+    def test_every_heard_phoneme_still_lands_in_exactly_one_record(self):
+        gt = self._gt("watching the playful squirrels")
+        flat = g2p_flat("watching the quiet playful squirrels")
+        results = align_to_ground_truth(flat, gt, ["watching", "the", "quiet", "playful", "squirrels"])
+        self.assertEqual([p for r in results for p in r["phonemes"]], flat)
+
+    def test_a_word_the_asr_made_up_takes_no_sounds(self):
+        # A perfect reading with a spurious ASR word: the free slot stays empty, because
+        # taking a sound from a real word would cost that word an error.
+        for asr in (['the', 'a', 'cat', 'sat'], ['the', 'cat', 'sat', 'down'], ['um', 'the', 'cat', 'sat']):
+            with self.subTest(asr=asr):
+                results = align_to_ground_truth(flatten(GT_SHORT), GT_SHORT, asr)
+                self.assertTrue(all(r["per"] == 0.0 for r in results))
+                self.assertEqual([r["phonemes"] for r in results if r["type"] == "insertion"], [[]])
+
+    def test_a_word_the_asr_split_in_two_keeps_its_sounds(self):
+        gt = self._gt("look into the box")
+        flat = g2p_flat("look into the box")
+        results = align_to_ground_truth(flat, gt, ["look", "in", "to", "the", "box"])
+        self.assertEqual(by_word(results, "into")[0]["per"], 0.0)
+        self.assertTrue(all(r["per"] == 0.0 for r in results))
+
+    def test_an_unknown_extra_word_gets_no_slot(self):
+        flat = flatten(GT_SHORT)
+        results = align_to_ground_truth(flat, GT_SHORT, ['the', 'zzxqv', 'cat', 'sat'])
+        self.assertEqual([r["per"] for r in results if r["type"] != "insertion"], [0.0, 0.0, 0.0])
+
+    def test_the_kill_switch_gives_extra_words_no_slot(self):
+        os.environ[LEGACY_SCORING_FLAG] = "1"
+        gt = self._gt("watching the playful squirrels")
+        flat = g2p_flat("watching the quiet playful squirrels")
+        asr = ["watching", "the", "quiet", "playful", "squirrels"]
+        self.assertEqual(without_v21_keys(align_to_ground_truth(flat, gt, asr)),
+                         pre_v2_align_to_ground_truth(flat, gt, asr))
+
+
 class TestAsrIsOnlySecondary(unittest.TestCase):
     """The ASR must never move a segment boundary on unambiguous input."""
 

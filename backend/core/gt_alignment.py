@@ -266,6 +266,7 @@ def segment_phonemes_by_ground_truth(
     flat_phonemes: list[str],
     ground_truth_phonemes: list[tuple[str, list[str]]],
     skip_hints: set[int] | frozenset = frozenset(),
+    free: set[int] | frozenset = frozenset(),
 ) -> list[list[str]]:
     """
     Split the flat acoustic phoneme stream into one contiguous segment per
@@ -285,6 +286,10 @@ def segment_phonemes_by_ground_truth(
         ground_truth_phonemes: ``[(word, [phonemes]), ...]`` for the sentence
             the child was asked to read.
         skip_hints: indices the ASR also reports as missing (secondary signal).
+        free: indices of extra words the ASR heard that are not in the sentence.
+            Their empty segment costs nothing and they never count as blamed
+            words, so they only take phonemes that would otherwise be insertions
+            on a neighbouring word.
 
     Returns:
         One list of phonemes per ground-truth word, same order and length as
@@ -337,7 +342,8 @@ def segment_phonemes_by_ground_truth(
         gt_phs = words[i - 1]
         g = len(gt_phs)
         limit = max_len[i - 1]
-        skip_cost = _COST_SCALE * g
+        is_free = (i - 1) in free
+        skip_cost = 0 if is_free else _COST_SCALE * g
         # -1 because the tuple is minimised: agreeing with the ASR is preferred.
         skip_agrees = -1 if (i - 1) in skip_hints else 0
 
@@ -355,8 +361,8 @@ def segment_phonemes_by_ground_truth(
             # --- empty segment: this word was skipped -------------------- #
             _relax(
                 row_cur, key_cur, back_cur, k, k,
-                base_cost + skip_cost, base_bad + (1 if g else 0),
-                base_agree + skip_agrees, 0, g,
+                base_cost + skip_cost, base_bad + (1 if g and not is_free else 0),
+                base_agree + skip_agrees, 0, 0 if is_free else g,
             )
 
             # --- non-empty segments, extending one phoneme at a time ----- #
@@ -377,7 +383,7 @@ def segment_phonemes_by_ground_truth(
                 edits = col[g]
                 _relax(
                     row_cur, key_cur, back_cur, k, j,
-                    base_cost + edits * _COST_SCALE, base_bad + (1 if edits else 0),
+                    base_cost + edits * _COST_SCALE, base_bad + (1 if edits and not is_free else 0),
                     base_agree, j - k, g,
                 )
 
@@ -621,6 +627,19 @@ def _score_word(
     return list(expected), missed, added, substituted, phoneme_alignment_records(ops), list(edges)
 
 
+def _asr_word_pronunciation(asr_word) -> tuple[str, list[str]] | None:
+    """The cleaned ASR word and its primary G2P phonemes, or None when it has no known
+    pronunciation (unknown words, numbers, empty strings). Never raises."""
+    try:
+        from .grapheme_to_phoneme import clean_sentence, grapheme_to_phoneme
+        words = grapheme_to_phoneme(clean_sentence(str(asr_word)))
+        if len(words) != 1 or getattr(words[0], "oov", False) or not words[0][1]:
+            return None
+        return words[0][0], list(words[0][1])
+    except Exception:  # no pronunciation is always a safe answer
+        return None
+
+
 def _asr_word_fits(asr_word, segment: list[str], forgiven_errors: int) -> bool:
     """
     True when the word the ASR heard fits ``segment``, with nothing forgiven,
@@ -645,16 +664,20 @@ def _asr_word_fits(asr_word, segment: list[str], forgiven_errors: int) -> bool:
     return best <= forgiven_errors
 
 
-def _insertion_record(pred_word: str) -> dict:
-    """An ASR word with no counterpart in the sentence the child was asked to read."""
+def _insertion_record(pred_word: str, phonemes=()) -> dict:
+    """An ASR word with no counterpart in the sentence the child was asked to read.
+
+    ``phonemes`` are the sounds the segmentation gave the extra word (word scoring
+    v2), kept so that no heard phoneme is dropped. They are never scored.
+    """
     return {
         "type": "insertion",
         "predicted_word": pred_word,
         "ground_truth_word": "",
-        "phonemes": [],
+        "phonemes": list(phonemes),
         "ground_truth_phonemes": [],
         "expected_phonemes": [],
-        "actual_phonemes": [],
+        "actual_phonemes": list(phonemes),
         "per": 0.0,   # insertion is not a mispronunciation of an expected word
         "missed": [],
         "added": [],
@@ -690,6 +713,66 @@ def _deletion_record(gt_word: str, gt_phonemes: list[str]) -> dict:
         "edge_insertions": [],
         "error": "Word missing in prediction.",
     }
+
+
+def _segment_with_extra_words(flat_phonemes, gtp, skip_hints, insertions, give_extra_words_slots: bool):
+    """
+    Segment the flat stream over the expected words, with a free slot for each extra
+    word the ASR heard (word scoring v2).
+
+    Without a slot, an extra word's sounds land on a neighbouring expected word as
+    insertions ("watching the quiet playful" for "watching the playful": quiet's
+    sounds were charged to "the"). A slot costs nothing when empty, so a word the ASR
+    made up takes no sounds from a correctly read word. Extra words with no known
+    pronunciation get no slot.
+
+    Returns ``(segments, insertion_segments)``: one segment per expected word, and for
+    each insertion position the segments of its extra words, in order (``[]`` for an
+    extra word without a slot).
+    """
+    gt_count = len(gtp)
+    if not give_extra_words_slots or not any(insertions.values()):
+        segments = segment_phonemes_by_ground_truth(flat_phonemes, gtp, skip_hints)
+        return segments, {pos: [[] for _ in words] for pos, words in insertions.items()}
+
+    augmented, kinds = [], []  # kinds: ("gt", idx) or ("extra", position, n) or None for no slot
+    slotless = {}
+
+    def add_extras(position):
+        for n, extra in enumerate(insertions.get(position, ())):
+            pronunciation = _asr_word_pronunciation(extra)
+            if pronunciation is None:
+                slotless[(position, n)] = True
+                continue
+            augmented.append((extra, pronunciation[1]))
+            kinds.append(("extra", position, n))
+
+    for idx, word_phs in enumerate(gtp):
+        add_extras(idx)
+        augmented.append(word_phs)
+        kinds.append(("gt", idx))
+    add_extras(gt_count)
+
+    free = frozenset(i for i, kind in enumerate(kinds) if kind[0] == "extra")
+    if not free:
+        segments = segment_phonemes_by_ground_truth(flat_phonemes, gtp, skip_hints)
+        return segments, {pos: [[] for _ in words] for pos, words in insertions.items()}
+
+    augmented_skips = {i for i, kind in enumerate(kinds) if kind[0] == "gt" and kind[1] in skip_hints}
+    augmented_segments = segment_phonemes_by_ground_truth(flat_phonemes, augmented, augmented_skips, free=free)
+
+    segments = [[] for _ in range(gt_count)]
+    extra_segments = {}
+    for kind, segment in zip(kinds, augmented_segments):
+        if kind[0] == "gt":
+            segments[kind[1]] = segment
+        else:
+            extra_segments[(kind[1], kind[2])] = segment
+    insertion_segments = {
+        pos: [extra_segments.get((pos, n), []) for n in range(len(words))]
+        for pos, words in insertions.items()
+    }
+    return segments, insertion_segments
 
 
 def align_to_ground_truth(
@@ -745,14 +828,16 @@ def align_to_ground_truth(
     legacy_scoring = is_legacy_word_scoring()
 
     skip_hints, pred_labels, insertions = derive_asr_hints(gt_words, asr_words)
-    segments = segment_phonemes_by_ground_truth(flat_phonemes, gtp, skip_hints)
+    segments, insertion_segments = _segment_with_extra_words(
+        flat_phonemes, gtp, skip_hints, insertions, give_extra_words_slots=not legacy_scoring,
+    )
     # One dictionary lookup for the whole sentence, before the scoring loop.
     variants = {} if legacy_scoring else _sentence_variants(gt_words)
 
     results: list[dict] = []
     for idx, (gt_word, gt_phs) in enumerate(gtp):
-        for extra in insertions.get(idx, ()):
-            results.append(_insertion_record(extra))
+        for extra, extra_phonemes in zip(insertions.get(idx, ()), insertion_segments.get(idx, ())):
+            results.append(_insertion_record(extra, extra_phonemes))
 
         segment = segments[idx] if idx < len(segments) else []
 
@@ -802,7 +887,7 @@ def align_to_ground_truth(
             "edge_insertions": edge_insertions,
         })
 
-    for extra in insertions.get(len(gtp), ()):
-        results.append(_insertion_record(extra))
+    for extra, extra_phonemes in zip(insertions.get(len(gtp), ()), insertion_segments.get(len(gtp), ())):
+        results.append(_insertion_record(extra, extra_phonemes))
 
     return results

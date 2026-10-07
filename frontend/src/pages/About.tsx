@@ -15,6 +15,7 @@ import SeoHead from "@/components/SeoHead";
 import LandingPageFooter from "@/components/LandingPageFooter";
 import LandingPageCTA from "@/components/LandingPageCTA";
 import { Link } from "react-router-dom";
+import { ORGANIZATION_SCHEMA } from "@/data/organization";
 
 const fadeUpVariant = {
   hidden: { opacity: 0, y: 30 },
@@ -41,21 +42,7 @@ const About = () => {
     const structuredData = {
       "@context": "https://schema.org",
       "@type": "AboutPage",
-      mainEntity: {
-        "@type": "Organization",
-        name: "Word Wiz AI",
-        description:
-          "Free AI-powered reading tutor helping children learn to read with phoneme-level pronunciation feedback",
-        url: "https://wordwizai.com",
-        founder: {
-          "@type": "Person",
-          name: "Bruce Peters",
-        },
-        sameAs: [
-          "https://instagram.com/wordwizai",
-          "https://github.com/wordwizai",
-        ],
-      },
+      mainEntity: ORGANIZATION_SCHEMA,
     };
 
     const script = document.createElement("script");

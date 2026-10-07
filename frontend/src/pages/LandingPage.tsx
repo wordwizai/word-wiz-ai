@@ -13,6 +13,7 @@ import { googleLogin } from "@/api";
 import { GoogleIcon } from "@/components/GoogleIcon";
 import { trackSignupClick, trackTryEvent } from "@/utils/analytics";
 import { AuthContext } from "@/contexts/AuthContext";
+import { ORGANIZATION_ID, ORGANIZATION_SCHEMA } from "@/data/organization";
 import LandingSection from "@/components/landing/LandingSection";
 import ScrollCue from "@/components/landing/ScrollCue";
 import SoundBoxesSection from "@/components/landing/SoundBoxesSection";
@@ -50,39 +51,6 @@ const LandingPage = () => {
   // buttons. The prerendered HTML is the signed-out version.
   const signedIn = !!React.useContext(AuthContext).token;
 
-  // Add structured data for SEO
-  React.useEffect(() => {
-    const structuredData = {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      name: "Word Wiz AI",
-      applicationCategory: "EducationalApplication",
-      offers: {
-        "@type": "Offer",
-        price: "0",
-        priceCurrency: "USD",
-      },
-      description:
-        "AI-powered reading tutor that helps children learn to read with personalized phonics practice and pronunciation feedback",
-      operatingSystem: "Web Browser",
-      url: "https://wordwizai.com",
-      author: {
-        "@type": "Organization",
-        name: "Word Wiz AI",
-        url: "https://wordwizai.com",
-      },
-    };
-
-    const script = document.createElement("script");
-    script.type = "application/ld+json";
-    script.text = JSON.stringify(structuredData);
-    document.head.appendChild(script);
-
-    return () => {
-      document.head.removeChild(script);
-    };
-  }, []);
-
   return (
     <MotionConfig reducedMotion="user">
       <main className="scroll-smooth bg-background text-foreground">
@@ -92,24 +60,30 @@ const LandingPage = () => {
           canonicalPath="/"
           structuredData={{
             "@context": "https://schema.org",
-            "@type": "SoftwareApplication",
-            name: "Word Wiz AI",
-            applicationCategory: "EducationalApplication",
-            operatingSystem: "Any (web browser)",
-            description:
-              "A free AI-powered reading tutor that listens to children read aloud and gives phoneme-level pronunciation feedback.",
-            url: "https://wordwizai.com/",
-            offers: {
-              "@type": "Offer",
-              price: "0",
-              priceCurrency: "USD",
-            },
-            audience: {
-              "@type": "EducationalAudience",
-              educationalRole: "student",
-              suggestedMinAge: 5,
-              suggestedMaxAge: 8,
-            },
+            "@graph": [
+              ORGANIZATION_SCHEMA,
+              {
+                "@type": "SoftwareApplication",
+                name: "Word Wiz AI",
+                applicationCategory: "EducationalApplication",
+                operatingSystem: "Any (web browser)",
+                description:
+                  "A free AI-powered reading tutor that listens to children read aloud and gives phoneme-level pronunciation feedback.",
+                url: "https://wordwizai.com/",
+                publisher: { "@id": ORGANIZATION_ID },
+                offers: {
+                  "@type": "Offer",
+                  price: "0",
+                  priceCurrency: "USD",
+                },
+                audience: {
+                  "@type": "EducationalAudience",
+                  educationalRole: "student",
+                  suggestedMinAge: 5,
+                  suggestedMaxAge: 8,
+                },
+              },
+            ],
           }}
         />
 

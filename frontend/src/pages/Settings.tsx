@@ -24,7 +24,6 @@ import { useSettings } from "@/contexts/SettingsContext";
 import {
   Settings2,
   User,
-  Bell,
   Palette,
   Zap,
   CheckCircle2,
@@ -52,6 +51,8 @@ const initialSettings: Settings = {
   use_websocket: false,
 };
 
+const TABS = ["profile", "account", "appearance", "performance"];
+
 const Settings = () => {
   const [savedStatus, setSavedStatus] = useState("");
   const { user } = useContext(AuthContext);
@@ -64,7 +65,8 @@ const Settings = () => {
       typeof window !== "undefined"
         ? window.location.hash.replace("#", "")
         : "";
-    return hash || "profile";
+    // Old links can still point at tabs that are gone (#notifications).
+    return TABS.includes(hash) ? hash : "profile";
   });
 
   useEffect(() => {
@@ -73,7 +75,7 @@ const Settings = () => {
     }
   }, [settings]);
 
-  const handleChange = (field: keyof Settings, value: any) => {
+  const handleChange = (field: keyof Settings, value: Settings[keyof Settings]) => {
     setTempSettings((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -90,7 +92,7 @@ const Settings = () => {
   };
 
   return (
-    <AppPage width="narrow">
+    <AppPage width="narrow" title="Settings">
       <PageHeader
         title="Settings"
         description="Your account, how the app looks, and how it processes audio."
@@ -105,26 +107,22 @@ const Settings = () => {
         }}
         className="w-full"
       >
-        <TabsList className="flex flex-wrap h-auto gap-1 mb-6 bg-muted/60 p-1 rounded-xl">
+        <TabsList className="grid w-full grid-cols-2 lg:flex lg:w-fit h-auto gap-1 mb-6 bg-muted/60 p-1 rounded-xl">
           <TabsTrigger value="profile" className="flex items-center gap-1.5 rounded-lg flex-1 min-w-fit data-[state=active]:shadow-sm">
             <User className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Profile</span>
+            <span>Profile</span>
           </TabsTrigger>
           <TabsTrigger value="account" className="flex items-center gap-1.5 rounded-lg flex-1 min-w-fit data-[state=active]:shadow-sm">
             <Settings2 className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Account</span>
+            <span>Account</span>
           </TabsTrigger>
           <TabsTrigger value="appearance" className="flex items-center gap-1.5 rounded-lg flex-1 min-w-fit data-[state=active]:shadow-sm">
             <Palette className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Appearance</span>
-          </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex items-center gap-1.5 rounded-lg flex-1 min-w-fit data-[state=active]:shadow-sm">
-            <Bell className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Notifications</span>
+            <span>Appearance</span>
           </TabsTrigger>
           <TabsTrigger value="performance" className="flex items-center gap-1.5 rounded-lg flex-1 min-w-fit data-[state=active]:shadow-sm">
             <Zap className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Performance</span>
+            <span>Performance</span>
           </TabsTrigger>
         </TabsList>
 
@@ -133,7 +131,7 @@ const Settings = () => {
             <CardHeader>
               <CardTitle>Profile Settings</CardTitle>
               <CardDescription>
-                Manage your personal profile information.
+                The name and email on your account.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -219,9 +217,9 @@ const Settings = () => {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label htmlFor="darkMode">Dark Mode</Label>
+                  <Label htmlFor="theme">Theme</Label>
                   <p className="text-sm text-muted-foreground">
-                    Toggle between light and dark mode.
+                    Light, dark, or match your device.
                   </p>
                 </div>
                 <Select
@@ -244,68 +242,26 @@ const Settings = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="notifications">
-          <Card className="rounded-2xl shadow-xs">
-            <CardHeader>
-              <CardTitle>Notification Settings</CardTitle>
-              <CardDescription>
-                Manage when and how you receive notifications.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="emailNotifs">Email Notifications</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Receive updates and information via email.
-                  </p>
-                </div>
-                <Switch
-                  id="emailNotifs"
-                  checked={!!tempSettings.email_notifications}
-                  onCheckedChange={(checked) =>
-                    handleChange("email_notifications", checked)
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="pushNotifs">Push Notifications</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Receive notifications on your device.
-                  </p>
-                </div>
-                <Switch
-                  id="pushNotifs"
-                  checked={!!tempSettings.notifications_enabled}
-                  onCheckedChange={(checked) =>
-                    handleChange("notifications_enabled", checked)
-                  }
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         <TabsContent value="performance">
           <Card className="rounded-2xl shadow-xs">
             <CardHeader>
               <CardTitle>Performance Settings</CardTitle>
               <CardDescription>
-                Optimize how the application processes audio and AI features.
+                Choose how your child's reading gets checked.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex-1 pr-4">
                   <Label htmlFor="clientProcessing">
-                    Client-Side Phoneme Processing
+                    Check sounds on this device
                   </Label>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Process phonemes in your browser for 50-70% faster results.
-                    Requires ~100MB model download on first use. Disable on
-                    slower devices or poor connections.
+                    Works out the sounds in this browser instead of waiting
+                    on our server, which is usually 50 to 70% faster. The
+                    first time, it downloads about 100 MB. Turn it off on
+                    older devices or slow internet.
                   </p>
                 </div>
                 <Switch
@@ -322,13 +278,12 @@ const Settings = () => {
               <div className="flex items-center justify-between">
                 <div className="flex-1 pr-4">
                   <Label htmlFor="websocketConnection">
-                    WebSocket Connection (Experimental)
+                    Stay connected between recordings (experimental)
                   </Label>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Use persistent WebSocket connection instead of creating new
-                    connections for each request. Eliminates 5-second connection
-                    overhead on subsequent recordings. Recommended for faster
-                    experience.
+                    Keeps one connection to our server open instead of
+                    starting a new one for every sentence, so feedback after
+                    the first recording can come back up to 5 seconds sooner.
                   </p>
                 </div>
                 <Switch
@@ -348,10 +303,10 @@ const Settings = () => {
                   <h4 className="text-sm font-semibold text-foreground">Performance Tips</h4>
                 </div>
                 <ul className="text-sm text-muted-foreground space-y-1.5 list-disc list-inside">
-                  <li>Model downloads once and caches for future sessions</li>
-                  <li>Automatically disabled on low-memory devices</li>
-                  <li>Falls back to server processing if any issues occur</li>
-                  <li>Best results on desktop with good internet connection</li>
+                  <li>The download happens once and is saved for next time</li>
+                  <li>Turns itself off on devices without enough memory</li>
+                  <li>If anything goes wrong, our server checks the reading instead</li>
+                  <li>Works best on a computer with a good internet connection</li>
                 </ul>
               </div>
             </CardContent>
@@ -359,6 +314,8 @@ const Settings = () => {
         </TabsContent>
       </Tabs>
 
+      {/* Profile is read-only, so a save button there did nothing. */}
+      {tab !== "profile" && (
       <div className="mt-6 flex justify-between items-center gap-4 pt-4 border-t border-border">
         <div className="flex items-center gap-2 min-h-[20px]">
           {savedStatus && (
@@ -376,6 +333,7 @@ const Settings = () => {
           Save changes
         </Button>
       </div>
+      )}
       </div>
     </AppPage>
   );

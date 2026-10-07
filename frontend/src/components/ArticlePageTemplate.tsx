@@ -23,7 +23,7 @@ import {
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import LandingPageFooter from "@/components/LandingPageFooter";
 import { DEFAULT_OG_IMAGE } from "@/components/SeoHead";
-import { trackSignupClick } from "@/utils/analytics";
+import { trackSignupClick, trackTryEvent } from "@/utils/analytics";
 import { getPracticeLinksForArticle } from "@/data/articlePracticeLinks";
 import { phonicsPatterns } from "@/data/phonicsPatterns";
 
@@ -90,6 +90,9 @@ interface ArticlePageProps {
   // Author & metadata
   author: Author;
   publishDate: string; // ISO format
+  // ISO format. The last real content change, shown in the byline and sent as
+  // dateModified. Leave it out for title or schema-only edits.
+  updatedDate?: string;
   readTime: number; // minutes
 
   // Content
@@ -139,6 +142,7 @@ const ArticleHero: React.FC<{
   category: string;
   author: Author;
   publishDate: string;
+  updatedDate?: string;
   readTime: number;
 }> = ({
   heroImage,
@@ -148,13 +152,15 @@ const ArticleHero: React.FC<{
   category,
   author,
   publishDate,
+  updatedDate,
   readTime,
 }) => {
-  const formattedDate = new Date(publishDate).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  // ISO dates parse as UTC midnight, so format in UTC too. Otherwise US
+  // visitors see the day before the prerendered date.
+  const formattedDate = new Date(updatedDate ?? publishDate).toLocaleDateString(
+    "en-US",
+    { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" }
+  );
 
   return (
     <div className="mb-12">
@@ -201,7 +207,15 @@ const ArticleHero: React.FC<{
           </div>
           <div className="flex items-center gap-1">
             <Calendar className="w-4 h-4" />
-            <span>{formattedDate}</span>
+            <span>
+              {updatedDate ? (
+                <>
+                  Updated <time dateTime={updatedDate}>{formattedDate}</time>
+                </>
+              ) : (
+                <time dateTime={publishDate}>{formattedDate}</time>
+              )}
+            </span>
           </div>
           <div className="flex items-center gap-1">
             <Clock className="w-4 h-4" />
@@ -286,10 +300,10 @@ const CalloutBoxComponent: React.FC<{ callout: CalloutBox }> = ({
   };
 
   const styles = {
-    info: "bg-blue-50 border-blue-200 text-blue-900",
-    tip: "bg-green-50 border-green-200 text-green-900",
-    warning: "bg-yellow-50 border-yellow-200 text-yellow-900",
-    success: "bg-emerald-50 border-emerald-200 text-emerald-900",
+    info: "bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-500/10 dark:border-blue-400/40 dark:text-blue-100",
+    tip: "bg-green-50 border-green-200 text-green-900 dark:bg-green-500/10 dark:border-green-400/40 dark:text-green-100",
+    warning: "bg-yellow-50 border-yellow-200 text-yellow-900 dark:bg-yellow-500/10 dark:border-yellow-400/40 dark:text-yellow-100",
+    success: "bg-emerald-50 border-emerald-200 text-emerald-900 dark:bg-emerald-500/10 dark:border-emerald-400/40 dark:text-emerald-100",
   };
 
   return (
@@ -365,6 +379,59 @@ const RelatedArticlesComponent: React.FC<{ articles: RelatedArticle[] }> = ({
   </Card>
 );
 
+// Leads with the no-account try page for the article's first practice
+// pattern, so a parent can hear what Word Wiz does before signing up.
+const FinalCta: React.FC<{ canonicalUrl: string; headline: string }> = ({
+  canonicalUrl,
+  headline,
+}) => {
+  const tryPattern = getPracticeLinksForArticle(
+    new URL(canonicalUrl).pathname
+  )[0];
+
+  return (
+    <Card className="mt-12 bg-primary text-primary-foreground">
+      <CardContent className="p-8 text-center">
+        <h3 className="text-2xl font-bold mb-4">
+          Ready to Help Your Child Read Better?
+        </h3>
+        <p className="mb-6 text-primary-foreground/90">
+          Have your child read a few sentences out loud and see which sounds
+          Word Wiz AI catches. Free, and no sign-up needed to try.
+        </p>
+        <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+          {tryPattern && (
+            <Button size="lg" variant="secondary" asChild>
+              <Link
+                to={`/try/${tryPattern.slug}`}
+                onClick={() =>
+                  trackTryEvent("try_link_click", tryPattern.slug, "article_final_cta")
+                }
+              >
+                Try it out loud
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Link>
+            </Button>
+          )}
+          <Button
+            size="lg"
+            variant="ghost"
+            asChild
+            className="text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
+          >
+            <Link
+              to="/signup"
+              onClick={() => trackSignupClick('article_final_cta', 'link', headline)}
+            >
+              Get Started Free
+            </Link>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 const PracticeWordListsCard: React.FC<{ canonicalUrl: string }> = ({
   canonicalUrl,
 }) => {
@@ -439,6 +506,7 @@ const ShareButtons: React.FC<{ url: string; title: string }> = ({
           <Button size="sm" variant="outline" asChild>
             <a
               href={shareUrls.twitter}
+              aria-label="Share on X (Twitter)"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -448,6 +516,7 @@ const ShareButtons: React.FC<{ url: string; title: string }> = ({
           <Button size="sm" variant="outline" asChild>
             <a
               href={shareUrls.facebook}
+              aria-label="Share on Facebook"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -457,6 +526,7 @@ const ShareButtons: React.FC<{ url: string; title: string }> = ({
           <Button size="sm" variant="outline" asChild>
             <a
               href={shareUrls.linkedin}
+              aria-label="Share on LinkedIn"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -464,7 +534,7 @@ const ShareButtons: React.FC<{ url: string; title: string }> = ({
             </a>
           </Button>
           <Button size="sm" variant="outline" asChild>
-            <a href={shareUrls.email}>
+            <a href={shareUrls.email} aria-label="Share by email">
               <Mail className="w-4 h-4" />
             </a>
           </Button>
@@ -506,6 +576,7 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
   subheadline,
   author,
   publishDate,
+  updatedDate,
   readTime,
   category,
   content,
@@ -514,6 +585,13 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
   breadcrumbs,
   inlineCTAs = [],
 }) => {
+  // Pages hardcode dateModified in their own JSON-LD. updatedDate wins so the
+  // schema and the visible byline can't disagree.
+  const jsonLd =
+    updatedDate && structuredData && !Array.isArray(structuredData)
+      ? { ...structuredData, dateModified: updatedDate }
+      : structuredData;
+
   const renderSection = (section: ArticleSection, idx: number) => {
     // Check if there's a CTA to insert after this section
     const ctaAfterSection = inlineCTAs.find((cta) => cta.afterSection === idx);
@@ -619,7 +697,7 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
         <meta name="twitter:description" content={metaDescription} />
         {ogImage && <meta name="twitter:image" content={ogImage} />}
         <script type="application/ld+json">
-          {JSON.stringify(structuredData)}
+          {JSON.stringify(jsonLd)}
         </script>
       </Helmet>
 
@@ -640,6 +718,7 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
               category={category}
               author={author}
               publishDate={publishDate}
+              updatedDate={updatedDate}
               readTime={readTime}
             />
 
@@ -653,27 +732,7 @@ const ArticlePageTemplate: React.FC<ArticlePageProps> = ({
 
                 <PracticeWordListsCard canonicalUrl={canonicalUrl} />
 
-                {/* Final CTA */}
-                <Card className="mt-12 bg-primary text-primary-foreground">
-                  <CardContent className="p-8 text-center">
-                    <h3 className="text-2xl font-bold mb-4">
-                      Ready to Help Your Child Read Better?
-                    </h3>
-                    <p className="mb-6 text-primary-foreground/90">
-                      Try Word Wiz AI's free pronunciation feedback and phonics
-                      practice
-                    </p>
-                    <Button size="lg" variant="secondary" asChild>
-                      <Link 
-                        to="/signup"
-                        onClick={() => trackSignupClick('article_final_cta', 'link', headline)}
-                      >
-                        Get Started Free
-                        <ArrowRight className="ml-2 w-4 h-4" />
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
+                <FinalCta canonicalUrl={canonicalUrl} headline={headline} />
               </div>
 
               {/* Sidebar */}

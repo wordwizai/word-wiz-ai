@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { wordWizIcon } from "@/assets";
+import Mascot from "@/components/mascot/Mascot";
 import React from "react";
 import {
   Users,
@@ -14,6 +14,8 @@ import LandingPageNavbar from "@/components/LandingPageNavbar";
 import SeoHead from "@/components/SeoHead";
 import LandingPageFooter from "@/components/LandingPageFooter";
 import LandingPageCTA from "@/components/LandingPageCTA";
+import { Link } from "react-router-dom";
+import { ORGANIZATION_SCHEMA } from "@/data/organization";
 
 const fadeUpVariant = {
   hidden: { opacity: 0, y: 30 },
@@ -40,17 +42,7 @@ const About = () => {
     const structuredData = {
       "@context": "https://schema.org",
       "@type": "AboutPage",
-      mainEntity: {
-        "@type": "Organization",
-        name: "Word Wiz AI",
-        description:
-          "Free AI-powered reading tutor helping children learn to read with phoneme-level pronunciation feedback",
-        url: "https://wordwizai.com",
-        sameAs: [
-          "https://instagram.com/wordwizai",
-          "https://github.com/wordwizai",
-        ],
-      },
+      mainEntity: ORGANIZATION_SCHEMA,
     };
 
     const script = document.createElement("script");
@@ -76,7 +68,7 @@ const About = () => {
 
       {/* Hero Section */}
       <motion.section
-        className="px-6 py-20 bg-gradient-to-br from-background to-purple-50/50"
+        className="px-6 py-20 bg-gradient-to-br from-background to-purple-50/50 dark:to-primary/10"
         variants={fadeUpVariant}
         initial="hidden"
         animate="visible"
@@ -88,7 +80,7 @@ const About = () => {
             whileHover={{ scale: 1.05, rotate: 5 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <img src={wordWizIcon} alt="Word Wiz AI" className="w-14 h-14" />
+            <Mascot mood="idle" label="Word Wiz AI" className="size-14" />
           </motion.div>
           <motion.h1
             className="text-4xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent"
@@ -156,7 +148,7 @@ const About = () => {
               },
             ].map((mission, i) => (
               <div key={i}>
-                <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl text-center h-full hover:shadow-2xl transition-shadow rounded-3xl">
+                <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 dark:from-card dark:to-card dark:border-border shadow-xl text-center h-full hover:shadow-2xl transition-shadow rounded-3xl">
                   <CardHeader className="pb-4">
                     <div
                       className={`w-12 h-12 bg-gradient-to-r ${mission.iconBg} rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg`}
@@ -174,6 +166,45 @@ const About = () => {
               </div>
             ))}
           </motion.div>
+        </div>
+      </motion.section>
+
+      {/* Founder Section */}
+      <motion.section
+        className="px-6 py-20 bg-background"
+        variants={fadeUpVariant}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.6 }}
+      >
+        <div className="max-w-3xl mx-auto space-y-6">
+          <h2 className="text-3xl md:text-4xl font-bold text-center">
+            Who built this
+          </h2>
+          <p className="text-muted-foreground leading-relaxed">
+            I'm Bruce Peters, a high school student in the Bay Area, and I
+            built Word Wiz AI on my own. Most reading apps tell a kid that a
+            word was wrong. I wanted something that could hear which sound
+            inside the word was off, the way a tutor sitting next to them
+            would. Word Wiz placed 2nd in the Congressional App Challenge for
+            California's 15th district.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            I'm also doing research on AI in education at Boston University
+            (one of my projects looks at noticing when a student has drifted
+            off task while reading). The goal is the same as Word Wiz, which
+            is making tools like this actually work for the people who matter,
+            kids learning to read and the parents and teachers helping them.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            It's free, and if something isn't working for your child, I'd
+            honestly like to hear about it through the{" "}
+            <Link to="/contact" className="text-primary underline">
+              contact page
+            </Link>
+            .
+          </p>
         </div>
       </motion.section>
 
@@ -230,7 +261,7 @@ const About = () => {
               },
             ].map((member, i) => (
               <motion.div key={i} variants={childVariant}>
-                <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl text-center h-full hover:shadow-2xl transition-shadow rounded-3xl">
+                <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 dark:from-card dark:to-card dark:border-border shadow-xl text-center h-full hover:shadow-2xl transition-shadow rounded-3xl">
                   <CardHeader className="pb-4">
                     <div className={`w-16 h-16 bg-gradient-to-br ${member.gradient} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg`}>
                       <span className="text-white font-bold text-lg">

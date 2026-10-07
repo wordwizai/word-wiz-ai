@@ -16,6 +16,7 @@ import SeoHead from "@/components/SeoHead";
 import LandingPageFooter from "@/components/LandingPageFooter";
 import LandingPageCTA from "@/components/LandingPageCTA";
 import React from "react";
+import { SUPPORT_EMAIL, supportMailto } from "@/config/contact";
 
 const fadeUpVariant = {
   hidden: { opacity: 0, y: 30 },
@@ -41,7 +42,6 @@ const Contact = () => {
   const [email, setEmail] = React.useState("");
   const [subject, setSubject] = React.useState("");
   const [message, setMessage] = React.useState("");
-  const [loading, setLoading] = React.useState(false);
   const [submitted, setSubmitted] = React.useState(false);
 
   // Add structured data for SEO
@@ -67,27 +67,18 @@ const Contact = () => {
     };
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  // There's no mail backend, so hand the message to the visitor's own email
+  // app with everything already filled in. This used to pop an alert saying
+  // the form wasn't built yet and throw the typed message away.
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    alert(
-      "This system is not yet implemented. Please feel free to reach out to us via email. We look forward to hearing form you!"
+    window.location.href = supportMailto(
+      subject,
+      `${message}
+
+${name} (${email})`
     );
-    // setLoading(true);
-    //
-    // // Simulate form submission
-    // await new Promise((resolve) => setTimeout(resolve, 1000));
-    //
-    // setSubmitted(true);
-    // setLoading(false);
-    //
-    // // Reset form after 3 seconds
-    // setTimeout(() => {
-    //   setSubmitted(false);
-    //   setName("");
-    //   setEmail("");
-    //   setSubject("");
-    //   setMessage("");
-    // }, 3000);
+    setSubmitted(true);
   };
 
   return (
@@ -103,7 +94,7 @@ const Contact = () => {
 
       {/* Hero Section */}
       <motion.section
-        className="px-6 py-20 bg-gradient-to-br from-background to-purple-50/50"
+        className="px-6 py-20 bg-gradient-to-br from-background to-purple-50/50 dark:to-primary/10"
         variants={fadeUpVariant}
         initial="hidden"
         animate="visible"
@@ -155,7 +146,7 @@ const Contact = () => {
               whileInView="visible"
               viewport={{ once: true }}
             >
-              <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-xl rounded-3xl">
+              <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 dark:from-card dark:to-card dark:border-border shadow-xl rounded-3xl">
                 <CardHeader>
                   <CardTitle className="text-2xl font-bold flex items-center gap-2">
                     <Send className="w-6 h-6 text-primary" />
@@ -172,12 +163,28 @@ const Contact = () => {
                       <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
                         <Heart className="w-8 h-8 text-green-600" />
                       </div>
-                      <h3 className="text-xl font-semibold text-green-700">
-                        Message Sent!
+                      <h3 className="text-xl font-semibold text-green-700 dark:text-green-400">
+                        Almost there
                       </h3>
                       <p className="text-muted-foreground">
-                        Thank you for reaching out. We'll get back to you soon!
+                        Your email app should be open with your message
+                        filled in. Press send there and it comes straight to
+                        us. If nothing opened, write to{" "}
+                        <a
+                          href={`mailto:${SUPPORT_EMAIL}`}
+                          className="font-medium text-primary underline-offset-4 hover:underline"
+                        >
+                          {SUPPORT_EMAIL}
+                        </a>
+                        .
                       </p>
+                      <Button
+                        variant="outline"
+                        className="rounded-xl"
+                        onClick={() => setSubmitted(false)}
+                      >
+                        Back to my message
+                      </Button>
                     </motion.div>
                   ) : (
                     <form onSubmit={handleSubmit} className="space-y-6">
@@ -229,14 +236,18 @@ const Contact = () => {
                           className="w-full px-3 py-2 border border-input bg-background rounded-xl text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
                         />
                       </div>
-                      <Button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full rounded-xl py-3 text-base font-semibold"
-                        size="lg"
-                      >
-                        {loading ? "Sending..." : "Send Message"}
-                      </Button>
+                      <div className="space-y-2">
+                        <Button
+                          type="submit"
+                          className="w-full rounded-xl py-3 text-base font-semibold"
+                          size="lg"
+                        >
+                          Send Message
+                        </Button>
+                        <p className="text-center text-xs text-muted-foreground">
+                          Opens your email app with this message filled in.
+                        </p>
+                      </div>
                     </form>
                   )}
                 </CardContent>
@@ -270,7 +281,7 @@ const Contact = () => {
                   },
                 ].map((item, i) => (
                   <motion.div key={i} variants={childVariant}>
-                    <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 shadow-lg hover:shadow-xl transition-shadow rounded-2xl">
+                    <Card className="bg-gradient-to-br from-white to-purple-50/50 border-2 border-purple-100/50 dark:from-card dark:to-card dark:border-border shadow-lg hover:shadow-xl transition-shadow rounded-2xl">
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
                           <div

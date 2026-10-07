@@ -19,7 +19,7 @@ const RecommendationsCard = ({ recommendations }: RecommendationsCardProps) => {
       {recommendations.map((recommendation, index) => (
         <div
           key={index}
-          className="bg-blue-50 dark:bg-blue-950 rounded-lg p-4 border-l-4 border-blue-500"
+          className="bg-pastel-blue rounded-xl p-4 border-l-4 border-pastel-blue-foreground"
         >
           <p className="text-sm text-foreground">{recommendation}</p>
         </div>

@@ -7,7 +7,7 @@ const SkipsWords = () => {
       content: {
         type: "info",
         title: "Why does my first grader skip words when reading aloud?",
-        content: "Word skipping has six root causes: text that is too hard, weak visual tracking, rushing, guessing from pictures, boredom, and no comprehension self-monitoring. Diagnose before fixing. Count errors and skips on one page, and if there are more than five, the text is too hard. Drop to books where the child knows 95-98 percent of words. Most children improve markedly within two to three months.",
+        content: "Word skipping has six root causes: text that is too hard, weak visual tracking, rushing, guessing from pictures, boredom, and no comprehension self-monitoring. Diagnose before fixing. Count errors and skips on one page, and if there are more than five, the text is too hard. Drop to books where the child knows 95-98 percent of words. Improvement usually takes several weeks of steady daily practice.",
       },
     },
     {
@@ -27,7 +27,7 @@ const SkipsWords = () => {
     {
       type: "list",
       content: [
-        "**Comprehension suffers** - Skipping \"not\" changes \"I am happy\" to \"I am not happy\"—opposite meaning",
+        "**Comprehension suffers** - Skipping \"not\" changes \"I am not happy\" to \"I am happy\"—opposite meaning",
         "**Bad habits form** - The brain learns it can guess/skip instead of decode, making fluent reading harder later",
         "**Indicates text is too hard** - Children skip words they can't decode, signaling they're reading above their level",
         "**Prevents self-correction** - Readers who skip don't monitor for meaning, so errors go uncorrected"
@@ -54,7 +54,7 @@ const SkipsWords = () => {
     },
     {
       type: "paragraph",
-      content: "The most common cause: your child is reading books above their decoding level. When children encounter unknown words, they skip them rather than struggle. This creates a cascading effect—the more words they skip, the less they understand, making subsequent words even harder to decode in context."
+      content: "A very common cause is that your child is reading books above their decoding level. When children encounter unknown words, they skip them rather than struggle. This creates a cascading effect—the more words they skip, the less they understand, making subsequent words even harder to decode in context."
     },
     {
       type: "paragraph",
@@ -401,16 +401,16 @@ const SkipsWords = () => {
       type: "list",
       content: [
         "**Text too hard:** Immediate improvement when using appropriate-level books",
-        "**Tracking issues:** 2-4 weeks with consistent use of tracking tools",
-        "**Speed reading:** 4-8 weeks retraining for careful reading",
-        "**Visual guessing:** 6-12 weeks breaking picture-dependence habit",
+        "**Tracking issues:** Often improves within a few weeks of consistent use of tracking tools",
+        "**Speed reading:** Takes several weeks of retraining for careful reading",
+        "**Visual guessing:** Breaking a picture-dependence habit usually takes longer",
         "**Boredom:** Immediate improvement with high-interest books",
-        "**Comprehension monitoring:** 8-12 weeks building self-checking habit"
+        "**Comprehension monitoring:** Building a self-checking habit is often the slowest"
       ]
     },
     {
       type: "paragraph",
-      content: "With consistent daily practice (15-20 minutes), most children show significant improvement within 2-3 months."
+      content: "With consistent daily practice (15-20 minutes), skipping usually fades over several weeks to a few months."
     },
     {
       type: "callout",
@@ -451,13 +451,13 @@ const SkipsWords = () => {
     },
     {
       type: "paragraph",
-      content: "Word Wiz AI is particularly effective at addressing word skipping because:"
+      content: "Here is how Word Wiz AI can help with word skipping."
     },
     {
       type: "list",
       content: [
-        "**Catches every skip instantly:** AI detects when child skips a word and provides immediate feedback",
-        "**Forces word-by-word reading:** System requires accurate pronunciation of each word before moving forward",
+        "**Notices skipped words:** AI detects when child skips a word and provides immediate feedback",
+        "**Encourages word-by-word reading:** Feedback names the words that were missed, so your child knows exactly what to reread",
         "**No picture guessing:** Text-only interface eliminates visual cue dependence",
         "**Builds careful reading habit:** Consistent feedback trains brain to read every word",
         "**Objective measurement:** Tracks accuracy percentage over time, showing clear improvement trends",
@@ -531,7 +531,7 @@ const SkipsWords = () => {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: "First Grader Skips Words When Reading Aloud",
-    description: "Your first grader skips words when reading? Learn the 6 root causes (text too hard, tracking issues, rushing, guessing, etc.) and proven fixes for each.",
+    description: "Your first grader skips words when reading? Learn the 6 root causes (text too hard, tracking issues, rushing, guessing, etc.) and practical fixes for each.",
     author: {
       "@type": "Organization",
       name: "Word Wiz AI"
@@ -552,7 +552,7 @@ const SkipsWords = () => {
     <>
       <ArticlePageTemplate
         metaTitle="First Grader Skips Words When Reading Aloud (6 Causes + Fixes)"
-        metaDescription="Your first grader skips words when reading? Learn the 6 root causes (text too hard, tracking issues, rushing, guessing, etc.) and proven fixes for each."
+        metaDescription="Your first grader skips words when reading? Learn the 6 root causes (text too hard, tracking issues, rushing, guessing, etc.) and practical fixes for each."
         canonicalUrl="https://wordwizai.com/articles/first-grader-skips-words-when-reading-aloud"
         heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=630&fit=crop"
         heroImageAlt="First grader reading with parent, skipping words"
@@ -563,6 +563,7 @@ const SkipsWords = () => {
           bio: "Reading specialists helping parents address common reading challenges.",
         }}
         publishDate="2025-01-02"
+        updatedDate="2026-09-07"
         readTime={13}
         category="Reading Problems"
         content={content}

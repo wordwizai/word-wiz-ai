@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import SessionHistoryList from "./SessionHistoryList";
 import PhonemeInsightsCard from "./PhonemeInsightsCard";
 import RecommendationsCard from "./RecommendationsCard";
+import StudentPhonicsPath from "./StudentPhonicsPath";
 import {
   ArrowLeft,
   BookOpen,
@@ -68,9 +69,9 @@ const StudentDetailView = ({
   };
 
   const getAccuracyColor = (per: number) => {
-    if (per < 0.1) return "text-green-600";
-    if (per < 0.2) return "text-yellow-600";
-    return "text-orange-600";
+    if (per < 0.1) return "text-pastel-mint-foreground";
+    if (per < 0.2) return "text-pastel-yellow-foreground";
+    return "text-pastel-coral-foreground";
   };
 
   const getStreakMessage = (streak: number) => {
@@ -109,7 +110,7 @@ const StudentDetailView = ({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <Card className="rounded-2xl bg-card border-2 border-border shadow-md">
+      <Card className="gap-0 rounded-2xl py-0 shadow-xs">
         <div className="p-6">
           <Button
             variant="ghost"
@@ -148,7 +149,7 @@ const StudentDetailView = ({
       </Card>
 
       {/* Performance Overview */}
-      <Card className="rounded-2xl bg-card border-2 border-border shadow-md">
+      <Card className="gap-0 rounded-2xl py-0 shadow-xs">
         <div className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-foreground">
@@ -220,7 +221,7 @@ const StudentDetailView = ({
             {/* Current Streak */}
             <div className="bg-muted rounded-lg p-4">
               <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                <Flame className="w-5 h-5 text-orange-500" />
+                <Flame className="w-5 h-5 text-pastel-coral-foreground" />
                 <span className="text-sm font-medium">Current Streak</span>
               </div>
               <p className="text-3xl font-bold text-foreground">
@@ -235,8 +236,10 @@ const StudentDetailView = ({
         </div>
       </Card>
 
+      <StudentPhonicsPath classId={classId} studentId={student.id} />
+
       {/* Recent Activity */}
-      <Card className="rounded-2xl bg-card border-2 border-border shadow-md">
+      <Card className="gap-0 rounded-2xl py-0 shadow-xs">
         <div className="p-6">
           <h2 className="text-lg font-bold text-foreground mb-4">
             Recent Activity
@@ -263,7 +266,7 @@ const StudentDetailView = ({
       </Card>
 
       {/* Problem Areas */}
-      <Card className="rounded-2xl bg-card border-2 border-border shadow-md">
+      <Card className="gap-0 rounded-2xl py-0 shadow-xs">
         <div className="p-6">
           <h2 className="text-lg font-bold text-foreground mb-4">
             Problem Areas
@@ -283,7 +286,7 @@ const StudentDetailView = ({
       </Card>
 
       {/* Teaching Recommendations */}
-      <Card className="rounded-2xl bg-card border-2 border-border shadow-md">
+      <Card className="gap-0 rounded-2xl py-0 shadow-xs">
         <div className="p-6">
           <h2 className="text-lg font-bold text-foreground mb-4">
             Teaching Recommendations

@@ -21,13 +21,16 @@ import {
   showNetworkError,
   showPracticeErrorToast,
 } from "@/utils/errorHandling";
+import type { SessionResult } from "@/lib/phonics";
 
 export interface UseAudioTransportOptions {
   onAnalysis?: (data: any) => void;
   /** Called immediately with locally-generated feedback text (before TTS is ready). */
   onFeedback?: (data: { text: string; ssml?: string }) => void;
   /** Called when GPT returns the next practice sentence (arrives in parallel with audio). */
-  onNextSentence?: (data: { sentence: any }) => void;
+  onNextSentence?: (data: { sentence: any; line_index?: number; line_count?: number }) => void;
+  /** Pattern sessions only: the last line was read. Carries the score. */
+  onSessionComplete?: (data: SessionResult) => void;
   onAudioFeedback?: (audioUrl: string) => void;
   onError?: (error: string) => void;
   onProcessingStart?: () => void;
@@ -70,6 +73,10 @@ export function useAudioTransport(options: UseAudioTransportOptions) {
 
       case "next_sentence":
         opts.onNextSentence?.(event.data);
+        break;
+
+      case "session_complete":
+        opts.onSessionComplete?.(event.data);
         break;
 
       case "audio_feedback_file":

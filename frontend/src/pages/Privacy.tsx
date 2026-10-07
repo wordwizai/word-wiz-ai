@@ -46,7 +46,7 @@ const Privacy = () => {
 
       {/* Hero Section */}
       <motion.section
-        className="px-6 py-4 bg-gradient-to-br from-background to-purple-50/50"
+        className="px-6 py-4 bg-gradient-to-br from-background to-purple-50/50 dark:to-primary/10"
         variants={fadeUpVariant}
         initial="hidden"
         animate="visible"
@@ -95,6 +95,16 @@ const Privacy = () => {
                     protecting personal information. The product collects only
                     the information necessary to provide phonics practice and
                     pronunciation feedback.
+                  </p>
+
+                  <br />
+                  <p className="text-foreground leading-relaxed">
+                    <strong>Practicing without an account.</strong> On
+                    wordwizai.com/try, a child can read a few practice
+                    sentences without creating an account. The recording is
+                    sent to our server, analyzed to give pronunciation
+                    feedback, and then discarded. Word Wiz AI doesn't save it
+                    or link it to anyone.
                   </p>
 
                   <br />

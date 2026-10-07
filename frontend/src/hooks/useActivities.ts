@@ -8,6 +8,7 @@ import type { Activity } from "@/lib/activities";
 export function useActivities() {
   const { token } = useContext(AuthContext);
   const [activities, setActivities] = useState<Activity[] | null>(null);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     if (!token) return;
@@ -18,14 +19,17 @@ export function useActivities() {
       })
       .catch((error: unknown) => {
         console.error("Failed to fetch activities:", error);
-        if (!cancelled) setActivities([]);
+        if (!cancelled) {
+          setActivities([]);
+          setFailed(true);
+        }
       });
     return () => {
       cancelled = true;
     };
   }, [token]);
 
-  return { activities, loading: activities === null };
+  return { activities, loading: activities === null, failed };
 }
 
 // Creating a session is a network round trip, so the card that was tapped

@@ -62,9 +62,18 @@ GOLDEN = json.loads(r"""
 """)
 
 
+# Fields added after the goldens were captured. They have their own tests
+# (tests/test_phoneme_alignment.py), so they are left out of the comparison and
+# the goldens still prove every original field is unchanged.
+ADDED_SINCE_GOLDEN = {"phoneme_alignment"}
+
+
 def normalize(results):
     """JSON round-trip so tuples/lists compare equal against the stored golden."""
-    return json.loads(json.dumps(results, ensure_ascii=False))
+    trimmed = [
+        {k: v for k, v in r.items() if k not in ADDED_SINCE_GOLDEN} for r in results
+    ]
+    return json.loads(json.dumps(trimmed, ensure_ascii=False))
 
 
 class _FlagMixin(unittest.TestCase):

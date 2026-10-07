@@ -4,32 +4,32 @@ const TRUST_BADGES = [
   {
     icon: Award,
     text: "2nd Place Congressional App Challenge Winner",
-    color: "text-yellow-600",
+    color: "text-yellow-600 dark:text-yellow-400",
   },
   {
     icon: Sparkles,
     text: "Ed Tech Indexed (Official App)",
-    color: "text-blue-600",
+    color: "text-blue-600 dark:text-blue-400",
   },
   {
     icon: Shield,
     text: "Backed with Real AI Research",
-    color: "text-purple-600",
+    color: "text-purple-600 dark:text-purple-400",
   },
   {
     icon: CircleDollarSign,
     text: "100% Free",
-    color: "text-green-600",
+    color: "text-green-600 dark:text-green-400",
   },
   {
     icon: Shield,
     text: "100% Data Safety",
-    color: "text-red-600",
+    color: "text-red-600 dark:text-red-400",
   },
   {
     icon: Clock,
     text: "2 Clicks to Set Up",
-    color: "text-orange-600",
+    color: "text-orange-600 dark:text-orange-400",
   },
 ];
 

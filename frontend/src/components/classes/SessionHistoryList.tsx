@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, ChevronDown, ChevronUp, BookOpen } from "lucide-react";
 import { type SessionActivity } from "@/api";
 import { parseServerDate } from "@/lib/activities";
+import { ACCURACY_TONE } from "./accuracy";
 
 interface SessionHistoryListProps {
   sessions: SessionActivity[];
@@ -27,10 +28,9 @@ const SessionHistoryList = ({
   };
 
   const getAccuracyColor = (accuracy: number) => {
-    if (accuracy >= 85) return "bg-green-100 text-green-800 border-green-300";
-    if (accuracy >= 70)
-      return "bg-yellow-100 text-yellow-800 border-yellow-300";
-    return "bg-orange-100 text-orange-800 border-orange-300";
+    if (accuracy >= 85) return ACCURACY_TONE.good;
+    if (accuracy >= 70) return ACCURACY_TONE.fair;
+    return ACCURACY_TONE.low;
   };
 
   if (sessions.length === 0) {
@@ -58,7 +58,7 @@ const SessionHistoryList = ({
         {displayedSessions.map((session) => (
           <div
             key={session.session_id}
-            className="bg-muted rounded-lg p-3 flex items-center justify-between"
+            className="bg-muted rounded-xl p-3 flex items-center justify-between"
           >
             <div className="flex items-center gap-3 flex-1">
               <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
@@ -73,7 +73,7 @@ const SessionHistoryList = ({
               </div>
             </div>
             <div
-              className={`px-3 py-1 rounded-full text-xs font-medium border ${getAccuracyColor(
+              className={`px-3 py-1 rounded-full text-xs font-medium tabular-nums ${getAccuracyColor(
                 session.accuracy
               )}`}
             >

@@ -51,6 +51,7 @@ CONTRACT_KEYS = {
     "type", "predicted_word", "ground_truth_word", "phonemes",
     "ground_truth_phonemes", "expected_phonemes", "actual_phonemes",
     "per", "missed", "added", "substituted", "total_phonemes", "total_errors",
+    "phoneme_alignment",
 }
 
 
@@ -209,10 +210,13 @@ REQUIRE_ASR_WORDS_FLAG = "WWAI_REQUIRE_ASR_WORDS"
 # Keys every ground-truth-anchored record carries on top of
 # _process_word_alignment's contract (scoring v2.1).
 V21_KEYS = {"canonical_phonemes", "edge_insertions"}
+# Keys added after the frozen pre-v2 copy below, which say nothing about the score:
+# v2.1's, and the per-phoneme tiles the frontend draws ("phoneme_alignment").
+ADDED_KEYS = V21_KEYS | {"phoneme_alignment"}
 
 
 def without_v21_keys(records):
-    return [{k: v for k, v in r.items() if k not in V21_KEYS} for r in records]
+    return [{k: v for k, v in r.items() if k not in ADDED_KEYS} for r in records]
 
 
 def pre_v2_align_to_ground_truth(flat_phonemes, ground_truth_phonemes, predicted_words=None):
@@ -771,6 +775,26 @@ class TestCanonicalPhonemesAndEdgeInsertions(_ScoringEnv):
         self.assertEqual(r["edge_insertions"], [])
         self.assertEqual(r["added"], ['s'])
         self.assertEqual(r["canonical_phonemes"], ['ɪ', 't'])
+
+    def test_the_phoneme_tiles_agree_with_the_score(self):
+        # The tiles come from the same alignment as the error lists, so forgiven edge
+        # noise never shows as an added sound.
+        from core.gt_alignment import align_sequences, phoneme_alignment_records
+        r = self.score_one(['h', 'k', 'æ', 't', 's'], CAT)
+        self.assertEqual([t["type"] for t in r["phoneme_alignment"]], ["match"] * 3)
+        self.assertEqual(r["edge_insertions"], ['h', 's'])
+        for segment in (['k', 'ɪ', 't'], ['k', 'æ', 's', 's', 't'], ['h', 'k', 'æ'], ['z', 'ʌ', 'ə', 'h', 'k', 'æ', 't']):
+            with self.subTest(segment=segment):
+                r = self.score_one(segment, CAT)
+                kinds = [t["type"] for t in r["phoneme_alignment"]]
+                self.assertEqual(kinds.count("deletion"), len(r["missed"]))
+                self.assertEqual(kinds.count("insertion"), len(r["added"]))
+                self.assertEqual(kinds.count("substitution"), len(r["substituted"]))
+        # Under the kill switch the tiles are the plain alignment, as before v2.
+        os.environ[LEGACY_SCORING_FLAG] = "1"
+        r = self.score_one(['h', 'k', 'æ', 't', 's'], CAT)
+        self.assertEqual(r["phoneme_alignment"],
+                         phoneme_alignment_records(align_sequences(['k', 'æ', 't'], ['h', 'k', 'æ', 't', 's'])))
 
     def test_every_record_type_carries_the_keys(self):
         flat = ['ð', 'ə', 't', 'æ', 't', 's', 'æ', 't', 'ɑ', 'n', 'ð', 'ə']

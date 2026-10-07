@@ -9,6 +9,7 @@ from .grapheme_to_phoneme import grapheme_to_phoneme as g2p
 from .evaluation.accuracy_metrics import compute_phoneme_error_rate
 from .speech_problem_classifier import SpeechProblemClassifier
 from .audio_preprocessing import preprocess_audio
+from .gt_alignment import phoneme_alignment_records
 import asyncio
 
 import os as _os
@@ -563,6 +564,7 @@ def _process_word_alignment(
                 "missed": missed,
                 "added": added,
                 "substituted": substituted,
+                "phoneme_alignment": phoneme_alignment_records(phoneme_ops),
                 "total_phonemes": len(gt_phonemes),
                 "total_errors": len(missed) + len(added) + len(substituted),
             })
@@ -585,6 +587,9 @@ def _process_word_alignment(
                 "missed": [],
                 "added": list(pred_phonemes) if pred_phonemes else [],
                 "substituted": [],
+                "phoneme_alignment": phoneme_alignment_records(
+                    align_sequences([], list(pred_phonemes or []))
+                ),
                 "total_phonemes": 0,
                 "total_errors": 0,
                 "error": "Extra word predicted."
@@ -607,6 +612,9 @@ def _process_word_alignment(
                 "missed": gt_phonemes_del,   # every phoneme in the word was missed
                 "added": [],
                 "substituted": [],
+                "phoneme_alignment": phoneme_alignment_records(
+                    align_sequences(gt_phonemes_del, [])
+                ),
                 "total_phonemes": len(gt_phonemes_del),
                 "total_errors": len(gt_phonemes_del),
                 "error": "Word missing in prediction."

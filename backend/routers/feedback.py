@@ -127,6 +127,11 @@ def get_mistake_type_phonemes_for_user(
 
 @router.get("/statistics", response_model=UserStatistics)
 def get_user_statistics_endpoint(
+    tz: str | None = Query(
+        None,
+        max_length=64,
+        description="The family's IANA timezone, so streak days are their days. UTC if omitted.",
+    ),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
@@ -135,14 +140,15 @@ def get_user_statistics_endpoint(
     
     Returns:
         - total_sessions: Count of all practice sessions (completed or in-progress)
-        - current_streak: Consecutive days with sessions (from today backwards)
+        - current_streak: Consecutive days with sessions, counting back from
+          today (or yesterday, if there's been no reading yet today)
         - longest_streak: Maximum streak ever achieved
         - words_read: Total words practiced across all feedback entries
     
     Requires authentication.
     """
     try:
-        stats = get_user_statistics(db, user_id=current_user.id)
+        stats = get_user_statistics(db, user_id=current_user.id, tz_name=tz)
         return UserStatistics(**stats)
     except Exception as e:
         print(f"Error fetching user statistics: {e}")

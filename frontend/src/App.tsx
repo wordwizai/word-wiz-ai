@@ -21,11 +21,17 @@ const ClassesPage = lazy(() => import("./pages/ClassesPage.tsx"));
 const OAuthRedirect = lazy(() => import("./components/OAuthRedirect.tsx"));
 const PracticeRouter = lazy(() => import("./pages/PracticeRouter.tsx"));
 const PracticeDashboard = lazy(() => import("./pages/PracticeDashboard.tsx"));
+const PhonicsPathPage = lazy(() => import("./pages/PhonicsPathPage.tsx"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage.tsx"));
 const About = lazy(() => import("./pages/About.tsx"));
 const Contact = lazy(() => import("./pages/Contact.tsx"));
 const Privacy = lazy(() => import("./pages/Privacy.tsx"));
+const TryPage = lazy(() => import("./pages/TryPage.tsx"));
 const ToastTestPage = lazy(() => import("./pages/ToastTestPage.tsx"));
+// Playground for the mascot's animations. Production builds drop it.
+const MascotPreview = import.meta.env.DEV
+  ? lazy(() => import("./pages/MascotPreview.tsx"))
+  : null;
 
 // Lazy load comparison pages
 const ABCmouseHookedOnPhonicsComparison = lazy(
@@ -42,6 +48,9 @@ const HookedOnPhonicsComparison = lazy(
 );
 const BestFreeReadingAppsComparison = lazy(
   () => import("./pages/comparisons/BestFreeReadingApps.tsx")
+);
+const AppsThatListenComparison = lazy(
+  () => import("./pages/comparisons/AppsThatListen.tsx")
 );
 const LexiaRazKidsComparison = lazy(
   () => import("./pages/comparisons/LexiaVsRazKids.tsx")
@@ -187,6 +196,9 @@ function App() {
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/signup" element={<SignUp />} />
+                  {/* Guest "try it" practice, no account (noindex, not prerendered) */}
+                  <Route path="/try" element={<TryPage />} />
+                  <Route path="/try/:slug" element={<TryPage />} />
 
                   {/* Comparison Pages */}
                   <Route
@@ -208,6 +220,10 @@ function App() {
                   <Route
                     path="/comparisons/best-free-reading-apps"
                     element={<BestFreeReadingAppsComparison />}
+                  />
+                  <Route
+                    path="/comparisons/reading-apps-that-listen-to-your-child-read"
+                    element={<AppsThatListenComparison />}
                   />
                   <Route
                     path="/comparisons/lexia-vs-raz-kids-vs-word-wiz-ai"
@@ -366,6 +382,9 @@ function App() {
                   />
 
                   <Route path="/toast-test" element={<ToastTestPage />} />
+                  {MascotPreview && (
+                    <Route path="/dev/mascot" element={<MascotPreview />} />
+                  )}
                   <Route path="/oauth-callback" element={<OAuthRedirect />} />
                   <Route
                     path="/practice/:sessionId"
@@ -388,6 +407,7 @@ function App() {
                     <Route path="/progress" element={<ProgressDashboard />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/practice" element={<PracticeDashboard />} />
+                    <Route path="/practice/phonics" element={<PhonicsPathPage />} />
                     <Route path="/classes" element={<ClassesPage />} />
                   </Route>
                   <Route path="*" element={<NotFoundPage />} />

@@ -9,25 +9,29 @@ const DEMO_SENTENCES = [
     words: ["The", "cat", "sat"],
     perScores: [0.0, 0.1, 0.0], // Perfect, nearly perfect, perfect
     feedback: "Great job!",
-    feedbackColor: "bg-green-100 text-green-600",
+    feedbackColor:
+      "bg-green-100 text-green-600 dark:bg-green-500/15 dark:text-green-300",
   },
   {
     words: ["I", "see", "the", "blue", "sky"],
     perScores: [0.0, 0.8, 0.0, 0.2, 0.0], // Error in "see"
     feedback: "Try the 'ee' sound in 'see'",
-    feedbackColor: "bg-orange-100 text-orange-600",
+    feedbackColor:
+      "bg-orange-100 text-orange-600 dark:bg-orange-500/15 dark:text-orange-300",
   },
   {
     words: ["Fish", "swim", "in", "the", "pond"],
     perScores: [0.0, 0.0, 0.0, 0.15, 0.0],
     feedback: "Perfect pronunciation!",
-    feedbackColor: "bg-green-100 text-green-600",
+    feedbackColor:
+      "bg-green-100 text-green-600 dark:bg-green-500/15 dark:text-green-300",
   },
   {
     words: ["The", "sheep", "eat", "grass"],
     perScores: [0.0, 0.7, 0.0, 0.0], // Error in "sheep"
     feedback: "Work on the 'sh' sound in 'sheep'",
-    feedbackColor: "bg-orange-100 text-orange-600",
+    feedbackColor:
+      "bg-orange-100 text-orange-600 dark:bg-orange-500/15 dark:text-orange-300",
   },
 ];
 
@@ -95,11 +99,12 @@ const AnimatedPracticeDemo = () => {
 
   return (
     <div className="relative w-full h-full flex items-center justify-center p-4 md:p-8">
-      {/* Background glow effect */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-100/50 via-pink-50/30 to-blue-50/30 rounded-3xl blur-xl" />
+      {/* Background glow effect. The light pastels turn into a white halo
+          on a dark page, so dark mode uses a faint brand purple instead. */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-100/50 via-pink-50/30 to-blue-50/30 dark:from-primary/15 dark:via-primary/5 dark:to-transparent rounded-3xl blur-xl" />
 
       {/* Main demo container */}
-      <div className="relative w-full max-w-4xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm rounded-3xl shadow-2xl border-2 border-purple-200/50 p-6 md:p-8 lg:p-12">
+      <div className="relative w-full max-w-4xl bg-white/80 dark:bg-card/80 backdrop-blur-sm rounded-3xl shadow-2xl dark:shadow-black/50 border-2 border-purple-200/50 dark:border-primary/20 p-6 md:p-8 lg:p-12">
         {/* Status indicator */}
         <motion.div
           className="flex items-center justify-center gap-3 mb-8"
@@ -118,7 +123,7 @@ const AnimatedPracticeDemo = () => {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-600 rounded-full"
+                className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-300 rounded-full"
               >
                 <Mic className="w-5 h-5 animate-pulse" />
                 <span className="font-medium">Recording...</span>
@@ -130,9 +135,9 @@ const AnimatedPracticeDemo = () => {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-600 rounded-full"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300 rounded-full"
               >
-                <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                 <span className="font-medium">Analyzing...</span>
               </motion.div>
             )}
@@ -154,7 +159,7 @@ const AnimatedPracticeDemo = () => {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-600 rounded-full"
+                className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-600 dark:bg-purple-500/15 dark:text-purple-300 rounded-full"
               >
                 <span className="font-medium">Read the sentence aloud</span>
               </motion.div>
@@ -163,19 +168,26 @@ const AnimatedPracticeDemo = () => {
         </motion.div>
 
         {/* Words display */}
-        <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4 min-h-[120px]">
+        <div className="min-h-[120px] flex items-center">
+          {/* "wait" needs a single child, so each sentence's words share one
+              keyed row. The badges' own exit animations still play. */}
           <AnimatePresence mode="wait">
-            {sentence.words.map((word, idx) => (
-              <WordBadge
-                key={`${currentSentence}-${idx}-${word}`}
-                word={word}
-                idx={idx}
-                showHighlighted={showHighlighting}
-                analysisPer={
-                  showHighlighting ? sentence.perScores[idx] : undefined
-                }
-              />
-            ))}
+            <motion.div
+              key={currentSentence}
+              className="flex w-full flex-wrap items-center justify-center gap-3 md:gap-4"
+            >
+              {sentence.words.map((word, idx) => (
+                <WordBadge
+                  key={`${idx}-${word}`}
+                  word={word}
+                  idx={idx}
+                  showHighlighted={showHighlighting}
+                  analysisPer={
+                    showHighlighting ? sentence.perScores[idx] : undefined
+                  }
+                />
+              ))}
+            </motion.div>
           </AnimatePresence>
         </div>
 

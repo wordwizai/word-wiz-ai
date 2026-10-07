@@ -1,5 +1,14 @@
 import type { RefObject } from "react";
 
+// One sound inside a word, in reading order. The four names match the
+// word-level `type`: read right, read as a different sound, left out, or
+// added. `expected` is null for an added sound, `actual` for a left-out one.
+export interface PhonemeOp {
+  type: "match" | "substitution" | "deletion" | "insertion";
+  expected: string | null;
+  actual: string | null;
+}
+
 // What the backend's `analysis` event carries (a pandas frame as dicts keyed
 // by row index).
 export interface PronunciationAnalysis {
@@ -8,6 +17,8 @@ export interface PronunciationAnalysis {
     per: Record<number, number | null>;
     ground_truth_word: Record<number, string | null>;
     predicted_word: Record<number, string | null>;
+    // Absent on analyses saved before per-sound results existed.
+    phoneme_alignment?: Record<number, PhonemeOp[] | null>;
   };
 }
 
@@ -26,10 +37,15 @@ export interface SentenceOptions {
 export interface PracticeStageState {
   wordArray: string[];
   analysisData: PronunciationAnalysis | null;
+  // Must go back to null when a new attempt starts processing. PracticeStage
+  // closes an attempt on the first render with a new analysis and non-null
+  // feedback, so stale text here would be paired with the new analysis.
   feedback: string | null;
   showHighlightedWords: boolean;
   isRecording: boolean;
   isProcessing: boolean;
+  // True while the spoken feedback is playing.
+  isFeedbackPlaying: boolean;
   audioLevel: RefObject<number>;
   onStartRecording: () => void;
   onStopRecording: () => void;

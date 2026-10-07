@@ -9,7 +9,7 @@ const CantBlendSounds = () => {
       content: {
         type: "info",
         title: "What do you do when a child knows letter sounds but can't blend them?",
-        content: "Blending is a separate skill from letter-sound knowledge and must be taught on its own, starting orally without print. Begin with two-sound words, move to three-sound words built from continuous sounds before stop sounds like /p/ and /t/, then add speed and decodable sentences. Practice 10-15 minutes daily; most children blend reliably within 6-12 weeks.",
+        content: "Blending is a separate skill from letter-sound knowledge and must be taught on its own, starting orally without print. Begin with two-sound words, move to three-sound words built from continuous sounds before stop sounds like /p/ and /t/, then add speed and decodable sentences. Practice 10-15 minutes daily, and expect several weeks of steady practice before blending is reliable.",
       },
     },
     {
@@ -26,7 +26,7 @@ const CantBlendSounds = () => {
     {
       type: "paragraph",
       content:
-        "Blending—also called **phoneme blending**—is the ability to push individual sounds together to form a word. It is not the same as knowing letter sounds. A child can have perfect letter-sound knowledge but still struggle with blending. This is because blending is a separate cognitive skill that requires working memory, auditory processing, and phonological awareness. When children cannot blend sounds, it is usually not because they are being lazy or defiant—it is because their brain has not yet developed this specific auditory-processing skill.",
+        "Blending—also called **phoneme blending**—is the ability to push individual sounds together to form a word. It is not the same as knowing letter sounds. A child can have perfect letter-sound knowledge but still struggle with blending. This is because blending is a separate cognitive skill that requires working memory, auditory processing, and phonological awareness. When children cannot blend sounds, it is usually not because they are being lazy or defiant—it is because they have not yet developed this specific skill.",
     },
     {
       type: "callout",
@@ -116,7 +116,7 @@ const CantBlendSounds = () => {
     {
       type: "paragraph",
       content:
-        "Here is the systematic approach that works for the majority of children with blending difficulties:",
+        "Here is a systematic approach that works for many children with blending difficulties:",
     },
     {
       type: "heading",
@@ -267,7 +267,7 @@ const CantBlendSounds = () => {
     {
       type: "paragraph",
       content:
-        "Blending is a skill that develops over weeks, not days. If your child is stuck on two-sound blending, do not force three-sound blending yet. Respect their developmental pace. Pushing too hard creates reading anxiety that can persist for years.",
+        "Blending is a skill that develops over weeks, not days. If your child is stuck on two-sound blending, do not force three-sound blending yet. Respect their developmental pace. Pushing too hard can create reading anxiety.",
     },
     {
       type: "heading",
@@ -320,7 +320,7 @@ const CantBlendSounds = () => {
     {
       type: "paragraph",
       content:
-        "Watching your child struggle to blend sounds is frustrating for everyone involved. But with patience, systematic instruction, and consistent practice, the vast majority of children overcome this challenge within 6-12 weeks. Remember: this is a skill that can be taught and improved. Your child is not broken or incapable—they just need the right approach and enough practice. Stay consistent, celebrate small wins, and trust the process.",
+        "Watching your child struggle to blend sounds is frustrating for everyone involved. But with patience, systematic instruction, and consistent practice, most children overcome this challenge with several weeks of steady practice. Remember: this is a skill that can be taught and improved. Your child is not broken or incapable—they just need the right approach and enough practice. Stay consistent, celebrate small wins, and trust the process.",
     },
   ];
 
@@ -376,7 +376,7 @@ const CantBlendSounds = () => {
   return (
     <ArticlePageTemplate
       metaTitle="Child Can't Blend Sounds Into Words: What to Do (Expert Guide)"
-      metaDescription="Your child knows letter sounds but can't blend them into words? Learn why this happens and exactly how to fix it with proven step-by-step strategies that work."
+      metaDescription="Your child knows letter sounds but can't blend them into words? Learn why this happens and exactly how to fix it with clear, step-by-step strategies."
       canonicalUrl="https://wordwizai.com/articles/child-cant-blend-sounds-into-words"
       heroImage="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=1200&h=630&fit=crop"
       heroImageAlt="Parent helping child learn to blend sounds and read words"
@@ -387,6 +387,7 @@ const CantBlendSounds = () => {
         bio: "Reading specialists focused on helping struggling readers overcome phonological challenges.",
       }}
       publishDate="2025-01-02"
+      updatedDate="2026-09-07"
       readTime={11}
       category="Reading Problems"
       content={content}

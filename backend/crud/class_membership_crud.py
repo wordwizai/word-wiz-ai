@@ -3,7 +3,7 @@ from models.class_membership import ClassMembership
 from models.class_model import Class
 from models.user import User
 from typing import List, Optional, Dict, Any
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 
 def create_membership(db: orm_session, class_id: int, student_id: int) -> ClassMembership:
@@ -134,43 +134,29 @@ def is_member(db: orm_session, class_id: int, student_id: int) -> bool:
     return membership is not None
 
 
-def calculate_student_streak(sessions: List) -> int:
-    """Calculate the current streak of consecutive days with sessions.
-    
+def calculate_student_streak(
+    sessions: List, tz_name: str | None = None, now: datetime | None = None
+) -> int:
+    """Current streak of consecutive days with sessions, for the teacher view.
+
+    Uses the same days and rules as the student's own dashboard
+    (crud.feedback_entry.calculate_streaks), so the two never disagree.
+
     Args:
-        sessions: List of session objects with created_at timestamps
-        
+        sessions: Session objects with created_at timestamps
+        tz_name: IANA timezone to count days in. UTC when missing or unknown.
+        now: The current time, for tests. Defaults to now.
+
     Returns:
         Number of consecutive days with activity
     """
+    from crud.feedback_entry import calculate_streaks, local_date, resolve_timezone
+
     if not sessions:
         return 0
-    
-    # Sort sessions by date (most recent first)
-    sorted_sessions = sorted(sessions, key=lambda s: s.created_at, reverse=True)
-    
-    # Get unique dates
-    session_dates = []
-    for session in sorted_sessions:
-        date = session.created_at.date()
-        if date not in session_dates:
-            session_dates.append(date)
-    
-    if not session_dates:
-        return 0
-    
-    # Check if the most recent session is today or yesterday
-    today = datetime.now().date()
-    if session_dates[0] not in [today, today - timedelta(days=1)]:
-        return 0
-    
-    # Count consecutive days
-    streak = 1
-    for i in range(1, len(session_dates)):
-        expected_date = session_dates[i-1] - timedelta(days=1)
-        if session_dates[i] == expected_date:
-            streak += 1
-        else:
-            break
-    
-    return streak
+    tz = resolve_timezone(tz_name)
+    today = (now or datetime.now(timezone.utc)).astimezone(tz).date()
+    current_streak, _ = calculate_streaks(
+        {local_date(s.created_at, tz) for s in sessions}, today=today
+    )
+    return current_streak

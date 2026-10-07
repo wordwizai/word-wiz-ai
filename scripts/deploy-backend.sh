@@ -52,7 +52,9 @@ prev=$(git rev-parse --short HEAD)
 git fetch -q origin
 target=$(git rev-parse --short "$ref^{commit}")
 echo "==> $prev -> $target"
-git log --format='    %h %s' "$prev..$target" -- backend | head -20
+# -n, not | head: with pipefail, head closing the pipe early kills git log (SIGPIPE)
+# and set -e then aborts the script silently on any range of 20+ commits.
+git log -n 20 --format='    %h %s' "$prev..$target" -- backend
 
 if [[ -z $migrations_ok ]] && git diff --name-only "$prev" "$target" | grep -q '^backend/alembic/versions/'; then
   echo "STOP: this range adds alembic migrations, which nothing applies automatically."

@@ -1,3 +1,4 @@
+from core.phonics_data import get_pattern
 from database import Base
 from sqlalchemy import Column, DateTime, ForeignKey, Integer
 from sqlalchemy.orm import relationship
@@ -15,3 +16,20 @@ class Session(Base):
     user = relationship("User", back_populates="sessions")
     activity = relationship("Activity", back_populates="sessions")
     feedback_entries = relationship("FeedbackEntry", back_populates="session")
+    # Only phonics pattern sessions have one (models/pattern_session.py).
+    # Lazy, so ordinary session loads don't pay for it; list routes selectinload it.
+    pattern = relationship(
+        "PatternSession",
+        back_populates="session",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+
+    @property
+    def pattern_slug(self) -> str | None:
+        return self.pattern.pattern_slug if self.pattern else None
+
+    @property
+    def pattern_name(self) -> str | None:
+        found = get_pattern(self.pattern_slug) if self.pattern_slug else None
+        return found["display_name"] if found else None

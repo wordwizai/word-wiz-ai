@@ -14,7 +14,7 @@ import {
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import LandingPageFooter from "@/components/LandingPageFooter";
 import { DEFAULT_OG_IMAGE } from "@/components/SeoHead";
-import { trackSignupClick } from "@/utils/analytics";
+import { trackTryEvent } from "@/utils/analytics";
 import {
   categoryLabels,
   getPatternBySlug,
@@ -151,7 +151,7 @@ const PracticePageTemplate = ({ pattern }: { pattern: PhonicsPattern }) => {
               {displayName}: Word List &amp; Practice
             </h1>
 
-            <div className="border-l-4 border-blue-200 bg-blue-50 text-blue-900 p-4 my-6 rounded">
+            <div className="border-l-4 border-blue-200 bg-blue-50 text-blue-900 p-4 my-6 rounded dark:border-blue-400/40 dark:bg-blue-500/10 dark:text-blue-100">
               <div className="flex gap-3">
                 <InfoIcon className="h-5 w-5 shrink-0 mt-0.5" />
                 <p className="text-sm leading-relaxed">{directAnswer}</p>
@@ -186,19 +186,19 @@ const PracticePageTemplate = ({ pattern }: { pattern: PhonicsPattern }) => {
                   Practice these words out loud
                 </h2>
                 <p className="text-muted-foreground mb-4 max-w-xl mx-auto">
-                  Word Wiz AI listens to your child read and shows exactly which
-                  sounds they missed — not just whether the word was right. Free,
-                  no ads.
+                  Have your child read these sentences to Word Wiz AI. It
+                  listens and shows exactly which sounds they missed, not just
+                  whether the word was right. Free, no sign-up needed to try.
                 </p>
                 <Button
                   asChild
                   size="lg"
                   onClick={() =>
-                    trackSignupClick("practice-words", "link", slug)
+                    trackTryEvent("try_link_click", slug, "practice-words")
                   }
                 >
-                  <Link to="/signup">
-                    Start practicing free
+                  <Link to={`/try/${slug}`}>
+                    Try these out loud
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>

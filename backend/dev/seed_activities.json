@@ -2,7 +2,7 @@
   {
     "id": 1,
     "title": "Unlimited Practice",
-    "description": "Test your skills in this basic unlimited practice mode",
+    "description": "New sentences that keep coming, each one built around the sounds your child is still working on.",
     "emoji_icon": "Infinity",
     "activity_type": "unlimited",
     "activity_settings": {}
@@ -10,7 +10,7 @@
   {
     "id": 2,
     "title": "Little Red Riding Hood",
-    "description": "Dive into this classic fairy tail with a personalized twist.",
+    "description": "Little Red Riding Hood is taking a basket to Grandma's house. A wolf in the woods has other plans.",
     "emoji_icon": "ShoppingBasket",
     "activity_type": "story",
     "activity_settings": {
@@ -87,7 +87,7 @@
   {
     "id": 9,
     "title": "Cinderella",
-    "description": "Dive into this classic fairy tail with a personalized twist.",
+    "description": "Cinderella does all the chores while her stepsisters go to the ball. Then her fairy godmother shows up.",
     "emoji_icon": "Wand",
     "activity_type": "story",
     "activity_settings": {
@@ -98,7 +98,7 @@
   {
     "id": 10,
     "title": "Goldilocks and the Three Bears",
-    "description": "Dive into this classic fairy tail with a personalized twist.",
+    "description": "Goldilocks walks into an empty house and tries everything inside. Then the three bears come home.",
     "emoji_icon": "Soup",
     "activity_type": "story",
     "activity_settings": {
@@ -109,7 +109,7 @@
   {
     "id": 11,
     "title": "The Tortoise and the Hare",
-    "description": "Dive into this classic fairy tail with a personalized twist.",
+    "description": "A speedy hare laughs at a slow tortoise and agrees to a race. He's so sure he'll win that he takes a nap.",
     "emoji_icon": "Turtle",
     "activity_type": "story",
     "activity_settings": {
@@ -120,7 +120,7 @@
   {
     "id": 12,
     "title": "Hansel and Gretel",
-    "description": "Dive into this classic fairy tail with a personalized twist.",
+    "description": "Hansel and Gretel get lost in the forest and find a house made of candy. The woman who lives there is not so sweet.",
     "emoji_icon": "WandSparkles",
     "activity_type": "story",
     "activity_settings": {
@@ -131,7 +131,7 @@
   {
     "id": 13,
     "title": "Jack and the Beanstalk",
-    "description": "Dive into this classic fairy tail with a personalized twist.",
+    "description": "Jack trades the family cow for a handful of beans. By morning, a beanstalk has grown up past the clouds.",
     "emoji_icon": "Bean",
     "activity_type": "story",
     "activity_settings": {

@@ -182,6 +182,21 @@ def align_sequences(gt: list, pred: list) -> list[tuple]:
     return operations
 
 
+def phoneme_alignment_records(ops: list[tuple]) -> list[dict]:
+    """
+    Turn ``align_sequences`` output into the ordered per-phoneme list the
+    frontend draws as sound tiles, one ``{"type", "expected", "actual"}`` per op.
+
+    ``type`` reuses the word-level names (match / substitution / deletion /
+    insertion). ``expected`` is None for an added phoneme and ``actual`` is None
+    for a missed one.
+    """
+    return [
+        {"type": op, "expected": gt_item, "actual": pred_item}
+        for op, gt_item, pred_item in ops
+    ]
+
+
 # --------------------------------------------------------------------------- #
 # Secondary ASR signal
 # --------------------------------------------------------------------------- #
@@ -426,16 +441,20 @@ def _proportional_segments(flat: list[str], words: list[list[str]]) -> list[list
 
 
 def _phoneme_errors(gt_phonemes: list[str], pred_phonemes: list[str]):
-    """Return ``(missed, added, substituted)`` for one word."""
+    """
+    Return ``(missed, added, substituted, phoneme_alignment)`` for one word,
+    all read off one op list so they always agree.
+    """
+    ops = align_sequences(gt_phonemes, pred_phonemes)
     missed, added, substituted = [], [], []
-    for pop, gph, pph in align_sequences(gt_phonemes, pred_phonemes):
+    for pop, gph, pph in ops:
         if pop == 'deletion':
             missed.append(gph)
         elif pop == 'insertion':
             added.append(pph)
         elif pop == 'substitution':
             substituted.append((gph, pph))
-    return missed, added, substituted
+    return missed, added, substituted, phoneme_alignment_records(ops)
 
 
 # --------------------------------------------------------------------------- #
@@ -572,8 +591,8 @@ def _score_word(
     variants=(), forgive_edges: bool = True,
 ):
     """
-    Return ``(expected, missed, added, substituted, edge_insertions)`` for one
-    non-empty segment.
+    Return ``(expected, missed, added, substituted, phoneme_alignment,
+    edge_insertions)`` for one non-empty segment.
 
     v2: the primary phonemes and every pronunciation in ``variants`` are
     candidates. Each candidate is aligned with the segment, up to
@@ -581,10 +600,13 @@ def _score_word(
     ``forgive_edges`` is False), and the candidate with the fewest counted errors wins (the earliest
     on a tie, so the primary wins ties). The error lists come from the
     winner's alignment, so forgiven edge phonemes never reach ``added``; they
-    are returned as ``edge_insertions`` instead.
+    are returned as ``edge_insertions`` instead. ``phoneme_alignment`` (the
+    per-phoneme tiles the frontend draws) is read off the same alignment, so the
+    tiles always agree with the score and never show forgiven edge noise.
     """
     if legacy:
-        return (list(gt_phonemes),) + _phoneme_errors(gt_phonemes, segment) + ([],)
+        missed, added, substituted, alignment = _phoneme_errors(gt_phonemes, segment)
+        return list(gt_phonemes), missed, added, substituted, alignment, []
 
     best = None
     for candidate in _pronunciation_candidates(gt_phonemes, variants):
@@ -596,7 +618,7 @@ def _score_word(
     missed = [gph for op, gph, _pph in ops if op == 'deletion']
     added = [pph for op, _gph, pph in ops if op == 'insertion']
     substituted = [(gph, pph) for op, gph, pph in ops if op == 'substitution']
-    return list(expected), missed, added, substituted, list(edges)
+    return list(expected), missed, added, substituted, phoneme_alignment_records(ops), list(edges)
 
 
 def _asr_word_fits(asr_word, segment: list[str], forgiven_errors: int) -> bool:
@@ -637,6 +659,7 @@ def _insertion_record(pred_word: str) -> dict:
         "missed": [],
         "added": [],
         "substituted": [],
+        "phoneme_alignment": [],
         "total_phonemes": 0,
         "total_errors": 0,
         "canonical_phonemes": [],
@@ -660,6 +683,7 @@ def _deletion_record(gt_word: str, gt_phonemes: list[str]) -> dict:
         "missed": list(gt_phonemes),   # every phoneme in the word was missed
         "added": [],
         "substituted": [],
+        "phoneme_alignment": phoneme_alignment_records(align_sequences(gt_phonemes, [])),
         "total_phonemes": len(gt_phonemes),
         "total_errors": len(gt_phonemes),
         "canonical_phonemes": list(gt_phonemes),
@@ -739,7 +763,7 @@ def align_to_ground_truth(
             continue
 
         word_variants = variants.get(gt_word, ())
-        expected, missed, added, substituted, edge_insertions = _score_word(
+        expected, missed, added, substituted, phoneme_alignment, edge_insertions = _score_word(
             gt_phs, segment, legacy_scoring, variants=word_variants,
         )
         # Miscue guard. When the ASR heard a different word in this slot
@@ -753,7 +777,7 @@ def align_to_ground_truth(
             and _normalize_word(pred_labels[idx]) != _normalize_word(gt_word)
             and _asr_word_fits(pred_labels[idx], segment, len(missed) + len(added) + len(substituted))
         ):
-            expected, missed, added, substituted, edge_insertions = _score_word(
+            expected, missed, added, substituted, phoneme_alignment, edge_insertions = _score_word(
                 gt_phs, segment, legacy_scoring, variants=word_variants, forgive_edges=False,
             )
         total_errors = len(missed) + len(added) + len(substituted)
@@ -771,6 +795,7 @@ def align_to_ground_truth(
             "missed": missed,
             "added": added,
             "substituted": substituted,
+            "phoneme_alignment": phoneme_alignment,
             "total_phonemes": len(expected),
             "total_errors": total_errors,
             "canonical_phonemes": list(gt_phs),

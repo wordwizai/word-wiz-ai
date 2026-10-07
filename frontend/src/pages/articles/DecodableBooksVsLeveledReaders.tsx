@@ -9,7 +9,7 @@ const DecodableBooksVsLeveledReaders = () => {
       content: {
         type: "info",
         title: "Decodable books or leveled readers: which should my child read?",
-        content: "Decodable books first, leveled readers later. Decodable texts use only patterns the child has been taught, so the only way through is sounding out. Leveled readers mix in untaught words and picture cues that reward guessing. Apply the 90 percent test: a book is decodable only if 90 percent of its words fit patterns your child knows. Add leveled readers once they clear 80 percent.",
+        content: "Decodable books first, leveled readers later. Decodable texts use only patterns the child has been taught, so the only way through is sounding out. Leveled readers mix in untaught words and picture cues that reward guessing. As a rule of thumb, a book is decodable for your child if about 90 percent of its words fit patterns they know. Add leveled readers once they clear 80 percent.",
       },
     },
     {
@@ -62,7 +62,7 @@ const DecodableBooksVsLeveledReaders = () => {
     {
       type: "paragraph",
       content:
-        "Leveled readers are books organized by difficulty using systems like Fountas and Pinnell levels (A through Z) or similar leveling frameworks. These books are designed to provide 'just right' independent reading experiences where children can read with approximately 90-95% accuracy. However, there is a crucial difference: leveled readers do not control vocabulary based on phonics patterns the child has been taught. Instead, they control difficulty through factors like sentence length, word count, repetition, picture support, and concept complexity. This means leveled readers often include high-frequency words and vocabulary that may not be phonetically regular or may use patterns the child has not yet learned through phonics instruction. The expectation is that children will use a combination of strategies to read these books, including phonics, sight word memory, picture clues, and context. This 'balanced literacy' approach differs significantly from the systematic phonics approach embodied in decodable texts.",
+        "Leveled readers are books organized by difficulty using systems like Fountas and Pinnell levels (A through Z) or similar leveling frameworks. These books are designed to provide 'just right' reading experiences where children can read with approximately 90-95% accuracy. However, there is a crucial difference: leveled readers do not control vocabulary based on phonics patterns the child has been taught. Instead, they control difficulty through factors like sentence length, word count, repetition, picture support, and concept complexity. This means leveled readers often include high-frequency words and vocabulary that may not be phonetically regular or may use patterns the child has not yet learned through phonics instruction. The expectation is that children will use a combination of strategies to read these books, including phonics, sight word memory, picture clues, and context. This 'balanced literacy' approach differs significantly from the systematic phonics approach embodied in decodable texts.",
     },
     {
       type: "paragraph",
@@ -159,7 +159,7 @@ const DecodableBooksVsLeveledReaders = () => {
     {
       type: "paragraph",
       content:
-        "Research on reading instruction strongly supports decodable texts during phonics instruction:",
+        "Most Science of Reading advocates recommend decodable texts during phonics instruction.",
     },
     {
       type: "heading",
@@ -185,7 +185,7 @@ const DecodableBooksVsLeveledReaders = () => {
       type: "list",
       content: [
         "Encourages guessing from pictures/context",
-        "Teaches the 3-cueing system (look at pictures, think what makes sense) - now debunked",
+        "Teaches the 3-cueing system (look at pictures, think what makes sense) - now widely criticized",
         "Undermines phonics instruction",
         "Can create word-guessing habits that persist",
         "Mixed signals: phonics says 'decode,' leveled readers say 'guess'",
@@ -339,7 +339,7 @@ const DecodableBooksVsLeveledReaders = () => {
       type: "list",
       content: [
         "Library: Ask librarian for decodable readers",
-        "Teacher stores: Decodable sets ($20-50)",
+        "Teacher stores: Decodable sets",
         "Make your own: Use phonics patterns to create simple books together",
       ],
     },
@@ -619,6 +619,7 @@ const DecodableBooksVsLeveledReaders = () => {
         bio: "Passionate about Science of Reading instruction and early literacy.",
       }}
       publishDate="2024-12-29"
+      updatedDate="2026-09-07"
       readTime={9}
       category="Reading Strategies"
       content={content}

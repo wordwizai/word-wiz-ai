@@ -1,14 +1,13 @@
 import { useState, useContext } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
-  Copy,
+  ArrowRight,
   Check,
   ChevronDown,
-  ChevronUp,
-  Trash2,
+  Copy,
   LogOut,
+  Trash2,
   Users,
 } from "lucide-react";
 import {
@@ -23,6 +22,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { deleteClass, leaveClass, type Class, type ClassWithTeacher } from "@/api";
+import { activityPastel } from "@/lib/activities";
+import { cn } from "@/lib/utils";
 import StudentList from "./StudentList";
 
 interface ClassCardProps {
@@ -84,157 +85,159 @@ const ClassCard = ({
 
   const studentCount = "student_count" in classItem ? classItem.student_count : undefined;
   const teacher = "teacher" in classItem ? classItem.teacher : null;
+  const showTeacherTools = isTeacher && viewMode === "teacher";
+  // Same id-to-pastel rule as activities, so a class keeps its colour.
+  const pastel = activityPastel(classItem.id);
 
   return (
-    <Card className="rounded-xl border-2 border-white/80 shadow-sm hover:shadow-md transition-all duration-200 bg-pastel-purple">
-      <div className="p-4">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-2">
-          <div className="flex-1">
-            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-              {classItem.name}
-              {isTeacher && viewMode === "teacher" && studentCount !== undefined && (
-                <span className="text-xs font-normal text-gray-600 bg-white/60 px-2 py-1 rounded-full">
-                  <Users className="w-3 h-3 inline mr-1" />
-                  {studentCount} {studentCount === 1 ? "student" : "students"}
-                </span>
-              )}
-            </h3>
-            {teacher && (
-              <p className="text-sm text-gray-600 mt-1">
-                Teacher: {teacher.full_name || teacher.email}
-              </p>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {/* Only show delete/leave actions in teacher view */}
-            {viewMode === "teacher" && (
-              <>
-                {isTeacher ? (
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-red-600 hover:text-red-700 hover:bg-red-100"
-                        disabled={deleting}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Class</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete "{classItem.name}"? This
-                          will remove all students from the class. This action
-                          cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={handleDelete}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                ) : (
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-gray-600 hover:text-gray-700 hover:bg-gray-100"
-                        disabled={leaving}
-                      >
-                        <LogOut className="w-4 h-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Leave Class</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to leave "{classItem.name}"? You can
-                          rejoin later using the join code.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleLeave}>
-                          Leave
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                )}
-              </>
-            )}
-          </div>
+    <article className="flex flex-col rounded-2xl border bg-card p-5 shadow-xs">
+      {/* Header */}
+      <div className="flex items-start gap-4">
+        <span
+          className="flex size-10 shrink-0 items-center justify-center rounded-xl"
+          style={{ backgroundColor: pastel.background, color: pastel.foreground }}
+        >
+          <Users className="size-5" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <h3 className="text-lg font-semibold leading-snug break-words text-foreground">
+            {classItem.name}
+          </h3>
+          {teacher && (
+            <p className="truncate text-sm text-muted-foreground">
+              Taught by {teacher.full_name || teacher.email}
+            </p>
+          )}
+          {showTeacherTools && studentCount !== undefined && (
+            <p className="text-sm text-muted-foreground">
+              {studentCount} {studentCount === 1 ? "student" : "students"}
+            </p>
+          )}
         </div>
 
-        {/* Join Code - Only show in teacher view */}
-        {viewMode === "teacher" && (
-          <div className="flex items-center gap-2 mb-3">
-            <div className="flex-1 bg-white/60 p-2 rounded-lg border border-gray-200">
-              <p className="text-xs text-gray-600 mb-1">Join Code</p>
-              <p className="font-mono font-bold text-lg tracking-wider text-gray-800">
-                {classItem.join_code}
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleCopyCode}
-              className="shrink-0"
-            >
-              {copied ? (
-                <Check className="w-4 h-4 text-green-600" />
-              ) : (
-                <Copy className="w-4 h-4" />
-              )}
-            </Button>
-          </div>
-        )}
-
-        {/* Expand Students Button (Teachers Only in Teacher View) */}
-        {isTeacher && viewMode === "teacher" && (
-          <>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={() => onViewDetails && onViewDetails(classItem as Class)}
-              className="w-full mb-2"
-            >
-              View Details
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setExpanded(!expanded)}
-              className="w-full justify-between hover:bg-white/40"
-            >
-              <span>Quick View Students</span>
-              {expanded ? (
-                <ChevronUp className="w-4 h-4" />
-              ) : (
-                <ChevronDown className="w-4 h-4" />
-              )}
-            </Button>
-          </>
-        )}
-
-        {/* Student List (Expandable - Teacher View Only) */}
-        {isTeacher && viewMode === "teacher" && expanded && (
-          <div className="mt-3 pt-3 border-t border-gray-200">
-            <StudentList classId={classItem.id} />
-          </div>
-        )}
+        {/* Only show delete/leave actions in teacher view */}
+        {viewMode === "teacher" &&
+          (isTeacher ? (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="-mt-1 -mr-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive dark:hover:bg-destructive/20"
+                  disabled={deleting}
+                  aria-label={`Delete ${classItem.name}`}
+                >
+                  <Trash2 />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Class</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete "{classItem.name}"? This
+                    will remove all students from the class. This action
+                    cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDelete}
+                    className={buttonVariants({ variant: "destructive" })}
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          ) : (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="-mt-1 -mr-2 text-muted-foreground hover:text-foreground"
+                  disabled={leaving}
+                  aria-label={`Leave ${classItem.name}`}
+                >
+                  <LogOut />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Leave Class</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to leave "{classItem.name}"? You can
+                    rejoin later using the join code.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleLeave}>
+                    Leave
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          ))}
       </div>
-    </Card>
+
+      {/* Join Code - Only show in teacher view */}
+      {viewMode === "teacher" && (
+        <div className="mt-4 flex items-center justify-between gap-3 rounded-xl bg-muted py-2 pr-2 pl-4">
+          <div className="min-w-0">
+            <p className="text-xs font-medium text-muted-foreground">Join code</p>
+            <p className="font-mono text-lg font-semibold tracking-widest text-foreground">
+              {classItem.join_code}
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleCopyCode}
+            aria-label={copied ? "Join code copied" : "Copy join code"}
+            className="shrink-0 hover:bg-background dark:hover:bg-background"
+          >
+            {copied ? <Check className="text-primary" /> : <Copy />}
+          </Button>
+        </div>
+      )}
+
+      {/* Open the class, or peek at its students in place */}
+      {showTeacherTools && (
+        <div className="mt-4 flex flex-col gap-2">
+          <Button
+            onClick={() => onViewDetails && onViewDetails(classItem as Class)}
+            className="w-full rounded-xl"
+          >
+            View class
+            <ArrowRight />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setExpanded(!expanded)}
+            aria-expanded={expanded}
+            className="w-full justify-between rounded-xl text-muted-foreground hover:text-foreground"
+          >
+            Quick view students
+            <ChevronDown
+              className={cn(
+                "transition-transform duration-200",
+                expanded && "rotate-180"
+              )}
+            />
+          </Button>
+        </div>
+      )}
+
+      {/* Student List (Expandable - Teacher View Only) */}
+      {showTeacherTools && expanded && (
+        <div className="mt-2 border-t pt-1">
+          <StudentList classId={classItem.id} />
+        </div>
+      )}
+    </article>
   );
 };
 

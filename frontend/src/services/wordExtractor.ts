@@ -1,12 +1,9 @@
-import {
-  pipeline,
-  AutomaticSpeechRecognitionPipeline,
-} from "@huggingface/transformers";
+import type { AutomaticSpeechRecognitionPipeline } from "@huggingface/transformers";
 import {
   checkDeviceCapabilities,
   type DeviceCapabilities,
 } from "../utils/deviceCapabilities";
-import "./transformersInit";
+import { loadTransformers } from "./transformersInit";
 
 /**
  * Singleton client-side word extractor.
@@ -111,6 +108,9 @@ class ClientWordExtractor {
       };
 
       updateProgress(10);
+
+      // Downloaded here, the first time a model loads, not with the page.
+      const { pipeline } = await loadTransformers();
 
       const hfToken = import.meta.env.VITE_HUGGINGFACE_TOKEN;
 

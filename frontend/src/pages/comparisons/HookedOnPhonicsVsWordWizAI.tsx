@@ -6,7 +6,7 @@ const HookedOnPhonicsComparison = () => {
     tagline: "Trusted phonics program for 35+ years",
     pricing: {
       free: "$1 first month",
-      paid: "$19.99/mo + physical materials",
+      paid: "From $23.96/mo, physical materials included",
       trial: "$1 trial",
     },
     website: "https://www.hookedonphonics.com",
@@ -43,8 +43,8 @@ const HookedOnPhonicsComparison = () => {
         {
           name: "AI-Powered Personalized Feedback",
           product1: false,
-          product2: "GPT-4",
-          wordWiz: "GPT-4",
+          product2: true,
+          wordWiz: true,
         },
         {
           name: "Real-Time Pronunciation Coaching",
@@ -83,7 +83,7 @@ const HookedOnPhonicsComparison = () => {
         },
         {
           name: "Decodable Storybooks",
-          product1: "Physical",
+          product1: "Print + ebooks",
           product2: "Digital",
           wordWiz: "Digital",
         },
@@ -118,7 +118,7 @@ const HookedOnPhonicsComparison = () => {
         },
         {
           name: "Flashcards",
-          product1: "Included",
+          product1: "Pre-K only",
           product2: false,
           wordWiz: false,
         },
@@ -153,7 +153,7 @@ const HookedOnPhonicsComparison = () => {
         },
         {
           name: "Parent/Teacher Dashboard",
-          product1: false,
+          product1: true,
           product2: true,
           wordWiz: true,
         },
@@ -176,19 +176,19 @@ const HookedOnPhonicsComparison = () => {
         },
         {
           name: "Monthly Subscription Cost",
-          product1: "$19.99",
+          product1: "From $23.96",
           product2: "$0",
           wordWiz: "$0",
         },
         {
           name: "Physical Materials Shipping",
-          product1: "Required",
+          product1: "Included",
           product2: "N/A",
           wordWiz: "N/A",
         },
         {
           name: "Total Annual Cost",
-          product1: "~$240+",
+          product1: "About $288+",
           product2: "Free",
           wordWiz: "Free",
         },
@@ -198,7 +198,7 @@ const HookedOnPhonicsComparison = () => {
 
   const product1Details = {
     pros: [
-      { text: "35+ years of proven effectiveness" },
+      { text: "Used by families for 35+ years" },
       { text: "Systematic, research-backed phonics approach" },
       { text: "Physical materials (workbooks, books, flashcards)" },
       { text: "Complete program with tangible resources" },
@@ -206,17 +206,17 @@ const HookedOnPhonicsComparison = () => {
       { text: "Decodable books matched to learned phonemes" },
     ],
     cons: [
-      { text: "Expensive ($240+ per year)" },
+      { text: "Ongoing paid subscription" },
       { text: "No speech recognition technology" },
       { text: "Requires manual parent assessment" },
       { text: "Physical materials create clutter" },
-      { text: "Shipping delays for new materials" },
+      { text: "Depends on materials arriving by mail" },
       { text: "Not web-based (app download required)" },
     ],
     bestFor: [
       "Parents preferring traditional + digital approach",
       "Families wanting physical learning materials",
-      "Those who can commit to $20/month investment",
+      "Those who can commit to a monthly subscription",
     ],
     description:
       "Hooked on Phonics is a time-tested systematic phonics program combining digital games with physical workbooks and books. While trusted for 35+ years, it lacks modern speech recognition technology.",
@@ -226,8 +226,8 @@ const HookedOnPhonicsComparison = () => {
     pros: [
       { text: "Advanced speech recognition (wav2vec2-TIMIT-IPA)" },
       { text: "Phoneme-level pronunciation analysis" },
-      { text: "GPT-4 powered personalized feedback" },
-      { text: "Completely free core features" },
+      { text: "Next sentence written around the sounds your child missed" },
+      { text: "Completely free, with no paid tier" },
       { text: "Web-based (works on any device)" },
       { text: "Real-time automated coaching" },
       { text: "Teacher dashboard included" },
@@ -253,13 +253,13 @@ const HookedOnPhonicsComparison = () => {
 
   const verdict = {
     product1:
-      "Hooked on Phonics is excellent if you prefer a traditional program with physical materials and can afford ~$240/year. It delivers systematic phonics instruction but requires parents to manually assess pronunciation.",
+      "Hooked on Phonics is excellent if you prefer a traditional program with physical materials and don't mind paying a monthly subscription. It delivers systematic phonics instruction but requires parents to manually assess pronunciation.",
     product2:
       "Word Wiz AI excels if you want modern AI technology that actually listens to your child and provides precise phoneme-level feedback. It delivers what Hooked on Phonics cannot—automated speech analysis—and it's free.",
     wordWiz:
       "Word Wiz AI represents the future of phonics instruction: AI-powered, data-driven, and accessible. While Hooked on Phonics offers time-tested materials, Word Wiz AI offers technology that can identify pronunciation errors parents might miss.",
     overall:
-      "For families prioritizing pronunciation accuracy and wanting modern technology, Word Wiz AI is the superior choice. It provides speech recognition capabilities that Hooked on Phonics cannot match, at zero cost. While Hooked on Phonics offers tangible materials, Word Wiz AI offers something more valuable: precise, automated pronunciation coaching that helps children master reading faster. The only reason to choose Hooked on Phonics is if you specifically want physical workbooks and are willing to pay $240+/year for them.",
+      "For families prioritizing pronunciation accuracy and wanting modern technology, Word Wiz AI is the stronger option. It provides speech recognition capabilities that Hooked on Phonics cannot match, at zero cost. While Hooked on Phonics offers tangible materials, Word Wiz AI offers precise, automated pronunciation coaching. The main reason to choose Hooked on Phonics is if you specifically want physical workbooks and are willing to pay a monthly subscription for them.",
   };
 
   const faqs = [
@@ -276,7 +276,7 @@ const HookedOnPhonicsComparison = () => {
     {
       question: "How much does each program cost?",
       answer:
-        "Hooked on Phonics costs $19.99/month (~$240/year) plus you receive physical materials. Word Wiz AI offers core features including speech recognition completely free. This represents a $240+ annual savings with Word Wiz AI.",
+        "Hooked on Phonics plans start at $23.96 a month and include books and workbooks mailed to your home. Word Wiz AI is completely free, including speech recognition, with no paid tier.",
     },
     {
       question: "Do I need to buy workbooks with Word Wiz AI?",
@@ -286,17 +286,17 @@ const HookedOnPhonicsComparison = () => {
     {
       question: "Can teachers use these programs?",
       answer:
-        "Hooked on Phonics is primarily designed for home use without teacher features. Word Wiz AI includes a free teacher dashboard with class management and student progress tracking, making it practical for classroom use.",
+        "Hooked on Phonics is mainly built for home use, though it also offers an educator dashboard for classrooms. Word Wiz AI includes a free teacher dashboard with class management and student progress tracking, making it practical for classroom use.",
     },
     {
       question: "Which program is more effective?",
       answer:
-        "Both teach phonics systematically. However, Word Wiz AI's speech recognition allows for immediate correction of pronunciation errors, which research shows accelerates learning. Hooked on Phonics requires parents to provide this feedback manually, which may not be as precise or consistent.",
+        "Both teach phonics systematically. However, Word Wiz AI's speech recognition allows for immediate correction of pronunciation errors, while the word is still fresh. Hooked on Phonics requires parents to provide this feedback manually, which may not be as precise or consistent.",
     },
     {
       question: "Is Hooked on Phonics worth the extra cost?",
       answer:
-        "That depends on your priorities. If you strongly prefer physical materials and are willing to pay $240+/year, Hooked on Phonics delivers. However, Word Wiz AI provides more advanced technology (speech recognition) at no cost. For most families, Word Wiz AI offers better value.",
+        "That depends on your priorities. If you strongly prefer physical materials and are willing to pay a monthly subscription, Hooked on Phonics delivers. However, Word Wiz AI provides more advanced technology (speech recognition) at no cost. For most families, Word Wiz AI offers better value.",
     },
   ];
 
@@ -313,7 +313,7 @@ const HookedOnPhonicsComparison = () => {
       metaDescription="Detailed comparison of Hooked on Phonics and Word Wiz AI. Compare speech recognition, pricing, effectiveness, and features to find the best phonics program for your child."
       canonicalUrl="https://wordwizai.com/comparisons/hooked-on-phonics-vs-word-wiz-ai"
       h1Title="Hooked on Phonics vs Word Wiz AI: Which Phonics Program is Better?"
-      introText="Hooked on Phonics costs about $240 a year and delivers systematic phonics with physical workbooks, but a parent has to judge pronunciation by ear. Word Wiz AI is free and analyzes speech at the phoneme level automatically. Choose Hooked on Phonics for tangible materials and structure; choose Word Wiz AI for automated pronunciation feedback."
+      introText="Hooked on Phonics starts at $23.96 a month and delivers systematic phonics with physical workbooks, but a parent has to judge pronunciation by ear. Word Wiz AI is free and analyzes speech at the phoneme level automatically. Choose Hooked on Phonics for tangible materials and structure; choose Word Wiz AI for automated pronunciation feedback."
       verdict={verdict}
       faqs={faqs}
     />

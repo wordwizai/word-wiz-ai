@@ -7,12 +7,12 @@ const FreeVsPaid = () => {
       content: {
         type: "info",
         title: "Are free phonics apps good enough, or is paid worth it?",
-        content: "Free apps work well when a child is on track or ahead, a parent can fill gaps, and the child self-directs. Paid programs, at $10-20 a month, add a complete scope and sequence, unlimited content, no ads, detailed progress tracking, and family plans. That is still 15-30 times cheaper than a private tutor at $200-400 a month, so paid is worth it when a child is genuinely behind.",
+        content: "Free apps work well when a child is on track or ahead, a parent can fill in what's missing, and the child self-directs. Paid programs, at about $10-25 a month (less on annual plans), add a fuller scope and sequence, more content, detailed progress tracking, and family plans. That is still far less than a private tutor at $200-400 a month, so paid is worth it when a child is genuinely behind.",
       },
     },
     {
       type: "paragraph",
-      content: "Every parent asks: Do I really need to pay for a phonics app, or are the free options good enough? With dozens of free reading apps available and quality paid programs costing $10-20/month, this is a critical budget decision. This comprehensive comparison will help you determine whether free apps can meet your child's needs or if paid programs offer essential advantages worth the investment."
+      content: "Every parent asks: Do I really need to pay for a phonics app, or are the free options good enough? With dozens of free reading apps available and quality paid programs costing about $10-25/month, this is a critical budget decision. This comprehensive comparison will help you determine whether free apps can meet your child's needs or if paid programs offer essential advantages worth the investment."
     },
     {
       type: "heading",
@@ -31,7 +31,7 @@ const FreeVsPaid = () => {
     },
     {
       type: "paragraph",
-      content: "Completely free with no ads, no subscriptions, no upsells. Covers early literacy, phonics, math, and social-emotional learning. High-quality content designed by education experts. Works offline after initial download."
+      content: "Completely free with no ads, no subscriptions, no upsells. Covers early literacy, phonics, math, and social-emotional learning. High-quality content designed by education experts. Some activities can be downloaded for offline use."
     },
     {
       type: "paragraph",
@@ -40,11 +40,11 @@ const FreeVsPaid = () => {
     {
       type: "heading",
       level: 3,
-      content: "2. Word Wiz AI Free Tier"
+      content: "2. Word Wiz AI (100% Free)"
     },
     {
       type: "paragraph",
-      content: "AI-powered pronunciation feedback with robust free tier. Real-time speech recognition, phoneme-level analysis, and personalized feedback—all available without payment."
+      content: "AI-powered pronunciation feedback with no ads, no subscription, and no premium tier. Children read aloud in the browser and get real-time, phoneme-level feedback on each sound, all without payment."
     },
     {
       type: "paragraph",
@@ -57,7 +57,7 @@ const FreeVsPaid = () => {
     },
     {
       type: "paragraph",
-      content: "Systematic phonics instruction with some content free. Classic program used in many schools. Additional content requires $5/month membership."
+      content: "Systematic phonics instruction with some content free. Classic program used in many schools. Full access requires a home membership ($35/year, or $5.99/month through the app)."
     },
     {
       type: "paragraph",
@@ -70,7 +70,7 @@ const FreeVsPaid = () => {
     },
     {
       type: "paragraph",
-      content: "Educational games from PBS shows. Some literacy-focused activities. Ads for other PBS content but no commercial ads."
+      content: "Educational games from PBS shows. Some literacy-focused activities. Free, with no ads or in-app purchases."
     },
     {
       type: "paragraph",
@@ -83,7 +83,7 @@ const FreeVsPaid = () => {
     },
     {
       type: "paragraph",
-      content: "Both offer 30-day free trials of their full programs. Can be useful for short-term intensive practice or to test before committing."
+      content: "Both offer free trials of their full programs (Homer's is 30 days). Can be useful for short-term intensive practice or to test before committing."
     },
     {
       type: "heading",
@@ -107,7 +107,7 @@ const FreeVsPaid = () => {
       content: {
         type: "info",
         title: "Free Doesn't Mean Low Quality",
-        content: "Khan Academy Kids and Word Wiz AI free tier prove that free can be excellent. These aren't stripped-down demos—they're genuinely useful tools. The question isn't quality; it's comprehensiveness and features."
+        content: "Khan Academy Kids and Word Wiz AI show that free can be excellent. These aren't stripped-down demos—they're genuinely useful tools. The question isn't quality; it's comprehensiveness and features."
       }
     },
     {
@@ -119,16 +119,16 @@ const FreeVsPaid = () => {
     {
       type: "heading",
       level: 3,
-      content: "1. ABCmouse ($12.99/month or $60/year)"
+      content: "1. ABCmouse ($14.99/month or $45/year)"
     },
     {
       type: "paragraph",
-      content: "Comprehensive early learning platform covering reading, math, science, and art. Over 10,000 activities. Structured learning path."
+      content: "Comprehensive early learning platform covering reading, math, science, and art. More than 13,000 activities. Structured learning path."
     },
     {
       type: "heading",
       level: 3,
-      content: "2. Reading Eggs ($12.99/month or $80/year)"
+      content: "2. Reading Eggs ($9.99/month for reading only, or $13.99/month and $99.99/year with math)"
     },
     {
       type: "paragraph",
@@ -137,20 +137,15 @@ const FreeVsPaid = () => {
     {
       type: "heading",
       level: 3,
-      content: "3. Hooked on Phonics ($19.99/month)"
+      content: "3. Hooked on Phonics ($23.96/month)"
     },
     {
       type: "paragraph",
       content: "Classic phonics program with digital app plus physical materials. Systematic, proven approach. Includes workbooks and storybooks shipped to you."
     },
     {
-      type: "heading",
-      level: 3,
-      content: "4. Word Wiz AI Premium ($9.99/month)"
-    },
-    {
       type: "paragraph",
-      content: "Advanced AI features, unlimited practice, detailed analytics, priority support. Builds on robust free tier."
+      content: "Prices listed above were checked on each program's website in October 2026 and may change."
     },
     {
       type: "heading",
@@ -184,7 +179,7 @@ const FreeVsPaid = () => {
     },
     {
       type: "paragraph",
-      content: "**Free:** $0. **Paid:** $10-20/month or $60-240/year. **Winner:** Free (obviously)"
+      content: "**Free:** $0. **Paid:** About $10-25/month, or $35-100/year on annual plans. **Winner:** Free (obviously)"
     },
     {
       type: "heading",
@@ -193,7 +188,7 @@ const FreeVsPaid = () => {
     },
     {
       type: "paragraph",
-      content: "**Free:** Limited books, lessons, activities. **Paid:** 10x-100x more content. **Winner:** Paid"
+      content: "**Free:** Limited books, lessons, activities. **Paid:** Much more content. **Winner:** Paid"
     },
     {
       type: "heading",
@@ -247,7 +242,7 @@ const FreeVsPaid = () => {
     },
     {
       type: "paragraph",
-      content: "**Free:** One profile, or limited profiles. **Paid:** Family plans for 2-4 kids. **Winner:** Paid (for families with multiple children)"
+      content: "**Free:** One profile, or limited profiles. **Paid:** Family plans for up to 3-4 kids. **Winner:** Paid (for families with multiple children)"
     },
     {
       type: "heading",
@@ -297,7 +292,7 @@ const FreeVsPaid = () => {
     },
     {
       type: "paragraph",
-      content: "**Reading Eggs paid subscription:** $80/year = $6.67/month = $0.22/day"
+      content: "**Reading Eggs reading and math plan:** $99.99/year = $8.33/month = about $0.27/day"
     },
     {
       type: "paragraph",
@@ -306,10 +301,10 @@ const FreeVsPaid = () => {
     {
       type: "list",
       content: [
-        "One coffee: $5 (23 days of Reading Eggs)",
-        "One movie ticket: $15 (68 days of Reading Eggs)",
-        "One month of streaming: $15-20 (2-3 months of reading app)",
-        "Private tutor: $200-400/month (15-30x more expensive)"
+        "One coffee: $5 (about 18 days of Reading Eggs)",
+        "One movie ticket: $15 (about 55 days of Reading Eggs)",
+        "One month of streaming: $15-20 (about 2 months of reading app)",
+        "Private tutor: $200-400/month (roughly 25-50x more expensive)"
       ]
     },
     {
@@ -321,7 +316,7 @@ const FreeVsPaid = () => {
       content: [
         "Falling behind academically—harder to catch up each year",
         "Reduced confidence and self-esteem",
-        "Future tutoring costs if problems compound: $2,000-10,000+",
+        "Future tutoring costs if problems compound, which can run to thousands of dollars",
         "Potential impacts on college readiness, career options, lifetime earnings"
       ]
     },
@@ -329,8 +324,8 @@ const FreeVsPaid = () => {
       type: "callout",
       content: {
         type: "warning",
-        title: "The $120/Year Investment",
-        content: "Annual subscription to a quality reading program costs less than most families spend on streaming services. If it helps your child become a confident reader, that's arguably the best $120 you'll spend all year."
+        title: "The $100/Year Investment",
+        content: "An annual subscription to a quality reading program (Reading Eggs lists $99.99 a year, ABCmouse $45) costs less than many families spend on streaming in a year. If it helps your child become a confident reader, that's arguably the best $100 you'll spend all year."
       }
     },
     {
@@ -349,7 +344,7 @@ const FreeVsPaid = () => {
         "**Child is on track or ahead** - No urgent reading concerns",
         "**Parent can supplement** - You fill gaps with books, teaching, practice",
         "**Motivated learner** - Child self-directs and stays engaged",
-        "**Budget is genuinely tight** - $10-20/month isn't feasible",
+        "**Budget is genuinely tight** - $10-25/month isn't feasible",
         "**Just starting** - Want to try before investing",
         "**Limited screen time anyway** - Child uses app 10-15 minutes daily, free tier sufficient"
       ]
@@ -371,7 +366,7 @@ const FreeVsPaid = () => {
         "**Need comprehensive curriculum** - Want systematic, complete instruction",
         "**Parent lacks time or phonics knowledge** - Can't supplement effectively",
         "**Multiple children** - Cost per child drops dramatically",
-        "**Can afford $10-20/month** - Within budget without hardship",
+        "**Can afford $10-25/month** - Within budget without hardship",
         "**Want best chance of success** - Willing to invest in child's education",
         "**Free options tried without success** - Need more advanced features"
       ]
@@ -390,11 +385,11 @@ const FreeVsPaid = () => {
       type: "list",
       content: [
         "**Start with free trials** - Test before committing (ABCmouse, Homer, Epic!)",
-        "**Annual subscriptions** - Save 30-40% vs month-to-month",
-        "**Multi-child discounts** - Family plans cover 2-4 kids at one price",
+        "**Annual subscriptions** - Save 40% or more vs month-to-month (Reading Eggs about 40%, ABCmouse about 75%)",
+        "**Multi-child discounts** - Family plans cover up to 3-4 kids at one price",
         "**Start free, upgrade if needed** - Use free tier, pay only if child needs more",
         "**Cancel during breaks** - Pause subscription during summer if not using",
-        "**Look for sales** - Black Friday, back-to-school often have 50% off deals"
+        "**Look for sales** - Black Friday and back-to-school sales often bring discounts"
       ]
     },
     {
@@ -419,7 +414,7 @@ const FreeVsPaid = () => {
       type: "list",
       content: [
         "Khan Academy Kids (free) for comprehensive early learning",
-        "Word Wiz AI free tier for pronunciation practice",
+        "Word Wiz AI (free) for pronunciation practice",
         "Library books for reading volume",
         "**Total cost: $0**"
       ]
@@ -431,9 +426,9 @@ const FreeVsPaid = () => {
     {
       type: "list",
       content: [
-        "Reading Eggs or ABCmouse ($80-130/year) for systematic curriculum",
-        "Word Wiz AI free tier for pronunciation",
-        "**Total cost: $80-130/year = $7-11/month**"
+        "ABCmouse ($45/year) or Reading Eggs ($99.99/year) for systematic curriculum",
+        "Word Wiz AI (free) for pronunciation",
+        "**Total cost: $45-100/year = about $4-8/month**"
       ]
     },
     {
@@ -443,10 +438,10 @@ const FreeVsPaid = () => {
     {
       type: "list",
       content: [
-        "Reading Eggs paid ($80/year) for curriculum",
-        "Word Wiz AI Premium ($120/year) for advanced pronunciation features",
+        "Reading Eggs ($99.99/year) for curriculum",
+        "Word Wiz AI (free) for daily pronunciation feedback",
         "Local library reading group (free) for social component",
-        "**Total cost: $200/year = $17/month**"
+        "**Total cost: about $100/year = $8.33/month**"
       ]
     },
     {
@@ -457,15 +452,15 @@ const FreeVsPaid = () => {
     },
     {
       type: "paragraph",
-      content: "**For most families, start free and upgrade if needed.** Khan Academy Kids and Word Wiz AI's free tier provide genuinely useful instruction at zero cost. Try them for 2-3 months."
+      content: "**For most families, start free and upgrade if needed.** Khan Academy Kids and Word Wiz AI provide genuinely useful instruction at zero cost. Try them for 2-3 months."
     },
     {
       type: "paragraph",
-      content: "**If your child is struggling or you want comprehensive coverage, $80-150/year for a paid program is excellent ROI.** That's less than most streaming services, coffee habits, or family dinners out—for something that directly impacts your child's future."
+      content: "**If your child is struggling or you want comprehensive coverage, $45-100/year for a paid program like ABCmouse or Reading Eggs is excellent ROI.** That's less than most streaming services, coffee habits, or family dinners out—for something that directly impacts your child's future."
     },
     {
       type: "paragraph",
-      content: "**The real question isn't 'Can I afford a paid reading program?'—it's 'Can I afford NOT to invest in my struggling reader?'** Reading proficiency by third grade predicts high school graduation rates, college readiness, and career success. $10-20/month is a tiny investment in outcomes that matter for life."
+      content: "**The real question isn't 'Can I afford a paid reading program?'—it's 'Can I afford NOT to invest in my struggling reader?'** A 2011 Annie E. Casey Foundation study of nearly 4,000 students found that children who aren't reading proficiently by the end of third grade are four times more likely to leave high school without a diploma. $10-25/month is a tiny investment in outcomes that matter for life."
     },
     {
       type: "callout",
@@ -533,6 +528,7 @@ const FreeVsPaid = () => {
         bio: "Education experts helping families make smart, budget-conscious choices for reading instruction.",
       }}
       publishDate="2025-01-02"
+      updatedDate="2026-09-07"
       readTime={13}
       category="App Comparisons"
       content={content}

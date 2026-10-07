@@ -4,11 +4,15 @@ import { ArrowRight, ChevronRight, Flame } from "lucide-react";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getSessions, getUserStatistics } from "@/api";
 import { AppPage, PageHeader, SectionHeader } from "@/components/AppPage";
-import ActivitiesList from "@/components/ActivitiesList";
+import ActivitiesList, {
+  ActivitiesLoadError,
+} from "@/components/ActivitiesList";
 import DynamicIcon from "@/components/DynamicIcon";
+import TeacherAssignments from "@/components/phonics/TeacherAssignments";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActivities, useStartActivity } from "@/hooks/useActivities";
+import { useMyAssignments, useStartPattern } from "@/hooks/usePhonics";
 import {
   activityPastel,
   activityTypeLabel,
@@ -20,6 +24,8 @@ interface DashboardSession {
   id: number;
   created_at: string;
   is_completed: boolean;
+  pattern_slug?: string | null;
+  pattern_name?: string | null;
   activity: {
     id: number;
     title: string;
@@ -29,6 +35,10 @@ interface DashboardSession {
 }
 
 const RECENT_LIMIT = 4;
+
+// Phonics sessions all share one activity, so they're told apart by pattern.
+const recentKey = (s: DashboardSession) =>
+  s.pattern_slug ? `pattern:${s.pattern_slug}` : `activity:${s.activity.id}`;
 
 const greeting = () => {
   const hour = new Date().getHours();
@@ -40,8 +50,10 @@ const greeting = () => {
 const Dashboard = () => {
   const { user, token } = useContext(AuthContext);
   const navigate = useNavigate();
-  const { activities } = useActivities();
+  const { activities, failed: activitiesFailed } = useActivities();
   const { start, startingId } = useStartActivity();
+  const { start: startPattern, startingSlug } = useStartPattern();
+  const { assignments } = useMyAssignments();
 
   const [sessions, setSessions] = useState<DashboardSession[] | null>(null);
   const [streak, setStreak] = useState(0);
@@ -79,17 +91,26 @@ const Dashboard = () => {
   // sessions can't be reopened (PracticeRouter bounces them), so in the
   // recent list they start a fresh session of the same activity instead.
   const resumable = sessions?.find((s) => !s.is_completed) ?? null;
+  // One row per activity (per pattern for phonics). Every "Start" makes a new
+  // session, so without this the list filled up with identical "Unlimited
+  // Practice · Today" rows.
+  const seen = new Set<string>(resumable ? [recentKey(resumable)] : []);
   const recent = (sessions ?? [])
-    .filter((s) => s.id !== resumable?.id)
+    .filter((s) => {
+      if (seen.has(recentKey(s))) return false;
+      seen.add(recentKey(s));
+      return true;
+    })
     .slice(0, RECENT_LIMIT);
 
   const openSession = (session: DashboardSession) => {
-    if (session.is_completed) start(session.activity.id);
-    else navigate(`/practice/${session.id}`);
+    if (!session.is_completed) navigate(`/practice/${session.id}`);
+    else if (session.pattern_slug) startPattern(session.pattern_slug);
+    else start(session.activity.id);
   };
 
   return (
-    <AppPage>
+    <AppPage title="Dashboard">
       <PageHeader
         title={firstName ? `${greeting()}, ${firstName}` : "Welcome back"}
         actions={
@@ -113,6 +134,8 @@ const Dashboard = () => {
         )
       )}
 
+      <TeacherAssignments assignments={assignments} onlyOpen limit={3} />
+
       <section aria-labelledby="picks-heading">
         <SectionHeader
           id="picks-heading"
@@ -127,7 +150,11 @@ const Dashboard = () => {
             </Link>
           }
         />
-        <ActivitiesList activities={dailyPicks} />
+        {activitiesFailed ? (
+          <ActivitiesLoadError />
+        ) : (
+          <ActivitiesList activities={dailyPicks} />
+        )}
       </section>
 
       {recent.length > 0 && (
@@ -138,8 +165,12 @@ const Dashboard = () => {
               <li key={session.id}>
                 <RecentRow
                   session={session}
-                  isStarting={startingId === session.activity.id}
-                  disabled={startingId !== null}
+                  isStarting={
+                    session.pattern_slug
+                      ? startingSlug === session.pattern_slug
+                      : startingId === session.activity.id
+                  }
+                  disabled={startingId !== null || startingSlug !== null}
                   onOpen={() => openSession(session)}
                 />
               </li>
@@ -161,14 +192,18 @@ const ContinueCard = ({
   const pastel = activityPastel(session.activity.id);
 
   return (
+    // Laid out by the card's own width, not the viewport's. On a tablet the
+    // sidebar leaves ~450px, and a viewport breakpoint put the button on top
+    // of the title.
     <section
       aria-labelledby="continue-heading"
-      className="flex flex-col gap-5 rounded-3xl p-5 shadow-sm ring-1 ring-inset ring-black/5 sm:flex-row sm:items-center sm:gap-6 sm:p-8 dark:ring-white/10"
+      className="@container rounded-3xl p-5 shadow-sm ring-1 ring-inset ring-black/5 sm:p-8 dark:shadow-black/50 dark:inset-shadow-2xs dark:inset-shadow-white/10"
       style={{ backgroundColor: pastel.background }}
     >
+      <div className="flex flex-col gap-5 @xl:flex-row @xl:items-center @xl:gap-6">
       <div className="flex min-w-0 flex-1 items-center gap-4 sm:gap-6">
         <span
-          className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-white/60 sm:size-20 dark:bg-black/20"
+          className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-white/60 sm:size-20 dark:bg-white/10"
           style={{ color: pastel.foreground }}
         >
           <DynamicIcon
@@ -187,7 +222,7 @@ const ContinueCard = ({
             className="mt-1 text-xl leading-tight font-bold tracking-tight sm:text-3xl"
             style={{ color: pastel.foreground }}
           >
-            {session.activity.title}
+            {session.pattern_name ?? session.activity.title}
           </h2>
           <p className="mt-1 text-sm text-foreground/70">
             {activityTypeLabel(session.activity.activity_type)} ·{" "}
@@ -199,11 +234,12 @@ const ContinueCard = ({
       <Button
         size="lg"
         onClick={onContinue}
-        className="h-14 w-full shrink-0 rounded-xl px-8 text-base font-semibold sm:w-auto active:scale-[0.98]"
+        className="h-14 w-full shrink-0 rounded-xl px-8 text-base font-semibold @xl:w-auto active:scale-[0.98]"
       >
         Keep reading
         <ArrowRight className="size-5" />
       </Button>
+      </div>
     </section>
   );
 };
@@ -240,7 +276,7 @@ const RecentRow = ({
       </span>
       <span className="min-w-0 flex-1">
         <span className="block truncate font-medium text-foreground">
-          {session.activity.title}
+          {session.pattern_name ?? session.activity.title}
         </span>
         <span className="block text-sm text-muted-foreground">
           {activityTypeLabel(session.activity.activity_type)} ·{" "}

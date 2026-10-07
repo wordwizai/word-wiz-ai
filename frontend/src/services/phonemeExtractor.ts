@@ -1,12 +1,9 @@
-import {
-  pipeline,
-  AutomaticSpeechRecognitionPipeline,
-} from "@huggingface/transformers";
+import type { AutomaticSpeechRecognitionPipeline } from "@huggingface/transformers";
 import {
   checkDeviceCapabilities,
   type DeviceCapabilities,
 } from "../utils/deviceCapabilities";
-import "./transformersInit";
+import { loadTransformers } from "./transformersInit";
 
 /* ------------------------------------------------------------------------- *
  * Canonical IPA inventory -- EXACT MIRROR of backend/core/phoneme_inventory.py
@@ -346,6 +343,9 @@ class ClientPhonemeExtractor {
       };
 
       updateProgress(10);
+
+      // Downloaded here, the first time a model loads, not with the page.
+      const { pipeline } = await loadTransformers();
 
       // Load the ASR pipeline with progress tracking and authentication
       const hfToken = import.meta.env.VITE_HUGGINGFACE_TOKEN;

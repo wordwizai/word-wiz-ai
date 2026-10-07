@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -52,7 +53,9 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="rounded-2xl border-2 border-border shadow-lg">
         <CardHeader className="text-center pb-2">
-          <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            <h1>Welcome back</h1>
+          </CardTitle>
           <CardDescription className="text-sm">
             Sign in to continue your reading journey
           </CardDescription>
@@ -164,9 +167,9 @@ export function LoginForm({
 
               <p className="text-center text-sm text-muted-foreground">
                 No account?{" "}
-                <a href="/signup" className="text-primary font-medium underline-offset-4 hover:underline">
+                <Link to="/signup" className="text-primary font-medium underline-offset-4 hover:underline">
                   Sign up free
-                </a>
+                </Link>
               </p>
             </div>
           </form>

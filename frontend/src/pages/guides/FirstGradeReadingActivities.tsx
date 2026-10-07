@@ -9,13 +9,13 @@ const FirstGradeReadingActivities = () => {
       content: {
         type: "info",
         title: "What reading activities should first graders do at home?",
-        content: "First graders need a weekly mix of decoding, fluency, and comprehension practice rather than a single activity. The highest-yield options are paired reading, timed repeated reading of the same passage across three or four days, phonics sorting, and story retelling. Keep texts at an independent level the child reads with 95 percent accuracy. The year-end fluency target is 40-60 words per minute.",
+        content: "First graders need a weekly mix of decoding, fluency, and comprehension practice rather than a single activity. Good options include paired reading, timed repeated reading of the same passage across three or four days, phonics sorting, and story retelling. Keep texts at an independent level the child reads with 95 percent accuracy. In Hasbrouck and Tindal's 2017 fluency norms, a typical first grader reads about 60 words correct per minute by spring.",
       },
     },
     {
       type: "paragraph",
       content:
-        "Your first grader comes home from school with a reading log to complete, but you're not sure how to make home practice effective without nightly battles. First grade is when children transition from 'learning to read' to 'reading to learn.' The right home practice accelerates this transition, while the wrong approach creates frustration and resistance. Effective practice requires balancing three components: decoding practice (phonics and fluency), comprehension development (understanding what's read), and motivation (maintaining engagement). With the structured activities and schedules in this guide, most first graders show measurable growth within 6-8 weeks of consistent practice.",
+        "Your first grader comes home from school with a reading log to complete, but you're not sure how to make home practice effective without nightly battles. First grade is a big year for learning to read. The right home practice helps a lot, while the wrong approach creates frustration and resistance. Effective practice requires balancing three components: decoding practice (phonics and fluency), comprehension development (understanding what's read), and motivation (maintaining engagement). With the structured activities and schedules in this guide, growth often becomes measurable after several weeks of consistent practice.",
     },
     {
       type: "heading",
@@ -32,7 +32,7 @@ const FirstGradeReadingActivities = () => {
       type: "list",
       content: [
         "**Decode words with:** short vowels, long vowels (silent e and vowel teams), consonant blends, consonant digraphs (sh, ch, th, wh), basic sight words (50-100 high-frequency words)",
-        "**Read fluently:** 40-60 words per minute in grade-level text by end of year",
+        "**Read fluently:** about 60 words correct per minute in grade-level text by the end of the year (the 50th percentile in Hasbrouck and Tindal's 2017 norms)",
         "**Comprehend:** answer literal comprehension questions, retell stories in sequence, identify main characters and settings, make simple predictions",
         "**Independence:** read simple books independently, decode unfamiliar words using phonics strategies, self-correct obvious errors",
       ],
@@ -48,7 +48,7 @@ const FirstGradeReadingActivities = () => {
         type: "info",
         title: "Meeting Your Child Where They Are",
         content:
-          "Don't force grade-level texts if your first grader isn't ready. Reading books at their independent level (95%+ accuracy) builds confidence and fluency faster than struggling through harder texts. Better to read easy books fluently than hard books haltingly.",
+          "Don't force grade-level texts if your first grader isn't ready. Reading books at their independent level (95%+ accuracy) builds confidence and fluency, while struggling alone through harder texts can be discouraging. Better to read easy books fluently than hard books haltingly.",
       },
     },
     {
@@ -146,7 +146,7 @@ const FirstGradeReadingActivities = () => {
     {
       type: "paragraph",
       content:
-        "Choose a short passage (50-100 words). Have your child read it aloud while you time them and count errors. Record their time and accuracy. The next day, have them read the SAME passage again, trying to beat yesterday's time with fewer errors. Repeat for 3-4 days, then move to a new passage. This research-backed technique dramatically improves fluency. Practice 5-10 minutes, 4-5 times per week.",
+        "Choose a short passage (50-100 words). Have your child read it aloud while you time them and count errors. Record their time and accuracy. The next day, have them read the SAME passage again, trying to beat yesterday's time with fewer errors. Repeat for 3-4 days, then move to a new passage. The National Reading Panel (2000) found that repeated oral reading with guidance from a teacher, peer, or parent improves fluency, word recognition, and comprehension. Practice 5-10 minutes, 4-5 times per week.",
     },
     {
       type: "heading",
@@ -350,7 +350,7 @@ const FirstGradeReadingActivities = () => {
     {
       type: "paragraph",
       content:
-        "This schedule totals 15-20 minutes daily on weekdays with lighter practice on weekends. Adjust based on your child's stamina and schedule. Consistency matters more than duration—20 minutes daily beats 60 minutes twice a week.",
+        "This schedule totals 15-20 minutes daily on weekdays with lighter practice on weekends. Adjust based on your child's stamina and schedule. Consistency matters more than duration—20 minutes daily usually beats 60 minutes twice a week.",
     },
     {
       type: "heading",
@@ -417,12 +417,12 @@ const FirstGradeReadingActivities = () => {
     {
       type: "paragraph",
       content:
-        "AI-powered reading apps like Word Wiz AI offer advantages that traditional books can't provide. The AI analyzes your child's pronunciation in real-time, catching subtle errors (saying /b/ instead of /d/, using short vowels instead of long vowels) that parents often miss. First graders receive immediate, specific feedback: 'Almost! Remember, the silent e makes the A say its name. Try again.' This precision accelerates skill development.",
+        "AI-powered reading apps like Word Wiz AI offer advantages that traditional books can't provide. The AI analyzes your child's pronunciation in real-time, catching subtle errors (saying /b/ instead of /d/, using short vowels instead of long vowels) that parents often miss. First graders receive immediate, specific feedback, such as 'You had trouble with the a sound in cake.' This precision helps children fix errors before they turn into habits.",
     },
     {
       type: "paragraph",
       content:
-        "Additionally, AI apps adapt difficulty dynamically. If your first grader masters short vowels, the app automatically introduces long vowels. If they struggle, it provides more practice at the current level. This adaptive difficulty ensures appropriate challenge without overwhelming or boring your child. Use AI apps 10-15 minutes daily, 3-4 times per week, as one component of a balanced home reading practice.",
+        "Additionally, AI apps can adjust difficulty as your child goes. In Word Wiz AI's phonics path, once your first grader masters one pattern, the path moves on to the next, working from short vowels through blends to long vowels. If they struggle, the same pattern stays up next for more practice. This helps keep the challenge right without overwhelming or boring your child. Use AI apps 10-15 minutes daily, 3-4 times per week, as one component of a balanced home reading practice.",
     },
     {
       type: "callout",
@@ -430,7 +430,7 @@ const FirstGradeReadingActivities = () => {
         type: "success",
         title: "Word Wiz AI for First Grade Practice",
         content:
-          "Word Wiz AI's phoneme-level pronunciation feedback helps first graders develop accurate decoding skills. The AI provides encouraging feedback that builds confidence while catching errors parents miss. The adaptive difficulty ensures your child always works at the right level, all completely free. Visit wordwizai.com to get started.",
+          "Word Wiz AI's phoneme-level pronunciation feedback helps first graders develop accurate decoding skills. The AI provides encouraging feedback that builds confidence while catching errors parents miss. The phonics path moves your child on once they master each pattern, all completely free. Visit wordwizai.com to get started.",
       },
     },
     {
@@ -457,7 +457,7 @@ const FirstGradeReadingActivities = () => {
     {
       type: "paragraph",
       content:
-        "Early intervention is critical—the reading gap widens significantly each year without support. First grade is the optimal time for intensive intervention because reading skills are still developing rapidly.",
+        "Early intervention matters, because reading difficulties usually get harder to fix the longer they go without support. First grade is a good time for intensive intervention because reading skills are still developing quickly.",
     },
     {
       type: "heading",
@@ -474,7 +474,7 @@ const FirstGradeReadingActivities = () => {
       content: [
         "Decode CVC words and common phonics patterns independently (mid-year: short vowels + blends; end-of-year: long vowels + digraphs)",
         "Recognize 25-50 sight words automatically (mid-year) or 50-100 (end-of-year)",
-        "Read at least 20-30 words per minute in grade-level text (mid-year) or 40-60 (end-of-year)",
+        "Read about 30 words correct per minute in grade-level text (mid-year) or about 60 (end-of-year), the typical scores in Hasbrouck and Tindal's 2017 norms",
         "Self-correct obvious errors when reading makes no sense",
         "Answer basic comprehension questions about what they read",
         "Retell stories in sequence with key details",
@@ -513,7 +513,7 @@ const FirstGradeReadingActivities = () => {
   return (
     <ArticlePageTemplate
       metaTitle="First Grade Reading Practice Activities at Home (15 Activities)"
-      metaDescription="15 proven first-grade reading activities for home practice: phonics, fluency, comprehension. Includes weekly schedules and parent strategies."
+      metaDescription="15 first-grade reading activities for home practice: phonics, fluency, comprehension. Includes weekly schedules and parent strategies."
       canonicalUrl="https://wordwizai.com/guides/first-grade-reading-practice-activities-home"
       heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=600&fit=crop"
       heroImageAlt="Parent and child doing reading activities at home"
@@ -524,6 +524,7 @@ const FirstGradeReadingActivities = () => {
         bio: "Passionate about phonics instruction and early literacy development.",
       }}
       publishDate="2025-01-24"
+      updatedDate="2026-09-07"
       readTime={14}
       category="Home Practice"
       content={content}

@@ -171,7 +171,19 @@ def preprocess_audio(audio, sr=16000, audio_length_seconds=None, use_adaptive=Tr
             noise_start = time.time()
             audio = nr.reduce_noise(y=audio, sr=sr, stationary=True, prop_decrease=1.0)
             print(f"⏱️  Noise reduction took {time.time() - noise_start:.3f}s")
-    
+
+    # noisereduce divides by a smoothed spectrum that is exactly 0 wherever
+    # the recording is digital silence (all-zero samples, which browsers
+    # commonly produce in the first buffers before the mic starts). 0/0 gives
+    # NaN there, and the normalization below then divides the whole buffer by
+    # NaN, so the entire recording fails with "Audio buffer is not finite".
+    # Those frames were silent going in, so silent (0) is the right output.
+    # Recordings without NaNs are untouched.
+    if not np.all(np.isfinite(audio)):
+        bad = int(np.count_nonzero(~np.isfinite(audio)))
+        print(f"⚠️  Noise reduction produced {bad} non-finite samples (digital silence); setting them to 0")
+        audio = np.nan_to_num(audio, nan=0.0, posinf=0.0, neginf=0.0)
+
     norm_start = time.time()
     # Replace slow librosa.util.normalize with fast numpy normalization
     # librosa.util.normalize is calling scipy peak normalization which is extremely slow

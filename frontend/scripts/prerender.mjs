@@ -29,6 +29,11 @@ const EXCLUDED_ROUTES = [
   "/signup",
   "/oauth-callback",
   "/toast-test",
+  // Dev-only pages; App.tsx doesn't route them in production builds.
+  "/dev",
+  // Guest try-it practice: an app screen, noindex, and one URL per pattern
+  // would only duplicate the practice-word pages that are meant to rank.
+  "/try",
 ];
 
 /**
@@ -347,6 +352,24 @@ function writeLlmsFiles(pages, distPath) {
     "> the expected pronunciation, and gives targeted feedback on the specific sounds",
     "> they missed. No subscription, no ads. Built around phonics rather than",
     "> whole-word memorization.",
+    "",
+    // Plain facts an answer engine can quote when someone asks about Word Wiz
+    // directly. Keep these in line with the homepage FAQ.
+    "## Key facts",
+    "",
+    "- Price: free. No subscription, no ads, no card on file.",
+    "- Ages: 5 to 8, roughly kindergarten through 3rd grade.",
+    "- Devices: any modern browser with a microphone (iPad, Chromebook, Windows,",
+    "  Mac, phones). Nothing to install.",
+    `- Account: a free account (Google or email) for ongoing practice. A short`,
+    `  sample at ${SITE_ORIGIN}/try works without one.`,
+    "- How it differs: most reading apps check whether the whole word was right.",
+    "  Word Wiz AI checks each sound inside the word and writes the next sentence",
+    "  around the sounds the child missed.",
+    "- Privacy: recordings are used to check the reading and then discarded. Scores",
+    "  and which sounds were hard are kept so practice can adapt. Nothing is sold",
+    "  or shared.",
+    `- About and contact: ${SITE_ORIGIN}/about, contactwordwizai@gmail.com`,
     "",
     "The pages below are written for parents and teachers of beginning and struggling",
     "readers. Guides are instructional, comparisons evaluate other reading apps, and",

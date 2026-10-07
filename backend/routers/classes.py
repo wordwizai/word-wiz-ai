@@ -1,7 +1,7 @@
 from auth.auth_handler import get_current_active_user
 from crud import class_crud, class_membership_crud
 from database import get_db
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from models import User, Session as UserSession, FeedbackEntry
 from schemas.class_schema import (
     ClassCreate,
@@ -108,6 +108,7 @@ def join_class(
 def get_class_students(
     class_id: int,
     use_recent_window: bool = True,
+    tz: str | None = Query(None, max_length=64),
     db: DBSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
@@ -186,7 +187,9 @@ def get_class_students(
         last_session_date = max([s.created_at for s in all_sessions]) if all_sessions else None
         
         # Calculate current streak
-        current_streak = class_membership_crud.calculate_student_streak(all_sessions)
+        current_streak = class_membership_crud.calculate_student_streak(
+            all_sessions, tz_name=tz
+        )
         
         # Create student with stats
         student_stats = StudentWithStats(

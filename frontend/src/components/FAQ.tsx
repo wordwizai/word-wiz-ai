@@ -1,47 +1,54 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
+import { SUPPORT_EMAIL } from "@/config/contact";
+import { cn } from "@/lib/utils";
+import { PenArrow, PenGroup, PenWords } from "./landing/TeacherPen";
+import { penNote, sectionTitle } from "./landing/styles";
 
 interface FAQItem {
   question: string;
   answer: string;
 }
 
+// Plain answers a parent can act on. The data answer has to stay in step
+// with the privacy policy and the home page's "What happens to the recording".
 const faqs: FAQItem[] = [
   {
-    question: "Is Word Wiz AI really free?",
+    question: "Is it really free?",
     answer:
-      "Yes! Word Wiz AI is 100% free with no ads, no subscriptions, and absolutely no hidden costs. Unlike other reading apps that charge $10-15/month, we believe every child deserves access to quality reading education regardless of their family's financial situation. Word Wiz AI will always remain free because improving children's literacy is our mission, not our business model.",
+      "Yes. There are no ads, no subscription, and no card on file. It stays free because charging $10 to $15 a month would shut out the kids who need reading help most.",
   },
   {
-    question: "What age is Word Wiz AI designed for?",
+    question: "What ages is it for?",
     answer:
-      "Word Wiz AI is specifically designed for children ages 5-8 (typically Kindergarten through 3rd grade) who are learning to read or struggling with early reading skills. The app focuses on phoneme awareness and phonics—the foundational skills needed for reading success. Whether your child is just beginning to recognize letters and sounds, or working on decoding more complex words, Word Wiz AI adapts to their level.",
+      "Ages 5 to 8, roughly kindergarten through 3rd grade. It's built for kids who are learning to sound words out, or who keep getting stuck on certain sounds.",
   },
   {
-    question: "How does Word Wiz AI help with pronunciation?",
+    question: "How does the feedback work?",
     answer:
-      "Word Wiz AI uses advanced speech recognition technology to listen as your child reads aloud and analyze their pronunciation at the phoneme level. Unlike traditional reading apps that only check if a word is read correctly, Word Wiz AI identifies exactly which sounds your child mispronounces. The AI then generates customized practice sentences focusing on those specific sound patterns, providing targeted, immediate feedback.",
+      "Your child reads a sentence out loud. Word Wiz breaks the recording into individual sounds, compares them with how each word should sound, and points to the exact sound that slipped. The next sentence is written to practice it.",
   },
   {
     question: "Is my child's data safe?",
     answer:
-      "Absolutely. We take privacy seriously and are committed to protecting your child's information. We comply with COPPA (Children's Online Privacy Protection Act) regulations. Audio recordings are processed for learning purposes only and are not stored permanently. We never sell or share personal data with third parties.",
+      "Recordings are used to check the reading and then thrown away. We keep scores and which sounds were hard, so practice can adapt. There are no ads, and nothing is sold or shared.",
   },
   {
-    question: "What devices does Word Wiz AI work on?",
+    question: "What devices does it work on?",
     answer:
-      "Word Wiz AI is a web-based application that works in any modern web browser. It's compatible with desktop computers, laptops, tablets, and smartphones. All you need is an internet connection and a device with a microphone. Works great on iPads, Chromebooks, Windows PCs, and Macs!",
+      "Any modern browser with a microphone. That includes iPads, Chromebooks, Windows laptops, Macs, and phones.",
   },
   {
-    question: "How is Word Wiz AI different from other reading apps?",
+    question: "How is it different from other reading apps?",
     answer:
-      "Word Wiz AI offers phoneme-level pronunciation analysis (most apps only check whole words), AI-generated custom content that adapts to your child's specific struggle areas, and real-time speech recognition for immediate feedback. Plus, it's 100% free with no ads—unlike competitors that charge monthly subscriptions or show advertisements.",
+      "Most apps check whether the whole word was right. Word Wiz checks each sound inside the word, and writes new practice around the sounds your child misses.",
   },
 ];
 
 const FAQ: React.FC = () => {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  // The first answer starts open; it's the question most parents arrive with.
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   // Add structured data for SEO
   React.useEffect(() => {
@@ -73,52 +80,84 @@ const FAQ: React.FC = () => {
   };
 
   return (
-    <section className="px-6 py-20 bg-gradient-to-br from-background to-purple-50/50">
-      <div className="max-w-4xl mx-auto space-y-10">
-        <div className="text-center space-y-4">
-          <h2 className="text-3xl md:text-4xl font-bold">
-            Frequently Asked Questions
-          </h2>
-          <p className="text-muted-foreground text-lg">
-            Everything you need to know about Word Wiz AI
-          </p>
-        </div>
-
-        <div className="space-y-4">
-          {faqs.map((faq, index) => (
-            <div
-              key={index}
-              className="bg-white border-2 border-purple-100/50 rounded-2xl shadow-sm overflow-hidden"
+    <section className="bg-muted/50 px-4 py-20 sm:px-6 md:py-24">
+      <div className="mx-auto flex max-w-6xl flex-col gap-10 lg:flex-row lg:items-start lg:gap-16">
+        <PenGroup className="space-y-4 lg:w-[380px] lg:flex-none">
+          <h2 className={sectionTitle}>Questions parents ask</h2>
+          <p className="text-[17px] text-muted-foreground">
+            Straight answers. If yours isn&rsquo;t here, write to{" "}
+            <a
+              href={`mailto:${SUPPORT_EMAIL}`}
+              className="break-words font-semibold text-primary underline-offset-4 hover:underline"
             >
-              <button
-                onClick={() => toggleFAQ(index)}
-                className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-purple-50/30 transition-colors"
-              >
-                <h3 className="text-lg font-semibold pr-4">{faq.question}</h3>
-                <motion.div
-                  animate={{ rotate: openIndex === index ? 180 : 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                </motion.div>
-              </button>
+              {SUPPORT_EMAIL}
+            </a>
+            .
+          </p>
+          <div className="hidden items-end gap-1.5 pt-2 lg:flex">
+            <PenWords
+              delay={0.3}
+              text="start with this one, it’s the big one"
+              className={cn(penNote, "max-w-[200px] -rotate-3")}
+            />
+            <PenArrow
+              variant="up-right"
+              delay={1.5}
+              className="mb-4 h-10 w-20 flex-none"
+            />
+          </div>
+        </PenGroup>
 
-              <AnimatePresence>
-                {openIndex === index && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <div className="px-6 pb-5 text-muted-foreground">
-                      {faq.answer}
-                    </div>
-                  </motion.div>
+        <div className="min-w-0 flex-1 rounded-3xl border border-border bg-card px-5 py-2 shadow-sm sm:px-7">
+          {faqs.map((faq, index) => {
+            const open = openIndex === index;
+            return (
+              <div
+                key={faq.question}
+                className={cn(
+                  "py-2",
+                  index < faqs.length - 1 && "border-b border-border"
                 )}
-              </AnimatePresence>
-            </div>
-          ))}
+              >
+                <button
+                  type="button"
+                  onClick={() => toggleFAQ(index)}
+                  aria-expanded={open}
+                  aria-controls={`faq-answer-${index}`}
+                  className="flex min-h-14 w-full items-center justify-between gap-4 rounded-lg text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                >
+                  <h3 className="text-lg font-semibold">{faq.question}</h3>
+                  <motion.span
+                    animate={{ rotate: open ? 180 : 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex-none"
+                  >
+                    <ChevronDown
+                      className="size-5 text-muted-foreground"
+                      aria-hidden="true"
+                    />
+                  </motion.span>
+                </button>
+
+                <AnimatePresence initial={false}>
+                  {open && (
+                    <motion.div
+                      id={`faq-answer-${index}`}
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="overflow-hidden"
+                    >
+                      <p className="max-w-[620px] pb-4 text-muted-foreground">
+                        {faq.answer}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

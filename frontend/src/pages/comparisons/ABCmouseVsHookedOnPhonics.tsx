@@ -17,7 +17,7 @@ const ABCmouseHookedOnPhonicsComparison = () => {
     tagline: "Systematic phonics program with physical materials",
     pricing: {
       free: "$1 first month",
-      paid: "Monthly subscription + materials",
+      paid: "From $23.96/mo, materials included",
       trial: "$1 trial month",
     },
     website: "https://www.hookedonphonics.com",
@@ -363,7 +363,7 @@ const ABCmouseHookedOnPhonicsComparison = () => {
       metaDescription="ABCmouse covers many subjects. Hooked on Phonics is a step-by-step phonics program. Compare cost, ages and approach, plus a free tool that listens to kids read."
       canonicalUrl="https://wordwizai.com/comparisons/abcmouse-vs-hooked-on-phonics-vs-word-wiz-ai"
       h1Title="ABCmouse vs Hooked on Phonics: Which Is Better for Learning to Read?"
-      introText="ABCmouse costs $14.99/month or $45/year for the broadest curriculum, Hooked on Phonics is a monthly subscription with mailed books and workbooks ($1 for the first month) for traditional systematic phonics, and Word Wiz AI is free and is the only one of the three that listens to a child read aloud and corrects pronunciation. Choose ABCmouse for breadth, Hooked on Phonics for structure, and Word Wiz AI for pronunciation accuracy."
+      introText="ABCmouse costs $14.99/month or $45/year for the broadest curriculum, Hooked on Phonics starts at $23.96/month with mailed books and workbooks for traditional systematic phonics, and Word Wiz AI is free and is the only one of the three that listens to a child read aloud and corrects pronunciation. Choose ABCmouse for breadth, Hooked on Phonics for structure, and Word Wiz AI for pronunciation accuracy."
       verdict={verdict}
       faqs={faqs}
     />

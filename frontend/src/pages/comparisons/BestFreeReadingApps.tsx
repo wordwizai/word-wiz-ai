@@ -326,7 +326,7 @@ const BestFreeReadingAppsComparison = () => {
     {
       question: "Which app is truly 100% free with no limitations?",
       answer:
-        "Khan Academy Kids is 100% free forever with all features included. Starfall has a free tier but best features require $60/year. Word Wiz AI is free, including speech recognition, with no paid tier.",
+        "Khan Academy Kids is 100% free forever with all features included. Starfall has a free tier but best features require $35/year. Word Wiz AI is free, including speech recognition, with no paid tier.",
     },
     {
       question: "Do any free reading apps have speech recognition?",

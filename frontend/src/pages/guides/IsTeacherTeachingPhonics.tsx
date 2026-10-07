@@ -655,7 +655,7 @@ const IsTeacherTeachingPhonics = () => {
       afterSection: 13,
       title: "Assess Your Child's Pronunciation",
       description:
-        "Word Wiz AI provides objective pronunciation assessment, helping you understand exactly what skills need work",
+        "Word Wiz AI gives sound-by-sound pronunciation feedback, helping you see which sounds need work",
       buttonText: "Try Free",
       buttonHref: "/signup",
     },

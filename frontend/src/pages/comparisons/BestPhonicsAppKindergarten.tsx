@@ -112,7 +112,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "Word Wiz AI is the only app on this list with true AI-powered pronunciation analysis. When your child reads a word aloud, the AI analyzes every phoneme (sound) they produce and provides specific feedback: 'You said /b/, but this word starts with /d/.' This catches errors that parents and traditional apps miss. For struggling readers who mispronounce words but don't know it, this real-time feedback is transformative.",
+        "Word Wiz AI is the only app on this list with true AI-powered pronunciation analysis. When your child reads a word aloud, the AI analyzes every phoneme (sound) they produce and provides specific feedback, such as 'You had trouble with the d sound in dog.' This catches errors that parents and traditional apps miss. For struggling readers who mispronounce words but don't know it, this real-time feedback is transformative.",
     },
     {
       type: "paragraph",
@@ -503,7 +503,7 @@ const BestPhonicsAppKindergarten = () => {
       content: [
         "**A good starting point:** 15 minutes daily, 5-6 days/week",
         "**A fuller routine:** 20-30 minutes daily, 6 days/week",
-        "**For a child who is further behind:** 30-40 minutes daily, split into two 15-20 minute sessions",
+        "**For a child who is further behind:** 30-40 minutes daily, as two 15-20 minute sessions",
       ],
     },
     {

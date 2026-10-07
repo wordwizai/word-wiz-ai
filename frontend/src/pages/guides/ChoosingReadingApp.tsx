@@ -154,14 +154,15 @@ const ChoosingReadingApp = () => {
     },
     {
       type: "paragraph",
-      content: "Most reading apps range from free to about $15/month. Prices below were checked in October 2026 and change often. Be realistic about:",
+      content: "Most reading apps range from free to about $15/month, and programs that mail books home cost more. Prices below were checked in October 2026 and change often. Be realistic about:",
     },
     {
       type: "list",
       content: [
         "$0: Free options (Word Wiz AI, Teach Your Monster in the browser, Khan Academy Kids)",
-        "About $8-10/month: Mid-range (Reading IQ at $7.99, IXL from $9.95 for one subject)",
-        "About $14-15/month: Premium (Reading Eggs at $13.99, Hooked on Phonics and ABCmouse at $14.99)",
+        "About $8-10/month: Mid-range (Reading IQ at $7.99, Reading Eggs reading-only at $9.99, IXL from $9.95 for one subject)",
+        "About $14-15/month: Premium (Reading Eggs with math at $13.99, ABCmouse at $14.99)",
+        "About $24-32/month: Programs that mail books and workbooks home (Hooked on Phonics)",
         "More than that: Tutoring replacements (some specialized apps)",
       ],
     },
@@ -273,8 +274,8 @@ const ChoosingReadingApp = () => {
       type: "list",
       content: [
         "Word Wiz AI (free, speech recognition for pronunciation)",
-        "Hooked on Phonics ($14.99/month, traditional phonics curriculum)",
-        "Reading Eggs ($13.99/month, gamified systematic phonics)",
+        "Hooked on Phonics (from $23.96/month with mailed books, traditional phonics curriculum)",
+        "Reading Eggs ($9.99/month, gamified systematic phonics)",
         "Teach Your Monster to Read (free in the browser, UK phonics, no speech recognition)",
       ],
     },

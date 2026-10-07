@@ -7,7 +7,7 @@ const TutorVsApp = () => {
       content: {
         type: "info",
         title: "Reading tutor or reading app: which is better?",
-        content: "Cost decides this for most families. A private reading tutor typically runs $40-80 an hour, or $320-960 a month at two to three sessions a week, and dyslexia specialists often charge more than $100 an hour. An app costs $0-15 a month. Tutors are worth it for suspected dyslexia, no progress after six months of app use, or a child needing human accountability. Otherwise, a daily app plus weekly tutoring can give you the strengths of both.",
+        content: "Cost decides this for most families. A private reading tutor typically runs $40-80 an hour, or $320-960 a month at two to three sessions a week, versus $0-15 a month for an app. Tutors are worth it for suspected dyslexia, no progress after six months of app use, or a child needing human accountability. Otherwise, a daily app plus weekly tutoring can give you the strengths of both.",
       },
     },
     {

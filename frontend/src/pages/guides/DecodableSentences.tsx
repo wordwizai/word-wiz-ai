@@ -51,7 +51,7 @@ const DecodableSentences = () => {
     {
       type: "heading",
       level: 2,
-      content: "The Science: Controlled Texts Accelerate Progress",
+      content: "Why Practice Should Match Instruction",
       id: "the-science",
     },
     {

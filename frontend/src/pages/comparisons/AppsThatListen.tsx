@@ -196,7 +196,7 @@ const AppsThatListenComparison = () => {
     {
       question: "What about Ello?",
       answer:
-        "Ello also listens as children read books aloud and is aimed at ages 4 to 9 on iPhone, iPad and Android. As of 2026 it is free to start with daily activities, and the full AI tutoring is a paid upgrade. Check the app for the current price.",
+        "Ello also listens as children read books aloud and is aimed at ages 4 to 9 on iPhone, iPad and Android. As of 2026 it offers free daily activities, and an optional paid upgrade adds premium features. Check the app for the current price.",
     },
     {
       question: "What about Amira?",

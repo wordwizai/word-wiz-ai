@@ -87,7 +87,7 @@ const IXLDuolingoABCComparison = () => {
         {
           name: "AI Technology",
           product1: false,
-          product2: false,
+          product2: "Speech recognition in some games",
           wordWiz: "Yes",
         },
       ],
@@ -248,7 +248,7 @@ const IXLDuolingoABCComparison = () => {
       "Kids who can decode but mispronounce words",
     ],
     description:
-      "Word Wiz AI is the specialist among these options—it does one thing excellently: pronunciation feedback through speech recognition. While not as comprehensive as IXL or as game-like as Duolingo ABC, it's the one of the three that actually listens and gives feedback on each sound.",
+      "Word Wiz AI is the specialist among these options—it does one thing excellently: pronunciation feedback through speech recognition. While not as comprehensive as IXL or as game-like as Duolingo ABC, it's the one of the three that gives feedback on each sound.",
   };
 
   const verdict = {
@@ -257,7 +257,7 @@ const IXLDuolingoABCComparison = () => {
     product2:
       "Best for early literacy fun (ages 3-7) on a $0 budget. Kids love Duolingo's style, and it's completely free. Perfect for preschool through first grade, but it's app-only and its optional speaking games don't give sound-by-sound pronunciation feedback.",
     wordWiz:
-      "Best for pronunciation feedback and speech technology. It's the only free option with actual speech recognition among these three. While narrower in scope than IXL, it checks reading at the level of individual sounds and works in any browser.",
+      "Best for pronunciation feedback and speech technology. It's the one of these three with sound-by-sound pronunciation feedback. While narrower in scope than IXL, it checks reading at the level of individual sounds and works in any browser.",
     overall:
       "These three serve different needs: IXL is comprehensive but paid, Duolingo ABC is fun and free for early readers, and Word Wiz AI provides sound-by-sound pronunciation feedback. The best free combination is Duolingo ABC (ages 3-7) + Word Wiz AI for pronunciation practice. If budget allows, add IXL for comprehensive coverage, with Word Wiz AI covering the read-aloud practice IXL doesn't offer.",
   };
@@ -276,7 +276,7 @@ const IXLDuolingoABCComparison = () => {
     {
       question: "Which has the best technology?",
       answer:
-        "Word Wiz AI uses speech recognition for pronunciation feedback. Neither IXL nor Duolingo ABC can listen to your child read or provide pronunciation corrections—Word Wiz AI is the one of these three with this capability.",
+        "Word Wiz AI uses speech recognition for pronunciation feedback. IXL doesn't listen to your child read, and Duolingo ABC's optional speaking games check letter sounds and words without sound-by-sound feedback. Word Wiz AI is the one of these three that points to the exact sound your child missed.",
     },
     {
       question: "Can I use these together?",

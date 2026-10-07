@@ -128,7 +128,7 @@ const FreeVsPaid = () => {
     {
       type: "heading",
       level: 3,
-      content: "2. Reading Eggs ($13.99/month or $99.99/year)"
+      content: "2. Reading Eggs ($9.99/month for reading only, or $13.99/month and $99.99/year with math)"
     },
     {
       type: "paragraph",
@@ -292,7 +292,7 @@ const FreeVsPaid = () => {
     },
     {
       type: "paragraph",
-      content: "**Reading Eggs paid subscription:** $99.99/year = $8.33/month = about $0.27/day"
+      content: "**Reading Eggs reading and math plan:** $99.99/year = $8.33/month = about $0.27/day"
     },
     {
       type: "paragraph",

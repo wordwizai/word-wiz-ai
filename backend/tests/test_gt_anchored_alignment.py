@@ -1171,6 +1171,119 @@ class TestProcessAudioArrayHook(unittest.TestCase):
         self._assert_anchored(self._run())
 
 
+class TestClientPhonemesHook(unittest.TestCase):
+    """
+    ``process_audio_with_client_phonemes`` (phonemes sent by the browser) scores
+    them exactly like ``process_audio_array`` does: flattened, then
+    ``align_to_ground_truth``. The flag turns it off, and the legacy client path
+    is pinned against the pre-change function in
+    tests/test_client_realign_and_index_safety.py.
+    """
+
+    REALIGN_FLAG = "WWAI_CLIENT_REALIGN"
+    WORDS = ['the', 'cat', 'sat']
+    # (client groups, client words, ground truth)
+    CASES = {
+        "exact": ([['ð', 'ə'], ['k', 'æ', 't'], ['s', 'æ', 't']], WORDS, GT_SHORT),
+        "asr_corrects_tat": ([['ð', 'ə'], ['t', 'æ', 't'], ['s', 'æ', 't']], WORDS, GT_SHORT),
+        "split_group": ([['ð', 'ə'], ['k', 'æ'], ['t'], ['s', 'æ', 't']], WORDS, GT_SHORT),
+        "merged_group": ([['ð', 'ə', 'k', 'æ', 't', 's', 'æ', 't']], WORDS, GT_SHORT),
+        "skipped_word": ([['ð', 'ə'], ['s', 'æ', 't']], ['the', 'sat'], GT_SHORT),
+        "extra_word": ([['ð', 'ə'], ['k', 'æ', 't'], ['s', 'æ', 't'], ['d', 'a', 'ʊ', 'n']],
+                       ['the', 'cat', 'sat', 'down'], GT_SHORT),
+        "long": ([['ð', 'ə'], ['k', 'æ', 't', 's', 'æ'], ['t'], ['ɑ', 'n', 'ð', 'ə'], ['m', 'æ', 't']],
+                 ['the', 'cat', 'sat', 'on', 'the', 'mat'], GT_LONG),
+    }
+
+    def setUp(self):
+        self._saved = {k: os.environ.get(k) for k in (GT_ANCHORED_FLAG, self.REALIGN_FLAG)}
+        for key in self._saved:
+            os.environ.pop(key, None)
+
+    def tearDown(self):
+        for key, value in self._saved.items():
+            os.environ.pop(key, None)
+            if value is not None:
+                os.environ[key] = value
+
+    def _run(self, groups, words, gt=GT_SHORT, **kwargs):
+        import asyncio
+        import contextlib
+        import io
+        from core.process_audio import process_audio_with_client_phonemes
+
+        with contextlib.redirect_stdout(io.StringIO()):
+            return asyncio.run(process_audio_with_client_phonemes(
+                client_phonemes=groups, ground_truth_phonemes=gt, audio_array=None,
+                sampling_rate=16000, client_words=words, **kwargs,
+            ))
+
+    def _assert_anchored_for_every_case(self):
+        for name, (groups, words, gt) in self.CASES.items():
+            with self.subTest(case=name):
+                flat = [p for group in groups for p in group]
+                self.assertEqual(self._run(groups, words, gt), align_to_ground_truth(flat, gt, words))
+
+    def test_flag_unset_scores_like_align_to_ground_truth(self):
+        self._assert_anchored_for_every_case()
+
+    def test_flag_set_scores_like_align_to_ground_truth(self):
+        os.environ[GT_ANCHORED_FLAG] = "true"
+        self._assert_anchored_for_every_case()
+
+    def test_the_client_grouping_no_longer_matters(self):
+        # The same phonemes, grouped three ways by the client, score the same.
+        outputs = [self._run(self.CASES[name][0], self.WORDS) for name in ("exact", "split_group", "merged_group")]
+        self.assertEqual(outputs[0], outputs[1])
+        self.assertEqual(outputs[0], outputs[2])
+        self.assertTrue(all(r["per"] == 0 for r in outputs[0]))
+
+    def test_the_mispronunciation_the_asr_corrected_is_found(self):
+        groups, words, gt = self.CASES["asr_corrects_tat"]
+        self.assertEqual([r["type"] for r in self._run(groups, words, gt)], ["match", "substitution", "match"])
+        os.environ[GT_ANCHORED_FLAG] = "false"
+        self.assertEqual([r["type"] for r in self._run(groups, words, gt)], ["match", "match", "match"])
+
+    def test_realignment_is_skipped_under_gt_anchoring(self):
+        from unittest import mock
+        import core.process_audio as pa
+
+        os.environ[self.REALIGN_FLAG] = "true"
+        groups, words, gt = self.CASES["split_group"]
+        with mock.patch.object(pa, "align_phonemes_to_words", side_effect=AssertionError("realigned")):
+            results = self._run(groups, words, gt)
+        self.assertEqual(results, align_to_ground_truth([p for g in groups for p in g], gt, words))
+
+    def test_the_guards_come_first_and_in_order(self):
+        # Ground truth length first, even with nothing to score.
+        with self.assertRaises(ValueError) as ctx:
+            self._run([], None, gt=[THE], word_extraction_model=self._Words(None))
+        self.assertIn("ground_truth_phonemes", str(ctx.exception))
+        # Then no speech, when there is at most one word.
+        with self.assertRaises(ValueError) as ctx:
+            self._run([['ð', 'ə']], ['the'])
+        self.assertEqual(str(ctx.exception), "The audio provided has no speech inside")
+
+    class _Words:
+        def __init__(self, words):
+            self.words = words
+
+        def extract_words(self, audio=None, sampling_rate=None):
+            return self.words
+
+    def test_server_words_are_used_when_the_client_sends_none(self):
+        # The hybrid mode: the server's ASR heard an extra word, which becomes an insertion record.
+        from unittest import mock
+        import core.process_audio as pa
+
+        groups = self.CASES["exact"][0]
+        with mock.patch.object(pa, "preprocess_audio", side_effect=lambda audio=None, **_kw: audio):
+            results = self._run(groups, None, word_extraction_model=self._Words(['the', 'cat', 'sat', 'down']))
+        self.assertEqual(results, align_to_ground_truth(
+            [p for g in groups for p in g], GT_SHORT, ['the', 'cat', 'sat', 'down']))
+        self.assertEqual([r["type"] for r in results][-1], "insertion")
+
+
 class TestRobustness(unittest.TestCase):
     """Nothing here may raise inside the live analysis pipeline."""
 

@@ -96,7 +96,7 @@
         ],
         "total_errors": 3,
         "total_phonemes": 7,
-        "type": "match"
+        "type": "substitution"
       },
       {
         "added": [],

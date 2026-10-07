@@ -306,7 +306,7 @@ class TestClientPath(unittest.TestCase):
 
     def test_client_phonemes_are_normalized_and_scored_with_the_server_words(self):
         import core.process_audio as process_audio
-        from core.grapheme_to_phoneme import grapheme_to_phoneme
+        from core.grapheme_to_phoneme import clean_sentence, grapheme_to_phoneme
         from routers.handlers.phoneme_processing_handler import normalize_espeak_to_ipa
 
         # The model's groups, with eSpeak's schwa in "the" so the normalization shows.
@@ -325,14 +325,29 @@ class TestClientPath(unittest.TestCase):
         self.assertEqual(kwargs["client_phonemes"], normalize_espeak_to_ipa(groups))
         self.assertEqual(kwargs["client_phonemes"], self.perfect)
         self.assertEqual(kwargs["client_words"], U.SAMPLE_TEXT.split())
-        # The handler's ground truth: grapheme_to_phoneme on the sentence as sent.
-        self.assertEqual(kwargs["ground_truth_phonemes"], grapheme_to_phoneme(text))
+        # The handler's ground truth, built as on the server path (clean_sentence, then G2P).
+        self.assertEqual(kwargs["ground_truth_phonemes"], grapheme_to_phoneme(clean_sentence(text)))
+        self.assertEqual([w for w, _ in kwargs["ground_truth_phonemes"]], U.SAMPLE_TEXT.split())
         self.assertEqual(kwargs["sampling_rate"], PL.SAMPLE_RATE)
         words = [w for w in outcome.words if w["type"] != "insertion"]
         self.assertEqual(len(words), 9)
         self.assertTrue(all(w["per"] == 0 for w in words))
         self.assertFalse(outcome.client_fallback)
         self.assertIs(outcome.to_dict()["client_fallback"], False)
+
+    def test_the_client_path_now_scores_like_the_server_path(self):
+        # The same phonemes, words and ground truth, so ground-truth-anchored scoring gives the
+        # same records whichever path they came by. "the" misread and "fox" split by the client.
+        groups = [list(p) for p in self.perfect]
+        groups[0] = ["d", "ə"]
+        groups[3:4] = [["f", "ɑ"], ["k", "s"]]
+        text = U.SAMPLE_TEXT.upper()
+        server = PL.analyze_clip(self.audio, text, _ListPhonemes(groups), U.FakeWords())
+        client = self._client(text, _ListPhonemes(groups))
+        self.assertEqual(client.status, "ok", client.error)
+        self.assertEqual(client.to_dict()["words"], server.to_dict()["words"])
+        self.assertEqual(client.feedback, server.feedback)
+        self.assertEqual(client.feedback["focus_words"][:1], ["the"])
 
     def test_a_validation_failure_falls_back_to_the_server_path_and_is_counted(self):
         import core.process_audio as process_audio

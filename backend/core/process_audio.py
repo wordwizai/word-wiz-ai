@@ -833,6 +833,10 @@ async def process_audio_with_client_phonemes(
     If client_words are provided, word extraction is skipped entirely, saving
     significant processing time (60-80% faster).
     
+    The phonemes are scored the way process_audio_array scores the server's. They are
+    flattened and aligned to the ground truth by gt_alignment.align_to_ground_truth, unless
+    WWAI_GT_ANCHORED_ALIGNMENT is off, which restores the legacy word-by-word scoring.
+
     Args:
         client_phonemes: List of words, where each word is a list of IPA phoneme strings
                         (already normalized from eSpeak format)
@@ -879,6 +883,20 @@ async def process_audio_with_client_phonemes(
     # Use client-provided phonemes directly (already normalized to IPA)
     phoneme_predictions = client_phonemes
     print(f"✓ Using client-provided phonemes ({len(phoneme_predictions)} words)")
+
+    # Ground-truth-anchored alignment (WWAI_GT_ANCHORED_ALIGNMENT, default ON), exactly as
+    # in process_audio_array. The expected words define the buckets, so the client's own
+    # word grouping does not matter and predicted_words is only a secondary signal.
+    # WWAI_CLIENT_REALIGN, which regroups the phonemes onto the ASR words, would be
+    # pointless here, so it only applies to the legacy path below.
+    from .gt_alignment import is_gt_anchored_enabled, align_to_ground_truth
+    if is_gt_anchored_enabled():
+        flattened_client_phonemes = [
+            phoneme
+            for group in (phoneme_predictions or [])
+            for phoneme in (group or [])
+        ]
+        return align_to_ground_truth(flattened_client_phonemes, ground_truth_phonemes, predicted_words)
     
     # Validate that we have the same number of words in phonemes and word predictions
     # If not, we may need to adjust the alignment

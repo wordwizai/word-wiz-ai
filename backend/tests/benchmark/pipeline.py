@@ -147,7 +147,7 @@ async def _analyze_client_path(audio, text, phoneme_model, word_model, state):
     )
     from routers.handlers.phoneme_processing_handler import normalize_espeak_to_ipa, validate_client_phonemes
 
-    ground_truth = grapheme_to_phoneme(text)  # the handler's ground truth, the sentence as sent
+    ground_truth = grapheme_to_phoneme(clean_sentence(text))  # the handler's, built as on the server path
     if len(ground_truth) <= 1:
         # What process_audio_with_client_phonemes raises first, whatever the phonemes. Checked
         # before extraction because process_audio_array refused these clips before calling the

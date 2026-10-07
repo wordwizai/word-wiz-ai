@@ -41,6 +41,7 @@ from core.process_audio import (  # noqa: E402
 )
 
 FLAG = "WWAI_CLIENT_REALIGN"
+GT_FLAG = "WWAI_GT_ANCHORED_ALIGNMENT"
 
 # --- Fixtures ---------------------------------------------------------------
 
@@ -67,15 +68,25 @@ def normalize(results):
 
 
 class _FlagMixin(unittest.TestCase):
-    """Save/restore WWAI_CLIENT_REALIGN so tests never leak env state."""
+    """Save/restore WWAI_CLIENT_REALIGN so tests never leak env state.
+
+    Everything here is about the legacy client path, so WWAI_GT_ANCHORED_ALIGNMENT is
+    pinned off. With it on (the default) process_audio_with_client_phonemes scores
+    with align_to_ground_truth instead, see tests/test_gt_anchored_alignment.py.
+    """
 
     def setUp(self):
         self._saved_flag = os.environ.pop(FLAG, None)
+        self._saved_gt_flag = os.environ.get(GT_FLAG)
+        os.environ[GT_FLAG] = "0"
 
     def tearDown(self):
         os.environ.pop(FLAG, None)
         if self._saved_flag is not None:
             os.environ[FLAG] = self._saved_flag
+        os.environ.pop(GT_FLAG, None)
+        if self._saved_gt_flag is not None:
+            os.environ[GT_FLAG] = self._saved_gt_flag
 
     def set_flag(self, value):
         os.environ[FLAG] = value
@@ -264,6 +275,57 @@ class TestClientPathFlagOn(_FlagMixin):
                 self.assertEqual(
                     out[0]["actual_phonemes"], ["ð", "ə", "k", "æ", "t", "s", "æ", "t"]
                 )
+
+
+# Outputs of process_audio_with_client_phonemes captured from the pre-change
+# function (commit 1257369, before ground-truth-anchored client scoring) with
+# WWAI_GT_ANCHORED_ALIGNMENT=0, WWAI_CLIENT_REALIGN off and on ("_realign").
+LEGACY_CLIENT_CASES = {
+    "exact": ([["ð", "ə"], ["k", "æ", "t"], ["s", "æ", "t"]], ["the", "cat", "sat"]),
+    "asr_corrects_tat": ([["ð", "ə"], ["t", "æ", "t"], ["s", "æ", "t"]], ["the", "cat", "sat"]),
+    "split_group": ([["ð", "ə"], ["k", "æ"], ["t"], ["s", "æ", "t"]], ["the", "cat", "sat"]),
+    "merged_group": ([["ð", "ə", "k", "æ", "t", "s", "æ", "t"]], ["the", "cat", "sat"]),
+    "skipped_word": ([["ð", "ə"], ["s", "æ", "t"]], ["the", "sat"]),
+    "extra_word": ([["ð", "ə"], ["k", "æ", "t"], ["s", "æ", "t"], ["d", "a", "ʊ", "n"]],
+                   ["the", "cat", "sat", "down"]),
+}
+LEGACY_CLIENT_GOLDEN = json.loads(r"""
+{
+ "exact":[{"type":"match","predicted_word":"the","ground_truth_word":"the","phonemes":["ð","ə"],"ground_truth_phonemes":["ð","ə"],"expected_phonemes":["ð","ə"],"actual_phonemes":["ð","ə"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":2,"total_errors":0},{"type":"match","predicted_word":"cat","ground_truth_word":"cat","phonemes":["k","æ","t"],"ground_truth_phonemes":["k","æ","t"],"expected_phonemes":["k","æ","t"],"actual_phonemes":["k","æ","t"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":3,"total_errors":0},{"type":"match","predicted_word":"sat","ground_truth_word":"sat","phonemes":["s","æ","t"],"ground_truth_phonemes":["s","æ","t"],"expected_phonemes":["s","æ","t"],"actual_phonemes":["s","æ","t"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":3,"total_errors":0}],
+ "asr_corrects_tat":[{"type":"match","predicted_word":"the","ground_truth_word":"the","phonemes":["ð","ə"],"ground_truth_phonemes":["ð","ə"],"expected_phonemes":["ð","ə"],"actual_phonemes":["ð","ə"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":2,"total_errors":0},{"type":"match","predicted_word":"cat","ground_truth_word":"cat","phonemes":["t","æ","t"],"ground_truth_phonemes":["k","æ","t"],"expected_phonemes":["k","æ","t"],"actual_phonemes":["t","æ","t"],"per":0.3333,"missed":[],"added":[],"substituted":[["k","t"]],"total_phonemes":3,"total_errors":1},{"type":"match","predicted_word":"sat","ground_truth_word":"sat","phonemes":["s","æ","t"],"ground_truth_phonemes":["s","æ","t"],"expected_phonemes":["s","æ","t"],"actual_phonemes":["s","æ","t"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":3,"total_errors":0}],
+ "split_group":[{"type":"match","predicted_word":"the","ground_truth_word":"the","phonemes":["ð","ə"],"ground_truth_phonemes":["ð","ə"],"expected_phonemes":["ð","ə"],"actual_phonemes":["ð","ə"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":2,"total_errors":0},{"type":"match","predicted_word":"cat","ground_truth_word":"cat","phonemes":["k","æ"],"ground_truth_phonemes":["k","æ","t"],"expected_phonemes":["k","æ","t"],"actual_phonemes":["k","æ"],"per":0.3333,"missed":["t"],"added":[],"substituted":[],"total_phonemes":3,"total_errors":1},{"type":"match","predicted_word":"sat","ground_truth_word":"sat","phonemes":["t"],"ground_truth_phonemes":["s","æ","t"],"expected_phonemes":["s","æ","t"],"actual_phonemes":["t"],"per":0.6667,"missed":["s","æ"],"added":[],"substituted":[],"total_phonemes":3,"total_errors":2}],
+ "merged_group":[{"type":"match","predicted_word":"the","ground_truth_word":"the","phonemes":["ð","ə","k","æ","t","s","æ","t"],"ground_truth_phonemes":["ð","ə"],"expected_phonemes":["ð","ə"],"actual_phonemes":["ð","ə","k","æ","t","s","æ","t"],"per":3.0,"missed":[],"added":["k","æ","t","s","æ","t"],"substituted":[],"total_phonemes":2,"total_errors":6},{"type":"match","predicted_word":"cat","ground_truth_word":"cat","phonemes":[],"ground_truth_phonemes":["k","æ","t"],"expected_phonemes":["k","æ","t"],"actual_phonemes":[],"per":1.0,"missed":["k","æ","t"],"added":[],"substituted":[],"total_phonemes":3,"total_errors":3},{"type":"match","predicted_word":"sat","ground_truth_word":"sat","phonemes":[],"ground_truth_phonemes":["s","æ","t"],"expected_phonemes":["s","æ","t"],"actual_phonemes":[],"per":1.0,"missed":["s","æ","t"],"added":[],"substituted":[],"total_phonemes":3,"total_errors":3}],
+ "skipped_word":[{"type":"match","predicted_word":"the","ground_truth_word":"the","phonemes":["ð","ə"],"ground_truth_phonemes":["ð","ə"],"expected_phonemes":["ð","ə"],"actual_phonemes":["ð","ə"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":2,"total_errors":0},{"type":"deletion","predicted_word":"","ground_truth_word":"cat","phonemes":[],"ground_truth_phonemes":["k","æ","t"],"expected_phonemes":["k","æ","t"],"actual_phonemes":[],"per":1.0,"missed":["k","æ","t"],"added":[],"substituted":[],"total_phonemes":3,"total_errors":3,"error":"Word missing in prediction."},{"type":"match","predicted_word":"sat","ground_truth_word":"sat","phonemes":["s","æ","t"],"ground_truth_phonemes":["s","æ","t"],"expected_phonemes":["s","æ","t"],"actual_phonemes":["s","æ","t"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":3,"total_errors":0}],
+ "extra_word":[{"type":"match","predicted_word":"the","ground_truth_word":"the","phonemes":["ð","ə"],"ground_truth_phonemes":["ð","ə"],"expected_phonemes":["ð","ə"],"actual_phonemes":["ð","ə"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":2,"total_errors":0},{"type":"match","predicted_word":"cat","ground_truth_word":"cat","phonemes":["k","æ","t"],"ground_truth_phonemes":["k","æ","t"],"expected_phonemes":["k","æ","t"],"actual_phonemes":["k","æ","t"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":3,"total_errors":0},{"type":"match","predicted_word":"sat","ground_truth_word":"sat","phonemes":["s","æ","t"],"ground_truth_phonemes":["s","æ","t"],"expected_phonemes":["s","æ","t"],"actual_phonemes":["s","æ","t"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":3,"total_errors":0},{"type":"insertion","predicted_word":"down","ground_truth_word":"","phonemes":["d","a","ʊ","n"],"ground_truth_phonemes":[],"expected_phonemes":[],"actual_phonemes":["d","a","ʊ","n"],"per":0.0,"missed":[],"added":["d","a","ʊ","n"],"substituted":[],"total_phonemes":0,"total_errors":0,"error":"Extra word predicted."}],
+ "exact_realign":[{"type":"match","predicted_word":"the","ground_truth_word":"the","phonemes":["ð","ə"],"ground_truth_phonemes":["ð","ə"],"expected_phonemes":["ð","ə"],"actual_phonemes":["ð","ə"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":2,"total_errors":0},{"type":"match","predicted_word":"cat","ground_truth_word":"cat","phonemes":["k","æ","t"],"ground_truth_phonemes":["k","æ","t"],"expected_phonemes":["k","æ","t"],"actual_phonemes":["k","æ","t"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":3,"total_errors":0},{"type":"match","predicted_word":"sat","ground_truth_word":"sat","phonemes":["s","æ","t"],"ground_truth_phonemes":["s","æ","t"],"expected_phonemes":["s","æ","t"],"actual_phonemes":["s","æ","t"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":3,"total_errors":0}],
+ "asr_corrects_tat_realign":[{"type":"match","predicted_word":"the","ground_truth_word":"the","phonemes":["ð","ə"],"ground_truth_phonemes":["ð","ə"],"expected_phonemes":["ð","ə"],"actual_phonemes":["ð","ə"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":2,"total_errors":0},{"type":"match","predicted_word":"cat","ground_truth_word":"cat","phonemes":["t","æ","t"],"ground_truth_phonemes":["k","æ","t"],"expected_phonemes":["k","æ","t"],"actual_phonemes":["t","æ","t"],"per":0.3333,"missed":[],"added":[],"substituted":[["k","t"]],"total_phonemes":3,"total_errors":1},{"type":"match","predicted_word":"sat","ground_truth_word":"sat","phonemes":["s","æ","t"],"ground_truth_phonemes":["s","æ","t"],"expected_phonemes":["s","æ","t"],"actual_phonemes":["s","æ","t"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":3,"total_errors":0}],
+ "split_group_realign":[{"type":"match","predicted_word":"the","ground_truth_word":"the","phonemes":["ð","ə"],"ground_truth_phonemes":["ð","ə"],"expected_phonemes":["ð","ə"],"actual_phonemes":["ð","ə"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":2,"total_errors":0},{"type":"match","predicted_word":"cat","ground_truth_word":"cat","phonemes":["k","æ","t"],"ground_truth_phonemes":["k","æ","t"],"expected_phonemes":["k","æ","t"],"actual_phonemes":["k","æ","t"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":3,"total_errors":0},{"type":"match","predicted_word":"sat","ground_truth_word":"sat","phonemes":["s","æ","t"],"ground_truth_phonemes":["s","æ","t"],"expected_phonemes":["s","æ","t"],"actual_phonemes":["s","æ","t"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":3,"total_errors":0}],
+ "merged_group_realign":[{"type":"match","predicted_word":"the","ground_truth_word":"the","phonemes":["ð","ə"],"ground_truth_phonemes":["ð","ə"],"expected_phonemes":["ð","ə"],"actual_phonemes":["ð","ə"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":2,"total_errors":0},{"type":"match","predicted_word":"cat","ground_truth_word":"cat","phonemes":["k","æ","t"],"ground_truth_phonemes":["k","æ","t"],"expected_phonemes":["k","æ","t"],"actual_phonemes":["k","æ","t"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":3,"total_errors":0},{"type":"match","predicted_word":"sat","ground_truth_word":"sat","phonemes":["s","æ","t"],"ground_truth_phonemes":["s","æ","t"],"expected_phonemes":["s","æ","t"],"actual_phonemes":["s","æ","t"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":3,"total_errors":0}],
+ "skipped_word_realign":[{"type":"match","predicted_word":"the","ground_truth_word":"the","phonemes":["ð","ə"],"ground_truth_phonemes":["ð","ə"],"expected_phonemes":["ð","ə"],"actual_phonemes":["ð","ə"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":2,"total_errors":0},{"type":"deletion","predicted_word":"","ground_truth_word":"cat","phonemes":[],"ground_truth_phonemes":["k","æ","t"],"expected_phonemes":["k","æ","t"],"actual_phonemes":[],"per":1.0,"missed":["k","æ","t"],"added":[],"substituted":[],"total_phonemes":3,"total_errors":3,"error":"Word missing in prediction."},{"type":"match","predicted_word":"sat","ground_truth_word":"sat","phonemes":["s","æ","t"],"ground_truth_phonemes":["s","æ","t"],"expected_phonemes":["s","æ","t"],"actual_phonemes":["s","æ","t"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":3,"total_errors":0}],
+ "extra_word_realign":[{"type":"match","predicted_word":"the","ground_truth_word":"the","phonemes":["ð","ə"],"ground_truth_phonemes":["ð","ə"],"expected_phonemes":["ð","ə"],"actual_phonemes":["ð","ə"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":2,"total_errors":0},{"type":"match","predicted_word":"cat","ground_truth_word":"cat","phonemes":["k","æ","t"],"ground_truth_phonemes":["k","æ","t"],"expected_phonemes":["k","æ","t"],"actual_phonemes":["k","æ","t"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":3,"total_errors":0},{"type":"match","predicted_word":"sat","ground_truth_word":"sat","phonemes":["s","æ","t"],"ground_truth_phonemes":["s","æ","t"],"expected_phonemes":["s","æ","t"],"actual_phonemes":["s","æ","t"],"per":0.0,"missed":[],"added":[],"substituted":[],"total_phonemes":3,"total_errors":0},{"type":"insertion","predicted_word":"down","ground_truth_word":"","phonemes":["d","a","ʊ","n"],"ground_truth_phonemes":[],"expected_phonemes":[],"actual_phonemes":["d","a","ʊ","n"],"per":0.0,"missed":[],"added":["d","a","ʊ","n"],"substituted":[],"total_phonemes":0,"total_errors":0,"error":"Extra word predicted."}]
+}
+""")
+
+
+class TestLegacyClientPathMatchesThePreChangeFunction(_FlagMixin):
+    """With WWAI_GT_ANCHORED_ALIGNMENT=0 the client path is byte-identical to before."""
+
+    def test_every_case_matches_the_pre_change_output(self):
+        for realign in ("", "true"):
+            if realign:
+                self.set_flag(realign)
+            for name, (groups, words) in LEGACY_CLIENT_CASES.items():
+                key = name + ("_realign" if realign else "")
+                with self.subTest(case=key):
+                    out = self.run_client([list(g) for g in groups], client_words=list(words))
+                    self.assertEqual(normalize(out), LEGACY_CLIENT_GOLDEN[key])
+
+    def test_the_comparison_is_not_vacuous(self):
+        # The default path scores the same input differently.
+        os.environ.pop(GT_FLAG, None)
+        groups, words = LEGACY_CLIENT_CASES["asr_corrects_tat"]
+        out = self.run_client([list(g) for g in groups], client_words=list(words))
+        self.assertNotEqual(normalize(out), LEGACY_CLIENT_GOLDEN["asr_corrects_tat"])
 
 
 if __name__ == "__main__":

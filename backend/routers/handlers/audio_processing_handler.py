@@ -16,7 +16,7 @@ from core.phoneme_assistant import PhonemeAssistant
 from core.phoneme_feedback_formatter import generate_feedback as generate_phoneme_feedback
 from core.temp_audio_cache import audio_cache
 from core.process_audio import process_audio_with_client_phonemes, analyze_results
-from core.grapheme_to_phoneme import grapheme_to_phoneme as g2p
+from core.grapheme_to_phoneme import clean_sentence, grapheme_to_phoneme as g2p
 from crud.feedback_entry import create_feedback_entry, get_feedback_entries_by_session
 from crud.session import get_session
 from fastapi import HTTPException, UploadFile, status
@@ -354,8 +354,9 @@ async def analyze_audio_file_event_stream(
         processing_start = time.time()
         
         if use_client_phonemes and client_phonemes is not None:
-            # Get ground truth phonemes for the sentence
-            ground_truth_phonemes = g2p(attempted_sentence)
+            # Get ground truth phonemes for the sentence, cleaned first as on the server
+            # path (PhonemeAssistant.process_audio), so punctuation and casing match.
+            ground_truth_phonemes = g2p(clean_sentence(attempted_sentence))
             
             # Process audio with client phonemes (and optionally client words)
             pronunciation_data = await process_audio_with_client_phonemes(

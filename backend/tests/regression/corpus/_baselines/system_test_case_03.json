@@ -148,7 +148,7 @@
         "substituted": [],
         "total_errors": 2,
         "total_phonemes": 6,
-        "type": "match"
+        "type": "substitution"
       },
       {
         "added": [],
@@ -244,7 +244,7 @@
         ],
         "total_errors": 2,
         "total_phonemes": 3,
-        "type": "match"
+        "type": "substitution"
       }
     ]
   },

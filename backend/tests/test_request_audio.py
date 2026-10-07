@@ -274,5 +274,66 @@ class TestHandlerErrorMessages(unittest.TestCase):
         self.assertEqual(self._error_message(events), "Try a shorter sentence.")
 
 
+class TestHandlerClientGroundTruth(unittest.TestCase):
+    """The client phoneme branch builds its ground truth the way the server path does."""
+
+    @classmethod
+    def setUpClass(cls):
+        # Same import pattern as TestHandlerMarksItsPass above.
+        os.environ.setdefault("DATABASE_URL", "sqlite://")
+        try:
+            from routers.handlers import audio_processing_handler as handler
+        except ImportError as exc:
+            raise unittest.SkipTest(f"audio_processing_handler not importable ({exc})") from exc
+        cls.handler = handler
+
+    def _client_ground_truth(self, sentence, client_phonemes, client_words):
+        """Run the stream down the client branch and return the ground truth it scored against."""
+        from types import SimpleNamespace
+
+        seen = {}
+
+        async def fake_client_scoring(**kwargs):
+            seen.update(kwargs)
+            raise RuntimeError("stop here")
+
+        async def fake_load(*_args, **_kwargs):
+            return np.ones(16000, dtype=np.float32), "cache-id"
+
+        async def collect():
+            return [chunk async for chunk in self.handler.analyze_audio_file_event_stream(
+                phoneme_assistant=SimpleNamespace(word_extractor=None), activity_object=None,
+                audio_bytes=b"x", audio_filename="a.wav", audio_content_type="audio/wav",
+                attempted_sentence=sentence, db=None, current_user=SimpleNamespace(id=1),
+                session=SimpleNamespace(id=7), client_phonemes=client_phonemes, client_words=client_words,
+            )]
+
+        with mock.patch.object(self.handler, "load_and_preprocess_audio_bytes", fake_load), \
+                mock.patch.object(self.handler, "check_speech_activity", return_value=80.0), \
+                mock.patch.object(self.handler, "process_audio_with_client_phonemes", fake_client_scoring), \
+                _quiet():
+            asyncio.run(collect())
+        return seen["ground_truth_phonemes"]
+
+    def test_the_sentence_is_cleaned_before_g2p(self):
+        from core.grapheme_to_phoneme import clean_sentence, grapheme_to_phoneme
+
+        for sentence in ("The cat sat.", "Is it the CAT, or the dog?", "  The dog's toy!  "):
+            with self.subTest(sentence=sentence):
+                truth = self._client_ground_truth(
+                    sentence, [["ð", "ə"], ["k", "æ", "t"], ["s", "æ", "t"]], ["the", "cat", "sat"])
+                # What PhonemeAssistant.process_audio builds for the server path.
+                self.assertEqual(truth, grapheme_to_phoneme(clean_sentence(sentence)))
+                self.assertEqual([w for w, _ in truth], clean_sentence(sentence).split())
+                for _word, phonemes in truth:
+                    self.assertFalse(set(phonemes) & set(".,?!'"), truth)
+
+    def test_hybrid_mode_cleans_it_too(self):
+        from core.grapheme_to_phoneme import clean_sentence, grapheme_to_phoneme
+
+        truth = self._client_ground_truth("The cat sat.", [["ð", "ə"], ["k", "æ", "t"], ["s", "æ", "t"]], None)
+        self.assertEqual(truth, grapheme_to_phoneme(clean_sentence("The cat sat.")))
+
+
 if __name__ == "__main__":
     unittest.main()

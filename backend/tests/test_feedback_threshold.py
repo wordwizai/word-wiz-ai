@@ -280,5 +280,75 @@ class TestLegacySwitch(_CurrentRules):
                     self.assertEqual((result.text, result.ssml, result.focus_words), (text, text, []))
 
 
+class TestClearMistakeInTheAnalysis(_CurrentRules):
+    """analyze_results' DataFrame, which the router sends as pronunciation_dataframe, carries
+    each word's clear_mistake decision, so the frontend can colour words by the feedback's rule."""
+
+    GT = [("the", ["ð", "ə"]), ("cat", ["k", "æ", "t"]), ("sat", ["s", "æ", "t"]),
+          ("on", ["ɑ", "n"]), ("the", ["ð", "ə"]), ("mat", ["m", "æ", "t"])]
+    # "the cat sat on the mat" read as "the dog sat on the", and the ASR heard an extra "now":
+    # a match, a substitution, a deletion and an insertion in one sentence.
+    FLAT = ["ð", "ə", "d", "ɔ", "g", "s", "æ", "t", "ɑ", "n", "ð", "ə"]
+    ASR = ["the", "cat", "sat", "on", "the", "mat", "now"]
+
+    def setUp(self):
+        super().setUp()
+        patcher = mock.patch.dict(os.environ)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        for flag in ("WWAI_G2P_STRICT", "WWAI_LEGACY_WORD_SCORING", "WWAI_GT_ANCHORED_ALIGNMENT"):
+            os.environ.pop(flag, None)
+
+    def _records(self):
+        from core.gt_alignment import align_to_ground_truth
+        return align_to_ground_truth(list(self.FLAT), self.GT, list(self.ASR))
+
+    def test_every_record_carries_the_decision(self):
+        from core.process_audio import analyze_results
+
+        records = self._records()
+        self.assertEqual({r["type"] for r in records}, {"match", "substitution", "deletion", "insertion"})
+        df, _highest, _problems, _per = analyze_results(records)
+        rows = df.to_dict("records")
+        self.assertEqual([r["clear_mistake"] for r in rows], [fmt.is_clear_mistake(r) for r in records])
+        self.assertEqual([r["clear_mistake"] for r in rows], [False, True, False, False, False, True, False])
+        # What the router sends is column-oriented and must stay JSON with plain booleans.
+        column = df.to_dict()["clear_mistake"]
+        self.assertTrue(all(type(flag) is bool for flag in column.values()))
+
+    def test_it_follows_the_legacy_feedback_switch(self):
+        from core.process_audio import analyze_results
+
+        records = self._records()
+        with _legacy():
+            df, _highest, _problems, _per = analyze_results(records)
+            expected = [fmt.is_clear_mistake(r) for r in records]
+        self.assertEqual(list(df["clear_mistake"]), expected)
+        self.assertEqual(expected, [bool(r["per"] >= fmt.HIGH_PER_THRESHOLD) for r in records])
+
+    def test_it_is_additive(self):
+        import copy
+        import pandas as pd
+        from core.process_audio import analyze_results
+
+        records = self._records()
+        before = copy.deepcopy(records)
+        df, highest, problems, per_summary = analyze_results(records)
+        self.assertEqual(records, before)  # the records themselves are not changed
+        self.assertEqual(list(df.columns), list(pd.DataFrame(before).columns) + ["clear_mistake"])
+        pd.testing.assert_frame_equal(df.drop(columns="clear_mistake"), pd.DataFrame(before))
+        self.assertEqual(per_summary["total_errors"], sum(r["total_errors"] for r in before))
+
+    def test_the_feedback_names_only_words_marked_clear_mistakes(self):
+        from core.process_audio import analyze_results
+
+        df, _highest, problems, per_summary = analyze_results(self._records())
+        rows = df.to_dict("records")
+        result = fmt.generate_feedback(problems, per_summary, rows)
+        self.assertTrue(result.focus_words)
+        marked = {r["ground_truth_word"] for r in rows if r["clear_mistake"]}
+        self.assertLessEqual(set(result.focus_words), marked)
+
+
 if __name__ == "__main__":
     unittest.main()

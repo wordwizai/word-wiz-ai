@@ -382,7 +382,8 @@ class TestHandlerFullClientWithoutAudio(unittest.TestCase):
             raise unittest.SkipTest(f"audio_processing_handler not importable ({exc})") from exc
         cls.handler = handler
 
-    def _events(self, client_phonemes, client_words):
+    def _events(self, client_phonemes, client_words, db=None):
+        """The stream's events. Without ``db`` the feedback entry is not stored."""
         import base64
         import json
         from types import SimpleNamespace
@@ -401,17 +402,54 @@ class TestHandlerFullClientWithoutAudio(unittest.TestCase):
             return [chunk async for chunk in self.handler.analyze_audio_file_event_stream(
                 phoneme_assistant=assistant, activity_object=FakeActivity(),
                 audio_bytes=b"", audio_filename="empty.wav", audio_content_type="audio/wav",
-                attempted_sentence="The cat sat.", db=None, current_user=SimpleNamespace(id=1),
+                attempted_sentence="The cat sat.", db=db, current_user=SimpleNamespace(id=1),
                 session=SimpleNamespace(id=7), client_phonemes=client_phonemes, client_words=client_words,
             )]
 
-        with mock.patch.dict(os.environ), \
-                mock.patch.object(self.handler, "create_feedback_entry"), \
-                mock.patch.object(self.handler.audio_cache, "save_feedback_audio"), \
-                _quiet():
+        with contextlib.ExitStack() as stack:
+            stack.enter_context(mock.patch.dict(os.environ))
+            if db is None:
+                stack.enter_context(mock.patch.object(self.handler, "create_feedback_entry"))
+            stack.enter_context(mock.patch.object(self.handler.audio_cache, "save_feedback_audio"))
+            stack.enter_context(_quiet())
             os.environ.pop("WWAI_GT_ANCHORED_ALIGNMENT", None)
             chunks = asyncio.run(collect())
         return [json.loads(c[len("data: "):]) for c in chunks if c.startswith("data: ")]
+
+    @staticmethod
+    def _column(df, name):
+        return [df[name][k] for k in sorted(df[name], key=int)]
+
+    def test_each_word_carries_its_clear_mistake_decision(self):
+        # "the cat sat" read as "the dog sat": three wrong sounds in "cat" is a clear mistake,
+        # the one wrong sound in "tat" is not.
+        for groups, expected in (([["ð", "ə"], ["d", "ɔ", "g"], ["s", "æ", "t"]], [False, True, False]),
+                                 (self.GROUPS, [False, False, False])):
+            with self.subTest(groups=groups):
+                events = self._events(groups, ["the", "cat", "sat"])
+                df = next(e for e in events if e["type"] == "analysis")["data"]["pronunciation_dataframe"]
+                self.assertEqual(self._column(df, "clear_mistake"), expected)
+                self.assertIn("per", df)  # the existing columns are still there
+
+    def test_the_new_column_is_stored_with_the_feedback_entry(self):
+        # A throwaway in-memory database, never the app's configured one.
+        from sqlalchemy import create_engine
+        from sqlalchemy.orm import sessionmaker
+        import models
+        from database import Base
+
+        engine = create_engine("sqlite://")
+        Base.metadata.create_all(engine)
+        db = sessionmaker(bind=engine)()
+        self.addCleanup(engine.dispose)
+        self.addCleanup(db.close)
+
+        events = self._events([["ð", "ə"], ["d", "ɔ", "g"], ["s", "æ", "t"]], ["the", "cat", "sat"], db=db)
+        self.assertNotIn("error", [e["type"] for e in events], events)
+        entries = db.query(models.FeedbackEntry).all()
+        self.assertEqual(len(entries), 1)
+        stored = entries[0].phoneme_analysis["pronunciation_dataframe"]
+        self.assertEqual(self._column(stored, "clear_mistake"), [False, True, False])
 
     def test_an_empty_transcript_without_audio_is_scored(self):
         events = self._events(self.GROUPS, [])

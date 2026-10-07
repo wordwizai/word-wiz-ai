@@ -1028,6 +1028,11 @@ def analyze_results(pronunciation_data: list[dict]) -> tuple[pd.DataFrame, dict,
         tuple[pd.DataFrame, pd.Series, dict, dict]: DataFrame of word-level results, highest phoneme error rate word, problems, and sentence per 
     """
     df = pd.DataFrame(pronunciation_data)
+    # Each word's clear-mistake decision, by the same rule the spoken feedback uses, so the
+    # frontend can colour words to match it. A new column only, and the records the caller
+    # passed in are not changed. Both the server and client paths go through here.
+    from .phoneme_feedback_formatter import is_clear_mistake
+    df["clear_mistake"] = [is_clear_mistake(word) for word in pronunciation_data]
 
     # get the highest PER word
     highest_per = df.sort_values("per", ascending=False).iloc[0].to_dict()

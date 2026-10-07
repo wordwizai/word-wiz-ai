@@ -9,7 +9,7 @@ const ReadingPracticeKidsHateReading = () => {
       content: {
         type: "info",
         title: "How do you get a child who hates reading to practice?",
-        content: "Lower the difficulty and shorten the session before anything else. Give books the child reads at 95-100 percent accuracy, set a five-minute timer, and stop when it rings even mid-sentence. Do not correct errors during reading. Reading resistance affects roughly 20-30 percent of children, and most shift from hating reading to tolerating it within 6-8 weeks of low-pressure practice.",
+        content: "Lower the difficulty and shorten the session before anything else. Give books the child reads at 95-100 percent accuracy, set a five-minute timer, and stop when it rings even mid-sentence. Do not correct errors during reading. Keep sessions short and easy for a few weeks before raising the difficulty, since resistance usually fades once reading stops feeling like a test.",
       },
     },
     {
@@ -424,6 +424,7 @@ const ReadingPracticeKidsHateReading = () => {
         bio: "Passionate about phonics instruction and early literacy development.",
       }}
       publishDate="2025-01-24"
+      updatedDate="2026-10-06"
       readTime={13}
       category="Reading Motivation"
       content={content}

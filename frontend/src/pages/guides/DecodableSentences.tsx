@@ -57,7 +57,7 @@ const DecodableSentences = () => {
     {
       type: "paragraph",
       content:
-        "Studies comparing decodable texts to predictable texts consistently find that decodable practice produces faster gains in word recognition, decoding accuracy, and reading fluency. A landmark 2018 study found that first graders who practiced with decodable texts for just 15 minutes per day outperformed peers using leveled readers by 6 months in reading ability by year-end. The reason is simple: practice must match instruction. If you teach phonics, children need phonics-based texts to practice what they learned. Giving them non-decodable texts wastes their practice time and teaches bad habits (guessing instead of decoding). Decodable sentences are not a trendy teaching method—they are the scientifically validated approach to building reading proficiency.",
+        "Direct research on decodable text is thinner than the research on phonics itself, but the reasoning holds up. Large reviews such as the National Reading Panel's 2000 report found that systematic phonics instruction helps beginning readers, and decodable text is where children get to use that phonics in real sentences. Practice should match instruction. If you teach phonics, children need phonics-based texts to practice what they learned. Giving them non-decodable texts takes practice time away from decoding and invites guessing instead. Decodable sentences work best as a bridge from sounding out single words to reading regular books.",
     },
     {
       type: "heading",
@@ -470,6 +470,7 @@ const DecodableSentences = () => {
         bio: "Reading specialists providing science-based decodable practice resources for parents and educators.",
       }}
       publishDate="2025-01-02"
+      updatedDate="2026-10-06"
       readTime={10}
       category="Phonics Guides"
       content={content}

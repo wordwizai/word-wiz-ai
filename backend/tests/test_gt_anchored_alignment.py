@@ -783,6 +783,26 @@ class TestCanonicalPhonemesAndEdgeInsertions(_ScoringEnv):
         self.assertEqual((again["canonical_phonemes"], again["edge_insertions"]), (['k', 'æ', 't'], ['h']))
 
 
+class TestContractions(_ScoringEnv):
+    """An ASR contraction matches the expected contraction, curly apostrophe or not."""
+
+    def test_normalize_word_keeps_one_apostrophe_form(self):
+        from core.gt_alignment import _normalize_word
+        for word in ("it's", "It's", "it\u2019s", "IT\u2018S"):
+            with self.subTest(word=word):
+                self.assertEqual(_normalize_word(word), "it's")
+
+    def test_a_contraction_read_right_is_not_a_misheard_slot(self):
+        from core.grapheme_to_phoneme import clean_sentence, grapheme_to_phoneme
+        gt = grapheme_to_phoneme(clean_sentence("It's a dog."))
+        flat = ['ɪ', 't', 's', 'z'] + ['ə'] + ['d', 'ɔ', 'g']
+        for asr in (["it's", "a", "dog"], ["It\u2019s", "a", "dog"]):
+            with self.subTest(asr=asr):
+                r = align_to_ground_truth(flat, gt, asr)[0]
+                self.assertEqual(r["ground_truth_word"], "it's")
+                self.assertEqual(r["per"], 0.0)
+
+
 class TestScoringVersion(unittest.TestCase):
 
     def test_per_summary_carries_the_scoring_version(self):

@@ -488,5 +488,47 @@ class TestSentencePronunciationVariants(unittest.TestCase):
         self.assertEqual(sentence_pronunciation_variants([], strict=False), {})
 
 
+class TestCleanSentenceKeepsContractions(unittest.TestCase):
+    """CMUdict knows "it's", "don't" and "didn't" but not "its"-style spellings like "dont",
+    so stripping the apostrophe turned contractions into unknown words scored against
+    their spelling (166 words on the speechocean762 dev half)."""
+
+    def test_apostrophes_inside_words_stay(self):
+        from core.grapheme_to_phoneme import clean_sentence
+        cases = {
+            "It's a dog.": "it's a dog",
+            "Don't go!": "don't go",
+            "He didn't see the dog's ball.": "he didn't see the dog's ball",
+            "I'm here, you're there?": "i'm here you're there",
+        }
+        for sentence, cleaned in cases.items():
+            with self.subTest(sentence=sentence):
+                self.assertEqual(clean_sentence(sentence), cleaned)
+
+    def test_curly_apostrophes_become_straight(self):
+        from core.grapheme_to_phoneme import clean_sentence
+        self.assertEqual(clean_sentence("It\u2019s fun. Don\u2018t stop"), "it's fun don't stop")
+
+    def test_quotes_and_other_apostrophes_go(self):
+        from core.grapheme_to_phoneme import clean_sentence
+        cases = {
+            "'Hello,' she said.": "hello she said",
+            "The dogs' toys.": "the dogs toys",
+            "Say 'cat' now": "say cat now",
+            "Plain words": "plain words",
+        }
+        for sentence, cleaned in cases.items():
+            with self.subTest(sentence=sentence):
+                self.assertEqual(clean_sentence(sentence), cleaned)
+
+    def test_contractions_get_real_pronunciations(self):
+        from core.grapheme_to_phoneme import clean_sentence
+        words = grapheme_to_phoneme(clean_sentence("He didn't see that it's here."), strict=False)
+        self.assertEqual([w.word for w in words], ["he", "didn't", "see", "that", "it's", "here"])
+        self.assertFalse(any(w.oov for w in words))
+        self.assertEqual(dict(words)["didn't"], ['d', 'ɪ', 'd', 'ə', 'n', 't'])
+        self.assertEqual(dict(words)["it's"], ['ɪ', 't', 's'])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

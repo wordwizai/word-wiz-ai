@@ -182,8 +182,11 @@ def align_sequences(gt: list, pred: list) -> list[tuple]:
 
 
 def _normalize_word(word) -> str:
-    """Lowercase and strip punctuation, for comparing ASR words to expected words."""
-    return _WORD_NORM_RE.sub("", str(word).lower())
+    """Lowercase and strip punctuation, for comparing ASR words to expected words.
+
+    Curly apostrophes count as straight ones, so "it\u2019s" matches "it's".
+    """
+    return _WORD_NORM_RE.sub("", str(word).lower().replace("\u2019", "'").replace("\u2018", "'"))
 
 
 def derive_asr_hints(

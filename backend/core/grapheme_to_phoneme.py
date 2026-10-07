@@ -333,20 +333,32 @@ def _convert_cached(grapheme: str, strict: bool) -> tuple:
 # ---------------------------------------------------------------------------
 
 
+_APOSTROPHES = str.maketrans({"\u2019": "'", "\u2018": "'", "\u02bc": "'"})
+# An apostrophe with a letter on both sides is part of a word ("it's", "don't",
+# "dog's"); any other one is a quote mark or a plural possessive ("dogs'").
+_STRAY_APOSTROPHE_RE = re.compile(r"(?<![a-z])'|'(?![a-z])")
+
+
 def clean_sentence(sentence: str) -> str:
     """The cleanup PhonemeAssistant.process_audio applies to a sentence before G2P.
+
+    Lowercases and drops . , ? ! and quote marks, but keeps apostrophes inside
+    words: CMUdict knows "it's" and "didn't", while "its"-style spellings like
+    "dont" or "didnt" are unknown words that would be scored against their
+    spelling. Curly apostrophes become straight ones first.
 
     Shared with the accuracy benchmark (backend/tests/benchmark) so both score the
     exact same ground truth.
     """
-    return (
+    cleaned = (
         sentence.strip().lower()
+        .translate(_APOSTROPHES)
         .replace(".", "")
         .replace(",", "")
         .replace("?", "")
         .replace("!", "")
-        .replace("'", "")
     )
+    return _STRAY_APOSTROPHE_RE.sub("", cleaned)
 
 
 def grapheme_to_phoneme(grapheme, strict: bool | None = None) -> list[tuple]:

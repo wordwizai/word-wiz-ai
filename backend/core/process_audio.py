@@ -776,6 +776,16 @@ async def extract_phonemes_and_words(audio_array, sampling_rate, phoneme_extract
 #: where only "the" of "the cat sat on the mat" came back hears 0.14.
 MIN_PHONEME_COVERAGE = 0.3
 
+#: Kill switch for scoring anchored readings the ASR heard nothing in. When truthy,
+#: _score_anchored first requires at least two ASR words and at least two phoneme groups,
+#: as the anchored path did before, without turning off anchored alignment. Default off.
+#: Read at call time.
+REQUIRE_ASR_WORDS_FLAG = "WWAI_REQUIRE_ASR_WORDS"
+
+
+def _require_asr_words() -> bool:
+    return _os.environ.get(REQUIRE_ASR_WORDS_FLAG, "").strip().lower() in ("1", "true", "yes", "on")
+
 
 def _score_anchored(ground_truth_phonemes, phoneme_predictions, predicted_words) -> list[dict]:
     """
@@ -788,8 +798,15 @@ def _score_anchored(ground_truth_phonemes, phoneme_predictions, predicted_words)
     speechocean762 dev clips), and those children used to be told nothing was
     heard. On that benchmark, scoring them kept the false-alarm rate within
     0.2 points, and their feedback named a real mistake more often than average.
+    WWAI_REQUIRE_ASR_WORDS brings back the old requirement of two ASR words and
+    two phoneme groups, checked before the coverage rule.
     """
     from .gt_alignment import align_to_ground_truth
+    if _require_asr_words() and (
+        phoneme_predictions is None or predicted_words is None
+        or len(phoneme_predictions) <= 1 or len(predicted_words) <= 1
+    ):
+        raise ValueError("The audio provided has no speech inside")
     flattened = [p for group in (phoneme_predictions or []) for p in (group or [])]
     expected = sum(len(phonemes or []) for _, phonemes in ground_truth_phonemes)
     if len(flattened) < max(2, MIN_PHONEME_COVERAGE * expected):

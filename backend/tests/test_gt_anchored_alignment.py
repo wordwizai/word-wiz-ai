@@ -204,6 +204,7 @@ class TestWithinWordMispronunciation(unittest.TestCase):
 # --------------------------------------------------------------------------- #
 
 LEGACY_SCORING_FLAG = "WWAI_LEGACY_WORD_SCORING"
+REQUIRE_ASR_WORDS_FLAG = "WWAI_REQUIRE_ASR_WORDS"
 
 # Keys every ground-truth-anchored record carries on top of
 # _process_word_alignment's contract (scoring v2.1).
@@ -1266,6 +1267,43 @@ class TestProcessAudioArrayHook(unittest.TestCase):
         flat = ['ð', 'ə', 'k', 'æ', 't']
         self.assertEqual(run([flat], ['the', 'cat']), align_to_ground_truth(flat, GT_LONG, ['the', 'cat']))
 
+    def test_the_require_asr_words_switch_brings_back_the_old_guard(self):
+        from unittest import mock
+
+        os.environ.pop(GT_ANCHORED_FLAG, None)
+        with mock.patch.dict(os.environ, {REQUIRE_ASR_WORDS_FLAG: "1"}):
+            for words in ([], None, ['the']):
+                with self.subTest(words=words):
+                    with self.assertRaisesRegex(ValueError, "The audio provided has no speech inside"):
+                        self._run(word_extractor=self._ListWordExtractor(words))
+            # Fewer than two phoneme groups is no speech too, however many words were heard.
+            with self.assertRaisesRegex(ValueError, "The audio provided has no speech inside"):
+                self._run(phoneme_extractor=self._ListPhonemeExtractor([list(self.FLAT)]))
+            # Enough of both is still scored on the anchored path, not the legacy one.
+            self._assert_anchored(self._run())
+
+    def test_the_require_asr_words_switch_is_off_by_default(self):
+        from unittest import mock
+
+        os.environ.pop(GT_ANCHORED_FLAG, None)
+        for value in (None, "", "0", "false", "off"):
+            env = {} if value is None else {REQUIRE_ASR_WORDS_FLAG: value}
+            with self.subTest(value=value), mock.patch.dict(os.environ, env):
+                if value is None:
+                    os.environ.pop(REQUIRE_ASR_WORDS_FLAG, None)
+                results = self._run(word_extractor=self._ListWordExtractor([]))
+                self.assertEqual(results, align_to_ground_truth(self.FLAT, GT_SHORT, []))
+
+    def test_the_require_asr_words_switch_keeps_the_coverage_rule(self):
+        # Two words and two groups, but too few phonemes, is still no speech.
+        from unittest import mock
+
+        os.environ.pop(GT_ANCHORED_FLAG, None)
+        with mock.patch.dict(os.environ, {REQUIRE_ASR_WORDS_FLAG: "true"}):
+            with self.assertRaisesRegex(ValueError, "The audio provided has no speech inside"):
+                self._run(phoneme_extractor=self._ListPhonemeExtractor([['ð'], ['ə']]),
+                          word_extractor=self._ListWordExtractor(['the', 'cat']))
+
     def test_legacy_path_keeps_the_old_guard(self):
         os.environ[GT_ANCHORED_FLAG] = "false"
         for words in ([], None, ['the']):
@@ -1456,6 +1494,36 @@ class TestClientPhonemesHook(unittest.TestCase):
         with self.assertRaises(ValueError) as ctx:
             self._run_without_audio(self.CASES["exact"][0], [], gt=[THE])
         self.assertIn("ground_truth_phonemes", str(ctx.exception))
+
+    def test_the_require_asr_words_switch_applies_to_the_client_path(self):
+        from unittest import mock
+        import core.process_audio as pa
+
+        self.assertEqual(pa.REQUIRE_ASR_WORDS_FLAG, REQUIRE_ASR_WORDS_FLAG)
+        groups = self.CASES["asr_corrects_tat"][0]
+        flat = [p for g in groups for p in g]
+        with mock.patch.dict(os.environ, {REQUIRE_ASR_WORDS_FLAG: "yes"}):
+            # A one-word transcript from the browser.
+            with self.assertRaises(ValueError) as ctx:
+                self._run(groups, ['the'])
+            self.assertEqual(str(ctx.exception), "The audio provided has no speech inside")
+            # The full client mode without audio, where the browser's ASR heard nothing.
+            with self.assertRaises(ValueError) as ctx:
+                self._run_without_audio(groups, [])
+            self.assertEqual(str(ctx.exception), "The audio provided has no speech inside")
+            # The hybrid mode, where the server's ASR heard nothing.
+            with mock.patch.object(pa, "preprocess_audio", side_effect=lambda audio=None, **_kw: audio):
+                with self.assertRaises(ValueError) as ctx:
+                    self._run(groups, None, word_extraction_model=self._Words([]))
+            self.assertEqual(str(ctx.exception), "The audio provided has no speech inside")
+            # A merged group is fewer than two groups.
+            with self.assertRaises(ValueError) as ctx:
+                self._run(self.CASES["merged_group"][0], self.WORDS)
+            self.assertEqual(str(ctx.exception), "The audio provided has no speech inside")
+            # Enough words and groups are still scored on the anchored path.
+            self.assertEqual(self._run(groups, self.WORDS), align_to_ground_truth(flat, GT_SHORT, self.WORDS))
+            self.assertEqual(self._run_without_audio(groups, self.WORDS),
+                             align_to_ground_truth(flat, GT_SHORT, self.WORDS))
 
     def test_the_legacy_path_still_preprocesses_an_empty_recording(self):
         import numpy as np

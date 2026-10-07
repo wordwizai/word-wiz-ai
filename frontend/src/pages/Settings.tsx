@@ -107,7 +107,7 @@ const Settings = () => {
         }}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-2 sm:flex sm:w-fit sm:flex-wrap h-auto gap-1 mb-6 bg-muted/60 p-1 rounded-xl">
+        <TabsList className="grid w-full grid-cols-2 lg:flex lg:w-fit h-auto gap-1 mb-6 bg-muted/60 p-1 rounded-xl">
           <TabsTrigger value="profile" className="flex items-center gap-1.5 rounded-lg flex-1 min-w-fit data-[state=active]:shadow-sm">
             <User className="w-3.5 h-3.5" />
             <span>Profile</span>

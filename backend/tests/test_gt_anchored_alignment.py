@@ -1165,16 +1165,82 @@ class TestProcessAudioArrayHook(unittest.TestCase):
         if self._saved_flag is not None:
             os.environ[GT_ANCHORED_FLAG] = self._saved_flag
 
-    def _run(self):
+    class _ListPhonemeExtractor:
+        def __init__(self, groups):
+            self.groups = groups
+
+        def extract_phoneme(self, audio=None, sampling_rate=None):
+            return self.groups
+
+    class _ListWordExtractor:
+        def __init__(self, words):
+            self.words = words
+
+        def extract_words(self, audio=None, sampling_rate=None):
+            return self.words
+
+    def _run(self, phoneme_extractor=None, word_extractor=None):
         import asyncio
         return asyncio.run(self.pa.process_audio_array(
             GT_SHORT,
             self.np.zeros(16000, dtype=self.np.float32),
             16000,
-            self._FakePhonemeExtractor(),
-            self._FakeWordExtractor(),
+            phoneme_extractor or self._FakePhonemeExtractor(),
+            word_extractor or self._FakeWordExtractor(),
             use_chunking=False,
         ))
+
+    # --- the ASR heard nothing, the phoneme model heard the reading ------- #
+
+    FLAT = ['ð', 'ə', 't', 'æ', 't', 's', 'æ', 't']
+
+    def test_anchored_path_scores_an_empty_transcript(self):
+        os.environ.pop(GT_ANCHORED_FLAG, None)
+        for words in ([], None, ['the']):
+            with self.subTest(words=words):
+                results = self._run(word_extractor=self._ListWordExtractor(words))
+                self.assertEqual(results, align_to_ground_truth(self.FLAT, GT_SHORT, words or []))
+                self.assertEqual(
+                    [(r["ground_truth_word"], r["type"]) for r in results],
+                    [('the', 'match'), ('cat', 'substitution'), ('sat', 'match')],
+                )
+
+    def test_anchored_path_scores_a_single_phoneme_group(self):
+        # The model's word grouping does not matter once the phonemes are anchored.
+        os.environ.pop(GT_ANCHORED_FLAG, None)
+        results = self._run(phoneme_extractor=self._ListPhonemeExtractor([list(self.FLAT)]),
+                            word_extractor=self._ListWordExtractor([]))
+        self.assertEqual(results, align_to_ground_truth(self.FLAT, GT_SHORT, []))
+
+    def test_anchored_path_still_needs_enough_phonemes(self):
+        # "the cat sat" expects 8 phonemes, so fewer than 3 (30%, at least 2) is no speech.
+        os.environ.pop(GT_ANCHORED_FLAG, None)
+        for groups in (None, [], [[]], [['ð']], [['ð'], []], [['ð', 'ə']]):
+            with self.subTest(groups=groups):
+                with self.assertRaisesRegex(ValueError, "The audio provided has no speech inside"):
+                    self._run(phoneme_extractor=self._ListPhonemeExtractor(groups),
+                              word_extractor=self._ListWordExtractor(['the', 'cat', 'sat']))
+
+    def test_almost_nothing_heard_of_a_long_sentence_is_no_speech(self):
+        # Only "the" of "the cat sat on the mat" (15 phonemes) came back: 2 < 4.5.
+        import asyncio
+        os.environ.pop(GT_ANCHORED_FLAG, None)
+        run = lambda groups, words: asyncio.run(self.pa.process_audio_array(
+            GT_LONG, self.np.zeros(16000, dtype=self.np.float32), 16000,
+            self._ListPhonemeExtractor(groups), self._ListWordExtractor(words), use_chunking=False))
+        with self.assertRaisesRegex(ValueError, "The audio provided has no speech inside"):
+            run([['ð', 'ə']], ['the'])
+        flat = ['ð', 'ə', 'k', 'æ', 't']
+        self.assertEqual(run([flat], ['the', 'cat']), align_to_ground_truth(flat, GT_LONG, ['the', 'cat']))
+
+    def test_legacy_path_keeps_the_old_guard(self):
+        os.environ[GT_ANCHORED_FLAG] = "false"
+        for words in ([], None, ['the']):
+            with self.subTest(words=words):
+                with self.assertRaisesRegex(ValueError, "The audio provided has no speech inside"):
+                    self._run(word_extractor=self._ListWordExtractor(words))
+        with self.assertRaisesRegex(ValueError, "The audio provided has no speech inside"):
+            self._run(phoneme_extractor=self._ListPhonemeExtractor([list(self.FLAT)]))
 
     def test_flag_off_uses_the_legacy_path(self):
         os.environ[GT_ANCHORED_FLAG] = "false"
@@ -1290,10 +1356,29 @@ class TestClientPhonemesHook(unittest.TestCase):
         with self.assertRaises(ValueError) as ctx:
             self._run([], None, gt=[THE], word_extraction_model=self._Words(None))
         self.assertIn("ground_truth_phonemes", str(ctx.exception))
-        # Then no speech, when there is at most one word.
+        # Then no speech. Anchored, that means fewer than two phonemes, whatever the words.
+        for groups, words in (([['ð']], ['the', 'cat']), ([], ['the', 'cat']), ([[]], ['the', 'cat'])):
+            with self.subTest(groups=groups, words=words):
+                with self.assertRaises(ValueError) as ctx:
+                    self._run(groups, words, word_extraction_model=self._Words(words))
+                self.assertEqual(str(ctx.exception), "The audio provided has no speech inside")
+        # On the legacy path, at most one word is still no speech.
+        os.environ[GT_ANCHORED_FLAG] = "false"
         with self.assertRaises(ValueError) as ctx:
             self._run([['ð', 'ə']], ['the'])
         self.assertEqual(str(ctx.exception), "The audio provided has no speech inside")
+
+    def test_an_empty_or_one_word_transcript_is_scored_when_anchored(self):
+        from unittest import mock
+        import core.process_audio as pa
+
+        groups = self.CASES["exact"][0]
+        flat = [p for g in groups for p in g]
+        self.assertEqual(self._run(groups, ['the']), align_to_ground_truth(flat, GT_SHORT, ['the']))
+        # The hybrid mode, where the server's ASR heard nothing.
+        with mock.patch.object(pa, "preprocess_audio", side_effect=lambda audio=None, **_kw: audio):
+            results = self._run(groups, None, word_extraction_model=self._Words([]))
+        self.assertEqual(results, align_to_ground_truth(flat, GT_SHORT, []))
 
     class _Words:
         def __init__(self, words):

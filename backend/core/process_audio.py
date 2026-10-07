@@ -770,11 +770,43 @@ async def extract_phonemes_and_words(audio_array, sampling_rate, phoneme_extract
     return phoneme_predictions, predicted_words
 
 
+#: On the anchored path a reading is "no speech" when the phoneme model heard fewer than
+#: this share of the sentence's expected phonemes (and always below two). On the
+#: speechocean762 dev half every scored reading heard at least 0.55 of them, while a clip
+#: where only "the" of "the cat sat on the mat" came back hears 0.14.
+MIN_PHONEME_COVERAGE = 0.3
+
+
+def _score_anchored(ground_truth_phonemes, phoneme_predictions, predicted_words) -> list[dict]:
+    """
+    Ground-truth-anchored scoring, shared by the server and client paths.
+
+    Anchored to the sentence, the ASR words are only hints and the model's word
+    grouping does not matter, so only the phonemes are required. Too few of them
+    (see MIN_PHONEME_COVERAGE) is "no speech". Deepgram returns an empty or one-word transcript for some
+    readings the phoneme model heard, mostly young children's (88 of 2,500
+    speechocean762 dev clips), and those children used to be told nothing was
+    heard. On that benchmark, scoring them kept the false-alarm rate within
+    0.2 points, and their feedback named a real mistake more often than average.
+    """
+    from .gt_alignment import align_to_ground_truth
+    flattened = [p for group in (phoneme_predictions or []) for p in (group or [])]
+    expected = sum(len(phonemes or []) for _, phonemes in ground_truth_phonemes)
+    if len(flattened) < max(2, MIN_PHONEME_COVERAGE * expected):
+        raise ValueError("The audio provided has no speech inside")
+    words = [str(word) for word in (predicted_words or []) if word]
+    return align_to_ground_truth(flattened, ground_truth_phonemes, words)
+
+
 def score_extracted_phonemes(ground_truth_phonemes, phoneme_predictions, predicted_words) -> list[dict]:
     """
     The scoring half of process_audio_array, on what extract_phonemes_and_words returned:
     the no-speech checks, then phoneme-to-word alignment and word scoring.
     """
+    from .gt_alignment import is_gt_anchored_enabled, align_to_ground_truth
+    if is_gt_anchored_enabled():  # WWAI_GT_ANCHORED_ALIGNMENT, default ON
+        return _score_anchored(ground_truth_phonemes, phoneme_predictions, predicted_words)
+
     if phoneme_predictions is None or predicted_words is None or len(phoneme_predictions) <= 1 or len(predicted_words) <= 1:
         raise ValueError("The audio provided has no speech inside")
 
@@ -793,9 +825,6 @@ def score_extracted_phonemes(ground_truth_phonemes, phoneme_predictions, predict
     import time
     alignment_start = time.time()
     flattened_phoneme_predictions = [item for sublist in phoneme_predictions for item in sublist]
-    from .gt_alignment import is_gt_anchored_enabled, align_to_ground_truth
-    if is_gt_anchored_enabled():  # WWAI_GT_ANCHORED_ALIGNMENT, default ON
-        return align_to_ground_truth(flattened_phoneme_predictions, ground_truth_phonemes, predicted_words)
     predicted_words_phonemes = g2p(" ".join(predicted_words)) # take the words our model thinks we said and get the phonemes for them
     alignment = align_phonemes_to_words(flattened_phoneme_predictions, predicted_words_phonemes)
     phoneme_predictions = [pred_phonemes for _, pred_phonemes,_ in alignment]
@@ -876,7 +905,14 @@ async def process_audio_with_client_phonemes(
             sampling_rate=sampling_rate
         )
         print(f"✓ Word extraction completed: {predicted_words}")
-    
+
+    from .gt_alignment import is_gt_anchored_enabled
+    if is_gt_anchored_enabled():  # WWAI_GT_ANCHORED_ALIGNMENT, default ON
+        # Exactly as in process_audio_array (see _score_anchored). The client's own
+        # word grouping does not matter, and the WWAI_CLIENT_REALIGN option, which
+        # regroups the phonemes onto the ASR words, only applies to the legacy path.
+        return _score_anchored(ground_truth_phonemes, client_phonemes, predicted_words)
+
     if predicted_words is None or len(predicted_words) <= 1:
         raise ValueError("The audio provided has no speech inside")
     
@@ -884,20 +920,6 @@ async def process_audio_with_client_phonemes(
     phoneme_predictions = client_phonemes
     print(f"✓ Using client-provided phonemes ({len(phoneme_predictions)} words)")
 
-    # Ground-truth-anchored alignment (WWAI_GT_ANCHORED_ALIGNMENT, default ON), exactly as
-    # in process_audio_array. The expected words define the buckets, so the client's own
-    # word grouping does not matter and predicted_words is only a secondary signal.
-    # WWAI_CLIENT_REALIGN, which regroups the phonemes onto the ASR words, would be
-    # pointless here, so it only applies to the legacy path below.
-    from .gt_alignment import is_gt_anchored_enabled, align_to_ground_truth
-    if is_gt_anchored_enabled():
-        flattened_client_phonemes = [
-            phoneme
-            for group in (phoneme_predictions or [])
-            for phoneme in (group or [])
-        ]
-        return align_to_ground_truth(flattened_client_phonemes, ground_truth_phonemes, predicted_words)
-    
     # Validate that we have the same number of words in phonemes and word predictions
     # If not, we may need to adjust the alignment
     if len(phoneme_predictions) != len(predicted_words):

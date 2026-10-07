@@ -39,6 +39,13 @@ _NO_SPEECH_ERRORS = frozenset({
     "The audio provided has no speech inside",
     "No valid words extracted from audio",
 })
+# The phoneme extractors (core/phoneme_extractor_onnx.py, core/phoneme_extractor.py)
+# raise these for a silent or too-short recording. Their text goes on with measured
+# numbers, so they are matched by how they start, after the leading "❌".
+_NO_SPEECH_ERROR_PREFIXES = (
+    "Audio appears to be silent",
+    "Audio too short",
+)
 NO_SPEECH_MESSAGE = (
     "We couldn't hear the words clearly. Read the sentence out loud, close to the microphone."
 )
@@ -47,8 +54,10 @@ PIPELINE_ERROR_MESSAGE = "Something went wrong while checking your reading. Plea
 
 def _user_message_for_pipeline_error(exc: Exception) -> str:
     """The message a child sees for an analysis failure that is not an HTTPException."""
-    if isinstance(exc, ValueError) and str(exc).strip() in _NO_SPEECH_ERRORS:
-        return NO_SPEECH_MESSAGE
+    if isinstance(exc, ValueError):
+        text = str(exc).strip()
+        if text in _NO_SPEECH_ERRORS or text.lstrip("❌ ").startswith(_NO_SPEECH_ERROR_PREFIXES):
+            return NO_SPEECH_MESSAGE
     return PIPELINE_ERROR_MESSAGE
 
 

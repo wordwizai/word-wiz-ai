@@ -260,8 +260,36 @@ class TestHandlerErrorMessages(unittest.TestCase):
                 self.assertEqual(self._error_message(events), self.FRIENDLY)
                 self.assertIn(text, log)  # the original still reaches the log
 
+    @staticmethod
+    def _extractor_errors():
+        """The errors both phoneme extractors raise for a too-short and a silent recording."""
+        from types import SimpleNamespace
+        from core.phoneme_extractor import PhonemeExtractor
+        from core.phoneme_extractor_onnx import PhonemeExtractorONNX
+
+        errors = []
+        for validate in (PhonemeExtractorONNX.extract_logits, PhonemeExtractor.extract_phoneme):
+            for audio in (np.zeros(1000, dtype=np.float32), np.zeros(16000, dtype=np.float32)):
+                try:
+                    validate(SimpleNamespace(_performance_logging=False), audio, 16000)
+                except ValueError as exc:
+                    errors.append(exc)
+        return errors
+
+    def test_silent_or_too_short_recordings_get_a_kind_instruction(self):
+        errors = self._extractor_errors()
+        self.assertEqual(len(errors), 4)
+        self.assertEqual(sum("Audio too short" in str(e) for e in errors), 2)
+        self.assertEqual(sum("Audio appears to be silent" in str(e) for e in errors), 2)
+        for error in errors:
+            with self.subTest(error=str(error)):
+                events, log = self._stream(error)
+                self.assertEqual(self._error_message(events), self.FRIENDLY)
+                self.assertIn(str(error), log)  # the original still reaches the log
+
     def test_other_errors_keep_the_generic_message(self):
-        for error in (ValueError("something else broke"), RuntimeError("The audio provided has no speech inside?")):
+        for error in (ValueError("something else broke"), RuntimeError("The audio provided has no speech inside?"),
+                      RuntimeError("❌ Audio too short (0.06s) - need at least 0.3s")):
             with self.subTest(error=repr(error)):
                 events, log = self._stream(error)
                 self.assertEqual(self._error_message(events), self.GENERIC)

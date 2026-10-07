@@ -52,6 +52,60 @@ def is_clear_mistake(record: dict) -> bool:
     return bool((record.get("total_errors") or 0) >= MIN_FOCUS_ERRORS)
 
 
+#: A sound wrong in at least this many different words of one reading is named as a
+#: pattern, even when no single word is clearly wrong ("cat", "chat" and "bat" each with
+#: the short a wrong). On the speechocean762 dev half a sound wrong in two words was
+#: mostly a consistent accent or recognizer bias on correct speech, while three words
+#: fire on about 3% of readings with no clearly wrong word.
+MIN_PATTERN_WORDS = 3
+
+
+def _own_wrong_sounds(record: dict) -> list[str]:
+    """The word's own sounds that were wrong (missed or replaced), in that order.
+
+    Added sounds are left out: they are not sounds of this word, so the feedback cannot
+    teach them as "the 'w' sound in 'the'".
+    """
+    wrong = list(record.get("missed") or [])
+    for sub in record.get("substituted") or []:
+        expected = sub[0] if isinstance(sub, (list, tuple)) and len(sub) > 0 else sub
+        if expected:
+            wrong.append(expected)
+    return [str(p) for p in wrong if p]
+
+
+def _repeated_sound(pronunciation_data: list[dict]) -> tuple[Optional[str], list[str]]:
+    """The sound wrong in the most different words, when that is at least MIN_PATTERN_WORDS.
+
+    Returns ``(sound, words)`` with the words in sentence order (at most three), or
+    ``(None, [])``. Skipped and inserted words do not count, and a word repeated in the
+    sentence counts once.
+    """
+    words_by_sound: dict[str, list[str]] = {}
+    errors_by_sound: dict[str, int] = {}
+    for record in pronunciation_data:
+        if record.get("type") in ("insertion", "deletion"):
+            continue
+        word = (record.get("ground_truth_word") or "").strip()
+        if not word:
+            continue
+        for sound in dict.fromkeys(_own_wrong_sounds(record)):
+            names = words_by_sound.setdefault(sound, [])
+            if word.lower() not in (w.lower() for w in names):
+                names.append(word)
+            errors_by_sound[sound] = errors_by_sound.get(sound, 0) + int(record.get("total_errors") or 0)
+    best = None
+    for sound, names in words_by_sound.items():  # first wrong sound in the sentence first on a tie
+        if len(names) < MIN_PATTERN_WORDS:
+            continue
+        rank = (len(names), errors_by_sound.get(sound, 0))
+        if best is None or rank > best[0]:
+            best = (rank, sound, names)
+    if best is None:
+        return None, []
+    return best[1], best[2][:3]
+
+
 def flag_rule() -> str:
     """The rule is_clear_mistake applies right now, as text for the accuracy benchmark to record."""
     if is_legacy_feedback():
@@ -358,10 +412,13 @@ def _words_for_phoneme(
     phoneme: str,
     phoneme_to_error_words: dict,
     max_words: int = 4,
+    own_sounds_only: bool = False,
 ) -> list[str]:
     seen: set[str] = set()
     words: list[str] = []
     for entry in phoneme_to_error_words.get(phoneme, []):
+        if own_sounds_only and entry.get("error_type") == "added":
+            continue  # an extra sound after the word, not one of its own
         w = (entry.get("word") or "").strip()
         if w and w not in seen:
             seen.add(w)
@@ -412,6 +469,19 @@ def _focus_and_source_word(
         word_name = (word_entry.get("ground_truth_word") or "").strip().lower()
         if not word_name:
             continue
+
+        if not is_legacy_feedback():
+            # Count this record's own wrong sounds only. Counting by word text pooled every
+            # occurrence of the word ("the" four times), and counting added sounds named a
+            # sound the word does not have ("the 'w' sound in 'the'").
+            wrong = _own_wrong_sounds(word_entry)
+            if not wrong:
+                continue  # only extra sounds after it: nothing in the word itself to teach
+            expected = [str(p) for p in (word_entry.get("expected_phonemes") or [])]
+            order = {p: (expected.index(p) if p in expected else len(expected)) for p in wrong}
+            counts = {p: wrong.count(p) for p in wrong}
+            source = (word_entry.get("ground_truth_word") or "").strip()
+            return min(counts, key=lambda p: (-counts[p], order[p])), source
 
         candidates: dict[str, int] = {}
         for phoneme, entries in phoneme_to_error_words.items():
@@ -532,6 +602,13 @@ def generate_feedback(
     # because it appears many times across the sentence with tiny errors.
     focus_phoneme, source_word = _focus_and_source_word(pronunciation_data, phoneme_to_error_words)
 
+    if not focus_phoneme and not is_legacy_feedback():
+        # No word was clearly wrong, but the same sound may be wrong in several words.
+        # That consistency is the evidence, so name it as a pattern.
+        pattern_sound, pattern_words = _repeated_sound(pronunciation_data)
+        if pattern_sound:
+            return _feedback_for(pattern_sound, pattern_words, pronunciation_data, pattern=True)
+
     if not focus_phoneme:
         # No word was clearly wrong. If the overall sentence is also low-error,
         # all mistakes are minor — praise the child rather than nitpicking a
@@ -549,7 +626,8 @@ def generate_feedback(
         if not ordered:
             return FeedbackResult(text="Keep practicing!", ssml="Keep practicing!")
         focus_phoneme = ordered[0]
-    words = _words_for_phoneme(focus_phoneme, phoneme_to_error_words, max_words=3)
+    words = _words_for_phoneme(focus_phoneme, phoneme_to_error_words, max_words=3,
+                               own_sounds_only=not is_legacy_feedback())
     # Name the word the focus sound came from first. The list above is in
     # sentence order, so its first word is often a barely-wrong one that merely
     # shares the sound with the word that was clearly wrong.
@@ -558,6 +636,47 @@ def generate_feedback(
     if not words:
         return FeedbackResult(text="Keep practicing!", ssml="Keep practicing!")
 
+    return _feedback_for(focus_phoneme, words, pronunciation_data)
+
+
+def _word_ipa(pronunciation_data: list[dict], word: str) -> Optional[str]:
+    """
+    The whole word's IPA for a <phoneme> tag, so Google TTS says the word right, not just
+    the isolated sound. Prefer canonical_phonemes (the primary G2P pronunciation): with word
+    scoring v2, expected_phonemes is whichever variant the child's attempt came closest to,
+    which is not necessarily the one to model. When the word appears more than once, use
+    the occurrence with the highest PER, the one the feedback is about.
+    """
+    word_ipa: Optional[str] = None
+    word_ipa_per: Optional[float] = None
+    for entry in pronunciation_data:
+        w = (entry.get("ground_truth_word") or "").strip().lower()
+        if w != word.lower():
+            continue
+        phonemes = entry.get("canonical_phonemes")
+        if not (isinstance(phonemes, list) and phonemes):
+            phonemes = entry.get("expected_phonemes")
+        if not (isinstance(phonemes, list) and phonemes):
+            continue
+        per = entry.get("per") or 0
+        if word_ipa_per is None or per > word_ipa_per:
+            word_ipa, word_ipa_per = "".join(phonemes), per
+    return word_ipa
+
+
+def _word_ssml(word: str, ipa: Optional[str]) -> str:
+    if ipa:
+        return f'<phoneme alphabet="ipa" ph="{ipa}">{word}</phoneme>'
+    return word
+
+
+def _feedback_for(
+    focus_phoneme: str, words: list[str], pronunciation_data: list[dict], pattern: bool = False,
+) -> FeedbackResult:
+    """The spoken correction for ``focus_phoneme``, naming ``words`` (the first word leads).
+
+    With ``pattern`` the sound was wrong in several words, so all of them are named.
+    """
     focus_word = words[0]
     display = _display_name(focus_phoneme)
     tag = _phoneme_tag(focus_phoneme)
@@ -569,37 +688,18 @@ def generate_feedback(
 
     tip = (GRAPHEME_TIPS.get(grapheme) if grapheme else None) or PRONUNCIATION_TIPS.get(focus_phoneme)
 
-    # Build full-word IPA from pronunciation_data so we can wrap the focus word
-    # in a <phoneme> tag — this gives Google TTS the correct pronunciation of
-    # the whole word, not just the isolated sound. Prefer canonical_phonemes
-    # (the primary G2P pronunciation): with word scoring v2, expected_phonemes
-    # is whichever variant the child's attempt came closest to, which is not
-    # necessarily the one to model. When the word appears more than once, use
-    # the occurrence with the highest PER, the one the feedback is about.
-    word_ipa: Optional[str] = None
-    word_ipa_per: Optional[float] = None
-    for entry in pronunciation_data:
-        w = (entry.get("ground_truth_word") or "").strip().lower()
-        if w != focus_word.lower():
-            continue
-        phonemes = entry.get("canonical_phonemes")
-        if not (isinstance(phonemes, list) and phonemes):
-            phonemes = entry.get("expected_phonemes")
-        if not (isinstance(phonemes, list) and phonemes):
-            continue
-        per = entry.get("per") or 0
-        if word_ipa_per is None or per > word_ipa_per:
-            word_ipa, word_ipa_per = "".join(phonemes), per
-
-    def _word_ssml(word: str, ipa: Optional[str]) -> str:
-        if ipa:
-            return f'<phoneme alphabet="ipa" ph="{ipa}">{word}</phoneme>'
-        return word
-
-    # Build a word-specific intro: lead with the word they saw, then name the
-    # letters (grapheme) using <say-as spell-out> so TTS spells them out clearly,
-    # then demo the isolated sound via the schwa-backed phoneme tag.
-    if grapheme and grapheme in focus_word.lower():
+    if pattern:
+        # One sound, several words: name them all so the child hears the pattern.
+        intro_text = f"Watch the '{display}' sound in {_oxford_list([f'{chr(39)}{w}{chr(39)}' for w in words])}."
+        intro_ssml = (
+            f'Watch the <break time="400ms"/>{tag}<break time="300ms"/> sound in '
+            f'{_oxford_list([_word_ssml(w, _word_ipa(pronunciation_data, w)) for w in words])}.'
+        )
+    elif grapheme and grapheme in focus_word.lower():
+        # Build a word-specific intro: lead with the word they saw, then name the
+        # letters (grapheme) using <say-as spell-out> so TTS spells them out clearly,
+        # then demo the isolated sound via the schwa-backed phoneme tag.
+        word_ipa = _word_ipa(pronunciation_data, focus_word)
         grapheme_ssml = f'<say-as interpret-as="spell-out">{grapheme}</say-as>'
         intro_text = (
             f"In the word '{focus_word}', the letters '{grapheme}' make the '{display}' sound."
@@ -610,6 +710,7 @@ def generate_feedback(
             f'<break time="400ms"/>{tag}<break time="300ms"/> sound.'
         )
     else:
+        word_ipa = _word_ipa(pronunciation_data, focus_word)
         intro_text = f"Watch the '{display}' sound in '{focus_word}'."
         intro_ssml = (
             f'Watch the <break time="400ms"/>{tag}<break time="300ms"/> '

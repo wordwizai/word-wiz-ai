@@ -13,7 +13,9 @@ ends up pointing anywhere other than SQLite.
 The seed is the 13 real activities (dev/seed_activities.json) plus a demo
 account with five days of reading history, so the dashboard, streak and
 Progress charts all have something to show. Log in with DEMO_EMAIL and
-DEMO_PASSWORD below. They only exist inside dev/dev.db.
+DEMO_PASSWORD below. A teacher account (TEACHER_EMAIL) owns a class with the
+demo child in it, for trying phonics assignments. Both only exist inside
+dev/dev.db.
 
 OpenAI and Google TTS still use the keys in .env, so recording audio in a
 practice session makes real (billed) API calls.
@@ -34,6 +36,12 @@ SEED_ACTIVITIES = DEV_DIR / "seed_activities.json"
 DEMO_EMAIL = "demo@wordwiz.test"
 DEMO_PASSWORD = "wordwiz-dev"
 DEMO_NAME = "Maya Okafor"
+
+TEACHER_EMAIL = "teacher@wordwiz.test"
+TEACHER_PASSWORD = "wordwiz-dev"
+TEACHER_NAME = "Ms. Rivera"
+DEV_CLASS_NAME = "Room 4"
+DEV_CLASS_CODE = "DEVRM4"
 
 
 def configure_environment():
@@ -98,7 +106,7 @@ def phoneme_analysis(per, errors):
 def seed():
     from auth.auth_handler import create_user, get_password_hash
     from database import Base, SessionLocal, engine
-    from models import Activity, FeedbackEntry, Session, User
+    from models import Activity, Class, ClassMembership, FeedbackEntry, Session, User
 
     if engine.url.get_backend_name() != "sqlite":
         sys.exit(f"Refusing to start: engine points at {engine.url.get_backend_name()}, not SQLite.")
@@ -141,6 +149,21 @@ def seed():
                     ))
             db.commit()
             print(f"Seeded demo account {DEMO_EMAIL} with {len(HISTORY)} sessions")
+
+        if db.query(User).filter(User.email == TEACHER_EMAIL).first() is None:
+            teacher = create_user(db, User(
+                username="teacher",
+                email=TEACHER_EMAIL,
+                full_name=TEACHER_NAME,
+                hashed_password=get_password_hash(TEACHER_PASSWORD),
+            ))
+            demo = db.query(User).filter(User.email == DEMO_EMAIL).one()
+            room = Class(name=DEV_CLASS_NAME, join_code=DEV_CLASS_CODE, teacher_id=teacher.id)
+            db.add(room)
+            db.flush()
+            db.add(ClassMembership(class_id=room.id, student_id=demo.id))
+            db.commit()
+            print(f"Seeded teacher account {TEACHER_EMAIL} with class {DEV_CLASS_NAME} ({DEV_CLASS_CODE})")
     finally:
         db.close()
 

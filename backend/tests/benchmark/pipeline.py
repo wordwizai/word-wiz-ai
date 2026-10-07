@@ -47,7 +47,8 @@ from . import common
 SAMPLE_RATE = 16000
 #: The request paths analyze_clip can mirror. See the module docstring.
 PATHS = ("server", "client")
-#: The per-word fields scoring needs. Everything else in a record is display data.
+#: The per-word fields scoring needs, copied from each record. Everything else in a record is
+#: display data. compact_record also adds "flagged", which it computes instead of copying.
 RECORD_FIELDS = (
     "type", "ground_truth_word", "expected_phonemes", "actual_phonemes",
     "per", "total_errors", "total_phonemes",
@@ -55,10 +56,20 @@ RECORD_FIELDS = (
 
 
 def compact_record(record: dict) -> dict:
+    """The fields scoring needs, plus "flagged", production's own decision on the word.
+
+    "flagged" is core's is_clear_mistake on the full record, under the rule in force when the
+    outcome is stored (WWAI_LEGACY_FEEDBACK is read at call time). It is whether the feedback may
+    correct the word, so the word metrics score that decision, and a results file keeps the rule
+    of the code that wrote it.
+    """
+    from core.phoneme_feedback_formatter import is_clear_mistake
+
     out = {}
     for key in RECORD_FIELDS:
         value = record[key]  # not .get(), so a renamed field fails loudly instead of scoring as None
         out[key] = list(value) if isinstance(value, (list, tuple)) else value
+    out["flagged"] = bool(is_clear_mistake(record))
     return out
 
 

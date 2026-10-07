@@ -88,6 +88,22 @@ class TestBuildItems(unittest.TestCase):
         self.assertEqual(items.word_count_mismatch, 0)
         self.assertEqual(len(items.words), 2)
 
+    def test_words_line_up_across_a_change_in_sentence_cleaning(self):
+        # Results written before clean_sentence kept apostrophes say "its" and "dont", while the
+        # dataset's "IT'S" and "DON'T" now clean to "it's" and "don't". Only letters are compared,
+        # as the frontend matches words, so both results files still join.
+        clip = U.synthetic_clip("c6", "s6", 30, [("IT'S", 10, "IH1 T S", [2, 2, 2]),
+                                                 ("DON'T", 10, "D OW1 N T", [2, 2, 2, 2])])
+        for words in (("its", "dont"), ("it's", "don't"), ("IT'S", "DON'T")):
+            with self.subTest(words=words):
+                outcome = U.ok(
+                    U.record(words[0], ["ɪ", "t", "s"], ["ɪ", "t", "s"], 0.0),
+                    U.record(words[1], ["d", "oʊ", "n", "t"], ["d", "oʊ", "n", "t"], 0.0),
+                )
+                items = S.build_items([clip], {"c6": outcome})
+                self.assertEqual(items.word_count_mismatch, 0)
+                self.assertEqual(len(items.words), 2)
+
     def test_client_fallbacks_are_counted_whatever_the_status(self):
         outcomes = _outcomes()
         outcomes["c1"] = dict(outcomes["c1"], client_fallback=True)
@@ -210,6 +226,65 @@ class TestSummarize(unittest.TestCase):
         summary = S.summarize(S.build_items(_clips(), outcomes), threshold=0.3)
         self.assertEqual(summary["unexpected_failures"], 1)
         self.assertEqual(summary["rejected"], 2)
+
+
+def _flagged_outcomes(cat_flag, dog_flag):
+    """_outcomes() with production's stored decision on CAT (per 0) and DOG (per 0.3333)."""
+    outcomes = _outcomes()
+    cat, insertion, dog = outcomes["c1"]["words"]
+    outcomes["c1"] = U.ok(dict(cat, flagged=cat_flag), dict(insertion, flagged=False), dict(dog, flagged=dog_flag))
+    outcomes["c3"] = U.ok(U.record("a", ["ə"], ["ə"], 0.0, flagged=False))
+    return outcomes
+
+
+class TestStoredFlags(unittest.TestCase):
+    """The word metrics score production's own decision, stored per word as "flagged"."""
+
+    def test_stored_flags_decide_the_word_metrics(self):
+        # Flags that contradict the PER: CAT (per 0, read correctly) flagged, DOG (a mistake) not.
+        summary = S.summarize(S.build_items(_clips(), _flagged_outcomes(True, False)), threshold=0.3)
+        self.assertEqual(summary["word"]["all"]["counts"], [0, 1, 1, 0])
+        summary = S.summarize(S.build_items(_clips(), _flagged_outcomes(False, True)), threshold=0.9)
+        self.assertEqual(summary["word"]["all"]["counts"], [1, 0, 0, 1])
+
+    def test_records_without_flags_are_scored_at_the_threshold(self):
+        # Results files written before the flag was stored.
+        items = S.build_items(_clips(), _outcomes())
+        self.assertTrue(all(w.flagged is None for w in items.words))
+        self.assertEqual(S.summarize(items, threshold=0.3)["word"]["all"]["counts"], [1, 0, 0, 1])
+        self.assertEqual(S.summarize(items, threshold=0.4)["word"]["all"]["counts"], [0, 0, 1, 1])
+
+    def test_an_override_scores_per_at_the_threshold(self):
+        items = S.build_items(_clips(), _flagged_outcomes(True, False))
+        self.assertEqual([w.flagged for w in items.words], [True, False])
+        summary = S.summarize(items, threshold=0.3, stored_flags=False)
+        self.assertEqual(summary["word"]["all"]["counts"], [1, 0, 0, 1])
+        self.assertEqual(S.word_flags(items.words, 0.3, stored=False), [False, True])
+        self.assertEqual(S.word_flags(items.words, 0.3), [True, False])
+
+    def test_the_per_based_numbers_stay_per_based(self):
+        plain = S.summarize(S.build_items(_clips(), _outcomes()), threshold=0.3)
+        flagged = S.summarize(S.build_items(_clips(), _flagged_outcomes(True, False)), threshold=0.3)
+        for key in ("best_threshold", "pr_curve", "flag_all_f05", "pearson", "phone", "phone_strict"):
+            self.assertEqual(flagged[key], plain[key], key)
+
+    def test_a_flag_that_is_not_a_bool_raises_and_names_the_clip(self):
+        outcomes = _flagged_outcomes(True, False)
+        outcomes["c1"]["words"][2]["flagged"] = "yes"
+        with self.assertRaises(ValueError) as ctx:
+            S.build_items(_clips(), outcomes)
+        self.assertIn("c1", str(ctx.exception))
+
+    def test_the_flag_rule_of_a_results_file(self):
+        self.assertEqual(S.results_flag_rule(U.results_dict("a", {}, flag_rule="total_errors >= 3")),
+                         "total_errors >= 3")
+        # Older files have no stored flags and were scored at their threshold.
+        self.assertEqual(S.results_flag_rule(U.results_dict("a", {}, threshold=0.5)), "per >= 0.5")
+        self.assertTrue(S.uses_stored_flags(U.results_dict("a", {}, flag_rule="per >= 0.4")))
+        self.assertTrue(S.uses_stored_flags(U.results_dict("a", {})))
+        override = U.results_dict("a", {}, threshold=0.5, flag_rule=S.override_rule(0.5))
+        self.assertEqual(S.results_flag_rule(override), "per >= 0.5 (override)")
+        self.assertFalse(S.uses_stored_flags(override))
 
 
 def _fb_clip(utt_id, speaker, age, words):

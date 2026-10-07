@@ -85,7 +85,34 @@ class TestAnalyzeClip(unittest.TestCase):
     def test_to_dict_keeps_only_scoring_fields(self):
         outcome = PL.analyze_clip(self.audio, U.SAMPLE_TEXT, _ListPhonemes(self.perfect), U.FakeWords())
         record = outcome.to_dict()["words"][0]
-        self.assertEqual(set(record), set(PL.RECORD_FIELDS))
+        self.assertEqual(set(record), set(PL.RECORD_FIELDS) | {"flagged"})
+
+    def test_flagged_is_cores_decision_on_the_full_record(self):
+        import core.phoneme_feedback_formatter as formatter
+
+        full = dict(U.record("fox", ["f", "ɑ", "k", "s"], ["f", "ɑ", "k", "s"], 0), missed=[], extra="display")
+        with mock.patch.object(formatter, "is_clear_mistake", return_value=True) as decide:
+            compact = PL.compact_record(full)
+        decide.assert_called_once()
+        self.assertIs(decide.call_args.args[0], full)  # the full record, not the compact one
+        self.assertIs(compact["flagged"], True)  # a perfect reading, so only core can have said so
+        self.assertNotIn("extra", compact)
+
+    def test_flagged_follows_the_rule_in_force_when_the_outcome_is_stored(self):
+        # "fox" read as [m i n t] (four wrong sounds) and "the" as [d ə] (one, PER 0.5).
+        misread = [list(p) for p in self.perfect]
+        misread[0] = ["d", "ə"]
+        misread[3] = ["m", "i", "n", "t"]
+        with mock.patch.dict(os.environ, {"WWAI_LEGACY_FEEDBACK": ""}):
+            outcome = PL.analyze_clip(self.audio, U.SAMPLE_TEXT, _ListPhonemes(misread), U.FakeWords())
+            stored = outcome.to_dict()["words"]
+        flagged = {r["ground_truth_word"] for r in stored if r["flagged"]}
+        self.assertEqual(flagged, {"fox"})
+        self.assertEqual(outcome.feedback["focus_words"][:1], ["fox"])  # the word the feedback corrects
+        self.assertTrue(all(type(r["flagged"]) is bool for r in stored))
+        with mock.patch.dict(os.environ, {"WWAI_LEGACY_FEEDBACK": "1"}):
+            legacy = {r["ground_truth_word"] for r in outcome.to_dict()["words"] if r["flagged"]}
+        self.assertEqual(legacy, {"fox", "the"})  # per >= 0.4
 
 
     def test_expected_failures_keep_their_own_type(self):
@@ -244,7 +271,7 @@ class TestAnalyzeClip(unittest.TestCase):
 
     def test_compact_record_fails_loudly_on_a_missing_field(self):
         full = U.record("fox", ["f", "ɑ", "k", "s"], ["f", "ɑ", "k", "s"], 0)
-        self.assertEqual(set(PL.compact_record(full)), set(PL.RECORD_FIELDS))
+        self.assertEqual(set(PL.compact_record(full)), set(PL.RECORD_FIELDS) | {"flagged"})
         del full["per"]
         with self.assertRaises(KeyError):
             PL.compact_record(full)

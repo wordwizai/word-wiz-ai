@@ -256,6 +256,54 @@ class TestFeedbackRows(unittest.TestCase):
         self.assertIn("correction precision difference, 95% CI n/a", text)
 
 
+def _with_flags(outcomes, dog_flag):
+    """The outcomes with production's stored decision: CAT never flagged, DOG flagged or not."""
+    flagged = {}
+    for utt, outcome in outcomes.items():
+        cat, dog = outcome["words"]
+        flagged[utt] = U.ok(dict(cat, flagged=False), dict(dog, flagged=dog_flag))
+    return flagged
+
+
+class TestFlagRules(unittest.TestCase):
+    """Each side is scored, and labelled, by the flag rule of the code that wrote it."""
+
+    def setUp(self):
+        self.clips, self.base, self.cand = _population()
+
+    def _compare(self, base, cand):
+        return C.compare_results(base, cand, self.clips, n_resamples=300)
+
+    def test_each_sides_rule_is_printed_under_the_header(self):
+        result = self._compare(U.results_dict("base", self.base),
+                               U.results_dict("cand", _with_flags(self.cand, True), flag_rule="total_errors >= 3"))
+        self.assertEqual((result["base_flag_rule"], result["candidate_flag_rule"]),
+                         ("per >= 0.4", "total_errors >= 3"))
+        lines = C.format_comparison(result).splitlines()
+        self.assertEqual(lines[0], "base (server path)  ->  cand (server path)   (dev half)")
+        self.assertEqual(lines[1], "flag rule per >= 0.4  ->  total_errors >= 3")
+
+    def test_stored_flags_decide_the_word_metrics(self):
+        # The candidate's DOG records have per 0.6667, but production did not flag them, so the
+        # candidate is no better than the base. Without stored flags it is a clear win.
+        base = U.results_dict("base", self.base)
+        unflagged = U.results_dict("cand", _with_flags(self.cand, False), flag_rule="total_errors >= 3")
+        result = self._compare(base, unflagged)
+        self.assertEqual(result["f05_ci"], [0.0, 0.0])
+        self.assertFalse(result["passed"])
+        self.assertTrue(self._compare(base, U.results_dict("cand", self.cand))["passed"])
+        flagged = U.results_dict("cand", _with_flags(self.base, True), flag_rule="total_errors >= 3")
+        self.assertTrue(self._compare(base, flagged)["passed"])  # flags the mistakes whatever the PER
+
+    def test_an_override_file_is_scored_at_its_threshold(self):
+        override = U.results_dict("cand", _with_flags(self.cand, False), threshold=0.5,
+                                  flag_rule="per >= 0.5 (override)")
+        result = self._compare(U.results_dict("base", self.base), override)
+        self.assertTrue(result["passed"], C.format_comparison(result))
+        self.assertEqual(C.format_comparison(result).splitlines()[1],
+                         "flag rule per >= 0.4  ->  per >= 0.5 (override)")
+
+
 class TestPathGuard(unittest.TestCase):
     """Runs of the server path and the client path measure different request paths."""
 

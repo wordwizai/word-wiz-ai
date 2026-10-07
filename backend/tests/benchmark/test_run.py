@@ -160,6 +160,13 @@ class TestFormatSummary(unittest.TestCase):
         text = RUN.format_summary(self._summary([clip], {"c1": U.ok(U.record("cat", ["k", "æ", "t"], ["k", "æ", "t"], 0.0))}))
         self.assertIn("feedback n/a", text)
 
+    def test_the_flag_rule_is_printed_with_the_threshold(self):
+        clip = U.synthetic_clip("c1", "s1", 30, [("CAT", 10, "K AE1 T", [2, 2, 2])])
+        summary = self._summary([clip], {"c1": U.ok(U.record("cat", ["k", "æ", "t"], ["k", "æ", "t"], 0.0))})
+        first = RUN.format_summary(summary, "server", flag_rule="total_errors >= 3").splitlines()[0]
+        self.assertTrue(first.endswith("threshold 0.4   flag rule total_errors >= 3"), first)
+        self.assertNotIn("flag rule", RUN.format_summary(summary))
+
     def test_the_first_line_names_the_path_and_the_client_path_counts_fallbacks(self):
         clips = [U.synthetic_clip(c, c, 30, [("CAT", 10, "K AE1 T", [2, 2, 2]), ("DOG", 10, "D AO1 G", [2, 2, 2])])
                  for c in ("c1", "c2")]
@@ -454,6 +461,50 @@ class TestEndToEnd(unittest.TestCase):
         self.assertEqual(results["threshold"], 0.4)
         self.assertEqual(results["summary"]["clips"], 2)
         self.assertTrue(os.path.isfile(out[:-5] + ".summary.json"))
+
+    def _run(self, *argv):
+        out = os.path.join(self.tmp.name, "r", "t_dev.json")
+        stdout = io.StringIO()
+        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(RUN.main(["--name", "t", "--workers", "1", "--out", out, *argv]), 0)
+        with open(out, encoding="utf-8") as fh:
+            results = json.load(fh)
+        with open(out[:-5] + ".summary.json", encoding="utf-8") as fh:
+            self.assertEqual(json.load(fh)["flag_rule"], results["flag_rule"])
+        words = [w for o in results["outcomes"].values() for w in o["words"] if w["type"] != "insertion"]
+        self.assertTrue(words)
+        return results, words, stdout.getvalue().splitlines()[0]
+
+    def _rescored(self, results, threshold, stored):
+        from tests.benchmark import scoring as S
+        from tests.benchmark.dataset import load_clips
+
+        return S.summarize(S.build_items(load_clips("dev"), results["outcomes"]), threshold, stored_flags=stored)
+
+    def test_every_word_stores_productions_decision_and_the_file_its_rule(self):
+        with mock.patch.dict(os.environ, {"WWAI_LEGACY_FEEDBACK": ""}):
+            results, words, first = self._run()
+        self.assertEqual(results["flag_rule"], "total_errors >= 3")
+        self.assertTrue(first.endswith("threshold 0.4   flag rule total_errors >= 3"), first)
+        self.assertEqual([w["flagged"] for w in words], [w["total_errors"] >= 3 for w in words])
+        self.assertEqual(results["summary"]["word"], self._rescored(results, 0.4, stored=True)["word"])
+
+    def test_the_legacy_switch_is_recorded_as_the_per_rule(self):
+        # Set in the environment, because --flag refuses once core is imported in this process.
+        with mock.patch.dict(os.environ, {"WWAI_LEGACY_FEEDBACK": "1"}):
+            results, words, first = self._run()
+        self.assertEqual(results["flag_rule"], "per >= 0.4")
+        self.assertTrue(first.endswith("threshold 0.4   flag rule per >= 0.4"), first)
+        self.assertEqual([w["flagged"] for w in words], [w["per"] >= 0.4 for w in words])
+
+    def test_a_threshold_override_scores_per_and_says_so(self):
+        with mock.patch.dict(os.environ, {"WWAI_LEGACY_FEEDBACK": ""}):
+            results, words, first = self._run("--threshold", "0.25")
+        self.assertEqual((results["threshold"], results["flag_rule"]), (0.25, "per >= 0.25 (override)"))
+        self.assertTrue(first.endswith("threshold 0.25   flag rule per >= 0.25 (override)"), first)
+        # Production's own decision is still stored, but the word metrics use the override.
+        self.assertEqual([w["flagged"] for w in words], [w["total_errors"] >= 3 for w in words])
+        self.assertEqual(results["summary"]["word"], self._rescored(results, 0.25, stored=False)["word"])
 
     def test_the_path_is_recorded(self):
         # The client path replays the cache the server path recorded, so it needs no cache of its own.

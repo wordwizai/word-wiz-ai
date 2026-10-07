@@ -168,9 +168,11 @@ def synthetic_clip(utt_id, speaker, age, words, sentence_accuracy=8.0, half="dev
     )
 
 
-def record(word, expected, actual, per, rtype=None):
+def record(word, expected, actual, per, rtype=None, flagged=None):
+    """A compact word record. With ``flagged`` it also carries production's stored decision,
+    as pipeline.compact_record writes it. Without it, it is a record from an older results file."""
     expected, actual = list(expected), list(actual)
-    return {
+    out = {
         "type": rtype or ("match" if per == 0 else "substitution"),
         "ground_truth_word": word,
         "expected_phonemes": expected,
@@ -179,6 +181,9 @@ def record(word, expected, actual, per, rtype=None):
         "total_errors": int(round(per * len(expected))),
         "total_phonemes": len(expected),
     }
+    if flagged is not None:
+        out["flagged"] = flagged
+    return out
 
 
 def ok(*records):
@@ -196,9 +201,12 @@ def rejected(error_type="AudioRejected"):
     return {"status": "rejected", "words": [], "error_type": error_type, "error": "rejected"}
 
 
-def results_dict(name, outcomes, half="dev", subset=None, threshold=0.4, path=None):
-    """A results file as run.py writes it. With path=None it has no "path" field, like older files."""
+def results_dict(name, outcomes, half="dev", subset=None, threshold=0.4, path=None, flag_rule=None):
+    """A results file as run.py writes it. With path=None it has no "path" field, and with
+    flag_rule=None no "flag_rule" field, like older files."""
     results = {"name": name, "half": half, "subset": subset, "threshold": threshold, "outcomes": outcomes}
     if path is not None:
         results["path"] = path
+    if flag_rule is not None:
+        results["flag_rule"] = flag_rule
     return results

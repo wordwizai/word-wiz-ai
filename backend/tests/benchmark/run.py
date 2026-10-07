@@ -68,6 +68,13 @@ def production_threshold() -> float:
     return float(HIGH_PER_THRESHOLD)
 
 
+def production_flag_rule() -> str:
+    """How production decides that the feedback may correct a word, under the active flags."""
+    from core.phoneme_feedback_formatter import flag_rule
+
+    return flag_rule()
+
+
 def check_cache(directory: str, half: str | None = None, flags=None) -> dict:
     """The cache's metadata, or StaleCacheError when it is missing, unreadable, built for another
     half than ``half``, built with another model revision than the current pin, or built under a
@@ -191,14 +198,17 @@ def write_results(results: dict, out_path: str) -> tuple[str, str]:
     return out_path, short
 
 
-def format_summary(summary: dict, path: str | None = None) -> str:
+def format_summary(summary: dict, path: str | None = None, flag_rule: str | None = None) -> str:
     """The printed summary. With ``path`` the first line starts with it, and on the client path
-    it also counts the clips that fell back to the server path."""
+    it also counts the clips that fell back to the server path. With ``flag_rule`` the threshold
+    is followed by the rule the word metrics score."""
     lines = [
         f"clips {summary['clips']}   rejected {summary['rejected']} ({summary['rejection_rate']:.1%})   "
         f"word-count mismatches {summary['word_count_mismatch']}   unscored {summary['unscored_rate']:.1%}   "
         f"threshold {summary['threshold']}",
     ]
+    if flag_rule is not None:
+        lines[0] += f"   flag rule {flag_rule}"
     if path is not None:
         lines[0] = f"path {path}   {lines[0]}"
     if path == "client":
@@ -238,7 +248,8 @@ def main(argv=None) -> int:
                         help="the request path to score: the server's phonemes (default) or the browser's")
     parser.add_argument("--cache", help="cache name (default: derived from front-end flags)")
     parser.add_argument("--flag", action="append", default=[], metavar="WWAI_NAME=VALUE")
-    parser.add_argument("--threshold", type=float, help="override production's HIGH_PER_THRESHOLD")
+    parser.add_argument("--threshold", type=float,
+                        help="flag words at per >= THRESHOLD instead of production's own rule")
     parser.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) // 2))
     parser.add_argument("--out", help="results path (default: tests/benchmark/results/<name>_<half>.json)")
     parser.add_argument("--reason", help="required for --half test")
@@ -288,7 +299,7 @@ def main(argv=None) -> int:
     active = common.active_wwai_flags()
 
     from .dataset import load_clips
-    from .scoring import build_items, summarize
+    from .scoring import build_items, override_rule, summarize
     from .stage_cache import cache_dir
 
     try:
@@ -304,6 +315,9 @@ def main(argv=None) -> int:
         # Neither of these reads labels, so a stale cache does not use up a look on the test half.
         cache_meta = check_cache(directory, args.half, active)
         threshold = args.threshold if args.threshold is not None else production_threshold()
+        # The rule the word metrics score. Each word's own decision is stored by the pipeline
+        # (pipeline.compact_record), and an override replaces it with per >= threshold.
+        flag_rule = override_rule(threshold) if args.threshold is not None else production_flag_rule()
         if args.half == "test":
             append_ledger(args.name, args.reason, sha, flags=active, threshold=threshold)
         outcomes = score_clips(clips, directory, args.workers, args.path)
@@ -311,7 +325,7 @@ def main(argv=None) -> int:
         print(f"stale cache: {exc}", file=sys.stderr)
         return EXIT_STALE
 
-    summary = summarize(build_items(clips, outcomes), threshold)
+    summary = summarize(build_items(clips, outcomes), threshold, stored_flags=args.threshold is None)
     results = {
         "name": args.name,
         "path": args.path,
@@ -322,13 +336,14 @@ def main(argv=None) -> int:
         "git_sha": sha,
         "flags": active,
         "threshold": threshold,
+        "flag_rule": flag_rule,
         "created": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "seconds": round(time.time() - start, 1),
         "summary": summary,
         "outcomes": outcomes,
     }
     full, short = write_results(results, out)
-    print(format_summary(summary, args.path))
+    print(format_summary(summary, args.path, flag_rule))
     print(f"wrote {full}\n      {short}")
     if summary["unexpected_failures"] > 0:
         types = sorted(k for k in summary["rejected_by_type"] if k.startswith("unexpected:"))

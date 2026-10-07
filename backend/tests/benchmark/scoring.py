@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 import numbers
+import re
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -21,6 +22,9 @@ class WordItem:
     human_accuracy: float
     is_mistake: bool
     per: float
+    # Production's own decision on the word (pipeline.compact_record). None for results files
+    # written before it was stored, which are scored at per >= threshold instead.
+    flagged: bool | None = None
 
 
 @dataclass
@@ -86,6 +90,20 @@ def _checked_per(clip, record) -> float:
     return float(per)
 
 
+def _checked_flag(clip, record):
+    flagged = record.get("flagged")
+    if flagged is not None and not isinstance(flagged, bool):
+        raise ValueError(
+            f"clip {clip.utt_id}: word record for {record.get('ground_truth_word')!r} has flagged "
+            f"{flagged!r}, which is not true or false"
+        )
+    return flagged
+
+
+def _letters(text: str) -> str:
+    return re.sub(r"[^a-z]", "", text)
+
+
 def _lines_up(clip, records) -> bool:
     """True when the records are, in order, one per scored word and about those words.
 
@@ -93,13 +111,16 @@ def _lines_up(clip, records) -> bool:
     would score a child's reading against the wrong expert label. The server path cleans the
     sentence before G2P (clean_sentence), and that is what ground_truth_word holds. The client
     path's handler has not always cleaned it, so its records can say "IT'S" for "its". Both
-    sides are cleaned, which changes nothing for a record that is clean already.
+    sides are cleaned, and then only their letters are compared, the way the frontend matches
+    words. compare re-scores old results files with the current code, so a results file from
+    before a change in the cleaning must still join. Its records say "its" where the dataset's
+    "IT'S" now cleans to "it's", and both are "its" once the apostrophe is dropped.
     """
     from core.grapheme_to_phoneme import clean_sentence  # lazy, so importing this module loads no core code
 
     def same_word(word, record) -> bool:
         found = record.get("ground_truth_word")
-        return isinstance(found, str) and clean_sentence(found) == clean_sentence(word.text)
+        return isinstance(found, str) and _letters(clean_sentence(found)) == _letters(clean_sentence(word.text))
 
     return len(records) == len(clip.words) and all(
         same_word(word, record) for word, record in zip(clip.words, records)
@@ -166,6 +187,7 @@ def build_items(clips, outcomes: dict) -> ItemSet:
             continue
         records = [r for r in outcome["words"] if r.get("type") != "insertion"]
         pers = [_checked_per(clip, r) for r in records]
+        flags = [_checked_flag(clip, r) for r in records]
         # Results written before feedback was recorded have no "feedback" key. A misaligned clip
         # keeps its feedback, since the words are matched by text and not by position.
         if isinstance(outcome.get("feedback"), dict):
@@ -179,10 +201,10 @@ def build_items(clips, outcomes: dict) -> ItemSet:
             clip.utt_id, clip.speaker, clip.is_child, clip.sentence_accuracy,
             total_errors / total_phonemes if total_phonemes else 0.0,
         ))
-        for word, record, per in zip(clip.words, records, pers):
+        for word, record, per, flagged in zip(clip.words, records, pers, flags):
             items.words.append(WordItem(
                 clip.utt_id, clip.speaker, clip.is_child, word.text, word.accuracy,
-                M.word_is_mistake(word.accuracy), per,
+                M.word_is_mistake(word.accuracy), per, flagged,
             ))
             expected = list(record.get("expected_phonemes") or [])
             canonical = canonical_ipa(word.phones)
@@ -222,8 +244,35 @@ def _metrics(labels, flags) -> dict:
     }
 
 
-def word_slice_metrics(words, threshold: float) -> dict:
-    return _metrics([w.is_mistake for w in words], M.flags_at([w.per for w in words], threshold))
+#: Ends a results file's flag_rule when run --threshold replaced production's rule.
+OVERRIDE_SUFFIX = " (override)"
+
+
+def override_rule(threshold: float) -> str:
+    """The flag_rule of a run whose --threshold replaced production's rule."""
+    return f"per >= {threshold}{OVERRIDE_SUFFIX}"
+
+
+def results_flag_rule(results: dict) -> str:
+    """The rule a results file's word metrics score. Files written before flag_rule was recorded
+    have no stored flags either, so they are scored at per >= their threshold."""
+    return results.get("flag_rule") or f"per >= {results['threshold']}"
+
+
+def uses_stored_flags(results: dict) -> bool:
+    """False when the file comes from a --threshold override, whose word metrics use the PER."""
+    return not results_flag_rule(results).endswith(OVERRIDE_SUFFIX)
+
+
+def word_flags(words, threshold: float, stored: bool = True) -> list[bool]:
+    """Which words count as flagged. Production's stored decision when the word has one, and
+    otherwise (results written before it was stored, or stored=False for a --threshold
+    override) per >= threshold."""
+    return [w.flagged if stored and w.flagged is not None else w.per >= threshold for w in words]
+
+
+def word_slice_metrics(words, threshold: float, stored_flags: bool = True) -> dict:
+    return _metrics([w.is_mistake for w in words], word_flags(words, threshold, stored_flags))
 
 
 def phone_slice_metrics(phones, strict: bool) -> dict:
@@ -289,7 +338,10 @@ def feedback_rate_counts(items: ItemSet, rate: str) -> dict:
     return out
 
 
-def summarize(items: ItemSet, threshold: float) -> dict:
+def summarize(items: ItemSet, threshold: float, stored_flags: bool = True) -> dict:
+    """The benchmark summary. The word-level metrics score each word's stored flag (production's
+    own decision) when it has one, and per >= threshold otherwise or when stored_flags is False
+    (see word_flags). best_threshold, pr_curve, flag_all_f05 and pearson are always PER-based."""
     out = {
         "threshold": threshold,
         "clips": items.clips,
@@ -311,7 +363,7 @@ def summarize(items: ItemSet, threshold: float) -> dict:
     for name, keep in SLICES.items():
         words = [w for w in items.words if keep(w)]
         phones = [p for p in items.phones if keep(p)]
-        out["word"][name] = word_slice_metrics(words, threshold)
+        out["word"][name] = word_slice_metrics(words, threshold, stored_flags)
         out["phone"][name] = phone_slice_metrics(phones, strict=False)
         out["phone_strict"][name] = phone_slice_metrics(phones, strict=True)
     labels = [w.is_mistake for w in items.words]

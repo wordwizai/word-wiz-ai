@@ -19,9 +19,12 @@ plain `python -m tests.benchmark.<command>`.
 The benchmark is precision-first. Word Wiz is for children learning to read, and telling a
 child they misread a word they read correctly does more harm than missing a mistake. So the
 headline number is word-level F0.5, which weights precision more heavily than recall,
-measured at production's own cutoff. `run` reads `HIGH_PER_THRESHOLD` from
-`core/phoneme_feedback_formatter.py` at run time, so a change to that constant is measured
-at its new value.
+measured on production's own decision. A word counts as flagged when the feedback may correct
+it, which `is_clear_mistake` in `core/phoneme_feedback_formatter.py` decides. Today that means
+at least three of the word's sounds were wrong (`total_errors >= 3`), or a PER of at least
+`HIGH_PER_THRESHOLD` (0.4) under `WWAI_LEGACY_FEEDBACK=1`. The pipeline stores that decision
+with every word, so a change to the rule is measured the way the code that ran decided (see
+"Flag rules" below).
 
 What counts as a mistake follows the speechocean762 rubric, which was designed so that an
 accent alone is never a mistake.
@@ -51,6 +54,9 @@ Messy cases are counted, not dropped.
   reported.
 - **Misaligned clips.** When the pipeline's word records cannot be matched one to one with
   the dataset's scored words, the clip's words are left out too and the clip is counted.
+  Words are matched by their letters after `clean_sentence`, so a results file written before
+  a change to the cleaning still lines up ("its" in an older file matches the dataset's "IT'S",
+  which now cleans to "it's").
 - **Unscored rate.** Rejected plus misaligned clips, as a share of all clips. Clips in both
   groups drop out of every metric, so the acceptance rule watches this number.
 - **Unexpected failures.** A failure that production would not show a child (an
@@ -67,10 +73,12 @@ phoneme path" below).
 
 The word-level numbers are a stand-in for what a child actually hears. After a reading, the
 router passes the analysis to `generate_feedback` in `core/phoneme_feedback_formatter.py`, and
-TTS reads its text aloud. No GPT is involved in that text. The threshold only reaches it through
-the focus sound. When no word clears the threshold, the child is praised if the sentence's PER is
-0.2 or less, and otherwise the feedback falls back to the sound with the most errors over all the
-words, mild ones included. So `run` also calls `generate_feedback` the way the router does and
+TTS reads its text aloud. No GPT is involved in that text. It only corrects a word that
+`is_clear_mistake` accepts, the same decision the word-level numbers score, and it names the worst
+of those words. When no word is clearly wrong, the child is praised if the sentence's PER is 0.2
+or less, and otherwise hears "Keep practicing!" with no word named. `WWAI_LEGACY_FEEDBACK=1` brings
+back the old fallback, which corrected the sound with the most errors over all the words, mild ones
+included. So `run` also calls `generate_feedback` the way the router does and
 records, for every clip that is not rejected, the kind of feedback and the sound and words it is
 about. The summary scores that under `feedback`, for all speakers, children and adults.
 
@@ -100,13 +108,32 @@ There are three kinds of feedback.
   these in `counts` (`first_word_unmatched` and `named_unmatched`), and both should be 0.
 - A rate with nothing to divide by, such as correction precision for a slice with no
   corrections, is null in the summary and shown as n/a.
-- The feedback always uses production's `HIGH_PER_THRESHOLD`. `--threshold` moves the word-level
-  numbers but not the feedback.
+- The feedback always uses production's own rule. `--threshold` moves the word-level numbers but
+  not the feedback.
 - Results files written before the feedback was recorded have none, and their `feedback` block
   is null. `compare` then says so in one line and skips the feedback rows.
 - These numbers are reported only. `compare` prints them for both runs with the difference, and
   a paired speaker-bootstrap 95% interval for the differences in `correction_precision` and
   `wrong_correction_rate`, but they play no part in the checks or the exit code.
+
+### Flag rules
+
+- Every word record in a results file carries `flagged`, which is `is_clear_mistake` on the full
+  record under the flags of that run (the pipeline computes it when it stores the outcome). The
+  word-level numbers score those stored decisions. The results file describes the rule in
+  `flag_rule`, such as `total_errors >= 3`, or `per >= 0.4` under `WWAI_LEGACY_FEEDBACK=1`, and
+  `run` prints it after the threshold.
+- Results files written before the decision was stored have no `flagged` and no `flag_rule`. They
+  are scored at `per >= threshold`, as they were when they were written, and `compare` shows their
+  rule as `per >= <threshold>`.
+- `run --threshold T` overrides the rule. Words are then flagged at `per >= T` and `flag_rule` says
+  `per >= T (override)`. Production's own decisions are still stored with the words, and the
+  feedback does not change.
+- The best threshold on the half, the precision/recall curve, the F0.5 of flagging every word and
+  the Pearson correlations stay based on PER, since they describe the score and not the decision.
+- `sweep` needs nothing extra. Every configuration it runs stores its own decisions, so a flag
+  that only moves PER changes the word-level numbers only when it changes what production would
+  correct.
 
 ## Layout
 
@@ -177,14 +204,14 @@ because production would have received the same thing. The summary a build print
 python -m tests.benchmark.run --name current                            # full dev half, current defaults
 python -m tests.benchmark.run --name quick --subset smoke_dev           # 250 clips, a fast look
 python -m tests.benchmark.run --name legacy --flag WWAI_LEGACY_WORD_SCORING=1
-python -m tests.benchmark.run --name t05 --threshold 0.5                # another cutoff
+python -m tests.benchmark.run --name t05 --threshold 0.5                # flag at per >= 0.5 instead
 python -m tests.benchmark.run --name client --path client               # the client phoneme path
 ```
 
 `run` writes `results/<name>_<half>.json` (the per-clip outcomes and a metrics summary, with
 `_<subset>` added for a subset) and a `.summary.json` with the metrics alone, and prints a
 table. A results file records the config name, request path, git SHA, cache name, model
-revision, active `WWAI_*` flags and threshold.
+revision, active `WWAI_*` flags, threshold and flag rule.
 
 - `--flag WWAI_NAME=VALUE` sets a flag for that run and records it. Harness settings
   (`WWAI_BENCH_*`) must be set as environment variables instead.
@@ -249,6 +276,10 @@ subset and clips, otherwise it exits with code 2. They must also come from the s
 path. Comparing a server-path run with a client-path run needs `--allow-path-mismatch`, and the
 output then carries a `WARNING` line, since the differences are between two paths and not
 between two versions of one.
+
+The line under the header names each run's flag rule. Each side is scored by its own stored
+decisions, so a comparison across a change to the rule compares what the two versions of
+production would have corrected.
 
 After the word rows, `compare` prints the spoken-feedback rows (see "The spoken feedback" above)
 with paired intervals for correction precision and the wrong-correction rate. They are there to
@@ -343,8 +374,9 @@ The cache guards against that with a hash of the exact model input.
 - **Errors replay faithfully.** A recorded failure is raised again at the same point, as the
   same kind of exception, so a clip production rejects is rejected in replay for the same
   reason.
-- **What needs no new cache.** Decoding, alignment, G2P, word scoring, the quality gates and
-  the threshold are all applied at scoring time, so changing them needs no new cache.
+- **What needs no new cache.** Decoding, alignment, G2P, word scoring, the feedback and its
+  flag rule, the quality gates and the threshold are all applied at scoring time, so changing
+  them needs no new cache.
 
 The cache also records its half, the ONNX model repository and revision (a 40-character
 commit SHA), the active flags and the git SHA, in `_cache_meta.json`. `run` refuses a cache

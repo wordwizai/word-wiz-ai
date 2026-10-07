@@ -8,6 +8,8 @@ at review time. A fifth check below the four conditions fails a candidate that a
 The spoken-feedback rows (scoring.FEEDBACK_RATES) are reported only and never decide the result.
 Runs of different request paths (run.py --path) are refused unless --allow-path-mismatch is
 passed, and then a warning line says so. A results file without a path is a server-path run.
+Each side's word metrics score the flag rule of the code that wrote it (scoring.word_flags),
+and the line under the header names both rules.
 Exit codes: 0 all checks pass, 1 at least one fails, 2 inputs not comparable.
 """
 
@@ -19,7 +21,9 @@ import sys
 
 from . import common
 from . import metrics as M
-from .scoring import build_items, feedback_rate_counts, summarize
+from .scoring import (
+    build_items, feedback_rate_counts, results_flag_rule, summarize, uses_stored_flags, word_flags,
+)
 
 FAR_TOLERANCE = 0.005
 UNSCORED_TOLERANCE = 0.01
@@ -44,10 +48,10 @@ def request_path(results: dict) -> str:
     return results.get("path") or "server"
 
 
-def _word_counts(items, threshold, children_only=False):
+def _word_counts(items, threshold, stored_flags, children_only=False):
     words = [w for w in items.words if w.is_child] if children_only else items.words
     return M.per_speaker_counts([w.speaker for w in words], [w.is_mistake for w in words],
-                                M.flags_at([w.per for w in words], threshold))
+                                word_flags(words, threshold, stored_flags))
 
 
 def _feedback_comparison(base_items, cand_items, bs, cs, n_resamples, seed):
@@ -87,15 +91,16 @@ def compare_results(base: dict, cand: dict, clips, n_resamples: int = N_RESAMPLE
 
     base_items = build_items(clips, base["outcomes"])
     cand_items = build_items(clips, cand["outcomes"])
-    bs = summarize(base_items, base["threshold"])
-    cs = summarize(cand_items, cand["threshold"])
-    deltas = M.bootstrap_fbeta_delta(_word_counts(base_items, base["threshold"]),
-                                     _word_counts(cand_items, cand["threshold"]), n_resamples, seed)
+    base_stored, cand_stored = uses_stored_flags(base), uses_stored_flags(cand)
+    bs = summarize(base_items, base["threshold"], base_stored)
+    cs = summarize(cand_items, cand["threshold"], cand_stored)
+    deltas = M.bootstrap_fbeta_delta(_word_counts(base_items, base["threshold"], base_stored),
+                                     _word_counts(cand_items, cand["threshold"], cand_stored), n_resamples, seed)
     lo, hi = M.percentile_interval(deltas)
 
     child_delta = cs["word"]["children"]["f05"] - bs["word"]["children"]["f05"]
-    base_children = _word_counts(base_items, base["threshold"], children_only=True)
-    cand_children = _word_counts(cand_items, cand["threshold"], children_only=True)
+    base_children = _word_counts(base_items, base["threshold"], base_stored, children_only=True)
+    cand_children = _word_counts(cand_items, cand["threshold"], cand_stored, children_only=True)
     if base_children or cand_children:
         child_lo, child_hi = M.percentile_interval(
             M.bootstrap_fbeta_delta(base_children, cand_children, n_resamples, seed))
@@ -130,6 +135,8 @@ def compare_results(base: dict, cand: dict, clips, n_resamples: int = N_RESAMPLE
         "candidate": cand["name"],
         "base_path": base_path,
         "candidate_path": cand_path,
+        "base_flag_rule": results_flag_rule(base),
+        "candidate_flag_rule": results_flag_rule(cand),
         "path_warning": path_warning,
         "half": base["half"],
         "f05_delta": cs["word"]["all"]["f05"] - bs["word"]["all"]["f05"],
@@ -184,6 +191,8 @@ def format_comparison(c: dict) -> str:
     b, k = c["base_summary"]["word"], c["candidate_summary"]["word"]
     rows = [f"{c['base']} ({c.get('base_path', 'server')} path)  ->  "
             f"{c['candidate']} ({c.get('candidate_path', 'server')} path)   ({c['half']} half)"]
+    if c.get("base_flag_rule") is not None:
+        rows.append(f"flag rule {c['base_flag_rule']}  ->  {c['candidate_flag_rule']}")
     if c.get("path_warning"):
         rows.append(f"WARNING: {c['path_warning']}")
     rows.append(f"{'':24s} {'base':>8s} {'cand':>8s} {'diff':>8s}")

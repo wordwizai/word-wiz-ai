@@ -8,6 +8,7 @@ import unittest
 from unittest import mock
 
 from tests.benchmark import common
+from tests.benchmark import pipeline as PL
 from tests.benchmark import run as RUN
 from tests.benchmark import stage_cache as SC
 from tests.benchmark import testutil as U
@@ -158,6 +159,21 @@ class TestFormatSummary(unittest.TestCase):
         clip = U.synthetic_clip("c1", "s1", 30, [("CAT", 10, "K AE1 T", [2, 2, 2])])
         text = RUN.format_summary(self._summary([clip], {"c1": U.ok(U.record("cat", ["k", "æ", "t"], ["k", "æ", "t"], 0.0))}))
         self.assertIn("feedback n/a", text)
+
+    def test_the_first_line_names_the_path_and_the_client_path_counts_fallbacks(self):
+        clips = [U.synthetic_clip(c, c, 30, [("CAT", 10, "K AE1 T", [2, 2, 2]), ("DOG", 10, "D AO1 G", [2, 2, 2])])
+                 for c in ("c1", "c2")]
+        records = (U.record("cat", ["k", "æ", "t"], ["k", "æ", "t"], 0.0),
+                   U.record("dog", ["d", "ɔ", "g"], ["d", "ɔ", "g"], 0.0))
+        outcomes = {"c1": dict(U.ok(*records), client_fallback=True), "c2": dict(U.ok(*records), client_fallback=False)}
+        summary = self._summary(clips, outcomes)
+        client = RUN.format_summary(summary, path="client").splitlines()[0]
+        self.assertTrue(client.startswith("path client   clips 2"), client)
+        self.assertIn("client fallbacks 1", client)
+        server = RUN.format_summary(summary, path="server").splitlines()[0]
+        self.assertTrue(server.startswith("path server   clips 2"), server)
+        self.assertNotIn("fallbacks", server)
+        self.assertTrue(RUN.format_summary(summary).startswith("clips 2"))
 
 
 def _write_cache_meta(directory, half, flags=None):
@@ -438,6 +454,31 @@ class TestEndToEnd(unittest.TestCase):
         self.assertEqual(results["threshold"], 0.4)
         self.assertEqual(results["summary"]["clips"], 2)
         self.assertTrue(os.path.isfile(out[:-5] + ".summary.json"))
+
+    def test_the_path_is_recorded(self):
+        # The client path replays the cache the server path recorded, so it needs no cache of its own.
+        for argv, path in (([], "server"), (["--path", "server"], "server"), (["--path", "client"], "client")):
+            with self.subTest(argv=argv):
+                out = os.path.join(self.tmp.name, "r", f"{path}_{len(argv)}_dev.json")
+                stdout = io.StringIO()
+                with contextlib.redirect_stdout(stdout):
+                    self.assertEqual(RUN.main(["--name", "t", "--workers", "1", "--out", out, *argv]), 0)
+                with open(out, encoding="utf-8") as fh:
+                    results = json.load(fh)
+                self.assertEqual(results["path"], path)
+                with open(out[:-5] + ".summary.json", encoding="utf-8") as fh:
+                    self.assertEqual(json.load(fh)["path"], path)
+                self.assertEqual(sorted(results["outcomes"]), ["000010011", "000020022"])
+                self.assertTrue(all(o["client_fallback"] is False for o in results["outcomes"].values()))
+                self.assertEqual(results["summary"]["client_fallbacks"], 0)
+                self.assertTrue(stdout.getvalue().startswith(f"path {path}   clips 2"))
+
+    def test_the_client_path_reaches_every_worker(self):
+        out = os.path.join(self.tmp.name, "r", "t_dev.json")
+        with mock.patch.object(PL, "analyze_clip", wraps=PL.analyze_clip) as spy:
+            self.assertEqual(self._pooled(["--name", "t", "--workers", "2", "--path", "client", "--out", out]), 0)
+        self.assertEqual(spy.call_count, 2)
+        self.assertTrue(all(call.kwargs.get("path") == "client" for call in spy.call_args_list))
 
     def test_a_recording_flag_that_differs_from_the_cache_is_a_stale_cache(self):
         out = os.path.join(self.tmp.name, "r", "t_dev.json")

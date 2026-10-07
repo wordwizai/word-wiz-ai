@@ -258,5 +258,178 @@ class TestAnalyzeClip(unittest.TestCase):
         self.assertIn("own event loop", str(ctx.exception))
 
 
+class _RecordsInputs:
+    """A phoneme model and a word model in one, keeping a copy of every audio array it was given."""
+
+    def __init__(self, lists, words):
+        self.lists = lists
+        self.words = list(words)
+        self.phoneme_inputs = []
+        self.word_inputs = []
+
+    def extract_phoneme(self, audio, sampling_rate=16000, **_kwargs):
+        self.phoneme_inputs.append((np.array(audio, copy=True), sampling_rate))
+        return [list(p) for p in self.lists]
+
+    def extract_words(self, audio, sampling_rate=16000, **_kwargs):
+        self.word_inputs.append((np.array(audio, copy=True), sampling_rate))
+        return list(self.words)
+
+
+class _WordsOnce:
+    """A word model that may be asked once, as a replayed cache entry may."""
+
+    def __init__(self, words):
+        self.words = words
+        self.calls = 0
+
+    def extract_words(self, audio, sampling_rate=16000, **_kwargs):
+        self.calls += 1
+        if self.calls > 1:
+            raise common.StaleCacheError("the word model was asked twice")
+        return None if self.words is None else list(self.words)
+
+
+class TestClientPath(unittest.TestCase):
+    """path="client" mirrors the handler's client branch on the server's own model outputs."""
+
+    @classmethod
+    def setUpClass(cls):
+        from core.grapheme_to_phoneme import grapheme_to_phoneme
+
+        cls.audio = PL.load_audio(U.SAMPLE_WAV)
+        cls.perfect = [list(p) for _, p in grapheme_to_phoneme(U.SAMPLE_TEXT)]
+
+    def _client(self, text, phonemes, words=None, audio=None):
+        return PL.analyze_clip(self.audio if audio is None else audio, text, phonemes,
+                               words if words is not None else U.FakeWords(), path="client")
+
+    def test_client_phonemes_are_normalized_and_scored_with_the_server_words(self):
+        import core.process_audio as process_audio
+        from core.grapheme_to_phoneme import grapheme_to_phoneme
+        from routers.handlers.phoneme_processing_handler import normalize_espeak_to_ipa
+
+        # The model's groups, with eSpeak's schwa in "the" so the normalization shows.
+        groups = [list(p) for p in self.perfect]
+        groups[0] = ["ð", "@"]
+        text = U.SAMPLE_TEXT.upper()
+        with mock.patch.object(process_audio, "process_audio_with_client_phonemes",
+                               wraps=process_audio.process_audio_with_client_phonemes) as client, \
+                mock.patch.object(process_audio, "process_audio_array",
+                                  wraps=process_audio.process_audio_array) as server:
+            outcome = self._client(text, _ListPhonemes(groups))
+        self.assertEqual(outcome.status, "ok", outcome.error)
+        server.assert_not_called()
+        client.assert_called_once()
+        kwargs = client.call_args.kwargs
+        self.assertEqual(kwargs["client_phonemes"], normalize_espeak_to_ipa(groups))
+        self.assertEqual(kwargs["client_phonemes"], self.perfect)
+        self.assertEqual(kwargs["client_words"], U.SAMPLE_TEXT.split())
+        # The handler's ground truth: grapheme_to_phoneme on the sentence as sent.
+        self.assertEqual(kwargs["ground_truth_phonemes"], grapheme_to_phoneme(text))
+        self.assertEqual(kwargs["sampling_rate"], PL.SAMPLE_RATE)
+        words = [w for w in outcome.words if w["type"] != "insertion"]
+        self.assertEqual(len(words), 9)
+        self.assertTrue(all(w["per"] == 0 for w in words))
+        self.assertFalse(outcome.client_fallback)
+        self.assertIs(outcome.to_dict()["client_fallback"], False)
+
+    def test_a_validation_failure_falls_back_to_the_server_path_and_is_counted(self):
+        import core.process_audio as process_audio
+
+        misread = [list(p) for p in self.perfect]
+        misread[3] = ["m", "i", "n", "t"]  # "fox"
+        server = PL.analyze_clip(self.audio, U.SAMPLE_TEXT, _ListPhonemes(misread), U.FakeWords())
+        with mock.patch("routers.handlers.phoneme_processing_handler.validate_client_phonemes",
+                        return_value=(False, "Phonemes must be an array")) as validate, \
+                mock.patch.object(process_audio, "process_audio_with_client_phonemes") as client:
+            outcome = self._client(U.SAMPLE_TEXT, _ListPhonemes(misread))
+        validate.assert_called_once_with(misread, U.SAMPLE_TEXT)
+        client.assert_not_called()
+        self.assertEqual(outcome.status, "ok", outcome.error)
+        self.assertTrue(outcome.client_fallback)
+        stored = outcome.to_dict()
+        self.assertIs(stored["client_fallback"], True)
+        # The server path's outcome, from the outputs the models already returned.
+        self.assertEqual(stored["words"], server.to_dict()["words"])
+        self.assertEqual(stored["feedback"], server.to_dict()["feedback"])
+
+    def test_a_fallback_that_is_then_rejected_is_still_counted(self):
+        # One phoneme group: the client path would accept it, but the server path finds no speech.
+        with mock.patch("routers.handlers.phoneme_processing_handler.validate_client_phonemes",
+                        return_value=(False, "bad")):
+            outcome = self._client(U.SAMPLE_TEXT, _ListPhonemes([["ð", "ə", "k"]]))
+        self.assertEqual((outcome.status, outcome.error_type), ("rejected", "ValueError"))
+        self.assertTrue(outcome.client_fallback)
+        self.assertIs(outcome.to_dict()["client_fallback"], True)
+
+    def test_the_models_get_what_they_get_on_the_server_path(self):
+        # The cache was recorded on the server path, so replay only works when the client path
+        # feeds the models the same arrays, chunk for chunk. Three times the sample is still
+        # over the 8 second chunking threshold after preprocessing trims it.
+        long_audio = np.concatenate([self.audio] * 3)
+        for name, audio in (("short", self.audio), ("chunked", long_audio)):
+            with self.subTest(audio=name):
+                server = _RecordsInputs(self.perfect, U.SAMPLE_TEXT.split())
+                client = _RecordsInputs(self.perfect, U.SAMPLE_TEXT.split())
+                PL.analyze_clip(audio, U.SAMPLE_TEXT, server, server)
+                PL.analyze_clip(audio, U.SAMPLE_TEXT, client, client, path="client")
+                self.assertGreaterEqual(len(server.phoneme_inputs), 2 if name == "chunked" else 1)
+                for kind in ("phoneme_inputs", "word_inputs"):
+                    got, want = getattr(client, kind), getattr(server, kind)
+                    self.assertEqual(len(got), len(want), kind)
+                    for (a, sr_a), (b, sr_b) in zip(got, want):
+                        self.assertEqual(sr_a, sr_b)
+                        self.assertTrue(np.array_equal(a, b), kind)
+
+    def test_a_one_word_text_is_rejected_before_the_models_run(self):
+        from core.grapheme_to_phoneme import grapheme_to_phoneme
+        from core.process_audio import process_audio_with_client_phonemes
+
+        model = _Records(self.perfect)
+        words = _WordsOnce(["cat"])
+        outcome = self._client("CAT", model, words)
+        self.assertEqual((outcome.status, outcome.error_type), ("rejected", "ValueError"))
+        self.assertEqual((model.calls, words.calls), (0, 0))
+        # The same message production gives for this ground truth.
+        with self.assertRaises(ValueError) as ctx:
+            asyncio.run(process_audio_with_client_phonemes(
+                client_phonemes=[["k", "æ", "t"]], ground_truth_phonemes=grapheme_to_phoneme("CAT"),
+                audio_array=self.audio, word_extraction_model=_WordsOnce(["cat"]), client_words=["cat"]))
+        self.assertEqual(outcome.error, str(ctx.exception))
+
+    def test_no_words_from_the_asr_is_no_speech_without_asking_the_model_again(self):
+        for words in ([], None):
+            with self.subTest(words=words):
+                model = _WordsOnce(words)
+                outcome = self._client(U.SAMPLE_TEXT, _ListPhonemes(self.perfect), model)
+                self.assertEqual((outcome.status, outcome.error_type), ("rejected", "ValueError"))
+                self.assertEqual(outcome.error, "The audio provided has no speech inside")
+                self.assertEqual(model.calls, 1)
+                self.assertFalse(outcome.client_fallback)
+
+    def test_feedback_is_recorded_on_the_client_path(self):
+        misread = [list(p) for p in self.perfect]
+        misread[3] = ["m", "i", "n", "t"]  # "fox"
+        outcome = self._client(U.SAMPLE_TEXT, _ListPhonemes(misread))
+        self.assertEqual(outcome.feedback["kind"], "correction")
+        self.assertEqual(outcome.feedback["focus_words"], ["fox"])
+        self.assertEqual(self._client(U.SAMPLE_TEXT, _ListPhonemes(self.perfect)).feedback["kind"], "praise")
+
+    def test_gate_rejections_happen_on_the_client_path_too(self):
+        silence = np.zeros(32000, dtype=np.float32)
+        with _gates(soft=True):
+            outcome = self._client(U.SAMPLE_TEXT, _ListPhonemes(self.perfect), audio=silence)
+        self.assertEqual((outcome.status, outcome.error_type), ("rejected", "AudioRejected"))
+
+    def test_the_server_path_never_falls_back(self):
+        outcome = PL.analyze_clip(self.audio, U.SAMPLE_TEXT, _ListPhonemes(self.perfect), U.FakeWords())
+        self.assertIs(outcome.to_dict()["client_fallback"], False)
+
+    def test_an_unknown_path_is_refused(self):
+        with self.assertRaises(ValueError):
+            PL.analyze_clip(self.audio, U.SAMPLE_TEXT, _ListPhonemes(self.perfect), U.FakeWords(), path="browser")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -57,10 +57,11 @@ Messy cases are counted, not dropped.
   onnxruntime error, a harness bug) is reported as `unexpected:<ErrorName>` and is never
   treated as an ordinary rejection.
 
-The benchmark covers the server path only. Production code runs unchanged, from the quality
-gates and preprocessing through G2P, decoding, alignment and scoring. Only the wav2vec2 forward
-pass and the Deepgram request are replaced with recorded outputs (see "How the cache stays
-honest").
+By default the benchmark scores the server path. Production code runs unchanged, from the
+quality gates and preprocessing through G2P, decoding, alignment and scoring. Only the wav2vec2
+forward pass and the Deepgram request are replaced with recorded outputs (see "How the cache
+stays honest"). `run --path client` scores the client phoneme path instead (see "The client
+phoneme path" below).
 
 ### The spoken feedback
 
@@ -114,7 +115,7 @@ There are three kinds of feedback.
 | `dataset.py` | Downloads and parses speechocean762, checks it, and writes the fixed clip subsets |
 | `stage_cache.py` | Runs the two slow models once per clip and records what they returned |
 | `replay.py` | Feeds the recorded outputs back into the real production code |
-| `pipeline.py` | One clip through the production request path (gates, preprocessing, G2P, `process_audio_array`, `analyze_results`, `generate_feedback`) |
+| `pipeline.py` | One clip through the production request path (gates, preprocessing, G2P, `process_audio_array`, `analyze_results`, `generate_feedback`), or through the handler's client phoneme branch |
 | `run.py` | Scores a whole half and writes a results file |
 | `scoring.py`, `metrics.py`, `phones.py` | Join outcomes with the labels, the pure metric functions, and ARPAbet-to-IPA phone mapping |
 | `compare.py` | Paired comparison of two results files with the acceptance checks |
@@ -177,12 +178,13 @@ python -m tests.benchmark.run --name current                            # full d
 python -m tests.benchmark.run --name quick --subset smoke_dev           # 250 clips, a fast look
 python -m tests.benchmark.run --name legacy --flag WWAI_LEGACY_WORD_SCORING=1
 python -m tests.benchmark.run --name t05 --threshold 0.5                # another cutoff
+python -m tests.benchmark.run --name client --path client               # the client phoneme path
 ```
 
 `run` writes `results/<name>_<half>.json` (the per-clip outcomes and a metrics summary, with
 `_<subset>` added for a subset) and a `.summary.json` with the metrics alone, and prints a
-table. A results file records the config name, git SHA, cache name, model revision, active
-`WWAI_*` flags and threshold.
+table. A results file records the config name, request path, git SHA, cache name, model
+revision, active `WWAI_*` flags and threshold.
 
 - `--flag WWAI_NAME=VALUE` sets a flag for that run and records it. Harness settings
   (`WWAI_BENCH_*`) must be set as environment variables instead.
@@ -195,6 +197,27 @@ table. A results file records the config name, git SHA, cache name, model revisi
   overwritten with `--force`, so an experiment cannot silently replace committed numbers. That
   is why the examples use other names.
 - Acceptance decisions use the full dev half. A subset is a quick look.
+
+### The client phoneme path
+
+Users with `use_client_phoneme_extraction` on run the phoneme model in the browser and send
+its phonemes, usually with words from a browser ASR. The browser loads the same pinned model
+as the server (`core/model_registry.py`), so `--path client` holds the acoustics fixed and
+changes only the scoring path.
+
+- The phoneme groups and ASR words are the server's own for the clip, from the same
+  preprocessed audio and chunking (`extract_phonemes_and_words` in `core/process_audio.py`).
+  Replay therefore reads the same cache entries, and no separate cache is needed.
+- Then the handler's client branch runs. `validate_client_phonemes` checks the groups, and if
+  it fails the clip is scored by the server path, as production does, and counted in
+  `client_fallbacks`. Otherwise the groups go through `normalize_espeak_to_ipa`, the ground
+  truth is built the way the handler builds it, and `process_audio_with_client_phonemes`
+  scores them, with the server's ASR words passed as `client_words`.
+- `analyze_results` and `generate_feedback` then run exactly as on the server path.
+
+The results file records `"path": "client"`, each outcome says whether it fell back, and the
+printed summary starts with the path and the fallback count. A results file without a path is
+a server-path run.
 
 ### Compare two runs
 
@@ -222,7 +245,10 @@ harness (`tests/regression/`) must pass. A change that intentionally moves regre
 should carry the re-pinned baseline and a written reason.
 
 `compare` also takes `--resamples N` and `--json PATH`. Both results must cover the same half,
-subset and clips, otherwise it exits with code 2.
+subset and clips, otherwise it exits with code 2. They must also come from the same request
+path. Comparing a server-path run with a client-path run needs `--allow-path-mismatch`, and the
+output then carries a `WARNING` line, since the differences are between two paths and not
+between two versions of one.
 
 After the word rows, `compare` prints the spoken-feedback rows (see "The spoken feedback" above)
 with paired intervals for correction precision and the wrong-correction rate. They are there to
@@ -488,10 +514,17 @@ suggests. `BENCHMARK.md` will repeat them next to the results.
   number, and these children are probably the ones the benchmark describes least well. The
   transcripts are frozen at recording time, so a later change in Deepgram's behavior would not
   show up here.
-- **The browser (client-phoneme) path is not covered.** Transformers.js extraction is out of
-  scope. The server path is the one users get, since a migration turned
-  `use_client_phoneme_extraction` off for everyone, and the browser path is only checked for
-  agreement with the server path by the regression harness.
+- **The client phoneme path is simulated, not run.** `--path client` scores the server's own
+  phoneme groups through the handler's client branch. Transformers.js extraction is not run, so
+  any difference in how the browser prepares, chunks or decodes the audio is not measured. The
+  browser ASR is not simulated either. The server's Deepgram words stand in for
+  `client_words`, which matches the hybrid mode (the server runs its ASR on the same audio and
+  gets the same words, apart from chunked clips, which the server path transcribes chunk by
+  chunk) and the full-client mode only with a browser ASR as good as Deepgram. Under
+  ground-truth-anchored alignment a worse browser ASR mostly changes skip hints, labels and the
+  miscue guard, but under the legacy alignment it decides which phonemes each word is scored
+  on. Few users take this path, since a migration turned `use_client_phoneme_extraction` off
+  for everyone.
 - **Phone-level positions use forward alignment only.** Each word's G2P phones are matched to
   the experts' canonical phones by one left-to-right edit-distance alignment, and a phone is
   flagged by the same kind of alignment between expected and recognized phones. There is no

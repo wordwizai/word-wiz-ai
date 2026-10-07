@@ -3,6 +3,7 @@
     python -m tests.benchmark.run --name baseline
     python -m tests.benchmark.run --name weighted --flag WWAI_WEIGHTED_PER=1
     python -m tests.benchmark.run --name quick --subset smoke_dev
+    python -m tests.benchmark.run --name client --path client    # the client phoneme path
 
 The test half needs WWAI_BENCH_UNLOCK_TEST=1, --reason and a clean git tree (every look
 has to be reproducible from its recorded SHA), and every such run that gets as far as
@@ -25,6 +26,7 @@ from concurrent.futures import ProcessPoolExecutor
 from multiprocessing import get_context
 
 from . import common
+from .pipeline import PATHS
 
 EXIT_STALE = 3
 EXIT_UNEXPECTED = 4
@@ -129,7 +131,7 @@ def _init_worker() -> None:
 def _score_task(task):
     if _init_error is not None:
         raise RuntimeError(f"benchmark worker could not load the wav2vec2 processor: {_init_error}")
-    utt_id, wav_path, text, directory = task
+    utt_id, wav_path, text, directory, path = task
     from .pipeline import analyze_clip, load_audio
     from .replay import CacheEntry, ReplayPhonemeExtractor, ReplayWordExtractor
 
@@ -137,12 +139,13 @@ def _score_task(task):
     outcome = analyze_clip(
         load_audio(wav_path), text,
         ReplayPhonemeExtractor(entry, _worker["processor"]), ReplayWordExtractor(entry),
+        path=path,
     )
     return utt_id, outcome.to_dict()
 
 
-def score_clips(clips, directory: str, workers: int) -> dict:
-    tasks = [(c.utt_id, c.wav_path, c.text, directory) for c in clips]
+def score_clips(clips, directory: str, workers: int, path: str = "server") -> dict:
+    tasks = [(c.utt_id, c.wav_path, c.text, directory, path) for c in clips]
     outcomes = {}
     if workers <= 1:
         _init_worker()
@@ -188,12 +191,18 @@ def write_results(results: dict, out_path: str) -> tuple[str, str]:
     return out_path, short
 
 
-def format_summary(summary: dict) -> str:
+def format_summary(summary: dict, path: str | None = None) -> str:
+    """The printed summary. With ``path`` the first line starts with it, and on the client path
+    it also counts the clips that fell back to the server path."""
     lines = [
         f"clips {summary['clips']}   rejected {summary['rejected']} ({summary['rejection_rate']:.1%})   "
         f"word-count mismatches {summary['word_count_mismatch']}   unscored {summary['unscored_rate']:.1%}   "
         f"threshold {summary['threshold']}",
     ]
+    if path is not None:
+        lines[0] = f"path {path}   {lines[0]}"
+    if path == "client":
+        lines[0] += f"   client fallbacks {summary.get('client_fallbacks', 0)}"
     if summary["unexpected_failures"] > 0:
         lines.append(f"unexpected failures {summary['unexpected_failures']}")
     lines.append(f"{'word':10s} {'F0.5':>7s} {'prec':>7s} {'recall':>7s} {'FAR':>7s} {'n':>7s}")
@@ -225,6 +234,8 @@ def main(argv=None) -> int:
     parser.add_argument("--name", default="unnamed", help="configuration name, used in output file names")
     parser.add_argument("--half", choices=["dev", "test"], default="dev")
     parser.add_argument("--subset", help="name of a list in tests/benchmark/subsets/")
+    parser.add_argument("--path", choices=list(PATHS), default="server",
+                        help="the request path to score: the server's phonemes (default) or the browser's")
     parser.add_argument("--cache", help="cache name (default: derived from front-end flags)")
     parser.add_argument("--flag", action="append", default=[], metavar="WWAI_NAME=VALUE")
     parser.add_argument("--threshold", type=float, help="override production's HIGH_PER_THRESHOLD")
@@ -295,7 +306,7 @@ def main(argv=None) -> int:
         threshold = args.threshold if args.threshold is not None else production_threshold()
         if args.half == "test":
             append_ledger(args.name, args.reason, sha, flags=active, threshold=threshold)
-        outcomes = score_clips(clips, directory, args.workers)
+        outcomes = score_clips(clips, directory, args.workers, args.path)
     except common.StaleCacheError as exc:
         print(f"stale cache: {exc}", file=sys.stderr)
         return EXIT_STALE
@@ -303,6 +314,7 @@ def main(argv=None) -> int:
     summary = summarize(build_items(clips, outcomes), threshold)
     results = {
         "name": args.name,
+        "path": args.path,
         "half": args.half,
         "subset": args.subset,
         "cache": cache_name,
@@ -316,7 +328,7 @@ def main(argv=None) -> int:
         "outcomes": outcomes,
     }
     full, short = write_results(results, out)
-    print(format_summary(summary))
+    print(format_summary(summary, args.path))
     print(f"wrote {full}\n      {short}")
     if summary["unexpected_failures"] > 0:
         types = sorted(k for k in summary["rejected_by_type"] if k.startswith("unexpected:"))

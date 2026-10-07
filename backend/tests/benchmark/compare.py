@@ -6,6 +6,8 @@ Conditions 5 (speed and memory, see speed.py) and 6 (tests pass) are checked sep
 at review time. A fifth check below the four conditions fails a candidate that adds
 "unexpected:" failures, which mean harness bugs or production crashes.
 The spoken-feedback rows (scoring.FEEDBACK_RATES) are reported only and never decide the result.
+Runs of different request paths (run.py --path) are refused unless --allow-path-mismatch is
+passed, and then a warning line says so. A results file without a path is a server-path run.
 Exit codes: 0 all checks pass, 1 at least one fails, 2 inputs not comparable.
 """
 
@@ -29,12 +31,17 @@ FEEDBACK_CI_RATES = ("correction_precision", "wrong_correction_rate")
 
 
 class NotComparable(ValueError):
-    """The two results files cannot be compared (different half, subset or clips)."""
+    """The two results files cannot be compared (different half, subset, clips or path)."""
 
 
 def load_results(path: str) -> dict:
     with open(path, encoding="utf-8") as fh:
         return json.load(fh)
+
+
+def request_path(results: dict) -> str:
+    """The request path a run scored. Files written before run.py had --path are server runs."""
+    return results.get("path") or "server"
 
 
 def _word_counts(items, threshold, children_only=False):
@@ -61,13 +68,22 @@ def _feedback_comparison(base_items, cand_items, bs, cs, n_resamples, seed):
     return out
 
 
-def compare_results(base: dict, cand: dict, clips, n_resamples: int = N_RESAMPLES, seed: int = SEED) -> dict:
+def compare_results(base: dict, cand: dict, clips, n_resamples: int = N_RESAMPLES, seed: int = SEED,
+                    allow_path_mismatch: bool = False) -> dict:
     if base["half"] != cand["half"] or base.get("subset") != cand.get("subset"):
         raise NotComparable(
             f"base is {base['half']}/{base.get('subset')}, candidate is {cand['half']}/{cand.get('subset')}"
         )
     if set(base["outcomes"]) != set(cand["outcomes"]):
         raise NotComparable("the two results cover different clips")
+    base_path, cand_path = request_path(base), request_path(cand)
+    path_warning = None
+    if base_path != cand_path:
+        mismatch = f"base is a {base_path} path run, candidate is a {cand_path} path run"
+        if not allow_path_mismatch:
+            raise NotComparable(f"{mismatch}; pass --allow-path-mismatch to compare them anyway")
+        path_warning = (f"{mismatch}, so the differences are between two request paths, "
+                        "not two versions of one")
 
     base_items = build_items(clips, base["outcomes"])
     cand_items = build_items(clips, cand["outcomes"])
@@ -112,6 +128,9 @@ def compare_results(base: dict, cand: dict, clips, n_resamples: int = N_RESAMPLE
     return {
         "base": base["name"],
         "candidate": cand["name"],
+        "base_path": base_path,
+        "candidate_path": cand_path,
+        "path_warning": path_warning,
         "half": base["half"],
         "f05_delta": cs["word"]["all"]["f05"] - bs["word"]["all"]["f05"],
         "f05_ci": [lo, hi],
@@ -163,8 +182,11 @@ def _feedback_rows(c: dict) -> list[str]:
 
 def format_comparison(c: dict) -> str:
     b, k = c["base_summary"]["word"], c["candidate_summary"]["word"]
-    rows = [f"{c['base']}  ->  {c['candidate']}   ({c['half']} half)",
-            f"{'':24s} {'base':>8s} {'cand':>8s} {'diff':>8s}"]
+    rows = [f"{c['base']} ({c.get('base_path', 'server')} path)  ->  "
+            f"{c['candidate']} ({c.get('candidate_path', 'server')} path)   ({c['half']} half)"]
+    if c.get("path_warning"):
+        rows.append(f"WARNING: {c['path_warning']}")
+    rows.append(f"{'':24s} {'base':>8s} {'cand':>8s} {'diff':>8s}")
     for name in ("all", "children", "adults"):
         rows.append(f"{'F0.5 ' + name:24s} {b[name]['f05']:8.4f} {k[name]['f05']:8.4f} "
                     f"{k[name]['f05'] - b[name]['f05']:+8.4f}")
@@ -192,6 +214,8 @@ def main(argv=None) -> int:
     parser.add_argument("candidate")
     parser.add_argument("--resamples", type=int, default=N_RESAMPLES)
     parser.add_argument("--json", help="also write the full comparison here")
+    parser.add_argument("--allow-path-mismatch", action="store_true",
+                        help="compare a server-path run with a client-path run (prints a warning line)")
     args = parser.parse_args(argv)
 
     base, cand = load_results(args.base), load_results(args.candidate)
@@ -201,7 +225,8 @@ def main(argv=None) -> int:
     try:
         from .dataset import load_clips
 
-        result = compare_results(base, cand, load_clips(base["half"], base.get("subset")), args.resamples)
+        result = compare_results(base, cand, load_clips(base["half"], base.get("subset")), args.resamples,
+                                 allow_path_mismatch=args.allow_path_mismatch)
     except NotComparable as exc:
         print(f"not comparable: {exc}", file=sys.stderr)
         return 2

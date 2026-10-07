@@ -73,6 +73,7 @@ class ItemSet:
     g2p_agree: int = 0
     g2p_total: int = 0
     phones_unmapped: int = 0
+    client_fallbacks: int = 0  # client-path clips the server path scored, see pipeline.ClipOutcome
 
 
 def _checked_per(clip, record) -> float:
@@ -89,14 +90,19 @@ def _lines_up(clip, records) -> bool:
     """True when the records are, in order, one per scored word and about those words.
 
     Insertions are not in `records`. The join is by position, so a record about another word
-    would score a child's reading against the wrong expert label. production cleans the
-    sentence before G2P (clean_sentence), and that is what ground_truth_word holds.
+    would score a child's reading against the wrong expert label. The server path cleans the
+    sentence before G2P (clean_sentence), and that is what ground_truth_word holds. The client
+    path's handler has not always cleaned it, so its records can say "IT'S" for "its". Both
+    sides are cleaned, which changes nothing for a record that is clean already.
     """
     from core.grapheme_to_phoneme import clean_sentence  # lazy, so importing this module loads no core code
 
+    def same_word(word, record) -> bool:
+        found = record.get("ground_truth_word")
+        return isinstance(found, str) and clean_sentence(found) == clean_sentence(word.text)
+
     return len(records) == len(clip.words) and all(
-        record.get("ground_truth_word") == clean_sentence(word.text)
-        for word, record in zip(clip.words, records)
+        same_word(word, record) for word, record in zip(clip.words, records)
     )
 
 
@@ -151,6 +157,8 @@ def build_items(clips, outcomes: dict) -> ItemSet:
         if status not in ("ok", "rejected"):
             raise ValueError(f"clip {clip.utt_id}: outcome status is {status!r}, expected 'ok' or 'rejected'")
         items.clips += 1
+        if outcome.get("client_fallback"):  # False on the server path, absent from older results
+            items.client_fallbacks += 1
         if status == "rejected":
             items.rejected += 1
             key = outcome.get("error_type") or "unknown"
@@ -293,6 +301,7 @@ def summarize(items: ItemSet, threshold: float) -> dict:
         "unscored_rate": (items.rejected + items.word_count_mismatch) / items.clips if items.clips else 0.0,
         "rejected_by_type": dict(sorted(items.rejected_by_type.items())),
         "word_count_mismatch": items.word_count_mismatch,
+        "client_fallbacks": items.client_fallbacks,
         "g2p_disagreement_rate": 1 - items.g2p_agree / items.g2p_total if items.g2p_total else None,
         "phones_unmapped": items.phones_unmapped,
         "word": {},

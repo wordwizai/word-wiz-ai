@@ -256,6 +256,78 @@ class TestFeedbackRows(unittest.TestCase):
         self.assertIn("correction precision difference, 95% CI n/a", text)
 
 
+class TestPathGuard(unittest.TestCase):
+    """Runs of the server path and the client path measure different request paths."""
+
+    def setUp(self):
+        self.clips, self.base, self.cand = _population()
+
+    def _compare(self, base_path, cand_path, **kwargs):
+        return C.compare_results(U.results_dict("base", self.base, path=base_path),
+                                 U.results_dict("cand", self.cand, path=cand_path),
+                                 self.clips, n_resamples=200, **kwargs)
+
+    def test_different_paths_are_not_comparable(self):
+        for base_path, cand_path in (("server", "client"), ("client", "server"), (None, "client")):
+            with self.subTest(base=base_path, cand=cand_path):
+                with self.assertRaises(C.NotComparable) as ctx:
+                    self._compare(base_path, cand_path)
+                self.assertIn("--allow-path-mismatch", str(ctx.exception))
+                self.assertIn("client path", str(ctx.exception))
+
+    def test_a_file_without_a_path_counts_as_the_server_path(self):
+        result = self._compare(None, "server")
+        self.assertEqual((result["base_path"], result["candidate_path"]), ("server", "server"))
+        self.assertIsNone(result["path_warning"])
+
+    def test_the_same_path_compares_without_a_warning(self):
+        result = self._compare("client", "client")
+        self.assertIsNone(result["path_warning"])
+        text = C.format_comparison(result)
+        self.assertNotIn("WARNING", text)
+        self.assertEqual(text.splitlines()[0], "base (client path)  ->  cand (client path)   (dev half)")
+
+    def test_allowing_a_mismatch_compares_and_prints_one_warning_line(self):
+        allowed = self._compare("server", "client", allow_path_mismatch=True)
+        plain = self._compare("client", "client")
+        self.assertEqual(allowed["checks"], plain["checks"])
+        self.assertIn("server path", allowed["path_warning"])
+        lines = C.format_comparison(allowed).splitlines()
+        self.assertEqual(lines[0], "base (server path)  ->  cand (client path)   (dev half)")
+        warnings = [line for line in lines if line.startswith("WARNING")]
+        self.assertEqual(len(warnings), 1)
+        self.assertEqual(warnings[0], "WARNING: " + allowed["path_warning"])
+
+    def test_main_refuses_a_mismatch_unless_allowed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            U.make_temp_dataset(tmp)
+            paths = {}
+            for name, path in (("server", "server"), ("client", "client")):
+                paths[name] = os.path.join(tmp, f"{name}.json")
+                with open(paths[name], "w", encoding="utf-8") as fh:
+                    json.dump(U.results_dict(name, _mini_outcomes(tmp), path=path), fh, ensure_ascii=False)
+            with mock.patch.dict(os.environ, {common.DATA_DIR_ENV: tmp}):
+                with mock.patch("sys.stderr", new_callable=io.StringIO) as err:
+                    self.assertEqual(C.main([paths["server"], paths["client"], "--resamples", "50"]), 2)
+                self.assertIn("--allow-path-mismatch", err.getvalue())
+                with mock.patch("sys.stdout", new_callable=io.StringIO) as out:
+                    code = C.main([paths["server"], paths["client"], "--resamples", "50", "--allow-path-mismatch"])
+                self.assertEqual(code, 1)  # identical outcomes are not an improvement
+                self.assertEqual(sum(line.startswith("WARNING") for line in out.getvalue().splitlines()), 1)
+
+
+def _mini_outcomes(tmp):
+    """Perfect outcomes for every dev clip of the mini fixture copied into tmp."""
+    from tests.benchmark.dataset import load_half
+    from tests.benchmark.phones import canonical_ipa
+
+    outcomes = {}
+    for clip in load_half(os.path.join(tmp, "speechocean762"), "dev"):
+        records = [U.record(w.text.lower(), canonical_ipa(w.phones), canonical_ipa(w.phones), 0.0) for w in clip.words]
+        outcomes[clip.utt_id] = U.ok(*records)
+    return outcomes
+
+
 class TestMain(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

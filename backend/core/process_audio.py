@@ -641,8 +641,6 @@ async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=
     Returns:
         List of dictionaries containing pronunciation analysis results
     """
-    from .audio_chunking import should_use_chunking, chunk_audio_at_silence, merge_chunk_results
-    
     if phoneme_extraction_model is None:
         phoneme_extraction_model = PhonemeExtractor()
     
@@ -651,6 +649,23 @@ async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=
     
     if len(ground_truth_phonemes) <= 1:
         raise ValueError("ground_truth_phonemes must have at least 2 elements)")
+
+    phoneme_predictions, predicted_words = await extract_phonemes_and_words(
+        audio_array, sampling_rate, phoneme_extraction_model, word_extraction_model, use_chunking,
+    )
+    return score_extracted_phonemes(ground_truth_phonemes, phoneme_predictions, predicted_words)
+
+
+async def extract_phonemes_and_words(audio_array, sampling_rate, phoneme_extraction_model, word_extraction_model, use_chunking=True):
+    """
+    The extraction half of process_audio_array: preprocessing, chunking and both models.
+
+    Returns (phoneme_predictions, predicted_words) as the models returned them, merged
+    across chunks when the audio was chunked. Nothing is checked or filtered here;
+    score_extracted_phonemes does that. The accuracy benchmark calls this to get the
+    server's phoneme groups for a clip when it simulates the client phoneme path.
+    """
+    from .audio_chunking import should_use_chunking, chunk_audio_at_silence, merge_chunk_results
 
     # Calculate audio duration for logging
     audio_duration = len(audio_array) / sampling_rate
@@ -752,6 +767,14 @@ async def process_audio_array(ground_truth_phonemes, audio_array, sampling_rate=
 
         phoneme_predictions, predicted_words = await extract_data()
 
+    return phoneme_predictions, predicted_words
+
+
+def score_extracted_phonemes(ground_truth_phonemes, phoneme_predictions, predicted_words) -> list[dict]:
+    """
+    The scoring half of process_audio_array, on what extract_phonemes_and_words returned:
+    the no-speech checks, then phoneme-to-word alignment and word scoring.
+    """
     if phoneme_predictions is None or predicted_words is None or len(phoneme_predictions) <= 1 or len(predicted_words) <= 1:
         raise ValueError("The audio provided has no speech inside")
 

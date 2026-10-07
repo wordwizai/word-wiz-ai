@@ -196,5 +196,9 @@ def rejected(error_type="AudioRejected"):
     return {"status": "rejected", "words": [], "error_type": error_type, "error": "rejected"}
 
 
-def results_dict(name, outcomes, half="dev", subset=None, threshold=0.4):
-    return {"name": name, "half": half, "subset": subset, "threshold": threshold, "outcomes": outcomes}
+def results_dict(name, outcomes, half="dev", subset=None, threshold=0.4, path=None):
+    """A results file as run.py writes it. With path=None it has no "path" field, like older files."""
+    results = {"name": name, "half": half, "subset": subset, "threshold": threshold, "outcomes": outcomes}
+    if path is not None:
+        results["path"] = path
+    return results

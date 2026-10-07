@@ -75,6 +75,32 @@ class TestBuildItems(unittest.TestCase):
         self.assertEqual(items.word_count_mismatch, 0)
         self.assertEqual(len(items.words), 2)
 
+    def test_record_words_are_cleaned_too(self):
+        # The client path's handler (before it cleaned the sentence) passed the text to G2P as
+        # sent, so its records say "IT'S" and "GO." where the server path's say "its" and "go".
+        # They are still about the same words.
+        clip = U.synthetic_clip("c5", "s5", 30, [("IT'S", 10, "IH1 T S", [2, 2, 2]), ("GO.", 10, "G OW1", [2, 2])])
+        outcome = U.ok(
+            U.record("IT'S", ["ɪ", "t", "s"], ["ɪ", "t", "s"], 0.0),
+            U.record("GO.", ["g", "oʊ"], ["g", "oʊ"], 0.0),
+        )
+        items = S.build_items([clip], {"c5": outcome})
+        self.assertEqual(items.word_count_mismatch, 0)
+        self.assertEqual(len(items.words), 2)
+
+    def test_client_fallbacks_are_counted_whatever_the_status(self):
+        outcomes = _outcomes()
+        outcomes["c1"] = dict(outcomes["c1"], client_fallback=True)
+        outcomes["c2"] = dict(outcomes["c2"], client_fallback=True)
+        outcomes["c3"] = dict(outcomes["c3"], client_fallback=False)
+        items = S.build_items(_clips(), outcomes)
+        self.assertEqual(items.client_fallbacks, 2)
+        self.assertEqual(S.summarize(items, 0.4)["client_fallbacks"], 2)
+
+    def test_outcomes_without_the_field_have_no_fallbacks(self):
+        self.assertEqual(self.items.client_fallbacks, 0)
+        self.assertEqual(S.summarize(self.items, 0.4)["client_fallbacks"], 0)
+
 
 class TestMalformedOutcomes(unittest.TestCase):
     def _items(self, outcome):

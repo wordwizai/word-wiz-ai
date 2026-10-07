@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { PatternStatus } from "@/lib/phonics";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 // Separate WebSocket URL to bypass nginx buffering
@@ -9,6 +10,9 @@ interface Session {
   activity_id: number;
   is_completed: boolean;
   created_at: string;
+  // Phonics pattern sessions only (backend models/pattern_session.py).
+  pattern_slug?: string | null;
+  pattern_name?: string | null;
   activity: {
     activity_type: string;
     title: string;
@@ -331,6 +335,86 @@ interface StudentInsights {
   calculation_window: string;
 }
 
+interface PatternRef {
+  slug: string;
+  name: string;
+}
+
+interface CurriculumUnit {
+  id: string;
+  title: string;
+  grade: string;
+  patterns: PatternRef[];
+}
+
+interface Curriculum {
+  units: CurriculumUnit[];
+}
+
+interface PatternProgress extends PatternRef {
+  status: PatternStatus;
+  words_correct: number | null;
+  words_total: number | null;
+  tries: number;
+}
+
+interface PathUnit {
+  id: string;
+  title: string;
+  grade: string;
+  mastered_count: number;
+  patterns: PatternProgress[];
+}
+
+interface PhonicsPath {
+  units: PathUnit[];
+  next_slug: string | null;
+}
+
+interface StudentAssignment {
+  id: number;
+  class_id: number;
+  class_name: string;
+  pattern_slug: string;
+  pattern_name: string;
+  unit_title: string;
+  status: PatternStatus;
+  words_correct: number | null;
+  words_total: number | null;
+  tries: number;
+}
+
+interface AssignmentStudentStatus {
+  id: number;
+  full_name: string | null;
+  status: PatternStatus;
+  words_correct: number | null;
+  words_total: number | null;
+  tries: number;
+}
+
+interface ClassAssignment {
+  id: number;
+  pattern_slug: string;
+  // Null when the pattern has been removed from the site's data.
+  pattern_name: string | null;
+  unit_title: string | null;
+  whole_class: boolean;
+  created_at: string | null;
+  counts: Record<PatternStatus, number>;
+  students: AssignmentStudentStatus[];
+}
+
+interface ClassPhonicsProgress {
+  units: CurriculumUnit[];
+  students: {
+    id: number;
+    full_name: string | null;
+    // Only patterns the student has touched; the rest are not started.
+    statuses: Partial<Record<string, PatternStatus>>;
+  }[];
+}
+
 const getUserStatistics = async (token: string): Promise<UserStatistics> => {
   try {
     const response = await axios.get(`${API_URL}/feedback/statistics`, {
@@ -479,6 +563,129 @@ const deleteClass = async (token: string, classId: number): Promise<void> => {
   }
 };
 
+// Phonics path and teacher assignments (backend routers/phonics.py and
+// routers/assignments.py).
+const getPhonicsPath = async (token: string): Promise<PhonicsPath> => {
+  try {
+    const response = await axios.get(`${API_URL}/phonics/path`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Fetch phonics path error:", error);
+    throw error;
+  }
+};
+
+const getCurriculum = async (token: string): Promise<Curriculum> => {
+  try {
+    const response = await axios.get(`${API_URL}/phonics/curriculum`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Fetch curriculum error:", error);
+    throw error;
+  }
+};
+
+const getMyAssignments = async (token: string): Promise<StudentAssignment[]> => {
+  try {
+    const response = await axios.get(`${API_URL}/phonics/assignments`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Fetch my assignments error:", error);
+    throw error;
+  }
+};
+
+const startPatternSession = async (token: string, patternSlug: string): Promise<Session> => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/phonics/sessions`,
+      { pattern_slug: patternSlug },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Start pattern session error:", error);
+    throw error;
+  }
+};
+
+const getClassAssignments = async (token: string, classId: number): Promise<ClassAssignment[]> => {
+  try {
+    const response = await axios.get(`${API_URL}/classes/${classId}/assignments`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Fetch class assignments error:", error);
+    throw error;
+  }
+};
+
+const assignPatterns = async (
+  token: string,
+  classId: number,
+  patternSlugs: string[],
+  studentIds: number[] | null
+): Promise<ClassAssignment[]> => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/classes/${classId}/assignments`,
+      { pattern_slugs: patternSlugs, student_ids: studentIds },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Assign patterns error:", error);
+    throw error;
+  }
+};
+
+const deleteAssignment = async (token: string, classId: number, assignmentId: number): Promise<void> => {
+  try {
+    await axios.delete(`${API_URL}/classes/${classId}/assignments/${assignmentId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch (error) {
+    console.error("Delete assignment error:", error);
+    throw error;
+  }
+};
+
+const getClassPhonicsProgress = async (token: string, classId: number): Promise<ClassPhonicsProgress> => {
+  try {
+    const response = await axios.get(`${API_URL}/classes/${classId}/phonics-progress`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Fetch class phonics progress error:", error);
+    throw error;
+  }
+};
+
+const getStudentPhonicsPath = async (
+  token: string,
+  classId: number,
+  studentId: number
+): Promise<PhonicsPath> => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/classes/${classId}/students/${studentId}/phonics-path`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Fetch student phonics path error:", error);
+    throw error;
+  }
+};
+
 export {
   loginUser,
   registerUser,
@@ -504,6 +711,15 @@ export {
   leaveClass,
   deleteClass,
   getStudentInsights,
+  getPhonicsPath,
+  getCurriculum,
+  getMyAssignments,
+  startPatternSession,
+  getClassAssignments,
+  assignPatterns,
+  deleteAssignment,
+  getClassPhonicsProgress,
+  getStudentPhonicsPath,
 };
 export type {
   Session,
@@ -517,5 +733,15 @@ export type {
   SessionActivity,
   PhonemeInsight,
   StudentInsights,
+  PatternRef,
+  CurriculumUnit,
+  Curriculum,
+  PatternProgress,
+  PathUnit,
+  PhonicsPath,
+  StudentAssignment,
+  AssignmentStudentStatus,
+  ClassAssignment,
+  ClassPhonicsProgress,
 };
 export { WS_URL };

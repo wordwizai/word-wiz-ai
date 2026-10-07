@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { getClassStudents, type StudentWithStats } from "@/api";
 import { cn } from "@/lib/utils";
+import { showSuccessToast } from "@/utils/errorHandling";
 import { ACCURACY_TONE, perAccuracyLabel, perTone } from "./accuracy";
 import AssignPracticeDialog from "./AssignPracticeDialog";
 import AssignmentsPanel from "./AssignmentsPanel";
@@ -58,6 +59,7 @@ const ClassDetailView = ({
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [showAssign, setShowAssign] = useState(false);
+  const [tab, setTab] = useState("students");
   // Bumped after assigning so the open tab refetches.
   const [assignmentsVersion, setAssignmentsVersion] = useState(0);
 
@@ -213,6 +215,7 @@ const ClassDetailView = ({
             </div>
             <Button
               onClick={() => setShowAssign(true)}
+              disabled={loading}
               className="shrink-0 self-end rounded-xl"
             >
               <ClipboardList />
@@ -284,7 +287,7 @@ const ClassDetailView = ({
         </div>
       </Card>
 
-      <Tabs defaultValue="students" className="gap-4">
+      <Tabs value={tab} onValueChange={setTab} className="gap-4">
         <TabsList className="h-11 w-full sm:w-fit">
           <TabsTrigger value="students" className="px-4">Students</TabsTrigger>
           <TabsTrigger value="assignments" className="px-4">Assignments</TabsTrigger>
@@ -426,7 +429,11 @@ const ClassDetailView = ({
         onOpenChange={setShowAssign}
         classId={classId}
         students={students}
-        onAssigned={() => setAssignmentsVersion((v) => v + 1)}
+        onAssigned={() => {
+          setAssignmentsVersion((v) => v + 1);
+          setTab("assignments");
+          showSuccessToast("Practice assigned");
+        }}
       />
     </div>
   );

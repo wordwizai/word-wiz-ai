@@ -77,7 +77,11 @@ const AssignPracticeDialog = ({
   };
 
   const studentCount = wholeClass ? students.length : chosen.size;
-  const canAssign = selected.size > 0 && studentCount > 0 && !saving;
+  const canAssign = selected.size > 0 && (wholeClass || chosen.size > 0) && !saving;
+  const summary =
+    wholeClass && students.length === 0
+      ? `Assign ${selected.size} pattern${selected.size === 1 ? "" : "s"} to everyone who joins`
+      : assignSummary(selected.size, studentCount);
 
   const handleAssign = async () => {
     if (!curriculum) return;
@@ -122,7 +126,7 @@ const AssignPracticeDialog = ({
                 const count = unit.patterns.filter((p) => selected.has(p.slug)).length;
                 return (
                   <details key={unit.id} className="rounded-xl border">
-                    <summary className="flex min-h-11 cursor-pointer list-none items-center gap-3 px-3 py-2 [&::-webkit-details-marker]:hidden">
+                    <summary className="flex min-h-11 cursor-pointer rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/60 list-none items-center gap-3 px-3 py-2 [&::-webkit-details-marker]:hidden">
                       <input
                         type="checkbox"
                         checked={count === unit.patterns.length}
@@ -137,7 +141,7 @@ const AssignPracticeDialog = ({
                         {i + 1}. {unit.title}
                       </span>
                       <span className="text-xs text-muted-foreground">
-                        {count > 0 ? `${count} of ${unit.patterns.length}` : unit.grade}
+                        {count > 0 ? `${count} of ${unit.patterns.length} picked` : unit.grade}
                       </span>
                     </summary>
                     <div className="grid grid-cols-1 gap-1 px-3 pb-3 sm:grid-cols-2">
@@ -180,10 +184,14 @@ const AssignPracticeDialog = ({
                 name="assign-to"
                 checked={!wholeClass}
                 onChange={() => setWholeClass(false)}
+                disabled={students.length === 0}
                 className="size-4 accent-primary"
               />
               Chosen students
             </label>
+            <p className="pl-6 text-xs text-muted-foreground">
+              A pattern the whole class already has stays with everyone.
+            </p>
             {!wholeClass && (
               <div className="grid grid-cols-1 gap-1 rounded-xl border p-3 sm:grid-cols-2">
                 {students.map((student) => (
@@ -207,17 +215,21 @@ const AssignPracticeDialog = ({
 
         {students.length === 0 && (
           <p className="text-sm text-muted-foreground">
-            No students have joined yet. Share your join code first.
+            No students have joined yet. Whole-class work will reach them when they join.
           </p>
         )}
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && (
+          <p role="alert" className="text-sm text-destructive">
+            {error}
+          </p>
+        )}
 
         <DialogFooter className="items-center gap-3 sm:justify-between">
           <p className="text-sm text-muted-foreground">
-            {assignSummary(selected.size, studentCount)}
+            {summary}
           </p>
           <Button onClick={handleAssign} disabled={!canAssign} className="rounded-xl">
-            {saving ? "Assigning..." : "Assign"}
+            {saving ? "Assigning…" : "Assign"}
           </Button>
         </DialogFooter>
       </DialogContent>

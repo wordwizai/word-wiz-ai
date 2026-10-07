@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { unitTone } from "@/lib/phonics";
 import { cn } from "@/lib/utils";
+import { getApiErrorMessage } from "@/utils/errorHandling";
 
 // Students down the side, units across the top. Each cell is how many of the
 // unit's patterns the student has mastered. Scrolls sideways on phones.
@@ -24,10 +25,13 @@ const PhonicsGrid = ({
     let cancelled = false;
     getClassPhonicsProgress(token, classId)
       .then((progress) => {
-        if (!cancelled) setData(progress);
+        if (!cancelled) {
+          setData(progress);
+          setError("");
+        }
       })
       .catch((err) => {
-        if (!cancelled) setError(err.response?.data?.detail || "Couldn't load the phonics path");
+        if (!cancelled) setError(getApiErrorMessage(err, "Couldn't load the phonics path"));
       });
     return () => {
       cancelled = true;
@@ -68,7 +72,10 @@ const PhonicsGrid = ({
                         scope="col"
                         className="min-w-12 px-1 py-1 text-center text-xs font-medium text-muted-foreground"
                       >
-                        <abbr title={unit.title} className="no-underline">
+                        <span className="sr-only">
+                          Unit {i + 1}, {unit.title}
+                        </span>
+                        <abbr title={unit.title} className="no-underline" aria-hidden>
                           {i + 1}
                         </abbr>
                       </th>
@@ -80,9 +87,11 @@ const PhonicsGrid = ({
                     <tr key={student.id}>
                       <th
                         scope="row"
-                        className="sticky left-0 z-10 max-w-40 truncate bg-card px-2 py-1 text-left font-medium text-foreground"
+                        className="sticky left-0 z-10 bg-card px-2 py-1 text-left font-medium text-foreground"
                       >
-                        {student.full_name || "Student"}
+                        <span className="block max-w-40 truncate">
+                          {student.full_name || "Student"}
+                        </span>
                       </th>
                       {data.units.map((unit) => {
                         const mastered = unit.patterns.filter(

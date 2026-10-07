@@ -4,6 +4,7 @@ import { getStudentPhonicsPath, type PhonicsPath } from "@/api";
 import PhonicsPathView from "@/components/phonics/PhonicsPathView";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getApiErrorMessage } from "@/utils/errorHandling";
 
 const StudentPhonicsPath = ({
   classId,
@@ -21,10 +22,13 @@ const StudentPhonicsPath = ({
     let cancelled = false;
     getStudentPhonicsPath(token, classId, studentId)
       .then((data) => {
-        if (!cancelled) setPath(data);
+        if (!cancelled) {
+          setPath(data);
+          setError("");
+        }
       })
       .catch((err) => {
-        if (!cancelled) setError(err.response?.data?.detail || "Couldn't load the phonics path");
+        if (!cancelled) setError(getApiErrorMessage(err, "Couldn't load the phonics path"));
       });
     return () => {
       cancelled = true;

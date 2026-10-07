@@ -41,7 +41,7 @@ const AssignmentsPanel = ({
         setError("");
       })
       .catch((err) => {
-        if (!cancelled) setError(err.response?.data?.detail || "Couldn't load assignments");
+        if (!cancelled) setError(getApiErrorMessage(err, "Couldn't load assignments"));
       });
     return () => {
       cancelled = true;
@@ -69,9 +69,13 @@ const AssignmentsPanel = ({
           pattern, including practice at home. Reading 80% of the pattern's
           words right counts as mastered.
         </p>
-        {error && <p className="mb-4 text-sm text-destructive">{error}</p>}
+        {error && (
+          <p role="alert" className="mb-4 text-sm text-destructive">
+            {error}
+          </p>
+        )}
 
-        {assignments === null ? (
+        {assignments === null && error ? null : assignments === null ? (
           <div className="space-y-3">
             {Array.from({ length: 3 }, (_, i) => (
               <Skeleton key={i} className="h-16 rounded-xl" />
@@ -81,18 +85,24 @@ const AssignmentsPanel = ({
           <div className="rounded-2xl border border-dashed px-6 py-10 text-center">
             <p className="font-medium text-foreground">Nothing assigned yet</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Choose Assign practice to give the class a unit or a single sound.
+              Choose Assign practice to give the class a whole unit or a single pattern.
             </p>
           </div>
         ) : (
+          <>
+          <div className="mb-4 flex flex-wrap gap-2" aria-hidden>
+            {BAR_ORDER.map((status) => (
+              <PatternStatusChip key={status} status={status} audience="teacher" />
+            ))}
+          </div>
           <ul className="space-y-3">
             {assignments.map((assignment) => {
               const total = assignment.students.length;
               return (
                 <li key={assignment.id}>
                   <details className="group rounded-xl border">
-                    <summary className="flex cursor-pointer list-none flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 [&::-webkit-details-marker]:hidden">
-                      <span className="min-w-0 flex-1">
+                    <summary className="flex cursor-pointer list-none flex-wrap rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/60 items-center gap-x-4 gap-y-2 px-4 py-3 [&::-webkit-details-marker]:hidden">
+                      <span className="order-1 min-w-0 flex-1">
                         <span className="block font-medium text-foreground">
                           {assignment.pattern_name ?? "No longer available"}
                         </span>
@@ -103,8 +113,8 @@ const AssignmentsPanel = ({
                             : `${total} student${total === 1 ? "" : "s"}`}
                         </span>
                       </span>
-                      <span className="flex w-full items-center gap-3 sm:w-64">
-                        <span className="flex h-2.5 flex-1 overflow-hidden rounded-full bg-muted" aria-hidden>
+                      <span className="order-3 flex w-full basis-full items-center gap-3 sm:order-2 sm:w-64 sm:basis-auto">
+                        <span className="flex h-2.5 flex-1 gap-0.5 overflow-hidden rounded-full bg-muted" aria-hidden>
                           {total > 0 &&
                             BAR_ORDER.map((status) =>
                               assignment.counts[status] > 0 ? (
@@ -126,7 +136,7 @@ const AssignmentsPanel = ({
                         </span>
                       </span>
                       <ChevronDown
-                        className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+                        className="order-2 size-4 sm:order-3 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
                         aria-hidden
                       />
                     </summary>
@@ -144,7 +154,7 @@ const AssignmentsPanel = ({
                                 <th className="py-1 font-medium">Student</th>
                                 <th className="py-1 font-medium">Status</th>
                                 <th className="py-1 text-right font-medium">Words right</th>
-                                <th className="py-1 text-right font-medium">Tries</th>
+                                <th className="py-1 text-right font-medium">Times finished</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -186,6 +196,7 @@ const AssignmentsPanel = ({
               );
             })}
           </ul>
+          </>
         )}
       </div>
     </Card>

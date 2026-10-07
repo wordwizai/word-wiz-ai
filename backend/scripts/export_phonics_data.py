@@ -125,7 +125,7 @@ def build() -> dict:
             pattern = patterns[slug]
             lines = word_lines(pattern["words"])
             all_lines = lines + pattern["sentences"]
-            if len(set(all_lines)) != len(all_lines):
+            if len({" ".join(line.lower().split()) for line in all_lines}) != len(all_lines):
                 raise ValueError(f"{slug} has the same line twice")
             ordered[slug] = {
                 "display_name": pattern["display_name"],

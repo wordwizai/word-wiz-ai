@@ -382,7 +382,7 @@ model and an in-memory SQLite database)
 - Line building, including the even distribution and short word lists.
 - Scoring. Sentence words count only when on the list, case and punctuation
   are ignored, inserted rows are skipped, the 0.15 cutoff, the 80% mark, and
-  only the first `line_count` entries count.
+  only the first reading of each line counts.
 - The mode returns the right next line and reports the end on the last line.
 - Status. All four states, the latest finished session wins, and `tries`.
 - Assignments. Non-teacher gets 403, non-member and unknown slug get 400,

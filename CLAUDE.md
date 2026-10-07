@@ -280,6 +280,8 @@ self.phoneme_extractor = PhonemeExtractorONNX()
 {"type": "processing_started"}
 {"type": "analysis", "data": {...}}
 {"type": "gpt_response", "data": {...}}
+{"type": "next_sentence", "data": {"sentence": "...", "line_index": 2, "line_count": 7}} // next line to read; line_* for pattern sessions
+{"type": "session_complete", "data": {...}} // pattern sessions only: the score after the last line
 {"type": "audio_feedback_file", "audio_base64": "..."}
 {"type": "complete"}
 {"type": "error", "message": "..."} // on failure

@@ -39,6 +39,7 @@ const SentencePersChart = ({
 }) => {
   const [chartData, setChartData] = useState<ChartPoint[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
   const { token } = useContext(AuthContext);
 
   useEffect(() => {
@@ -73,6 +74,7 @@ const SentencePersChart = ({
       fetchChartData()
         .catch((error) => {
           console.error("Error fetching chart data:", error);
+          setFailed(true);
         })
         .finally(() => setLoaded(true));
     }
@@ -121,6 +123,15 @@ const SentencePersChart = ({
       <CardContent className="px-2 pt-4 pb-4 sm:px-4">
         {!loaded ? (
           <Skeleton className="h-56 w-full rounded-xl" />
+        ) : failed ? (
+          <div className="flex h-56 flex-col items-center justify-center gap-1 text-center">
+            <p className="font-medium text-foreground">
+              Couldn't load your readings
+            </p>
+            <p className="max-w-md text-sm text-balance text-muted-foreground">
+              They're still saved. Check your connection and refresh the page.
+            </p>
+          </div>
         ) : chartData.length === 0 ? (
           <div className="flex h-56 flex-col items-center justify-center gap-1 text-center">
             <p className="font-medium text-foreground">No readings yet</p>

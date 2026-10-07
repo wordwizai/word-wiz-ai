@@ -15,7 +15,7 @@ from tests.phonics_helpers import (
     make_user,
 )
 
-from models import Assignment, ClassMembership  # noqa: E402
+from models import Assignment, AssignmentStudent, ClassMembership  # noqa: E402
 from routers import assignments  # noqa: E402
 
 DAY = datetime(2026, 10, 1)
@@ -93,6 +93,30 @@ class AssignmentsApiTest(unittest.TestCase):
         self.db.commit()
         names = {s["full_name"] for s in self.listed()[0]["students"]}
         self.assertEqual(names, {"Maya", "Ava"})
+
+    def test_duplicate_student_ids_are_fine(self):
+        r = self.assign(["at-family"], [self.maya.id, self.maya.id])
+        self.assertEqual(r.status_code, 200, r.text)
+        body = r.json()
+        self.assertEqual(len(body), 1)
+        self.assertEqual([s["full_name"] for s in body[0]["students"]], ["Maya"])
+
+    def test_chosen_students_who_leave_drop_off(self):
+        self.assign(["at-family"], [self.maya.id, self.leo.id])
+        self.db.query(ClassMembership).filter_by(student_id=self.leo.id).delete()
+        self.db.commit()
+        self.assertEqual([s["full_name"] for s in self.listed()[0]["students"]], ["Maya"])
+
+    def test_switching_to_whole_class_clears_the_list(self):
+        self.assign(["at-family"], [self.maya.id])
+        self.assign(["at-family"])
+        self.db.expire_all()
+        self.assertEqual(self.db.query(AssignmentStudent).count(), 0)
+
+    def test_another_teacher_is_refused(self):
+        other = make_user(self.db, "Mr Lee")
+        self.assertEqual(self.assign(["at-family"], user=other).status_code, 403)
+        self.assertEqual(self.as_user(other).get(self.url).status_code, 403)
 
     def test_delete(self):
         assignment_id = self.assign(["at-family"]).json()[0]["id"]

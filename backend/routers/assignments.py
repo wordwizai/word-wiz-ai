@@ -8,6 +8,7 @@ from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
 from models import Class, User
 from schemas.phonics import AssignRequest, ClassAssignment, ClassPhonicsProgress, PhonicsPath
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session as DBSession
 
 router = APIRouter()
@@ -56,7 +57,12 @@ def create_assignments(
             raise HTTPException(status_code=400, detail="Pick at least one student, or assign to the whole class.")
         if not set(body.student_ids) <= assignment_crud.member_ids(db, class_id):
             raise HTTPException(status_code=400, detail="Some of those students aren't in this class.")
-    assignment_crud.assign_patterns(db, class_id, slugs, body.student_ids)
+    try:
+        assignment_crud.assign_patterns(db, class_id, slugs, body.student_ids)
+    except IntegrityError:
+        # Another request created the same (class, pattern) row first; retrying merges into it.
+        db.rollback()
+        assignment_crud.assign_patterns(db, class_id, slugs, body.student_ids)
     return assignment_crud.class_assignments(db, class_id)
 
 

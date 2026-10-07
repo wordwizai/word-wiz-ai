@@ -1,4 +1,6 @@
 from auth.auth_handler import get_current_active_user
+from core.phonics_data import PHONICS_ACTIVITY_TYPE, get_pattern
+from core.phonics_scoring import line_index
 from crud import session as session_crud
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -25,6 +27,9 @@ def create_session(
     )
     if not activity:
         raise HTTPException(status_code=404, detail="Activity not found")
+    if activity.activity_type == PHONICS_ACTIVITY_TYPE:
+        # A pattern session needs its pattern; POST /phonics/sessions makes them.
+        raise HTTPException(status_code=400, detail="Start phonics practice from the Phonics path.")
     # Create session
     session_in = SessionCreate(
         user_id=current_user.id, activity_id=session_create_request.activity_id
@@ -117,21 +122,39 @@ def get_current_data_for_session(
             status_code=403, detail="Not authorized to access this session"
         )
 
+    # Pattern sessions read fixed lines, and the app shows "Line 3 of 7".
+    pattern = get_pattern(db_session.pattern_slug) if db_session.pattern_slug else None
+
     # Retrieve feedback entries if they exist
     feedback = getattr(db_session, "feedback_entries", [])
 
-    # If no feedback exists, return activity settings
+    # If no feedback exists, return activity settings (or a pattern's first line)
     if not feedback:
+        if pattern is not None:
+            return {
+                "type": "activity-settings",
+                "data": {"first_sentence": pattern["lines"][0]},
+                "line_index": 0,
+                "line_count": len(pattern["lines"]),
+            }
         return {
             "type": "activity-settings",
             "data": db_session.activity.activity_settings,
         }
 
-    # Retrieve the latest feedback entry based on `created_at`
-    latest_feedback = max(feedback, key=lambda f: getattr(f, "created_at", None))
+    # Retrieve the latest feedback entry based on `created_at`. The id breaks
+    # ties, since SQLite stores whole seconds.
+    latest_feedback = max(
+        feedback, key=lambda f: (getattr(f, "created_at", None), f.id)
+    )
 
     # Return the latest feedback in a structured format
-    return {
+    response = {
         "type": "full-feedback-state",
         "data": latest_feedback,
     }
+    if pattern is not None:
+        current = (latest_feedback.gpt_response or {}).get("sentence", "")
+        response["line_index"] = line_index(pattern, current) or 0
+        response["line_count"] = len(pattern["lines"])
+    return response

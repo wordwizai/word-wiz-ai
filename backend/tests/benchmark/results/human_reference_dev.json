@@ -1,0 +1,64 @@
+{
+  "created": "2026-10-06T23:45:12",
+  "half": "dev",
+  "mean": {
+    "false_alarm_rate": 0.049245591849808694,
+    "precision": 0.653329573742324,
+    "recall": 0.8310007911496109,
+    "sentence_pearson": 0.7860777796975438,
+    "word_f05": 0.6778812183062923,
+    "word_pearson": 0.750916801314471
+  },
+  "per_annotator": [
+    {
+      "annotator": 0,
+      "false_alarm_rate": 0.03430758524704245,
+      "precision": 0.7049670855774985,
+      "recall": 0.7964841108857336,
+      "sentence_pearson": 0.8108319588653113,
+      "word_f05": 0.7215484503246355,
+      "word_pearson": 0.7646158709367513,
+      "words": 15849
+    },
+    {
+      "annotator": 1,
+      "false_alarm_rate": 0.10699503311258278,
+      "precision": 0.4432878679109835,
+      "recall": 0.9127864005912787,
+      "sentence_pearson": 0.7440924913114265,
+      "word_f05": 0.4941185884612307,
+      "word_pearson": 0.6575547966172807,
+      "words": 15849
+    },
+    {
+      "annotator": 2,
+      "false_alarm_rate": 0.044897110787778007,
+      "precision": 0.6523605150214592,
+      "recall": 0.8587570621468926,
+      "sentence_pearson": 0.8165269763787456,
+      "word_f05": 0.6853020739404869,
+      "word_pearson": 0.7796941375514281,
+      "words": 15849
+    },
+    {
+      "annotator": 3,
+      "false_alarm_rate": 0.03172173913043478,
+      "precision": 0.7241379310344828,
+      "recall": 0.8120759837177748,
+      "sentence_pearson": 0.77406122847193,
+      "word_f05": 0.7401681919366807,
+      "word_pearson": 0.7861256613104812,
+      "words": 15849
+    },
+    {
+      "annotator": 4,
+      "false_alarm_rate": 0.028306490971205467,
+      "precision": 0.7418944691671965,
+      "recall": 0.7749003984063745,
+      "sentence_pearson": 0.7848762434603056,
+      "word_f05": 0.7482687868684278,
+      "word_pearson": 0.7665935401564136,
+      "words": 15849
+    }
+  ]
+}

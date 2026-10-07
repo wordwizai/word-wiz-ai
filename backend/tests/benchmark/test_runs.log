@@ -1,2 +1,4 @@
 # Every run against the sealed test half is appended here by tests/benchmark/run.py.
 # timestamp	git sha	config	reason	flags (JSON)	threshold
+2026-10-06T23:45:29	a276b21aa3a7d849927288b3d96fdf980939582e	original	Before: original scoring via all kill switches at the frozen final commit (verified identical to 95633c8 on all 2500 dev clips)	{"WWAI_GT_ANCHORED_ALIGNMENT":"0","WWAI_LEGACY_FEEDBACK":"1","WWAI_LEGACY_SENTENCE_CLEANING":"1","WWAI_LEGACY_WORD_SCORING":"1","WWAI_SINGLE_PREPROCESS":"0","WWAI_SOFT_QUALITY_GATES":"0"}	0.4
+2026-10-06T23:48:34	a276b21aa3a7d849927288b3d96fdf980939582e	final	After: final system with its defaults at the frozen commit	{}	0.4

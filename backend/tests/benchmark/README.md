@@ -310,6 +310,15 @@ would make a worse pipeline look quicker. `--compare` passes when all of these h
 The design also rules out loading a second acoustic model, which is a review item and not
 something the script can see.
 
+Two `speed` runs taken one after the other are not a fair comparison on a laptop, because the
+second one runs hotter and slower. `speed_interleaved.py` measures the original scoring (every
+kill switch on) and the current defaults in one process, alternating recording by recording,
+and is what `BENCHMARK.md` reports.
+
+```bash
+python tests/benchmark/speed_interleaved.py 2 tests/benchmark/results/interleaved_speed.json
+```
+
 ### Flag sweep
 
 ```bash

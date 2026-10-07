@@ -67,12 +67,13 @@ def finish_pattern_session(db: DBSession, session: Session) -> dict:
     keeps its first score.
     """
     row = session.pattern
-    pattern = get_pattern(row.pattern_slug)
     if row.completed_at is None:
+        pattern = get_pattern(row.pattern_slug)
+        # Insertion order is reading order; created_at only has whole seconds on SQLite.
         entries = (
             db.query(FeedbackEntry)
             .filter(FeedbackEntry.session_id == session.id)
-            .order_by(FeedbackEntry.created_at.asc(), FeedbackEntry.id.asc())
+            .order_by(FeedbackEntry.id.asc())
             .all()
         )
         correct, total = score_readings(
@@ -87,5 +88,5 @@ def finish_pattern_session(db: DBSession, session: Session) -> dict:
         "words_correct": row.words_correct,
         "words_total": row.words_total,
         "mastered": is_mastered(row.words_correct, row.words_total),
-        "pattern_name": pattern["display_name"],
+        "pattern_name": session.pattern_name,
     }

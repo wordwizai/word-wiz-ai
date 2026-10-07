@@ -58,7 +58,15 @@ class PhonicsSessionsTest(unittest.TestCase):
         self.assertEqual(session.is_completed, 1)
 
         add_reading(self.db, session, AT["lines"][2], per=0.0)
-        self.assertEqual(finish_pattern_session(self.db, session)["words_total"], 10)
+        again = finish_pattern_session(self.db, session)
+        self.assertEqual((again["words_correct"], again["words_total"]), (5, 10))
+
+    def test_finishing_twice_survives_a_removed_pattern(self):
+        session = self.start()
+        finish_pattern_session(self.db, session)
+        session.pattern.pattern_slug = "gone-family"
+        self.db.commit()
+        self.assertIsNone(finish_pattern_session(self.db, session)["pattern_name"])
 
 
 if __name__ == "__main__":

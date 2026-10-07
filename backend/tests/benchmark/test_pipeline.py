@@ -442,9 +442,21 @@ class TestClientPath(unittest.TestCase):
                 audio_array=self.audio, word_extraction_model=_WordsOnce(["cat"]), client_words=["cat"]))
         self.assertEqual(outcome.error, str(ctx.exception))
 
-    def test_no_words_from_the_asr_is_no_speech_without_asking_the_model_again(self):
+    def test_no_words_from_the_asr_is_scored_without_asking_the_model_again(self):
+        # Anchored to the sentence, the ASR words are only hints, so a reading the phoneme
+        # model heard is scored even when the ASR heard nothing.
         for words in ([], None):
             with self.subTest(words=words):
+                model = _WordsOnce(words)
+                outcome = self._client(U.SAMPLE_TEXT, _ListPhonemes(self.perfect), model)
+                self.assertEqual(outcome.status, "ok")
+                self.assertEqual(model.calls, 1)
+                self.assertFalse(outcome.client_fallback)
+
+    def test_no_words_from_the_asr_is_no_speech_on_the_legacy_path(self):
+        from unittest import mock
+        for words in ([], None):
+            with self.subTest(words=words), mock.patch.dict(os.environ, {"WWAI_GT_ANCHORED_ALIGNMENT": "0"}):
                 model = _WordsOnce(words)
                 outcome = self._client(U.SAMPLE_TEXT, _ListPhonemes(self.perfect), model)
                 self.assertEqual((outcome.status, outcome.error_type), ("rejected", "ValueError"))

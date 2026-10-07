@@ -108,6 +108,18 @@ class PhonicsApiTest(unittest.TestCase):
         self.assertEqual(state["data"]["gpt_response"]["sentence"], AT["lines"][1])
         self.assertEqual((state["line_index"], state["line_count"]), (1, 7))
 
+        add_reading(self.db, session, AT["lines"][1], next_sentence=AT["lines"][2])
+        state = self.client.get(f"/session/{session_id}/current-data").json()
+        self.assertEqual(state["line_index"], 2)
+        self.assertEqual(state["data"]["gpt_response"]["sentence"], AT["lines"][2])
+
+    def test_current_data_counts_readings_for_a_stale_line(self):
+        session_id = self.start().json()["id"]
+        session = self.db.get(Session, session_id)
+        add_reading(self.db, session, AT["lines"][0], next_sentence="A line that was removed.")
+        state = self.client.get(f"/session/{session_id}/current-data").json()
+        self.assertEqual(state["line_index"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()

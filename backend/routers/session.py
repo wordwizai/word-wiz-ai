@@ -142,11 +142,8 @@ def get_current_data_for_session(
             "data": db_session.activity.activity_settings,
         }
 
-    # Retrieve the latest feedback entry based on `created_at`. The id breaks
-    # ties, since SQLite stores whole seconds.
-    latest_feedback = max(
-        feedback, key=lambda f: (getattr(f, "created_at", None), f.id)
-    )
+    # The newest reading. Ids follow insertion order; created_at only has whole seconds.
+    latest_feedback = max(feedback, key=lambda f: f.id)
 
     # Return the latest feedback in a structured format
     response = {
@@ -155,6 +152,10 @@ def get_current_data_for_session(
     }
     if pattern is not None:
         current = (latest_feedback.gpt_response or {}).get("sentence", "")
-        response["line_index"] = line_index(pattern, current) or 0
+        index = line_index(pattern, current)
+        if index is None:
+            # A line no longer in the pattern; the mode counts readings in that case too.
+            index = min(len(feedback), len(pattern["lines"]) - 1)
+        response["line_index"] = index
         response["line_count"] = len(pattern["lines"])
     return response

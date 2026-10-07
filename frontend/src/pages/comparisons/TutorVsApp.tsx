@@ -7,7 +7,7 @@ const TutorVsApp = () => {
       content: {
         type: "info",
         title: "Reading tutor or reading app: which is better?",
-        content: "Cost decides this for most families. A private reading tutor runs $40-80 an hour, or $320-960 a month at two to three sessions a week, versus $0-15 a month for an app. Tutors are worth it for suspected dyslexia, no progress after six months of app use, or a child needing human accountability. Otherwise a daily app plus weekly tutoring beats either alone.",
+        content: "Cost decides this for most families. A private reading tutor typically runs $40-80 an hour, or $320-960 a month at two to three sessions a week, and dyslexia specialists often charge more than $100 an hour. An app costs $0-15 a month. Tutors are worth it for suspected dyslexia, no progress after six months of app use, or a child needing human accountability. Otherwise, a daily app plus weekly tutoring can give you the strengths of both.",
       },
     },
     {
@@ -57,14 +57,14 @@ const TutorVsApp = () => {
     },
     {
       type: "paragraph",
-      content: "**AI Reading App (Word Wiz AI):** Free tier available, premium features $10/month. Annual cost: $0-120."
+      content: "**AI Reading App (Word Wiz AI):** Completely free, with no ads, no subscription, and no premium tier. Annual cost: $0."
     },
     {
       type: "callout",
       content: {
         type: "info",
         title: "Cost Per Hour of Practice",
-        content: "Reading tutor: $40-80/hour. Traditional app: $0.10/hour (with daily use). AI app: $0.08/hour (with daily use). Apps provide dramatically more cost-effective practice."
+        content: "Reading tutor: $40-80/hour. Traditional app: about $1/hour or less with 30 minutes of daily use. Word Wiz AI: free. Apps provide dramatically more cost-effective practice."
       }
     },
     {
@@ -99,7 +99,7 @@ const TutorVsApp = () => {
     },
     {
       type: "paragraph",
-      content: "**AI Reading App:** Sophisticated personalization. AI analyzes phoneme-level errors, identifies patterns in mistakes, adjusts content based on individual progress. GPT-4 powered feedback tailored to each child's pronunciation challenges."
+      content: "**AI Reading App:** Sophisticated personalization. AI analyzes phoneme-level errors, identifies patterns in mistakes, adjusts content based on individual progress. AI-written feedback tailored to each child's pronunciation challenges."
     },
     {
       type: "heading",
@@ -116,14 +116,14 @@ const TutorVsApp = () => {
     },
     {
       type: "paragraph",
-      content: "**AI Reading App:** Phoneme-level accuracy that surpasses human hearing. Catches errors humans miss (like slight vowel distortions). Instant feedback—knows exactly which sound in which word was mispronounced."
+      content: "**AI Reading App:** Phoneme-level feedback that checks every sound, so it can catch small slips that are easy to miss by ear (like a slightly off vowel). Instant feedback that points to the sound and word that went wrong."
     },
     {
       type: "callout",
       content: {
         type: "warning",
         title: "The Pronunciation Advantage",
-        content: "Human tutors can hear if a word is 'wrong,' but AI can identify WHICH phoneme was mispronounced and by how much. This precision is particularly valuable for children with articulation issues or non-native English speakers."
+        content: "Human tutors listen for whether a word is 'wrong,' while AI checks each phoneme in the word and points to WHICH one was mispronounced. This precision is particularly valuable for children with articulation issues or non-native English speakers."
       }
     },
     {
@@ -167,15 +167,15 @@ const TutorVsApp = () => {
     },
     {
       type: "paragraph",
-      content: "**Reading Tutor:** Decades of research supporting one-on-one instruction. Tutoring consistently shows strong results, especially for struggling readers. Gold standard when implemented well."
+      content: "**Reading Tutor:** Decades of research support one-on-one instruction. A 2020 NBER review of tutoring experiments by Nickow, Oreopoulos, and Quan found consistent, substantial learning gains, with reading tutoring showing its biggest effects in the early grades. Gold standard when implemented well."
     },
     {
       type: "paragraph",
-      content: "**Traditional Reading App:** Mixed research. Some studies show benefits comparable to traditional instruction; others show minimal impact. Effectiveness varies widely by app quality and student engagement."
+      content: "**Traditional Reading App:** Evidence varies. Some apps have published studies and many have none, and results depend a lot on app quality and how much a child actually uses it."
     },
     {
       type: "paragraph",
-      content: "**AI Reading App:** Emerging research very promising. Phoneme-level feedback addresses pronunciation accuracy that traditional methods miss. Newer technology with fewer long-term studies, but early results impressive."
+      content: "**AI Reading App:** Research is still early. Phoneme-level feedback targets pronunciation directly, but this is newer technology with few long-term studies so far."
     },
     {
       type: "heading",
@@ -253,8 +253,8 @@ const TutorVsApp = () => {
       type: "callout",
       content: {
         type: "success",
-        title: "Word Wiz AI's Unique Advantage",
-        content: "Word Wiz AI provides pronunciation feedback at a level of precision impossible for humans to match. It catches the subtle vowel distortion in 'cat' vs 'cot,' the slight lisp on 's' sounds, the R-colored vowel issues—errors that parents and even tutors often miss."
+        title: "Where Word Wiz AI Helps Most",
+        content: "Word Wiz AI checks each sound your child reads aloud, so it can point out a vowel mix-up like 'cat' vs 'cot' or an R sound that's off. These are errors that parents and even tutors can miss when listening to a whole sentence."
       }
     },
     {
@@ -274,10 +274,10 @@ const TutorVsApp = () => {
     {
       type: "list",
       content: [
-        "Primary: AI reading app (Word Wiz AI) for daily pronunciation practice - $0-10/month",
+        "Primary: AI reading app (Word Wiz AI) for daily pronunciation practice - Free",
         "Secondary: Traditional app (Homer/ABCmouse) for variety and motivation - $10-15/month",
         "Occasional: Local library reading groups for social component - Free",
-        "**Total monthly cost: $10-25**"
+        "**Total monthly cost: $10-15**"
       ]
     },
     {
@@ -288,9 +288,9 @@ const TutorVsApp = () => {
       type: "list",
       content: [
         "Primary: Reading tutor 1x/week for structured intervention - $160-320/month",
-        "Daily: AI reading app (Word Wiz AI) for pronunciation practice between sessions - $10/month",
+        "Daily: AI reading app (Word Wiz AI) for pronunciation practice between sessions - Free",
         "As needed: Traditional app for engagement on days child resists other practice - $15/month",
-        "**Total monthly cost: $185-345**"
+        "**Total monthly cost: $175-335**"
       ]
     },
     {
@@ -300,10 +300,10 @@ const TutorVsApp = () => {
     {
       type: "list",
       content: [
-        "Primary: Reading tutor 2-3x/week with dyslexia specialist - $400-750/month",
-        "Daily: AI reading app aligned with tutor's approach for pronunciation accuracy - $10/month",
+        "Primary: Reading tutor 2-3x/week with dyslexia specialist - often $800+/month, since specialists frequently charge $100 or more an hour",
+        "Daily: AI reading app (Word Wiz AI) aligned with tutor's approach for pronunciation practice - Free",
         "School: Advocate for specialized reading services (504/IEP) - Free",
-        "**Total monthly cost: $410-760**"
+        "**Total monthly cost: often $800+**"
       ]
     },
     {
@@ -327,9 +327,9 @@ const TutorVsApp = () => {
     {
       type: "list",
       content: [
-        "Cost: $6,000-12,000 per year",
+        "Cost: $4,200-8,300 per year (at $40-80/hour)",
         "Practice time: ~100 hours/year",
-        "Cost per hour: $60-120",
+        "Cost per hour: $40-80",
         "Progress: Typically strong with good tutor"
       ]
     },
@@ -353,10 +353,10 @@ const TutorVsApp = () => {
     {
       type: "list",
       content: [
-        "Cost: $2,000-5,000 per year",
+        "Cost: $2,100-4,200 per year (Word Wiz AI is free)",
         "Practice time: ~230 hours/year",
-        "Cost per hour: $9-22",
-        "Progress: Often best outcomes—tutor guidance + daily practice volume"
+        "Cost per hour: $9-18",
+        "Progress: Combines tutor guidance with daily practice volume"
       ]
     },
     {
@@ -364,7 +364,7 @@ const TutorVsApp = () => {
       content: {
         type: "info",
         title: "The Volume Factor",
-        content: "Research shows reading improvement requires high practice volume—30+ minutes daily. Tutoring 2x/week provides only 2 hours/week. Apps enable daily practice at minimal cost, dramatically increasing total reading time."
+        content: "Reading improves with lots of practice, and a little every day adds up. Tutoring 2x/week provides about 2 hours/week. Apps enable daily practice at little or no cost, which adds a lot of total reading time."
       }
     },
     {
@@ -424,24 +424,28 @@ const TutorVsApp = () => {
     {
       type: "heading",
       level: 2,
-      content: "Success Stories: Real Results from Each Approach",
+      content: "Example Scenarios for Each Approach",
       id: "success-stories"
     },
     {
       type: "paragraph",
-      content: "**Tutor Success:** Emma, age 8, diagnosed with dyslexia. After 18 months with Orton-Gillingham tutor (2x/week), reading improved from 1st to 3rd grade level. Cost: $8,000. Worth it for severe case."
+      content: "These are illustrative examples, not real customer results."
     },
     {
       type: "paragraph",
-      content: "**Traditional App Success:** Liam, age 6, slightly behind in kindergarten. Daily 20-minute Homer sessions for 6 months brought him to grade level. Cost: $80. Excellent ROI for mild delay."
+      content: "**Tutor:** Emma, age 8, has been diagnosed with dyslexia. She works with an Orton-Gillingham tutor twice a week for more than a year. It's a big expense, but worth it for a severe case."
     },
     {
       type: "paragraph",
-      content: "**AI App Success:** Sofia, age 7, could decode but mispronounced vowels consistently. Three months of Word Wiz AI (15 min/day) corrected pronunciation issues. Cost: $30. Addressed specific problem affordably."
+      content: "**Traditional App:** Liam, age 6, is slightly behind in kindergarten. Daily 20-minute Homer sessions give him steady practice at a low monthly cost. A good fit for a mild delay."
     },
     {
       type: "paragraph",
-      content: "**Combination Success:** Marcus, age 9, struggled significantly. Tutor 1x/week ($200/month) provided structure; Word Wiz AI daily provided practice volume. 12 months = 2 years reading growth. Cost: $2,520. Best of both worlds."
+      content: "**AI App:** Sofia, age 7, can decode but mispronounces vowels consistently. Fifteen minutes a day of Word Wiz AI shows her exactly which vowel sounds are off. Cost: $0. Targets a specific problem affordably."
+    },
+    {
+      type: "paragraph",
+      content: "**Combination:** Marcus, age 9, struggles significantly. A weekly tutor ($200/month) provides structure, and daily Word Wiz AI practice adds volume. Cost: about $2,400 a year. Best of both worlds."
     },
     {
       type: "heading",

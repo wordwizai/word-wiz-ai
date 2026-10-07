@@ -9,13 +9,13 @@ const WorksheetsVsInteractive = () => {
       content: {
         type: "info",
         title: "Are phonics worksheets or interactive apps more effective?",
-        content: "Interactive practice is more effective for phonics instruction because it gives immediate feedback and adapts difficulty; worksheets are better for handwriting and letter formation, which apps cannot teach. The practical answer is both: apps as primary instruction three to five days a week at 15-20 minutes, plus two or three worksheets weekly at 10-15 minutes. Commit for 8-12 weeks before judging results.",
+        content: "Interactive practice tends to work better for learning phonics because it gives immediate feedback and adapts difficulty, while worksheets are better for handwriting and letter formation, which most apps don't teach. The practical answer is both, with apps as primary practice three to five days a week at 15-20 minutes, plus two or three worksheets weekly at 10-15 minutes. Commit for 8-12 weeks before judging results.",
       },
     },
     {
       type: "paragraph",
       content:
-        "Your child groans when you pull out phonics worksheets, but you're not sure if interactive digital practice is truly better or just more entertaining. The debate between phonics worksheets and interactive reading practice is a practical one for parents: worksheets are cheap, easy to find, and don't require technology, while interactive apps offer engagement, immediate feedback, and gamification. But which approach actually builds reading skills more effectively? The research reveals a nuanced answer: both have value, but for different purposes and different children. This comprehensive comparison examines the pros and cons of each approach, when to use worksheets vs interactive practice, and how to strategically combine them for optimal reading development.",
+        "Your child groans when you pull out phonics worksheets, but you're not sure if interactive digital practice is truly better or just more entertaining. The debate between phonics worksheets and interactive reading practice is a practical one for parents: worksheets are cheap, easy to find, and don't require technology, while interactive apps offer engagement, immediate feedback, and gamification. But which approach actually builds reading skills more effectively? The honest answer is nuanced. Both have value, but for different purposes and different children. This comprehensive comparison examines the pros and cons of each approach, when to use worksheets vs interactive practice, and how to strategically combine them for optimal reading development.",
     },
     {
       type: "heading",
@@ -31,7 +31,7 @@ const WorksheetsVsInteractive = () => {
     {
       type: "paragraph",
       content:
-        "Worksheets are incredibly affordable. You can find thousands of free printable phonics worksheets online (Teachers Pay Teachers, Education.com, ABCTeachingResources) or purchase workbooks for $10-15. No subscription fees, no devices required, no internet needed. For budget-conscious families, worksheets provide structured phonics practice at minimal cost. You can print exactly what you need, when you need it.",
+        "Worksheets are incredibly affordable. You can find thousands of free printable phonics worksheets online (Teachers Pay Teachers, Education.com) or purchase workbooks for $10-15. No subscription fees, no devices required, no internet needed. For budget-conscious families, worksheets provide structured phonics practice at minimal cost. You can print exactly what you need, when you need it.",
     },
     {
       type: "heading",
@@ -97,7 +97,7 @@ const WorksheetsVsInteractive = () => {
     {
       type: "paragraph",
       content:
-        "When your child completes a worksheet, they don't know if they got answers right or wrong until you check it (often hours later). Delayed feedback is less effective than immediate feedback for learning. If your child practices the wrong pronunciation or spelling on 20 worksheet problems before you catch the error, they've reinforced the incorrect pattern 20 times. Learning research consistently shows immediate feedback accelerates skill acquisition.",
+        "When your child completes a worksheet, they don't know if they got answers right or wrong until you check it (often hours later). For young children practicing new sounds, feedback that comes hours later is less useful than feedback in the moment. If your child practices the wrong pronunciation or spelling on 20 worksheet problems before you catch the error, they've reinforced the incorrect pattern 20 times. Catching mistakes quickly keeps them from turning into habits.",
     },
     {
       type: "heading",
@@ -152,7 +152,7 @@ const WorksheetsVsInteractive = () => {
     {
       type: "paragraph",
       content:
-        "Interactive apps and programs use game mechanics—points, badges, levels, rewards, animations—to make phonics practice feel like play. Children earn virtual pets, unlock new levels, and compete against themselves. For reluctant readers, this gamification maintains motivation through challenging practice. Research shows gamified learning increases time-on-task and persistence, especially for struggling students.",
+        "Interactive apps and programs use game mechanics—points, badges, levels, rewards, animations—to make phonics practice feel like play. Children earn virtual pets, unlock new levels, and compete against themselves. For reluctant readers, this gamification can help maintain motivation through challenging practice.",
     },
     {
       type: "heading",
@@ -162,7 +162,7 @@ const WorksheetsVsInteractive = () => {
     {
       type: "paragraph",
       content:
-        "When your child completes an activity in an interactive program, they immediately know if they're correct. Better yet, AI-powered apps like Word Wiz AI provide specific feedback: 'You said /b/, but this word starts with /d/. Try again.' Immediate feedback allows children to correct errors before they become habits. Traditional apps provide right/wrong feedback; AI apps provide phoneme-level pronunciation feedback.",
+        "When your child completes an activity in an interactive program, they immediately know if they're correct. Better yet, AI-powered apps like Word Wiz AI provide specific feedback, such as 'You had trouble with the d sound in dog.' Immediate feedback allows children to correct errors before they become habits. Traditional apps provide right/wrong feedback; AI apps provide phoneme-level pronunciation feedback.",
     },
     {
       type: "heading",
@@ -218,7 +218,7 @@ const WorksheetsVsInteractive = () => {
     {
       type: "paragraph",
       content:
-        "Quality interactive reading programs require paid subscriptions: $5-20/month or $50-150/year. While this is affordable compared to tutoring ($50-100/hour), it's significantly more expensive than free worksheets. For families with multiple children or tight budgets, subscription costs add up. Some families simply can't afford interactive apps.",
+        "Many interactive reading programs require paid subscriptions, usually about $6-25/month or $35-100/year, though some (including Word Wiz AI and Khan Academy Kids) are free. While paid apps are affordable compared to tutoring ($50-100/hour), they're significantly more expensive than free worksheets. For families with multiple children or tight budgets, subscription costs add up. Some families simply can't afford paid apps.",
     },
     {
       type: "heading",
@@ -228,7 +228,7 @@ const WorksheetsVsInteractive = () => {
     {
       type: "paragraph",
       content:
-        "The American Academy of Pediatrics recommends limiting screen time for children ages 5-7 to 1-2 hours daily of high-quality content. If your child already uses screens for school, entertainment, and communication, adding 15-30 minutes of reading app practice may exceed recommended limits. Parents must balance the learning benefits against screen time concerns.",
+        "The American Academy of Pediatrics' 2016 guidance suggested about one hour a day of high-quality screen time for children ages 2 to 5 and consistent limits for children 6 and older, and its 2026 policy asks families to also weigh what screen time crowds out. If your child already uses screens for school, entertainment, and communication, adding 15-30 minutes of reading app practice may push past the limits your family has set. Parents must balance the learning benefits against screen time concerns.",
     },
     {
       type: "heading",
@@ -283,47 +283,47 @@ const WorksheetsVsInteractive = () => {
     {
       type: "heading",
       level: 3,
-      content: "Study 1: Immediate Feedback Accelerates Learning",
+      content: "1. Feedback Timing Matters",
     },
     {
       type: "paragraph",
       content:
-        "Meta-analyses consistently show that immediate feedback (provided by interactive programs) accelerates skill acquisition compared to delayed feedback (typical with worksheets checked later). Effect sizes range from 0.3-0.6—modest but meaningful. For struggling learners, immediate feedback may be even more critical because it prevents error reinforcement.",
+        "Feedback that comes while a child still remembers the problem (as with interactive programs) is generally more useful in everyday practice than feedback that comes hours later (typical with worksheets checked later). For struggling learners, quick feedback may be even more important because it keeps them from repeating the same error.",
     },
     {
       type: "heading",
       level: 3,
-      content: "Study 2: Gamification Increases Engagement and Persistence",
+      content: "2. Game Elements Can Help, Depending on Design",
     },
     {
       type: "paragraph",
       content:
-        "Research on gamified learning shows increased time-on-task, persistence through challenges, and intrinsic motivation. However, benefits depend on implementation—poorly designed gamification (focusing on extrinsic rewards rather than learning) can actually undermine learning. High-quality gamification where game mechanics support learning goals shows positive effects.",
+        "Game elements like points, levels, and rewards can help children stick with practice, but the benefit depends on design. Poorly designed gamification that focuses on rewards rather than learning can pull attention away from reading, while game mechanics tied to the learning goal tend to work better.",
     },
     {
       type: "heading",
       level: 3,
-      content: "Study 3: Handwriting Supports Literacy Development",
+      content: "3. Handwriting Helps Children Learn Letters",
     },
     {
       type: "paragraph",
       content:
-        "Neuroscience research shows handwriting activates brain regions involved in reading and spelling more than typing. Young children who practice handwriting show better letter recognition and reading skills than those who only type. This suggests worksheets' handwriting component provides value beyond just phonics practice.",
+        "In a small 2012 brain-imaging study at Indiana University, Karin James and Laura Engelhardt had 15 preschoolers (ages 4 to 5) practice letters by printing them freehand, tracing them, or typing them. Afterward, seeing the letters recruited brain areas linked to reading only when the children had printed them by hand, not when they had traced or typed them. An earlier study by Marieke Longcamp and colleagues (2005) found that older preschoolers who learned letters by copying them by hand later recognized them better than children who learned by typing. This suggests worksheets' handwriting component provides value beyond just phonics practice, especially when children write letters themselves rather than only tracing them.",
     },
     {
       type: "heading",
       level: 3,
-      content: "Study 4: Screen Time Effects Are Complex",
+      content: "4. Screen Time Effects Are Complex",
     },
     {
       type: "paragraph",
       content:
-        "Research on screen time distinguishes between passive consumption (watching videos) and active engagement (interactive learning apps). Educational apps don't carry the same developmental risks as passive screen time. However, excessive screen time of any kind can displace other important activities (outdoor play, face-to-face interaction, sleep).",
+        "Research on screen time increasingly looks at what children do on screens, not just how long, and passive watching (videos) is a different experience from active, interactive practice (learning apps). However, excessive screen time of any kind can displace other important activities (outdoor play, face-to-face interaction, sleep).",
     },
     {
       type: "paragraph",
       content:
-        "**Bottom line from research:** Interactive learning with immediate feedback is more effective than worksheets alone for most children, especially struggling readers. However, handwriting practice (provided by worksheets) supports literacy development. The optimal approach combines both.",
+        "**Bottom line:** Immediate feedback and adaptive difficulty give interactive practice real advantages, while handwriting practice (provided by worksheets) helps young children learn letters. Combining both covers the strengths of each.",
     },
     {
       type: "heading",
@@ -383,7 +383,7 @@ const WorksheetsVsInteractive = () => {
     {
       type: "paragraph",
       content:
-        "Interactive apps for pronunciation and oral reading practice (Word Wiz AI, Reading Eggs). Worksheets for spelling, handwriting, and written exercises. This leverages each tool's strengths: apps for auditory/pronunciation skills, worksheets for written/motor skills.",
+        "Interactive apps for pronunciation and oral reading practice (such as Word Wiz AI). Worksheets for spelling, handwriting, and written exercises. This leverages each tool's strengths: apps for auditory/pronunciation skills, worksheets for written/motor skills.",
     },
     {
       type: "heading",
@@ -435,7 +435,7 @@ const WorksheetsVsInteractive = () => {
         "**Set screen time limits:** Use timers or app controls to enforce 15-20 minute practice sessions.",
         "**Supervise initially:** Sit with your child during the first week to ensure they're engaging with learning, not just clicking randomly.",
         "**Review progress reports:** Check app analytics weekly to identify which skills need more practice.",
-        "**Choose quality apps:** Invest in research-backed programs (Word Wiz AI, Hooked on Phonics, Reading Eggs) rather than free games disguised as education.",
+        "**Choose quality apps:** Look for programs built on systematic phonics (Word Wiz AI, Hooked on Phonics, Reading Eggs) rather than games disguised as education.",
         "**Balance with real books:** Apps are supplements, not replacements, for reading physical books.",
         "**Ensure pronunciation practice:** Choose apps with speech recognition (like Word Wiz AI) rather than just click-based activities.",
       ],
@@ -446,7 +446,7 @@ const WorksheetsVsInteractive = () => {
         type: "success",
         title: "Word Wiz AI: The Best of Interactive Practice",
         content:
-          "Word Wiz AI combines the engagement of interactive apps with phoneme-level pronunciation feedback that catches errors worksheets miss. The AI provides immediate, specific feedback that accelerates skill development. Use alongside worksheets for comprehensive phonics practice at no cost. Visit wordwizai.com to get started.",
+          "Word Wiz AI combines the engagement of interactive apps with phoneme-level pronunciation feedback that catches errors worksheets miss. The AI gives immediate, specific feedback on each sound. Use alongside worksheets for comprehensive phonics practice at no cost. Visit wordwizai.com to get started.",
       },
     },
     {

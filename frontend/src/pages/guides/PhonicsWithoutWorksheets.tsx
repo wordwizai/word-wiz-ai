@@ -9,7 +9,7 @@ const PhonicsWithoutWorksheets = () => {
       content: {
         type: "info",
         title: "How do you practice phonics without worksheets?",
-        content: "Replace worksheets with five categories of active practice: movement games like sound hopscotch, manipulatives such as letter tiles and play-dough, card and board games, app-based practice, and daily-life reading of signs and labels. Kindergarteners hold focus for only 5-15 minutes on seated tasks, so a 20-30 minute worksheet becomes a battle. Aim for 15-20 minutes of hands-on practice daily.",
+        content: "Replace worksheets with five categories of active practice: movement games like sound hopscotch, manipulatives such as letter tiles and play-dough, card and board games, app-based practice, and daily-life reading of signs and labels. Most kindergarteners can only stay focused on a seated task for a short stretch, so a 20-30 minute worksheet becomes a battle. Aim for 15-20 minutes of hands-on practice daily.",
       },
     },
     {
@@ -46,7 +46,7 @@ const PhonicsWithoutWorksheets = () => {
     {
       type: "paragraph",
       content:
-        "Kindergarteners typically have attention spans of 5-15 minutes for seated, focused tasks. A worksheet that takes 20-30 minutes becomes a battle of wills, not a learning opportunity. By minute 10, they're done—mentally, even if you force them to keep going physically.",
+        "Kindergarteners can usually only stay focused on a seated task for a short stretch. A worksheet that takes 20-30 minutes becomes a battle of wills, not a learning opportunity. By minute 10, they're done—mentally, even if you force them to keep going physically.",
     },
     {
       type: "heading",
@@ -76,12 +76,12 @@ const PhonicsWithoutWorksheets = () => {
     {
       type: "paragraph",
       content:
-        "Research consistently shows that multisensory learning—engaging multiple senses simultaneously—creates stronger neural connections and better retention. When kids see, hear, touch, and move while learning phonics, they remember better and enjoy the process more.",
+        "Multisensory learning means engaging several senses at once. When kids see, hear, touch, and move while learning phonics, many of them stay engaged longer and enjoy the process more.",
     },
     {
       type: "list",
       content: [
-        "**Deeper learning:** Engaging multiple senses creates multiple memory pathways",
+        "**More ways to remember:** Seeing, hearing, saying, and touching a sound gives kids more than one way to recall it",
         "**Better engagement:** Movement and games hold attention longer than static worksheets",
         "**Removes barriers:** Kids with fine motor delays, dysgraphia, or attention challenges can still excel",
         "**Builds positive associations:** Fun practice = positive feelings about reading",
@@ -266,7 +266,7 @@ const PhonicsWithoutWorksheets = () => {
         type: "success",
         title: "Games Reduce Performance Pressure",
         content:
-          "When learning feels like a game instead of a test, kids relax. Relaxed brains learn better. Plus, games naturally provide repetition—kids will play the same game 10 times in a row if it's fun, getting that crucial practice without realizing they're 'working.'",
+          "When learning feels like a game instead of a test, kids relax. Relaxed kids learn better. Plus, games naturally provide repetition—kids will play the same game 10 times in a row if it's fun, getting that crucial practice without realizing they're 'working.'",
       },
     },
     {
@@ -288,7 +288,7 @@ const PhonicsWithoutWorksheets = () => {
     {
       type: "paragraph",
       content:
-        "Word Wiz AI uses speech recognition to provide real-time pronunciation feedback. Your child reads sentences aloud, and the AI instantly identifies errors at the phoneme level—far more accurate than human listening. This is worksheet-free phonics practice that's also more precise than most teachers can provide.",
+        "Word Wiz AI uses speech recognition to provide real-time pronunciation feedback. Your child reads sentences aloud, and the AI points out errors at the phoneme level, so you can see exactly which sounds need work. This is worksheet-free phonics practice that picks up details that are easy to miss by ear.",
     },
     {
       type: "paragraph",
@@ -515,7 +515,7 @@ const PhonicsWithoutWorksheets = () => {
     {
       type: "paragraph",
       content:
-        "Kindergarteners are wired for playful learning. Their brains develop best when they're engaged, moving, touching, exploring, and having fun. Worksheets might look like \"serious learning\" to adults, but they're often the least effective method for this age group.",
+        "Kindergarteners are wired for playful learning. They tend to learn best when they're engaged, moving, touching, exploring, and having fun. Worksheets might look like \"serious learning\" to adults, but they're often a poor fit for this age group.",
     },
     {
       type: "paragraph",
@@ -544,7 +544,7 @@ const PhonicsWithoutWorksheets = () => {
         type: "success",
         title: "Trust the Process",
         content:
-          "Kids who learn phonics through play and movement often outpace their worksheet-bound peers. They develop stronger neural connections, better retention, and genuine love for reading. Embrace the mess, the movement, and the games—your child is learning, even when it doesn't look like 'school work.'",
+          "Phonics learned through play and movement is still real phonics practice, and it gives your child a better shot at enjoying reading instead of dreading it. Embrace the mess, the movement, and the games—your child is learning, even when it doesn't look like 'school work.'",
       },
     },
   ];

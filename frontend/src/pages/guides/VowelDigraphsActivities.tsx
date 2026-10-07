@@ -9,13 +9,13 @@ const VowelDigraphsActivities = () => {
       content: {
         type: "info",
         title: "How do you teach vowel digraphs to first graders?",
-        content: "Introduce vowel digraphs in order of predictability: OI and OY first, then EW and AU/AW, then OO with its two sounds, and finally OU and OW. Spend one to two weeks on each, testing 15 mixed words weekly and advancing at 90 percent accuracy. Fifteen minutes daily for 6-8 weeks covers the major digraphs for most first graders.",
+        content: "Introduce vowel digraphs in order of predictability: OI and OY first, then EW and AU/AW, then OO with its two sounds, and finally OU and OW. Spend one to two weeks on each, testing 15 mixed words weekly and advancing at 90 percent accuracy. Fifteen minutes a day is enough, and covering all the major digraphs usually takes several weeks.",
       },
     },
     {
       type: "paragraph",
       content:
-        "Your first grader can read simple words with silent e and even some vowel teams, but now you're encountering words like 'book,' 'coin,' and 'cloud' that don't follow the familiar patterns. These words contain vowel digraphs—two vowels that work together to make one sound. Unlike vowel teams where the first vowel usually 'says its name' (like 'ai' in 'rain'), vowel digraphs create entirely new sounds that must be learned as separate patterns. Understanding vowel digraphs unlocks hundreds of common words and is essential for first-grade reading fluency. With the hands-on activities and systematic practice in this guide, most first graders master the major vowel digraphs in 6-8 weeks.",
+        "Your first grader can read simple words with silent e and even some vowel teams, but now you're encountering words like 'book,' 'coin,' and 'cloud' that don't follow the familiar patterns. These words contain vowel digraphs—two vowels that work together to make one sound. Unlike vowel teams where the first vowel usually 'says its name' (like 'ai' in 'rain'), vowel digraphs create entirely new sounds that must be learned as separate patterns. Understanding vowel digraphs unlocks hundreds of common words and is essential for first-grade reading fluency. With the hands-on activities and systematic practice in this guide, most first graders can master the major vowel digraphs over several weeks.",
     },
     {
       type: "heading",
@@ -44,7 +44,7 @@ const VowelDigraphsActivities = () => {
         type: "info",
         title: "The Essential Vowel Digraphs",
         content:
-          "Focus on these eight digraph patterns: OO (two sounds), OI/OY, OU/OW (two sounds each), AU/AW, and EW. These account for the vast majority of vowel digraphs in first-grade texts. Master these before moving to rarer patterns.",
+          "Focus on these eight digraph patterns: OO (two sounds), OI/OY, OU/OW (two sounds each), AU/AW, and EW. These are the vowel pairs first graders run into most. Master these before moving to rarer patterns.",
       },
     },
     {
@@ -61,7 +61,7 @@ const VowelDigraphsActivities = () => {
     {
       type: "paragraph",
       content:
-        "The oo digraph is tricky because it makes two different sounds. **Short OO (as in 'book'):** book, look, took, good, wood, foot, stood, brook, cookie, rookie. **Long OO (as in 'moon'):** moon, soon, food, room, zoom, noon, cool, pool, tool, school, spoon, balloon. Unfortunately, there's no reliable rule for which sound oo makes—children must learn these through practice and exposure. Start with the short oo sound (more common in beginning reading) before introducing long oo.",
+        "The oo digraph is tricky because it makes two different sounds. **Short OO (as in 'book'):** book, look, took, good, wood, foot, stood, brook, cookie, rookie. **Long OO (as in 'moon'):** moon, soon, food, room, zoom, noon, cool, pool, tool, school, spoon, balloon. Unfortunately, there's no reliable rule for which sound oo makes—children must learn these through practice and exposure. Start with the short oo sound before introducing long oo.",
     },
     {
       type: "heading",
@@ -81,7 +81,7 @@ const VowelDigraphsActivities = () => {
     {
       type: "paragraph",
       content:
-        "Both OU and OW can make two different sounds, which makes them challenging for first graders. **OU as /ow/ (cow sound):** out, house, mouse, loud, cloud, found, round, ground, about, shout. **OU as /oo/ (moon sound):** you, soup, group, through (irregular). **OW as /ow/ (cow sound):** cow, how, now, brown, down, town, crown, flower, power. **OW as /oh/ (long O sound):** snow, grow, show, blow, know, yellow, window. The /ow/ sound is more common for first graders, so teach that first.",
+        "Both OU and OW can make two different sounds, which makes them challenging for first graders. **OU as /ow/ (cow sound):** out, house, mouse, loud, cloud, found, round, ground, about, shout. **OU as /oo/ (moon sound):** you, soup, group, through (irregular). **OW as /ow/ (cow sound):** cow, how, now, brown, down, town, crown, flower, power. **OW as /oh/ (long O sound):** snow, grow, show, blow, know, yellow, window. Teach the /ow/ sound first.",
     },
     {
       type: "heading",
@@ -231,7 +231,7 @@ const VowelDigraphsActivities = () => {
         type: "success",
         title: "Make Practice Playful",
         content:
-          "First graders learn best through games and hands-on activities. Turn every vowel digraph lesson into a game. Competition, movement, and creativity maintain engagement and accelerate learning. Avoid worksheets at this age whenever possible.",
+          "First graders often learn best through games and hands-on activities. Turn every vowel digraph lesson into a game. Competition, movement, and creativity keep them engaged. Avoid worksheets at this age whenever possible.",
       },
     },
     {
@@ -278,7 +278,7 @@ const VowelDigraphsActivities = () => {
     {
       type: "paragraph",
       content:
-        "Save OU/OW for last because they're the most variable. Focus primarily on the /ow/ sound (house, cow) since it's more common in first-grade texts. Introduce the long O sound for OW (snow, grow) as a secondary pattern. Acknowledge that OU can also make /oo/ (you, soup) but treat these as sight words for now.",
+        "Save OU/OW for last because they're the most variable. Focus first on the /ow/ sound (house, cow). Introduce the long O sound for OW (snow, grow) as a secondary pattern. Acknowledge that OU can also make /oo/ (you, soup) but treat these as sight words for now.",
     },
     {
       type: "heading",
@@ -324,7 +324,7 @@ const VowelDigraphsActivities = () => {
     },
     {
       type: "paragraph",
-      content: "Consistency is key. Here's a proven 15-minute daily routine:",
+      content: "Consistency is key. Here's a simple 15-minute daily routine:",
     },
     {
       type: "list",
@@ -339,7 +339,7 @@ const VowelDigraphsActivities = () => {
     {
       type: "paragraph",
       content:
-        "Follow this routine 5-6 days per week. Test progress weekly by having your child read 15 mixed digraph words. When they achieve 90% accuracy, move to the next pattern. Most first graders master the major vowel digraphs in 6-8 weeks with this consistent practice schedule.",
+        "Follow this routine 5-6 days per week. Test progress weekly by having your child read 15 mixed digraph words. When they achieve 90% accuracy, move to the next pattern. Working through all the major vowel digraphs this way usually takes several weeks.",
     },
     {
       type: "heading",
@@ -350,7 +350,7 @@ const VowelDigraphsActivities = () => {
     {
       type: "paragraph",
       content:
-        "Vowel digraphs are particularly challenging because many of them have multiple possible sounds (OO, OU, OW). Traditional apps can tell if your child read a word correctly, but they can't pinpoint whether your child said 'book' with the right OO sound or mispronounced it with a long OO sound. AI-powered tools like Word Wiz AI analyze pronunciation at the phoneme level, detecting subtle errors and providing specific feedback: 'Remember, in book, the OO makes a short sound like in good.' This precision accelerates mastery of complex patterns.",
+        "Vowel digraphs are particularly challenging because many of them have multiple possible sounds (OO, OU, OW). Traditional apps can tell if your child read a word correctly, but they can't pinpoint whether your child said 'book' with the right OO sound or mispronounced it with a long OO sound. AI-powered tools like Word Wiz AI analyze pronunciation at the phoneme level, detecting subtle errors and giving specific feedback, such as 'You had trouble with the oo sound in book.' That kind of specific feedback is especially useful for patterns with more than one sound.",
     },
     {
       type: "callout",
@@ -358,7 +358,7 @@ const VowelDigraphsActivities = () => {
         type: "success",
         title: "Word Wiz AI for Vowel Digraph Practice",
         content:
-          "Word Wiz AI's AI-powered pronunciation analysis catches subtle vowel digraph errors that parents and traditional apps miss. First graders receive instant, encouraging feedback at no cost, helping them master these complex patterns faster. Visit wordwizai.com to get started.",
+          "Word Wiz AI's AI-powered pronunciation analysis is built to catch subtle vowel digraph errors that are easy to miss by ear. First graders receive instant, encouraging feedback at no cost while they practice these complex patterns. Visit wordwizai.com to get started.",
       },
     },
     {

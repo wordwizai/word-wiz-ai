@@ -9,7 +9,7 @@ const RControlledVowels = () => {
       content: {
         type: "info",
         title: "How do you teach r-controlled vowels?",
-        content: "Start with AR and OR because their sounds are distinct, spending three to five days on each, then teach ER, IR, and UR together since all three make the same schwa-r sound. Children are usually ready in late kindergarten or early first grade, after three to six months of phonics. Expect mastery in 4-8 weeks with 10-15 minutes of daily practice.",
+        content: "Start with AR and OR because their sounds are distinct, spending three to five days on each, then teach ER, IR, and UR together since all three make the same schwa-r sound. Children are usually ready in first grade, once short vowels and blends are solid. With 10-15 minutes of daily practice, mastery often takes several weeks.",
       },
     },
     {
@@ -145,7 +145,7 @@ const RControlledVowels = () => {
     {
       type: "paragraph",
       content:
-        "Most children are ready for r-controlled vowels in late kindergarten or early first grade, typically after 3-6 months of consistent phonics practice. Don't rush this—a strong foundation in short vowels makes r-controlled patterns much easier to learn.",
+        "Most children are ready for r-controlled vowels sometime in first grade, once these skills feel easy. Don't rush this—a strong foundation in short vowels makes r-controlled patterns much easier to learn.",
     },
     {
       type: "heading",
@@ -377,13 +377,13 @@ const RControlledVowels = () => {
         "Targeted practice sentences featuring r-controlled patterns",
         "Phoneme-level analysis that catches subtle pronunciation errors",
         "Progress tracking showing mastery of each r-controlled pattern",
-        "Adaptive difficulty that introduces new patterns only when previous ones are solid",
+        "A phonics path that points your child to the next pattern once earlier ones are mastered",
       ],
     },
     {
       type: "paragraph",
       content:
-        "Parents often miss subtle pronunciation errors (\"Did she say 'for' or 'fur'?\"), but Word Wiz AI catches them every time, giving your child immediate, accurate feedback.",
+        "Parents often miss subtle pronunciation errors (\"Did she say 'for' or 'fur'?\"). Word Wiz AI listens for them sound by sound and gives your child immediate feedback.",
     },
     {
       type: "heading",
@@ -412,7 +412,7 @@ const RControlledVowels = () => {
     {
       type: "paragraph",
       content:
-        "Expect this mastery to take 4-8 weeks with consistent daily practice. Reading fluency will develop faster than spelling accuracy—that's completely normal.",
+        "Expect this mastery to take several weeks of consistent daily practice. Reading fluency will develop faster than spelling accuracy—that's completely normal.",
     },
     {
       type: "heading",
@@ -437,7 +437,7 @@ const RControlledVowels = () => {
     {
       type: "paragraph",
       content:
-        "R-controlled vowels represent a significant milestone—your child can now read thousands of additional words, including many high-frequency words in children's books.",
+        "R-controlled vowels represent a significant milestone—your child can now read many more words, including lots of common words in children's books.",
     },
     {
       type: "callout",
@@ -463,7 +463,7 @@ const RControlledVowels = () => {
         "Accept that spelling will lag behind reading—this is normal",
         "Practice daily with 10-15 minutes of focused r-controlled vowel work",
         "Celebrate progress—these patterns are genuinely challenging!",
-        "Use Word Wiz AI for pronunciation feedback that's more accurate than human ears",
+        "Use Word Wiz AI for sound-by-sound pronunciation feedback",
       ],
     },
     {
@@ -524,7 +524,7 @@ const RControlledVowels = () => {
       "@type": "HowTo",
       name: "R-Controlled Vowels Teaching Strategies for Parents",
       description:
-        "Learn how to teach r-controlled vowels (AR, ER, IR, OR, UR) to your child with proven strategies and activities.",
+        "Learn how to teach r-controlled vowels (AR, ER, IR, OR, UR) to your child with practical strategies and activities.",
       step: [
         {
           "@type": "HowToStep",
@@ -569,7 +569,7 @@ const RControlledVowels = () => {
         heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=630&fit=crop"
         heroImageAlt="Parent teaching child r-controlled vowels with word cards"
         headline="R-Controlled Vowels Teaching Strategies for Parents (AR, ER, IR, OR, UR)"
-        subheadline="Master 'Bossy R' patterns with proven strategies, word lists, and activities for AR, ER, IR, OR, and UR combinations"
+        subheadline="Master 'Bossy R' patterns with practical strategies, word lists, and activities for AR, ER, IR, OR, and UR combinations"
         author={{
           name: "Word Wiz AI Editorial Team",
           bio: "Educational technology experts helping parents teach foundational reading skills.",

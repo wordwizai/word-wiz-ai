@@ -7,7 +7,7 @@ const ChildReadsSlowly = () => {
       content: {
         type: "info",
         title: "Why does my child read so slowly, and how do I fix it?",
-        content: "Slow reading with good accuracy is a fluency problem, not a decoding problem: the child can sound words out but has not made it automatic. Compare against benchmarks of 60 words per minute by the end of first grade, 90 by second, and 110 by third. Repeated reading of the same passage at a level where 95-98 percent of words are known, 20-30 minutes daily, produces gains in 8-12 weeks.",
+        content: "Slow reading with good accuracy is a fluency problem, not a decoding problem: the child can sound words out but has not made it automatic. For comparison, the median spring scores in Hasbrouck and Tindal's 2017 oral reading fluency norms are 60 words correct per minute in first grade, 100 in second, and 112 in third. Repeated reading of the same passage at a level where 95-98 percent of words are known, done 20-30 minutes daily, usually brings steady gains over several weeks.",
       },
     },
     {
@@ -41,7 +41,7 @@ const ChildReadsSlowly = () => {
       content: {
         type: "info",
         title: "Slow Reading Is a Developmental Stage",
-        content: "Most beginning readers move through this progression: inaccurate → accurate but slow → fluent. Slow reading after decoding skills emerge is normal and temporary with the right practice. It doesn't mean your child has a reading disability."
+        content: "Most beginning readers move through this progression: inaccurate → accurate but slow → fluent. Slow reading after decoding skills emerge is normal and temporary with the right practice. On its own, it doesn't mean your child has a reading disability."
       }
     },
     {
@@ -172,22 +172,21 @@ const ChildReadsSlowly = () => {
     },
     {
       type: "paragraph",
-      content: "Reading speed is measured in words per minute (WPM) for age-appropriate text. Here are approximate targets:"
+      content: "For young readers, reading speed is measured in words read correctly per minute (WCPM) on a grade-level passage they haven't practiced. These are the median (50th percentile) spring scores from Hasbrouck and Tindal's 2017 oral reading fluency norms."
     },
     {
       type: "list",
       content: [
-        "**End of 1st grade:** 60 WPM",
-        "**End of 2nd grade:** 90 WPM",
-        "**End of 3rd grade:** 110 WPM",
-        "**End of 4th grade:** 125 WPM",
-        "**End of 5th grade:** 140 WPM",
-        "**Adult fluent reader:** 200-250 WPM"
+        "**End of 1st grade:** 60 WCPM",
+        "**End of 2nd grade:** 100 WCPM",
+        "**End of 3rd grade:** 112 WCPM",
+        "**End of 4th grade:** 133 WCPM",
+        "**End of 5th grade:** 146 WCPM"
       ]
     },
     {
       type: "paragraph",
-      content: "To test your child: select a passage at their reading level, time them for 1 minute, count words read, subtract errors. If they're reading significantly below these benchmarks (20+ WPM below), fluency work is needed."
+      content: "To test your child, select a grade-level passage they haven't read before, time them for 1 minute, count words read, and subtract errors. If they're reading significantly below these benchmarks (20+ WCPM below), fluency work is needed."
     },
     {
       type: "heading",
@@ -202,7 +201,7 @@ const ChildReadsSlowly = () => {
     },
     {
       type: "paragraph",
-      content: "This is the single most effective fluency-building strategy. Have your child read the same short passage 3-5 times. Each reading gets faster and smoother as the words become more automatic."
+      content: "The National Reading Panel (2000) found that repeated oral reading with feedback and guidance leads to meaningful improvements in reading. Have your child read the same short passage 3-5 times. Each reading gets faster and smoother as the words become more automatic."
     },
     {
       type: "paragraph",
@@ -350,21 +349,21 @@ const ChildReadsSlowly = () => {
     },
     {
       type: "paragraph",
-      content: "Word Wiz AI is uniquely designed for fluency building:"
+      content: "Here is how Word Wiz AI can support fluency practice."
     },
     {
       type: "list",
       content: [
         "**Real-time feedback:** Your child reads sentences aloud and receives instant pronunciation feedback, catching subtle errors that slow reading down",
         "**Phoneme-level analysis:** The AI identifies exactly which sounds are mispronounced, allowing targeted practice",
-        "**Adaptive difficulty:** Sentences automatically adjust to your child's level—always challenging but never overwhelming",
+        "**Targeted practice:** The next sentence focuses on the sound your child had trouble with",
         "**Built-in repetition:** The app encourages re-reading sentences to improve accuracy and speed",
-        "**Progress tracking:** Visual data shows fluency improvements over time, motivating continued practice"
+        "**Progress tracking:** Visual data shows accuracy improvements over time, motivating continued practice"
       ]
     },
     {
       type: "paragraph",
-      content: "Think of Word Wiz AI as a fluency coach that never gets tired, never judges, and provides more accurate feedback than human ears can detect."
+      content: "Think of Word Wiz AI as a fluency coach that never gets tired, never judges, and points out small pronunciation errors that are easy to miss by ear."
     },
     {
       type: "heading",
@@ -374,23 +373,23 @@ const ChildReadsSlowly = () => {
     },
     {
       type: "paragraph",
-      content: "With consistent daily practice (20-30 minutes), most children see measurable fluency improvements within 8-12 weeks. Here's a typical progression:"
+      content: "With consistent daily practice (20-30 minutes), reading usually speeds up gradually over several weeks. Every child's pace is different, but progress often looks something like this."
     },
     {
       type: "paragraph",
-      content: "**Weeks 1-3:** Reading feels the same to your child, but you notice slight speed increases in repeated readings"
+      content: "**At first:** Reading feels the same to your child, but you notice slight speed increases in repeated readings"
     },
     {
       type: "paragraph",
-      content: "**Weeks 4-6:** Your child starts to notice they're reading faster. Confidence grows. High-frequency words become automatic"
+      content: "**After a few weeks:** Your child starts to notice they're reading faster. Confidence grows. High-frequency words become automatic"
     },
     {
       type: "paragraph",
-      content: "**Weeks 7-10:** Significant jump in speed and expression. Reading begins to feel less effortful. Your child might voluntarily read more"
+      content: "**Later on:** A bigger jump in speed and expression. Reading begins to feel less effortful. Your child might voluntarily read more"
     },
     {
       type: "paragraph",
-      content: "**Weeks 11-12:** Fluency plateau reached for current level. Ready to move up in text difficulty and repeat the process"
+      content: "**Eventually:** Speed levels off at the current text level. Ready to move up in text difficulty and repeat the process"
     },
     {
       type: "paragraph",
@@ -404,7 +403,7 @@ const ChildReadsSlowly = () => {
     },
     {
       type: "paragraph",
-      content: "Most slow readers simply need more practice. But some slow readers have underlying issues like dyslexia that require specialized intervention. How do you know which is which?"
+      content: "Many slow readers simply need more practice. But some slow readers have underlying issues like dyslexia that require specialized intervention. How do you know which is which?"
     },
     {
       type: "heading",
@@ -447,8 +446,8 @@ const ChildReadsSlowly = () => {
       type: "callout",
       content: {
         type: "info",
-        title: "Most Slow Readers Don't Have Dyslexia",
-        content: "About 15-20% of the population has dyslexia, which means 80-85% of slow readers simply need more practice, better instruction, or time to develop. Don't jump immediately to dyslexia concerns—but don't ignore persistent red flags either."
+        title: "Slow Reading Doesn't Always Mean Dyslexia",
+        content: "The International Dyslexia Association estimates that 15-20% of people have a language-based learning disability, and dyslexia is the most common of these. Slow reading on its own doesn't mean your child has one, and many slow readers simply need more practice, better instruction, or time to develop. Don't jump immediately to dyslexia concerns—but don't ignore persistent red flags either."
       }
     },
     {
@@ -482,7 +481,7 @@ const ChildReadsSlowly = () => {
     },
     {
       type: "paragraph",
-      content: "Fluency develops in spurts. Your child might plateau for weeks, then suddenly jump forward. This is normal brain development—skills consolidate in non-linear ways."
+      content: "Fluency develops in spurts. Your child might plateau for weeks, then suddenly jump forward. This is normal—skills often consolidate in non-linear ways."
     },
     {
       type: "heading",
@@ -521,7 +520,7 @@ const ChildReadsSlowly = () => {
     },
     {
       type: "paragraph",
-      content: "Do this 5-6 days per week. You'll see results within 2 months."
+      content: "Do this 5-6 days per week. Results usually show up after several weeks of steady practice."
     },
     {
       type: "heading",
@@ -550,14 +549,14 @@ const ChildReadsSlowly = () => {
     },
     {
       type: "paragraph",
-      content: "Most slow readers become fluent readers within 8-12 weeks of dedicated practice. Your child's brain is learning to automate the decoding process—it just needs repetition to get there. Be patient, be consistent, and celebrate every small speed increase. Fluency is coming."
+      content: "With several weeks of dedicated practice, most slow readers get noticeably faster. Your child's brain is learning to automate the decoding process—it just needs repetition to get there. Be patient, be consistent, and celebrate every small speed increase. Fluency is coming."
     },
     {
       type: "callout",
       content: {
         type: "success",
         title: "Slow Now Doesn't Mean Slow Forever",
-        content: "Many children who struggle with slow reading in early grades become voracious, fast readers by middle school. The slow phase is temporary—as long as you provide the practice they need to build automaticity and fluency."
+        content: "Many children who struggle with slow reading in early grades become voracious, fast readers by middle school. The slow phase can be temporary—as long as you provide the practice they need to build automaticity and fluency."
       }
     }
   ];
@@ -587,7 +586,7 @@ const ChildReadsSlowly = () => {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: "Child Reads Slowly and Struggles with Fluency",
-    description: "Your child reads accurately but painfully slow? Learn the 5 root causes of slow reading and 6 proven solutions to build reading fluency in 8-12 weeks.",
+    description: "Your child reads accurately but painfully slow? Learn the 5 root causes of slow reading and 6 practical ways to build reading fluency with daily practice.",
     author: {
       "@type": "Organization",
       name: "Word Wiz AI"
@@ -608,12 +607,12 @@ const ChildReadsSlowly = () => {
     <>
       <ArticlePageTemplate
         metaTitle="Child Reads Slowly and Struggles with Fluency (Solutions That Work)"
-        metaDescription="Your child reads accurately but painfully slow? Learn the 5 root causes of slow reading and 6 proven solutions to build reading fluency in 8-12 weeks."
+        metaDescription="Your child reads accurately but painfully slow? Learn the 5 root causes of slow reading and 6 practical ways to build reading fluency with daily practice."
         canonicalUrl="https://wordwizai.com/articles/child-reads-slowly-struggles-with-fluency"
         heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=630&fit=crop"
         heroImageAlt="Child reading slowly while parent helps"
         headline="Child Reads Slowly and Struggles with Fluency"
-        subheadline="Understanding why reading is slow and 6 proven strategies to build fluency in 8-12 weeks with consistent practice"
+        subheadline="Understanding why reading is slow and 6 practical strategies to build fluency with consistent practice"
         author={{
           name: "Word Wiz AI Editorial Team",
           bio: "Reading specialists helping parents build reading fluency through evidence-based strategies.",

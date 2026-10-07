@@ -17,7 +17,7 @@ const ABCmouseHookedOnPhonicsComparison = () => {
     tagline: "Systematic phonics program with physical materials",
     pricing: {
       free: "$1 first month",
-      paid: "$19.99/mo + materials",
+      paid: "Monthly subscription + materials",
       trial: "$1 trial month",
     },
     website: "https://www.hookedonphonics.com",
@@ -63,7 +63,7 @@ const ABCmouseHookedOnPhonicsComparison = () => {
         {
           name: "Adaptive Learning",
           product1: "Limited",
-          product2: false,
+          product2: true,
           wordWiz: true,
         },
         {
@@ -186,7 +186,7 @@ const ABCmouseHookedOnPhonicsComparison = () => {
         {
           name: "Teacher Dashboard",
           product1: "School edition",
-          product2: false,
+          product2: "Educator dashboard",
           wordWiz: true,
         },
         {
@@ -241,7 +241,7 @@ const ABCmouseHookedOnPhonicsComparison = () => {
     cons: [
       { text: "No speech recognition or pronunciation analysis" },
       { text: "Generic feedback without personalization" },
-      { text: "Subscription required after trial" },
+      { text: "Full access requires a subscription after the trial" },
       { text: "Can be overwhelming with too much content" },
       { text: "Not focused specifically on phonics" },
     ],
@@ -257,7 +257,7 @@ const ABCmouseHookedOnPhonicsComparison = () => {
   const product2Details = {
     pros: [
       { text: "Systematic, research-backed phonics instruction" },
-      { text: "35+ years of proven effectiveness" },
+      { text: "Used by families for 35+ years" },
       { text: "Physical materials (workbooks, flashcards, books)" },
       { text: "Decodable storybooks matched to learned skills" },
       { text: "Complete program with no additional materials needed" },
@@ -281,9 +281,9 @@ const ABCmouseHookedOnPhonicsComparison = () => {
 
   const wordWizDetails = {
     pros: [
-      { text: "Only app with phoneme-level speech recognition" },
-      { text: "AI-powered personalized feedback (GPT-4)" },
-      { text: "Free core features (no subscription required)" },
+      { text: "Only one of these three with phoneme-level speech recognition" },
+      { text: "Next sentence written around the sounds your child missed" },
+      { text: "Completely free (no subscription required)" },
       { text: "Real-time pronunciation coaching" },
       { text: "Web-based (works on any device)" },
       { text: "Specifically designed for phonics mastery" },
@@ -302,7 +302,7 @@ const ABCmouseHookedOnPhonicsComparison = () => {
       "Families seeking free speech recognition tools",
     ],
     description:
-      "Word Wiz AI is the only reading platform using advanced speech recognition to analyze pronunciation at the phoneme level. Powered by wav2vec2-TIMIT-IPA models and GPT-4, it provides precise, personalized feedback that generic apps cannot match.",
+      "Unlike ABCmouse and Hooked on Phonics, Word Wiz AI uses speech recognition to check pronunciation at the phoneme level as your child reads aloud. Powered by wav2vec2-TIMIT-IPA speech models, it provides precise, personalized feedback that generic apps cannot match.",
   };
 
   const verdict = {
@@ -330,23 +330,23 @@ const ABCmouseHookedOnPhonicsComparison = () => {
     {
       question: "Are these programs suitable for different age groups?",
       answer:
-        "ABCmouse targets ages 2-8 with broad curriculum, Hooked on Phonics focuses on ages 3-8 for systematic phonics, and Word Wiz AI is optimized for ages 4-10 who are actively learning to read. Word Wiz AI is particularly effective for children who can already speak but need help refining pronunciation.",
+        "ABCmouse targets ages 2-8 with broad curriculum, Hooked on Phonics focuses on ages 3-8 for systematic phonics, and Word Wiz AI is built for ages 5-8, when children are actively learning to read.",
     },
     {
       question:
         "Can I use Word Wiz AI alongside ABCmouse or Hooked on Phonics?",
       answer:
-        "Absolutely! Word Wiz AI complements other programs by providing the speech recognition and pronunciation feedback they lack. Many families use ABCmouse or Hooked on Phonics for content variety and Word Wiz AI for targeted pronunciation practice.",
+        "Absolutely! Word Wiz AI complements other programs by providing the speech recognition and pronunciation feedback they lack. You could use ABCmouse or Hooked on Phonics for content variety and Word Wiz AI for targeted pronunciation practice.",
     },
     {
       question: "Which offers the best value for money?",
       answer:
-        "Word Wiz AI offers the best value with free core features including speech recognition. ABCmouse is affordable at $45/year but requires ongoing subscription. Hooked on Phonics is the most expensive at ~$20/month plus physical materials. For speech technology specifically, Word Wiz AI provides capabilities worth hundreds of dollars for free.",
+        "Word Wiz AI offers the best value since it is completely free, including speech recognition. ABCmouse is affordable at $45/year but requires ongoing subscription. Hooked on Phonics is the most expensive of the three, since its monthly subscription includes books and workbooks mailed to your home.",
     },
     {
       question: "Do I need special equipment for these programs?",
       answer:
-        "ABCmouse and Hooked on Phonics work with standard devices (tablet, computer, smartphone). Word Wiz AI additionally requires a working microphone for speech recognition, which most devices have built-in. All three need internet connectivity.",
+        "ABCmouse and Hooked on Phonics work with standard devices (tablet, computer, smartphone). Word Wiz AI additionally requires a working microphone for speech recognition, which most devices have built-in. Word Wiz AI also needs an internet connection, while the ABCmouse and Hooked on Phonics apps offer some offline play.",
     },
   ];
 
@@ -363,7 +363,7 @@ const ABCmouseHookedOnPhonicsComparison = () => {
       metaDescription="ABCmouse covers many subjects. Hooked on Phonics is a step-by-step phonics program. Compare cost, ages and approach, plus a free tool that listens to kids read."
       canonicalUrl="https://wordwizai.com/comparisons/abcmouse-vs-hooked-on-phonics-vs-word-wiz-ai"
       h1Title="ABCmouse vs Hooked on Phonics: Which Is Better for Learning to Read?"
-      introText="ABCmouse costs $14.99/month for the broadest curriculum, Hooked on Phonics runs $19.99/month plus materials for traditional systematic phonics, and Word Wiz AI is free and is the only one of the three that listens to a child read aloud and corrects pronunciation. Choose ABCmouse for breadth, Hooked on Phonics for structure, and Word Wiz AI for pronunciation accuracy."
+      introText="ABCmouse costs $14.99/month or $45/year for the broadest curriculum, Hooked on Phonics is a monthly subscription with mailed books and workbooks ($1 for the first month) for traditional systematic phonics, and Word Wiz AI is free and is the only one of the three that listens to a child read aloud and corrects pronunciation. Choose ABCmouse for breadth, Hooked on Phonics for structure, and Word Wiz AI for pronunciation accuracy."
       verdict={verdict}
       faqs={faqs}
     />

@@ -9,7 +9,7 @@ const TeachConsonantBlends = () => {
       content: {
         type: "info",
         title: "How do you teach consonant blends at home?",
-        content: "Teach blends in a fixed sequence: isolate blend sounds first, then L-blends, R-blends, and S-blends, roughly one group per week. Ten to fifteen minutes daily is enough; most kindergarteners and first graders master blends in 4-8 weeks. The most common error is inserting a vowel between the consonants, saying buh-lack for black, which slower stretched blending corrects.",
+        content: "Teach blends in a fixed sequence: isolate blend sounds first, then L-blends, R-blends, and S-blends, roughly one group per week. Ten to fifteen minutes daily is enough, and blends often take several weeks to click. A common error is inserting a vowel between the consonants, saying buh-lack for black, which slower, stretched blending helps fix.",
       },
     },
     {
@@ -125,7 +125,7 @@ const TeachConsonantBlends = () => {
     {
       type: "paragraph",
       content:
-        "This systematic approach takes 4-6 weeks with daily 10-15 minute practice sessions:",
+        "This systematic approach is planned over about six weeks of daily 10-15 minute practice sessions, though your child may need more or less time:",
     },
     {
       type: "heading",
@@ -170,7 +170,7 @@ const TeachConsonantBlends = () => {
     {
       type: "paragraph",
       content:
-        "S-blends (sc, sk, sm, sn, sp, st, sw) are the most common in English, which is why they come next. Examples: 'skip, skin, scan, snip, snap, spin, spot, stop, step, swim, swig.' These are easier than L-blends and R-blends because both sounds are more distinct and easier to separate. Practice 10-12 words per session. Many children pick up S-blends faster than other types. When your child can read mixed S-blend words (not just one blend in a row), move to Stage 5.",
+        "S-blends (sc, sk, sm, sn, sp, st, sw) show up in lots of everyday words. Examples: 'skip, skin, scan, snip, snap, spin, spot, stop, step, swim, swig.' These are easier than L-blends and R-blends because both sounds are more distinct and easier to separate. Practice 10-12 words per session. Many children pick up S-blends faster than other types. When your child can read mixed S-blend words (not just one blend in a row), move to Stage 5.",
     },
     {
       type: "heading",
@@ -340,7 +340,7 @@ const TeachConsonantBlends = () => {
     {
       type: "paragraph",
       content:
-        "Most kindergarteners and first graders will master consonant blends with 4-8 weeks of consistent practice. However, consider professional evaluation if:",
+        "Most kindergarteners and first graders will master consonant blends with several weeks of consistent practice. However, consider professional evaluation if:",
     },
     {
       type: "list",
@@ -382,7 +382,7 @@ const TeachConsonantBlends = () => {
     {
       type: "paragraph",
       content:
-        "Teaching consonant blends is a crucial step between simple CVC words and more complex reading patterns. With patience, systematic instruction, and engaging practice activities, your kindergartener can master blends in 4-8 weeks and build the confidence needed to tackle more challenging texts. Remember: every child learns at their own pace, and consistent, pressure-free practice always wins over intense, stressful cramming sessions.",
+        "Teaching consonant blends is a crucial step between simple CVC words and more complex reading patterns. With patience, systematic instruction, and engaging practice activities, your kindergartener can master blends and build the confidence needed to tackle more challenging texts. Remember: every child learns at their own pace, and consistent, pressure-free practice always wins over intense, stressful cramming sessions.",
     },
   ];
 
@@ -418,7 +418,7 @@ const TeachConsonantBlends = () => {
     "@type": "HowTo",
     name: "How to Teach Consonant Blends to Kindergarten at Home",
     description:
-      "Step-by-step guide for parents on teaching consonant blends to kindergarteners and first graders at home with practical activities and proven methods.",
+      "Step-by-step guide for parents on teaching consonant blends to kindergarteners and first graders at home with practical activities and step-by-step methods.",
     step: [
       {
         "@type": "HowToStep",
@@ -438,7 +438,7 @@ const TeachConsonantBlends = () => {
       {
         "@type": "HowToStep",
         name: "Progress Through Blend Types",
-        text: "Move systematically from L-blends to R-blends to S-blends over 4-6 weeks.",
+        text: "Move systematically from L-blends to R-blends to S-blends, about one group per week.",
       },
       {
         "@type": "HowToStep",
@@ -457,7 +457,7 @@ const TeachConsonantBlends = () => {
       heroImage="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1200&h=630&fit=crop"
       heroImageAlt="Kindergarten child learning consonant blends with letter tiles"
       headline="Teaching Consonant Blends to Kindergarten at Home"
-      subheadline="A systematic approach to mastering L-blends, R-blends, and S-blends in 4-6 weeks"
+      subheadline="A systematic, week-by-week approach to mastering L-blends, R-blends, and S-blends"
       author={{
         name: "Word Wiz AI Editorial Team",
         bio: "Expert educators specializing in early literacy and phonics instruction for young learners.",

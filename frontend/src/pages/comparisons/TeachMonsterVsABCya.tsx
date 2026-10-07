@@ -6,7 +6,7 @@ const TeachMonsterABCyaComparison = () => {
     tagline: "Award-winning free phonics game for ages 3-6",
     pricing: {
       free: "$0 (browser version)",
-      paid: "$4.99 (mobile app, optional)",
+      paid: "Paid mobile app (optional)",
       trial: "Free forever (web)",
     },
     website: "https://www.teachyourmonstertoread.com",
@@ -14,10 +14,10 @@ const TeachMonsterABCyaComparison = () => {
 
   const product2 = {
     name: "ABCya",
-    tagline: "Educational game portal with 400+ activities",
+    tagline: "Educational game portal with 300+ games",
     pricing: {
       free: "$0 (with ads)",
-      paid: "$99/year (ad-free)",
+      paid: "$79.99/year (ad-free)",
       trial: "Free tier available",
     },
     website: "https://www.abcya.com",
@@ -70,7 +70,7 @@ const TeachMonsterABCyaComparison = () => {
           name: "Age Range",
           product1: "3-6 years",
           product2: "3-12 years",
-          wordWiz: "4-9 years",
+          wordWiz: "5-8 years",
         },
         {
           name: "Phonics Coverage",
@@ -103,7 +103,7 @@ const TeachMonsterABCyaComparison = () => {
         },
         {
           name: "Mobile Apps",
-          product1: "iOS/Android ($5)",
+          product1: "iOS/Android (paid)",
           product2: "iOS/Android",
           wordWiz: "Web (all devices)",
         },
@@ -116,7 +116,7 @@ const TeachMonsterABCyaComparison = () => {
         {
           name: "No Ads",
           product1: true,
-          product2: "Premium ($99/yr)",
+          product2: "Premium ($79.99/yr)",
           wordWiz: true,
         },
       ],
@@ -126,12 +126,12 @@ const TeachMonsterABCyaComparison = () => {
   const product1Details = {
     pros: [
       { text: "Completely free on browser with no ads or in-app purchases" },
-      { text: "Award-winning (BAFTA Children's Award 2018)" },
+      { text: "Award-winning, and twice nominated for a BAFTA Children's Award" },
       { text: "Highly engaging adventure game keeps kids motivated" },
       {
-        text: "Systematic phonics instruction aligned with Science of Reading",
+        text: "Systematic phonics instruction aligned with the UK's Letters and Sounds",
       },
-      { text: "Created by educators from UK's successful phonics program" },
+      { text: "Developed with reading experts at the University of Roehampton" },
       {
         text: "Kids genuinely love playing it (excellent for reluctant learners)",
       },
@@ -158,8 +158,8 @@ const TeachMonsterABCyaComparison = () => {
 
   const product2Details = {
     pros: [
-      { text: "Huge variety: 400+ educational games across multiple subjects" },
-      { text: "Works for wider age range (K-6)" },
+      { text: "Huge variety: 300+ educational games across multiple subjects" },
+      { text: "Works for wider age range (PreK-6)" },
       { text: "Trusted by teachers and used in schools since 2004" },
       { text: "Colorful, kid-friendly interface" },
       { text: "Free tier available (with ads)" },
@@ -170,7 +170,7 @@ const TeachMonsterABCyaComparison = () => {
       { text: "Not a systematic curriculum (just scattered games)" },
       { text: "Ads on free tier can be distracting" },
       { text: "Games prioritize entertainment over deep learning" },
-      { text: "$99/year for ad-free experience" },
+      { text: "$79.99/year for ad-free experience" },
       { text: "No real assessment or progress tracking" },
     ],
     bestFor: [
@@ -181,7 +181,7 @@ const TeachMonsterABCyaComparison = () => {
       "Families wanting one platform for multiple subjects",
     ],
     description:
-      "ABCya offers 400+ educational games covering reading, math, science, and more. It's great for variety and engagement but lacks systematic phonics instruction and pronunciation feedback. Best used as supplemental entertainment rather than primary reading instruction.",
+      "ABCya offers 300+ educational games covering reading, math, science, and more. It's great for variety and engagement but lacks systematic phonics instruction and pronunciation feedback. Best used as supplemental entertainment rather than primary reading instruction.",
   };
 
   const wordWizDetails = {
@@ -190,7 +190,7 @@ const TeachMonsterABCyaComparison = () => {
       { text: "ONLY option among these three with speech recognition" },
       { text: "Provides actual pronunciation feedback (not just game scores)" },
       { text: "Phoneme-level analysis identifies specific errors" },
-      { text: "AI-powered personalization with GPT-4" },
+      { text: "Next sentence written around the sounds your child missed" },
       { text: "Works on any device with browser (no app download needed)" },
       { text: "Science of Reading aligned with systematic phonics" },
     ],
@@ -216,7 +216,7 @@ const TeachMonsterABCyaComparison = () => {
     product1:
       "Best for making early phonics (ages 3-6) fun and engaging. Kids love the adventure game format, and it's completely free. However, it can't tell you if your child is actually pronouncing words correctly.",
     product2:
-      "Best for variety and multi-subject entertainment. With 400+ games, kids won't get bored. But it's not systematic phonics instruction, and the free version has ads. At $99/year for ad-free, it's not the most budget-friendly option.",
+      "Best for variety and multi-subject entertainment. With 300+ games, kids won't get bored. But it's not systematic phonics instruction, and the free version has ads. At $79.99/year for ad-free, it's not the most budget-friendly option.",
     wordWiz:
       "Best for pronunciation feedback and assessment. It's the only free tool that actually listens to kids read and provides specific corrections. Less entertaining than games, but more educational and informative for parents.",
     overall:
@@ -227,12 +227,12 @@ const TeachMonsterABCyaComparison = () => {
     {
       question: "Is Teach Your Monster to Read really free?",
       answer:
-        "Yes! The browser version at teachyourmonstertoread.com is 100% free with no ads, in-app purchases, or subscriptions. The mobile app (iOS/Android) costs $4.99 but is optional—the free browser version has all the same content.",
+        "Yes! The browser version at teachyourmonstertoread.com is 100% free with no ads, in-app purchases, or subscriptions. The mobile app (iOS/Android) is paid but optional, and the free browser version has the same core game.",
     },
     {
       question: "Does ABCya have a free version?",
       answer:
-        "Yes, ABCya has a free tier, but it includes ads and has limited access to games. ABCya Plus ($99/year) removes ads and unlocks all 400+ games with offline mode.",
+        "Yes, ABCya has a free tier, but it includes ads and has limited access to games. An ABCya Family membership ($9.99/month or $79.99/year) removes ads and unlocks all 300+ games, with offline play in the mobile app.",
     },
     {
       question: "Which app teaches phonics best?",
@@ -242,7 +242,7 @@ const TeachMonsterABCyaComparison = () => {
     {
       question: "Can these apps tell if my child is reading correctly?",
       answer:
-        "Only Word Wiz AI has speech recognition to check pronunciation. Teach Your Monster and ABCya don't listen to your child read, so you won't know if they're mispronouncing words. If pronunciation assessment is important, Word Wiz AI is your only free option.",
+        "Only Word Wiz AI has speech recognition to check pronunciation. Teach Your Monster and ABCya don't listen to your child read, so you won't know if they're mispronouncing words. If pronunciation assessment is important, Word Wiz AI is the one of these three that offers it.",
     },
     {
       question: "Which is best for a 4-year-old just starting to read?",
@@ -269,7 +269,7 @@ const TeachMonsterABCyaComparison = () => {
       metaDescription="Compare Teach Your Monster, ABCya, and Word Wiz AI. All offer free phonics practice, but only Word Wiz AI provides speech recognition. See which is right for your child."
       canonicalUrl="https://wordwizai.com/comparisons/teach-your-monster-vs-abcya-vs-word-wiz-ai"
       h1Title="Teach Your Monster vs ABCya vs Word Wiz AI: Which Free Reading Game is Best?"
-      introText="Teach Your Monster is free in the browser and $4.99 on mobile, ABCya is free with ads or $99/year ad-free, and Word Wiz AI is free with no ads and the only one giving spoken pronunciation feedback. Teach Your Monster plus Word Wiz AI is the strongest free combination: engaging phonics games plus accuracy checking."
+      introText="Teach Your Monster is free in the browser and paid on mobile, ABCya is free with ads or $79.99/year ad-free, and Word Wiz AI is free with no ads and the only one giving spoken pronunciation feedback. Teach Your Monster plus Word Wiz AI is the strongest free combination: engaging phonics games plus accuracy checking."
       verdict={verdict}
       faqs={faqs}
     />

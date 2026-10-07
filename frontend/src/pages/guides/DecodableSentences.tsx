@@ -15,7 +15,7 @@ const DecodableSentences = () => {
     {
       type: "paragraph",
       content:
-        "Your child can sound out individual words, but when you hand them a book, they guess, skip words, or freeze completely. The problem is not your child's decoding ability—it is the text itself. Most beginning reader books are filled with words that do not follow the phonics rules your child has learned, forcing them to memorize or guess instead of decode. The solution is decodable sentences: carefully controlled texts where every single word can be sounded out using the phonics patterns your child knows. This guide provides 100+ free decodable sentences organized by skill level, explains the science behind why they work, and shows you exactly how to use them to accelerate your child's reading progress. Whether your child is just starting with simple CVC words or ready for blends and digraphs, these sentences give them the practice they need to build true reading fluency.",
+        "Your child can sound out individual words, but when you hand them a book, they guess, skip words, or freeze completely. The problem is not your child's decoding ability—it is the text itself. Most beginning reader books are filled with words that do not follow the phonics rules your child has learned, forcing them to memorize or guess instead of decode. The solution is decodable sentences: carefully controlled texts where every single word can be sounded out using the phonics patterns your child knows. This guide provides 100+ free decodable sentences organized by skill level, explains why they work, and shows you exactly how to use them to support your child's reading progress. Whether your child is just starting with simple CVC words or ready for blends and digraphs, these sentences give them the practice they need to build true reading fluency.",
     },
     {
       type: "heading",
@@ -46,7 +46,7 @@ const DecodableSentences = () => {
     {
       type: "paragraph",
       content:
-        "Many schools use 'predictable texts' or 'leveled readers' that rely on pictures, context, and memorization. A predictable text might repeat: 'I like apples. I like bananas. I like grapes.' The repetitive pattern lets children memorize the structure and guess new words using pictures. While this feels like reading, it is not teaching decoding. Research from the National Reading Panel and decades of reading science show that children who practice with decodable texts become better readers than those who practice with predictable texts. Why? Because decodable practice builds the neural pathways for actual word recognition, not just pattern memorization. When your child decodes 'The cat sat on a mat' by sounding out every word, their brain learns that letters represent sounds and those sounds blend into words. When your child memorizes 'I like apples' and guesses 'bananas' from the picture, they learn nothing about the alphabetic code. One method teaches reading. The other teaches guessing.",
+        "Many schools use 'predictable texts' or 'leveled readers' that rely on pictures, context, and memorization. A predictable text might repeat: 'I like apples. I like bananas. I like grapes.' The repetitive pattern lets children memorize the structure and guess new words using pictures. While this feels like reading, it is not teaching decoding. The National Reading Panel (2000) found that systematic phonics instruction helps children learn to read, and decodable texts are where children practice that phonics in real sentences. Decodable practice builds actual word recognition, not just pattern memorization. When your child decodes 'The cat sat on a mat' by sounding out every word, they learn that letters represent sounds and those sounds blend into words. When your child memorizes 'I like apples' and guesses 'bananas' from the picture, they learn very little about the alphabetic code. One method teaches reading. The other teaches guessing.",
     },
     {
       type: "heading",
@@ -252,7 +252,7 @@ const DecodableSentences = () => {
     {
       type: "paragraph",
       content:
-        "Pick 5-10 sentences per practice session. Child reads each sentence at least 3 times: First read: Focus on accuracy, sound out every word. Second read: Push for smoother blending and faster decoding. Third read: Add expression and natural phrasing. By the third read, the sentence should sound fluent, like natural speech. This repeated practice builds the neural pathways for automatic word recognition.",
+        "Pick 5-10 sentences per practice session. Child reads each sentence at least 3 times: First read: Focus on accuracy, sound out every word. Second read: Push for smoother blending and faster decoding. Third read: Add expression and natural phrasing. By the third read, the sentence should sound fluent, like natural speech. This repeated practice builds automatic word recognition.",
     },
     {
       type: "heading",
@@ -319,9 +319,9 @@ const DecodableSentences = () => {
     {
       type: "list",
       content: [
-        "**Free Options:** Flyleaf Publishing (free decodable books), SPELD SA (free decodable sentences and stories), Reading Elephant (free downloadable texts), Fry List decodable sentences (searchable online).",
-        "**Paid Options:** Bob Books (classic decodable series, $30-50 per set), Phonics Hero (subscription-based decodable texts, $12/month), Reading A-Z decodable books (subscription, $150/year), Sound City Reading (comprehensive decodable materials, one-time purchase $50).",
-        "**Apps:** Word Wiz AI provides decodable sentence practice with instant pronunciation feedback. The AI ensures your child is truly decoding, not guessing or memorizing.",
+        "**Free Options:** Flyleaf Publishing (free decodable books), SPELD SA (free decodable sentences and stories), Reading Elephant (free downloadable texts), Sound City Reading (comprehensive decodable materials, free PDF downloads), Fry List decodable sentences (searchable online).",
+        "**Paid Options:** Bob Books (classic decodable series, about $18 per boxed set), Phonics Hero (subscription-based phonics games and texts), Reading A-Z decodable books (yearly subscription license).",
+        "**Apps:** Word Wiz AI provides decodable sentence practice with instant pronunciation feedback. The feedback on each sound helps you check that your child is decoding, not guessing or memorizing.",
       ],
     },
     {
@@ -389,7 +389,7 @@ const DecodableSentences = () => {
       type: "list",
       content: [
         "Decodable sentences contain only words following phonics patterns the child knows",
-        "Research shows decodable texts accelerate reading progress faster than predictable texts",
+        "Decodable texts let children practice the phonics they have learned, while predictable texts invite guessing",
         "Start with Level 1 (short A CVC) and progress through Level 4 (blends + digraphs)",
         "Read each sentence 3-5 times to build fluency through repetition",
         "Match text difficulty to child's current skill level (90% accuracy target)",
@@ -403,7 +403,7 @@ const DecodableSentences = () => {
     {
       type: "paragraph",
       content:
-        "Decodable sentences are not exciting. They are not creative. They are not imaginative. But they work. They build the foundational reading skills that allow your child to eventually read anything—creative stories, informational texts, chapter books. Think of decodable sentences as the scales a pianist practices before playing a symphony. Boring, repetitive, essential. Your child will not remember practicing 'The cat sat on the mat' years from now. But they will remember becoming a confident, capable reader. And that confidence starts with decodable practice. Use the 100+ sentences in this guide. Create your own. Find more resources. But commit to high-volume decodable practice for the next 6-12 months. It is the single most effective use of reading practice time during the foundational phase. Start today with Level 1. Mark your child's progress. Watch their fluency grow. In 6 months, you will look back and be amazed at how far they have come.",
+        "Decodable sentences are not exciting. They are not creative. They are not imaginative. But they work. They build the foundational reading skills that allow your child to eventually read anything—creative stories, informational texts, chapter books. Think of decodable sentences as the scales a pianist practices before playing a symphony. Boring, repetitive, essential. Your child will not remember practicing 'The cat sat on the mat' years from now. But they will remember becoming a confident, capable reader. And that confidence starts with decodable practice. Use the 100+ sentences in this guide. Create your own. Find more resources. But commit to high-volume decodable practice for the next 6-12 months. It is one of the best uses of reading practice time during the foundational phase. Start today with Level 1. Mark your child's progress. Watch their fluency grow. A few months from now, you will likely look back and be amazed at how far they have come.",
     },
   ];
 

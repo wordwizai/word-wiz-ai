@@ -9,7 +9,7 @@ const WhyChildHatesReading = () => {
       content: {
         type: "info",
         title: "Why does my child hate reading?",
-        content: "Reading hatred is usually a symptom, not a personality trait. Five causes account for most of it: reading is genuinely hard for the child, the material is boring, past experiences created negative associations, confidence has collapsed after repeated failure, or an undiagnosed issue such as vision, hearing, or dyslexia is in the way. Diagnose which applies before choosing a fix.",
+        content: "Reading hatred is usually a symptom, not a personality trait. It tends to trace back to one of five common causes. Reading may be genuinely hard for the child, the material may be boring, past experiences may have created negative associations, confidence may have collapsed after repeated failure, or an undiagnosed issue such as vision, hearing, or dyslexia may be in the way. Diagnose which applies before choosing a fix.",
       },
     },
     {
@@ -36,7 +36,7 @@ const WhyChildHatesReading = () => {
     {
       type: "paragraph",
       content:
-        "This is by far the **most common reason** children hate reading, and it is often overlooked by well-meaning parents who assume their child is simply being difficult or unmotivated. If decoding feels like hard work instead of flowing naturally and automatically, reading becomes an exhausting chore rather than an enjoyable activity. **Imagine trying to enjoy a movie when you have to pause every few seconds** to figure out what is happening on screen. That is what reading feels like for struggling readers. The cognitive load of decoding leaves little mental energy for comprehension or enjoyment. Signs that reading is genuinely difficult for your child include:",
+        "This is a **very common reason** children hate reading, and it is often overlooked by well-meaning parents who assume their child is simply being difficult or unmotivated. If decoding feels like hard work instead of flowing naturally and automatically, reading becomes an exhausting chore rather than an enjoyable activity. **Imagine trying to enjoy a movie when you have to pause every few seconds** to figure out what is happening on screen. That is what reading feels like for struggling readers. The cognitive load of decoding leaves little mental energy for comprehension or enjoyment. Signs that reading is genuinely difficult for your child include:",
     },
     {
       type: "list",
@@ -132,7 +132,7 @@ const WhyChildHatesReading = () => {
     {
       type: "list",
       content: [
-        "Dyslexia (affects 5-15% of children)",
+        "Dyslexia",
         "Vision problems (uncorrected or undetected)",
         "ADHD (difficulty sustaining attention)",
         "Auditory processing disorder",
@@ -599,7 +599,7 @@ const WhyChildHatesReading = () => {
     {
       type: "list",
       content: [
-        "Library apps (Libby, Hoopla) for unlimited free books",
+        "Library apps (Libby, Hoopla) for free library books",
         "Epic Books (subscription service with huge variety)",
         "Bookstore gift cards and freedom to choose",
       ],
@@ -729,7 +729,7 @@ const WhyChildHatesReading = () => {
   return (
     <ArticlePageTemplate
       metaTitle="Why Your Child Hates Reading (And How to Turn It Around)"
-      metaDescription="Discover the 5 real reasons children hate reading and get proven strategies to help. Includes assessment tools, solutions, and a 30-day turnaround plan for reluctant readers."
+      metaDescription="Discover the 5 real reasons children hate reading and get practical strategies to help. Includes assessment tools, solutions, and a 30-day turnaround plan for reluctant readers."
       canonicalUrl="https://wordwizai.com/articles/why-child-hates-reading"
       heroImage="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=1920&h=1080&fit=crop"
       heroImageAlt="Frustrated child refusing to read with parent nearby"

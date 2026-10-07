@@ -9,13 +9,13 @@ const TeachCVCWords = () => {
       content: {
         type: "info",
         title: "How do you teach CVC words to a struggling reader?",
-        content: "Teach CVC words in five stages: automatic letter sounds, oral blending, reading single words, mixed practice, then timed fluency work. Ten to fifteen minutes of daily practice is enough. Most struggling readers master CVC words in 4-6 weeks, and nearly all within 4-8 weeks. Readiness for blends means reading 20-30 CVC words a minute at 90 percent accuracy.",
+        content: "Teach CVC words in five stages: automatic letter sounds, oral blending, reading single words, mixed practice, then timed fluency work. Ten to fifteen minutes of daily practice is enough, though struggling readers often need several weeks before CVC words click. Readiness for blends means reading 20-30 CVC words a minute at 90 percent accuracy.",
       },
     },
     {
       type: "paragraph",
       content:
-        "You watch your child struggle to read simple three-letter words like 'cat' or 'dog,' and you know they need help, but you are not sure where to start or how to make it click. CVC words—Consonant-Vowel-Consonant patterns like 'bat,' 'pen,' and 'hot'—are the absolute foundation of early reading, yet many struggling readers get stuck on these seemingly simple words for months. The good news is that with the right approach, most children can master CVC words in just 4-6 weeks of consistent practice at home. This comprehensive guide will walk you through exactly how to teach CVC words to struggling readers, using proven methods that build both decoding skills and confidence. Whether your child is in kindergarten just starting out or in first or second grade still struggling with basics, these strategies will meet them where they are and move them forward systematically.",
+        "You watch your child struggle to read simple three-letter words like 'cat' or 'dog,' and you know they need help, but you are not sure where to start or how to make it click. CVC words—Consonant-Vowel-Consonant patterns like 'bat,' 'pen,' and 'hot'—are the absolute foundation of early reading, yet many struggling readers get stuck on these seemingly simple words for months. The good news is that with the right approach and consistent practice at home, most children can master CVC words. This comprehensive guide will walk you through exactly how to teach CVC words to struggling readers, using methods that build both decoding skills and confidence. Whether your child is in kindergarten just starting out or in first or second grade still struggling with basics, these strategies will meet them where they are and move them forward systematically.",
     },
     {
       type: "heading",
@@ -26,7 +26,7 @@ const TeachCVCWords = () => {
     {
       type: "paragraph",
       content:
-        "CVC stands for Consonant-Vowel-Consonant, describing the structure of these three-letter words. Each letter represents exactly one sound, making them the simplest possible words for children to decode. Examples include: cat, dog, pen, sit, mop, bug, red, sun, and hundreds more. CVC words matter because they teach children the fundamental skill of blending individual sounds together to form words. This is called **phoneme blending**, and it is the core skill that separates children who can read from those who cannot. When your child masters CVC words, they learn that reading is not about memorizing whole words but about understanding how sounds work together systematically and predictably.",
+        "CVC stands for Consonant-Vowel-Consonant, describing the structure of these three-letter words. Each letter represents exactly one sound, making them the simplest possible words for children to decode. Examples include: cat, dog, pen, sit, mop, bug, red, sun, and hundreds more. CVC words matter because they teach children the fundamental skill of blending individual sounds together to form words. This is called **phoneme blending**, and it is a core skill every reader needs. When your child masters CVC words, they learn that reading is not about memorizing whole words but about understanding how sounds work together systematically and predictably.",
     },
     {
       type: "callout",
@@ -126,7 +126,7 @@ const TeachCVCWords = () => {
     {
       type: "paragraph",
       content:
-        "This method works for the vast majority of struggling readers when applied consistently for 10-15 minutes daily. The key is systematic progression through clear stages:",
+        "This method is built for struggling readers and works best when applied consistently for 10-15 minutes daily. The key is systematic progression through clear stages:",
     },
     {
       type: "heading",
@@ -333,7 +333,7 @@ const TeachCVCWords = () => {
     {
       type: "paragraph",
       content:
-        "Teaching CVC words to a struggling reader requires patience and persistence, but the payoff is enormous. Once your child masters this foundational skill, the entire world of reading opens up to them. With the right approach and consistent practice, most children can achieve CVC mastery in 4-8 weeks—and that is when reading finally starts to feel less like work and more like discovery.",
+        "Teaching CVC words to a struggling reader requires patience and persistence, but the payoff is enormous. Once your child masters this foundational skill, the entire world of reading opens up to them. With the right approach and consistent practice, most children get to CVC mastery within several weeks—and that is when reading finally starts to feel less like work and more like discovery.",
     },
   ];
 
@@ -369,7 +369,7 @@ const TeachCVCWords = () => {
     "@type": "Article",
     headline: "How to Teach CVC Words to Struggling Readers: Complete Guide",
     description:
-      "A comprehensive step-by-step guide for parents on teaching CVC words to struggling readers at home. Includes proven methods, practice activities, and progress tracking.",
+      "A comprehensive step-by-step guide for parents on teaching CVC words to struggling readers at home. Includes a staged teaching method, practice activities, and progress tracking.",
     author: {
       "@type": "Organization",
       name: "Word Wiz AI",
@@ -394,12 +394,12 @@ const TeachCVCWords = () => {
   return (
     <ArticlePageTemplate
       metaTitle="How to Teach CVC Words to Struggling Readers (2025 Guide)"
-      metaDescription="Proven step-by-step methods to teach CVC words to struggling readers at home. Master phonics foundations in 4-6 weeks with these practical parent-friendly strategies."
+      metaDescription="Step-by-step methods to teach CVC words to struggling readers at home. Build phonics foundations with these practical, parent-friendly strategies."
       canonicalUrl="https://wordwizai.com/guides/how-to-teach-cvc-words-to-struggling-readers"
       heroImage="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=630&fit=crop"
       heroImageAlt="Parent and child practicing phonics and reading CVC words together"
       headline="How to Teach CVC Words to Struggling Readers"
-      subheadline="A proven step-by-step method for mastering the foundation of reading at home"
+      subheadline="A step-by-step method for mastering the foundation of reading at home"
       author={{
         name: "Word Wiz AI Editorial Team",
         bio: "Expert educators specializing in early literacy and phonics instruction for struggling readers.",

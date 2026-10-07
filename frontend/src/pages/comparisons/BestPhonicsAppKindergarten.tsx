@@ -9,13 +9,13 @@ const BestPhonicsAppKindergarten = () => {
       content: {
         type: "info",
         title: "What is the best phonics app for a kindergarten struggling reader?",
-        content: "The best choice depends on the specific gap. Hooked on Phonics ($9.99/month) is the strongest structured curriculum; Reading Eggs ($12.99/month) wins on engagement; ABCmouse covers a whole kindergarten curriculum; Starfall is the best free option; and Word Wiz AI focuses narrowly on phoneme-level pronunciation feedback. Apps alone can suffice for a child six to twelve months behind, practicing 15-20 minutes daily.",
+        content: "The best pick depends on what your child is struggling with. Hooked on Phonics is the strongest structured curriculum; Reading Eggs ($13.99/month) wins on engagement; ABCmouse covers a whole kindergarten curriculum; Starfall is the best free option; and Word Wiz AI focuses narrowly on phoneme-level pronunciation feedback. Apps alone may be enough for a child who is only mildly behind and practices a little every day.",
       },
     },
     {
       type: "paragraph",
       content:
-        "Your kindergartener is falling behind in reading. While classmates are sounding out CVC words and reading simple books, your child still struggles with letter sounds or can't blend sounds together. You need targeted help, and in-person tutoring at $50-100 per hour isn't always practical or affordable. Phonics apps can provide systematic instruction at a fraction of the cost, but you'll find dozens of options that vary wildly in quality. The best apps for struggling kindergarteners deliver systematic phonics instruction, engage multiple senses, provide pronunciation feedback, and adjust to your child's pace. This review examines five top apps to help you choose the right one.",
+        "Your kindergartener is falling behind in reading. While classmates are sounding out CVC words and reading simple books, your child still struggles with letter sounds or can't blend sounds together. You need targeted help, and in-person tutoring isn't always practical or affordable. Phonics apps can provide systematic instruction at a fraction of the cost, but you'll find dozens of options that vary wildly in quality. The best apps for struggling kindergarteners deliver systematic phonics instruction, engage multiple senses, provide pronunciation feedback, and adjust to your child's pace. This review examines five top apps to help you choose the right one.",
     },
     {
       type: "heading",
@@ -56,7 +56,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "Traditional apps only tell kids if their answer is right or wrong. AI-powered apps analyze how your child pronounces words, catching subtle errors (saying /b/ instead of /d/, using short instead of long vowels). This phoneme-level feedback accelerates learning for struggling readers who need precise correction.",
+        "Traditional apps only tell kids if their answer is right or wrong. AI-powered apps analyze how your child pronounces words, catching subtle errors (saying /b/ instead of /d/, using short instead of long vowels). This phoneme-level feedback helps struggling readers who need precise correction.",
     },
     {
       type: "heading",
@@ -102,7 +102,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "**Price:** Free. **Age Range:** 5-10 years. **Key Features:** AI-powered phoneme-level pronunciation analysis, systematic phonics sequence, adaptive difficulty, real-time corrective feedback, progress tracking for parents.",
+        "**Price:** Free. **Age Range:** 5-8 years. **Key Features:** AI-powered phoneme-level pronunciation analysis, systematic phonics sequence, adaptive difficulty, real-time corrective feedback, progress tracking for parents.",
     },
     {
       type: "heading",
@@ -117,7 +117,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "The app follows a systematic phonics sequence starting with letter sounds and progressing through increasingly complex patterns. Each lesson includes explicit instruction, guided practice, and independent practice with immediate feedback. The AI adapts difficulty based on performance, ensuring your child works at the right level—challenging but not overwhelming.",
+        "The app follows a systematic phonics sequence starting with short-vowel word families and progressing through increasingly complex patterns. In each pattern session your child reads lines of practice words and then sentences, with feedback after each line. In open practice, the next sentence is written around the sounds your child just missed, so practice stays focused on what they need.",
     },
     {
       type: "heading",
@@ -137,7 +137,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "Newer app with smaller library than established competitors. Requires speaking aloud, which may not work in all environments (classroom, shared spaces). Slightly higher price than some alternatives.",
+        "Newer app with smaller library than established competitors. Requires speaking aloud, which may not work in all environments (classroom, shared spaces).",
     },
     {
       type: "heading",
@@ -148,7 +148,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "**Price:** $9.99/month or $59.99/year. **Age Range:** 3-8 years. **Key Features:** Systematic 36-lesson curriculum, multisensory activities, animated lessons, decodable books included, progress tracking, offline access.",
+        "**Price:** Paid subscription (app-only plans are sold through the app stores, and plans with workbooks and books mailed home start at $23.96/month on its website). **Age Range:** 3-8 years. **Key Features:** Systematic step-by-step curriculum, multisensory activities, animated lessons, decodable books included, progress tracking.",
     },
     {
       type: "heading",
@@ -158,7 +158,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "Hooked on Phonics has been teaching children to read for 30+ years and follows a proven systematic phonics scope and sequence. The program is comprehensive—each lesson includes video instruction, interactive games, decodable books, and review activities. The multisensory approach combines animation, songs, and interactive games that keep kindergarteners engaged.",
+        "Hooked on Phonics has been teaching children to read since 1987 and follows a systematic phonics scope and sequence. The program is comprehensive—each lesson includes video instruction, interactive games, decodable books, and review activities. The multisensory approach combines animation, songs, and interactive games that keep kindergarteners engaged.",
     },
     {
       type: "paragraph",
@@ -173,7 +173,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "Children who need complete structured curriculum, families who want a proven program, children who respond well to songs and animations, parents who want clear lesson plans.",
+        "Children who need complete structured curriculum, families who want a long-established program, children who respond well to songs and animations, parents who want clear lesson plans.",
     },
     {
       type: "heading",
@@ -194,7 +194,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "**Price:** $12.99/month or $59.99/year (includes both Reading Eggs and Mathseeds). **Age Range:** 2-13 years. **Key Features:** 120+ lessons, self-paced learning, reward system with virtual eggs and pets, library of 3,500+ ebooks, progress reports.",
+        "**Price:** $13.99/month or $99.99/year (includes both Reading Eggs and Mathseeds). **Age Range:** 2-13 years. **Key Features:** 120+ lessons, self-paced learning, reward system with virtual eggs and pets, library of thousands of ebooks, progress reports.",
     },
     {
       type: "heading",
@@ -240,7 +240,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "**Price:** $12.99/month or $59.99/year. Often available for $5/month with promotional codes. **Age Range:** 2-8 years. **Key Features:** 10,000+ activities across reading, math, science, art, comprehensive curriculum, step-by-step learning path, rewards and games, printable worksheets.",
+        "**Price:** $14.99/month or $45/year when you sign up on its website, plus a free Basic Access tier with 10 activities a day. **Age Range:** 2-8 years. **Key Features:** 13,000+ activities across reading, math, science, art, comprehensive curriculum, step-by-step learning path, rewards and games, printable worksheets.",
     },
     {
       type: "heading",
@@ -250,7 +250,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "ABCmouse offers incredible value—for the price of a phonics app, you get a complete kindergarten curriculum covering all subjects. The reading curriculum follows a systematic sequence with 450+ lessons. The app includes phonics instruction, sight words, reading comprehension, and fluency practice.",
+        "ABCmouse offers incredible value—for the price of a phonics app, you get a complete kindergarten curriculum covering all subjects. The reading curriculum follows a systematic, step-by-step Learning Path. The app includes phonics instruction, sight words, reading comprehension, and fluency practice.",
     },
     {
       type: "paragraph",
@@ -286,7 +286,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "**Price:** Free (limited content) or $35/year for full access. **Age Range:** Preschool-3rd grade. **Key Features:** Phonics-focused curriculum, letter sounds and phonemic awareness, simple interface, interactive activities, decodable books.",
+        "**Price:** Free Learn-to-Read program, or $35/year for a home membership with full access. **Age Range:** Pre-K to 5th grade. **Key Features:** Phonics-focused curriculum, letter sounds and phonemic awareness, simple interface, interactive activities, decodable books.",
     },
     {
       type: "heading",
@@ -321,7 +321,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "No pronunciation feedback. Limited content in free version. Graphics and interface are very dated (last major redesign was early 2000s). Less engaging than gamified competitors. Limited progress tracking. Not adaptive to individual child's level.",
+        "No pronunciation feedback. Limited content in free version. Graphics and interface feel dated. Less engaging than gamified competitors. Limited progress tracking. Not adaptive to individual child's level.",
     },
     {
       type: "callout",
@@ -346,7 +346,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "**Winner: Word Wiz AI.** Only app with true phoneme-level pronunciation analysis. Others: Hooked on Phonics, Reading Eggs, ABCmouse, and Starfall provide no pronunciation feedback—they only check if answers are right or wrong.",
+        "**Winner: Word Wiz AI.** The only app on this list with true phoneme-level pronunciation analysis. Others: Hooked on Phonics, Reading Eggs, ABCmouse, and Starfall provide no pronunciation feedback—they only check if answers are right or wrong.",
     },
     {
       type: "heading",
@@ -366,7 +366,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "**Winner: Word Wiz AI.** AI adjusts difficulty in real-time based on performance. Others have some adaptivity (placement tests, moving at own pace) but don't dynamically adjust like AI-powered apps.",
+        "**Winner: Word Wiz AI.** In open practice, each new sentence is written around the sounds your child just missed. Others have some adaptivity (placement tests, moving at own pace) but don't dynamically adjust like AI-powered apps.",
     },
     {
       type: "heading",
@@ -386,7 +386,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "**Winner: Word Wiz AI.** Completely free with AI-powered pronunciation feedback. Starfall free version also offers good value. ABCmouse provides entire kindergarten curriculum for ~$60/year. Hooked on Phonics and Reading Eggs ~$60/year for reading only.",
+        "**Winner: Word Wiz AI.** Completely free with AI-powered pronunciation feedback. Starfall free version also offers good value. ABCmouse provides an entire kindergarten curriculum for $45/year when you sign up on its website. Reading Eggs is $99.99/year with math included, and Hooked on Phonics is a paid subscription.",
     },
     {
       type: "heading",
@@ -396,7 +396,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "**Winner: Word Wiz AI.** Pronunciation feedback is critical for children with significant phonological difficulties. Hooked on Phonics second-best due to systematic explicit instruction.",
+        "**Winner: Word Wiz AI.** Pronunciation feedback can be especially helpful for children with significant phonological difficulties. Hooked on Phonics second-best due to systematic explicit instruction.",
     },
     {
       type: "heading",
@@ -413,7 +413,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "**Recommendation: Word Wiz AI.** Pronunciation feedback is essential for these children. Traditional apps can't identify or correct pronunciation errors, allowing bad habits to persist. Word Wiz AI catches every phoneme error and provides immediate corrective feedback.",
+        "**Recommendation: Word Wiz AI.** Pronunciation feedback is essential for these children. Traditional apps can't identify or correct pronunciation errors, allowing bad habits to persist. Word Wiz AI checks each sound your child reads and provides immediate corrective feedback.",
     },
     {
       type: "heading",
@@ -434,7 +434,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "**Recommendation: Hooked on Phonics.** Most comprehensive structured curriculum with explicit video instruction. Parents know exactly what's being taught and can supplement. The 36-lesson program provides clear progression from letters to reading books.",
+        "**Recommendation: Hooked on Phonics.** Most comprehensive structured curriculum with explicit video instruction. Parents know exactly what's being taught and can supplement. The step-by-step program provides clear progression from letters to reading books.",
     },
     {
       type: "heading",
@@ -444,7 +444,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "**Recommendation: Word Wiz AI or Hooked on Phonics.** Dyslexic children need systematic, multisensory, explicit instruction—both provide this. Word Wiz AI adds pronunciation feedback which is especially valuable for dyslexic children. Consider using both: Hooked on Phonics for structured lessons, Word Wiz AI for pronunciation practice.",
+        "**Recommendation: Word Wiz AI or Hooked on Phonics.** Dyslexic children need systematic, multisensory, explicit instruction—both provide this. Word Wiz AI adds pronunciation feedback, which can help dyslexic children hear which sounds they missed. Consider using both: Hooked on Phonics for structured lessons, Word Wiz AI for pronunciation practice.",
     },
     {
       type: "heading",
@@ -454,7 +454,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "**Recommendation: Starfall (free).** The free content is substantial and focuses specifically on phonics. If you can afford $35/year, upgrade to Starfall membership. If you can stretch to ~$60/year, ABCmouse provides incredible value with whole-curriculum content.",
+        "**Recommendation: Starfall (free).** The free content is substantial and focuses specifically on phonics. If you can afford $35/year, upgrade to Starfall membership. If you can stretch to $45/year, ABCmouse provides incredible value with whole-curriculum content.",
     },
     {
       type: "heading",
@@ -475,17 +475,17 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "Apps are powerful tools but have limitations. For mildly struggling readers (6-12 months behind), high-quality apps can be sufficient intervention, especially with parent support. For significantly struggling readers (2+ years behind, suspected learning disability), apps work best as supplements to professional tutoring, not replacements.",
+        "Apps are powerful tools but have limitations. For mildly struggling readers, high-quality apps can be sufficient intervention, especially with parent support. For children who are far behind or may have a learning disability, apps work best as supplements to professional tutoring, not replacements.",
     },
     {
       type: "paragraph",
       content:
-        "**When apps alone may be sufficient:** Child is 6-12 months behind, motivated to practice, no suspected learning disability, parents can provide 15-30 minutes daily supervision. **When professional help is needed:** Child is 2+ years behind, has suspected dyslexia or learning disability, shows extreme resistance or anxiety about reading, makes little progress after 8-12 weeks of app use.",
+        "**When apps alone may be sufficient:** Child is a little behind, motivated to practice, no suspected learning disability, parents can sit in on short daily sessions. **When professional help is needed:** Child is far behind, has suspected dyslexia or learning disability, shows extreme resistance or anxiety about reading, makes little progress after several weeks of steady app use.",
     },
     {
       type: "paragraph",
       content:
-        "Even when professional help is needed, apps provide valuable daily practice between tutoring sessions. Many reading specialists recommend combining in-person tutoring (1-2x/week) with daily app practice (15-20 minutes) for optimal results.",
+        "Even when professional help is needed, apps provide valuable daily practice between tutoring sessions. Pairing in-person tutoring once or twice a week with short daily app practice can work well.",
     },
     {
       type: "heading",
@@ -496,20 +496,20 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "For kindergarten struggling readers, consistency matters more than duration. Research shows 15-20 minutes daily outperforms 60 minutes 2-3 times per week. Recommended schedule:",
+        "For kindergarten struggling readers, consistency matters more than duration. Short daily sessions are usually easier for a five-year-old to keep up than a few long ones each week. Recommended schedule:",
     },
     {
       type: "list",
       content: [
-        "**Minimum effective dose:** 15 minutes daily, 5-6 days/week",
-        "**Optimal:** 20-30 minutes daily, 6 days/week",
-        "**Intensive intervention:** 30-40 minutes daily, split into two 15-20 minute sessions",
+        "**A good starting point:** 15 minutes daily, 5-6 days/week",
+        "**A fuller routine:** 20-30 minutes daily, 6 days/week",
+        "**For a child who is further behind:** 30-40 minutes daily, split into two 15-20 minute sessions",
       ],
     },
     {
       type: "paragraph",
       content:
-        "More than 40 minutes daily leads to diminishing returns and burnout for kindergarteners. Better to do 20 minutes daily with engagement than force 60 minutes with tears and resistance.",
+        "Long sessions tend to wear kindergarteners out. Better to do 20 minutes daily with engagement than force 60 minutes with tears and resistance.",
     },
     {
       type: "callout",
@@ -517,7 +517,7 @@ const BestPhonicsAppKindergarten = () => {
         type: "warning",
         title: "Don't Rely on Apps Alone",
         content:
-          "Even the best app should supplement, not replace, other reading activities. Combine app practice with: reading aloud to your child, decodable books, word-building activities, and print awareness (environmental print, signs, labels). Multi-modal exposure accelerates learning.",
+          "Even the best app should supplement, not replace, other reading activities. Combine app practice with: reading aloud to your child, decodable books, word-building activities, and print awareness (environmental print, signs, labels).",
       },
     },
     {
@@ -529,7 +529,7 @@ const BestPhonicsAppKindergarten = () => {
     {
       type: "paragraph",
       content:
-        "If you can only choose one app: **Word Wiz AI for severe pronunciation struggles or suspected dyslexia** (the AI feedback is uniquely valuable); **Hooked on Phonics for comprehensive structured intervention** (proven curriculum, explicit teaching); **Reading Eggs if motivation is the biggest barrier** (gamification keeps resistant readers engaged).",
+        "If you can only choose one app: **Word Wiz AI for severe pronunciation struggles or suspected dyslexia** (it checks each sound your child reads); **Hooked on Phonics for comprehensive structured intervention** (established curriculum, explicit teaching); **Reading Eggs if motivation is the biggest barrier** (gamification keeps resistant readers engaged).",
     },
     {
       type: "paragraph",

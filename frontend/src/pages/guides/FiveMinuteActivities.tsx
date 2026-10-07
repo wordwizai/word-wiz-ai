@@ -9,13 +9,13 @@ const FiveMinuteActivities = () => {
       content: {
         type: "info",
         title: "Can five minutes of reading practice a day actually help?",
-        content: "Yes. Five minutes of focused daily practice produces 35 minutes a week spread across seven sessions, which builds skill faster than a single 30-minute weekly session because the child revisits patterns before forgetting them. Short sessions also end before resistance sets in. Use a timer, pick one focused activity such as a letter-sound speed drill or word-family ladder, and stop when it rings.",
+        content: "Yes. Five minutes of focused daily practice produces 35 minutes a week spread across seven sessions, which tends to build skill better than a single 30-minute weekly session because the child revisits patterns before forgetting them. Short sessions also end before resistance sets in. Use a timer, pick one focused activity such as a letter-sound speed drill or word-family ladder, and stop when it rings.",
       },
     },
     {
       type: "paragraph",
       content:
-        "You know your child needs daily reading practice, but the thought of another 30-minute reading session makes you both exhausted before you even start. Between work, homework, dinner, and bedtime battles, finding time for reading feels impossible. Here is the good news: effective reading practice does not require long sessions. Five minutes—yes, just five—is enough to make real progress when the activity is focused and purposeful. This guide provides 15 quick, effective 5-minute reading practice activities that busy parents can actually do every single day. These activities require minimal prep, no expensive materials, and work for kids from pre-K through second grade. Whether your child loves reading or resists it, these short bursts of practice build skills without burning out either of you. Pick a different activity each day to keep practice fresh, or repeat favorites. The key is consistency: 5 minutes daily beats 30 minutes weekly every time.",
+        "You know your child needs daily reading practice, but the thought of another 30-minute reading session makes you both exhausted before you even start. Between work, homework, dinner, and bedtime battles, finding time for reading feels impossible. Here is the good news: effective reading practice does not require long sessions. Five minutes—yes, just five—is enough to make real progress when the activity is focused and purposeful. This guide provides 15 quick, effective 5-minute reading practice activities that busy parents can actually do every single day. These activities require minimal prep, no expensive materials, and work for kids from pre-K through second grade. Whether your child loves reading or resists it, these short bursts of practice build skills without burning out either of you. Pick a different activity each day to keep practice fresh, or repeat favorites. The key is consistency, since 5 minutes daily usually does more than 30 minutes weekly.",
     },
     {
       type: "heading",
@@ -26,7 +26,7 @@ const FiveMinuteActivities = () => {
     {
       type: "paragraph",
       content:
-        "Reading research shows that frequency matters more than duration for skill building. Five minutes of daily practice creates 35 minutes of weekly practice spread across seven sessions. Compare this to one 30-minute session per week. The daily practice child revisits skills seven times, allowing for spaced repetition and memory consolidation. The weekly practice child revisits skills once, leading to forgetting between sessions. Additionally, 5-minute sessions are short enough that children do not have time to build resistance. Before they can complain or lose focus, the session is over. This keeps practice positive and sustainable. For reluctant readers, 5 minutes feels manageable instead of overwhelming. For eager readers, 5 minutes leaves them wanting more, which is ideal for maintaining motivation. Finally, 5 minutes fits into any schedule. Before breakfast. After school. Before bed. In the car. At the doctor's office. There is always 5 minutes. The brevity makes consistency achievable.",
+        "Frequency often matters more than duration for skill building. Five minutes of daily practice creates 35 minutes of weekly practice spread across seven sessions. Compare this to one 30-minute session per week. The daily practice child revisits skills seven times, allowing for spaced repetition and memory consolidation. The weekly practice child revisits skills once, leading to forgetting between sessions. Additionally, 5-minute sessions are short enough that children do not have time to build resistance. Before they can complain or lose focus, the session is over. This keeps practice positive and sustainable. For reluctant readers, 5 minutes feels manageable instead of overwhelming. For eager readers, 5 minutes leaves them wanting more, which is ideal for maintaining motivation. Finally, 5 minutes fits into any schedule. Before breakfast. After school. Before bed. In the car. At the doctor's office. There is always 5 minutes. The brevity makes consistency achievable.",
     },
     {
       type: "callout",
@@ -46,7 +46,7 @@ const FiveMinuteActivities = () => {
     {
       type: "paragraph",
       content:
-        "**Materials:** Flashcards with individual letters, or write letters on paper. **How it works:** Set a 5-minute timer. Show child one letter at a time. Child says the sound immediately. Go as fast as possible while maintaining accuracy. Track how many letters you get through in 5 minutes. **Goal:** Beat yesterday's record. Start with 26 letters (all consonants and vowels). Once automatic, add digraphs (sh, ch, th) and blends (st, bl, fr). **Why it works:** Rapid-fire review builds automaticity. When letter sounds are instant and effortless, decoding becomes faster and easier. This warm-up activity primes the brain for more complex reading tasks.",
+        "**Materials:** Flashcards with individual letters, or write letters on paper. **How it works:** Set a 5-minute timer. Show child one letter at a time. Child says the sound immediately. Go as fast as possible while maintaining accuracy. Track how many letters you get through in 5 minutes. **Goal:** Beat yesterday's record. Start with 26 letters (all consonants and vowels). Once automatic, add digraphs (sh, ch, th) and blends (st, bl, fr). **Why it works:** Rapid-fire review builds automaticity. When letter sounds are instant and effortless, decoding becomes faster and easier. This warm-up activity gets your child ready for more complex reading tasks.",
     },
     {
       type: "heading",
@@ -90,7 +90,7 @@ const FiveMinuteActivities = () => {
     {
       type: "paragraph",
       content:
-        "**Materials:** None—oral activity. **How it works:** You say a word. Child has 5 seconds to say a rhyming word. Go back and forth. Keep score of successful rhymes. Start easy (cat → bat, dog → frog) and increase difficulty (jump → bump, bring → sing). **Goal:** Get 20+ successful rhymes in 5 minutes. **Why it works:** Rhyming is a phonological awareness skill that predicts reading success. Children who can rhyme quickly have strong sound manipulation skills, which transfer to decoding. This activity requires zero prep and can be done anywhere—in the car, waiting in line, during meals.",
+        "**Materials:** None—oral activity. **How it works:** You say a word. Child has 5 seconds to say a rhyming word. Go back and forth. Keep score of successful rhymes. Start easy (cat → bat, dog → frog) and increase difficulty (jump → bump, bring → sing). **Goal:** Get 20+ successful rhymes in 5 minutes. **Why it works:** Rhyming is an early phonological awareness skill. It helps children notice the sounds inside words, which supports decoding later. This activity requires zero prep and can be done anywhere—in the car, waiting in line, during meals.",
     },
     {
       type: "heading",
@@ -112,7 +112,7 @@ const FiveMinuteActivities = () => {
     {
       type: "paragraph",
       content:
-        "**Materials:** Very short decodable story (1 page, 5-8 sentences). **How it works:** Child reads the story once through, focusing on accuracy. Then reads it again, pushing for speed. Finally reads it a third time with expression and natural phrasing. **Goal:** Three complete readings in 5 minutes. **Why it works:** Repeated reading of the same text is one of the most effective fluency-building strategies. First read establishes accuracy. Second read improves automaticity. Third read adds prosody (expression), which signals true comprehension. One story, three reads, massive gains.",
+        "**Materials:** Very short decodable story (1 page, 5-8 sentences). **How it works:** Child reads the story once through, focusing on accuracy. Then reads it again, pushing for speed. Finally reads it a third time with expression and natural phrasing. **Goal:** Three complete readings in 5 minutes. **Why it works:** The National Reading Panel (2000) found that repeated oral reading with guidance from a parent, teacher, or peer improves fluency. First read establishes accuracy. Second read improves automaticity. Third read adds prosody (expression), which usually goes along with understanding. One story, three reads, steady gains.",
     },
     {
       type: "heading",
@@ -123,7 +123,7 @@ const FiveMinuteActivities = () => {
     {
       type: "paragraph",
       content:
-        "**Materials:** None—oral activity. **How it works:** You say a word. Child breaks it into individual sounds. Example: You say 'cat,' child says '/c/ /a/ /t/.' Start with CVC words, then move to CCVC (blends) and CVCC. **Goal:** Segment 25-30 words correctly in 5 minutes. **Why it works:** Segmenting (breaking words apart) is the opposite of blending (putting sounds together). Children who can segment easily can also spell more accurately. This activity builds phonemic awareness, which is the strongest predictor of reading and spelling success.",
+        "**Materials:** None—oral activity. **How it works:** You say a word. Child breaks it into individual sounds. Example: You say 'cat,' child says '/c/ /a/ /t/.' Start with CVC words, then move to CCVC (blends) and CVCC. **Goal:** Segment 25-30 words correctly in 5 minutes. **Why it works:** Segmenting (breaking words apart) is the opposite of blending (putting sounds together). Children who can segment easily can also spell more accurately. This activity builds phonemic awareness, which the National Reading Panel (2000) named, along with letter knowledge, as one of the two best predictors at school entry of how well children learn to read.",
     },
     {
       type: "heading",
@@ -134,7 +134,7 @@ const FiveMinuteActivities = () => {
     {
       type: "paragraph",
       content:
-        "**Materials:** Word cards or word lists (no pictures). **How it works:** Present 15-20 words with no visual context. Child must decode each word using only the letters. No pictures to use as clues, no context to guess from. Pure phonics-based decoding. **Goal:** Read all 20 words correctly in 5 minutes. **Why it works:** Many children rely on pictures to guess words instead of actually decoding. Picture-free practice forces true reading, not guessing. This is essential for building real literacy skills. If your child struggles without pictures, they are not yet truly reading—they are memorizing and guessing.",
+        "**Materials:** Word cards or word lists (no pictures). **How it works:** Present 15-20 words with no visual context. Child must decode each word using only the letters. No pictures to use as clues, no context to guess from. Pure phonics-based decoding. **Goal:** Read all 20 words correctly in 5 minutes. **Why it works:** Many children rely on pictures to guess words instead of actually decoding. Picture-free practice forces true reading, not guessing. This is essential for building real literacy skills. If your child struggles without pictures, they may be leaning on memorizing and guessing rather than truly reading.",
     },
     {
       type: "heading",
@@ -145,7 +145,7 @@ const FiveMinuteActivities = () => {
     {
       type: "paragraph",
       content:
-        "**Materials:** Device with **Word Wiz AI** app. **How it works:** Set a 5-minute timer. Child practices reading words or sentences on Word Wiz AI. The AI provides instant pronunciation feedback, identifying exactly which sounds were mispronounced. **Goal:** Complete one skill level or practice session. **Why it works:** AI provides precision feedback that humans cannot match. When your child says 'pet' but means 'pit,' the AI catches it. When they skip a sound or substitute a vowel, the AI identifies it immediately. This prevents bad habits from forming and accelerates progress through targeted correction.",
+        "**Materials:** Device with **Word Wiz AI** app. **How it works:** Set a 5-minute timer. Child practices reading words or sentences on Word Wiz AI. The AI provides instant pronunciation feedback, identifying exactly which sounds were mispronounced. **Goal:** Complete one skill level or practice session. **Why it works:** AI gives precise, consistent feedback on every word. When your child says 'pet' but means 'pit,' the AI catches it. When they skip a sound or substitute a vowel, the AI identifies it immediately. This helps stop bad habits from forming through targeted correction.",
     },
     {
       type: "heading",
@@ -283,7 +283,7 @@ const FiveMinuteActivities = () => {
     {
       type: "list",
       content: [
-        "Five minutes daily beats 30 minutes weekly—frequency matters more than duration",
+        "Five minutes daily usually beats 30 minutes weekly—frequency often matters more than duration",
         "Use 15 different activities to prevent boredom and maintain engagement",
         "Most activities require zero or minimal prep (flashcards, paper, pencil)",
         "Set a visible timer and stop immediately when it goes off",
@@ -298,7 +298,7 @@ const FiveMinuteActivities = () => {
     {
       type: "paragraph",
       content:
-        "Reading practice does not have to be a 30-minute battle. Five focused minutes creates real progress when done consistently. These 15 activities give you variety, flexibility, and proven strategies that fit into even the busiest schedules. Pick one activity today. Set your timer. Practice for exactly 5 minutes. Then do it again tomorrow. And the next day. In 30 days, you will have completed 150 minutes of reading practice—2.5 hours—spread across 30 sessions. That is far more effective than a single 2.5-hour marathon. Your child will barely notice the daily time commitment, but you will definitely notice the reading progress. Start today with Activity 1 (letter sound speed drill) or Activity 3 (treasure hunt). Mark your first X on the calendar. Then keep going. Consistency is the superpower.",
+        "Reading practice does not have to be a 30-minute battle. Five focused minutes creates real progress when done consistently. These 15 activities give you variety, flexibility, and practical strategies that fit into even the busiest schedules. Pick one activity today. Set your timer. Practice for exactly 5 minutes. Then do it again tomorrow. And the next day. In 30 days, you will have completed 150 minutes of reading practice—2.5 hours—spread across 30 sessions. That will likely do far more than a single 2.5-hour marathon. Your child will barely notice the daily time commitment, but you will definitely notice the reading progress. Start today with Activity 1 (letter sound speed drill) or Activity 3 (treasure hunt). Mark your first X on the calendar. Then keep going. Consistency is the superpower.",
     },
   ];
 

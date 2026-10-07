@@ -6,7 +6,7 @@ const HomerKhanAcademyKidsComparison = () => {
     tagline: "Personalized learning for ages 2-8",
     pricing: {
       free: "$0 (30-day trial)",
-      paid: "$12.99/mo or $79.99/yr",
+      paid: "$9.99/mo or $59.99/yr",
       trial: "30 days free",
     },
     website: "https://learnwithhomer.com",
@@ -40,7 +40,7 @@ const HomerKhanAcademyKidsComparison = () => {
           name: "AI-Powered Personalization",
           product1: "Interest-based",
           product2: "Adaptive",
-          wordWiz: "GPT-4",
+          wordWiz: "Yes",
         },
         {
           name: "Speech Recognition",
@@ -127,7 +127,7 @@ const HomerKhanAcademyKidsComparison = () => {
         },
         {
           name: "Web Browser Access",
-          product1: false,
+          product1: true,
           product2: false,
           wordWiz: true,
         },
@@ -139,7 +139,7 @@ const HomerKhanAcademyKidsComparison = () => {
         },
         {
           name: "No Download Required",
-          product1: false,
+          product1: true,
           product2: false,
           wordWiz: true,
         },
@@ -157,8 +157,8 @@ const HomerKhanAcademyKidsComparison = () => {
         {
           name: "Multiple Child Profiles",
           product1: "Up to 4",
-          product2: "Unlimited",
-          wordWiz: "Multiple",
+          product2: "Multiple",
+          wordWiz: "One per account",
         },
         {
           name: "Parent Progress Dashboard",
@@ -170,7 +170,7 @@ const HomerKhanAcademyKidsComparison = () => {
           name: "Offline Activities/Printables",
           product1: true,
           product2: "Limited",
-          wordWiz: "Coming soon",
+          wordWiz: false,
         },
         {
           name: "Educational Resources for Parents",
@@ -211,7 +211,7 @@ const HomerKhanAcademyKidsComparison = () => {
           name: "Safe for Kids (COPPA)",
           product1: true,
           product2: true,
-          wordWiz: true,
+          wordWiz: "See privacy policy",
         },
       ],
     },
@@ -220,7 +220,9 @@ const HomerKhanAcademyKidsComparison = () => {
   const product1Details = {
     pros: [
       { text: "Highly personalized based on child interests" },
-      { text: "Claims 74% improvement in reading scores" },
+      {
+        text: "Cites a six-week NYU study (82 preschoolers) where phonological awareness scores rose 74%",
+      },
       { text: "Multi-subject coverage (reading, math, SEL)" },
       { text: "Up to 4 child profiles per subscription" },
       { text: "Engaging, joyful learning experience" },
@@ -228,7 +230,6 @@ const HomerKhanAcademyKidsComparison = () => {
     ],
     cons: [
       { text: "No speech recognition for pronunciation" },
-      { text: "App-only (no web browser version)" },
       { text: "Requires subscription after trial" },
       { text: "Limited phonics depth compared to specialists" },
       { text: "Best for younger kids (ages 2-6)" },
@@ -244,11 +245,11 @@ const HomerKhanAcademyKidsComparison = () => {
 
   const product2Details = {
     pros: [
-      { text: "100% free forever (no cost ever)" },
+      { text: "100% free for families (no ads or subscriptions)" },
       { text: "Completely ad-free nonprofit platform" },
       { text: "Khan Academy brand trust and reputation" },
       { text: "Adaptive learning that adjusts to child" },
-      { text: "Unlimited child profiles" },
+      { text: "Multiple child profiles" },
       { text: "High-quality content with regular updates" },
     ],
     cons: [
@@ -269,13 +270,13 @@ const HomerKhanAcademyKidsComparison = () => {
 
   const wordWizDetails = {
     pros: [
-      { text: "Only free app with speech recognition" },
+      { text: "Listens as your child reads aloud" },
       { text: "Phoneme-level pronunciation analysis" },
-      { text: "GPT-4 powered personalized feedback" },
+      { text: "Next sentence written around the sounds your child missed" },
       { text: "Web-based (works on any device)" },
       { text: "No app download required" },
       { text: "Specialized for phonics and pronunciation" },
-      { text: "Teacher dashboard for educators" },
+      { text: "Free classes for teachers, with phonics patterns to assign" },
     ],
     cons: [
       { text: "Requires microphone and internet" },
@@ -301,34 +302,34 @@ const HomerKhanAcademyKidsComparison = () => {
     wordWiz:
       "Choose Word Wiz AI if you want the only free platform with speech recognition and phoneme-level feedback. While HOMER and Khan Kids offer breadth, only Word Wiz AI provides speech analysis depth.",
     overall:
-      "For pronunciation and phonics mastery, Word Wiz AI is the clear choice among free options. Khan Academy Kids offers broad free learning, HOMER offers personalized paid learning, but only Word Wiz AI combines free access with advanced speech recognition technology. If your child needs more than games and videos—if they need actual pronunciation coaching—Word Wiz AI is unmatched.",
+      "For pronunciation and phonics practice, Word Wiz AI is the one of these three that listens to your child read. Khan Academy Kids offers broad free learning and HOMER offers personalized paid learning, but neither checks how your child reads aloud. If your child needs more than games and videos—if they need actual pronunciation coaching—Word Wiz AI adds that for free.",
   };
 
   const faqs = [
     {
       question: "Which is completely free with no limitations?",
       answer:
-        "Both Khan Academy Kids and Word Wiz AI are free. Khan Kids is 100% free for all features across all subjects. Word Wiz AI is free for core features including speech recognition, with optional premium features. HOMER requires paid subscription after 30-day trial.",
+        "Both Khan Academy Kids and Word Wiz AI are free. The Khan Kids app is 100% free for families across all subjects, with no ads or subscriptions. Word Wiz AI is free, including speech recognition, with no paid tier. HOMER requires paid subscription after 30-day trial.",
     },
     {
       question: "Do any of these apps have speech recognition?",
       answer:
-        "Only Word Wiz AI has speech recognition technology. Neither HOMER nor Khan Academy Kids can listen to your child read or analyze pronunciation—they rely on tap-and-click activities.",
+        "Of these three, only Word Wiz AI has speech recognition technology. Neither HOMER nor Khan Academy Kids analyzes your child's reading aloud or pronunciation—they rely on tap-and-click activities.",
     },
     {
       question: "Which is best for personalized learning?",
       answer:
-        "HOMER specializes in personalization based on interests (sports, princesses, space, etc.). Khan Academy Kids adapts difficulty level. Word Wiz AI uses GPT-4 to generate personalized feedback based on specific pronunciation errors—the only one that personalizes to actual speech patterns.",
+        "HOMER specializes in personalization based on interests (sports, princesses, space, etc.). Khan Academy Kids adapts difficulty level. Word Wiz AI writes feedback and the next sentence around the specific sounds your child missed—the one of the three that personalizes to how your child actually reads aloud.",
     },
     {
       question: "Can I use these on a web browser or do I need an app?",
       answer:
-        "HOMER and Khan Academy Kids are app-only (iOS/Android). Word Wiz AI is web-based, working in any browser without downloads. This makes Word Wiz AI more accessible across devices.",
+        "Khan Academy Kids is app-only (iOS, Android and Amazon devices). HOMER is mainly used as an app, though it can also be used on a computer. Word Wiz AI is web-based, working in any browser without downloads.",
     },
     {
       question: "Which is better for a struggling reader?",
       answer:
-        "Word Wiz AI is specifically designed for pronunciation challenges. Its phoneme-level feedback identifies exactly which sounds a child struggles with. HOMER and Khan Academy Kids offer general reading content but cannot diagnose or correct specific pronunciation issues.",
+        "Word Wiz AI is specifically designed for pronunciation challenges. Its phoneme-level feedback shows which sounds a child struggles with. HOMER and Khan Academy Kids offer general reading content but cannot diagnose or correct specific pronunciation issues.",
     },
     {
       question: "Are these suitable for homeschooling?",
@@ -350,7 +351,7 @@ const HomerKhanAcademyKidsComparison = () => {
       metaDescription="Compare HOMER's personalization, Khan Academy Kids' free platform, and Word Wiz AI's speech recognition. See which learning app is best for your child."
       canonicalUrl="https://wordwizai.com/comparisons/homer-vs-khan-academy-kids-vs-word-wiz-ai"
       h1Title="HOMER vs Khan Academy Kids vs Word Wiz AI: Personalized Learning Compared"
-      introText="Khan Academy Kids is free with no paid tier, HOMER costs $12.99/month or $79.99/year for interest-based personalization, and Word Wiz AI is free and the only one that listens to a child read aloud. Khan Academy Kids paired with Word Wiz AI covers both breadth and pronunciation at no cost."
+      introText="Khan Academy Kids is free for families with no ads or subscriptions, HOMER offers interest-based personalization for $9.99/month or $59.99/year after a 30-day free trial, and Word Wiz AI is free and the only one of the three that listens to a child read aloud. Khan Academy Kids paired with Word Wiz AI covers both breadth and pronunciation at no cost."
       verdict={verdict}
       faqs={faqs}
     />

@@ -9,13 +9,13 @@ const ChoosingReadingApp = () => {
       content: {
         type: "info",
         title: "How do you choose the right reading app for your child?",
-        content: "Work through five steps: identify the child's specific skill gap, set a budget, verify the app teaches systematic phonics in a defined sequence, evaluate whether it offers real speech feedback rather than just recording, and trial it long enough to judge engagement. Reading apps range from free to about $20 a month, so match the app to the gap before comparing prices.",
+        content: "Work through five steps. Identify the specific skill your child needs to work on, set a budget, verify the app teaches systematic phonics in a defined sequence, evaluate whether it offers real speech feedback rather than just recording, and trial it long enough to judge engagement. Most reading apps cost somewhere between nothing and about $15 a month, so match the app to what your child needs before comparing prices.",
       },
     },
     {
       type: "paragraph",
       content:
-        "With hundreds of reading apps available and aggressive marketing campaigns promoting each one as 'the best,' choosing the right one for your child can feel overwhelming and confusing. The stakes feel high because you want to make the right choice for your child's education, and many of these apps require significant financial investment or time commitment. Some apps cost hundreds of dollars per year, while others are free but may not be effective. How do you know which app will actually help your child learn to read versus just keeping them entertained? This comprehensive guide will help you cut through the marketing noise and select an app that actually helps your child become a better, more confident reader. By the end of this guide, you will have a clear decision-making framework based on research and practical considerations rather than advertising claims.",
+        "With hundreds of reading apps available and aggressive marketing campaigns promoting each one as 'the best,' choosing the right one for your child can feel overwhelming and confusing. The stakes feel high because you want to make the right decision for your child's education, and many of these apps require significant financial investment or time commitment. Some apps cost hundreds of dollars per year, while others are free but may not be effective. How do you know which app will actually help your child learn to read versus just keeping them entertained? This comprehensive guide will help you cut through the marketing noise and select an app that actually helps your child become a better, more confident reader. By the end of this guide, you will have a clear decision-making framework based on practical considerations rather than advertising claims.",
     },
     {
       type: "heading",
@@ -26,7 +26,7 @@ const ChoosingReadingApp = () => {
     {
       type: "paragraph",
       content:
-        "Not all reading apps are created equal, and many apps that appear educational are actually just games wrapped in academic language. The difference between an effective reading app and an entertaining distraction can be subtle but crucial for your child's learning outcomes. Before downloading anything or paying for a subscription, take time to evaluate whether the app includes these essential features that research shows actually support reading development:",
+        "Not all reading apps are created equal, and many apps that appear educational are actually just games wrapped in academic language. The difference between an effective reading app and an entertaining distraction can be subtle but crucial for your child's learning outcomes. Before downloading anything or paying for a subscription, take time to evaluate whether the app includes these essential features that actually support reading development.",
     },
     {
       type: "heading",
@@ -36,7 +36,7 @@ const ChoosingReadingApp = () => {
     {
       type: "paragraph",
       content:
-        "The app should teach systematic, explicit phonics instruction based on the Science of Reading research. This means teaching letter-sound correspondences in a logical, sequential order rather than randomly introducing words or patterns. The app should build from simple to complex, starting with basic consonant-vowel-consonant words before moving to more advanced patterns. Major red flags include apps that encourage guessing from pictures or using context clues instead of actually decoding words. These approaches, sometimes called '3-cueing,' have been thoroughly debunked by reading research but unfortunately still appear in many popular apps. Look for apps that explicitly and systematically teach letter-sound relationships and require children to apply those relationships to decode words.",
+        "The app should teach systematic, explicit phonics instruction based on the Science of Reading research. This means teaching letter-sound correspondences in a logical, sequential order rather than randomly introducing words or patterns. The app should build from simple to complex, starting with basic consonant-vowel-consonant words before moving to more advanced patterns. Major red flags include apps that encourage guessing from pictures or using context clues instead of actually decoding words. These approaches, sometimes called '3-cueing,' have been widely criticized by reading researchers but unfortunately still appear in many popular apps. Look for apps that explicitly and systematically teach letter-sound relationships and require children to apply those relationships to decode words.",
     },
     {
       type: "callout",
@@ -112,7 +112,7 @@ const ChoosingReadingApp = () => {
     {
       type: "paragraph",
       content:
-        "However, Word Wiz AI breaks this pattern by offering advanced speech recognition completely free, a feature typically reserved for premium apps.",
+        "However, Word Wiz AI breaks this pattern by offering speech recognition completely free, with no ads or in-app purchases.",
     },
     {
       type: "heading",
@@ -154,15 +154,15 @@ const ChoosingReadingApp = () => {
     },
     {
       type: "paragraph",
-      content: "Reading apps range from free to $20/month. Be realistic about:",
+      content: "Most reading apps range from free to about $15/month. Prices below were checked in October 2026 and change often. Be realistic about:",
     },
     {
       type: "list",
       content: [
-        "$0: Free options (Word Wiz AI, Teach Your Monster, Khan Academy Kids)",
-        "$5-10/month: Mid-range (Reading Eggs, ABCya Premium)",
-        "$15-20/month: Premium (IXL, Hooked on Phonics, ABCmouse)",
-        "$50+/month: Tutoring replacements (some specialized apps)",
+        "$0: Free options (Word Wiz AI, Teach Your Monster in the browser, Khan Academy Kids)",
+        "About $8-10/month: Mid-range (Reading IQ at $7.99, IXL from $9.95 for one subject)",
+        "About $14-15/month: Premium (Reading Eggs at $13.99, Hooked on Phonics and ABCmouse at $14.99)",
+        "More than that: Tutoring replacements (some specialized apps)",
       ],
     },
     {
@@ -171,7 +171,7 @@ const ChoosingReadingApp = () => {
         type: "tip",
         title: "Budget Tip",
         content:
-          "Start with free options before committing to subscriptions. Word Wiz AI offers speech recognition free, which most paid apps charge extra for.",
+          "Start with free options before committing to subscriptions. Word Wiz AI offers speech recognition for free.",
       },
     },
     {
@@ -215,10 +215,10 @@ const ChoosingReadingApp = () => {
     {
       type: "list",
       content: [
-        "Word Wiz AI: FREE, phoneme-level analysis with GPT-4 feedback",
-        "Reading IQ: Recording feature but no analysis ($10/month)",
-        "Raz-Kids: Can record but doesn't analyze pronunciation ($120/classroom)",
-        "Amira: Has speech recognition but costs $15-25/month",
+        "Word Wiz AI: FREE, phoneme-level analysis with AI-written feedback",
+        "Reading IQ: Recording feature but no analysis ($7.99/month)",
+        "Raz-Kids: Can record but doesn't analyze pronunciation (paid classroom license)",
+        "Amira: Has speech recognition but is sold mainly to schools",
       ],
     },
     {
@@ -273,9 +273,9 @@ const ChoosingReadingApp = () => {
       type: "list",
       content: [
         "Word Wiz AI (free, speech recognition for pronunciation)",
-        "Hooked on Phonics ($20/month, traditional phonics curriculum)",
-        "Reading Eggs ($10/month, gamified systematic phonics)",
-        "Teach Your Monster to Read (free, UK phonics, no speech recognition)",
+        "Hooked on Phonics ($14.99/month, traditional phonics curriculum)",
+        "Reading Eggs ($13.99/month, gamified systematic phonics)",
+        "Teach Your Monster to Read (free in the browser, UK phonics, no speech recognition)",
       ],
     },
     {
@@ -295,10 +295,10 @@ const ChoosingReadingApp = () => {
     {
       type: "list",
       content: [
-        "ABCmouse ($13/month, 850+ activities across subjects)",
-        "Homer ($10/month, personalized learning path)",
+        "ABCmouse ($14.99/month, 13,000+ activities across subjects)",
+        "Homer (subscription, personalized learning path)",
         "Khan Academy Kids (free, broad early learning)",
-        "Duolingo ABC (free, early literacy for ages 3-7, iOS only)",
+        "Duolingo ABC (free, early literacy for ages 3-7, iOS and Android)",
       ],
     },
     {
@@ -318,9 +318,9 @@ const ChoosingReadingApp = () => {
     {
       type: "list",
       content: [
-        "Raz-Kids ($120/classroom, 400+ leveled books)",
+        "Raz-Kids (paid classroom license, hundreds of leveled books)",
         "Epic (subscription, 40,000+ books)",
-        "Reading IQ ($10/month, 7,000+ books)",
+        "Reading IQ ($7.99/month, 1,000+ books)",
       ],
     },
     {
@@ -340,8 +340,8 @@ const ChoosingReadingApp = () => {
     {
       type: "list",
       content: [
-        "Word Wiz AI (FREE, phoneme-level analysis, GPT-4 feedback)",
-        "Amira Learning ($15-25/month, school-focused)",
+        "Word Wiz AI (FREE, phoneme-level analysis, AI-written feedback)",
+        "Amira Learning (sold mainly to schools)",
         "Reading Assistant (school licenses only)",
       ],
     },
@@ -437,7 +437,7 @@ const ChoosingReadingApp = () => {
     {
       type: "list",
       content: [
-        "Word Wiz AI: Speech recognition + pronunciation feedback (normally $10-20/month feature)",
+        "Word Wiz AI: Speech recognition + pronunciation feedback",
         "Teach Your Monster to Read: Systematic phonics game (browser version)",
         "Khan Academy Kids: General early learning",
         "Starfall: Free tier with basic phonics",
@@ -559,7 +559,7 @@ const ChoosingReadingApp = () => {
     {
       type: "paragraph",
       content:
-        "Here are evidence-based recommendations for specific situations:",
+        "Here are our recommendations for specific situations.",
     },
     {
       type: "heading",
@@ -579,7 +579,7 @@ const ChoosingReadingApp = () => {
     {
       type: "paragraph",
       content:
-        "Teach Your Monster to Read (free) or Duolingo ABC (free, iOS only) - Both offer systematic phonics in engaging formats.",
+        "Teach Your Monster to Read (free in the browser) or Duolingo ABC (free) - Both offer systematic phonics in engaging formats.",
     },
     {
       type: "heading",
@@ -696,7 +696,7 @@ const ChoosingReadingApp = () => {
       type: "list",
       content: [
         "It's completely free (no hidden costs or subscriptions)",
-        "It has the most important feature (speech recognition) that others charge $10-20/month for",
+        "It has the most important feature (speech recognition), which most reading apps leave out",
         "It provides specific, actionable feedback on pronunciation",
         "It's based on the Science of Reading (systematic phonics)",
         "It works on any device (browser-based, no app download needed)",
@@ -706,7 +706,7 @@ const ChoosingReadingApp = () => {
     {
       type: "paragraph",
       content:
-        "You can always add other apps later, but Word Wiz AI should be in every parent's toolkit because it solves a problem (pronunciation feedback) that nothing else addresses for free.",
+        "You can always add other apps later, but Word Wiz AI should be in every parent's toolkit because it gives detailed pronunciation feedback for free.",
     },
     {
       type: "callout",
@@ -746,7 +746,7 @@ const ChoosingReadingApp = () => {
       afterSection: 11,
       title: "Try Speech Recognition for Free",
       description:
-        "Word Wiz AI offers phoneme-level pronunciation feedback at no cost, a feature most apps charge $10-20/month for",
+        "Word Wiz AI offers phoneme-level pronunciation feedback at no cost",
       buttonText: "Start Free",
       buttonHref: "/signup",
     },
@@ -804,7 +804,7 @@ const ChoosingReadingApp = () => {
   return (
     <ArticlePageTemplate
       metaTitle="How to Choose the Right Reading App for Your Child"
-      metaDescription="Overwhelmed by reading app choices? Use this 5-step framework to select the best app for your child. Includes comparison worksheet, red flags, and expert recommendations."
+      metaDescription="Overwhelmed by reading app options? Use this 5-step framework to select the best app for your child. Includes comparison worksheet, red flags, and recommendations by need."
       canonicalUrl="https://wordwizai.com/guides/how-to-choose-reading-app"
       heroImage="https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=1920&h=1080&fit=crop"
       heroImageAlt="Child using tablet with educational reading app"

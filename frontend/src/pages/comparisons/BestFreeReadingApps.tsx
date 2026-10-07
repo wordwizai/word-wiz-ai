@@ -3,10 +3,10 @@ import ComparisonPage from "@/components/ComparisonPageTemplate";
 const BestFreeReadingAppsComparison = () => {
   const product1 = {
     name: "Starfall",
-    tagline: "Nonprofit educational platform since 2002",
+    tagline: "Nonprofit educational platform, online since 2002",
     pricing: {
       free: "Limited free",
-      paid: "$60/yr for full access",
+      paid: "$35/yr for full access",
       trial: "Free tier available",
     },
     website: "https://www.starfall.com",
@@ -40,7 +40,7 @@ const BestFreeReadingAppsComparison = () => {
           name: "Completely Free",
           product1: "Limited",
           product2: true,
-          wordWiz: "Core features",
+          wordWiz: true,
         },
         {
           name: "No Trial Period Limits",
@@ -198,8 +198,8 @@ const BestFreeReadingAppsComparison = () => {
         },
         {
           name: "Multiple Child Profiles",
-          product1: "Paid",
-          product2: "Unlimited",
+          product1: false,
+          product2: true,
           wordWiz: true,
         },
       ],
@@ -209,7 +209,7 @@ const BestFreeReadingAppsComparison = () => {
       features: [
         {
           name: "Parent Dashboard",
-          product1: "Paid tier",
+          product1: false,
           product2: true,
           wordWiz: true,
         },
@@ -221,7 +221,7 @@ const BestFreeReadingAppsComparison = () => {
         },
         {
           name: "Detailed Progress Reports",
-          product1: "Paid",
+          product1: false,
           product2: "Basic",
           wordWiz: "Detailed",
         },
@@ -239,16 +239,16 @@ const BestFreeReadingAppsComparison = () => {
     pros: [
       { text: "Free tier available (no cost to start)" },
       { text: "Nonprofit mission focused on education" },
-      { text: "Specifically designed for dyslexia" },
+      { text: "Founded by someone who had dyslexia" },
       { text: "Multisensory, untimed activities" },
       { text: "Trusted by teachers nationwide" },
-      { text: "No advertising or data collection" },
+      { text: "No advertising, and no personal data collected from children" },
     ],
     cons: [
-      { text: "Best features require $60/year" },
+      { text: "Best features require $35/year" },
       { text: "No speech recognition technology" },
       { text: "Interface feels dated" },
-      { text: "No progress tracking in free tier" },
+      { text: "No progress tracking for children" },
       { text: "Limited personalization" },
     ],
     bestFor: [
@@ -257,7 +257,7 @@ const BestFreeReadingAppsComparison = () => {
       "Multi-subject learning on a budget",
     ],
     description:
-      "Starfall is a nonprofit platform founded specifically to help children with dyslexia learn to read. It offers multisensory activities with a free tier, though best features require annual membership.",
+      "Starfall is a nonprofit platform whose founder had dyslexia and built it to help children learn to read. It offers multisensory activities with a free tier, though best features require annual membership.",
   };
 
   const product2Details = {
@@ -266,7 +266,7 @@ const BestFreeReadingAppsComparison = () => {
       { text: "No ads ever (nonprofit)" },
       { text: "Khan Academy brand trust" },
       { text: "Adaptive learning technology" },
-      { text: "Unlimited child profiles" },
+      { text: "Multiple child profiles" },
       { text: "Comprehensive multi-subject curriculum" },
     ],
     cons: [
@@ -313,7 +313,7 @@ const BestFreeReadingAppsComparison = () => {
 
   const verdict = {
     product1:
-      "Choose Starfall if you want a free dyslexia-friendly platform with multisensory activities. It's trusted by educators but requires $60/year for full features and lacks speech recognition.",
+      "Choose Starfall if you want a free dyslexia-friendly platform with multisensory activities. It's trusted by educators but requires $35/year for full features and lacks speech recognition.",
     product2:
       "Choose Khan Academy Kids if you want 100% free multi-subject learning from a trusted nonprofit. It's comprehensive and completely free but doesn't focus on phonics or pronunciation.",
     wordWiz:
@@ -351,7 +351,7 @@ const BestFreeReadingAppsComparison = () => {
     {
       question: "Can I use multiple apps together?",
       answer:
-        "Absolutely! Many families use Khan Academy Kids for broad learning, Starfall for dyslexia-friendly activities, and Word Wiz AI for pronunciation practice. Since all have free options, you can combine them based on your child's needs.",
+        "Absolutely! You could use Khan Academy Kids for broad learning, Starfall for dyslexia-friendly activities, and Word Wiz AI for pronunciation practice. Since all have free options, you can combine them based on your child's needs.",
     },
     {
       question: "Which requires an app download vs works in browser?",
@@ -373,7 +373,7 @@ const BestFreeReadingAppsComparison = () => {
       metaDescription="Compare the best free reading apps for kids. See Starfall, Khan Academy Kids, and Word Wiz AI features, speech recognition, and which is best for your child."
       canonicalUrl="https://wordwizai.com/comparisons/best-free-reading-apps"
       h1Title="Best Free Reading Apps: Starfall vs Khan Academy Kids vs Word Wiz AI"
-      introText="Khan Academy Kids is entirely free with the broadest curriculum, Starfall is free with limits or $60/year for full access, and Word Wiz AI is free and the only one that gives spoken pronunciation feedback. For a genuinely free setup, Khan Academy Kids covers breadth while Word Wiz AI covers pronunciation accuracy."
+      introText="Khan Academy Kids is entirely free with the broadest curriculum, Starfall is free with limits or $35/year for full access, and Word Wiz AI is free and the only one that gives spoken pronunciation feedback. For a genuinely free setup, Khan Academy Kids covers breadth while Word Wiz AI covers pronunciation accuracy."
       verdict={verdict}
       faqs={faqs}
     />

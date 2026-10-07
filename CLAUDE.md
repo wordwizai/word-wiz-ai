@@ -371,9 +371,13 @@ Test JSON format example:
 
 #### Scoring and audio flags
 `WWAI_*` flags read in `core/`. The speechocean762 benchmark (`backend/tests/benchmark/README.md`)
-decided the defaults below. Falsy values are `0`, `false`, `no` and `off`.
+decided the defaults below. Falsy values are `0`, `false`, `no` and `off`, and the kill switches
+take `1`, `true`, `yes` or `on`. Each accepted change has one, so the original behaviour can still be measured.
 - `WWAI_GT_ANCHORED_ALIGNMENT` (default on) - Align phonemes against the expected words, with the ASR transcript only as a hint. A falsy value restores the legacy ASR-driven alignment.
-- `WWAI_LEGACY_WORD_SCORING` (default off) - Kill switch for word scoring v2, which scores each word against its closest CMUdict pronunciation and forgives one stray phoneme at each edge. A truthy value goes back to primary-G2P scoring with every insertion counted.
+- `WWAI_LEGACY_WORD_SCORING` (default off) - Kill switch for word scoring v2, which scores each word against its closest CMUdict pronunciation and forgives up to three stray phonemes at each edge, unless the ASR heard a different word that fits the sounds ("sit" for "it"). A truthy value goes back to primary-G2P scoring with every insertion counted.
+- `WWAI_LEGACY_FEEDBACK` (default off) - Kill switch for the spoken-feedback changes. By default a word is corrected only when at least three of its sounds were wrong (`is_clear_mistake` in `core/phoneme_feedback_formatter.py`), the feedback names the word the focus sound came from, and with no clear mistake the child hears "Keep practicing!" (or "Great job!" when sentence PER is 0.2 or less). A truthy value restores the PER >= 0.4 cutoff, the old naming and the old fallback. Every word record carries `clear_mistake`, but the practice screen still colours words by PER (`WordBadge.tsx`).
+- `WWAI_LEGACY_SENTENCE_CLEANING` (default off) - `clean_sentence` keeps apostrophes inside words ("it's" and "didn't" are in CMUdict, "its"-style spellings like "didnt" are not) and drops double quotes, colons, semicolons and dashes. A truthy value restores the old cleanup, which stripped every apostrophe.
+- `WWAI_REQUIRE_ASR_WORDS` (default off) - On the anchored path a reading is scored even when the ASR heard nothing, as long as the phoneme model heard at least 30% of the expected phonemes (`MIN_PHONEME_COVERAGE` in `core/process_audio.py`). A truthy value brings back the old requirement of two ASR words and two phoneme groups.
 - `WWAI_SINGLE_PREPROCESS` and `WWAI_SOFT_QUALITY_GATES` (default on) - Preprocess the audio once instead of twice, and use the robust SNR measurement with soft quality warnings. A falsy value turns each off. Both change the audio the models receive, so the benchmark keeps a separate cache for each setting.
 - `WWAI_PHONEME_NORMALIZATION` (default off) - Rewrites recognized ʧ/ʤ to tʃ/dʒ while G2P keeps the ligatures, so every CH and JH word reads as an error. Known affricate mismatch, and the benchmark rejected it.
 - `WWAI_WEIGHTED_PER` (default off) - No effect on server scoring with GT-anchored alignment, since word scoring computes plain PER itself.

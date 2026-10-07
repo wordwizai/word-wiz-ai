@@ -7,16 +7,16 @@ before creating an account. Compared with /ai/analyze-audio this route:
 - needs no login and writes nothing to the database,
 - never stores the recording (cache_audio=False in preprocessing),
 - skips the GPT next-sentence step (the page walks through fixed sentences),
-- only scores sentences from the practice-word pages (data/guest_sentences.json),
+- only scores sentences from the practice-word pages (data/phonics_patterns.json),
 - is rate-limited per IP, capped site-wide per hour, and runs a limited
   number of analyses at once so guests can't starve signed-in users.
 """
 
 import asyncio
 import json
-from pathlib import Path
 
 from core.guest_limits import SlidingWindowLimiter, client_ip, normalize_sentence
+from core.phonics_data import all_patterns
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile, status
 from fastapi.responses import StreamingResponse
 from routers.handlers.audio_processing_handler import analyze_audio_guest_event_stream
@@ -41,15 +41,11 @@ GUEST_CONCURRENCY = 2
 QUEUE_WAIT_SECONDS = 20
 _guest_slots = asyncio.Semaphore(GUEST_CONCURRENCY)
 
-_SENTENCES_FILE = Path(__file__).resolve().parent.parent / "data" / "guest_sentences.json"
-
-
 def _load_allowed_sentences() -> set[str]:
-    data = json.loads(_SENTENCES_FILE.read_text(encoding="utf-8"))
     return {
         normalize_sentence(sentence)
-        for sentences in data["patterns"].values()
-        for sentence in sentences
+        for pattern in all_patterns().values()
+        for sentence in pattern["sentences"]
     }
 
 

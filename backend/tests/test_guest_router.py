@@ -225,7 +225,7 @@ class GuestStreamTest(unittest.TestCase):
 class AllowlistTest(unittest.TestCase):
     def test_allowlist_matches_frontend_data(self):
         result = subprocess.run(
-            [sys.executable, str(BACKEND / "scripts" / "export_guest_sentences.py"), "--check"],
+            [sys.executable, str(BACKEND / "scripts" / "export_phonics_data.py"), "--check"],
             capture_output=True, text=True,
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

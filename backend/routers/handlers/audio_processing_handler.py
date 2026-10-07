@@ -24,6 +24,7 @@ from core.temp_audio_cache import audio_cache
 from core.process_audio import process_audio_with_client_phonemes, analyze_results
 from core.grapheme_to_phoneme import grapheme_to_phoneme as g2p
 from crud.feedback_entry import create_feedback_entry, get_feedback_entries_by_session
+from crud.phonics_sessions import finish_pattern_session
 from crud.session import get_session
 from fastapi import HTTPException, UploadFile, status
 from models.session import Session as UserSession
@@ -606,16 +607,20 @@ async def analyze_audio_file_event_stream(
 
                 if task is gpt_task:
                     sentence_result = result
+                    # Pattern sessions end after their last line instead of
+                    # getting another sentence (core/modes/phonics_pattern.py).
+                    session_complete = bool(sentence_result.get("session_complete")) and session.pattern is not None
 
-                    next_sentence_payload = {
-                        "type": "next_sentence",
-                        "data": {
-                            "sentence": sentence_result.get("sentence", ""),
-                        },
-                    }
-                    print("📤 Sending next_sentence payload (GPT)...")
-                    yield f"data: {json.dumps(sanitize(next_sentence_payload))}\n\n"
-                    await asyncio.sleep(0.01)
+                    if not session_complete:
+                        next_sentence_data = {"sentence": sentence_result.get("sentence", "")}
+                        # Pattern sessions also say which line this is.
+                        for key in ("line_index", "line_count"):
+                            if key in sentence_result:
+                                next_sentence_data[key] = sentence_result[key]
+                        next_sentence_payload = {"type": "next_sentence", "data": next_sentence_data}
+                        print("📤 Sending next_sentence payload (GPT)...")
+                        yield f"data: {json.dumps(sanitize(next_sentence_payload))}\n\n"
+                        await asyncio.sleep(0.01)
 
                     # STEP 4: LOG TO DB as soon as we have the sentence.
                     # Local feedback is already known, so we have everything we need.
@@ -632,6 +637,16 @@ async def analyze_audio_file_event_stream(
                         gpt_response=gpt_response_for_db,
                     )
                     create_feedback_entry(db, feedback_entry)
+
+                    if session_complete:
+                        # Scored after saving, so this reading counts too.
+                        complete_payload = {
+                            "type": "session_complete",
+                            "data": finish_pattern_session(db, session),
+                        }
+                        print("📤 Sending session_complete payload...")
+                        yield f"data: {json.dumps(sanitize(complete_payload))}\n\n"
+                        await asyncio.sleep(0.01)
 
                 else:
                     # TTS future completed

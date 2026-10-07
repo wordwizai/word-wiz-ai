@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import SessionHistoryList from "./SessionHistoryList";
 import PhonemeInsightsCard from "./PhonemeInsightsCard";
 import RecommendationsCard from "./RecommendationsCard";
+import StudentPhonicsPath from "./StudentPhonicsPath";
 import {
   ArrowLeft,
   BookOpen,
@@ -234,6 +235,8 @@ const StudentDetailView = ({
           </div>
         </div>
       </Card>
+
+      <StudentPhonicsPath classId={classId} studentId={student.id} />
 
       {/* Recent Activity */}
       <Card className="gap-0 rounded-2xl py-0 shadow-xs">

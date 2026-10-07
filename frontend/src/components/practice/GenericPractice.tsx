@@ -4,6 +4,8 @@ import ChoiceStoryBasePractice from "@/components/practice/ChoiceStoryBasePracti
 import PracticeStage from "@/components/practice/PracticeStage";
 import { LocalProcessingAlert } from "@/components/LocalProcessingAlert";
 import { getPracticeConfig } from "@/config/practiceTypes";
+import PatternFinish from "@/components/practice/PatternFinish";
+import { lineLabel } from "@/lib/phonics";
 
 interface GenericPracticeProps {
   session: Session;
@@ -41,19 +43,34 @@ const GenericPractice = ({ session, activityType }: GenericPracticeProps) => {
   return (
     <BasePractice
       session={session}
-      renderContent={(props) => (
-        <>
-          <LocalProcessingAlert />
-          <PracticeStage
-            {...props}
-            session={session}
-            next={{
-              visible: config.features.hasNextButton && props.showNextButton,
-              onNext: props.displayNextSentence,
-            }}
-          />
-        </>
-      )}
+      renderContent={(props) =>
+        props.finished && props.sessionResult ? (
+          <PatternFinish session={session} result={props.sessionResult} />
+        ) : (
+          <>
+            <LocalProcessingAlert />
+            <PracticeStage
+              {...props}
+              session={session}
+              // Pattern sessions show the pattern and "Line 3 of 7".
+              title={session.pattern_name ?? undefined}
+              subtitle={
+                props.lineInfo
+                  ? lineLabel(props.lineInfo.index, props.lineInfo.count)
+                  : undefined
+              }
+              next={{
+                // After the last line, re-reading it shouldn't race the finish screen.
+                visible:
+                  config.features.hasNextButton &&
+                  props.showNextButton &&
+                  !(props.sessionResult && (props.isRecording || props.isProcessing)),
+                onNext: props.displayNextSentence,
+              }}
+            />
+          </>
+        )
+      }
     />
   );
 };

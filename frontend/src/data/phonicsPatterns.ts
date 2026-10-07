@@ -7,6 +7,9 @@
 // and r-controlled vowels. See frontend/src/components/PracticePageTemplate.tsx for how
 // this data is rendered, and frontend/src/pages/PracticeWordsHub.tsx for
 // the category index page.
+//
+// Every pattern must also be placed in one unit of phonicsCurriculum.json.
+// After editing either file, run `python scripts/export_phonics_data.py` from backend/ and redeploy the backend.
 
 export type PatternCategory =
   | "word-family"

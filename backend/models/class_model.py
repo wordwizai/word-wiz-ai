@@ -14,3 +14,4 @@ class Class(Base):
 
     teacher = relationship("User", back_populates="classes")
     memberships = relationship("ClassMembership", back_populates="class_obj", cascade="all, delete-orphan")
+    assignments = relationship("Assignment", back_populates="class_obj", cascade="all, delete-orphan")

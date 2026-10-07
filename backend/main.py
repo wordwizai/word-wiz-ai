@@ -3,7 +3,7 @@ from database import Base, engine
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
-from routers import ai, auth, google_auth, session, user, activities, feedback, health, classes, guest
+from routers import ai, auth, google_auth, session, user, activities, feedback, health, classes, guest, assignments, phonics
 from starlette.middleware.sessions import SessionMiddleware
 
 # debug=True returns full tracebacks (SQL, parameters, file paths) in 500
@@ -40,6 +40,9 @@ app.include_router(session.router, prefix="/session")
 app.include_router(activities.router, prefix="/activities")
 app.include_router(feedback.router, prefix="/feedback")
 app.include_router(classes.router, prefix="/classes")
+# Teacher assignments of phonics patterns (see routers/assignments.py)
+app.include_router(assignments.router, prefix="/classes")
+app.include_router(phonics.router, prefix="/phonics")
 # Public "try it" analysis, no account (see routers/guest.py)
 app.include_router(guest.router, prefix="/guest")
 app.include_router(health.router)  # Health check endpoints

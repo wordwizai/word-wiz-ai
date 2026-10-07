@@ -22,6 +22,9 @@ class SessionOut(SessionBase):
     created_at: datetime  # ISO format date string
     is_completed: bool  # True for completed, False for not completed
     activity: ActivityOut
+    # Phonics pattern sessions only, read from Session's properties.
+    pattern_slug: str | None = None
+    pattern_name: str | None = None
 
     model_config = {"from_attributes": True}
 

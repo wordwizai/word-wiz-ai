@@ -5,6 +5,7 @@ import { useFeedbackAudio } from "@/hooks/useFeedbackAudio";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getCurrentSessionState, type Session } from "@/api";
 import { showPracticeErrorToast } from "@/utils/errorHandling";
+import type { SessionResult } from "@/lib/phonics";
 import type { PracticeStageState, PronunciationAnalysis } from "./types";
 
 export interface BasePracticeRenderProps extends PracticeStageState {
@@ -14,6 +15,16 @@ export interface BasePracticeRenderProps extends PracticeStageState {
   displayNextSentence: () => void;
   nextSentence: string | null;
   showNextButton: boolean;
+  // Phonics pattern sessions only: where the child is, the score once the
+  // last line is read, and whether they've moved on to the finish screen.
+  lineInfo: LineInfo | null;
+  sessionResult: SessionResult | null;
+  finished: boolean;
+}
+
+export interface LineInfo {
+  index: number;
+  count: number;
 }
 
 interface BasePracticeProps {
@@ -32,6 +43,10 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
   const [nextSentence, setNextSentence] = useState<string | null>(null);
   const [showNextButton, setShowNextButton] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [lineInfo, setLineInfo] = useState<LineInfo | null>(null);
+  const [nextLineInfo, setNextLineInfo] = useState<LineInfo | null>(null);
+  const [sessionResult, setSessionResult] = useState<SessionResult | null>(null);
+  const [finished, setFinished] = useState(false);
   const { token } = useContext(AuthContext);
   const feedbackAudio = useFeedbackAudio();
 
@@ -63,6 +78,19 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
       // Arrives after the GPT call (in parallel with TTS audio). This is the
       // sentence the child reads next; it is not spoken aloud.
       setNextSentence(data.sentence);
+      setNextLineInfo(
+        data.line_index !== undefined && data.line_count !== undefined
+          ? { index: data.line_index, count: data.line_count }
+          : null
+      );
+      setTimeout(() => {
+        setShowNextButton(true);
+      }, 1000);
+    },
+    onSessionComplete: (result) => {
+      // The last line of a pattern session. The arrow now leads to the
+      // finish screen instead of another sentence.
+      setSessionResult(result);
       setTimeout(() => {
         setShowNextButton(true);
       }, 1000);
@@ -86,10 +114,14 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
     const getCurrentSentence = async () => {
       try {
         const state = await getCurrentSessionState(token ?? "", session.id);
+        if (state.line_count !== undefined) {
+          setLineInfo({ index: state.line_index ?? 0, count: state.line_count });
+        }
         if (state.type === "full-feedback-state") {
           setCurrentSentence(state.data.gpt_response.sentence);
-        } else if (session.activity.activity_settings?.first_sentence) {
-          setCurrentSentence(session.activity.activity_settings.first_sentence);
+        } else if (state.data?.first_sentence) {
+          // The activity's settings, or a pattern session's first line.
+          setCurrentSentence(state.data.first_sentence);
         } else {
           setCurrentSentence(FALLBACK_SENTENCE);
         }
@@ -111,6 +143,13 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
     });
 
   const displayNextSentence = () => {
+    if (sessionResult) {
+      feedbackAudio.reset();
+      setFinished(true);
+      return;
+    }
+    if (nextLineInfo) setLineInfo(nextLineInfo);
+    setNextLineInfo(null);
     setShowHighlightedWords(false);
     setAnalysisData(null);
     setCurrentSentence(nextSentence || FALLBACK_SENTENCE);
@@ -142,6 +181,9 @@ const BasePractice = ({ session, renderContent }: BasePracticeProps) => {
     displayNextSentence,
     nextSentence,
     showNextButton,
+    lineInfo,
+    sessionResult,
+    finished,
   });
 };
 

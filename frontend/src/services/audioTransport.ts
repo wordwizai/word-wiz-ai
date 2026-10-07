@@ -16,6 +16,7 @@ export interface AudioAnalysisEvent {
     | "next_sentence"     // GPT-generated sentence (arrives in parallel with audio)
     | "audio_feedback_file"
     | "complete"          // guest (try-it) stream only: nothing more is coming
+    | "session_complete"  // pattern sessions only: the last line was read, with the score
     | "error"
     | "pong";
   data: any;

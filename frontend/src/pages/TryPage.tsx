@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { Mic, Volume2, ShieldCheck } from "lucide-react";
@@ -7,19 +7,22 @@ import type { PronunciationAnalysis } from "@/components/practice/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { wordWizIcon } from "@/assets";
+import { AuthContext } from "@/contexts/AuthContext";
 import { getPatternBySlug, type PhonicsPattern } from "@/data/phonicsPatterns";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useFeedbackAudio } from "@/hooks/useFeedbackAudio";
 import { b64toBlob, type AudioAnalysisEvent } from "@/services/audioTransport";
 import { analyzeGuestAudio, GuestAnalysisError } from "@/services/guestAnalysis";
+import { getGuestId } from "@/services/guestId";
 import { showPracticeErrorToast } from "@/utils/errorHandling";
 import { trackSignupClick, trackTryEvent } from "@/utils/analytics";
 
 // /try and /try/:slug let a visitor's child read a few practice sentences out
-// loud and get real sound-level feedback before making an account. Nothing is
-// saved: the backend route (routers/guest.py) scores the recording and drops
-// it. Kept out of search results (noindex, not prerendered); the guide and
-// practice-word pages are the pages meant to rank.
+// loud and get real sound-level feedback before making an account. The
+// backend route (routers/guest.py) scores the recording and drops it. The only
+// thing kept is one anonymous guest user per browser, so try-mode visitors are
+// counted (services/guestId.ts). Kept out of search results (noindex, not
+// prerendered); the guide and practice-word pages are the pages meant to rank.
 
 const DEFAULT_SLUG = "at-family";
 const SENTENCES_PER_TRY = 3;
@@ -44,6 +47,7 @@ const TrySession = ({ pattern }: { pattern: PhonicsPattern }) => {
   const [showNext, setShowNext] = useState(false);
   const [ending, setEnding] = useState<Ending | null>(null);
   const feedbackAudio = useFeedbackAudio();
+  const { token } = useContext(AuthContext);
   const abortRef = useRef<AbortController | null>(null);
   const nextTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -98,7 +102,9 @@ const TrySession = ({ pattern }: { pattern: PhonicsPattern }) => {
     setFeedback(null);
     trackTryEvent("try_attempt", pattern.slug, "try_page");
     try {
-      await analyzeGuestAudio(file, sentence, handleEvent, controller.signal);
+      // Signed-in visitors already have an account, so don't count them again.
+      const guestId = token ? undefined : getGuestId();
+      await analyzeGuestAudio(file, sentence, handleEvent, controller.signal, guestId);
     } catch (err) {
       if ((err as Error)?.name === "AbortError") return;
       setIsProcessing(false);

@@ -103,6 +103,28 @@ def phoneme_analysis(per, errors):
     }
 
 
+def add_missing_columns(engine, Base):
+    """Add columns the models gained since dev.db was made.
+
+    create_all adds new tables but never new columns, so without this a model
+    change (users.is_guest, say) breaks every query until --reset.
+    """
+    from sqlalchemy import inspect
+    from sqlalchemy.schema import CreateColumn
+
+    inspector = inspect(engine)
+    with engine.begin() as conn:
+        for table in Base.metadata.sorted_tables:
+            if not inspector.has_table(table.name):
+                continue
+            have ={c["name"] for c in inspector.get_columns(table.name)}
+            for column in table.columns:
+                if column.name not in have:
+                    ddl = CreateColumn(column).compile(dialect=engine.dialect)
+                    conn.exec_driver_sql(f"ALTER TABLE {table.name} ADD COLUMN {ddl}")
+                    print(f"Added {table.name}.{column.name} to dev.db")
+
+
 def seed():
     from auth.auth_handler import create_user, get_password_hash
     from database import Base, SessionLocal, engine
@@ -112,6 +134,7 @@ def seed():
         sys.exit(f"Refusing to start: engine points at {engine.url.get_backend_name()}, not SQLite.")
 
     Base.metadata.create_all(bind=engine)
+    add_missing_columns(engine, Base)
     db = SessionLocal()
     try:
         if db.query(Activity).count() == 0:

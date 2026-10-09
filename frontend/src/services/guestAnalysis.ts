@@ -4,7 +4,9 @@
  * Posts one recording to the backend's public /guest/analyze-audio route and
  * streams back the same events signed-in practice gets (analysis, feedback,
  * audio_feedback_file), followed by "complete". The backend only accepts
- * sentences from the practice-word pages and rate-limits each visitor.
+ * sentences from the practice-word pages and rate-limits each visitor. With
+ * a guestId, the backend counts the browser as one anonymous guest user
+ * (services/guestId.ts).
  */
 
 import { API_URL } from "@/api";
@@ -42,11 +44,13 @@ export async function analyzeGuestAudio(
   file: File,
   sentence: string,
   onEvent: (event: AudioAnalysisEvent) => void,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  guestId?: string
 ): Promise<void> {
   const formData = new FormData();
   formData.append("audio_file", file);
   formData.append("attempted_sentence", sentence);
+  if (guestId) formData.append("guest_id", guestId);
 
   let response: Response;
   try {

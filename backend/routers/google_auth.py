@@ -13,6 +13,7 @@ from auth.auth_handler import (
     create_user,
     get_user,
 )
+from crud.guest_users import parse_guest_id, upgrade_guest_user
 from database import get_db
 from models import User
 
@@ -33,7 +34,13 @@ oauth.register(
 
 
 @router.get("/login")
-async def login_with_google(request: Request):
+async def login_with_google(request: Request, guest_id: str | None = None):
+    # Held in the session cookie until Google sends the visitor back, so a
+    # new Google account can take over the browser's try-mode guest row.
+    if parse_guest_id(guest_id):
+        request.session["guest_id"] = guest_id
+    else:
+        request.session.pop("guest_id", None)
     redirect_uri = request.url_for("google_auth_callback")
     return await oauth.google.authorize_redirect(
         request, redirect_uri, prompt="select_account"
@@ -62,6 +69,16 @@ async def google_auth_callback(request: Request, db: Session = Depends(get_db)):
 
     # Check your database: If user exists, log them in; if not, create a new one
     db_user = get_user(db, email)
+    guest_id = request.session.pop("guest_id", None)
+    if db_user is None:
+        db_user = upgrade_guest_user(
+            db,
+            guest_id,
+            username=email.split("@")[0],
+            email=email,
+            full_name=name,
+            hashed_password=None,
+        )
     if db_user is None:
         # Create a new user if they don't exist
         db_user = User(

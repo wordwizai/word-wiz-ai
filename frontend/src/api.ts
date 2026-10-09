@@ -1,5 +1,6 @@
 import axios from "axios";
 import type { PatternStatus } from "@/lib/phonics";
+import { peekGuestId } from "@/services/guestId";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 // Separate WebSocket URL to bypass nginx buffering
@@ -74,7 +75,11 @@ const fetchUserProfile = async (token) => {
 const googleLogin = async () => {
   try {
     // Redirect to your backend's Google login route
-    window.location.href = `${API_URL}/auth/google/login`;
+    // A new Google account takes over this browser's try-mode guest row.
+    const guestId = peekGuestId();
+    window.location.href = guestId
+      ? `${API_URL}/auth/google/login?guest_id=${encodeURIComponent(guestId)}`
+      : `${API_URL}/auth/google/login`;
   } catch (error) {
     console.error("Google login error:", error);
     throw error;

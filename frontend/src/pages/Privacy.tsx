@@ -103,8 +103,12 @@ const Privacy = () => {
                     wordwizai.com/try, a child can read a few practice
                     sentences without creating an account. The recording is
                     sent to our server, analyzed to give pronunciation
-                    feedback, and then discarded. Word Wiz AI doesn't save it
-                    or link it to anyone.
+                    feedback, and then discarded. Word Wiz AI doesn't save it.
+                    To count how many people use Word Wiz AI, the page keeps a
+                    random ID in your browser and stores an anonymous guest
+                    record under that ID. The record has no name, email, or
+                    recording in it. If you later create an account in the
+                    same browser, the guest record becomes that account.
                   </p>
 
                   <br />

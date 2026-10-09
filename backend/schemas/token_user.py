@@ -29,6 +29,8 @@ class UserCreate(BaseModel):
     email: str
     password: str
     full_name: str
+    # The browser's try-mode id, if it has one (crud/guest_users.py).
+    guest_id: Optional[str] = None
 
     # Messages are shown to parents as-is by the sign-up form.
     @field_validator("email")

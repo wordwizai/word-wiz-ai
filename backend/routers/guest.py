@@ -4,7 +4,8 @@ A parent landing on a guide can have their child read a few practice
 sentences out loud and get the same sound-level feedback signed-in users get,
 before creating an account. Compared with /ai/analyze-audio this route:
 
-- needs no login and writes nothing to the database,
+- needs no login, and its only database write is one anonymous `users` row
+  per browser (crud/guest_users.py) so try-mode visitors are counted,
 - never stores the recording (cache_audio=False in preprocessing),
 - skips the GPT next-sentence step (the page walks through fixed sentences),
 - only scores sentences from the practice-word pages (data/phonics_patterns.json),
@@ -17,9 +18,13 @@ import json
 
 from core.guest_limits import SlidingWindowLimiter, client_ip, normalize_sentence
 from core.phonics_data import all_patterns
+from crud.guest_users import record_guest_user
+from database import get_db
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile, status
+from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import StreamingResponse
 from routers.handlers.audio_processing_handler import analyze_audio_guest_event_stream
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -96,7 +101,9 @@ async def guest_analyze_audio(
     request: Request,
     attempted_sentence: str = Form(...),
     audio_file: UploadFile = File(...),
+    guest_id: str | None = Form(None),
     phoneme_assistant=Depends(get_phoneme_assistant),
+    db: Session = Depends(get_db),
 ):
     """Analyze one practice sentence for a visitor without an account (SSE)."""
     global _request_count
@@ -130,6 +137,13 @@ async def guest_analyze_audio(
     if _request_count % 200 == 0:
         PER_IP_BURST.prune()
         PER_IP_DAILY.prune()
+
+    # Only accepted readings count a visitor, so refused requests and crawlers
+    # never add rows. Counting must never cost the visitor their feedback.
+    try:
+        await run_in_threadpool(record_guest_user, db, guest_id)
+    except Exception as e:
+        print(f"Could not record guest user: {e}")
 
     print("Guest analysis accepted")
     filename = audio_file.filename

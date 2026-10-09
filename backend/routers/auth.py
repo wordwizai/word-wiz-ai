@@ -8,6 +8,7 @@ from auth.auth_handler import (
     get_password_hash,
     get_user,
 )
+from crud.guest_users import upgrade_guest_user
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -31,6 +32,18 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
             detail="That username is taken. Please choose another one.",
         )
     hashed_password = get_password_hash(user.password)
+    # Signing up from a browser that used try mode turns that guest row into
+    # this account, so the visitor isn't counted twice.
+    db_user = upgrade_guest_user(
+        db,
+        user.guest_id,
+        username=user.username,
+        email=user.email,
+        full_name=user.full_name,
+        hashed_password=hashed_password,
+    )
+    if db_user is not None:
+        return db_user
     try:
         db_user = User(
             username=user.username,

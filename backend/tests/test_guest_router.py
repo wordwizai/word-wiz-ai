@@ -2,9 +2,10 @@
 
 Run from backend/:  python -m unittest tests.test_guest_router
 
-These never load the ONNX model, call Deepgram/Google, or touch a database:
-the router is mounted on a bare FastAPI app, the assistant is a fake, and the
-heavy stream is patched where a test only cares about the router's checks.
+These never load the ONNX model, call Deepgram/Google, or touch the real
+database: the router is mounted on a bare FastAPI app, the assistant is a fake,
+the heavy stream is patched where a test only cares about the router's checks,
+and the guest-user tests get a throwaway in-memory database.
 """
 
 import asyncio
@@ -30,6 +31,9 @@ sys.path.insert(0, str(BACKEND))
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 
 from core.guest_limits import SlidingWindowLimiter, client_ip, normalize_sentence  # noqa: E402
+from database import get_db  # noqa: E402
+from models import User  # noqa: E402
+from tests.phonics_helpers import make_db  # noqa: E402
 from routers import guest  # noqa: E402
 from routers.handlers import audio_processing_handler as handler  # noqa: E402
 
@@ -57,17 +61,29 @@ class FakeAssistant:
         return {"data": "UklGRg==", "filename": "feedback.wav", "mimetype": "audio/wav"}
 
 
-def make_client(assistant=None):
+def make_client(assistant=None, SessionLocal=None):
     app = FastAPI()
     app.include_router(guest.router, prefix="/guest")
     app.dependency_overrides[guest.get_phoneme_assistant] = lambda: assistant or FakeAssistant()
+    if SessionLocal is not None:
+        def override_db():
+            db = SessionLocal()
+            try:
+                yield db
+            finally:
+                db.close()
+
+        app.dependency_overrides[get_db] = override_db
     return TestClient(app)
 
 
-def post(client, sentence=ALLOWED, audio=b"RIFF0000WAVE", headers=None):
+def post(client, sentence=ALLOWED, audio=b"RIFF0000WAVE", headers=None, guest_id=None):
+    data = {"attempted_sentence": sentence}
+    if guest_id is not None:
+        data["guest_id"] = guest_id
     return client.post(
         "/guest/analyze-audio",
-        data={"attempted_sentence": sentence},
+        data=data,
         files={"audio_file": ("r.wav", audio, "audio/wav")},
         headers=headers or {},
     )
@@ -135,6 +151,59 @@ class RouterChecksTest(FreshLimits):
         for _ in range(guest.GUEST_CONCURRENCY + 3):
             self.assertEqual(post(self.client).status_code, 200)
         self.assertEqual(guest._guest_slots._value, guest.GUEST_CONCURRENCY)
+
+
+class GuestUserTest(FreshLimits):
+    """Each browser that reads a sentence is counted once as a guest user."""
+
+    GUEST_ID = "6f1c2b9e-3d4a-4f5b-8c7d-9e0a1b2c3d4e"
+
+    def setUp(self):
+        super().setUp()
+        p = mock.patch.object(guest, "analyze_audio_guest_event_stream", side_effect=fake_stream)
+        p.start()
+        self.addCleanup(p.stop)
+        self.SessionLocal = make_db()
+        self.client = make_client(SessionLocal=self.SessionLocal)
+
+    def guests(self):
+        db = self.SessionLocal()
+        try:
+            return [(u.username, u.is_guest) for u in db.query(User).all()]
+        finally:
+            db.close()
+
+    def test_readings_from_one_browser_add_one_guest(self):
+        for _ in range(3):
+            self.assertEqual(post(self.client, guest_id=self.GUEST_ID).status_code, 200)
+        self.assertEqual(self.guests(), [(f"guest-{self.GUEST_ID}", True)])
+
+    def test_each_browser_is_its_own_guest(self):
+        post(self.client, guest_id=self.GUEST_ID)
+        post(self.client, guest_id="0b4e7d1a-2c3f-4a5b-9c8d-7e6f5a4b3c2d")
+        self.assertEqual(len(self.guests()), 2)
+
+    def test_no_or_invalid_guest_id_adds_nothing(self):
+        self.assertEqual(post(self.client).status_code, 200)
+        self.assertEqual(post(self.client, guest_id="nope").status_code, 200)
+        self.assertEqual(self.guests(), [])
+
+    def test_refused_readings_add_nothing(self):
+        post(self.client, sentence="not on the list", guest_id=self.GUEST_ID)
+        post(self.client, audio=b"0" * (guest.MAX_AUDIO_BYTES + 1), guest_id=self.GUEST_ID)
+        self.assertEqual(self.guests(), [])
+
+    def test_rate_limited_readings_add_nothing(self):
+        for _ in range(15):
+            post(self.client)
+        self.assertEqual(post(self.client, guest_id=self.GUEST_ID).status_code, 429)
+        self.assertEqual(self.guests(), [])
+
+    def test_a_database_error_still_gives_feedback(self):
+        with mock.patch.object(guest, "record_guest_user", side_effect=RuntimeError("db down")):
+            r = post(self.client, guest_id=self.GUEST_ID)
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(sse_events(r.text)[-1]["type"], "complete")
 
 
 class ClientIpTest(unittest.TestCase):

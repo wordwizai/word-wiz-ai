@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { loginUser, fetchUserProfile, registerUser } from "../api";
 import { getErrorStatus } from "@/utils/errorHandling";
 import { consumePostLoginRedirect } from "@/lib/postLoginRedirect";
+import { clearGuestId, peekGuestId } from "@/services/guestId";
 
 interface User {
   id: string;
@@ -113,6 +114,8 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const loginWithGoogleToken = async (token: string): Promise<void> => {
+    // googleLogin sent any try-mode guest id, so it has done its job.
+    clearGuestId();
     setToken(token);
     localStorage.setItem("token", token);
     const userProfile = await fetchUserProfile(token);
@@ -126,7 +129,9 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     password: string,
     full_name: string,
   ): Promise<void> => {
-    await registerUser({ username, email, password, full_name });
+    // A visitor who used try mode first takes over that guest row.
+    await registerUser({ username, email, password, full_name, guest_id: peekGuestId() });
+    clearGuestId();
   };
 
   const clearSession = () => {

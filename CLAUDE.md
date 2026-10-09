@@ -327,6 +327,8 @@ Key relationships:
 - `users` → `sessions` (1:many) → `feedback_entries` (1:many)
 - `sessions` → `activities` (1:1)
 
+Try mode (`/try`) adds one `users` row per browser on its first accepted reading, with `is_guest = 1`, username `guest-<uuid>` and no email or password (`crud/guest_users.py`, id kept in `frontend/src/services/guestId.ts`). Signing up from that browser, by email or Google, turns the row into the account, so a person counts once. Count real accounts with `WHERE is_guest = 0`. Tests: `python -m unittest tests.test_guest_users tests.test_guest_router`.
+
 ## Common Patterns
 
 ### Adding a New Practice Mode

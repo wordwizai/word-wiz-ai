@@ -613,7 +613,10 @@ class WordExtractorOnline:
             "punctuate": "true",
             "smart_format": "true",
             "encoding": "linear16",
-            "sample_rate": sampling_rate
+            "sample_rate": sampling_rate,
+            # Keep children's recordings out of Deepgram's Model Improvement
+            # Program, so the audio is held only while the request is processed.
+            "mip_opt_out": "true"
         }
 
         # Retry loop

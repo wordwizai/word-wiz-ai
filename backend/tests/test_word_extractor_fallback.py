@@ -409,6 +409,29 @@ class TestFlagOffLegacyBehaviour(WordExtractorTestBase):
 
 
 # --------------------------------------------------------------------------- #
+# Request parameters
+# --------------------------------------------------------------------------- #
+
+
+class TestDeepgramRequestParams(WordExtractorTestBase):
+    def test_opts_out_of_deepgram_model_improvement_program(self):
+        """
+        Children's recordings must not be kept by Deepgram. mip_opt_out defaults
+        to false, which enrolls the request in Deepgram's Model Improvement
+        Program, so it has to be sent explicitly.
+        """
+        extractor = self.make_extractor()
+        post = mock.MagicMock(
+            return_value=_http_response(200, _transcript_payload("the cat sat"))
+        )
+        with mock.patch("requests.post", post):
+            extractor.extract_words(_audio(), max_retries=0)
+
+        post.assert_called_once()
+        self.assertEqual(post.call_args.kwargs["params"].get("mip_opt_out"), "true")
+
+
+# --------------------------------------------------------------------------- #
 # Structured logging
 # --------------------------------------------------------------------------- #
 

@@ -32,7 +32,7 @@ const faqs: FAQItem[] = [
   {
     question: "Is my child's data safe?",
     answer:
-      "Recordings are used to check the reading and then thrown away. We keep scores and which sounds were hard, so practice can adapt. There are no ads, and nothing is sold or shared.",
+      "Recordings are used to check the reading and then thrown away. Deepgram, a speech service, turns each one into words for us without keeping it, and OpenAI only sees the scores. We keep scores and which sounds were hard, so practice can adapt. There are no ads, and nothing is sold.",
   },
   {
     question: "What devices does it work on?",

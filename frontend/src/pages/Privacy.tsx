@@ -99,6 +99,27 @@ const Privacy = () => {
 
                   <br />
                   <p className="text-foreground leading-relaxed">
+                    <strong>Recordings.</strong> When a child reads a sentence,
+                    the recording goes to our server, which scores each sound
+                    and writes the feedback. To recognize the words, our server
+                    also sends the recording to Deepgram, a speech-to-text
+                    service. Deepgram sends back the words it heard and doesn't
+                    keep the recording or use it to train its models. Word Wiz
+                    AI doesn't save recordings. It keeps the scores and which
+                    sounds were hard, so practice can adapt.
+                  </p>
+
+                  <br />
+                  <p className="text-foreground leading-relaxed">
+                    <strong>Other services.</strong> OpenAI writes some practice
+                    sentences from the scores and never receives a recording.
+                    Google Cloud Text-to-Speech turns the written feedback into
+                    the voice your child hears. Each service gets only what it
+                    needs for its step.
+                  </p>
+
+                  <br />
+                  <p className="text-foreground leading-relaxed">
                     <strong>Practicing without an account.</strong> On
                     wordwizai.com/try, a child can read a few practice
                     sentences without creating an account. The recording is

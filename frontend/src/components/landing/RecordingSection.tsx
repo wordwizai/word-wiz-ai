@@ -10,8 +10,8 @@ const STEPS = [
     text: "The microphone runs while your child reads a sentence, and stops.",
   },
   {
-    title: "Scored on our own server",
-    text: "OpenAI writes the feedback from the scores as text. It never hears your child.",
+    title: "Scored on our server",
+    text: "Deepgram, a speech service, writes down the words without keeping the audio. Our server scores each sound and writes the feedback. OpenAI only sees scores.",
   },
   {
     title: "Then thrown away",

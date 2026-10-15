@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import LandingSection from "./LandingSection";
 import { PEN_PATHS } from "./penPaths";
-import { PenGroup, PenMark, PenNumeral, PenStroke } from "./TeacherPen";
+import { PenGroup, PenMark, PenStroke } from "./TeacherPen";
 
 // Keep in step with the privacy policy and the FAQ's data answer.
 const STEPS = [
@@ -10,8 +10,8 @@ const STEPS = [
     text: "The microphone runs while your child reads a sentence, and stops.",
   },
   {
-    title: "Scored on our own server",
-    text: "OpenAI writes the feedback from the scores as text. It never hears your child.",
+    title: "Scored on our server",
+    text: "Deepgram, a speech service, writes down the words without keeping the audio. Our server scores each sound and writes the feedback. OpenAI only sees scores.",
   },
   {
     title: "Then thrown away",
@@ -43,12 +43,9 @@ const RecordingSection = () => (
       <ol className="grid grid-cols-1 gap-x-10 gap-y-7 md:grid-cols-3">
         {STEPS.map((step, i) => (
           <li key={step.title} className="flex items-start gap-3.5">
-            <PenNumeral
-              digit={String(i + 1) as "1" | "2" | "3"}
-              delay={0.1 + i * 0.2}
-              strokeWidth={4}
-              className="mt-0.5 h-9 w-6 flex-none"
-            />
+            <span className="w-6 flex-none text-2xl font-bold leading-tight text-primary">
+              {i + 1}
+            </span>
             <div className="space-y-2.5">
               <h3 className="text-lg font-semibold">
                 {step.circled ? (

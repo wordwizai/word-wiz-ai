@@ -265,7 +265,7 @@ async def websocket_audio_analysis(websocket: WebSocket):
     Message format (client -> server):
     {
         "type": "analyze_audio",
-        "audio_base64": "<base64 encoded audio>",
+        "audio_base64": "<base64 encoded audio>", // empty when client_phonemes and client_words are both sent
         "attempted_sentence": "the sentence",
         "session_id": 123,
         "filename": "recording.wav",
@@ -380,10 +380,14 @@ async def websocket_audio_analysis(websocket: WebSocket):
             client_phonemes = data.get("client_phonemes")
             client_words = data.get("client_words")
             
-            if not audio_base64 or not attempted_sentence or session_id is None:
+            # Audio isn't required here. When the browser extracted both the
+            # phonemes and the words it sends an empty file (useHybridAudioAnalysis.ts),
+            # which arrives as "" or with no key at all. The stream decides whether
+            # empty audio is enough, as it does for the same empty file over SSE.
+            if not attempted_sentence or session_id is None:
                 await websocket.send_json({
                     "type": "error",
-                    "data": {"message": "Missing required fields: audio_base64, attempted_sentence, or session_id"}
+                    "data": {"message": "Missing required fields: attempted_sentence or session_id"}
                 })
                 continue
             
@@ -400,7 +404,7 @@ async def websocket_audio_analysis(websocket: WebSocket):
             # Decode audio (this can take a few seconds for large files)
             try:
                 decode_start = time.time()
-                audio_bytes = base64.b64decode(audio_base64)
+                audio_bytes = base64.b64decode(audio_base64 or "")
                 print(f"⏱️  Base64 decode took {time.time() - decode_start:.3f}s")
             except Exception as e:
                 # The raw decoder error means nothing to a parent; log it instead.

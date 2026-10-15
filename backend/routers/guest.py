@@ -140,12 +140,18 @@ async def guest_analyze_audio(
 
     # Only accepted readings count a visitor, so refused requests and crawlers
     # never add rows. Counting must never cost the visitor their feedback.
+    counted = "no guest id sent (signed-in visitor or not the try page)"
     try:
-        await run_in_threadpool(record_guest_user, db, guest_id)
+        guest = await run_in_threadpool(record_guest_user, db, guest_id)
+        if guest is not None:
+            counted = f"guest user {guest.id}"
+        elif guest_id:
+            counted = "guest id was not a UUID"
     except Exception as e:
-        print(f"Could not record guest user: {e}")
+        counted = "guest user NOT recorded"
+        print(f"Could not record guest user: {e!r}")
 
-    print("Guest analysis accepted")
+    print(f"Guest analysis accepted, {counted}")
     filename = audio_file.filename
     content_type = audio_file.content_type
 

@@ -18,6 +18,7 @@ import LandingSection from "@/components/landing/LandingSection";
 import ScrollCue from "@/components/landing/ScrollCue";
 import SoundBoxesSection from "@/components/landing/SoundBoxesSection";
 import SessionStepsSection from "@/components/landing/SessionStepsSection";
+import SoundSorterSection from "@/components/landing/SoundSorterSection";
 import RecordingSection from "@/components/landing/RecordingSection";
 import {
   PenGroup,
@@ -199,6 +200,8 @@ const LandingPage = () => {
         </section>
 
         <SoundBoxesSection id="how-it-hears" />
+
+        <SoundSorterSection id="sound-sorter" />
 
         <SessionStepsSection id="how-it-works-section" />
 

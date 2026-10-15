@@ -16,6 +16,3 @@ export const floatingCard =
 /** The pill the hero demo uses for "try this sound" feedback. */
 export const tryPill =
   "inline-flex items-center gap-2 rounded-full bg-orange-100 px-4 py-2 text-[15px] font-medium text-orange-700 dark:bg-orange-500/15 dark:text-orange-300";
-
-/** A handwritten note in pen ink. */
-export const penNote = "font-hand text-[30px] leading-[1.05] text-pen-ink";

@@ -1,0 +1,3 @@
+# Review pages and screenshots from build.mjs; the landing page uses the generated files in src/.
+out/
+shots/

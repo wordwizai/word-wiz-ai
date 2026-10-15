@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { SUPPORT_EMAIL } from "@/config/contact";
 import { cn } from "@/lib/utils";
-import { PenArrow, PenGroup, PenWords } from "./landing/TeacherPen";
-import { penNote, sectionTitle } from "./landing/styles";
+import { PenGroup } from "./landing/TeacherPen";
+import { sectionTitle } from "./landing/styles";
 
 interface FAQItem {
   question: string;
@@ -94,18 +94,6 @@ const FAQ: React.FC = () => {
             </a>
             .
           </p>
-          <div className="hidden items-end gap-1.5 pt-2 lg:flex">
-            <PenWords
-              delay={0.3}
-              text="start with this one, it’s the big one"
-              className={cn(penNote, "max-w-[200px] -rotate-3")}
-            />
-            <PenArrow
-              variant="up-right"
-              delay={1.5}
-              className="mb-4 h-10 w-20 flex-none"
-            />
-          </div>
         </PenGroup>
 
         <div className="min-w-0 flex-1 rounded-3xl border border-border bg-card px-5 py-2 shadow-sm sm:px-7">

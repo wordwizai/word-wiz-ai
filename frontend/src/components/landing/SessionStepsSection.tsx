@@ -3,15 +3,8 @@ import { Mic, Volume2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import LandingSection from "./LandingSection";
 import { PEN_PATHS } from "./penPaths";
-import {
-  PenArrow,
-  PenGroup,
-  PenMark,
-  PenNumeral,
-  PenStroke,
-  PenWords,
-} from "./TeacherPen";
-import { penNote, sectionTitle } from "./styles";
+import { PenGroup, PenMark, PenStroke } from "./TeacherPen";
+import { sectionTitle } from "./styles";
 
 const stepCard =
   "relative flex h-[250px] flex-col justify-between gap-4 rounded-3xl border border-border bg-card p-7 shadow-xl dark:shadow-black/40";
@@ -24,46 +17,20 @@ const closeChip =
 
 const Step = ({
   number,
-  numberTilt,
   card,
-  note,
-  noteTilt,
   title,
   text,
-  arrow,
 }: {
-  number: "1" | "2" | "3";
-  numberTilt: string;
+  number: number;
   card: ReactNode;
-  note: string;
-  noteTilt: string;
   title: string;
   text: string;
-  arrow?: "right-up" | "right-down";
 }) => (
   <li>
-    <PenGroup className="relative flex flex-col gap-[18px] pt-9" amount={0.5}>
-      <PenNumeral
-        digit={number}
-        delay={0.1}
-        className={cn("absolute -left-2 -top-5 z-10 h-[84px] w-14", numberTilt)}
-      />
-      <div className={stepCard}>
-        {card}
-        {arrow && (
-          <PenArrow
-            variant={arrow}
-            delay={0.9}
-            className="absolute -right-11 top-[110px] hidden h-[30px] w-12 lg:block"
-          />
-        )}
-      </div>
-      <PenWords
-        delay={0.6}
-        text={note}
-        className={cn(penNote, noteTilt)}
-      />
+    <PenGroup className="flex flex-col gap-6" amount={0.5}>
+      <div className={stepCard}>{card}</div>
       <div className="space-y-1.5">
+        <span className="text-sm font-semibold text-primary">Step {number}</span>
         <h3 className="text-xl font-semibold">{title}</h3>
         <p className="text-muted-foreground">{text}</p>
       </div>
@@ -176,7 +143,7 @@ const FeedbackCard = () => (
         knee. Want to try it again?
       </p>
     </div>
-    <div className="space-y-1.5 border-t-2 border-dashed border-border pt-3.5">
+    <div className="space-y-1.5 border-t border-border pt-3.5">
       <span className="text-[13px] text-muted-foreground">Next sentence</span>
       <p className="text-[22px] font-medium">Now the brown cow sat down.</p>
     </div>
@@ -200,33 +167,22 @@ const SessionStepsSection = ({ id }: { id: string }) => (
 
       <ol className="grid grid-cols-1 gap-x-10 gap-y-12 lg:grid-cols-3">
         <Step
-          number="1"
-          numberTilt="-rotate-6"
+          number={1}
           card={<ReadingCard />}
-          note="one sentence at a time, at their pace"
-          noteTilt="-rotate-1"
           title="Your child reads aloud"
-          text="A sentence appears and Word Wiz listens through the microphone."
-          arrow="right-up"
+          text="A sentence appears and Word Wiz listens through the microphone, one sentence at a time."
         />
         <Step
-          number="2"
-          numberTilt="rotate-[4deg]"
+          number={2}
           card={<CheckedCard />}
-          note="green means every sound landed"
-          noteTilt="rotate-1"
           title="Every sound gets checked"
           text="The recording is broken into sounds and compared, word by word, with how the sentence should sound."
-          arrow="right-down"
         />
         <Step
-          number="3"
-          numberTilt="-rotate-3"
+          number={3}
           card={<FeedbackCard />}
-          note="said out loud, so pre-readers get it too"
-          noteTilt="-rotate-1"
           title="Feedback, then a new sentence"
-          text="Your child hears what to try differently, and the next sentence is built around the sound that needs practice."
+          text="Your child hears what to try differently, out loud so pre-readers get it too. The next sentence is built around the sound that needs practice."
         />
       </ol>
     </div>

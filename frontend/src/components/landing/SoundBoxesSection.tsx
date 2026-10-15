@@ -1,23 +1,10 @@
 import { motion } from "framer-motion";
-import { Volume2 } from "lucide-react";
+import { Check, Volume2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import LandingSection from "./LandingSection";
 import { PEN_PATHS } from "./penPaths";
-import {
-  PenArrow,
-  PenGroup,
-  PenMark,
-  PenStroke,
-  PenUnderlined,
-  PenWords,
-} from "./TeacherPen";
-import {
-  cardGlow,
-  floatingCard,
-  penNote,
-  sectionTitle,
-  tryPill,
-} from "./styles";
+import { PenGroup, PenMark, PenStroke } from "./TeacherPen";
+import { cardGlow, floatingCard, sectionTitle, tryPill } from "./styles";
 
 const POINTS = [
   "Checks every sound in every word",
@@ -25,7 +12,7 @@ const POINTS = [
   "Free, with no ads and nothing to upgrade",
 ];
 
-// "brown" as a reading teacher's sound boxes: one box per sound.
+// "brown" as a reading teacher's sound boxes, one box per sound.
 const BOXES = [
   { letters: "b", sound: "b" },
   { letters: "r", sound: "r" },
@@ -47,7 +34,10 @@ const rise = (i: number) => ({
   },
 });
 
-/** "It hears the sound, not just the word": sound boxes, marked up in pen. */
+/** The practice sound, picked out in the next sentence. */
+const Ow = () => <span className="text-primary">ow</span>;
+
+/** "It hears the sound, not just the word", shown as sound boxes with the missed one circled. */
 const SoundBoxesSection = ({ id }: { id: string }) => (
   <LandingSection
     id={id}
@@ -70,15 +60,9 @@ const SoundBoxesSection = ({ id }: { id: string }) => (
           sound that slipped.
         </p>
         <ul className="space-y-3.5 pt-1">
-          {POINTS.map((point, i) => (
+          {POINTS.map((point) => (
             <li key={point} className="flex items-center gap-3.5 font-medium">
-              <PenMark viewBox="0 0 30 24" className="h-6 w-[30px] flex-none">
-                <PenStroke
-                  d={PEN_PATHS.ticks[i]}
-                  delay={0.5 + i * 0.2}
-                  duration={0.28}
-                />
-              </PenMark>
+              <Check className="size-5 flex-none text-primary" aria-hidden="true" />
               {point}
             </li>
           ))}
@@ -99,7 +83,8 @@ const SoundBoxesSection = ({ id }: { id: string }) => (
               </span>
               <span className="text-[13px] text-muted-foreground">
                 Your child read{" "}
-                <strong className="font-semibold text-foreground">brown</strong>
+                <strong className="font-semibold text-foreground">brown</strong>{" "}
+                as &ldquo;brone&rdquo;
               </span>
             </div>
 
@@ -117,15 +102,26 @@ const SoundBoxesSection = ({ id }: { id: string }) => (
                   >
                     <div
                       className={cn(
-                        "relative flex aspect-square w-[min(96px,17vw)] items-center justify-center border-2 text-[clamp(28px,4vw,40px)] font-medium",
+                        "relative flex aspect-square w-[min(96px,17vw)] items-center justify-center border-2 border-foreground/15 bg-card text-[clamp(28px,4vw,40px)] font-medium",
                         i === 0 && "rounded-l-[14px]",
-                        i === BOXES.length - 1 && "rounded-r-[14px]",
-                        box.missed
-                          ? "border-pastel-pink-foreground bg-pastel-pink font-semibold text-pastel-pink-foreground"
-                          : "border-foreground/15 bg-card"
+                        i === BOXES.length - 1 && "rounded-r-[14px]"
                       )}
                     >
-                      {box.letters}
+                      {/* The missed sound gets a soft tile inside its box, so the row keeps one rounded outline. */}
+                      {box.missed && (
+                        <span
+                          aria-hidden="true"
+                          className="absolute inset-[7px] rounded-[11px] bg-pastel-pink"
+                        />
+                      )}
+                      <span
+                        className={cn(
+                          "relative",
+                          box.missed && "font-semibold text-pastel-pink-foreground"
+                        )}
+                      >
+                        {box.letters}
+                      </span>
                       {box.missed && (
                         <PenMark
                           viewBox="0 0 160 140"
@@ -153,24 +149,9 @@ const SoundBoxesSection = ({ id }: { id: string }) => (
                   </motion.div>
                 ))}
               </div>
-              <div className="mt-0.5 flex flex-col items-start gap-1 sm:flex-row sm:pl-[176px]">
-                <PenArrow
-                  variant="up-left"
-                  delay={1.5}
-                  className="ml-[29vw] h-[50px] w-[70px] flex-none sm:-ml-2"
-                />
-                <PenWords
-                  delay={1.7}
-                  className={cn(
-                    penNote,
-                    "-mt-1 ml-[14vw] max-w-[240px] -rotate-2 sm:ml-0 sm:mt-6"
-                  )}
-                  text="came out as “brone.” That’s the one to practice."
-                />
-              </div>
             </div>
 
-            <figcaption className="space-y-3.5 border-t-2 border-dashed border-border pt-6">
+            <figcaption className="space-y-3 border-t border-border pt-6">
               <span className="block text-sm text-muted-foreground">
                 Next sentence, built around{" "}
                 <span className="font-ipa-sans text-base text-foreground">
@@ -178,21 +159,15 @@ const SoundBoxesSection = ({ id }: { id: string }) => (
                 </span>
               </span>
               <p className="text-[clamp(24px,3vw,32px)] font-medium leading-normal">
-                <PenUnderlined delay={2.3}>Now</PenUnderlined> the{" "}
-                <PenUnderlined delay={2.5} alt>
-                  brown
-                </PenUnderlined>{" "}
-                <PenUnderlined delay={2.7}>cow</PenUnderlined> sat{" "}
-                <PenUnderlined delay={2.9} alt>
-                  down
-                </PenUnderlined>
-                .
+                N<Ow />
+                {" the br"}
+                <Ow />
+                {"n c"}
+                <Ow />
+                {" sat d"}
+                <Ow />
+                n.
               </p>
-              <PenWords
-                delay={3.2}
-                className={cn(penNote, "text-right -rotate-[1.5deg]")}
-                text="four more tries at the same sound"
-              />
             </figcaption>
           </figure>
         </PenGroup>

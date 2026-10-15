@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 
 /**
- * A small handwritten "see how it works" under the hero, with an arrow that
+ * A small "see how it works" under the hero, with a hand-drawn arrow that
  * bobs. Only on wide screens, where the hero fills the window; on phones the
  * page already reads as something to scroll.
  */
@@ -11,9 +11,7 @@ const ScrollCue = ({ href }: { href: string }) => (
       href={href}
       className="inline-flex min-h-11 flex-col items-center gap-1 px-3 py-1 text-pen-ink no-underline"
     >
-      <span className="-rotate-2 font-hand text-[30px] leading-none">
-        see how it works
-      </span>
+      <span className="text-sm font-medium">See how it works</span>
       {/* MotionConfig's reducedMotion="user" on the page stops the bob */}
       <motion.svg
         width="28"

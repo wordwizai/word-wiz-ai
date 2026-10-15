@@ -7,13 +7,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { GoogleIcon } from "./GoogleIcon";
 import { trackSignupClick } from "@/utils/analytics";
-import { PenArrow, PenGroup, PenWords } from "./landing/TeacherPen";
-import {
-  cardGlow,
-  floatingCard,
-  penNote,
-  sectionTitle,
-} from "./landing/styles";
+import { PenGroup } from "./landing/TeacherPen";
+import { cardGlow, floatingCard, sectionTitle } from "./landing/styles";
 
 interface LandingPageCTAProps {
   fadeUpVariant: {
@@ -65,22 +60,6 @@ const LandingPageCTA = ({ fadeUpVariant }: LandingPageCTAProps) => {
               </Button>
             ) : (
               <>
-                <div
-                  aria-hidden="true"
-                  className="absolute -top-14 right-[calc(100%+4px)] hidden w-32 flex-col items-end lg:flex"
-                >
-                  <PenWords
-                    as="span"
-                    delay={0.4}
-                    text="two clicks to start"
-                    className={cn(penNote, "text-right -rotate-[4deg]")}
-                  />
-                  <PenArrow
-                    variant="down-right"
-                    delay={1.2}
-                    className="-mr-1.5 h-11 w-[90px]"
-                  />
-                </div>
                 <Button
                   size="lg"
                   className="min-h-[56px] w-full px-8 text-base font-semibold sm:w-auto"

@@ -319,6 +319,11 @@ self.phoneme_extractor = PhonemeExtractorONNX()
 - Children see the path at `/practice/phonics`. It sits under `/practice` so the prerender step skips it, which leaves `/phonics` free for a public page.
 - Backend tests for all of this run from `/backend` with `PYTHONUTF8=1 python -m unittest tests.test_phonics_data tests.test_phonics_models tests.test_phonics_scoring tests.test_phonics_sessions tests.test_phonics_mode tests.test_phonics_progress tests.test_assignments_api tests.test_phonics_api tests.test_guest_router`. They use in-memory SQLite.
 
+### The sound sorter (landing page)
+- `SoundSorterSection` on the home page is an isometric machine that acts out the scoring for four readings of "The dog ran." Its sentence, readings and feedback rules are in `frontend/src/components/landing/soundSorter/model.ts`, checked against `generate_feedback`. If the thresholds in `phoneme_feedback_formatter.py` or `WordBadge.tsx` change, change them there too.
+- The art is generated. `node scripts/anatomy/sound-sorter/build.mjs` (from `/frontend`) draws it with the anatomy kit in `scripts/anatomy/kit` and writes `art.generated.ts` and `sorter.generated.css`. Rerun it after editing `model.ts` (each reading's blocks are drawn ahead of time), `build.mjs` or `sound-sorter.css`. `--audit` proves the geometry, and `out/sound-sorter-light.html` is a standalone page for review.
+- `live.ts` moves it. Every pose is a function of the time since a reading started. The figure loads lazily (about 60 KB gzipped) once the section is near, so the prerendered home page doesn't carry it.
+
 ## Database Schema
 
 **MySQL (prod) / SQLite (dev)** with Alembic migrations

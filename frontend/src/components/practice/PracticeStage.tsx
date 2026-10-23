@@ -158,16 +158,19 @@ const PracticeStage = ({
             splitIntoSounds={splitIntoSounds}
           />
 
-          {/* While the child reads, the old feedback keeps its space (unseen)
-              so the sentence doesn't jump. Once they stop it's gone until
-              the new feedback arrives. */}
-          <PracticeCompanion
-            mood={mascotMood}
-            feedback={attemptOpen && !isRecording ? null : feedback}
-            quiet={isRecording}
-            onReplay={onReplayFeedback}
-            onCelebrateEnd={() => setCelebrating(false)}
-          />
+          {/* Added with the first result, so the card is just the sentence
+              until then. After that it keeps its space (empty while the
+              child reads and while the reading is checked) so the sentence
+              doesn't jump. */}
+          {hasAttempted && (
+            <PracticeCompanion
+              mood={mascotMood}
+              feedback={attemptOpen && !isRecording ? null : feedback}
+              quiet={isRecording}
+              onReplay={onReplayFeedback}
+              onCelebrateEnd={() => setCelebrating(false)}
+            />
+          )}
 
           {showChoices && choices?.options && (
             <ChoicePicker

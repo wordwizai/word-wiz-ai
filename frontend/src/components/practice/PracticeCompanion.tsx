@@ -5,15 +5,14 @@ import { FeedbackAnimatedText } from "@/components/FeedbackAnimatedText";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-// The mascot's spot under the sentence. It stays put the whole time so the
-// child gets used to it. It listens while they read, and the speech bubble
-// fills in beside it when the feedback arrives.
+// The feedback row under the sentence. The mascot only shows beside its own
+// words, since on its own it was a stray tile under the sentence. The row
+// keeps its height while hidden so the sentence above doesn't move.
 interface PracticeCompanionProps {
   mood: MascotMood;
-  // Null while there's nothing to say. Then only the mascot shows.
+  // Null while there's nothing to say. Then the row is empty.
   feedback: string | null;
-  // True while the child reads. The old feedback stays in place, unseen,
-  // so the sentence above doesn't move.
+  // True while the child reads. The old feedback stays in place, unseen.
   quiet?: boolean;
   onReplay: (() => void) | null;
   onCelebrateEnd: () => void;
@@ -27,14 +26,20 @@ const PracticeCompanion = ({
   onCelebrateEnd,
 }: PracticeCompanionProps) => {
   const reduceMotion = useReducedMotion();
+  const speaking = !!feedback && !quiet;
   return (
     <div
       className={cn(
         "flex w-full max-w-2xl items-start gap-3 rounded-2xl p-3 transition-colors duration-300 sm:p-4",
-        feedback && !quiet ? "bg-muted/70" : "bg-transparent",
+        speaking ? "bg-muted/70" : "bg-transparent",
       )}
     >
-      <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-card shadow-xs">
+      <span
+        className={cn(
+          "flex size-12 shrink-0 items-center justify-center rounded-xl bg-card shadow-xs transition-opacity duration-300 motion-reduce:transition-none",
+          !speaking && "opacity-0",
+        )}
+      >
         <Mascot mood={mood} onCelebrateEnd={onCelebrateEnd} className="size-9" />
       </span>
       {/* No exit animation. Old feedback usually leaves while it's already

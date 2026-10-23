@@ -318,7 +318,7 @@ const About = () => {
                 icon: <Instagram className="w-6 h-6" />,
                 label: "Instagram",
                 href: "https://instagram.com/wordwizai",
-                color: "from-pink-400 to-purple-600",
+                color: "from-pink-700 to-purple-600",
               },
               {
                 icon: <Github className="w-6 h-6" />,
@@ -330,7 +330,7 @@ const About = () => {
                 icon: <Mail className="w-6 h-6" />,
                 label: "Email",
                 href: "mailto:contactwordwizai@gmail.com",
-                color: "from-blue-400 to-cyan-600",
+                color: "from-blue-600 to-cyan-700",
               },
             ].map((social, i) => (
               <div key={i}>

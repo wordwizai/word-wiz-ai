@@ -141,6 +141,7 @@ const CreateClassDialog = ({
                     variant="outline"
                     onClick={handleCopyCode}
                     className="shrink-0"
+                    aria-label={copied ? "Join code copied" : "Copy join code"}
                   >
                     {copied ? (
                       <Check className="w-4 h-4 text-primary" />

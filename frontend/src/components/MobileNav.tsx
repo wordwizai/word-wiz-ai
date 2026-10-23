@@ -91,7 +91,7 @@ const MobileNav = ({ className }: MobileNavProps) => {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="w-11 h-11 rounded-full p-0 transition-all duration-200 active:scale-90 hover:bg-transparent focus-visible:ring-0"
+                className="w-11 h-11 rounded-full p-0 transition-all duration-200 active:scale-90 hover:bg-transparent"
               >
                 <span className="sr-only">Account</span>
                 <Avatar className="w-8 h-8 rounded-full ring-2 ring-primary/20">

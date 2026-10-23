@@ -10,28 +10,28 @@ const DEMO_SENTENCES = [
     perScores: [0.0, 0.1, 0.0], // Perfect, nearly perfect, perfect
     feedback: "Great job!",
     feedbackColor:
-      "bg-green-100 text-green-600 dark:bg-green-500/15 dark:text-green-300",
+      "bg-green-100 text-green-800 dark:bg-green-500/15 dark:text-green-300",
   },
   {
     words: ["I", "see", "the", "blue", "sky"],
     perScores: [0.0, 0.8, 0.0, 0.2, 0.0], // Error in "see"
     feedback: "Try the 'ee' sound in 'see'",
     feedbackColor:
-      "bg-orange-100 text-orange-600 dark:bg-orange-500/15 dark:text-orange-300",
+      "bg-orange-100 text-orange-800 dark:bg-orange-500/15 dark:text-orange-300",
   },
   {
     words: ["Fish", "swim", "in", "the", "pond"],
     perScores: [0.0, 0.0, 0.0, 0.15, 0.0],
     feedback: "Perfect pronunciation!",
     feedbackColor:
-      "bg-green-100 text-green-600 dark:bg-green-500/15 dark:text-green-300",
+      "bg-green-100 text-green-800 dark:bg-green-500/15 dark:text-green-300",
   },
   {
     words: ["The", "sheep", "eat", "grass"],
     perScores: [0.0, 0.7, 0.0, 0.0], // Error in "sheep"
     feedback: "Work on the 'sh' sound in 'sheep'",
     feedbackColor:
-      "bg-orange-100 text-orange-600 dark:bg-orange-500/15 dark:text-orange-300",
+      "bg-orange-100 text-orange-800 dark:bg-orange-500/15 dark:text-orange-300",
   },
 ];
 
@@ -123,7 +123,7 @@ const AnimatedPracticeDemo = () => {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-300 rounded-full"
+                className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300 rounded-full"
               >
                 <Mic className="w-5 h-5 animate-pulse" />
                 <span className="font-medium">Recording...</span>
@@ -135,7 +135,7 @@ const AnimatedPracticeDemo = () => {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-600 dark:bg-blue-500/15 dark:text-blue-300 rounded-full"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300 rounded-full"
               >
                 <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                 <span className="font-medium">Analyzing...</span>
@@ -192,13 +192,9 @@ const AnimatedPracticeDemo = () => {
         </div>
 
         {/* Instruction text */}
-        <motion.p
-          className="text-center text-sm md:text-base text-muted-foreground mt-8"
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
+        <p className="text-center text-sm md:text-base text-muted-foreground mt-8">
           Watch how Word Wiz AI analyzes pronunciation in real-time
-        </motion.p>
+        </p>
       </div>
     </div>
   );

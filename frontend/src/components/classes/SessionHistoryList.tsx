@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar, ChevronDown, ChevronUp, BookOpen } from "lucide-react";
+import { Calendar, ChevronDown, ChevronUp, BookOpen } from "@/components/icons";
 import { type SessionActivity } from "@/api";
 import { parseServerDate } from "@/lib/activities";
 import { ACCURACY_TONE } from "./accuracy";

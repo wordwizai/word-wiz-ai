@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, ChevronRight, Loader2 } from "lucide-react";
+import { ArrowRight, ChevronRight, Loader2 } from "@/components/icons";
 import type { StudentAssignment } from "@/api";
 import { SectionHeader } from "@/components/AppPage";
 import PatternStatusChip from "@/components/phonics/PatternStatusChip";

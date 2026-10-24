@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { UserPlus } from "lucide-react";
+import { UserPlus } from "@/components/icons";
 import { joinClass } from "@/api";
 
 interface JoinClassDialogProps {

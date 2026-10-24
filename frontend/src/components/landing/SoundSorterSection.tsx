@@ -1,5 +1,5 @@
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
-import { Volume2 } from "lucide-react";
+import { Volume2 } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import LandingSection from "./LandingSection";
 import { PenGroup } from "./TeacherPen";

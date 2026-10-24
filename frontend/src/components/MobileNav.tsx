@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
-import { LogOut, Settings, UserRound } from "lucide-react";
+import { LogOut, Settings, UserRound } from "./icons";
 import { useContext } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import type { AuthContextType } from "@/contexts/AuthContext";
@@ -70,7 +70,7 @@ const MobileNav = ({ className }: MobileNavProps) => {
                       style={{
                         width: "1.2rem",
                         height: "1.2rem",
-                        strokeWidth: active ? 2.2 : 1.8,
+                        strokeWidth: active ? 2.8 : 2.2,
                       }}
                     />
                   </Link>

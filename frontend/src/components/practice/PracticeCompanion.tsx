@@ -1,5 +1,5 @@
 import { motion, useReducedMotion } from "framer-motion";
-import { Volume2 } from "lucide-react";
+import { Volume2 } from "@/components/icons";
 import Mascot, { type MascotMood } from "@/components/mascot/Mascot";
 import { FeedbackAnimatedText } from "@/components/FeedbackAnimatedText";
 import { Button } from "@/components/ui/button";

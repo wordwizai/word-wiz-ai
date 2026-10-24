@@ -9,7 +9,7 @@ import {
   Settings,
   Sun,
   UserRound,
-} from "lucide-react";
+} from "./icons";
 import { Button } from "./ui/button";
 import {
   Tooltip,

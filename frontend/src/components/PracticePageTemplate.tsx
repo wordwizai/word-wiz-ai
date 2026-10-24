@@ -10,7 +10,7 @@ import {
   Mic,
   AlertCircle,
   Info as InfoIcon,
-} from "lucide-react";
+} from "./icons";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import LandingPageFooter from "@/components/LandingPageFooter";
 import { DEFAULT_OG_IMAGE } from "@/components/SeoHead";

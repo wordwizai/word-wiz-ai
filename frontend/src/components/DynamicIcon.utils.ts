@@ -41,15 +41,15 @@ import {
   Wand,
   WandSparkles,
   Wheat,
-  type LucideIcon,
-} from 'lucide-react';
+  type IconComponent,
+} from './icons';
 
 // Only the icons activities actually use (emoji_icon in
 // backend/dev/seed_activities.json and backend/scripts/new_activities.json).
 // `import * as` pulled in all ~1,500 lucide icons, about 700 KB of
 // JavaScript on the dashboard and practice pages. A new activity with an
 // icon that isn't listed here shows the fallback until it's added.
-const icons: Record<string, LucideIcon> = {
+const icons: Record<string, IconComponent> = {
   Bean,
   BedDouble,
   Bird,

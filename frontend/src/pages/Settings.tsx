@@ -27,7 +27,7 @@ import {
   Palette,
   Zap,
   CheckCircle2,
-} from "lucide-react";
+} from "@/components/icons";
 import { AppPage, PageHeader } from "@/components/AppPage";
 type Settings = {
   preferred_language?: string;

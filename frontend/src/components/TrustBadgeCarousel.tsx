@@ -1,4 +1,4 @@
-import { CircleDollarSign, Sparkles, Award, Shield, Clock } from "lucide-react";
+import { CircleDollarSign, Sparkles, Award, Shield, Clock } from "./icons";
 
 const TRUST_BADGES = [
   {

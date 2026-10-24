@@ -1,6 +1,6 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, ChevronRight, Flame } from "lucide-react";
+import { ArrowRight, ChevronRight, Flame } from "@/components/icons";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getSessions, getUserStatistics } from "@/api";
 import { AppPage, PageHeader, SectionHeader } from "@/components/AppPage";

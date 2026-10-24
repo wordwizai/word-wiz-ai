@@ -11,14 +11,16 @@ import {
   ArrowRight,
   BookOpen,
   Share2,
-  Facebook,
-  Twitter,
-  Linkedin,
   Mail,
   AlertCircle,
   CheckCircle,
   Info as InfoIcon,
   Lightbulb,
+} from "./icons";
+import {
+  Facebook,
+  Twitter,
+  Linkedin,
 } from "lucide-react";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import LandingPageFooter from "@/components/LandingPageFooter";

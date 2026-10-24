@@ -1,4 +1,4 @@
-import { Check, RotateCcw } from "lucide-react";
+import { Check, RotateCcw } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import {
   STATUS_LABEL,

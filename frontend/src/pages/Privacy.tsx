@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import React from "react";
-import { Shield } from "lucide-react";
+import { Shield } from "@/components/icons";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import SeoHead from "@/components/SeoHead";
 import LandingPageFooter from "@/components/LandingPageFooter";

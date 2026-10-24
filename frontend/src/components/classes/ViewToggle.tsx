@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { GraduationCap, User } from "lucide-react";
+import { GraduationCap, User } from "@/components/icons";
 
 interface ViewToggleProps {
   mode: "student" | "teacher";

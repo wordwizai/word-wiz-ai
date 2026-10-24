@@ -5,10 +5,12 @@ import React from "react";
 import {
   Users,
   Target,
-  Github,
   Mail,
-  Instagram,
   DollarSign,
+} from "@/components/icons";
+import {
+  Github,
+  Instagram,
 } from "lucide-react";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import SeoHead from "@/components/SeoHead";

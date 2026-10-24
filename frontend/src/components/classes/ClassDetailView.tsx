@@ -14,7 +14,7 @@ import {
   ChevronDown,
   ChevronUp,
   ClipboardList,
-} from "lucide-react";
+} from "@/components/icons";
 import { getClassStudents, type StudentWithStats } from "@/api";
 import { cn } from "@/lib/utils";
 import { showSuccessToast } from "@/utils/errorHandling";

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown } from "./icons";
 import { SUPPORT_EMAIL } from "@/config/contact";
 import { cn } from "@/lib/utils";
 import { PenGroup } from "./landing/TeacherPen";

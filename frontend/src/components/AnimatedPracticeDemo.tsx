@@ -1,6 +1,6 @@
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { WordBadge } from "./WordBadge";
-import { Mic, Volume2 } from "lucide-react";
+import { Mic, Volume2 } from "./icons";
 import { useEffect, useState, useRef } from "react";
 
 // Demo sentences with PER scores and feedback messages

@@ -6,10 +6,12 @@ import { Label } from "@/components/ui/label";
 import {
   Heart,
   Mail,
-  Github,
-  Instagram,
   Send,
   MessageCircle,
+} from "@/components/icons";
+import {
+  Github,
+  Instagram,
 } from "lucide-react";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import SeoHead from "@/components/SeoHead";

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight } from "@/components/icons";
 import { AppPage, PageHeader, SectionHeader } from "@/components/AppPage";
 import ActivitiesList, {
   ActivitiesLoadError,

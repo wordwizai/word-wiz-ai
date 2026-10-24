@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { ChevronDown, Trash2 } from "lucide-react";
+import { ChevronDown, Trash2 } from "@/components/icons";
 import { AuthContext } from "@/contexts/AuthContext";
 import { deleteAssignment, getClassAssignments, type ClassAssignment } from "@/api";
 import PatternStatusChip from "@/components/phonics/PatternStatusChip";

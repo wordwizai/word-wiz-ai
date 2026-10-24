@@ -218,7 +218,7 @@ const PracticeStage = ({
                       size="icon"
                       onClick={next?.onNext}
                       aria-label="Next sentence"
-                      className="size-24 rounded-full shadow-lg active:scale-95"
+                      className="size-24 rounded-full shadow-lg active:scale-95 [--icon-stroke:2.4]"
                     >
                       <ArrowRight className="size-10" />
                     </Button>
@@ -276,7 +276,8 @@ const RecordButton = ({
               : "Start reading out loud"
         }
         className={cn(
-          "relative flex size-24 items-center justify-center rounded-full transition-all duration-200 outline-none",
+          // 40px icons, where the 2.8 kid line looks heavy, so 2.4 here.
+          "relative flex size-24 items-center justify-center rounded-full transition-all duration-200 outline-none [--icon-stroke:2.4]",
           "focus-visible:ring-[4px] focus-visible:ring-ring/50 active:scale-95",
           isProcessing && "cursor-default bg-secondary text-primary",
           isRecording &&

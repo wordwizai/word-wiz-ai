@@ -6,10 +6,12 @@ import { Label } from "@/components/ui/label";
 import {
   Heart,
   Mail,
-  Github,
-  Instagram,
   Send,
   MessageCircle,
+} from "@/components/icons";
+import {
+  Github,
+  Instagram,
 } from "lucide-react";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import SeoHead from "@/components/SeoHead";
@@ -277,7 +279,7 @@ ${name} (${email})`
                     title: "Email",
                     content: "contactwordwizai@gmail.com",
                     action: "mailto:contactwordwizai@gmail.com",
-                    color: "from-blue-400 to-cyan-600",
+                    color: "from-blue-600 to-cyan-700",
                   },
                 ].map((item, i) => (
                   <motion.div key={i} variants={childVariant}>
@@ -349,7 +351,7 @@ ${name} (${email})`
                 icon: <Instagram className="w-8 h-8" />,
                 label: "Instagram",
                 href: "https://instagram.com/wordwizai",
-                color: "from-pink-400 to-purple-600",
+                color: "from-pink-700 to-purple-600",
                 description: "Educational tips & updates",
               },
               {
@@ -381,7 +383,7 @@ ${name} (${email})`
                         <h3 className="text-lg font-bold mb-1">
                           {social.label}
                         </h3>
-                        <p className="text-xs opacity-90">
+                        <p className="text-xs">
                           {social.description}
                         </p>
                       </div>

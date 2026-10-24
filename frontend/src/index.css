@@ -90,14 +90,15 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  /* Updated: Purple for branding (slightly adjusted for better readability) */
-  --primary: oklch(0.58 0.16 280);
+  /* Purple for branding. L 0.54 keeps white text on it, and it as text, above 4.5:1 */
+  --primary: oklch(0.54 0.16 280);
   --primary-foreground: oklch(0.985 0 0);
   /* Updated: Soft neutral for secondary actions */
   --secondary: oklch(0.97 0.02 240);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0.02 240);
-  --muted-foreground: oklch(0.556 0 0);
+  /* 0.52 keeps 4.5:1 on the background and on the light pastels (except peach) */
+  --muted-foreground: oklch(0.52 0 0);
   /* Updated: Vibrant teal for contrast and energy */
   --accent: oklch(0.72 0.14 190);
   --accent-foreground: oklch(0.145 0 0);
@@ -105,7 +106,7 @@
   --border: oklch(0.92 0.02 240);
   --input: oklch(0.92 0.02 240);
   /* Updated: Match new primary purple */
-  --ring: oklch(0.58 0.16 280);
+  --ring: oklch(0.54 0.16 280);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -115,13 +116,13 @@
   --sidebar: oklch(0.98 0.01 240);
   --sidebar-foreground: oklch(0.145 0 0);
   /* Updated: Purple brand for sidebar */
-  --sidebar-primary: oklch(0.58 0.16 280);
+  --sidebar-primary: oklch(0.54 0.16 280);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.95 0.05 280);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   /* Updated: Match new primary purple */
-  --sidebar-ring: oklch(0.58 0.16 280);
+  --sidebar-ring: oklch(0.54 0.16 280);
   /* Teacher's-pen ink for hand-drawn marks and handwritten notes */
   --pen-ink: #5a4fcf;
 
@@ -133,9 +134,9 @@
   --pastel-peach: #fed7aa;
   --pastel-peach-foreground: #8b4513;
   --pastel-yellow: #fef3c7;
-  --pastel-yellow-foreground: #a16207;
+  --pastel-yellow-foreground: #854d0e;
   --pastel-coral: #ffe8e0;
-  --pastel-coral-foreground: #c2410c;
+  --pastel-coral-foreground: #9a3412;
   --pastel-pink: #fce7f3;
   --pastel-pink-foreground: #8b1a3a;
   --pastel-lavender: #f3f0ff;
@@ -233,10 +234,10 @@
 }
 
 .glass-nav-item-active {
-  background: oklch(0.58 0.16 280 / 0.12);
+  background: oklch(0.54 0.16 280 / 0.12);
   box-shadow:
-    0 0 0 1px oklch(0.58 0.16 280 / 0.18),
-    0 2px 10px oklch(0.58 0.16 280 / 0.18);
+    0 0 0 1px oklch(0.54 0.16 280 / 0.18),
+    0 2px 10px oklch(0.54 0.16 280 / 0.18);
 }
 
 .dark .glass-nav-item-active {
@@ -248,7 +249,7 @@
 
 .glass-nav-icon-active {
   color: oklch(0.52 0.18 280);
-  filter: drop-shadow(0 1px 4px oklch(0.58 0.16 280 / 0.4));
+  filter: drop-shadow(0 1px 4px oklch(0.54 0.16 280 / 0.4));
 }
 
 .dark .glass-nav-icon-active {
@@ -289,10 +290,10 @@
   background: oklch(0.94 0.04 280 / 0.72);
   backdrop-filter: blur(24px) saturate(220%);
   -webkit-backdrop-filter: blur(24px) saturate(220%);
-  border-bottom: 1px solid oklch(0.58 0.16 280 / 0.20);
+  border-bottom: 1px solid oklch(0.54 0.16 280 / 0.20);
   box-shadow:
-    0 4px 30px oklch(0.58 0.16 280 / 0.12),
-    inset 0 -1px 0 oklch(0.58 0.16 280 / 0.10),
+    0 4px 30px oklch(0.54 0.16 280 / 0.12),
+    inset 0 -1px 0 oklch(0.54 0.16 280 / 0.10),
     inset 0 1px 0 oklch(1 0 0 / 0.85);
 }
 

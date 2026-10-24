@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check } from "@/components/icons";
 import { createClass } from "@/api";
 
 interface CreateClassDialogProps {
@@ -141,6 +141,7 @@ const CreateClassDialog = ({
                     variant="outline"
                     onClick={handleCopyCode}
                     className="shrink-0"
+                    aria-label={copied ? "Join code copied" : "Copy join code"}
                   >
                     {copied ? (
                       <Check className="w-4 h-4 text-primary" />

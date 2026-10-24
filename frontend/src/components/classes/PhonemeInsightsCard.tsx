@@ -1,4 +1,4 @@
-import { AlertTriangle, HelpCircle } from "lucide-react";
+import { AlertTriangle, HelpCircle } from "@/components/icons";
 import { type PhonemeInsight } from "@/api";
 import {
   Tooltip,

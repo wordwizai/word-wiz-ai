@@ -11,14 +11,16 @@ import {
   ArrowRight,
   BookOpen,
   Share2,
-  Facebook,
-  Twitter,
-  Linkedin,
   Mail,
   AlertCircle,
   CheckCircle,
   Info as InfoIcon,
   Lightbulb,
+} from "./icons";
+import {
+  Facebook,
+  Twitter,
+  Linkedin,
 } from "lucide-react";
 import LandingPageNavbar from "@/components/LandingPageNavbar";
 import LandingPageFooter from "@/components/LandingPageFooter";
@@ -395,7 +397,7 @@ const FinalCta: React.FC<{ canonicalUrl: string; headline: string }> = ({
         <h3 className="text-2xl font-bold mb-4">
           Ready to Help Your Child Read Better?
         </h3>
-        <p className="mb-6 text-primary-foreground/90">
+        <p className="mb-6 text-primary-foreground">
           Have your child read a few sentences out loud and see which sounds
           Word Wiz AI catches. Free, and no sign-up needed to try.
         </p>

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, RotateCcw, Star, Volume2 } from "lucide-react";
+import { ArrowRight, RotateCcw, Star, Volume2 } from "@/components/icons";
 import type { Session } from "@/api";
 import { Button } from "@/components/ui/button";
 import { useSpeechSynthesis } from "@/hooks/useSpeechSynthesis";

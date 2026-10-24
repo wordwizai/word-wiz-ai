@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus } from "lucide-react";
+import { Plus } from "@/components/icons";
 import { AppPage, PageHeader, SectionHeader } from "@/components/AppPage";
 import {
   getMyClasses,

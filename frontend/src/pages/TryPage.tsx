@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, Navigate, useParams } from "react-router-dom";
-import { Mic, Volume2, ShieldCheck } from "lucide-react";
+import { Mic, Volume2, ShieldCheck } from "@/components/icons";
 import PracticeStage from "@/components/practice/PracticeStage";
 import type { PronunciationAnalysis } from "@/components/practice/types";
 import { Button } from "@/components/ui/button";

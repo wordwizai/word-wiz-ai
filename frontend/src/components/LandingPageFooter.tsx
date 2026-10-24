@@ -142,7 +142,7 @@ const LandingPageFooter = () => {
           <div className="grid grid-cols-1 gap-x-8 gap-y-7 sm:grid-cols-2 lg:grid-cols-4">
             {READING_HELP.map((group) => (
               <div key={group.title} className="flex flex-col gap-2 text-sm">
-                <span className="opacity-80">{group.title}</span>
+                <span className="font-semibold">{group.title}</span>
                 {group.links.map((link) => (
                   <Link key={link.to} to={link.to} className={linkClass}>
                     {link.label}

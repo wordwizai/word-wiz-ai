@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { Link } from "react-router-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, House, Loader2, Mic, Puzzle, Volume2 } from "lucide-react";
+import { ArrowRight, House, Loader2, Mic, Puzzle, Volume2 } from "@/components/icons";
 import type { Session } from "@/api";
 import WordBadgeRow from "@/components/WordBadgeRow";
 import { Button } from "@/components/ui/button";
@@ -106,7 +106,8 @@ const PracticeStage = ({
   };
 
   return (
-    <div className="flex min-h-dvh flex-col bg-background">
+    // Kid screen, so icons take the heavier 2.8 line (see components/icons.tsx).
+    <div className="flex min-h-dvh flex-col bg-background [--icon-stroke:2.8]">
       <header className="grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-2 px-3 sm:px-6">
         <Button
           variant="ghost"

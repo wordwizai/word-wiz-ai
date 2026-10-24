@@ -9,7 +9,7 @@ import {
   Settings,
   Sun,
   UserRound,
-} from "lucide-react";
+} from "./icons";
 import { Button } from "./ui/button";
 import {
   Tooltip,
@@ -226,7 +226,7 @@ const Sidebar = ({ className }: { className?: string }) => {
                 collapsed ? "w-14" : "px-2"
               )}
             >
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/5 text-sm font-semibold text-primary">
                 {nameToInitials(user?.full_name ?? "") || (
                   <UserRound className="size-4" />
                 )}

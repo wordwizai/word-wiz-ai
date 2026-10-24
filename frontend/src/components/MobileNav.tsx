@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
-import { LogOut, Settings, UserRound } from "lucide-react";
+import { LogOut, Settings, UserRound } from "./icons";
 import { useContext } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import type { AuthContextType } from "@/contexts/AuthContext";
@@ -70,7 +70,7 @@ const MobileNav = ({ className }: MobileNavProps) => {
                       style={{
                         width: "1.2rem",
                         height: "1.2rem",
-                        strokeWidth: active ? 2.2 : 1.8,
+                        strokeWidth: active ? 2.8 : 2.2,
                       }}
                     />
                   </Link>
@@ -91,7 +91,7 @@ const MobileNav = ({ className }: MobileNavProps) => {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="w-11 h-11 rounded-full p-0 transition-all duration-200 active:scale-90 hover:bg-transparent focus-visible:ring-0"
+                className="w-11 h-11 rounded-full p-0 transition-all duration-200 active:scale-90 hover:bg-transparent"
               >
                 <span className="sr-only">Account</span>
                 <Avatar className="w-8 h-8 rounded-full ring-2 ring-primary/20">

@@ -1,4 +1,4 @@
-import { Check, ChevronDown, Loader2, RotateCcw } from "lucide-react";
+import { Check, ChevronDown, Loader2, RotateCcw } from "@/components/icons";
 import type { PatternProgress, PhonicsPath } from "@/api";
 import PatternStatusChip from "@/components/phonics/PatternStatusChip";
 import {

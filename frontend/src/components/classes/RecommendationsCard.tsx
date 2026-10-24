@@ -1,4 +1,4 @@
-import { Lightbulb } from "lucide-react";
+import { Lightbulb } from "@/components/icons";
 
 interface RecommendationsCardProps {
   recommendations: string[];

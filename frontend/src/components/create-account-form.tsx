@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { AuthContext, type AuthContextType } from "@/contexts/AuthContext";
 import { useContext } from "react";
 import React from "react";
-import { AlertCircleIcon } from "lucide-react";
+import { AlertCircleIcon } from "./icons";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { googleLogin } from "@/api";
 import { trackSignupClick } from "@/utils/analytics";

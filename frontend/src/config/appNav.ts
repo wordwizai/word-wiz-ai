@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import { BarChart3, BookOpen, House, Users } from "lucide-react";
+import { BarChart3, BookOpen, House, Users } from "@/components/icons";
 
 // The signed-in destinations, shared by the desktop sidebar and the
 // mobile nav so the two never drift apart.

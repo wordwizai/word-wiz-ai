@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Zap, Loader2 } from "lucide-react";
+import { X, Zap, Loader2 } from "./icons";
 import { Button } from "@/components/ui/button";
 import { checkDeviceCapabilities } from "@/utils/deviceCapabilities";
 import { useSettings } from "@/contexts/SettingsContext";

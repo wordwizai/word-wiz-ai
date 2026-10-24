@@ -14,7 +14,7 @@ import {
   ChevronDown,
   ChevronUp,
   ClipboardList,
-} from "lucide-react";
+} from "@/components/icons";
 import { getClassStudents, type StudentWithStats } from "@/api";
 import { cn } from "@/lib/utils";
 import { showSuccessToast } from "@/utils/errorHandling";
@@ -192,6 +192,25 @@ const ClassDetailView = ({
     );
   };
 
+  // Called as a function, not rendered as a component, so the button keeps focus after sorting
+  const sortHeader = (field: SortField, label: string, className?: string) => (
+    <TableHead
+      className={className}
+      aria-sort={
+        sortField !== field ? "none" : sortDirection === "asc" ? "ascending" : "descending"
+      }
+    >
+      <button
+        type="button"
+        onClick={() => handleSort(field)}
+        className="-mx-2 inline-flex h-9 items-center rounded-md px-2 font-medium outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50"
+      >
+        {label}
+        <SortIcon field={field} />
+      </button>
+    </TableHead>
+  );
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -236,6 +255,7 @@ const ClassDetailView = ({
               size="icon"
               onClick={handleCopyCode}
               className="shrink-0"
+              aria-label={copied ? "Join code copied" : "Copy join code"}
             >
               {copied ? (
                 <Check className="w-4 h-4 text-primary" />
@@ -328,42 +348,12 @@ const ClassDetailView = ({
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead
-                          className="cursor-pointer hover:bg-muted"
-                          onClick={() => handleSort("name")}
-                        >
-                          Student <SortIcon field="name" />
-                        </TableHead>
-                        <TableHead
-                          className="cursor-pointer hover:bg-muted text-center"
-                          onClick={() => handleSort("sessions")}
-                        >
-                          Sessions <SortIcon field="sessions" />
-                        </TableHead>
-                        <TableHead
-                          className="cursor-pointer hover:bg-muted text-center"
-                          onClick={() => handleSort("words")}
-                        >
-                          Words <SortIcon field="words" />
-                        </TableHead>
-                        <TableHead
-                          className="cursor-pointer hover:bg-muted text-center"
-                          onClick={() => handleSort("accuracy")}
-                        >
-                          Accuracy <SortIcon field="accuracy" />
-                        </TableHead>
-                        <TableHead
-                          className="cursor-pointer hover:bg-muted text-center"
-                          onClick={() => handleSort("streak")}
-                        >
-                          Streak <SortIcon field="streak" />
-                        </TableHead>
-                        <TableHead
-                          className="cursor-pointer hover:bg-muted text-center"
-                          onClick={() => handleSort("last_active")}
-                        >
-                          Last Active <SortIcon field="last_active" />
-                        </TableHead>
+                        {sortHeader("name", "Student")}
+                        {sortHeader("sessions", "Sessions", "text-center")}
+                        {sortHeader("words", "Words", "text-center")}
+                        {sortHeader("accuracy", "Accuracy", "text-center")}
+                        {sortHeader("streak", "Streak", "text-center")}
+                        {sortHeader("last_active", "Last Active", "text-center")}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -375,9 +365,13 @@ const ClassDetailView = ({
                         >
                           <TableCell>
                             <div>
-                              <p className="font-medium text-foreground">
+                              {/* No handler of its own: Enter or Space clicks it, and the click bubbles to the row */}
+                              <button
+                                type="button"
+                                className="rounded-sm text-left font-medium text-foreground outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                              >
                                 {student.full_name || "Student"}
-                              </p>
+                              </button>
                               <p className="text-xs text-muted-foreground">
                                 {student.email}
                               </p>

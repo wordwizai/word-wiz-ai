@@ -9,7 +9,7 @@ import {
   LogOut,
   Trash2,
   Users,
-} from "lucide-react";
+} from "@/components/icons";
 import {
   AlertDialog,
   AlertDialogAction,

@@ -20,7 +20,7 @@ import {
   Calendar,
   TrendingUp,
   User,
-} from "lucide-react";
+} from "@/components/icons";
 
 interface StudentDetailViewProps {
   student: StudentWithStats;

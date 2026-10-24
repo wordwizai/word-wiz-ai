@@ -1,4 +1,4 @@
-import { ArrowRight, Blocks, Loader2, PartyPopper } from "lucide-react";
+import { ArrowRight, Blocks, Loader2, PartyPopper } from "@/components/icons";
 import type { PhonicsPath } from "@/api";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Mic, Volume2 } from "lucide-react";
+import { Mic, Volume2 } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import LandingSection from "./LandingSection";
 import { PEN_PATHS } from "./penPaths";

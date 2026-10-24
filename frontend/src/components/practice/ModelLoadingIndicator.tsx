@@ -1,6 +1,6 @@
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Download, AlertCircle } from "lucide-react";
+import { Loader2, Download, AlertCircle } from "@/components/icons";
 
 interface ModelLoadingIndicatorProps {
   isLoading: boolean;
